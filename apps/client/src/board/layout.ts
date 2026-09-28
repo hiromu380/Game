@@ -6,7 +6,7 @@ import { BALANCE } from '@chain-factory/sim';
 /** 1マスの大きさ（px） */
 export const CELL_SIZE = 72;
 /** 盤面の外周の余白（px） */
-export const BOARD_PADDING = 12;
+export const BOARD_PADDING = 16;
 
 export const BOARD_PIXEL_WIDTH = BALANCE.board.width * CELL_SIZE + BOARD_PADDING * 2;
 export const BOARD_PIXEL_HEIGHT = BALANCE.board.height * CELL_SIZE + BOARD_PADDING * 2;

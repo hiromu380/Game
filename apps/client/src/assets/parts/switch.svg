@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- スイッチ: ハザード柄の台座に赤い押しボタン -->
+  <defs><clipPath id="c"><rect x="5" y="5" width="54" height="54" rx="10"/></clipPath></defs>
+  <rect x="5" y="5" width="54" height="54" rx="10" fill="#ffca28"/>
+  <g clip-path="url(#c)" stroke="#3e2723" stroke-width="5">
+    <path d="M-4 18 L18 -4 M-4 32 L32 -4 M32 68 L68 32 M46 68 L68 46"/>
+  </g>
+  <rect x="5" y="5" width="54" height="54" rx="10" fill="none" stroke="#3e2723" stroke-width="3"/>
+  <circle cx="32" cy="36" r="17" fill="#8e1414"/>
+  <circle cx="32" cy="31" r="17" fill="#e53935" stroke="#3e2723" stroke-width="3"/>
+  <ellipse cx="26" cy="25" rx="6" ry="3.5" fill="#ffcdd2" opacity="0.85"/>
+</svg>

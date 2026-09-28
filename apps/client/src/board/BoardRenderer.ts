@@ -1,25 +1,28 @@
 /**
  * PixiJS による盤面の描画と、シミュレーションイベントの再生演出
  *
- * - 盤面（マス・パーツ・選択枠）の描画
- * - events を tick ごとに再生: 信号の移動 / パーツの発光 / 出荷時の数字ポップ / リセットの波紋
+ * - 盤面（床・パーツ・倍率バッジ・選択枠）の描画
+ * - マウスを乗せたマスの名前表示と、配置前のプレビュー（ゴースト）
+ * - events を tick ごとに再生: 信号の移動 / パーツの発光 / 火花 / 出荷時の数字ポップ / 揺れ
  *
  * ゲームロジックはここでは一切計算しない。見た目はアセットマニフェスト経由で決める。
  */
 import {
-  rotateCcw,
-  rotateCw,
+  DEFAULT_RULES,
+  getPart,
+  getPressMultiplier,
   type Board,
   type Dir4,
   type Part,
+  type PartId,
   type Score,
   type SimEvent,
   type SimResult,
 } from '@chain-factory/sim';
 import { Application, Container, Graphics, Text } from 'pixi.js';
-import { BOARD_THEME, PART_ASSETS, type ShapeKind } from '../assets/manifest';
+import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
-import { formatCompact, formatScore } from '../ui/format';
+import { formatScore } from '../ui/format';
 import {
   BOARD_PIXEL_HEIGHT,
   BOARD_PIXEL_WIDTH,
@@ -27,12 +30,29 @@ import {
   cellCenter,
   pixelToCell,
 } from './layout';
+import { loadPartTextures, type PartTextures } from './textures';
 import { easeOutCubic, TweenManager } from './tweens';
+import {
+  createFloor,
+  createPartView,
+  createSignalView,
+  PART_DISPLAY_SIZE,
+  valueTier,
+} from './views';
 
-/** 盤面上で強調表示するマス */
-export interface BoardHighlight {
-  x: number;
-  y: number;
+/** 盤面の表示状態（React 側から渡される） */
+export interface BoardViewState {
+  board: Board;
+  /** 選択中のマス */
+  highlight: { x: number; y: number } | null;
+  /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
+  placing: { partId: PartId; dir: Dir4 } | null;
+}
+
+export interface BoardRendererOptions {
+  onCellClick: (x: number, y: number) => void;
+  /** パーツの表示名（ホバー時のラベル用。言語切り替えに追従するよう関数で受け取る） */
+  getPartName: (partId: PartId) => string;
 }
 
 export interface PlaybackCallbacks {
@@ -47,10 +67,17 @@ const MOVE_RATIO = 0.55;
 
 export class BoardRenderer {
   private readonly app: Application;
-  private readonly cellLayer = new Container();
+  private readonly textures: PartTextures;
+  private readonly options: BoardRendererOptions;
+
+  /** 揺れ演出のために、盤面全体をこのコンテナに入れる */
+  private readonly root = new Container();
+  private readonly floorLayer = new Container();
   private readonly partLayer = new Container();
+  private readonly overlayLayer = new Container();
   private readonly signalLayer = new Container();
   private readonly fxLayer = new Container();
+  private readonly tooltipLayer = new Container();
   private readonly tweens = new TweenManager();
 
   /** マス index → パーツの表示オブジェクト（発光演出で使う） */
@@ -58,91 +85,167 @@ export class BoardRenderer {
   /** 信号 id → 表示オブジェクト */
   private signalViews = new Map<number, Container>();
 
-  private board: Board | null = null;
+  private state: BoardViewState | null = null;
+  private hovered: { x: number; y: number } | null = null;
   private timeline: PlaybackTimeline | null = null;
   private callbacks: PlaybackCallbacks | null = null;
   private speed: PlaybackSpeed = 1;
+  /** 揺れの残り強さ（px） */
+  private shake = 0;
 
-  private constructor(app: Application, onCellClick: (x: number, y: number) => void) {
+  private constructor(app: Application, textures: PartTextures, options: BoardRendererOptions) {
     this.app = app;
-    app.stage.addChild(this.cellLayer, this.partLayer, this.signalLayer, this.fxLayer);
+    this.textures = textures;
+    this.options = options;
 
-    // クリックされたマスを通知
+    this.root.addChild(
+      this.floorLayer,
+      this.partLayer,
+      this.overlayLayer,
+      this.signalLayer,
+      this.fxLayer,
+      this.tooltipLayer,
+    );
+    app.stage.addChild(this.root);
+
+    // マウス・タッチ操作
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
     app.stage.on('pointertap', (e) => {
-      if (!this.board) return;
-      const cell = pixelToCell(e.global.x, e.global.y, this.board.width, this.board.height);
-      if (cell) onCellClick(cell.x, cell.y);
+      const cell = this.toCell(e.global.x, e.global.y);
+      if (cell) options.onCellClick(cell.x, cell.y);
     });
+    app.stage.on('pointermove', (e) => this.setHovered(this.toCell(e.global.x, e.global.y)));
+    app.stage.on('pointerleave', () => this.setHovered(null));
 
     app.ticker.add((ticker) => this.update(ticker.deltaMS));
   }
 
-  /** PixiJS の初期化は非同期のため、生成はこの関数で行う */
-  static async create(
-    parent: HTMLElement,
-    onCellClick: (x: number, y: number) => void,
-  ): Promise<BoardRenderer> {
+  /** PixiJS の初期化と画像の読み込みは非同期のため、生成はこの関数で行う */
+  static async create(parent: HTMLElement, options: BoardRendererOptions): Promise<BoardRenderer> {
     const app = new Application();
-    await app.init({
-      width: BOARD_PIXEL_WIDTH,
-      height: BOARD_PIXEL_HEIGHT,
-      background: BOARD_THEME.background,
-      antialias: true,
-      resolution: window.devicePixelRatio || 1,
-      autoDensity: true,
-    });
+    const [, textures] = await Promise.all([
+      app.init({
+        width: BOARD_PIXEL_WIDTH,
+        height: BOARD_PIXEL_HEIGHT,
+        backgroundAlpha: 0,
+        antialias: true,
+        resolution: window.devicePixelRatio || 1,
+        autoDensity: true,
+      }),
+      loadPartTextures(PART_DISPLAY_SIZE),
+    ]);
     app.canvas.classList.add('board-canvas');
     parent.appendChild(app.canvas);
-    return new BoardRenderer(app, onCellClick);
+    return new BoardRenderer(app, textures, options);
   }
 
   destroy(): void {
     this.app.destroy(true, { children: true });
   }
 
+  private toCell(px: number, py: number) {
+    if (!this.state) return null;
+    return pixelToCell(px, py, this.state.board.width, this.state.board.height);
+  }
+
   // ---------------------------------------------------------------------------
   // 盤面の描画
   // ---------------------------------------------------------------------------
 
-  /** 盤面・選択中のマスを描き直す */
-  setBoard(board: Board, highlight: BoardHighlight | null): void {
-    this.board = board;
-    this.cellLayer.removeChildren().forEach((c) => c.destroy());
+  /** 盤面・選択状態を描き直す */
+  setState(state: BoardViewState): void {
+    const sizeChanged =
+      this.state?.board.width !== state.board.width ||
+      this.state?.board.height !== state.board.height;
+    this.state = state;
+
+    if (sizeChanged) {
+      this.floorLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+      this.floorLayer.addChild(createFloor(state.board.width, state.board.height));
+    }
+
     this.partLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.partViews.clear();
-
+    const { board } = state;
     for (let y = 0; y < board.height; y++) {
       for (let x = 0; x < board.width; x++) {
+        const part = getPart(board, x, y);
+        if (!part) continue;
+        const view = createPartView(part, this.textures, this.multiplierOf(part, x, y));
         const { px, py } = cellCenter(x, y);
-        const isSelected = highlight?.x === x && highlight?.y === y;
-
-        // マスの下地
-        const cell = new Graphics()
-          .roundRect(
-            px - CELL_SIZE / 2 + 2,
-            py - CELL_SIZE / 2 + 2,
-            CELL_SIZE - 4,
-            CELL_SIZE - 4,
-            6,
-          )
-          .fill(BOARD_THEME.cell)
-          .stroke({
-            width: isSelected ? 3 : 1,
-            color: isSelected ? BOARD_THEME.selected : BOARD_THEME.cellBorder,
-          });
-        this.cellLayer.addChild(cell);
-
-        const part = board.cells[y * board.width + x];
-        if (part) {
-          const view = createPartView(part);
-          view.position.set(px, py);
-          this.partLayer.addChild(view);
-          this.partViews.set(y * board.width + x, view);
-        }
+        view.position.set(px, py);
+        this.partLayer.addChild(view);
+        this.partViews.set(y * board.width + x, view);
       }
     }
+    this.drawOverlay();
+  }
+
+  /** ギア・プレス機の倍率（バッジ表示用。計算は sim の関数・ルールに任せる） */
+  private multiplierOf(part: Part, x: number, y: number): number | null {
+    if (!this.state) return null;
+    if (part.id === 'gear') return DEFAULT_RULES.gearMultiplier;
+    if (part.id === 'press') return getPressMultiplier(this.state.board, x, y, DEFAULT_RULES);
+    return null;
+  }
+
+  private setHovered(cell: { x: number; y: number } | null): void {
+    if (this.hovered?.x === cell?.x && this.hovered?.y === cell?.y) return;
+    this.hovered = cell;
+    this.drawOverlay();
+  }
+
+  /** 選択枠・ホバー枠・配置プレビュー・名前ラベルを描く */
+  private drawOverlay(): void {
+    this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+    this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+    if (!this.state) return;
+    const { board, highlight, placing } = this.state;
+
+    if (highlight)
+      this.overlayLayer.addChild(cellFrame(highlight.x, highlight.y, BOARD_THEME.selected, 4));
+
+    // 再生中はホバー表示を出さない（演出を見やすくするため）
+    const hovered = this.timeline ? null : this.hovered;
+    if (!hovered) return;
+    const part = getPart(board, hovered.x, hovered.y);
+
+    if (placing && !part) {
+      // 配置プレビュー: 半透明のパーツと緑の枠
+      const ghostPart: Part = { id: placing.partId, dir: placing.dir };
+      const ghost = createPartView(ghostPart, this.textures, null);
+      const { px, py } = cellCenter(hovered.x, hovered.y);
+      ghost.position.set(px, py);
+      ghost.alpha = 0.55;
+      this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
+      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(placing.partId));
+      return;
+    }
+    if (part) {
+      this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
+      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(part.id));
+    }
+  }
+
+  /** マスの上にパーツ名のラベルを出す */
+  private showTooltip(x: number, y: number, text: string): void {
+    const label = new Text({
+      text,
+      style: { fill: BOARD_THEME.tooltipText, fontSize: 14, fontWeight: 'bold' },
+    });
+    label.anchor.set(0.5);
+    const w = label.width + 16;
+    const h = 24;
+    const { px, py } = cellCenter(x, y);
+    // 最上段では下に出す
+    const top = y === 0 ? py + CELL_SIZE / 2 + 4 : py - CELL_SIZE / 2 - h - 4;
+    const left = Math.min(Math.max(px - w / 2, 2), BOARD_PIXEL_WIDTH - w - 2);
+    const bg = new Graphics()
+      .roundRect(left, top, w, h, 6)
+      .fill({ color: BOARD_THEME.tooltipBg, alpha: 0.9 });
+    label.position.set(left + w / 2, top + h / 2);
+    this.tooltipLayer.addChild(bg, label);
   }
 
   // ---------------------------------------------------------------------------
@@ -155,6 +258,7 @@ export class BoardRenderer {
     this.timeline = new PlaybackTimeline(result.events);
     this.callbacks = callbacks;
     this.speed = speed;
+    this.drawOverlay();
     if (speed === 'skip') this.skip();
   }
 
@@ -168,6 +272,7 @@ export class BoardRenderer {
     if (!this.timeline) return;
     for (const tickEvents of this.timeline.flush()) this.applyTick(tickEvents, 0);
     this.tweens.finishAll();
+    this.shake = 0;
     this.finishPlayback();
   }
 
@@ -177,6 +282,7 @@ export class BoardRenderer {
     this.timeline = null;
     this.callbacks = null;
     this.tweens.finishAll();
+    this.shake = 0;
     this.signalLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.fxLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.signalViews.clear();
@@ -191,6 +297,18 @@ export class BoardRenderer {
     }
     this.tweens.update(deltaMs);
 
+    // 揺れ: ランダムにずらしながら減衰させる（演出のみ。シミュレーションとは無関係）
+    if (this.shake > 0.1) {
+      this.root.position.set(
+        (Math.random() - 0.5) * this.shake,
+        (Math.random() - 0.5) * this.shake,
+      );
+      this.shake *= 0.86;
+    } else if (this.shake !== 0) {
+      this.shake = 0;
+      this.root.position.set(0, 0);
+    }
+
     // 全 tick を再生し終え、演出も落ち着いたら終了を通知
     if (this.timeline?.isFinished && this.tweens.isIdle) this.finishPlayback();
   }
@@ -199,6 +317,7 @@ export class BoardRenderer {
     const callbacks = this.callbacks;
     this.timeline = null;
     this.callbacks = null;
+    this.drawOverlay();
     callbacks?.onFinish();
   }
 
@@ -206,6 +325,7 @@ export class BoardRenderer {
   private applyTick(events: SimEvent[], tickMs: number): void {
     const moveMs = tickMs * MOVE_RATIO;
     const fxMs = Math.max(tickMs, 1) * 1.2;
+    const instant = tickMs === 0;
 
     for (const event of events) {
       switch (event.type) {
@@ -219,8 +339,10 @@ export class BoardRenderer {
           this.signalViews.set(event.signalId, view);
           this.tweens.add({
             delay: event.tick === 0 ? 0 : moveMs,
-            duration: 0,
+            duration: fxMs * 0.4,
             onStart: () => (view.visible = true),
+            // ポンと出てくる
+            onUpdate: (t) => view.scale.set(0.4 + 0.6 * easeOutCubic(t)),
           });
           break;
         }
@@ -237,7 +359,10 @@ export class BoardRenderer {
             this.tweens.add({
               delay: moveMs,
               duration: fxMs * 0.5,
-              onUpdate: (t) => (view.alpha = 1 - t),
+              onUpdate: (t) => {
+                view.alpha = 1 - t;
+                view.scale.set(1 - 0.5 * t);
+              },
               onComplete: () => view.destroy({ children: true }),
             });
           }
@@ -252,7 +377,12 @@ export class BoardRenderer {
             duration: 0,
             onComplete: () => {
               view?.destroy({ children: true });
-              this.flashPart(event.x, event.y, fxMs);
+              if (instant) return;
+              this.flashPart(event.x, event.y, event.partId, fxMs);
+              if (event.partId === 'barrel') {
+                this.sparks(event.x, event.y, PART_ASSETS.barrel.color, 16, fxMs * 2);
+                this.shake = Math.max(this.shake, 10);
+              }
             },
           });
           break;
@@ -262,8 +392,12 @@ export class BoardRenderer {
             delay: moveMs,
             duration: 0,
             onComplete: () => {
-              this.popText(event.x, event.y, `+${formatScore(event.value)}`, fxMs * 2.5);
               this.callbacks?.onShip(event.total);
+              if (instant) return;
+              const tier = valueTier(event.value);
+              this.popText(event.x, event.y, `+${formatScore(event.value)}`, tier, fxMs * 2.5);
+              this.sparks(event.x, event.y, BOARD_THEME.shipText, 8 + tier * 3, fxMs * 1.5);
+              if (tier >= 2) this.shake = Math.max(this.shake, 3 + tier * 2);
             },
           });
           break;
@@ -271,7 +405,7 @@ export class BoardRenderer {
           this.tweens.add({
             delay: moveMs,
             duration: 0,
-            onComplete: () => this.ripple(event.x, event.y, fxMs * 1.5),
+            onComplete: () => !instant && this.ripple(event.x, event.y, fxMs * 1.5),
           });
           break;
       }
@@ -293,21 +427,22 @@ export class BoardRenderer {
     });
   }
 
-  /** パーツを一瞬光らせる */
-  private flashPart(x: number, y: number, durationMs: number): void {
+  /** パーツをテーマ色で光らせ、弾ませる */
+  private flashPart(x: number, y: number, partId: PartId, durationMs: number): void {
     const { px, py } = cellCenter(x, y);
     const glow = new Graphics()
-      .roundRect(-CELL_SIZE / 2 + 2, -CELL_SIZE / 2 + 2, CELL_SIZE - 4, CELL_SIZE - 4, 8)
-      .fill({ color: BOARD_THEME.glow, alpha: 0.7 });
+      .circle(0, 0, CELL_SIZE * 0.55)
+      .fill({ color: PART_ASSETS[partId].color, alpha: 0.55 });
     glow.position.set(px, py);
     this.fxLayer.addChild(glow);
 
-    const part = this.board ? this.partViews.get(y * this.board.width + x) : undefined;
+    const part = this.state ? this.partViews.get(y * this.state.board.width + x) : undefined;
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
         glow.alpha = 1 - t;
-        part?.scale.set(1 + 0.18 * (1 - t));
+        glow.scale.set(0.6 + 0.6 * t);
+        part?.scale.set(1 + 0.25 * (1 - t));
       },
       onComplete: () => {
         glow.destroy();
@@ -316,16 +451,40 @@ export class BoardRenderer {
     });
   }
 
-  /** 出荷量などの数字を浮かび上がらせる */
-  private popText(x: number, y: number, text: string, durationMs: number): void {
+  /** 火花（小さな粒が放射状に飛び散る） */
+  private sparks(x: number, y: number, color: number, count: number, durationMs: number): void {
+    const { px, py } = cellCenter(x, y);
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+      const distance = CELL_SIZE * (0.5 + Math.random() * 0.6);
+      const dot = new Graphics().circle(0, 0, 2.5 + Math.random() * 2.5).fill(color);
+      dot.position.set(px, py);
+      this.fxLayer.addChild(dot);
+      this.tweens.add({
+        duration: durationMs,
+        onUpdate: (t) => {
+          const e = easeOutCubic(t);
+          dot.position.set(
+            px + Math.cos(angle) * distance * e,
+            py + Math.sin(angle) * distance * e,
+          );
+          dot.alpha = 1 - t;
+        },
+        onComplete: () => dot.destroy(),
+      });
+    }
+  }
+
+  /** 出荷量の数字を浮かび上がらせる（値が大きいほど大きく） */
+  private popText(x: number, y: number, text: string, tier: number, durationMs: number): void {
     const { px, py } = cellCenter(x, y);
     const label = new Text({
       text,
       style: {
         fill: BOARD_THEME.shipText,
-        fontSize: 22,
-        fontWeight: 'bold',
-        stroke: { color: BOARD_THEME.background, width: 4 },
+        fontSize: 20 + tier * 5,
+        fontWeight: '900',
+        stroke: { color: BOARD_THEME.background, width: 5 },
       },
     });
     label.anchor.set(0.5);
@@ -334,7 +493,8 @@ export class BoardRenderer {
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
-        label.y = py - 10 - 36 * easeOutCubic(t);
+        label.y = py - 10 - 40 * easeOutCubic(t);
+        label.scale.set(t < 0.15 ? 0.5 + (t / 0.15) * 0.7 : 1.2 - Math.min(0.2, (t - 0.15) * 0.5));
         label.alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
       },
       onComplete: () => label.destroy(),
@@ -360,93 +520,11 @@ export class BoardRenderer {
   }
 }
 
-// -----------------------------------------------------------------------------
-// 表示オブジェクトの生成
-// -----------------------------------------------------------------------------
-
-/** パーツの出力方向（矢印の表示用）。方向を持たないパーツは空 */
-function outputDirs(part: Part): Dir4[] {
-  switch (part.id) {
-    case 'splitter':
-      return [rotateCcw(part.dir), rotateCw(part.dir)];
-    case 'barrel':
-    case 'junkbot':
-    case 'dock':
-      return [];
-    default:
-      return [part.dir];
-  }
-}
-
-/** アセットマニフェストに従ってパーツを描く（中心が原点） */
-function createPartView(part: Part): Container {
-  const view = new Container();
-  const asset = PART_ASSETS[part.id];
-  const size = CELL_SIZE * 0.66;
-
-  if (asset.kind === 'shape') {
-    view.addChild(drawShape(asset.shape, size, asset.color));
-    const glyph = new Text({
-      text: asset.glyph,
-      style: { fill: BOARD_THEME.glyph, fontSize: 24, fontWeight: 'bold' },
-    });
-    glyph.anchor.set(0.5);
-    view.addChild(glyph);
-  }
-  // kind: 'image' は本番素材の導入時に Sprite で描画する（フェーズ2以降）
-
-  // 出力方向の矢印
-  for (const dir of outputDirs(part)) {
-    const arrow = new Graphics().poly([0, -6, 7, 5, -7, 5]).fill(BOARD_THEME.arrow);
-    const offset = CELL_SIZE * 0.4;
-    const angle = (dir * Math.PI) / 2;
-    arrow.position.set(Math.sin(angle) * offset, -Math.cos(angle) * offset);
-    arrow.rotation = angle;
-    view.addChild(arrow);
-  }
-  return view;
-}
-
-function drawShape(shape: ShapeKind, size: number, color: number): Graphics {
-  const r = size / 2;
-  const g = new Graphics();
-  switch (shape) {
-    case 'square':
-      g.roundRect(-r, -r, size, size, 8);
-      break;
-    case 'circle':
-      g.circle(0, 0, r);
-      break;
-    case 'diamond':
-      g.poly([0, -r * 1.1, r * 1.1, 0, 0, r * 1.1, -r * 1.1, 0]);
-      break;
-    case 'hexagon': {
-      const points: number[] = [];
-      for (let i = 0; i < 6; i++) {
-        const a = (Math.PI / 3) * i + Math.PI / 6;
-        points.push(Math.cos(a) * r, Math.sin(a) * r);
-      }
-      g.poly(points);
-      break;
-    }
-  }
-  return g.fill(color).stroke({ width: 2, color: 0x000000, alpha: 0.35 });
-}
-
-/** 信号（値つきの丸） */
-function createSignalView(value: Score): Container {
-  const view = new Container();
-  view.addChild(
-    new Graphics()
-      .circle(0, 0, 15)
-      .fill(BOARD_THEME.signal)
-      .stroke({ width: 2, color: 0x000000, alpha: 0.4 }),
-  );
-  const label = new Text({
-    text: formatCompact(value),
-    style: { fill: BOARD_THEME.signalText, fontSize: 13, fontWeight: 'bold' },
-  });
-  label.anchor.set(0.5);
-  view.addChild(label);
-  return view;
+/** マスを囲む枠 */
+function cellFrame(x: number, y: number, color: number, width: number): Graphics {
+  const { px, py } = cellCenter(x, y);
+  const half = CELL_SIZE / 2 - 3;
+  return new Graphics()
+    .roundRect(px - half, py - half, half * 2, half * 2, 8)
+    .stroke({ width, color });
 }

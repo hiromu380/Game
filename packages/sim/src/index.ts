@@ -11,6 +11,7 @@ export * from './core/board';
 
 export { simulate } from './simulate/simulate';
 export { createRuleSet, DEFAULT_RULES } from './simulate/rules';
+export { getPressMultiplier } from './simulate/parts/press';
 
 export * from './run/types';
 export * from './run/run';

@@ -26,10 +26,12 @@ export function ShopPanel({ offers, budget, disabled, onBuy }: Props) {
                 className="item-button"
                 disabled={disabled || offer.sold || !affordable}
                 onClick={() => onBuy(index)}
-                title={t(`part.${offer.partId}.desc`)}
               >
                 <PartIcon partId={offer.partId} />
-                <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
+                <span className="item-button__text">
+                  <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
+                  <span className="item-button__desc">{t(`part.${offer.partId}.desc`)}</span>
+                </span>
                 <span className="item-button__meta">
                   {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
                 </span>

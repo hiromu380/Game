@@ -3,6 +3,7 @@
  */
 import { scoreToString, type Score } from '@chain-factory/sim';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { useI18n } from './i18n';
 import type { PlaybackSpeed } from './playback/timeline';
@@ -42,9 +43,15 @@ export function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const highlight = useMemo(
-    () => (selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null),
-    [selection],
+  // 盤面に渡す表示状態（選択中のマス・配置しようとしているパーツ）
+  const boardView = useMemo<BoardViewState>(
+    () => ({
+      board: run.board,
+      highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
+      placing:
+        selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
+    }),
+    [run.board, selection],
   );
 
   const onShip = useCallback((total: Score) => setLiveScore(scoreToString(total)), []);
@@ -93,8 +100,8 @@ export function App() {
       <main className="layout">
         <div className="layout__board">
           <PixiBoard
-            board={run.board}
-            highlight={highlight}
+            view={boardView}
+            getPartName={(partId) => t(`part.${partId}.name`)}
             playbackResult={playback?.result ?? null}
             speed={speed}
             onCellClick={onCellClick}

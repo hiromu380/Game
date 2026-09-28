@@ -31,10 +31,12 @@ export function InventoryPanel({ inventory, selection, disabled, onSelect }: Pro
                 className={`item-button ${selectedId === id ? 'item-button--selected' : ''}`}
                 disabled={disabled}
                 onClick={() => onSelect(id)}
-                title={t(`part.${id}.desc`)}
               >
                 <PartIcon partId={id} />
-                <span className="item-button__name">{t(`part.${id}.name`)}</span>
+                <span className="item-button__text">
+                  <span className="item-button__name">{t(`part.${id}.name`)}</span>
+                  <span className="item-button__desc">{t(`part.${id}.desc`)}</span>
+                </span>
                 <span className="item-button__meta">×{inventory[id]}</span>
               </button>
             </li>

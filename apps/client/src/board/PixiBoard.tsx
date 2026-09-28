@@ -4,24 +4,24 @@
  * 描画そのものは BoardRenderer が担当し、ここでは
  * 「React の状態が変わったら BoardRenderer に伝える」ことだけを行う。
  */
-import type { Board, Score, SimResult } from '@chain-factory/sim';
+import type { PartId, Score, SimResult } from '@chain-factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import type { PlaybackSpeed } from '../playback/timeline';
-import { BoardRenderer, type BoardHighlight } from './BoardRenderer';
+import { BoardRenderer, type BoardViewState } from './BoardRenderer';
 
 interface Props {
-  board: Board;
-  highlight: BoardHighlight | null;
+  view: BoardViewState;
   /** 再生する結果（null なら再生しない）。同じオブジェクトの間は再生し直さない */
   playbackResult: SimResult | null;
   speed: PlaybackSpeed;
+  getPartName: (partId: PartId) => string;
   onCellClick: (x: number, y: number) => void;
   onShip: (total: Score) => void;
   onPlaybackFinish: () => void;
 }
 
 export function PixiBoard(props: Props) {
-  const { board, highlight, playbackResult, speed } = props;
+  const { view, playbackResult, speed } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderer, setRenderer] = useState<BoardRenderer | null>(null);
   /** 再生開始時の速度（速度変更だけで再生し直さないよう ref で持つ） */
@@ -40,16 +40,17 @@ export function PixiBoard(props: Props) {
     let disposed = false;
     let created: BoardRenderer | null = null;
 
-    void BoardRenderer.create(parent, (x, y) => callbacksRef.current.onCellClick(x, y)).then(
-      (r) => {
-        if (disposed) {
-          r.destroy();
-          return;
-        }
-        created = r;
-        setRenderer(r);
-      },
-    );
+    void BoardRenderer.create(parent, {
+      onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
+      getPartName: (partId) => callbacksRef.current.getPartName(partId),
+    }).then((r) => {
+      if (disposed) {
+        r.destroy();
+        return;
+      }
+      created = r;
+      setRenderer(r);
+    });
 
     return () => {
       disposed = true;
@@ -60,8 +61,8 @@ export function PixiBoard(props: Props) {
 
   // 盤面・選択の反映
   useEffect(() => {
-    renderer?.setBoard(board, highlight);
-  }, [renderer, board, highlight]);
+    renderer?.setState(view);
+  }, [renderer, view]);
 
   // 再生の開始・終了
   useEffect(() => {

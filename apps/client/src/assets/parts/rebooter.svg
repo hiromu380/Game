@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 再起動装置: 円形の矢印（↻）で「もう一度」を表す -->
+  <rect x="6" y="6" width="52" height="52" rx="26" fill="#00acc1" stroke="#004d56" stroke-width="3"/>
+  <path d="M44.5 23 A15 15 0 1 0 47 34" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="37,14 51,15 46,28" fill="#ffffff" stroke="#004d56" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="4" fill="#e0f7fa"/>
+</svg>
