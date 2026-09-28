@@ -3,6 +3,7 @@
  */
 import type { BossPlanEntry, RunState } from '@chain-factory/sim';
 import { useI18n, type TranslateFn } from '../i18n';
+import { BOSS_ICONS } from '../assets/manifest';
 
 /** 今表示すべきボス情報（適用中 or 今夜の予告）。なければ null */
 export function findBossToShow(run: RunState): { entry: BossPlanEntry; isNow: boolean } | null {
@@ -47,6 +48,7 @@ export function BossNotice({ run }: { run: RunState }) {
     <>
       {special && (
         <div className="boss-notice boss-notice--now">
+          <img className="boss-notice__icon" src={BOSS_ICONS[special.id]} alt="" />
           <span className="boss-notice__label">{t('daily.specialRule')}</span>
           <strong>{t(`boss.${special.id}.name`)}</strong>
           <span className="boss-notice__desc">{describeBoss(t, run, special)}</span>
@@ -54,6 +56,7 @@ export function BossNotice({ run }: { run: RunState }) {
       )}
       {boss && (
         <div className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}>
+          <img className="boss-notice__icon" src={BOSS_ICONS[boss.entry.id]} alt="" />
           <span className="boss-notice__label">
             {boss.isNow ? t('boss.now') : t('boss.tonight')}
           </span>

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '../../i18n';
 import { api } from '../../online/api';
 import { buildShareText, siteUrl, xIntentUrl } from '../../online/shareText';
+import { UiIcon } from '../UiIcon';
 
 interface Props {
   run: RunState;
@@ -59,6 +60,7 @@ export function DailyShare({ run, dailyId, number }: Props) {
           target="_blank"
           rel="noopener noreferrer"
         >
+          <UiIcon name="share" />
           {t('share.toX')}
         </a>
         <button onClick={() => void copy()}>{copied ? t('share.copied') : t('share.copy')}</button>

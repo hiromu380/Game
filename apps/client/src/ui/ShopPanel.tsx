@@ -6,6 +6,7 @@ import type { PriceTrend } from '../online/market';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
+import { UiIcon } from './UiIcon';
 
 interface Props {
   /** 説明文に数値を差し込むためのルール */
@@ -33,6 +34,7 @@ export function ShopPanel(props: Props) {
           disabled={disabled || rerollCost === null || budget < rerollCost}
           onClick={onReroll}
         >
+          <UiIcon name="reroll" size={16} />
           {rerollCost === null ? t('shop.rerollDisabled') : t('shop.reroll', { cost: rerollCost })}
         </button>
       </div>

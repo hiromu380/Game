@@ -40,6 +40,7 @@ import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
+import { UiIcon } from './ui/UiIcon';
 
 /** ゲーム画面の始め方（デイリー・練習はメニューで組み立てたランを渡す） */
 export interface GameStart {
@@ -275,14 +276,17 @@ export function App({ start, onTitle }: Props) {
           </>
         )}
         <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
+          <UiIcon name="daily" />
           {t('online.dailyButton')}
         </button>
         {DEBUG_AVAILABLE && (
           <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
+            <UiIcon name="debug" />
             {t('debug.toggle')}
           </button>
         )}
         <button className="button--ghost" onClick={() => setSettingsOpen(true)}>
+          <UiIcon name="settings" />
           {t('settings.open')}
         </button>
       </div>

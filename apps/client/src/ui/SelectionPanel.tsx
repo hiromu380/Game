@@ -10,6 +10,7 @@ import { useI18n } from '../i18n';
 import type { Selection } from '../state/gameReducer';
 import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
+import { UiIcon } from './UiIcon';
 
 interface Props {
   run: RunState;
@@ -75,9 +76,11 @@ export function SelectionPanel({
       </div>
       <div className="button-row">
         <button disabled={disabled} onClick={onRotate}>
+          <UiIcon name="rotate" />
           {t('selection.rotate')}
         </button>
         <button disabled={disabled} onClick={onReturn}>
+          <UiIcon name="return" />
           {t('selection.returnToInventory')}
         </button>
       </div>
@@ -88,6 +91,7 @@ export function SelectionPanel({
           onClick={handleSell}
           onBlur={() => setConfirmingKey(null)}
         >
+          {sellable && <UiIcon name="sell" />}
           {!sellable
             ? t('selection.cannotSell')
             : confirming

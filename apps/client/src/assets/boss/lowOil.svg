@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ボス: lowOil（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="28" fill="#ff5252" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="21" fill="#ffc107" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M28 16 q-9 13 -9 19 a9 9 0 0 0 18 0 q0 -6 -9 -19 Z" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M20.5 38 a8 8 0 0 0 15 0 Z" fill="#4e342e"/>
+  <path d="M43 22 V40 M38 35 l5 6 l5 -6" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: settings（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="12" cy="12" r="3" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 3 v2.5 M12 18.5 v2.5 M3 12 h2.5 M18.5 12 h2.5 M5.6 5.6 l1.8 1.8 M16.6 16.6 l1.8 1.8 M5.6 18.4 l1.8 -1.8 M16.6 7.4 l1.8 -1.8" fill="none" stroke="#eef0f3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="12" cy="12" r="6.5" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

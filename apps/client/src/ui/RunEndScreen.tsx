@@ -19,6 +19,7 @@ import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
 import { DailyShare } from './share/DailyShare';
 import { StoreLink } from './StoreLink';
+import { UiIcon } from './UiIcon';
 
 interface Props {
   run: RunState;
@@ -98,6 +99,7 @@ export function RunEndScreen(props: Props) {
       ) : (
         <div className="button-row run-end__actions">
           <button className="button--primary" onClick={props.onViewRanking}>
+            <UiIcon name="ranking" />
             {t('runEnd.viewRanking')}
           </button>
           {mode.kind === 'practice' && (

@@ -44,7 +44,12 @@ import { chainSemitones, type SoundKey } from '../audio/manifest';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
-import { loadPartTextures, type PartTextures } from './textures';
+import {
+  loadBoardTextures,
+  loadPartTextures,
+  type BoardTextures,
+  type PartTextures,
+} from './textures';
 import { easeOutCubic, TweenManager } from './tweens';
 import {
   createBlockedCell,
@@ -105,6 +110,7 @@ const MOVE_RATIO = 0.55;
 export class BoardRenderer {
   private readonly app: Application;
   private readonly textures: PartTextures;
+  private readonly boardTextures: BoardTextures;
   private readonly options: BoardRendererOptions;
 
   /** 揺れ演出のために、盤面全体をこのコンテナに入れる */
@@ -135,9 +141,15 @@ export class BoardRenderer {
   private callbacks: PlaybackCallbacks | null = null;
   private speed: PlaybackSpeed = 1;
 
-  private constructor(app: Application, textures: PartTextures, options: BoardRendererOptions) {
+  private constructor(
+    app: Application,
+    textures: PartTextures,
+    boardTextures: BoardTextures,
+    options: BoardRendererOptions,
+  ) {
     this.app = app;
     this.textures = textures;
+    this.boardTextures = boardTextures;
     this.options = options;
     this.status = new StatusOverlay(options.getBreakLabel);
     this.effects = new EffectsLayer(
@@ -205,7 +217,7 @@ export class BoardRenderer {
   /** PixiJS の初期化と画像の読み込みは非同期のため、生成はこの関数で行う */
   static async create(parent: HTMLElement, options: BoardRendererOptions): Promise<BoardRenderer> {
     const app = new Application();
-    const [, textures] = await Promise.all([
+    const [, textures, boardTextures] = await Promise.all([
       app.init({
         width: INITIAL_BOARD_PIXEL_SIZE.width,
         height: INITIAL_BOARD_PIXEL_SIZE.height,
@@ -215,10 +227,11 @@ export class BoardRenderer {
         autoDensity: true,
       }),
       loadPartTextures(PART_DISPLAY_SIZE),
+      loadBoardTextures(),
     ]);
     app.canvas.classList.add('board-canvas');
     parent.appendChild(app.canvas);
-    return new BoardRenderer(app, textures, options);
+    return new BoardRenderer(app, textures, boardTextures, options);
   }
 
   destroy(): void {
@@ -247,18 +260,30 @@ export class BoardRenderer {
       const size = boardPixelSize(state.board.width, state.board.height);
       this.app.renderer.resize(size.width, size.height);
       this.floorLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-      this.floorLayer.addChild(createFloor(state.board.width, state.board.height));
+      this.floorLayer.addChild(
+        createFloor(state.board.width, state.board.height, this.boardTextures),
+      );
     }
 
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     for (const cell of state.rules.blockedCells) {
       this.blockLayer.addChild(
-        createBlockedCell(cell % state.board.width, Math.floor(cell / state.board.width), false),
+        createBlockedCell(
+          cell % state.board.width,
+          Math.floor(cell / state.board.width),
+          false,
+          this.boardTextures,
+        ),
       );
     }
     for (const cell of state.upcomingBlocked) {
       this.blockLayer.addChild(
-        createBlockedCell(cell % state.board.width, Math.floor(cell / state.board.width), true),
+        createBlockedCell(
+          cell % state.board.width,
+          Math.floor(cell / state.board.width),
+          true,
+          this.boardTextures,
+        ),
       );
     }
 

@@ -6,6 +6,8 @@
  * 素材を人の制作物に差し替えたら、その項目をここから外すだけで済むように）。
  * 書き出し済みのファイルがここの結果とずれていないかはテスト（test/art.test.ts）で確かめる。
  */
+import { boardFiles } from './board';
+import { iconFiles } from './icons';
 import { mascotFiles } from './mascot';
 import { partFiles } from './parts';
 import { paletteCss } from './paletteCss';
@@ -16,6 +18,8 @@ export function buildArt(): Record<string, string> {
     'src/styles/palette.css': paletteCss(),
     ...mascotFiles(),
     ...partFiles(),
+    ...boardFiles(),
+    ...iconFiles(),
   };
   files['art/preview.html'] = previewHtml([
     ...Object.keys(files),

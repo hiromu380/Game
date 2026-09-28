@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: return（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M4 13 V20 H20 V13" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 3 V14 M8 10 l4 4 l4 -4" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

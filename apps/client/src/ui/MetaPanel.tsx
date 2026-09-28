@@ -13,6 +13,7 @@ import {
 } from '@chain-factory/sim';
 import { useI18n, type ScoreFormatter, type TranslateFn } from '../i18n';
 import { PartIcon } from './PartIcon';
+import { UiIcon } from './UiIcon';
 
 interface Props {
   meta: MetaProgress;
@@ -53,7 +54,7 @@ export function MetaPanel({ meta, unlocks }: Props) {
                 </li>
               ) : (
                 <li key={`board-${u.level}`}>
-                  <img src="./icon.svg" width={32} height={32} alt="" />
+                  <UiIcon name="expand" size={32} />
                   {t('meta.newBoard', { size: boardSizeAt(u.level) })}
                 </li>
               ),
@@ -82,7 +83,7 @@ export function MetaPanel({ meta, unlocks }: Props) {
           return (
             <GoalRow
               key={`board-${i}`}
-              icon={<img src="./icon.svg" width={28} height={28} alt="" />}
+              icon={<UiIcon name="expand" size={28} />}
               label={t('meta.boardGoal', { size: boardSizeAt(i + 1) })}
               condition={describeCondition(t, formatScore, condition)}
               progress={done ? 1 : conditionProgress(meta.records, condition)}

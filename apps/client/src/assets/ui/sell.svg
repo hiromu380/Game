@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: sell（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="10" cy="14" r="6" fill="#ffd54f" stroke="#1b1f27" stroke-width="1.5"/>
+  <path d="M8 14 h4" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18 20 V5 M14 9 l4 -4 l4 4" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

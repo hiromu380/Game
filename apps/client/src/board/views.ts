@@ -5,10 +5,10 @@
  * 倍率などの数値は sim パッケージの関数・ルールから受け取って表示する。
  */
 import type { Dir4, Part, PartBadge, Score } from '@chain-factory/sim';
-import { Container, Graphics, Sprite, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text, TilingSprite } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { BOARD_PADDING, CELL_SIZE } from './layout';
-import type { PartTextures } from './textures';
+import type { BoardTextures, PartTextures } from './textures';
 
 /** パーツ画像の表示サイズ（マスに対する割合） */
 export const PART_DISPLAY_SIZE = Math.round(CELL_SIZE * 0.78);
@@ -132,52 +132,68 @@ export function createSignalView(value: Score, formatCompact: (value: Score) => 
 // 床
 // -----------------------------------------------------------------------------
 
-/** 工場の床（市松模様のタイル）とハザード柄の枠 */
-export function createFloor(width: number, height: number): Container {
+/** 床タイルの選び方（マスの位置から決まる。無地がほとんどで、鋲は時々・汚れはまれ） */
+function floorVariant(x: number, y: number): number {
+  const h = Math.imul(x + 1, 0x9e3779b1) ^ Math.imul(y + 1, 0x85ebca6b);
+  const n = ((h ^ (h >>> 15)) >>> 0) % 16;
+  return n < 12 ? 0 : n < 15 ? 1 : 2;
+}
+
+/**
+ * 床（タイル）とハザード柄の枠。素材は assets/board/（art/board.ts）
+ * 枠は角4つ＋辺4本（辺は柄を並べてつなぐ）なので、どの盤面サイズでも同じ見た目になる
+ */
+export function createFloor(width: number, height: number, textures: BoardTextures): Container {
   const floor = new Container();
   const innerW = width * CELL_SIZE;
   const innerH = height * CELL_SIZE;
   const outerW = innerW + BOARD_PADDING * 2;
   const outerH = innerH + BOARD_PADDING * 2;
 
-  // ハザード柄の枠: 黄色の下地に黒い斜線を引き、枠の形でマスクする
-  const frameShape = () =>
-    new Graphics()
-      .roundRect(0, 0, outerW, outerH, 12)
-      .fill(0xffffff)
-      .rect(BOARD_PADDING, BOARD_PADDING, innerW, innerH)
-      .cut();
-  const stripes = new Graphics().rect(0, 0, outerW, outerH).fill(BOARD_THEME.hazardYellow);
-  for (let i = -outerH; i < outerW; i += 22) {
-    stripes.poly([i, 0, i + 11, 0, i + 11 + outerH, outerH, i + outerH, outerH]);
-  }
-  stripes.fill(BOARD_THEME.hazardBlack);
-  const mask = frameShape();
-  stripes.mask = mask;
-  floor.addChild(stripes, mask);
-
-  // 床タイル
-  const tiles = new Graphics();
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      tiles
-        .rect(BOARD_PADDING + x * CELL_SIZE, BOARD_PADDING + y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-        .fill((x + y) % 2 === 0 ? BOARD_THEME.floorA : BOARD_THEME.floorB);
+      const tile = new Sprite(textures.floors[floorVariant(x, y)]);
+      tile.position.set(BOARD_PADDING + x * CELL_SIZE, BOARD_PADDING + y * CELL_SIZE);
+      tile.setSize(CELL_SIZE, CELL_SIZE);
+      // 市松模様: 1マスおきに少しだけ暗くする
+      if ((x + y) % 2 === 1) tile.tint = 0xeeeeee;
+      floor.addChild(tile);
     }
   }
-  // 目地
-  for (let i = 0; i <= width; i++) {
-    tiles
-      .moveTo(BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING)
-      .lineTo(BOARD_PADDING + i * CELL_SIZE, BOARD_PADDING + innerH);
+
+  // 辺: 上・右・下・左の順に、素材（上辺の向き）を 90 度ずつ回して置く
+  const half = BOARD_PADDING / 2;
+  const edges = [
+    { x: outerW / 2, y: half, length: innerW, angle: 0 },
+    { x: outerW - half, y: outerH / 2, length: innerH, angle: 90 },
+    { x: outerW / 2, y: outerH - half, length: innerW, angle: 180 },
+    { x: half, y: outerH / 2, length: innerH, angle: 270 },
+  ];
+  for (const e of edges) {
+    const edge = new TilingSprite({
+      texture: textures.frameEdge,
+      width: e.length,
+      height: BOARD_PADDING,
+    });
+    edge.anchor.set(0.5);
+    edge.position.set(e.x, e.y);
+    edge.angle = e.angle;
+    floor.addChild(edge);
   }
-  for (let i = 0; i <= height; i++) {
-    tiles
-      .moveTo(BOARD_PADDING, BOARD_PADDING + i * CELL_SIZE)
-      .lineTo(BOARD_PADDING + innerW, BOARD_PADDING + i * CELL_SIZE);
+  // 角: 左上・右上・右下・左下
+  const corners = [
+    { x: half, y: half, angle: 0 },
+    { x: outerW - half, y: half, angle: 90 },
+    { x: outerW - half, y: outerH - half, angle: 180 },
+    { x: half, y: outerH - half, angle: 270 },
+  ];
+  for (const c of corners) {
+    const corner = new Sprite(textures.frameCorner);
+    corner.anchor.set(0.5);
+    corner.position.set(c.x, c.y);
+    corner.angle = c.angle;
+    floor.addChild(corner);
   }
-  tiles.stroke({ width: 2, color: BOARD_THEME.floorLine });
-  floor.addChild(tiles);
   return floor;
 }
 
@@ -185,43 +201,38 @@ export function createFloor(width: number, height: number): Container {
  * 使用不可マス（補修工事中）の表示
  * @param upcoming true なら「今夜使えなくなる」予告（点線の枠だけ）
  */
-export function createBlockedCell(x: number, y: number, upcoming: boolean): Graphics {
+export function createBlockedCell(
+  x: number,
+  y: number,
+  upcoming: boolean,
+  textures: BoardTextures,
+): Container {
   const left = BOARD_PADDING + x * CELL_SIZE;
   const top = BOARD_PADDING + y * CELL_SIZE;
-  const g = new Graphics();
-  if (upcoming) {
-    // 点線の代わりに短い線分を並べる
-    const inset = 5;
-    const size = CELL_SIZE - inset * 2;
-    for (let i = 0; i < size; i += 10) {
-      const len = Math.min(5, size - i);
-      g.moveTo(left + inset + i, top + inset).lineTo(left + inset + i + len, top + inset);
-      g.moveTo(left + inset + i, top + inset + size).lineTo(
-        left + inset + i + len,
-        top + inset + size,
-      );
-      g.moveTo(left + inset, top + inset + i).lineTo(left + inset, top + inset + i + len);
-      g.moveTo(left + inset + size, top + inset + i).lineTo(
-        left + inset + size,
-        top + inset + i + len,
-      );
-    }
-    return g.stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+  if (!upcoming) {
+    // 工事中: 工事柵とコーンの素材（assets/board/floor-blocked.svg）
+    const sprite = new Sprite(textures.blocked);
+    sprite.position.set(left + 2, top + 2);
+    sprite.setSize(CELL_SIZE - 4, CELL_SIZE - 4);
+    sprite.alpha = 0.92;
+    return sprite;
   }
-  // 工事中: 赤白の斜線と中央の ✕
-  g.rect(left + 2, top + 2, CELL_SIZE - 4, CELL_SIZE - 4).fill({
-    color: BOARD_THEME.blocked,
-    alpha: 0.85,
-  });
-  for (let i = -CELL_SIZE; i < CELL_SIZE; i += 14) {
-    g.moveTo(left + Math.max(0, i), top + Math.max(0, -i)).lineTo(
-      left + Math.min(CELL_SIZE, CELL_SIZE + i),
-      top + Math.min(CELL_SIZE, CELL_SIZE - i),
+  // 今夜の予告: 黄色の点線の枠（点線の代わりに短い線分を並べる）
+  const g = new Graphics();
+  const inset = 5;
+  const size = CELL_SIZE - inset * 2;
+  for (let i = 0; i < size; i += 10) {
+    const len = Math.min(5, size - i);
+    g.moveTo(left + inset + i, top + inset).lineTo(left + inset + i + len, top + inset);
+    g.moveTo(left + inset + i, top + inset + size).lineTo(
+      left + inset + i + len,
+      top + inset + size,
+    );
+    g.moveTo(left + inset, top + inset + i).lineTo(left + inset, top + inset + i + len);
+    g.moveTo(left + inset + size, top + inset + i).lineTo(
+      left + inset + size,
+      top + inset + i + len,
     );
   }
-  g.stroke({ width: 4, color: 0xffffff, alpha: 0.35 });
-  const c = CELL_SIZE / 2;
-  g.moveTo(left + c - 12, top + c - 12).lineTo(left + c + 12, top + c + 12);
-  g.moveTo(left + c + 12, top + c - 12).lineTo(left + c - 12, top + c + 12);
-  return g.stroke({ width: 5, color: 0xffffff, cap: 'round' });
+  return g.stroke({ width: 3, color: BOARD_THEME.hazardYellow });
 }

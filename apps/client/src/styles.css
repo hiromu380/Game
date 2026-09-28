@@ -18,7 +18,15 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  /* 縞鋼板の模様を敷き詰める（assets/board/background.svg） */
+  background: var(--bg) url('./assets/board/background.svg') repeat;
+  background-size: 32px 32px;
+}
+
+/* ボタンの文字の前に添える UI アイコン（ui/UiIcon.tsx） */
+.ui-icon {
+  vertical-align: middle;
+  margin: -3px 6px -2px 0;
 }
 
 button {
@@ -402,6 +410,12 @@ button:disabled {
 .boss-notice--now {
   border: 2px solid var(--missed);
   background: rgba(255, 82, 82, 0.12);
+}
+.boss-notice__icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-self: center;
 }
 .boss-notice__label {
   font-size: 0.75rem;
@@ -1044,6 +1058,10 @@ a.button.button--primary {
 .app--short .hud {
   margin: 6px 0;
   padding: 6px 12px;
+}
+.app--short .boss-notice__icon {
+  width: 20px;
+  height: 20px;
 }
 .app--short .boss-notice {
   margin-bottom: 6px;

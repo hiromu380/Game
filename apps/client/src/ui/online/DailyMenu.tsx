@@ -13,6 +13,7 @@ import { useI18n } from '../../i18n';
 import { api, OnlineError, type OnlineErrorCode } from '../../online/api';
 import { buildDailyRun, buildPracticeRun } from '../../online/dailyRun';
 import { loadIdentity } from '../../online/identity';
+import { BOSS_ICONS } from '../../assets/manifest';
 import { getPlatform, requestOnScreenKeyboard } from '../../platform';
 import { HumanCheck } from './HumanCheck';
 import { SteamSignIn } from './SteamSignIn';
@@ -142,6 +143,7 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose, onRanked }: 
         <p className="panel__hint">{t('daily.description')}</p>
         {rule && (
           <div className="boss-notice boss-notice--now">
+            <img className="boss-notice__icon" src={BOSS_ICONS[rule.id]} alt="" />
             <span className="boss-notice__label">{t('daily.specialRule')}</span>
             <strong>{t(`boss.${rule.id}.name`)}</strong>
             <span className="boss-notice__desc">{describeBoss(t, preview, rule)}</span>
