@@ -13,7 +13,6 @@ import {
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
-import { formatScore } from './format';
 
 interface Props {
   playback: Playback;
@@ -22,7 +21,7 @@ interface Props {
 }
 
 export function PlaybackPanel({ playback, run, onClose }: Props) {
-  const { t } = useI18n();
+  const { t, formatScore } = useI18n();
   if (!playback.finished) {
     return <div className="playback-banner">{t('playback.playing')}</div>;
   }
@@ -71,7 +70,7 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
 
 /** 連鎖が途切れた理由の内訳（盤面にはマーカーで場所を表示している） */
 function BreakList({ result, run }: { result: SimResult; run: RunState }) {
-  const { t } = useI18n();
+  const { t, formatScore } = useI18n();
   const summary = summarizeBreaks(result.events, run.board);
   const reasons = Object.keys(summary.counts) as VanishReason[];
   if (reasons.length === 0 && !summary.haltReason) return null;

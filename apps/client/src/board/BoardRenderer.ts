@@ -70,6 +70,9 @@ export interface BoardLabels {
   formatChain: (count: number) => string;
   /** 大出荷カットインの見出し */
   getCutInTitle: () => string;
+  /** スコアの表記（通常 / 短い） */
+  formatScore: (value: Score) => string;
+  formatCompact: (value: Score) => string;
 }
 
 export interface BoardRendererOptions extends BoardLabels {
@@ -133,6 +136,7 @@ export class BoardRenderer {
         chain: options.formatChain,
         cutInTitle: options.getCutInTitle,
         income: options.formatIncome,
+        score: options.formatScore,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
       () => ({ width: this.app.screen.width, height: this.app.screen.height }),
@@ -398,7 +402,7 @@ export class BoardRenderer {
       switch (event.type) {
         case 'emit': {
           // 信号は発射元のマスに出現し、次の tick で移動を始める
-          const view = createSignalView(event.value);
+          const view = createSignalView(event.value, this.options.formatCompact);
           const { px, py } = cellCenter(event.x, event.y);
           view.position.set(px, py);
           view.visible = false;

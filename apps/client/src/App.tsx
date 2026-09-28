@@ -24,7 +24,7 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { ShopPanel } from './ui/ShopPanel';
 
 export function App() {
-  const { t } = useI18n();
+  const { t, formatScore, formatCompact } = useI18n();
   const [state, dispatch] = useReducer(gameReducer, undefined, () => {
     const initial = createInitialState();
     return createGameState(initial.run, initial.meta);
@@ -110,8 +110,10 @@ export function App() {
       getBreakLabel: (reason) => t(`break.short.${reason}`),
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
+      formatScore,
+      formatCompact,
     }),
-    [t],
+    [t, formatScore, formatCompact],
   );
   const effectSettings = useMemo(
     () => ({ strength: settings.effects, shake: settings.shake }),

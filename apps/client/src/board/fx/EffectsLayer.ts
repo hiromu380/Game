@@ -9,7 +9,6 @@ import type { PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
 import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
-import { formatScore } from '../../ui/format';
 import { CELL_SIZE, cellCenter } from '../layout';
 import { easeOutCubic, type TweenManager } from '../tweens';
 
@@ -25,6 +24,8 @@ export interface EffectLabels {
   cutInTitle: () => string;
   /** 収入のポップアップ（例: +1円） */
   income: (amount: number) => string;
+  /** スコアの表記 */
+  score: (value: Score) => string;
 }
 
 /** 値の桁数（演出の段階を決める） */
@@ -147,7 +148,14 @@ export class EffectsLayer {
   onShip(x: number, y: number, value: Score, durationMs: number): void {
     const digits = digitsOf(value);
     const tier = Math.min(digits - 1, 5);
-    this.popText(x, y, `+${formatScore(value)}`, tier, durationMs * 2.5, BOARD_THEME.shipText);
+    this.popText(
+      x,
+      y,
+      `+${this.labels.score(value)}`,
+      tier,
+      durationMs * 2.5,
+      BOARD_THEME.shipText,
+    );
 
     const p = EFFECTS_CONFIG.particles;
     const count = Math.min(p.max, p.shipBase + digits * p.shipPerDigit);
@@ -383,7 +391,7 @@ export class EffectsLayer {
     });
     title.position.set(110, 14);
     const amount = new Text({
-      text: `+${formatScore(value)}`,
+      text: `+${this.labels.score(value)}`,
       style: {
         fill: BOARD_THEME.shipText,
         fontSize: 36,

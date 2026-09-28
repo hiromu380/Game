@@ -11,8 +11,7 @@ import {
   type MetaProgress,
   type Unlock,
 } from '@chain-factory/sim';
-import { useI18n, type TranslateFn } from '../i18n';
-import { formatScore } from './format';
+import { useI18n, type ScoreFormatter, type TranslateFn } from '../i18n';
 import { PartIcon } from './PartIcon';
 
 interface Props {
@@ -22,7 +21,11 @@ interface Props {
 }
 
 /** 解放条件の文言 */
-function describeCondition(t: TranslateFn, condition: MetaCondition): string {
+function describeCondition(
+  t: TranslateFn,
+  formatScore: ScoreFormatter,
+  condition: MetaCondition,
+): string {
   const value =
     condition.kind === 'totalShipped' || condition.kind === 'bestShiftScore'
       ? formatScore(String(condition.value))
@@ -34,7 +37,7 @@ function describeCondition(t: TranslateFn, condition: MetaCondition): string {
 const boardSizeAt = (level: number) => BALANCE.board.width + level;
 
 export function MetaPanel({ meta, unlocks }: Props) {
-  const { t } = useI18n();
+  const { t, formatScore } = useI18n();
 
   return (
     <section className="meta">
@@ -68,7 +71,7 @@ export function MetaPanel({ meta, unlocks }: Props) {
               key={partId}
               icon={<PartIcon partId={partId} size={28} />}
               label={t(`part.${partId}.name`)}
-              condition={describeCondition(t, condition)}
+              condition={describeCondition(t, formatScore, condition)}
               progress={done ? 1 : conditionProgress(meta.records, condition)}
               done={done}
             />
@@ -81,7 +84,7 @@ export function MetaPanel({ meta, unlocks }: Props) {
               key={`board-${i}`}
               icon={<img src="./icon.svg" width={28} height={28} alt="" />}
               label={t('meta.boardGoal', { size: boardSizeAt(i + 1) })}
-              condition={describeCondition(t, condition)}
+              condition={describeCondition(t, formatScore, condition)}
               progress={done ? 1 : conditionProgress(meta.records, condition)}
               done={done}
             />

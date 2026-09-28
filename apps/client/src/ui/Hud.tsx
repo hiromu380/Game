@@ -3,7 +3,6 @@
  */
 import { getCurrentShift, getDayAndPeriod, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
-import { formatScore } from './format';
 
 interface Props {
   run: RunState;
@@ -12,7 +11,7 @@ interface Props {
 }
 
 export function Hud({ run, liveScore }: Props) {
-  const { t } = useI18n();
+  const { t, formatScore } = useI18n();
   const quota = getCurrentShift(run).quota;
   const { day, period } = getDayAndPeriod(run);
 

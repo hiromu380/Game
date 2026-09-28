@@ -11,7 +11,6 @@ import {
   type Unlock,
 } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
-import { formatScore } from './format';
 import { MetaPanel } from './MetaPanel';
 
 interface Props {
@@ -23,7 +22,7 @@ interface Props {
 }
 
 export function RunEndScreen({ run, meta, unlocks, onRetry }: Props) {
-  const { t } = useI18n();
+  const { t, formatScore } = useI18n();
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
 

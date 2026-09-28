@@ -7,7 +7,6 @@
 import type { Dir4, Part, PartBadge, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
-import { formatCompact } from '../ui/format';
 import { BOARD_PADDING, CELL_SIZE } from './layout';
 import type { PartTextures } from './textures';
 
@@ -107,7 +106,7 @@ export function valueTier(value: Score): number {
 }
 
 /** 信号（値つきの光る玉） */
-export function createSignalView(value: Score): Container {
+export function createSignalView(value: Score, formatCompact: (value: Score) => string): Container {
   const tier = valueTier(value);
   const color = BOARD_THEME.signalTiers[tier]!;
   const radius = 13 + tier * 2.5;

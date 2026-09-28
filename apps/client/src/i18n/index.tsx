@@ -6,7 +6,9 @@
  * 文中の {name} は t() の params で置き換える。
  */
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import type { Score } from '@chain-factory/sim';
 import { useSettings } from '../settings/SettingsContext';
+import { formatCompactNumber, formatScoreNumber } from './numberFormat';
 import en from './en.json';
 import ja from './ja.json';
 
@@ -29,10 +31,17 @@ export function translate(
   );
 }
 
+/** スコアの表記（言語で単位が変わる） */
+export type ScoreFormatter = (value: Score | string) => string;
+
 interface I18nContextValue {
   lang: Lang;
   setLang: (lang: Lang) => void;
   t: TranslateFn;
+  /** 通常の表記（HUD・結果画面など。大きすぎる値は単位つき） */
+  formatScore: ScoreFormatter;
+  /** 短い表記（信号の上など狭い場所） */
+  formatCompact: ScoreFormatter;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -44,7 +53,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLang = useCallback((next: Lang) => updateSettings({ lang: next }), [updateSettings]);
 
   const value = useMemo<I18nContextValue>(
-    () => ({ lang, setLang, t: (key, params) => translate(lang, key, params) }),
+    () => ({
+      lang,
+      setLang,
+      t: (key, params) => translate(lang, key, params),
+      formatScore: (value) => formatScoreNumber(value, lang),
+      formatCompact: (value) => formatCompactNumber(value, lang),
+    }),
     [lang, setLang],
   );
 

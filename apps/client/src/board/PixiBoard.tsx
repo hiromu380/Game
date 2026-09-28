@@ -51,6 +51,8 @@ export function PixiBoard(props: Props) {
       getBreakLabel: (reason) => labels().getBreakLabel(reason),
       formatChain: (count) => labels().formatChain(count),
       getCutInTitle: () => labels().getCutInTitle(),
+      formatScore: (value) => labels().formatScore(value),
+      formatCompact: (value) => labels().formatCompact(value),
       playSound: (key, semitones) => audio.play(key, semitones),
     }).then((r) => {
       if (disposed) {
