@@ -1,11 +1,12 @@
 /**
- * 大きな数の表記（言語ごと）
+ * 大きな数の表記
  *
- * - 日本語: 12,345 → 1.23万 / 123,456,789 → 1.23億 … 極 まで。それを超えたら指数表記（1.23e52）
- * - 英語:   12,345 → 12.3K / 1,234,567 → 1.23M … Dc まで。それを超えたら指数表記
+ * - 12,345 → 12.3K / 1,234,567 → 1.23M … Dc まで。それを超えたら指数表記（1.23e36）
+ * - 日本語も英語と同じ K・M・B 表記にする（ユーザー判断: 万・億より桁の伸びが直感的に伝わるため）
  * - 「そのまま（桁区切り）」と「単位つき」を切り替える桁数は NUMBER_FORMAT_CONFIG で調整する
  *
  * スコアは bigint を包んだ Score 型なので、浮動小数点に変換せず文字列の桁操作で表記を作る。
+ * lang 引数は、将来言語ごとに表記を変えたくなったとき用に残している。
  */
 import { scoreFromString, type Score } from '@chain-factory/sim';
 
@@ -16,10 +17,8 @@ export const NUMBER_FORMAT_CONFIG = {
   fullMaxDigits: 12,
   /** 単位つき表記の有効数字 */
   significantDigits: 3,
-  /** 日本語の単位（4桁ごと） */
-  jaUnits: ['万', '億', '兆', '京', '垓', '秭', '穣', '溝', '澗', '正', '載', '極'],
-  /** 英語の単位（3桁ごと） */
-  enUnits: ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'],
+  /** 単位（3桁ごと） */
+  units: ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'],
 } as const;
 
 /** 数字の文字列を3桁区切りにする */
@@ -47,28 +46,19 @@ function scientific(digits: string, sig: number): string {
  * 短い表記（信号の上・ポップアップなど狭い場所用）
  * 4桁以下はそのまま、それ以上は単位つき
  */
-export function formatCompactNumber(value: Score | string, lang: NumberLang): string {
+export function formatCompactNumber(value: Score | string, _lang: NumberLang): string {
   const text = (typeof value === 'string' ? scoreFromString(value) : value).toString();
   const negative = text.startsWith('-');
   const digits = negative ? text.slice(1) : text;
   const sign = negative ? '-' : '';
-  const { significantDigits: sig, jaUnits, enUnits } = NUMBER_FORMAT_CONFIG;
-
-  if (lang === 'ja') {
-    if (digits.length <= 4) return sign + digits;
-    // 4桁ごとに単位が上がる（万 = 10^4）
-    const unitIndex = Math.floor((digits.length - 1) / 4) - 1;
-    if (unitIndex >= jaUnits.length) return sign + scientific(digits, sig);
-    const intLen = digits.length - (unitIndex + 1) * 4;
-    return sign + mantissa(digits, intLen, sig) + jaUnits[unitIndex];
-  }
+  const { significantDigits: sig, units } = NUMBER_FORMAT_CONFIG;
 
   if (digits.length <= 4) return sign + groupDigits(digits);
   // 3桁ごとに単位が上がる（K = 10^3）
   const unitIndex = Math.floor((digits.length - 1) / 3) - 1;
-  if (unitIndex >= enUnits.length) return sign + scientific(digits, sig);
+  if (unitIndex >= units.length) return sign + scientific(digits, sig);
   const intLen = digits.length - (unitIndex + 1) * 3;
-  return sign + mantissa(digits, intLen, sig) + enUnits[unitIndex];
+  return sign + mantissa(digits, intLen, sig) + units[unitIndex];
 }
 
 /**
