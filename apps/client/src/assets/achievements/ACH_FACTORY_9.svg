@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_FACTORY_9（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#ffc107" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g transform="translate(17 13) scale(1.25)"><rect x="7" y="7" width="10" height="10" rx="1" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M3 7 V3 H7 M17 3 H21 V7 M21 17 V21 H17 M7 21 H3 V17" fill="none" stroke="#ffc107" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="12" y="44" width="40" height="15" rx="5" fill="#1b1f27" stroke="#1b1f27" stroke-width="2"/><g transform="translate(21.5 45.5) scale(0.42)"><g fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path transform="translate(0 0)" d="M13 8 a6 7 0 1 1 0 -1 V14 q0 10 -11 10"/><path transform="translate(19 0)" d="M1 7 L11 17 M11 7 L1 17"/><path transform="translate(36 0)" d="M13 8 a6 7 0 1 1 0 -1 V14 q0 10 -11 10"/></g></g></g>
+</svg>

@@ -5,7 +5,9 @@
  * parts/ 以下のファイルを置き換える（または src の import 先を変える）だけでよい。
  * 現在は仮素材として SVG のピクトグラムを使っている（art/ のスクリプトで生成したものを含む）。
  */
-import { PART_IDS, type BossModifierId, type PartId } from '@chain-factory/sim';
+import { PART_IDS, type AchievementId, type BossModifierId, type PartId } from '@chain-factory/sim';
+import logoDarkSrc from './logo/logo-dark-bg.svg';
+import logoLightSrc from './logo/logo-light-bg.svg';
 import boltFailSrc from './mascot/bolt-fail.svg';
 import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
@@ -143,6 +145,14 @@ export const UI_ICON_NAMES = [
 ] as const;
 export type UiIconName = (typeof UI_ICON_NAMES)[number];
 export const UI_ICONS = uiFiles as Record<UiIconName, string>;
+
+/** ロゴ（art/logo.ts で生成） */
+export const LOGO_ASSETS = { darkBackground: logoDarkSrc, lightBackground: logoLightSrc } as const;
+
+/** 実績アイコン（art/achievements.ts で生成）。未解除は画面側でグレーにして表示する */
+export const ACHIEVEMENT_ICONS = byName(
+  import.meta.glob<string>('./achievements/*.svg', { eager: true, import: 'default' }),
+) as Record<AchievementId, string>;
 
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_DAILY_TOP10（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#00acc1" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g transform="translate(18 14) scale(1.1666666666666667)"><rect x="9" y="7" width="6" height="14" fill="#ffc107" stroke="#1b1f27" stroke-width="1"/><rect x="3" y="12" width="6" height="9" fill="#eef0f3"/><rect x="15" y="15" width="6" height="6" fill="#eef0f3"/><path d="M2 21 H22" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="12" y="44" width="40" height="15" rx="5" fill="#1b1f27" stroke="#1b1f27" stroke-width="2"/><g transform="translate(21.08 45.5) scale(0.42)"><g fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path transform="translate(0 0)" d="M2 5 L7 0 V24 M2 24 H11"/><path transform="translate(15 0)" d="M5 0 H9 a5 5 0 0 1 5 5 V19 a5 5 0 0 1 -5 5 H5 a5 5 0 0 1 -5 -5 V5 a5 5 0 0 1 5 -5 Z"/><path transform="translate(34 0)" d="M16 0 L2 24 M4 2 a2.5 3 0 1 0 0.1 0 Z M14 17 a2.5 3 0 1 0 0.1 0 Z"/></g></g></g>
+</svg>

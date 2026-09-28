@@ -304,6 +304,9 @@ const PARTS: Record<PartId, () => string[]> = {
   ],
 };
 
+/** パーツの絵の中身（64×64。実績アイコンなどに流用する） */
+export const partBody = (id: PartId): string[] => PARTS[id]();
+
 export function partSvg(id: PartId): string {
   return svg(`パーツ: ${id}`, PARTS[id]());
 }

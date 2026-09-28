@@ -52,7 +52,10 @@ export function boardFiles(): Record<string, string> {
       [
         rect(0, 0, 64, 64, { fill: B.blocked }),
         ...[-48, -24, 0, 24, 48].map((x) =>
-          polygon(`${x},64 ${x + 12},64 ${x + 76},0 ${x + 64},0`, { fill: INK.white, opacity: 0.85 }),
+          polygon(`${x},64 ${x + 12},64 ${x + 76},0 ${x + 64},0`, {
+            fill: INK.white,
+            opacity: 0.85,
+          }),
         ),
         rect(2, 2, 60, 60, { fill: 'none', stroke: INK.outline, 'stroke-width': 3 }),
         polygon('32,14 42,46 22,46', {
@@ -68,17 +71,17 @@ export function boardFiles(): Record<string, string> {
     ),
     'src/assets/board/frame-edge.svg': svg(
       '盤面の枠の辺（横に並べる。縦の辺は回転して使う）',
-      [rect(0, 0, 16, 16, { fill: B.hazardYellow }), ...stripes(16), path('M0 15 H16', line(INK.outline, 2))],
+      [
+        rect(0, 0, 16, 16, { fill: B.hazardYellow }),
+        ...stripes(16),
+        path('M0 15 H16', line(INK.outline, 2)),
+      ],
       '0 0 16 16',
     ),
     'src/assets/board/frame-corner.svg': svg(
       '盤面の枠の角（左上。ほかの角は回転して使う）',
       [
-        el(
-          'clipPath',
-          { id: 'corner' },
-          path('M16 0 H12 A12 12 0 0 0 0 12 V16 H16 Z', {}),
-        ),
+        el('clipPath', { id: 'corner' }, path('M16 0 H12 A12 12 0 0 0 0 12 V16 H16 Z', {})),
         el(
           'g',
           { 'clip-path': 'url(#corner)' },

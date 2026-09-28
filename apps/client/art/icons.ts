@@ -74,10 +74,7 @@ const UI: Record<string, string[]> = {
     path('M18 20 V5 M14 9 l4 -4 l4 4', ui()),
   ],
   // 手持ちに戻す: 箱へ入る下向きの矢印
-  return: [
-    path('M4 13 V20 H20 V13', ui()),
-    path('M12 3 V14 M8 10 l4 4 l4 -4', ui()),
-  ],
+  return: [path('M4 13 V20 H20 V13', ui()), path('M12 3 V14 M8 10 l4 4 l4 -4', ui())],
   // 回転: 時計回りの矢印
   rotate: [path('M18 12 a6 6 0 1 1 -2 -4.5', ui()), polygon('20,3 20,10 13,9', { fill: S })],
   // 試運転: 再生ボタン（輪郭だけ）
@@ -140,6 +137,11 @@ const UI: Record<string, string[]> = {
 };
 
 export const UI_ICON_NAMES = Object.keys(UI);
+
+/** ボスのアイコンの中身（64×64。実績アイコンに流用する） */
+export const bossBody = (id: BossModifierId): string[] => [...sign(), ...BOSS[id]];
+/** UI アイコンの中身（24×24） */
+export const uiBody = (name: string): string[] => UI[name]!;
 
 export function iconFiles(): Record<string, string> {
   const files: Record<string, string> = {};

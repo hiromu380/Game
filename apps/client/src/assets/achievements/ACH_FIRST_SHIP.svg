@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_FIRST_SHIP（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#fb8c00" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><rect x="20" y="16" width="24" height="19.200000000000003" rx="2" fill="#c8a165" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M32 16 V24.4" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+</svg>

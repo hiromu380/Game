@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_SHIFT_1T（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#fb8c00" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><rect x="13" y="20" width="14" height="11.200000000000001" rx="2" fill="#c8a165" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M20 20 V24.9" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="25" y="10" width="16" height="12.8" rx="2" fill="#c8a165" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M33 10 V15.6" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="37" y="18" width="15" height="12" rx="2" fill="#c8a165" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M44.5 18 V23.25" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="12" y="44" width="40" height="15" rx="5" fill="#1b1f27" stroke="#1b1f27" stroke-width="2"/><g transform="translate(24.25 45.5) scale(0.5)"><g fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path transform="translate(0 0)" d="M2 5 L7 0 V24 M2 24 H11"/><path transform="translate(15 0)" d="M0 0 H16 M8 0 V24"/></g></g></g>
+</svg>

@@ -8,6 +8,7 @@
  */
 import { EDITION } from '../../config/edition';
 import { useI18n } from '../../i18n';
+import { LOGO_ASSETS } from '../../assets/manifest';
 
 interface Props {
   /** ゲーム本体の読み込み進捗（0〜1） */
@@ -32,7 +33,7 @@ export function TitleScreen({
   const percent = Math.round(progress * 100);
   return (
     <main className="title">
-      <img className="title__icon" src="./icon.svg" alt="" width={120} height={120} />
+      <img className="title__logo" src={LOGO_ASSETS.darkBackground} alt="Chain Factory" />
       <h1 className="title__name">{t('app.title')}</h1>
       {EDITION === 'demo' && <span className="mode-badge">{t('title.demoBadge')}</span>}
       <p className="title__tagline">{t('title.tagline')}</p>

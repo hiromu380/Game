@@ -101,13 +101,14 @@ const FACES: Record<BoltExpression, { lamp: string; face: string[]; extras?: str
   },
 };
 
-export function boltSvg(expression: BoltExpression): string {
+/** ボルトの絵の中身（viewBox -2 -3 68 68 の座標。実績アイコンなどに流用する） */
+export function boltBody(expression: BoltExpression): string[] {
   const { lamp, face, extras } = FACES[expression];
-  return svg(
-    `マスコット「ボルト」: ${expression}`,
-    [...body(lamp, extras), head(face)],
-    '-2 -3 68 68',
-  );
+  return [...body(lamp, extras), head(face)];
+}
+
+export function boltSvg(expression: BoltExpression): string {
+  return svg(`マスコット「ボルト」: ${expression}`, boltBody(expression), '-2 -3 68 68');
 }
 
 export function mascotFiles(): Record<string, string> {

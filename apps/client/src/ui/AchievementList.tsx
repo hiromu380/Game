@@ -4,6 +4,7 @@
  * 隠し実績は解除するまで名前・説明を伏せる。体験版では出さない（実績が無効のため）。
  */
 import { ACHIEVEMENTS, type AchievementProgress } from '@chain-factory/sim';
+import { ACHIEVEMENT_ICONS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 
 export function AchievementList({ progress }: { progress: AchievementProgress }) {
@@ -23,6 +24,13 @@ export function AchievementList({ progress }: { progress: AchievementProgress })
           const secret = hidden && !done;
           return (
             <li key={id} className={`meta__goal ${done ? 'is-done' : ''}`}>
+              <img
+                className={`achievements__icon ${done ? '' : 'is-locked'} ${secret ? 'is-secret' : ''}`}
+                src={ACHIEVEMENT_ICONS[id]}
+                alt=""
+                width={36}
+                height={36}
+              />
               <div className="meta__goal-text">
                 <strong>{secret ? t('achievement.hidden') : t(`achievement.${id}.name`)}</strong>{' '}
                 <span className="meta__condition">
