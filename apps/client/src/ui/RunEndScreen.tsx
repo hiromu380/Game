@@ -3,6 +3,7 @@
  */
 import {
   getBestChain,
+  type AchievementProgress,
   SCORE_ZERO,
   scoreAdd,
   scoreFromString,
@@ -13,6 +14,7 @@ import {
 import { useI18n } from '../i18n';
 import type { PlayMode } from '../state/gameReducer';
 import { EDITION_CONFIG } from '../config/edition';
+import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
 import { DailyShare } from './share/DailyShare';
 import { StoreLink } from './StoreLink';
@@ -22,6 +24,7 @@ interface Props {
   meta: MetaProgress;
   /** このランで新しく解放されたもの */
   unlocks: Unlock[];
+  achievements: AchievementProgress;
   mode: PlayMode;
   onRetry: () => void;
   /** 延長戦へ進む（全シフトクリア後のみ） */
@@ -106,6 +109,7 @@ export function RunEndScreen(props: Props) {
       {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
         <MetaPanel meta={meta} unlocks={unlocks} />
       )}
+      {EDITION_CONFIG.achievements && <AchievementList progress={props.achievements} />}
       {mode.kind === 'normal' && <StoreLink />}
     </div>
   );

@@ -28,6 +28,7 @@ import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
 import { createInitialState, createNewSeed, startNormalRun } from './state/newRun';
 import { useMediaQuery } from './state/useMediaQuery';
+import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
@@ -62,8 +63,8 @@ export function App({ start, onTitle }: Props) {
   const [state, dispatch] = useReducer(gameReducer, start, (initialStart) => {
     const initial = createInitialState();
     return initialStart
-      ? createGameState(initialStart.run, initial.meta, initialStart.mode)
-      : createGameState(initial.run, initial.meta);
+      ? createGameState(initialStart.run, initial.meta, initialStart.mode, initial.achievements)
+      : createGameState(initial.run, initial.meta, undefined, initial.achievements);
   });
   const compact = useMediaQuery(`(max-width: ${LAYOUT.compactMaxWidthPx}px)`);
   /** 狭い画面で表示中のタブ */
@@ -81,11 +82,24 @@ export function App({ start, onTitle }: Props) {
   const { run, selection, playback, error, mode } = state;
   const playing = playback !== null || state.awaitingServer;
 
-  // 状態が変わるたびに進行中のランを保存する（通常モードのみ。デイリーはサーバーから再開する）
+  // 状態が変わるたびに保存する。ランは通常モードのみ（デイリーはサーバーから再開する）。
+  // デイリー・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
   const persistedRun = getPersistedRun(state);
   useEffect(() => {
-    if (persistedRun) saveGame(persistedRun, state.meta);
-  }, [persistedRun, state.meta]);
+    saveGame({
+      run: persistedRun ?? undefined,
+      meta: state.meta,
+      achievements: state.achievements,
+    });
+  }, [persistedRun, state.meta, state.achievements]);
+
+  // 実績と統計を Steam へ送る（起動時・解除や記録が変わったとき）。
+  // 解除済みを毎回まとめて送るのは、オフラインで解除した分を後から送り直すため（Steam 側では二重に解除されない）
+  useSteamAchievements(state.meta, state.achievements);
+  const onRanked = useCallback(
+    (topPercent: number) => dispatch({ type: 'dailyRanked', topPercent }),
+    [],
+  );
 
   // デイリー本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
   // 同じシフトを二重に送らないよう、送信中のシフトを覚えておく（開発時の StrictMode の二重実行対策も兼ねる）
@@ -271,7 +285,12 @@ export function App({ start, onTitle }: Props) {
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {dailyMenu && (
-        <DailyMenu initialView={dailyMenu} onEnter={enterRun} onClose={() => setDailyMenu(null)} />
+        <DailyMenu
+          initialView={dailyMenu}
+          onEnter={enterRun}
+          onClose={() => setDailyMenu(null)}
+          onRanked={onRanked}
+        />
       )}
     </header>
   );
@@ -318,6 +337,7 @@ export function App({ start, onTitle }: Props) {
           run={run}
           meta={state.meta}
           unlocks={state.unlocks}
+          achievements={state.achievements}
           mode={mode}
           onViewRanking={() => setDailyMenu('ranking')}
           onBackToNormal={backToNormal}

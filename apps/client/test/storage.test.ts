@@ -49,7 +49,7 @@ describe('セーブの相互運用（localStorage ⇄ ファイル）', () => {
   it('Web 版で保存したセーブをデスクトップ版で読める', () => {
     const web = memoryLocalStorage();
     const run = createRun(7);
-    saveGame(run, createInitialMeta(), web);
+    saveGame({ run, meta: createInitialMeta() }, web);
     // デスクトップ版のファイルの中身は localStorage の値と同じ文字列
     const desktop = createDesktopStorage({ write: async () => {} }, web.dump());
     expect(loadSave(desktop)?.run).toEqual(run);
@@ -66,7 +66,7 @@ describe('セーブの相互運用（localStorage ⇄ ファイル）', () => {
       {},
     );
     const run = createRun(11);
-    saveGame(run, createInitialMeta(), desktop);
+    saveGame({ run, meta: createInitialMeta() }, desktop);
     const web = memoryLocalStorage();
     web.setItem(SAVE_STORAGE_KEY, files[SAVE_STORAGE_KEY]!);
     expect(loadSave(web)?.run).toEqual(run);

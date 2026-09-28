@@ -25,6 +25,8 @@ interface Props {
   initialView?: 'menu' | 'ranking';
   onEnter: (run: RunState, mode: PlayMode) => void;
   onClose: () => void;
+  /** ランキングで自分の順位を受け取った（上位○% の実績の判定に使う） */
+  onRanked: (topPercent: number) => void;
 }
 
 /** 取得した今日のデイリーと自分の進行状況（fetchedAt は締め切りまでの残り時間の表示用） */
@@ -38,7 +40,7 @@ async function fetchDaily(): Promise<Loaded> {
   return { info, session, fetchedAt: Date.now() };
 }
 
-export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
+export function DailyMenu({ initialView = 'menu', onEnter, onClose, onRanked }: Props) {
   const { t } = useI18n();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<OnlineErrorCode | null>(null);
@@ -120,7 +122,12 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
     const { info, session, fetchedAt } = loaded;
     if (view === 'ranking') {
       return (
-        <RankingView dailyId={info.dailyId} number={info.number} onBack={() => setView('menu')} />
+        <RankingView
+          dailyId={info.dailyId}
+          number={info.number}
+          onBack={() => setView('menu')}
+          onRanked={onRanked}
+        />
       );
     }
     const rule = info.config.globalModifier;

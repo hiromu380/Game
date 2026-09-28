@@ -3,7 +3,13 @@
  * 形式とバージョン管理は @chain-factory/shared の save/ を参照
  */
 import { createSave, migrateSave, type SaveData } from '@chain-factory/shared';
-import { createInitialMeta, type MetaProgress, type RunState } from '@chain-factory/sim';
+import {
+  createInitialAchievements,
+  createInitialMeta,
+  type AchievementProgress,
+  type MetaProgress,
+  type RunState,
+} from '@chain-factory/sim';
 import { appStorage } from '../storage';
 
 export const SAVE_STORAGE_KEY = 'chain-factory:save';
@@ -29,17 +35,23 @@ export function loadSave(storage = defaultStorage()): SaveData | null {
 }
 
 /**
- * ランを保存する。メタ進行は省略すると保存済みのものを引き継ぐ
+ * 保存する。省略した項目は保存済みのものを引き継ぐ
+ * （デイリー・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
  */
 export function saveGame(
-  run: RunState | null,
-  meta?: MetaProgress,
+  update: { run?: RunState | null; meta?: MetaProgress; achievements?: AchievementProgress },
   storage = defaultStorage(),
 ): void {
   if (!storage) return;
   try {
-    const currentMeta = meta ?? loadSave(storage)?.meta ?? createInitialMeta();
-    storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(createSave(run, currentMeta)));
+    const saved =
+      update.run === undefined || !update.meta || !update.achievements ? loadSave(storage) : null;
+    const data = createSave(
+      update.run !== undefined ? update.run : (saved?.run ?? null),
+      update.meta ?? saved?.meta ?? createInitialMeta(),
+      update.achievements ?? saved?.achievements ?? createInitialAchievements(),
+    );
+    storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(data));
   } catch {
     // 容量不足などで保存できなくてもゲームは続行する
   }

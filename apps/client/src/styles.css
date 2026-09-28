@@ -561,6 +561,15 @@ button:disabled {
   font-weight: bold;
 }
 
+/* 実績の一覧（ラン終了画面。折りたたみ） */
+.achievements {
+  margin-top: 16px;
+}
+.achievements summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
 /* ---- モーダル（設定画面など） ---- */
 .modal {
   position: fixed;

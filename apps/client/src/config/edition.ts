@@ -15,6 +15,8 @@ export const EDITION_CONFIG = {
   metaProgression: EDITION === 'full',
   /** 全シフトクリア後に延長戦を選べるか */
   overtime: EDITION === 'full',
+  /** 実績を記録・送信するか（体験版では無効） */
+  achievements: EDITION === 'full',
   /** 製品版（Steam）への誘導を出すか */
   showStoreLink: EDITION === 'demo',
   /** 製品版のストアページ（未公開の間は空。空なら「近日発売」の表示だけ出す） */

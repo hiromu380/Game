@@ -9,6 +9,7 @@ import { loadGame, type GameModule } from './boot/loadGame';
 import { useI18n } from './i18n';
 import { loadMarket } from './online/market';
 import { SettingsPanel } from './settings/SettingsPanel';
+import { recordRankingToSave } from './state/achievements';
 import { loadRun } from './state/saveStore';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
@@ -61,6 +62,7 @@ export function Root() {
             setRequest({ start: { run, mode } });
           }}
           onClose={() => setDailyOpen(false)}
+          onRanked={recordRankingToSave}
         />
       )}
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}

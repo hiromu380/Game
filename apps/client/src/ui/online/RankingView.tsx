@@ -10,9 +10,11 @@ interface Props {
   dailyId: string;
   number: number;
   onBack: () => void;
+  /** 自分の結果があれば、その上位○% を知らせる */
+  onRanked?: (topPercent: number) => void;
 }
 
-export function RankingView({ dailyId, number, onBack }: Props) {
+export function RankingView({ dailyId, number, onBack, onRanked }: Props) {
   const { t } = useI18n();
   const [ranking, setRanking] = useState<RankingResponse | null>(null);
   const [error, setError] = useState<OnlineError['code'] | null>(null);
@@ -27,6 +29,10 @@ export function RankingView({ dailyId, number, onBack }: Props) {
       cancelled = true;
     };
   }, [dailyId]);
+
+  useEffect(() => {
+    if (ranking?.me) onRanked?.(ranking.me.topPercent);
+  }, [ranking, onRanked]);
 
   return (
     <div className="ranking">

@@ -18,7 +18,7 @@ describe('セーブ/ロード', () => {
   it('保存したランをそのまま読み込める（バージョン番号付き）', () => {
     const storage = memoryStorage();
     const run = createRun(99);
-    saveGame(run, undefined, storage);
+    saveGame({ run }, storage);
     expect(JSON.parse(storage.data.get(SAVE_STORAGE_KEY)!).version).toBe(SAVE_VERSION);
     expect(loadRun(storage)).toEqual(run);
   });

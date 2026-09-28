@@ -12,10 +12,12 @@ import {
   applyOp,
   applyRunToMeta,
   commitShift,
+  createInitialAchievements,
   getPart,
   runTrial,
   startOvertime,
   rotateCw,
+  type AchievementProgress,
   type Dir4,
   type MetaProgress,
   type PartId,
@@ -27,6 +29,7 @@ import {
   type SimResult,
   type Unlock,
 } from '@chain-factory/sim';
+import { achievementsAfterCommit, achievementsAfterRanking } from './achievements';
 
 /** 選択状態: 手持ちのパーツ（配置待ち） or 盤面のマス */
 export type Selection =
@@ -75,6 +78,8 @@ export interface GameState {
   meta: MetaProgress;
   /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
   unlocks: Unlock[];
+  /** 実績（解除済み・デイリーの参加日数。ランをまたいで残る） */
+  achievements: AchievementProgress;
   /**
    * 直前の操作の手応え（効果音用）。seq が変わるたびに1回鳴らす。
    * reducer は純粋関数のまま、音を鳴らすのは画面側（App）に任せるための仕組み
@@ -108,12 +113,15 @@ export type GameAction =
   | { type: 'serverCommitted'; seed: number }
   | { type: 'serverCommitFailed'; error: GameError }
   | { type: 'playbackFinished' }
-  | { type: 'closePlayback' };
+  | { type: 'closePlayback' }
+  /** デイリーのランキングで自分の順位を受け取った（上位○% の実績） */
+  | { type: 'dailyRanked'; topPercent: number };
 
 export function createGameState(
   run: RunState,
   meta: MetaProgress,
   mode: PlayMode = { kind: 'normal' },
+  achievements: AchievementProgress = createInitialAchievements(),
 ): GameState {
   return {
     run,
@@ -126,6 +134,7 @@ export function createGameState(
     lastResult: null,
     meta,
     unlocks: [],
+    achievements,
     feedback: null,
   };
 }
@@ -168,10 +177,17 @@ function beginCommit(state: GameState, seed?: number): GameState {
     state.mode.kind === 'normal'
       ? applyRunToMeta(state.meta, committed.state)
       : { meta: state.meta, unlocks: [], run: committed.state };
+  const achievements = achievementsAfterCommit(state.achievements, {
+    mode: state.mode,
+    before: state.run,
+    committed,
+    meta: recorded.meta === state.meta ? undefined : recorded.meta,
+  });
   return {
     ...state,
     meta: recorded.meta,
     unlocks: recorded.unlocks,
+    achievements,
     pendingOps: [],
     awaitingServer: false,
     selection: null,
@@ -189,20 +205,32 @@ function beginCommit(state: GameState, seed?: number): GameState {
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
-  const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun'];
+  const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun', 'dailyRanked'];
   if (state.playback && !busyAllowed.includes(action.type)) return state;
-  if (state.awaitingServer && !['serverCommitted', 'serverCommitFailed'].includes(action.type)) {
+  if (
+    state.awaitingServer &&
+    !['serverCommitted', 'serverCommitFailed', 'dailyRanked'].includes(action.type)
+  ) {
     return state;
   }
 
   switch (action.type) {
     case 'loadRun':
-      return createGameState(action.run, state.meta, action.mode);
+      return createGameState(action.run, state.meta, action.mode, state.achievements);
+
+    case 'dailyRanked':
+      return {
+        ...state,
+        achievements: achievementsAfterRanking(state.achievements, action.topPercent),
+      };
 
     case 'startOvertime': {
       const next = startOvertime(state.run);
       if (!next) return state;
-      return { ...createGameState(next, state.meta, state.mode), lastResult: state.lastResult };
+      return {
+        ...createGameState(next, state.meta, state.mode, state.achievements),
+        lastResult: state.lastResult,
+      };
     }
 
     case 'buy': {

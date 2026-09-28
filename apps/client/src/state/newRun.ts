@@ -5,15 +5,18 @@
  * （「同じシード・同じ配置なら同じスコア」の確認や、不具合の再現に使う）。
  */
 import {
+  createInitialAchievements,
   createInitialMeta,
   createRun,
   metaToModifiers,
+  type AchievementProgress,
   type MetaProgress,
   type PartId,
   type RunState,
 } from '@chain-factory/sim';
 import { EDITION_CONFIG } from '../config/edition';
 import { getMarket } from '../online/market';
+import { achievementsOnLoad } from './achievements';
 import { loadSave } from './saveStore';
 
 /** URL で指定されたシード（なければ null） */
@@ -48,12 +51,17 @@ export function startNormalRun(
 /**
  * 起動時の状態
  * - ラン: URL 指定シード > 保存済みラン > 新規
- * - メタ進行: 保存済み > 初期値
+ * - メタ進行・実績: 保存済み > 初期値（実績はメタ進行の記録で満たしているものをここで解除する）
  */
-export function createInitialState(): { run: RunState; meta: MetaProgress } {
+export function createInitialState(): {
+  run: RunState;
+  meta: MetaProgress;
+  achievements: AchievementProgress;
+} {
   const save = loadSave();
   const meta = save?.meta ?? createInitialMeta();
+  const achievements = achievementsOnLoad(save?.achievements ?? createInitialAchievements(), meta);
   const urlSeed = seedFromUrl();
-  if (urlSeed !== null) return { run: startNormalRun(urlSeed, meta), meta };
-  return { run: save?.run ?? startNormalRun(createNewSeed(), meta), meta };
+  if (urlSeed !== null) return { run: startNormalRun(urlSeed, meta), meta, achievements };
+  return { run: save?.run ?? startNormalRun(createNewSeed(), meta), meta, achievements };
 }

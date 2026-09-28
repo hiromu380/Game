@@ -204,3 +204,40 @@ describe('操作ログとデイリー本番', () => {
     expect(state.pendingOps).toEqual([{ op: 'reroll' }]);
   });
 });
+
+describe('実績', () => {
+  it('本番の結果で解除し、ランを替えても残る', () => {
+    // 何も置かずに本番 → 出荷量 0（隠し実績）
+    let state = apply(createGameState(createRun(1), createInitialMeta()), { type: 'startCommit' });
+    expect(state.achievements.unlocked).toEqual(['ACH_ZERO']);
+    state = apply(state, { type: 'loadRun', run: createRun(2), mode: { kind: 'normal' } });
+    expect(state.achievements.unlocked).toEqual(['ACH_ZERO']);
+  });
+
+  it('デイリー本番の確定で参加日数を数え、ランキングの順位で上位の実績を判定する', () => {
+    const run = createDailyRun('2026-10-01');
+    let state = createGameState(run, createInitialMeta(), {
+      kind: 'daily',
+      dailyId: '2026-10-01',
+      number: 1,
+    });
+    state = apply(state, { type: 'startCommit' }, { type: 'serverCommitted', seed: 1 });
+    expect(state.achievements.dailyDays).toBe(1);
+    expect(state.achievements.unlocked).toContain('ACH_DAILY_FIRST');
+    state = apply(state, { type: 'dailyRanked', topPercent: 50 });
+    expect(state.achievements.unlocked).not.toContain('ACH_DAILY_TOP10');
+    state = apply(state, { type: 'dailyRanked', topPercent: 3 });
+    expect(state.achievements.unlocked).toContain('ACH_DAILY_TOP10');
+  });
+
+  it('練習はデイリーの参加日数に数えない', () => {
+    const run = createDailyRun('2026-10-01');
+    let state = createGameState(
+      { ...run, config: { ...run.config, commitSeedMode: 'derived' } },
+      createInitialMeta(),
+      { kind: 'practice', dailyId: '2026-10-01', number: 1 },
+    );
+    state = apply(state, { type: 'startCommit' });
+    expect(state.achievements.dailyDays).toBe(0);
+  });
+});
