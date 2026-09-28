@@ -38,10 +38,9 @@ export function startNormalRun(
   meta: MetaProgress,
   prices: Partial<Record<PartId, number>> | undefined = getMarket()?.prices,
 ): RunState {
-  const run = createRun(seed, {
-    meta: EDITION_CONFIG.metaProgression ? metaToModifiers(meta) : undefined,
-    prices,
-  });
+  // 体験版は「メタ進行が初期状態のまま」として扱う（メタ進行を渡さないと全パーツ解放になるため、初期値を渡す）
+  const progress = EDITION_CONFIG.metaProgression ? meta : createInitialMeta();
+  const run = createRun(seed, { meta: metaToModifiers(progress), prices });
   if (EDITION_CONFIG.overtime) return run;
   return { ...run, config: { ...run.config, overtimeAllowed: false } };
 }
