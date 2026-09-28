@@ -2,6 +2,7 @@
   "name": "@chain-factory/desktop",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "デスクトップ版（Electron）。Steam 連携はメインプロセスの Steam アダプターに閉じ込める",
   "main": "dist/main.cjs",
   "scripts": {
