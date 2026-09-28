@@ -10,6 +10,7 @@ import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun } from './state/gameReducer';
 import { createInitialRun, createNewSeed } from './state/newRun';
 import { saveGame } from './state/saveStore';
+import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { Hud } from './ui/Hud';
 import { InventoryPanel } from './ui/InventoryPanel';
@@ -48,6 +49,11 @@ export function App() {
     () => ({
       board: run.board,
       rules: getCurrentRules(run),
+      // 今夜の補修工事で使えなくなるマスを、朝・昼のうちから予告表示する
+      upcomingBlocked: (() => {
+        const boss = findBossToShow(run);
+        return boss && !boss.isNow ? boss.entry.blockedCells : [];
+      })(),
       highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
       placing:
         selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
@@ -98,6 +104,7 @@ export function App() {
     <div className="app">
       {header}
       <Hud run={run} liveScore={liveScore} />
+      <BossNotice run={run} />
       <main className="layout">
         <div className="layout__board">
           <PixiBoard

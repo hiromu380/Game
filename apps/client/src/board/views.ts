@@ -179,3 +179,48 @@ export function createFloor(width: number, height: number): Container {
   floor.addChild(tiles);
   return floor;
 }
+
+/**
+ * 使用不可マス（補修工事中）の表示
+ * @param upcoming true なら「今夜使えなくなる」予告（点線の枠だけ）
+ */
+export function createBlockedCell(x: number, y: number, upcoming: boolean): Graphics {
+  const left = BOARD_PADDING + x * CELL_SIZE;
+  const top = BOARD_PADDING + y * CELL_SIZE;
+  const g = new Graphics();
+  if (upcoming) {
+    // 点線の代わりに短い線分を並べる
+    const inset = 5;
+    const size = CELL_SIZE - inset * 2;
+    for (let i = 0; i < size; i += 10) {
+      const len = Math.min(5, size - i);
+      g.moveTo(left + inset + i, top + inset).lineTo(left + inset + i + len, top + inset);
+      g.moveTo(left + inset + i, top + inset + size).lineTo(
+        left + inset + i + len,
+        top + inset + size,
+      );
+      g.moveTo(left + inset, top + inset + i).lineTo(left + inset, top + inset + i + len);
+      g.moveTo(left + inset + size, top + inset + i).lineTo(
+        left + inset + size,
+        top + inset + i + len,
+      );
+    }
+    return g.stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+  }
+  // 工事中: 赤白の斜線と中央の ✕
+  g.rect(left + 2, top + 2, CELL_SIZE - 4, CELL_SIZE - 4).fill({
+    color: BOARD_THEME.blocked,
+    alpha: 0.85,
+  });
+  for (let i = -CELL_SIZE; i < CELL_SIZE; i += 14) {
+    g.moveTo(left + Math.max(0, i), top + Math.max(0, -i)).lineTo(
+      left + Math.min(CELL_SIZE, CELL_SIZE + i),
+      top + Math.min(CELL_SIZE, CELL_SIZE - i),
+    );
+  }
+  g.stroke({ width: 4, color: 0xffffff, alpha: 0.35 });
+  const c = CELL_SIZE / 2;
+  g.moveTo(left + c - 12, top + c - 12).lineTo(left + c + 12, top + c + 12);
+  g.moveTo(left + c + 12, top + c - 12).lineTo(left + c - 12, top + c + 12);
+  return g.stroke({ width: 5, color: 0xffffff, cap: 'round' });
+}

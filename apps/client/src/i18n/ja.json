@@ -1,7 +1,6 @@
 {
   "app.title": "チェインファクトリー（仮）",
   "app.language": "English",
-  "hud.shift": "シフト {current} / {total}",
   "hud.budget": "予算",
   "hud.quota": "ノルマ",
   "hud.score": "出荷量",
@@ -78,5 +77,22 @@
   "selection.sellConfirm": "本当に売却する？（+{refund} 円）",
   "selection.cannotSell": "売却できません",
   "shop.reroll": "リロール（{cost} 円）",
-  "shop.rerollDisabled": "リロール不可"
+  "shop.rerollDisabled": "リロール不可",
+  "hud.dayPeriod": "{day}日目・{period}",
+  "hud.shiftProgress": "シフト {current} / {total}",
+  "period.0": "朝",
+  "period.1": "昼",
+  "period.2": "夜",
+  "boss.now": "ボスシフト",
+  "boss.tonight": "今夜の予告",
+  "boss.lowOil.name": "油切れ",
+  "boss.lowOil.desc": "コンベアの発動回数 {delta}",
+  "boss.repairWork.name": "床の補修工事",
+  "boss.repairWork.desc": "{cells}マスが使用不可（盤面に表示）。置いてあるパーツは手持ちに戻る",
+  "boss.strictInspection.name": "出荷検査強化",
+  "boss.strictInspection.desc": "出荷口の加算が 1/{divisor}（切り捨て）",
+  "boss.shortShift.name": "短縮営業",
+  "boss.shortShift.desc": "{ticks} tick で打ち切り",
+  "boss.partShortage.name": "部品不足",
+  "boss.partShortage.desc": "ショップの品数 {delta}、リロール不可"
 }

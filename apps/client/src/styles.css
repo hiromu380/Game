@@ -389,3 +389,32 @@ button:disabled {
   border-color: var(--missed);
   font-weight: bold;
 }
+
+/* ---- ボスシフトの予告・適用中表示 ---- */
+.boss-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: -4px 0 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--accent);
+  background: rgba(255, 193, 7, 0.08);
+}
+.boss-notice--now {
+  border: 2px solid var(--missed);
+  background: rgba(255, 82, 82, 0.12);
+}
+.boss-notice__label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+.boss-notice--now .boss-notice__label {
+  color: var(--missed);
+}
+.boss-notice__desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

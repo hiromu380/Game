@@ -33,6 +33,7 @@ import {
 import { loadPartTextures, type PartTextures } from './textures';
 import { easeOutCubic, TweenManager } from './tweens';
 import {
+  createBlockedCell,
   createFloor,
   createPartView,
   createSignalView,
@@ -49,6 +50,8 @@ export interface BoardViewState {
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
   placing: { partId: PartId; dir: Dir4 } | null;
+  /** 今夜（ボス）に使用不可になるマス（予告表示用） */
+  upcomingBlocked: number[];
 }
 
 export interface BoardRendererOptions {
@@ -75,6 +78,8 @@ export class BoardRenderer {
   /** 揺れ演出のために、盤面全体をこのコンテナに入れる */
   private readonly root = new Container();
   private readonly floorLayer = new Container();
+  /** 使用不可マス（補修工事）と、その予告 */
+  private readonly blockLayer = new Container();
   private readonly partLayer = new Container();
   private readonly overlayLayer = new Container();
   private readonly signalLayer = new Container();
@@ -102,6 +107,7 @@ export class BoardRenderer {
 
     this.root.addChild(
       this.floorLayer,
+      this.blockLayer,
       this.partLayer,
       this.overlayLayer,
       this.signalLayer,
@@ -165,6 +171,18 @@ export class BoardRenderer {
     if (sizeChanged) {
       this.floorLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
       this.floorLayer.addChild(createFloor(state.board.width, state.board.height));
+    }
+
+    this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+    for (const cell of state.rules.blockedCells) {
+      this.blockLayer.addChild(
+        createBlockedCell(cell % state.board.width, Math.floor(cell / state.board.width), false),
+      );
+    }
+    for (const cell of state.upcomingBlocked) {
+      this.blockLayer.addChild(
+        createBlockedCell(cell % state.board.width, Math.floor(cell / state.board.width), true),
+      );
     }
 
     this.partLayer.removeChildren().forEach((c) => c.destroy({ children: true }));

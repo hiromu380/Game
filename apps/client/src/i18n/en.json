@@ -1,7 +1,6 @@
 {
   "app.title": "Chain Factory (WIP)",
   "app.language": "日本語",
-  "hud.shift": "Shift {current} / {total}",
   "hud.budget": "Budget",
   "hud.quota": "Quota",
   "hud.score": "Shipped",
@@ -78,5 +77,22 @@
   "selection.sellConfirm": "Really sell? (+${refund})",
   "selection.cannotSell": "Can't be sold",
   "shop.reroll": "Reroll (${cost})",
-  "shop.rerollDisabled": "No rerolls"
+  "shop.rerollDisabled": "No rerolls",
+  "hud.dayPeriod": "Day {day} · {period}",
+  "hud.shiftProgress": "Shift {current} / {total}",
+  "period.0": "Morning",
+  "period.1": "Noon",
+  "period.2": "Night",
+  "boss.now": "Boss shift",
+  "boss.tonight": "Tonight",
+  "boss.lowOil.name": "Low Oil",
+  "boss.lowOil.desc": "Conveyor activations {delta}",
+  "boss.repairWork.name": "Floor Repairs",
+  "boss.repairWork.desc": "{cells} cells unusable (shown on the floor). Parts there return to inventory",
+  "boss.strictInspection.name": "Strict Inspection",
+  "boss.strictInspection.desc": "Docks ship 1/{divisor} of the value (rounded down)",
+  "boss.shortShift.name": "Short Shift",
+  "boss.shortShift.desc": "Stops after {ticks} ticks",
+  "boss.partShortage.name": "Part Shortage",
+  "boss.partShortage.desc": "Shop items {delta}, no rerolls"
 }

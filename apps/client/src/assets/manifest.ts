@@ -52,6 +52,8 @@ export const BOARD_THEME = {
   /** ハザード柄の枠 */
   hazardYellow: 0xffc107,
   hazardBlack: 0x2b2b2b,
+  /** 使用不可マス（補修工事） */
+  blocked: 0xc62828,
   /** 選択・配置プレビュー */
   selected: 0xffeb3b,
   ghostOk: 0x69f0ae,
