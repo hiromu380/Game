@@ -20,6 +20,13 @@ describe('ボット', () => {
     expect(b.shifts).toEqual(a.shifts);
   });
 
+  it('中級ボットは組み替え（回転・移動）を使い、貪欲ボット以上のシフトを進める（同じシード）', () => {
+    const greedy = playRun(7, 'greedy', OPTIONS);
+    const mid = playRun(7, 'mid', OPTIONS);
+    expect(mid.shiftsCleared).toBeGreaterThanOrEqual(greedy.shiftsCleared);
+    expect(playRun(7, 'mid', OPTIONS).shifts).toEqual(mid.shifts); // 決定論
+  });
+
   it('探索ボットは貪欲ボット以上のシフトを進める（同じシード）', () => {
     const greedy = playRun(7, 'greedy', OPTIONS);
     const search = playRun(7, 'search', { ...OPTIONS, timeLimitMs: 2000 });

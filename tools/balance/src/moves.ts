@@ -15,6 +15,7 @@ import {
   placePart,
   rerollShop,
   returnPart,
+  rotatePart,
   type Dir4,
   type PartId,
   type RunState,
@@ -43,7 +44,11 @@ export type Move =
   | { kind: 'buyPlace'; offerIndex: number; partId: PartId; placement: Placement }
   | { kind: 'reroll' }
   /** 盤面のパーツを手持ちに戻す（組み直し用） */
-  | { kind: 'return'; x: number; y: number };
+  | { kind: 'return'; x: number; y: number }
+  /** 盤面のパーツを90度回す */
+  | { kind: 'rotate'; x: number; y: number }
+  /** 盤面のパーツを別の場所・向きへ移す（手持ちに戻して置き直す。どちらも無料） */
+  | { kind: 'relocate'; x: number; y: number; partId: PartId; placement: Placement };
 
 /**
  * 置くのを避けるマス: 今使えないマス＋同じ日の夜に工事で使えなくなるマス（予告は画面に出ているので、
@@ -146,7 +151,62 @@ export function applyMove(state: RunState, move: Move): RunState | null {
       const r = returnPart(state, move.x, move.y);
       return r.ok ? r.state : null;
     }
+    case 'rotate': {
+      const r = rotatePart(state, move.x, move.y);
+      return r.ok ? r.state : null;
+    }
+    case 'relocate': {
+      const r = returnPart(state, move.x, move.y);
+      return r.ok ? applyPlacement(r.state, move.partId, move.placement) : null;
+    }
   }
+}
+
+/** 盤面に置いてあるパーツ（スイッチ以外）の位置 */
+function placedParts(state: RunState): { x: number; y: number; partId: PartId }[] {
+  const result: { x: number; y: number; partId: PartId }[] = [];
+  state.board.cells.forEach((part, index) => {
+    if (!part || part.id === 'switch') return;
+    result.push({
+      x: index % state.board.width,
+      y: Math.floor(index / state.board.width),
+      partId: part.id,
+    });
+  });
+  return result;
+}
+
+/**
+ * 組み替えの手（回転・移動）をすべて列挙する。どちらも無料なので、評価が上がるなら打てる。
+ * 移動先は「そのパーツを抜いた盤面」での置き場所の候補（既存パーツの周囲・出荷口の手前）
+ */
+export function listRearrangeMoves(state: RunState): Move[] {
+  const moves: Move[] = [];
+  for (const { x, y, partId } of placedParts(state)) {
+    if (!DIRECTIONLESS.has(partId)) moves.push({ kind: 'rotate', x, y });
+    const lifted = returnPart(state, x, y);
+    if (!lifted.ok) continue;
+    for (const placement of placementsFor(lifted.state, partId)) {
+      if (placement.type === 'cell' && placement.x === x && placement.y === y) continue;
+      moves.push({ kind: 'relocate', x, y, partId, placement });
+    }
+  }
+  return moves;
+}
+
+/** 盤面のパーツ（スイッチ以外）をすべて手持ちに戻す（組み直しの起点）。戻すものがなければ null */
+export function returnAll(state: RunState): { state: RunState; moves: Move[] } | null {
+  let current = state;
+  const moves: Move[] = [];
+  for (const { x, y } of placedParts(state)) {
+    const move: Move = { kind: 'return', x, y };
+    const next = applyMove(current, move);
+    if (next) {
+      current = next;
+      moves.push(move);
+    }
+  }
+  return moves.length > 0 ? { state: current, moves } : null;
 }
 
 /** 今の状態で打てる手（配置系）をすべて列挙する */

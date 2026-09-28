@@ -8,7 +8,7 @@
  */
 import type { RunState } from '@chain-factory/sim';
 import { compareEvaluation, compareOutlook, evaluate, type Evaluation } from '../evaluate';
-import { applyMove, canReroll, listMoves, type Move } from '../moves';
+import { applyMove, canReroll, listMoves, returnAll, type Move } from '../moves';
 import type { Bot, BotOptions, ShiftPlan } from './types';
 
 const BEAM_WIDTH = 6;
@@ -47,7 +47,7 @@ export const searchBot: Bot = {
     // 思考時間を半分ずつ使い、良い方を選ぶ
     const half = { ...options, timeLimitMs: options.timeLimitMs / 2 };
     const keep = beamSearch(initial, [], half);
-    const cleared = clearBoard(initial);
+    const cleared = returnAll(initial);
     if (!cleared) return keep;
     const rebuilt = beamSearch(cleared.state, cleared.moves, half);
     const a = evaluate(keep.state, options.samples);
@@ -56,24 +56,6 @@ export const searchBot: Bot = {
     return cmp > 0 ? rebuilt : keep;
   },
 };
-
-/** 盤面のパーツ（スイッチ以外）をすべて手持ちに戻す。戻すものがなければ null */
-function clearBoard(state: RunState): { state: RunState; moves: Move[] } | null {
-  let current = state;
-  const moves: Move[] = [];
-  state.board.cells.forEach((part, index) => {
-    if (!part || part.id === 'switch') return;
-    const x = index % state.board.width;
-    const y = Math.floor(index / state.board.width);
-    const move: Move = { kind: 'return', x, y };
-    const next = applyMove(current, move);
-    if (next) {
-      current = next;
-      moves.push(move);
-    }
-  });
-  return moves.length > 0 ? { state: current, moves } : null;
-}
 
 function beamSearch(
   initial: RunState,

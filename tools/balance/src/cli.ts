@@ -3,7 +3,7 @@
  *
  * 使い方:
  *   pnpm balance --seeds 1000                  # 全ボットで 1000 シード（探索ボットは --search-seeds まで）
- *   pnpm balance --seeds 200 --bots greedy     # ボットを指定
+ *   pnpm balance --seeds 200 --bots greedy,mid # ボットを指定（random / greedy / mid / search）
  *   pnpm balance --seeds 100 --start 5000      # シード 5000〜5099
  *   pnpm balance --unlock all                  # 全パーツ解放済みの状態で検証（既定は初期解放のみ）
  *
@@ -28,7 +28,7 @@ function parseArgs(argv: string[]) {
   return {
     seeds,
     start: Number(args.get('start') ?? 1),
-    bots: (args.get('bots') ?? 'random,greedy,search').split(',') as BotName[],
+    bots: (args.get('bots') ?? 'random,greedy,mid,search').split(',') as BotName[],
     // 探索ボットは重いので、既定では最大 100 シードに絞る
     searchSeeds: Number(args.get('search-seeds') ?? Math.min(seeds, 100)),
     workers: Number(args.get('workers') ?? cpus().length),

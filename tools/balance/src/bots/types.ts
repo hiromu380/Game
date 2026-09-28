@@ -7,7 +7,7 @@
 import type { Prng, RunState } from '@chain-factory/sim';
 import type { Move } from '../moves';
 
-export type BotName = 'random' | 'greedy' | 'search';
+export type BotName = 'random' | 'greedy' | 'mid' | 'search';
 
 export interface BotOptions {
   /** ランダムな要素がある盤面を評価するときの試行回数 */
