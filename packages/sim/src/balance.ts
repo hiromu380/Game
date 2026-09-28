@@ -250,14 +250,15 @@ export const BALANCE: Balance = {
       'coil',
       'solar',
     ],
+    // 1回目のランで1〜2種、全クリアや延長戦でさらに、と段階的に増えるようにしている
     partUnlocks: [
       { partId: 'inspector', condition: { kind: 'bestShiftScore', value: 100 } },
       { partId: 'piggyBank', condition: { kind: 'runsPlayed', value: 2 } },
-      { partId: 'turntable', condition: { kind: 'reachShift', value: 4 } },
-      { partId: 'merger', condition: { kind: 'bestChain', value: 15 } },
-      { partId: 'copier', condition: { kind: 'totalShipped', value: 10_000 } },
-      { partId: 'oiler', condition: { kind: 'reachShift', value: 7 } },
-      { partId: 'chainMeter', condition: { kind: 'bestChain', value: 30 } },
+      { partId: 'turntable', condition: { kind: 'reachShift', value: 6 } },
+      { partId: 'merger', condition: { kind: 'bestChain', value: 25 } },
+      { partId: 'oiler', condition: { kind: 'reachShift', value: 9 } },
+      { partId: 'copier', condition: { kind: 'totalShipped', value: 1_000_000 } },
+      { partId: 'chainMeter', condition: { kind: 'bestChain', value: 50 } },
     ],
     boardExpansions: [
       { kind: 'clears', value: 1 },
