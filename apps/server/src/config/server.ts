@@ -1,6 +1,6 @@
 /**
  * サーバーの数値設定（上限・件数など）
- * ゲームバランスの数値は packages/sim/src/balance.ts、こちらは API・運用まわりの値だけを置く。
+ * ゲームバランスの数値は packages/sim/src/balance/、こちらは API・運用まわりの値だけを置く。
  */
 export const SERVER_LIMITS = {
   /** 1シフトの操作ログの最大手数（これを超える提出は不正扱い。通常のプレイは数十手） */

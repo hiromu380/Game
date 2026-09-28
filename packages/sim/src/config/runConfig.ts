@@ -1,9 +1,9 @@
 /**
  * RunConfig: 1ランの間ずっと使う設定一式
  *
- * ラン開始時に balance.ts（＋メタ進行）から組み立てて RunState に保存する。
+ * ラン開始時に balance/（＋メタ進行）から組み立てて RunState に保存する。
  * こうしておくと、
- * - balance.ts を変更しても進行中のランの挙動は変わらない（セーブの互換性）
+ * - balance/ を変更しても進行中のランの挙動は変わらない（セーブの互換性）
  * - フェーズ3の相場（価格）やデイリーの条件を、ここに差し込むだけで反映できる
  */
 import { BALANCE, type Balance, type BossModifierId, type ShiftSpec } from '../balance';
@@ -40,11 +40,11 @@ export interface RunConfig {
   shiftsPerDay: number;
   /** 本編のシフト数（延長戦でシフトが増えても変わらない。クリア判定に使う） */
   baseShiftCount: number;
-  /** 延長戦の設定（balance.ts の overtime の写し） */
+  /** 延長戦の設定（balance/ の overtime の写し） */
   overtime: Balance['overtime'];
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
-  /** ボス修正ルールの効果量（balance.ts の boss の写し） */
+  /** ボス修正ルールの効果量（balance/ の boss の写し） */
   bossParams: Balance['boss'];
   starterKit: Partial<Record<PartId, number>>;
   /** このランを作ったシミュレーションのバージョン（デイリーの提出で照合する） */

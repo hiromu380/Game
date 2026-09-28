@@ -115,7 +115,7 @@ export function convertV2toV3(save: SaveDataV2): SaveDataV3 {
 
 /**
  * v1 → v2
- * - ランは現在の balance.ts で RunConfig を作って包む（v1 の 3シフト = 9シフト構成の1日目として続行）
+ * - ランは現在の balance/ で RunConfig を作って包む（v1 の 3シフト = 9シフト構成の1日目として続行）
  * - リロール・試運転の回数は 0、履歴の収入は 0・ボスなし
  * - メタ進行は初期値
  */

@@ -63,7 +63,7 @@ export interface Signal {
 
 /**
  * シミュレーションのルール
- * ラン開始時に「基本（balance.ts）→ メタ進行 → ボス修正」の順に組み立てる（config/ を参照）
+ * ラン開始時に「基本（balance/）→ メタ進行 → ボス修正」の順に組み立てる（config/ を参照）
  */
 export interface RuleSet {
   tickLimit: number;

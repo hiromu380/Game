@@ -1,7 +1,7 @@
 /**
  * メタ進行の表示: 今回新しく解放されたもの ＋ 解放の目標と達成度
  *
- * 解放条件は balance.ts の meta を読み、達成度は sim の conditionProgress で計算する。
+ * 解放条件は balance/ の meta を読み、達成度は sim の conditionProgress で計算する。
  */
 import {
   BALANCE,

@@ -1,5 +1,5 @@
 /**
- * テスト用のバランス（本番の balance.ts を元に、必要な値だけ差し替える）
+ * テスト用のバランス（本番の balance/ を元に、必要な値だけ差し替える）
  */
 import { BALANCE, type Balance, type ShiftSpec } from '../src';
 

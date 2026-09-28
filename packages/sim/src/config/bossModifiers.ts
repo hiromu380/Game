@@ -1,8 +1,8 @@
 /**
  * ボスシフトの修正ルール
  *
- * 1ルール = RuleSet / 経済設定を書き換える純粋関数。効果量は balance.ts の boss に置く。
- * 新しいルールを足すときは BossModifierId（balance.ts）とここの一覧に追加する。
+ * 1ルール = RuleSet / 経済設定を書き換える純粋関数。効果量は balance/ の boss に置く。
+ * 新しいルールを足すときは BossModifierId（balance/）とここの一覧に追加する。
  */
 import type { Balance, BossModifierId } from '../balance';
 import type { RuleSet } from '../types';

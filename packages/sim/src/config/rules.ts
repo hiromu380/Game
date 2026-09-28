@@ -1,5 +1,5 @@
 /**
- * 基本の RuleSet（balance.ts そのまま）を組み立てる
+ * 基本の RuleSet（balance/ そのまま）を組み立てる
  *
  * ルールは「基本 → メタ進行 → ボス修正」の順に重ねる。ここは最初の層。
  */
@@ -22,5 +22,5 @@ export function createRuleSet(balance: Balance = BALANCE): RuleSet {
   };
 }
 
-/** 既定のルール（balance.ts そのまま。テストや単体のシミュレーション用） */
+/** 既定のルール（balance/ そのまま。テストや単体のシミュレーション用） */
 export const DEFAULT_RULES: RuleSet = createRuleSet();

@@ -100,7 +100,7 @@ describe('ランの開始', () => {
     expect(JSON.parse(JSON.stringify(run))).toEqual(run);
   });
 
-  it('balance.ts を変えても、開始済みのランの設定は変わらない', () => {
+  it('balance/ を変えても、開始済みのランの設定は変わらない', () => {
     const run = createRun(1);
     const changed = withBalance({ partParams: { ...BALANCE.partParams, gearMultiplier: 99 } });
     expect(createRun(1, { balance: changed }).config.rules.params.gearMultiplier).toBe(99);
