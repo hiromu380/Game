@@ -2,7 +2,7 @@
  * steamworks-ffi-node を使った Steam アダプター（メインプロセスでのみ初期化する）
  *
  * - SDK の redistributable（steam_api64.dll など）はライセンス上リポジトリに入れない。人が Steamworks SDK から
- *   `apps/desktop/steamworks_sdk/redistributable_bin/` に置く（docs/ops/steam-sdk.md）
+ *   `apps/desktop/steamworks_sdk/redistributable_bin/` に置く（docs/ops/desktop.md §1）
  * - ライブラリ・SDK・Steam クライアントのどれかが無ければ unavailableSteam を返す（ゲームは起動して遊べる）
  * - 実機での確認は人が行う（docs/ops/steam-testing.md）。ここでの呼び出し方は型定義（0.11.3）から書いている
  */

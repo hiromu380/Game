@@ -8,7 +8,7 @@
  *   環境変数の書き方が Windows と Linux で違うので、版はコマンドの引数で渡す）
  *
  * - steamworks-ffi-node と koffi と Steamworks SDK の redistributable は ASAR に入れると動かないので外に出す
- * - Steamworks SDK（steamworks_sdk/redistributable_bin）は人が配置する（docs/ops/steam-sdk.md）
+ * - Steamworks SDK（steamworks_sdk/redistributable_bin）は人が配置する（docs/ops/desktop.md §1）
  * - exe へのアイコン・バージョン情報の埋め込み（rcedit）は Windows 機でのみ行う。Linux から作るときは
  *   WIN_EDIT_EXECUTABLE を付けない（wine が要るため）
  */
