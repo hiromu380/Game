@@ -6,6 +6,4 @@ export const INPUT_CONFIG = {
   longPressMs: 500,
   /** この距離（盤面のピクセル）以上動かしたらドラッグ（置いたパーツを別のマスへ動かす） */
   dragThresholdPx: 10,
-  /** この時間（ミリ秒）以内に同じマスを2回クリックしたらダブルクリック（手持ちに戻す） */
-  doubleClickMs: 350,
 } as const;

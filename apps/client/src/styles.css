@@ -1136,3 +1136,22 @@ a.button.button--primary {
   /* 高さの低い画面では .layout の高さ（cqh）、それ以外は画面の高さに合わせる */
   width: min(100%, 100cqh, calc(100dvh - 40px));
 }
+
+/* ---- 置いたパーツのドラッグ（ui/DragGhost.tsx） ---- */
+.drag-ghost {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+.drag-ghost.is-over-inventory {
+  opacity: 1;
+  transform: scale(0.8);
+}
+/* ドラッグ中は手持ちの一覧・タブを落とし先として目立たせる */
+.is-dragging-part [data-panel='inventory'],
+.is-dragging-part [data-drop='inventory'] {
+  outline: 3px dashed var(--met);
+  outline-offset: -3px;
+}

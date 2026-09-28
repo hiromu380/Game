@@ -8,7 +8,7 @@
   "shop.price": "${price}",
   "inventory.title": "Inventory",
   "inventory.empty": "No parts in inventory",
-  "inventory.hint": "Pick a part, then click an empty cell to place it. Drag a placed part to move it; double-click (long-press on phones) to return it to your inventory",
+  "inventory.hint": "Pick a part, then click an empty cell to place it. Drag a placed part to move it, or drag it here to return it to your inventory (long-press also works on phones)",
   "inventory.placingDir": "Facing: {dir} (R to rotate)",
   "selection.title": "Selected part",
   "selection.rotate": "Rotate (R / tap again)",

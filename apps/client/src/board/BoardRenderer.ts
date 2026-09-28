@@ -21,7 +21,7 @@ import {
   type SimResult,
   type VanishReason,
 } from '@chain-factory/sim';
-import { Application, Container, Graphics, Text } from 'pixi.js';
+import { Application, Container, Graphics, Text, type FederatedPointerEvent } from 'pixi.js';
 // CSP で eval を禁止している（apps/client/public/_headers）ため、PixiJS に eval を使わない
 // シェーダー処理を読み込ませる。これがないと本番配信で盤面が描けない
 import 'pixi.js/unsafe-eval';
@@ -91,10 +91,19 @@ export interface BoardLabels {
 
 export interface BoardRendererOptions extends BoardLabels {
   onCellClick: (x: number, y: number) => void;
-  /** 長押し・ダブルクリック（「手持ちに戻す」に使う） */
+  /** 長押し（スマホで「手持ちに戻す」に使う） */
   onCellLongPress: (x: number, y: number) => void;
-  /** 置いたパーツをドラッグして別のマスに落とした */
-  onCellDrag: (from: { x: number; y: number }, to: { x: number; y: number }) => void;
+  /** 置いたパーツのドラッグを始めた（画面側で指についてくる絵と、手持ちの落とし先を出す） */
+  onCellDragStart: (from: { x: number; y: number }, partId: PartId) => void;
+  /**
+   * ドラッグを終えた。target は盤面のマス（盤面の外なら null）、client は画面上の位置
+   * （盤面の外で離したとき、手持ちの一覧の上かどうかを画面側で判定する）
+   */
+  onCellDragEnd: (
+    from: { x: number; y: number },
+    target: { x: number; y: number } | null,
+    client: { x: number; y: number },
+  ) => void;
   /** 効果音を鳴らす（semitones: 上げる音程。連鎖が続くほど高くする） */
   playSound: (key: SoundKey, semitones: number) => void;
 }
@@ -195,8 +204,6 @@ export class BoardRenderer {
     let pressTimer: ReturnType<typeof setTimeout> | null = null;
     /** 長押し・ドラッグをしたら、そのあとのタップ（クリック）を無視する */
     let longPressed = false;
-    /** ダブルクリックの判定用: 直前のクリック */
-    let lastTap: { x: number; y: number; at: number } | null = null;
     const cancelPress = () => {
       if (pressTimer) clearTimeout(pressTimer);
       pressTimer = null;
@@ -215,61 +222,46 @@ export class BoardRenderer {
         options.onCellLongPress(cell.x, cell.y);
       }, INPUT_CONFIG.longPressMs);
     });
-    const endDrag = (x: number, y: number) => {
+    const endDrag = (e: FederatedPointerEvent) => {
       cancelPress();
       const drag = this.drag;
       this.drag = null;
       if (!drag?.pointer) return;
-      const target = this.toCell(x, y);
-      if (target && (target.x !== drag.from.x || target.y !== drag.from.y)) {
-        options.onCellDrag(drag.from, target);
-      }
+      options.onCellDragEnd(drag.from, this.toCell(e.global.x, e.global.y), {
+        x: e.clientX,
+        y: e.clientY,
+      });
+      this.hovered = null;
       this.drawOverlay();
     };
-    app.stage.on('pointerup', (e) => endDrag(e.global.x, e.global.y));
-    app.stage.on('pointerupoutside', (e) => endDrag(e.global.x, e.global.y));
+    app.stage.on('pointerup', endDrag);
+    app.stage.on('pointerupoutside', endDrag);
     app.stage.on('pointertap', (e) => {
       if (longPressed) return;
       const cell = this.toCell(e.global.x, e.global.y);
-      if (!cell) return;
-      // 同じマスを続けて2回クリック → 手持ちに戻す（1回目のクリックは選択として扱われている）
-      const now = performance.now();
-      if (
-        lastTap &&
-        lastTap.x === cell.x &&
-        lastTap.y === cell.y &&
-        now - lastTap.at < INPUT_CONFIG.doubleClickMs &&
-        this.state &&
-        getPart(this.state.board, cell.x, cell.y)
-      ) {
-        lastTap = null;
-        options.onCellLongPress(cell.x, cell.y);
-        return;
-      }
-      // 1回目は「パーツのあるマス」のクリックだけ数える（置いた直後のクリックで戻らないように）
-      const hasPart = !!this.state && !!getPart(this.state.board, cell.x, cell.y);
-      lastTap = hasPart ? { ...cell, at: now } : null;
-      options.onCellClick(cell.x, cell.y);
+      if (cell) options.onCellClick(cell.x, cell.y);
     });
     // スマホの長押しで出るメニューを出さない
     app.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-    app.stage.on('pointermove', (e) => {
+    // ドラッグは盤面の外まで追いかける（手持ちの一覧へ落とすため）
+    app.stage.on('globalpointermove', (e) => {
       const drag = this.drag;
-      if (drag) {
-        const moved = Math.hypot(e.global.x - drag.startX, e.global.y - drag.startY);
-        if (!drag.pointer && moved >= INPUT_CONFIG.dragThresholdPx) {
-          // ドラッグ開始: 長押しをやめ、指を離したときのクリックも無視する
-          cancelPress();
-          longPressed = true;
-        }
-        if (drag.pointer || moved >= INPUT_CONFIG.dragThresholdPx) {
-          drag.pointer = { x: e.global.x, y: e.global.y };
-          this.hovered = this.toCell(e.global.x, e.global.y);
-          this.drawOverlay();
-          return;
-        }
+      if (!drag) return;
+      const moved = Math.hypot(e.global.x - drag.startX, e.global.y - drag.startY);
+      if (!drag.pointer && moved < INPUT_CONFIG.dragThresholdPx) return;
+      if (!drag.pointer) {
+        // ドラッグ開始: 長押しをやめ、指を離したときのクリックも無視する
+        cancelPress();
+        longPressed = true;
+        const part = this.state && getPart(this.state.board, drag.from.x, drag.from.y);
+        if (part) options.onCellDragStart(drag.from, part.id);
       }
-      this.setHovered(this.toCell(e.global.x, e.global.y));
+      drag.pointer = { x: e.global.x, y: e.global.y };
+      this.hovered = this.toCell(e.global.x, e.global.y);
+      this.drawOverlay();
+    });
+    app.stage.on('pointermove', (e) => {
+      if (!this.drag?.pointer) this.setHovered(this.toCell(e.global.x, e.global.y));
     });
     app.stage.on('pointerleave', cancelPress);
     app.stage.on('pointerleave', () => this.setHovered(null));
@@ -415,11 +407,11 @@ export class BoardRenderer {
           cellFrame(target.x, target.y, free ? BOARD_THEME.ghostOk : BOARD_THEME.blocked, 3),
         );
       }
+      // 動かしているパーツの元のマスに枠（指についてくる絵は画面側で出す: 盤面の外まで動かせるように）
       if (moving) {
-        const ghost = createPartView(moving, this.textures, null);
-        ghost.position.set(dragging.pointer!.x, dragging.pointer!.y);
-        ghost.alpha = 0.8;
-        this.overlayLayer.addChild(ghost);
+        this.overlayLayer.addChild(
+          cellFrame(dragging.from.x, dragging.from.y, BOARD_THEME.selected, 2),
+        );
       }
       return;
     }

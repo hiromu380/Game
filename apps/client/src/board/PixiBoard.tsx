@@ -8,7 +8,12 @@ import type { Score, SimResult } from '@chain-factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import { audio } from '../audio/AudioEngine';
 import type { PlaybackSpeed } from '../playback/timeline';
-import { BoardRenderer, type BoardLabels, type BoardViewState } from './BoardRenderer';
+import {
+  BoardRenderer,
+  type BoardLabels,
+  type BoardRendererOptions,
+  type BoardViewState,
+} from './BoardRenderer';
 import type { EffectSettings } from './fx/EffectsLayer';
 
 interface Props {
@@ -22,7 +27,8 @@ interface Props {
   cursor?: { x: number; y: number } | null;
   onCellClick: (x: number, y: number) => void;
   onCellLongPress: (x: number, y: number) => void;
-  onCellDrag: (from: { x: number; y: number }, to: { x: number; y: number }) => void;
+  onCellDragStart: BoardRendererOptions['onCellDragStart'];
+  onCellDragEnd: BoardRendererOptions['onCellDragEnd'];
   onShip: (total: Score) => void;
   onPlaybackFinish: () => void;
 }
@@ -51,7 +57,9 @@ export function PixiBoard(props: Props) {
     void BoardRenderer.create(parent, {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
       onCellLongPress: (x, y) => callbacksRef.current.onCellLongPress(x, y),
-      onCellDrag: (from, to) => callbacksRef.current.onCellDrag(from, to),
+      onCellDragStart: (from, partId) => callbacksRef.current.onCellDragStart(from, partId),
+      onCellDragEnd: (from, target, client) =>
+        callbacksRef.current.onCellDragEnd(from, target, client),
       getPartName: (partId) => labels().getPartName(partId),
       formatIncome: (amount) => labels().formatIncome(amount),
       getBreakLabel: (reason) => labels().getBreakLabel(reason),

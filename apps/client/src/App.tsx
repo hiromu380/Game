@@ -13,6 +13,7 @@ import {
   SIM_VERSION,
   type RunState,
   type Score,
+  type PartId,
 } from '@chain-factory/sim';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
@@ -41,6 +42,7 @@ import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
+import { DragGhost, isInventoryDropZone } from './ui/DragGhost';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
@@ -226,9 +228,28 @@ export function App({ start, onTitle }: Props) {
     [],
   );
 
-  const onCellDrag = useCallback(
-    (from: { x: number; y: number }, to: { x: number; y: number }) =>
-      dispatch({ type: 'movePart', from, to }),
+  // 置いたパーツのドラッグ: 盤面の空きマスへ落とすと移動、手持ちの一覧（またはタブ）へ落とすと手持ちに戻す
+  const [dragging, setDragging] = useState<PartId | null>(null);
+  const onCellDragStart = useCallback((_from: { x: number; y: number }, partId: PartId) => {
+    setDragging(partId);
+    // タブ表示では、落とし先の手持ちを見せる
+    setTab('inventory');
+  }, []);
+  const onCellDragEnd = useCallback(
+    (
+      from: { x: number; y: number },
+      target: { x: number; y: number } | null,
+      client: { x: number; y: number },
+    ) => {
+      setDragging(null);
+      if (target) {
+        dispatch({ type: 'movePart', from, to: target });
+        return;
+      }
+      if (isInventoryDropZone(document.elementFromPoint(client.x, client.y))) {
+        dispatch({ type: 'longPressCell', x: from.x, y: from.y });
+      }
+    },
     [],
   );
 
@@ -395,8 +416,9 @@ export function App({ start, onTitle }: Props) {
 
   return (
     <div
-      className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''} capture-ui--${captureUi}`}
+      className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''} capture-ui--${captureUi} ${dragging ? 'is-dragging-part' : ''}`}
     >
+      {dragging && <DragGhost partId={dragging} />}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
@@ -425,7 +447,8 @@ export function App({ start, onTitle }: Props) {
             cursor={cursor}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
-            onCellDrag={onCellDrag}
+            onCellDragStart={onCellDragStart}
+            onCellDragEnd={onCellDragEnd}
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />
@@ -453,6 +476,7 @@ export function App({ start, onTitle }: Props) {
                   role="tab"
                   aria-selected={tab === key}
                   className={`tabs__tab ${tab === key ? 'is-active' : ''}`}
+                  data-drop={key === 'inventory' ? 'inventory' : undefined}
                   onClick={() => setTab(key)}
                 >
                   {t(key === 'shop' ? 'shop.title' : 'inventory.title')}

@@ -8,7 +8,7 @@
   "shop.price": "{price} 円",
   "inventory.title": "手持ち",
   "inventory.empty": "手持ちのパーツはありません",
-  "inventory.hint": "パーツを選んでから盤面の空きマスをクリックすると配置します。置いたパーツはドラッグで移動、ダブルクリック（スマホは長押し）で手持ちに戻せます",
+  "inventory.hint": "パーツを選んでから盤面の空きマスをクリックすると配置します。置いたパーツはドラッグで移動でき、手持ちへドラッグすると戻せます（スマホは長押しでも戻せます）",
   "inventory.placingDir": "置く向き: {dir}（R で回転）",
   "selection.title": "選択中のパーツ",
   "selection.rotate": "回転（R／再タップ）",
