@@ -7,4 +7,9 @@ export const LAYOUT = {
    * 盤面の下にショップ・手持ちをタブで切り替えて出し、スクロールなしで盤面全体を操作できるようにする
    */
   compactMaxWidthPx: 600,
+  /**
+   * 横長で高さが低い画面（Steam Deck の 1280×800・ノートPC）。1画面に収め、ページをスクロールさせない:
+   * 盤面は画面の高さに合わせ、ショップ・手持ちはタブで切り替え、右の列だけをスクロールする
+   */
+  shortQuery: '(min-width: 821px) and (max-height: 860px)',
 } as const;

@@ -60,3 +60,21 @@ export function getPlatform(): Platform {
   cached ??= desktopPlatform() ?? webPlatform;
   return cached;
 }
+
+/**
+ * 文字入力欄にフォーカスしたとき、Steam Deck なら画面上キーボードを出す（それ以外では何もしない）。
+ * 位置は入力欄の場所（ウィンドウ内のピクセル）。キーボードが入力欄を隠さない位置に出る
+ */
+export function requestOnScreenKeyboard(element: HTMLElement): void {
+  const platform = getPlatform();
+  if (platform.kind !== 'desktop') return;
+  const rect = element.getBoundingClientRect();
+  const scale = window.devicePixelRatio || 1;
+  const px = (v: number) => Math.max(0, Math.round(v * scale));
+  void platform.showKeyboard({
+    x: px(rect.left),
+    y: px(rect.top),
+    width: px(rect.width),
+    height: px(rect.height),
+  });
+}

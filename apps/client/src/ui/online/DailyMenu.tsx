@@ -13,7 +13,7 @@ import { useI18n } from '../../i18n';
 import { api, OnlineError, type OnlineErrorCode } from '../../online/api';
 import { buildDailyRun, buildPracticeRun } from '../../online/dailyRun';
 import { loadIdentity } from '../../online/identity';
-import { getPlatform } from '../../platform';
+import { getPlatform, requestOnScreenKeyboard } from '../../platform';
 import { HumanCheck } from './HumanCheck';
 import { SteamSignIn } from './SteamSignIn';
 import type { PlayMode } from '../../state/gameReducer';
@@ -225,6 +225,7 @@ function NameEditor() {
         maxLength={24}
         placeholder={t('online.namePlaceholder')}
         onChange={(e) => setName(e.target.value)}
+        onFocus={(e) => requestOnScreenKeyboard(e.currentTarget)}
       />
       <button className="button--small" onClick={() => void save()}>
         {t('online.nameSave')}

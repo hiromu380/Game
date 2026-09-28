@@ -67,6 +67,9 @@ export function App({ start, onTitle }: Props) {
       : createGameState(initial.run, initial.meta, undefined, initial.achievements);
   });
   const compact = useMediaQuery(`(max-width: ${LAYOUT.compactMaxWidthPx}px)`);
+  const short = useMediaQuery(LAYOUT.shortQuery);
+  /** ショップ・手持ちをタブで切り替えるか（狭い画面・高さの低い画面） */
+  const tabbed = compact || short;
   /** 狭い画面で表示中のタブ */
   const [tab, setTab] = useState<'shop' | 'inventory'>('shop');
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
@@ -320,7 +323,7 @@ export function App({ start, onTitle }: Props) {
     <SelectionPanel
       run={run}
       selection={selection}
-      hideWhenEmpty={compact}
+      hideWhenEmpty={tabbed}
       disabled={playing}
       onRotate={() => dispatch({ type: 'rotate' })}
       onReturn={() => dispatch({ type: 'returnSelected' })}
@@ -352,7 +355,7 @@ export function App({ start, onTitle }: Props) {
   }
 
   return (
-    <div className={`app ${compact ? 'app--compact' : ''}`}>
+    <div className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''}`}>
       {header}
       <Hud run={run} liveScore={liveScore} />
       <BossNotice run={run} />
@@ -382,9 +385,9 @@ export function App({ start, onTitle }: Props) {
             onCommit={() => startPlayback('startCommit')}
             onSpeedChange={setSpeed}
           />
-          {/* 狭い画面では選択中のパーツの操作を盤面のすぐ下に出す（何も選んでいなければ出さない） */}
-          {compact && selectionPanel}
-          {compact && (
+          {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
+          {tabbed && selectionPanel}
+          {tabbed && (
             <div className="tabs" role="tablist">
               {(['shop', 'inventory'] as const).map((key) => (
                 <button
@@ -399,10 +402,10 @@ export function App({ start, onTitle }: Props) {
               ))}
             </div>
           )}
-          {(!compact || tab === 'shop') && shopPanel}
-          {(!compact || tab === 'inventory') && inventoryPanel}
+          {(!tabbed || tab === 'shop') && shopPanel}
+          {(!tabbed || tab === 'inventory') && inventoryPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
-          {!compact && selectionPanel}
+          {!tabbed && selectionPanel}
         </aside>
       </main>
     </div>

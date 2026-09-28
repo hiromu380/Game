@@ -992,7 +992,8 @@ a.button.button--primary {
   overflow-y: auto;
 }
 /* 見出しはタブと重複するので隠す（リロールボタンは残す） */
-.app--compact .tabs ~ .panel .panel__title {
+.app--compact .tabs ~ .panel .panel__title,
+.app--short .tabs ~ .panel .panel__title {
   display: none;
 }
 .app--compact .controls {
@@ -1030,4 +1031,49 @@ a.button.button--primary {
 .daily__actions > button {
   flex: 1 1 30%;
   white-space: nowrap;
+}
+
+/* ---- 横長で高さが低い画面（Steam Deck 1280×800 など。config/layout.ts の shortQuery） ----
+   ページ全体を画面の高さに収める: 盤面の一辺 = 残りの高さ、右の列だけスクロール */
+.app--short {
+  max-width: 1280px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 16px 8px;
+  overflow: hidden;
+}
+.app--short .app-header {
+  padding-bottom: 4px;
+}
+.app--short .app-header__title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.app--short .hud {
+  margin: 6px 0;
+  padding: 6px 12px;
+}
+.app--short .boss-notice {
+  margin-bottom: 6px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.app--short .layout {
+  flex: 1;
+  min-height: 0;
+  /* 盤面の一辺を .layout の高さに合わせるため、.layout を高さの基準（コンテナ）にする */
+  container-type: size;
+  grid-template-columns: auto minmax(300px, 1fr);
+  align-items: stretch;
+}
+.app--short .layout__board {
+  /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
+  width: min(100cqh, 640px);
+}
+.app--short .layout__side {
+  min-height: 0;
+  overflow-y: auto;
+  gap: 8px;
+  padding-right: 4px;
 }
