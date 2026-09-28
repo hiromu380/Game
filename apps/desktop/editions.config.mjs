@@ -28,6 +28,8 @@ export const EDITIONS = {
     externalAllowList,
     storeUrl,
     dataFolder: 'Chain Factory',
+    // 体験版のセーブを引き継ぐときに読むフォルダ（体験版の dataFolder と同じ名前）
+    demoDataFolder: 'Chain Factory Demo',
   },
   demo: {
     edition: 'demo',
@@ -38,7 +40,8 @@ export const EDITIONS = {
     apiOrigin,
     externalAllowList,
     storeUrl,
-    // 体験版のセーブは製品版と別のフォルダ（混ざらないように。引き継ぎは製品版が読み込む: 4d）
+    // 体験版のセーブは製品版と別のフォルダ（混ざらないように。引き継ぎは製品版が読み込む）
     dataFolder: 'Chain Factory Demo',
+    demoDataFolder: null,
   },
 };

@@ -19,6 +19,7 @@ export const IPC_CHANNELS = {
   openStore: 'platform:openStore',
   showKeyboard: 'platform:showKeyboard',
   openExternal: 'platform:openExternal',
+  readDemoSave: 'storage:readDemoSave',
 } as const;
 
 /**
@@ -79,4 +80,9 @@ export interface DesktopBridge {
   showKeyboard(rect: ScreenRect): Promise<boolean>;
   /** 許可リストにある外部 URL を既定のブラウザで開く */
   openExternal(url: string): Promise<void>;
+  /**
+   * 同じ PC にある体験版のセーブ（save.json の中身）。製品版だけが読める。なければ null
+   * （製品版の初回起動時に、体験版のデータを引き継ぐかを聞くため）
+   */
+  readDemoSave(): Promise<string | null>;
 }

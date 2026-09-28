@@ -9,7 +9,10 @@ import { loadGame, type GameModule } from './boot/loadGame';
 import { useI18n } from './i18n';
 import { loadMarket } from './online/market';
 import { SettingsPanel } from './settings/SettingsPanel';
+import type { MetaProgress } from '@chain-factory/sim';
 import { recordRankingToSave } from './state/achievements';
+import { findDemoSaveToImport } from './state/demoImport';
+import { DemoImportDialog } from './ui/title/DemoImportDialog';
 import { loadRun } from './state/saveStore';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
@@ -25,6 +28,12 @@ export function Root() {
   const [request, setRequest] = useState<Request | null>(null);
   const [dailyOpen, setDailyOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** 引き継げる体験版のデータ（製品版の初回起動時だけ。答えたら null） */
+  const [demoMeta, setDemoMeta] = useState<MetaProgress | null>(null);
+
+  useEffect(() => {
+    void findDemoSaveToImport().then(setDemoMeta);
+  }, []);
 
   useEffect(() => {
     loadGame(setProgress)
@@ -66,6 +75,7 @@ export function Root() {
         />
       )}
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {demoMeta && <DemoImportDialog meta={demoMeta} onDone={() => setDemoMeta(null)} />}
     </>
   );
 }

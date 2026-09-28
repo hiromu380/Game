@@ -57,6 +57,11 @@ if (started.kind === 'restarting') {
       ipcMain,
       createHandlers({
         store: new FileStore(app.getPath('userData')),
+        readDemoSave: async () => {
+          if (!CONFIG.demoDataFolder) return null;
+          const demo = new FileStore(join(app.getPath('appData'), CONFIG.demoDataFolder));
+          return (await demo.readAll())['chain-factory:save'] ?? null;
+        },
         steam,
         openExternal: (url) => shell.openExternal(url),
         // 定義済みの実績だけを Steam へ送る（レンダラーが乗っ取られても任意の ID は解除できない）

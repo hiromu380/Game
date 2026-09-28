@@ -20,6 +20,8 @@ export interface Platform {
   /** 外部 URL を開く（Web 版は新しいタブ、デスクトップ版は許可リストの URL だけ既定のブラウザで） */
   openExternal(url: string): Promise<void>;
   showKeyboard(rect: ScreenRect): Promise<boolean>;
+  /** 同じ PC の体験版のセーブ（デスクトップの製品版だけ。ほかは null） */
+  readDemoSave(): Promise<string | null>;
 }
 
 const webPlatform: Platform = {
@@ -35,6 +37,7 @@ const webPlatform: Platform = {
     window.open(url, '_blank', 'noopener');
   },
   showKeyboard: async () => false,
+  readDemoSave: async () => null,
 };
 
 function desktopPlatform(): Platform | null {
@@ -51,6 +54,7 @@ function desktopPlatform(): Platform | null {
     openStore: () => bridge.openStore(),
     openExternal: (url) => bridge.openExternal(url),
     showKeyboard: (rect) => bridge.showKeyboard(rect),
+    readDemoSave: () => (EDITION === 'demo' ? Promise.resolve(null) : bridge.readDemoSave()),
   };
 }
 

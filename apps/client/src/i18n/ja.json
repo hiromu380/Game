@@ -308,5 +308,9 @@
   "achievement.title": "実績",
   "achievement.progress": "{count} / {total} 解除",
   "achievement.hidden": "？？？",
-  "achievement.hiddenDesc": "隠し実績"
+  "achievement.hiddenDesc": "隠し実績",
+  "demoImport.title": "体験版のデータを引き継ぎますか？",
+  "demoImport.body": "この PC に体験版で遊んだ記録（ラン {runs} 回）があります。記録と、解放したパーツ・工場の広さを製品版に引き継げます（遊んでいる途中のランは引き継ぎません）。",
+  "demoImport.yes": "引き継ぐ",
+  "demoImport.no": "最初から遊ぶ"
 }

@@ -308,5 +308,9 @@
   "achievement.title": "Achievements",
   "achievement.progress": "{count} / {total} unlocked",
   "achievement.hidden": "???",
-  "achievement.hiddenDesc": "Hidden achievement"
+  "achievement.hiddenDesc": "Hidden achievement",
+  "demoImport.title": "Import your demo progress?",
+  "demoImport.body": "We found demo progress on this PC ({runs} runs). You can bring your records, unlocked parts and factory size into the full game (a run in progress is not carried over).",
+  "demoImport.yes": "Import",
+  "demoImport.no": "Start fresh"
 }

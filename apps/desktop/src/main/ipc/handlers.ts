@@ -24,6 +24,8 @@ export interface HandlerDeps {
   steam: SteamAdapter;
   /** 既定のブラウザで開く（Electron の shell.openExternal） */
   openExternal(url: string): Promise<void>;
+  /** 体験版のセーブを読む（製品版だけ。index.ts が体験版のフォルダを読む関数を渡す） */
+  readDemoSave?: () => Promise<string | null>;
   /** 定義済みの実績の ID（sim の ACHIEVEMENT_IDS。未指定なら形だけ確かめる: テスト用） */
   achievementIds?: ReadonlySet<string>;
 }
@@ -68,6 +70,9 @@ export function createHandlers(
       const valid = validateScreenRect(rect);
       return valid ? steam.showKeyboard(valid) : false;
     },
+    // 体験版からは読ませない（引き継ぎは「体験版 → 製品版」の一方向だけ）
+    [IPC_CHANNELS.readDemoSave]: async () =>
+      isDemo || !deps.readDemoSave ? null : deps.readDemoSave(),
     [IPC_CHANNELS.openExternal]: async (url) => {
       if (typeof url === 'string' && isAllowedExternalUrl(url, config.externalAllowList)) {
         await deps.openExternal(url);

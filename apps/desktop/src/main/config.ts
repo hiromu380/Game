@@ -24,6 +24,8 @@ export interface DesktopBuildConfig {
   storeUrl: string;
   /** ユーザーデータのフォルダ名（%APPDATA% の下。製品版と体験版で分ける） */
   dataFolder: string;
+  /** 体験版のユーザーデータのフォルダ名（製品版だけ。セーブの引き継ぎに使う。体験版では null） */
+  demoDataFolder: string | null;
 }
 
 declare const __DESKTOP_CONFIG__: DesktopBuildConfig;
@@ -39,6 +41,7 @@ const DEV_DEFAULTS: DesktopBuildConfig = {
   externalAllowList: ['https://x.com/intent/post', 'https://store.steampowered.com/'],
   storeUrl: 'https://store.steampowered.com/app/480/',
   dataFolder: 'Chain Factory Dev',
+  demoDataFolder: 'Chain Factory Demo Dev',
 };
 
 export const CONFIG: DesktopBuildConfig =

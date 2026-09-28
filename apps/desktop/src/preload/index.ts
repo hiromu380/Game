@@ -17,6 +17,7 @@ const bridge: DesktopBridge = {
   openStore: () => ipcRenderer.invoke(IPC_CHANNELS.openStore),
   showKeyboard: (rect) => ipcRenderer.invoke(IPC_CHANNELS.showKeyboard, rect),
   openExternal: (url) => ipcRenderer.invoke(IPC_CHANNELS.openExternal, url),
+  readDemoSave: () => ipcRenderer.invoke(IPC_CHANNELS.readDemoSave),
 };
 
 contextBridge.exposeInMainWorld('chainFactory', bridge);
