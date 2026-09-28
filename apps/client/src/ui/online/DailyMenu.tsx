@@ -2,6 +2,8 @@
  * デイリーチャレンジのメニュー（モーダル）
  *
  * 今日のデイリーを取得し、状況に応じて「本番に挑戦 / 続きから / 終了済み」「練習」「ランキング」を出す。
+ * - 初めての参加時だけ人間確認（Turnstile）を通して匿名登録する
+ * - 練習は本番を終えた後に解放する（CLAUDE.md「挑戦後は同じ条件の練習モードを遊べる」）
  * 表示名の変更もここで行う。
  */
 import type { DailyInfo, DailySessionView } from '@chain-factory/shared';
@@ -11,6 +13,7 @@ import { useI18n } from '../../i18n';
 import { api, OnlineError, type OnlineErrorCode } from '../../online/api';
 import { buildDailyRun, buildPracticeRun } from '../../online/dailyRun';
 import { loadIdentity } from '../../online/identity';
+import { HumanCheck } from './HumanCheck';
 import type { PlayMode } from '../../state/gameReducer';
 import { describeBoss } from '../BossNotice';
 import { RankingView } from './RankingView';
@@ -39,6 +42,8 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
   const [error, setError] = useState<OnlineErrorCode | null>(null);
   const [view, setView] = useState(initialView);
   const [busy, setBusy] = useState(false);
+  /** 匿名登録済みか（まだなら人間確認を出す） */
+  const [registered, setRegistered] = useState(() => loadIdentity() !== null);
 
   // 今日のデイリーと自分の進行状況を取得する（開いたとき・再読み込みのとき）
   const load = useCallback(() => {
@@ -134,25 +139,32 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
           })}
         </p>
 
+        {!registered && <HumanCheck onRegistered={() => setRegistered(true)} />}
         <div className="button-row daily__actions">
           {finished ? (
             <p className="panel__hint">{t('daily.finished')}</p>
           ) : (
-            <button className="button--primary" disabled={busy} onClick={() => void playRanked()}>
+            <button
+              className="button--primary"
+              disabled={busy || !registered}
+              onClick={() => void playRanked()}
+            >
               {session ? t('daily.resume', { shift: session.ops.length + 1 }) : t('daily.start')}
             </button>
           )}
-          <button disabled={busy} onClick={practice}>
+          <button disabled={busy || !finished} onClick={practice}>
             {t('daily.practice')}
           </button>
           <button disabled={busy} onClick={() => setView('ranking')}>
             {t('daily.ranking')}
           </button>
         </div>
-        <p className="panel__hint">{t('daily.practiceHint')}</p>
+        <p className="panel__hint">
+          {finished ? t('daily.practiceHint') : t('daily.practiceLocked')}
+        </p>
         {error && <p className="panel__hint daily__error">{t(`error.online.${error}`)}</p>}
 
-        <NameEditor />
+        {registered && <NameEditor />}
         <p className="daily__commitment">
           {t('daily.seedCommitment', { hash: info.seedCommitment.slice(0, 16) })}
         </p>

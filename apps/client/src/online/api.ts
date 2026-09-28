@@ -12,7 +12,9 @@ import type {
   CommitResponse,
   DailyInfo,
   DailySessionView,
+  MarketResponse,
   RankingResponse,
+  RegisterPlayerRequest,
   RegisterPlayerResponse,
   StartDailyResponse,
   UpdateNameResponse,
@@ -55,11 +57,13 @@ async function request<T>(
   return json as T;
 }
 
-/** 身元がなければ登録して保存する */
-export async function ensureIdentity(): Promise<OnlineIdentity> {
-  const saved = loadIdentity();
-  if (saved) return saved;
-  const res = await request<RegisterPlayerResponse>('POST', '/players');
+/**
+ * 匿名登録して身元を保存する。人間確認（Turnstile）のトークンが必要
+ * （大量の ID 生成で相場・ランキングを荒らされないように。ui/online/HumanCheck.tsx で取得する）
+ */
+export async function registerIdentity(turnstileToken: string): Promise<OnlineIdentity> {
+  const body: RegisterPlayerRequest = { turnstileToken };
+  const res = await request<RegisterPlayerResponse>('POST', '/players', { body });
   const identity: OnlineIdentity = {
     version: 1,
     playerId: res.playerId,
@@ -70,13 +74,22 @@ export async function ensureIdentity(): Promise<OnlineIdentity> {
   return identity;
 }
 
+/** 登録済みの身元。まだなら unauthorized（画面側で人間確認 → registerIdentity を促す） */
+function requireIdentity(): OnlineIdentity {
+  const identity = loadIdentity();
+  if (!identity) throw new OnlineError('unauthorized');
+  return identity;
+}
+
 export const api = {
   getToday: () => request<DailyInfo>('GET', '/daily/today'),
+
+  getMarket: () => request<MarketResponse>('GET', '/market/latest'),
 
   start: async (dailyId: string) =>
     (
       await request<StartDailyResponse>('POST', `/daily/${dailyId}/start`, {
-        token: (await ensureIdentity()).token,
+        token: requireIdentity().token,
       })
     ).session,
 
@@ -97,7 +110,7 @@ export const api = {
   commit: async (dailyId: string, body: CommitRequest) =>
     request<CommitResponse>('POST', `/daily/${dailyId}/commit`, {
       body,
-      token: (await ensureIdentity()).token,
+      token: requireIdentity().token,
     }),
 
   getRanking: (dailyId: string) =>
@@ -106,7 +119,7 @@ export const api = {
     }),
 
   updateName: async (displayName: string) => {
-    const identity = await ensureIdentity();
+    const identity = requireIdentity();
     const res = await request<UpdateNameResponse>('PUT', '/players/me/name', {
       body: { displayName },
       token: identity.token,

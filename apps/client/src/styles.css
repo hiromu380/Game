@@ -704,3 +704,323 @@ button:disabled {
   font-weight: bold;
   color: var(--accent);
 }
+
+/* ---- ヘッダー: アイコン＋タイトルはタイトル画面へ戻るボタン ---- */
+.app-header__home {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  color: inherit;
+}
+.app-header__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---- 相場の前日比 ---- */
+.trend {
+  margin-left: 4px;
+  font-size: 0.75rem;
+}
+.trend--up {
+  color: var(--missed);
+}
+.trend--down {
+  color: var(--met);
+}
+
+/* ---- タイトル画面 ---- */
+.title {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+}
+.title__icon {
+  width: 120px;
+  height: 120px;
+}
+.title__name {
+  margin: 0;
+  font-size: 2rem;
+}
+.title__tagline {
+  margin: 0;
+  color: var(--muted);
+  max-width: 28em;
+}
+.title__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(280px, 100%);
+  margin-top: 12px;
+}
+.title__actions > .button--primary {
+  font-size: 1.2rem;
+  padding: 12px;
+}
+.title__loading {
+  position: relative;
+  width: min(280px, 100%);
+  height: 22px;
+  margin-top: 8px;
+  border-radius: 11px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+.title__loading-bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+.title__loading-label {
+  position: absolute;
+  inset: 0;
+  font-size: 0.75rem;
+  line-height: 22px;
+  color: var(--text);
+  text-shadow: 0 0 3px var(--bg);
+}
+.title__error {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--missed);
+  color: #fff;
+  text-align: center;
+}
+
+/* ---- 人間確認・シェア・製品版への誘導 ---- */
+.human-check {
+  margin: 12px 0;
+}
+.share {
+  margin: 16px 0;
+}
+.share__preview {
+  white-space: pre-wrap;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 8px;
+}
+.share__actions {
+  justify-content: center;
+}
+a.button {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--secondary);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+a.button.button--primary {
+  background: var(--primary);
+  border-color: var(--primary-shadow);
+}
+.store-link {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+}
+.store-link__lead {
+  margin: 0 0 8px;
+}
+
+/* ---- タブ（狭い画面のショップ／手持ち） ---- */
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+.tabs__tab {
+  flex: 1;
+  padding: 6px;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+}
+.tabs__tab.is-active {
+  background: var(--panel);
+  border-bottom-color: var(--panel);
+  font-weight: bold;
+}
+
+/* =============================================================================
+   狭い画面（スマホ縦画面）: 盤面全体をスクロールなしで操作できるように詰める
+   ブレークポイントは src/config/layout.ts の compactMaxWidthPx と合わせる
+   ============================================================================= */
+@media (max-width: 600px) {
+  .app {
+    padding: 6px 8px 16px;
+  }
+  .app-header {
+    padding-bottom: 4px;
+    border-bottom-width: 4px;
+  }
+  .app-header__title {
+    font-size: 1rem;
+    margin: 0;
+  }
+  .app-header__icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+  }
+  /* 狭い画面ではタイトル文字を隠してアイコンだけにする */
+  .app-header__name {
+    display: none;
+  }
+  .app-header__actions {
+    gap: 4px;
+  }
+  .app-header__actions > button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+  .mode-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+  }
+  .hud {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px 10px;
+    margin: 6px 0;
+  }
+  .hud__item--shift {
+    font-size: 0.85rem;
+  }
+  .hud__label {
+    font-size: 0.65rem;
+  }
+  .hud__value {
+    font-size: 0.95rem;
+  }
+  .boss-notice {
+    margin: 0 0 6px;
+    padding: 4px 10px;
+    gap: 2px 8px;
+  }
+  .boss-notice__desc {
+    font-size: 0.75rem;
+  }
+  .layout {
+    gap: 6px;
+  }
+  /* 盤面は画面の高さが足りなければ縮める（下の操作ボタンまで1画面に収める） */
+  .layout__board {
+    width: min(100%, calc(100dvh - 300px));
+    min-width: 240px;
+    margin: 0 auto;
+  }
+  .layout__side {
+    gap: 6px;
+  }
+  .panel {
+    padding: 8px 10px;
+  }
+  .controls .panel__hint {
+    display: none;
+  }
+  .controls .button-row {
+    margin-bottom: 4px;
+  }
+  .item-button__desc {
+    font-size: 0.7rem;
+  }
+  .tabs + .panel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .run-end {
+    margin: 16px auto;
+    padding: 16px;
+  }
+}
+
+/* ---- 狭い画面: アプリ全体を画面の高さに固定し、ショップ・手持ちだけを中でスクロールさせる ----
+   （盤面が画面外に出ないので、商品を選んでからすぐ盤面をタップできる） */
+.app--compact {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 6px;
+}
+.app--compact .layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.app--compact .layout__side {
+  flex: 1;
+  min-height: 0;
+}
+/* タブの中身（ショップ or 手持ち）が残りの高さを使い、はみ出した分は中でスクロール */
+.app--compact .tabs ~ .panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* 見出しはタブと重複するので隠す（リロールボタンは残す） */
+.app--compact .tabs ~ .panel .panel__title {
+  display: none;
+}
+.app--compact .controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+.app--compact .controls .button-row {
+  flex: 1;
+  margin: 0;
+}
+.app--compact .controls button {
+  padding: 8px 6px;
+}
+.app--compact .speed {
+  flex-shrink: 0;
+  gap: 2px;
+}
+.app--compact .speed__label {
+  display: none;
+}
+.app--compact .speed__button {
+  padding: 6px 6px;
+  font-size: 0.75rem;
+}
+@media (max-width: 600px) {
+  .title__name {
+    font-size: 1.5rem;
+  }
+  .layout__board {
+    width: min(100%, calc(100dvh - 330px));
+  }
+}
+.daily__actions > button {
+  flex: 1 1 30%;
+  white-space: nowrap;
+}

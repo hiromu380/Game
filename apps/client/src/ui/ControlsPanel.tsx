@@ -6,6 +6,8 @@ import type { PlaybackSpeed } from '../playback/timeline';
 
 interface Props {
   playing: boolean;
+  /** 狭い画面用の短い表記 */
+  compact?: boolean;
   speed: PlaybackSpeed;
   onTrial: () => void;
   onCommit: () => void;
@@ -14,7 +16,14 @@ interface Props {
 
 const SPEEDS: PlaybackSpeed[] = [1, 2, 'skip'];
 
-export function ControlsPanel({ playing, speed, onTrial, onCommit, onSpeedChange }: Props) {
+export function ControlsPanel({
+  playing,
+  compact = false,
+  speed,
+  onTrial,
+  onCommit,
+  onSpeedChange,
+}: Props) {
   const { t } = useI18n();
   return (
     <section className="panel controls">
@@ -23,7 +32,7 @@ export function ControlsPanel({ playing, speed, onTrial, onCommit, onSpeedChange
           {t('controls.trial')}
         </button>
         <button className="button--primary" disabled={playing} onClick={onCommit}>
-          {t('controls.commit')}
+          {compact ? t('controls.commitShort') : t('controls.commit')}
         </button>
       </div>
       <p className="panel__hint">{t('controls.commitHint')}</p>

@@ -1,13 +1,14 @@
 /**
- * アプリのルート。ゲーム状態を持ち、盤面（PixiJS）と各 UI パネルをつなぐ
+ * ゲーム画面。ゲーム状態を持ち、盤面（PixiJS）と各 UI パネルをつなぐ
+ *
+ * このファイル以下（PixiJS を含む）は遅延読み込みされる（boot/loadGame.ts）。
+ * 画面幅が狭いとき（スマホ縦画面）は、盤面の下にショップ・手持ちをタブで切り替えて出す。
  */
 import {
-  createRun,
   createRunWithConfig,
   dailyRunSeed,
   getCurrentRules,
   getRerollCost,
-  metaToModifiers,
   scoreToString,
   SIM_VERSION,
   type RunState,
@@ -17,13 +18,16 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
+import { LAYOUT } from './config/layout';
 import { useI18n } from './i18n';
 import { api, OnlineError } from './online/api';
+import { getMarket, priceTrends } from './online/market';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
-import { createInitialState, createNewSeed } from './state/newRun';
+import { createInitialState, createNewSeed, startNormalRun } from './state/newRun';
+import { useMediaQuery } from './state/useMediaQuery';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
@@ -36,12 +40,34 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 
-export function App() {
+/** ゲーム画面の始め方（デイリー・練習はメニューで組み立てたランを渡す） */
+export interface GameStart {
+  run: RunState;
+  mode: PlayMode;
+}
+
+interface Props {
+  /** null なら通常ラン（保存済みの続き or 新規） */
+  start: GameStart | null;
+  /** タイトル画面へ戻る */
+  onTitle: () => void;
+}
+
+/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す */
+const DEBUG_AVAILABLE =
+  import.meta.env.DEV || new URLSearchParams(window.location.search).has('debug');
+
+export function App({ start, onTitle }: Props) {
   const { t, formatScore, formatCompact } = useI18n();
-  const [state, dispatch] = useReducer(gameReducer, undefined, () => {
+  const [state, dispatch] = useReducer(gameReducer, start, (initialStart) => {
     const initial = createInitialState();
-    return createGameState(initial.run, initial.meta);
+    return initialStart
+      ? createGameState(initialStart.run, initial.meta, initialStart.mode)
+      : createGameState(initial.run, initial.meta);
   });
+  const compact = useMediaQuery(`(max-width: ${LAYOUT.compactMaxWidthPx}px)`);
+  /** 狭い画面で表示中のタブ */
+  const [tab, setTab] = useState<'shop' | 'inventory'>('shop');
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   /** 再生中の出荷量の途中経過 */
   const [liveScore, setLiveScore] = useState<string | null>(null);
@@ -193,7 +219,7 @@ export function App() {
       });
       return;
     }
-    dispatch({ type: 'newRun', seed: createNewSeed() });
+    dispatch({ type: 'loadRun', run: startNormalRun(createNewSeed(), state.meta), mode });
   };
   const enterRun = (next: RunState, nextMode: PlayMode) => {
     setLiveScore(null);
@@ -202,17 +228,25 @@ export function App() {
   };
   /** 通常モードに戻る（保存済みのランがあれば続きから） */
   const backToNormal = () =>
-    enterRun(loadRun() ?? createRun(createNewSeed(), { meta: metaToModifiers(state.meta) }), {
-      kind: 'normal',
-    });
+    enterRun(loadRun() ?? startNormalRun(createNewSeed(), state.meta), { kind: 'normal' });
+
+  // ショップの前日比（今日の相場で始めたランだけ）
+  const trends = useMemo(() => priceTrends(getMarket(), run.config.economy.prices), [run.config]);
 
   const header = (
     <header className="app-header">
       <h1 className="app-header__title">
-        <img className="app-header__icon" src="./icon.svg" alt="" width={36} height={36} />
-        {t('app.title')}
+        <button
+          className="app-header__home"
+          disabled={playing}
+          onClick={onTitle}
+          aria-label={t('title.backToTitle')}
+        >
+          <img className="app-header__icon" src="./icon.svg" alt="" width={36} height={36} />
+          <span className="app-header__name">{t('app.title')}</span>
+        </button>
       </h1>
-      <div className="button-row">
+      <div className="button-row app-header__actions">
         {mode.kind !== 'normal' && (
           <>
             <span className="mode-badge">
@@ -226,9 +260,11 @@ export function App() {
         <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
           {t('online.dailyButton')}
         </button>
-        <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
-          {t('debug.toggle')}
-        </button>
+        {DEBUG_AVAILABLE && (
+          <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
+            {t('debug.toggle')}
+          </button>
+        )}
         <button className="button--ghost" onClick={() => setSettingsOpen(true)}>
           {t('settings.open')}
         </button>
@@ -238,6 +274,39 @@ export function App() {
         <DailyMenu initialView={dailyMenu} onEnter={enterRun} onClose={() => setDailyMenu(null)} />
       )}
     </header>
+  );
+
+  const shopPanel = (
+    <ShopPanel
+      rules={boardView.rules}
+      offers={run.shop}
+      budget={run.budget}
+      rerollCost={getRerollCost(run)}
+      trends={trends}
+      disabled={playing}
+      onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
+      onReroll={() => dispatch({ type: 'reroll' })}
+    />
+  );
+  const inventoryPanel = (
+    <InventoryPanel
+      rules={boardView.rules}
+      inventory={run.inventory}
+      selection={selection}
+      disabled={playing}
+      onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
+    />
+  );
+  const selectionPanel = (
+    <SelectionPanel
+      run={run}
+      selection={selection}
+      hideWhenEmpty={compact}
+      disabled={playing}
+      onRotate={() => dispatch({ type: 'rotate' })}
+      onReturn={() => dispatch({ type: 'returnSelected' })}
+      onSell={() => dispatch({ type: 'sellSelected' })}
+    />
   );
 
   // ラン終了（全シフト達成 or ノルマ未達）
@@ -263,7 +332,7 @@ export function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${compact ? 'app--compact' : ''}`}>
       {header}
       <Hud run={run} liveScore={liveScore} />
       <BossNotice run={run} />
@@ -287,36 +356,33 @@ export function App() {
         <aside className="layout__side">
           <ControlsPanel
             playing={playing}
+            compact={compact}
             speed={speed}
             onTrial={() => startPlayback('startTrial')}
             onCommit={() => startPlayback('startCommit')}
             onSpeedChange={setSpeed}
           />
-          <ShopPanel
-            rules={boardView.rules}
-            offers={run.shop}
-            budget={run.budget}
-            rerollCost={getRerollCost(run)}
-            disabled={playing}
-            onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
-            onReroll={() => dispatch({ type: 'reroll' })}
-          />
-          <InventoryPanel
-            rules={boardView.rules}
-            inventory={run.inventory}
-            selection={selection}
-            disabled={playing}
-            onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
-          />
+          {/* 狭い画面では選択中のパーツの操作を盤面のすぐ下に出す（何も選んでいなければ出さない） */}
+          {compact && selectionPanel}
+          {compact && (
+            <div className="tabs" role="tablist">
+              {(['shop', 'inventory'] as const).map((key) => (
+                <button
+                  key={key}
+                  role="tab"
+                  aria-selected={tab === key}
+                  className={`tabs__tab ${tab === key ? 'is-active' : ''}`}
+                  onClick={() => setTab(key)}
+                >
+                  {t(key === 'shop' ? 'shop.title' : 'inventory.title')}
+                </button>
+              ))}
+            </div>
+          )}
+          {(!compact || tab === 'shop') && shopPanel}
+          {(!compact || tab === 'inventory') && inventoryPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
-          <SelectionPanel
-            run={run}
-            selection={selection}
-            disabled={playing}
-            onRotate={() => dispatch({ type: 'rotate' })}
-            onReturn={() => dispatch({ type: 'returnSelected' })}
-            onSell={() => dispatch({ type: 'sellSelected' })}
-          />
+          {!compact && selectionPanel}
         </aside>
       </main>
     </div>

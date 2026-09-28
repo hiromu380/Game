@@ -12,7 +12,10 @@ import {
 } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import type { PlayMode } from '../state/gameReducer';
+import { EDITION_CONFIG } from '../config/edition';
 import { MetaPanel } from './MetaPanel';
+import { DailyShare } from './share/DailyShare';
+import { StoreLink } from './StoreLink';
 
 interface Props {
   run: RunState;
@@ -97,7 +100,13 @@ export function RunEndScreen(props: Props) {
           {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
         </p>
       )}
-      {mode.kind === 'normal' && <MetaPanel meta={meta} unlocks={unlocks} />}
+      {mode.kind === 'daily' && (
+        <DailyShare run={run} dailyId={mode.dailyId} number={mode.number} />
+      )}
+      {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
+        <MetaPanel meta={meta} unlocks={unlocks} />
+      )}
+      {mode.kind === 'normal' && <StoreLink />}
     </div>
   );
 }

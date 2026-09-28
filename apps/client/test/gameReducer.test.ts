@@ -109,7 +109,7 @@ describe('画面の状態遷移', () => {
       state,
       { type: 'playbackFinished' },
       { type: 'closePlayback' },
-      { type: 'newRun', seed: 2 },
+      { type: 'loadRun', run: createRun(2), mode: { kind: 'normal' } },
     );
     expect(state.meta.records.runsPlayed).toBe(1);
     expect(state.run.phase).toBe('building');

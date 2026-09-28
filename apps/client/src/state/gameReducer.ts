@@ -12,9 +12,7 @@ import {
   applyOp,
   applyRunToMeta,
   commitShift,
-  createRun,
   getPart,
-  metaToModifiers,
   runTrial,
   startOvertime,
   rotateCw,
@@ -88,8 +86,10 @@ export interface GameState {
 export type FeedbackKind = 'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'error';
 
 export type GameAction =
-  | { type: 'newRun'; seed: number }
-  /** デイリー・練習のランに入る / 通常のランに戻る */
+  /**
+   * 新しいラン・デイリー・練習に入る / 通常のランに戻る。
+   * ランの組み立て（相場・体験版の制限など）は画面側で行う（state/newRun.ts、online/dailyRun.ts）
+   */
   | { type: 'loadRun'; run: RunState; mode: PlayMode }
   /** 全シフトクリア後に延長戦へ進む */
   | { type: 'startOvertime' }
@@ -189,20 +189,13 @@ function beginCommit(state: GameState, seed?: number): GameState {
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
-  const busyAllowed = ['playbackFinished', 'closePlayback', 'newRun', 'loadRun'];
+  const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun'];
   if (state.playback && !busyAllowed.includes(action.type)) return state;
   if (state.awaitingServer && !['serverCommitted', 'serverCommitFailed'].includes(action.type)) {
     return state;
   }
 
   switch (action.type) {
-    case 'newRun':
-      // メタ進行（解放済みパーツ・工場拡張）を反映して始める
-      return createGameState(
-        createRun(action.seed, { meta: metaToModifiers(state.meta) }),
-        state.meta,
-      );
-
     case 'loadRun':
       return createGameState(action.run, state.meta, action.mode);
 

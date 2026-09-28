@@ -1,7 +1,8 @@
 /**
  * ショップ: その シフトに並んだ商品を購入する
  */
-import type { RuleSet, ShopOffer } from '@chain-factory/sim';
+import type { PartId, RuleSet, ShopOffer } from '@chain-factory/sim';
+import type { PriceTrend } from '../online/market';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
@@ -13,12 +14,15 @@ interface Props {
   budget: number;
   /** 次のリロール価格（リロールできないシフトでは null） */
   rerollCost: number | null;
+  /** 相場の前日比（値上がり・値下がりしたパーツだけ） */
+  trends: Partial<Record<PartId, PriceTrend>>;
   disabled: boolean;
   onBuy: (offerIndex: number) => void;
   onReroll: () => void;
 }
 
-export function ShopPanel({ rules, offers, budget, rerollCost, disabled, onBuy, onReroll }: Props) {
+export function ShopPanel(props: Props) {
+  const { rules, offers, budget, rerollCost, trends, disabled, onBuy, onReroll } = props;
   const { t } = useI18n();
   return (
     <section className="panel">
@@ -49,6 +53,14 @@ export function ShopPanel({ rules, offers, budget, rerollCost, disabled, onBuy, 
                 </span>
                 <span className="item-button__meta">
                   {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
+                  {!offer.sold && trends[offer.partId] && (
+                    <span
+                      className={`trend trend--${trends[offer.partId]}`}
+                      title={t(trends[offer.partId] === 'up' ? 'shop.trendUp' : 'shop.trendDown')}
+                    >
+                      {trends[offer.partId] === 'up' ? '▲' : '▼'}
+                    </span>
+                  )}
                 </span>
               </button>
             </li>

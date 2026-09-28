@@ -14,13 +14,23 @@ import { PartIcon } from './PartIcon';
 interface Props {
   run: RunState;
   selection: Selection;
+  /** 何も選んでいないときはパネルごと出さない（狭い画面で場所を空けるため） */
+  hideWhenEmpty?: boolean;
   disabled: boolean;
   onRotate: () => void;
   onReturn: () => void;
   onSell: () => void;
 }
 
-export function SelectionPanel({ run, selection, disabled, onRotate, onReturn, onSell }: Props) {
+export function SelectionPanel({
+  run,
+  selection,
+  hideWhenEmpty = false,
+  disabled,
+  onRotate,
+  onReturn,
+  onSell,
+}: Props) {
   const { t } = useI18n();
   const part = selection?.kind === 'cell' ? getPart(run.board, selection.x, selection.y) : null;
 
@@ -30,6 +40,7 @@ export function SelectionPanel({ run, selection, disabled, onRotate, onReturn, o
   const confirming = confirmingKey !== null && confirmingKey === selectionKey;
 
   if (!part) {
+    if (hideWhenEmpty) return null;
     return (
       <section className="panel">
         <h2 className="panel__title">{t('selection.title')}</h2>
