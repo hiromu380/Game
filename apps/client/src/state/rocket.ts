@@ -8,6 +8,7 @@
  */
 import { BALANCE, type RunState } from '@chain-factory/sim';
 import { ROCKET_ASSETS } from '../assets/manifest';
+import { ROCKET_CONFIG, type RocketDestination } from '../config/rocket';
 
 /** ロケットの部品の数（絵の段階の数 - 1） */
 export const ROCKET_PARTS = ROCKET_ASSETS.stages.length - 1;
@@ -39,4 +40,15 @@ export function getRocketProgress(run: RunState): RocketProgress {
     launched: clearedMain >= main,
     destinations: Math.floor(clearedOvertime / run.config.shiftsPerDay),
   };
+}
+
+/**
+ * 行き先の表示: n 番目（1 始まり）に届いた場所。一覧の最後より先は「最後の行き先 + 余りの日数」
+ * n = 0（まだどこにも届いていない）なら null
+ */
+export function getDestination(n: number): { key: RocketDestination; extraDays: number } | null {
+  if (n <= 0) return null;
+  const list = ROCKET_CONFIG.destinations;
+  const index = Math.min(n, list.length) - 1;
+  return { key: list[index]!, extraDays: n - 1 - index };
 }

@@ -3,12 +3,36 @@
  */
 import type { RunState } from '@chain-factory/sim';
 import { ROCKET_ASSETS } from '../assets/manifest';
-import { useI18n } from '../i18n';
-import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
+import { useI18n, type TranslateFn } from '../i18n';
+import { getDestination, getRocketProgress, ROCKET_PARTS } from '../state/rocket';
 
-/** ランの最初のシフトだけ出す、目的の案内 */
+/** 行き先の名前（一覧の最後より先は「銀河の果て +2日」のように数える）。n = 0 なら null */
+export function destinationName(t: TranslateFn, n: number): string | null {
+  const destination = getDestination(n);
+  if (!destination) return null;
+  const name = t(`rocket.destination.${destination.key}`);
+  return destination.extraDays > 0
+    ? t('rocket.destinationBeyond', { name, days: destination.extraDays })
+    : name;
+}
+
+/**
+ * 目的の案内
+ * - ランの最初のシフト: ロケットを完成させよう
+ * - 延長戦: 次の行き先（その日の夜シフトまでクリアすると届く）
+ */
 export function RocketGoal({ run }: { run: RunState }) {
   const { t } = useI18n();
+  if (run.overtime) {
+    const next = destinationName(t, getRocketProgress(run).destinations + 1);
+    return (
+      <div className="boss-notice rocket-goal">
+        <img className="boss-notice__icon" src={ROCKET_ASSETS.stages[ROCKET_PARTS]} alt="" />
+        <span className="boss-notice__label">{t('rocket.goalLabel')}</span>
+        <span className="boss-notice__desc">{t('rocket.goalOvertime', { next: next ?? '' })}</span>
+      </div>
+    );
+  }
   if (run.shiftIndex !== 0 || run.history.length > 0) return null;
   return (
     <div className="boss-notice rocket-goal">
@@ -23,14 +47,19 @@ export function RocketGoal({ run }: { run: RunState }) {
 
 export function RocketProgress({ run }: { run: RunState }) {
   const { t } = useI18n();
-  const { parts, launched } = getRocketProgress(run);
+  const { parts, launched, destinations } = getRocketProgress(run);
+  const reached = destinationName(t, destinations);
   return (
     <div className="hud__item hud__rocket" title={t('rocket.goal')}>
       <img src={ROCKET_ASSETS.stages[parts]} alt="" width={28} height={30} />
       <span>
         <span className="hud__label">{t('rocket.label')}</span>
         <span className="hud__value">
-          {launched ? t('rocket.launched') : t('rocket.parts', { parts, total: ROCKET_PARTS })}
+          {reached
+            ? t('rocket.reached', { name: reached })
+            : launched
+              ? t('rocket.launched')
+              : t('rocket.parts', { parts, total: ROCKET_PARTS })}
         </span>
       </span>
     </div>

@@ -359,5 +359,19 @@
   "rocket.partBuilt": "ロケットの部品ができた！（{parts} / {total}）",
   "rocket.readyToLaunch": "ロケット完成！ いよいよ発射！",
   "rocket.launchCaption": "ボルトのロケットが宇宙へ飛び立った！",
-  "rocket.unfinished": "ロケットは未完成…（部品 {parts} / {total}）"
+  "rocket.unfinished": "ロケットは未完成…（部品 {parts} / {total}）",
+  "rocket.reached": "{name} に到達",
+  "rocket.goalOvertime": "延長戦: 1日（夜シフトまで）クリアするごとに、ロケットはもっと遠くへ。次の行き先は {next}",
+  "rocket.arrived": "{name} に到着！",
+  "rocket.reachedCaption": "ボルトのロケットは {name} まで到達！",
+  "rocket.overtimeNoArrival": "月まであと少しだった…",
+  "rocket.destinationBeyond": "{name} +{days}日",
+  "rocket.destination.moon": "月",
+  "rocket.destination.mars": "火星",
+  "rocket.destination.jupiter": "木星",
+  "rocket.destination.saturn": "土星",
+  "rocket.destination.uranus": "天王星",
+  "rocket.destination.neptune": "海王星",
+  "rocket.destination.pluto": "冥王星",
+  "rocket.destination.galaxyEdge": "銀河の果て"
 }

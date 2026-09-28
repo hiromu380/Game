@@ -359,5 +359,19 @@
   "rocket.partBuilt": "A rocket part is done! ({parts} / {total})",
   "rocket.readyToLaunch": "The rocket is complete! Ready for launch!",
   "rocket.launchCaption": "Bolt's rocket blasted off into space!",
-  "rocket.unfinished": "The rocket is unfinished... (parts {parts} / {total})"
+  "rocket.unfinished": "The rocket is unfinished... (parts {parts} / {total})",
+  "rocket.reached": "Reached {name}",
+  "rocket.goalOvertime": "Overtime: every full day you clear (through the night shift) sends the rocket farther. Next stop: {next}",
+  "rocket.arrived": "Arrived at {name}!",
+  "rocket.reachedCaption": "Bolt's rocket made it to {name}!",
+  "rocket.overtimeNoArrival": "So close to the Moon...",
+  "rocket.destinationBeyond": "{name} +{days} days",
+  "rocket.destination.moon": "the Moon",
+  "rocket.destination.mars": "Mars",
+  "rocket.destination.jupiter": "Jupiter",
+  "rocket.destination.saturn": "Saturn",
+  "rocket.destination.uranus": "Uranus",
+  "rocket.destination.neptune": "Neptune",
+  "rocket.destination.pluto": "Pluto",
+  "rocket.destination.galaxyEdge": "the Edge of the Galaxy"
 }

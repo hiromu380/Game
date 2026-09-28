@@ -14,6 +14,7 @@ import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
+import { destinationName } from './RocketProgress';
 
 interface Props {
   playback: Playback;
@@ -70,12 +71,19 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
   );
 }
 
-/** 本番でノルマを達成したとき: ロケットの部品が増えたら知らせる */
+/** 本番でノルマを達成したとき: ロケットの部品が増えた・発射できる・行き先に届いたことを知らせる */
 function RocketLine({ playback, run }: { playback: Playback; run: RunState }) {
   const { t } = useI18n();
   if (playback.mode !== 'commit') return null;
   const before = getRocketProgress(run);
   const after = getRocketProgress(playback.nextRun);
+  if (after.destinations > before.destinations) {
+    return (
+      <div className="playback-panel__rocket">
+        {t('rocket.arrived', { name: destinationName(t, after.destinations) ?? '' })}
+      </div>
+    );
+  }
   if (after.launched && !before.launched) {
     return <div className="playback-panel__rocket">{t('rocket.readyToLaunch')}</div>;
   }

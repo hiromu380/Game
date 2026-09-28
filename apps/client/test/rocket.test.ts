@@ -1,6 +1,7 @@
 import { createDailyRun, createRun, type RunState } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { getRocketProgress, ROCKET_PARTS } from '../src/state/rocket';
+import { ROCKET_CONFIG } from '../src/config/rocket';
+import { getDestination, getRocketProgress, ROCKET_PARTS } from '../src/state/rocket';
 
 /** cleared 個のシフトをクリアした履歴を持つラン */
 function withCleared(run: RunState, cleared: number, overtime = false): RunState {
@@ -51,6 +52,22 @@ describe('ロケットの進み具合', () => {
       parts: 9,
       launched: true,
       destinations: 1,
+    });
+  });
+});
+
+describe('延長戦の行き先', () => {
+  it('1日目で最初の行き先、一覧の最後より先は余りの日数を数える', () => {
+    expect(getDestination(0)).toBeNull();
+    expect(getDestination(1)).toEqual({ key: ROCKET_CONFIG.destinations[0], extraDays: 0 });
+    const last = ROCKET_CONFIG.destinations.length;
+    expect(getDestination(last)).toEqual({
+      key: ROCKET_CONFIG.destinations[last - 1],
+      extraDays: 0,
+    });
+    expect(getDestination(last + 2)).toEqual({
+      key: ROCKET_CONFIG.destinations[last - 1],
+      extraDays: 2,
     });
   });
 });
