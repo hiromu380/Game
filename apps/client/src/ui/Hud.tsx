@@ -14,6 +14,9 @@ interface Props {
 export function Hud({ run, liveScore }: Props) {
   const { t, formatScore } = useI18n();
   const quota = getCurrentShift(run).quota;
+  // 出荷量 ÷ ノルマ（表示用の目安なので、大きな数は Number の精度で十分）
+  const ratio = liveScore === null ? 0 : Math.min(1, Number(liveScore) / Math.max(1, quota));
+  const met = liveScore !== null && ratio >= 1;
   const { day, period } = getDayAndPeriod(run);
 
   return (
@@ -32,9 +35,15 @@ export function Hud({ run, liveScore }: Props) {
         <span className="hud__label">{t('hud.budget')}</span>
         <span className="hud__value">{t('shop.price', { price: run.budget })}</span>
       </div>
-      <div className="hud__item">
+      {/* ノルマはいちばん大事な数字なので、枠つきで大きく出す。再生中は出荷量の進み具合をバーで見せる */}
+      <div className={`hud__item hud__quota ${met ? 'is-met' : ''}`}>
         <span className="hud__label">{t('hud.quota')}</span>
-        <span className="hud__value">{formatScore(String(quota))}</span>
+        <span className="hud__quota-value">{formatScore(String(quota))}</span>
+        {liveScore !== null && (
+          <span className="hud__quota-bar">
+            <span style={{ width: `${Math.round(ratio * 100)}%` }} />
+          </span>
+        )}
       </div>
       <div className="hud__item">
         <span className="hud__label">{t('hud.score')}</span>
