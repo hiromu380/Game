@@ -50,8 +50,8 @@ export const searchBot: Bot = {
     const cleared = returnAll(initial);
     if (!cleared) return keep;
     const rebuilt = beamSearch(cleared.state, cleared.moves, half);
-    const a = evaluate(keep.state, options.samples);
-    const b = evaluate(rebuilt.state, options.samples);
+    const a = evaluate(keep.state, options.samples, options.evalMode);
+    const b = evaluate(rebuilt.state, options.samples, options.evalMode);
     const cmp = compareEvaluation(b, a) || rebuilt.state.budget - keep.state.budget;
     return cmp > 0 ? rebuilt : keep;
   },
@@ -60,7 +60,7 @@ export const searchBot: Bot = {
 function beamSearch(
   initial: RunState,
   prefix: Move[],
-  { samples, timeLimitMs, maxRerolls }: BotOptions,
+  { samples, evalMode, timeLimitMs, maxRerolls }: BotOptions,
 ): ShiftPlan {
   const started = performance.now();
   let start = initial;
@@ -74,7 +74,7 @@ function beamSearch(
   const root: Node = {
     state: start,
     moves: startMoves,
-    eval: evaluate(start, samples),
+    eval: evaluate(start, samples, evalMode),
     rerolls: 0,
   };
   let beam: Node[] = [root];
@@ -95,7 +95,7 @@ function beamSearch(
         const child: Node = {
           state: next,
           moves: [...node.moves, move],
-          eval: evaluate(next, samples),
+          eval: evaluate(next, samples, evalMode),
           rerolls: node.rerolls,
         };
         // 何も良くならない手は捨てる（お金の無駄遣いを探索しないため）。

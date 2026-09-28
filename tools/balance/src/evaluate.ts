@@ -2,7 +2,10 @@
  * 盤面の評価
  *
  * ボットはプレイヤーと同じ条件で判断するため、本番シードは使わず試運転と同じ種類のシードで評価する。
- * ランダムな要素（ポンコツロボ）がある盤面は複数回試して平均をとる（＝試運転を繰り返すのと同じ）。
+ * ランダムな要素（ポンコツロボ）がある盤面は複数回試す（＝試運転を繰り返すのと同じ）。
+ * まとめ方は2通り:
+ *   - mean:  平均（期待値で判断する。大当たりがあると実際より良く見える）
+ *   - worst: いちばん悪かった回（「何度試運転しても安定して通る」配置を選ぶ慎重なプレイヤー）
  */
 import {
   getCurrentEconomy,
@@ -31,7 +34,9 @@ export interface Evaluation {
 /** 評価に使う試運転シードの番号（プレイヤーの試運転回数と重ならないよう大きな値から使う） */
 const EVAL_TRIAL_BASE = 100_000;
 
-export function evaluate(state: RunState, samples: number): Evaluation {
+export type EvalMode = 'mean' | 'worst';
+
+export function evaluate(state: RunState, samples: number, mode: EvalMode = 'mean'): Evaluation {
   const rules = getCurrentRules(state);
   const hasRandom = state.board.cells.some((c) => c?.id === 'junkbot');
   const dockPrice = Math.max(1, getCurrentEconomy(state).prices.dock);
@@ -39,6 +44,8 @@ export function evaluate(state: RunState, samples: number): Evaluation {
   const n = hasRandom ? samples : 1;
 
   let score = 0n;
+  /** worst のときに使う: 出荷量がいちばん少なかった回の評価 */
+  let worst: Evaluation | null = null;
   let maxValue = 0n;
   let income = 0;
   let chainCount = 0;
@@ -62,8 +69,20 @@ export function evaluate(state: RunState, samples: number): Evaluation {
         lost.push(values.get(e.signalId) ?? 0n);
     }
     lost.sort((a, b) => (a > b ? -1 : a < b ? 1 : 0));
-    for (const v of lost.slice(0, docksAvailable)) potential += v;
+    let samplePotential = 0n;
+    for (const v of lost.slice(0, docksAvailable)) samplePotential += v;
+    potential += samplePotential;
+    if (!worst || result.score < worst.score) {
+      worst = {
+        score: result.score,
+        maxValue: result.stats.maxValue,
+        income: result.income,
+        chainCount: result.stats.chainCount,
+        potential: samplePotential,
+      };
+    }
   }
+  if (mode === 'worst' && worst) return worst;
   return {
     score: score / BigInt(n),
     maxValue: maxValue / BigInt(n),

@@ -5,6 +5,7 @@
  * 盤面に適用し、スイッチ（本番）を押す。ボットは本番シードを見ない。
  */
 import type { Prng, RunState } from '@chain-factory/sim';
+import type { EvalMode } from '../evaluate';
 import type { Move } from '../moves';
 
 export type BotName = 'random' | 'greedy' | 'mid' | 'search';
@@ -12,6 +13,8 @@ export type BotName = 'random' | 'greedy' | 'mid' | 'search';
 export interface BotOptions {
   /** ランダムな要素がある盤面を評価するときの試行回数 */
   samples: number;
+  /** ランダムな盤面の評価のまとめ方（evaluate.ts の EvalMode） */
+  evalMode: EvalMode;
   /** 1シフトあたりの思考時間の上限（ミリ秒）。探索ボットが使う */
   timeLimitMs: number;
   /** 1シフトあたりのリロール回数の上限 */

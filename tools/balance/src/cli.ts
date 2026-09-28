@@ -6,6 +6,7 @@
  *   pnpm balance --seeds 200 --bots greedy,mid # ボットを指定（random / greedy / mid / search）
  *   pnpm balance --seeds 100 --start 5000      # シード 5000〜5099
  *   pnpm balance --unlock all                  # 全パーツ解放済みの状態で検証（既定は初期解放のみ）
+ *   pnpm balance --eval worst --samples 5      # ランダムな盤面を「5回試して最悪の回」で評価する（慎重なプレイヤー）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
  */
@@ -33,6 +34,7 @@ function parseArgs(argv: string[]) {
     searchSeeds: Number(args.get('search-seeds') ?? Math.min(seeds, 100)),
     workers: Number(args.get('workers') ?? cpus().length),
     samples: Number(args.get('samples') ?? 3),
+    evalMode: (args.get('eval') === 'worst' ? 'worst' : 'mean') as 'mean' | 'worst',
     timeLimitMs: Number(args.get('time-limit') ?? 3000),
     maxRerolls: Number(args.get('max-rerolls') ?? 3),
     unlock: (args.get('unlock') === 'all' ? 'all' : 'initial') as 'initial' | 'all',
@@ -44,6 +46,7 @@ async function main() {
   const runnerOptions: RunnerOptions = {
     unlock: opts.unlock,
     samples: opts.samples,
+    evalMode: opts.evalMode,
     timeLimitMs: opts.timeLimitMs,
     maxRerolls: opts.maxRerolls,
   };
@@ -66,6 +69,7 @@ async function main() {
     日時: new Date().toISOString(),
     シード: `${opts.start}〜（${opts.seeds} 個。search は ${opts.searchSeeds} 個）`,
     評価の試行回数: opts.samples,
+    ランダムな盤面の評価: opts.evalMode === 'worst' ? '最悪の回（慎重）' : '平均（期待値）',
     探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,
     リロール上限: `${opts.maxRerolls}回/シフト`,
     パーツの解放:

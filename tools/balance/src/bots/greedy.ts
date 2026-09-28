@@ -16,7 +16,7 @@ const MAX_STEPS = 40;
 
 export const greedyBot: Bot = {
   name: 'greedy',
-  playShift(initial, { samples, maxRerolls }) {
+  playShift(initial, { samples, evalMode, maxRerolls }) {
     let state = initial;
     const moves: Move[] = [];
     let rerolls = 0;
@@ -28,14 +28,14 @@ export const greedyBot: Bot = {
     }
 
     for (let step = 0; step < MAX_STEPS; step++) {
-      const current = evaluate(state, samples);
+      const current = evaluate(state, samples, evalMode);
       let bestEval: Evaluation | null = null;
       let best: { move: Move; state: typeof state } | null = null;
 
       for (const move of listMoves(state)) {
         const next = applyMove(state, move);
         if (!next) continue;
-        const e = evaluate(next, samples);
+        const e = evaluate(next, samples, evalMode);
         // お金を使う手は「出荷量か収入が増える」ときだけ打つ（連鎖数が増えるだけの買い物はしない）。
         // 無料の手（手持ちを置く）は、値を育てる（最大値が上がる）だけでも打つ
         const gains = e.score > current.score || e.income > current.income;

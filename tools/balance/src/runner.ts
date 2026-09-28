@@ -14,6 +14,7 @@ import {
   type RunState,
 } from '@chain-factory/sim';
 import { BOTS, type BotName, type BotOptions } from './bots';
+import type { EvalMode } from './evaluate';
 import { applyMove } from './moves';
 
 /** 1シフトの記録 */
@@ -47,6 +48,8 @@ export interface RunnerOptions {
   /** initial: 初めて遊ぶ人と同じ（初期解放パーツのみ・7×7）／ all: やり込んだ状態（全パーツ解放・工場拡張も最大） */
   unlock: 'initial' | 'all';
   samples: number;
+  /** ランダムな盤面の評価のまとめ方（mean: 平均 / worst: 最悪の回） */
+  evalMode: EvalMode;
   timeLimitMs: number;
   maxRerolls: number;
 }

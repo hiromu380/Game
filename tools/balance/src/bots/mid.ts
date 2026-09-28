@@ -31,15 +31,19 @@ export const midBot: Bot = {
     const cleared = returnAll(initial);
     if (!cleared) return keep;
     const rebuilt = improve(cleared.state, cleared.moves, options);
-    const a = evaluate(keep.state, options.samples);
-    const b = evaluate(rebuilt.state, options.samples);
+    const a = evaluate(keep.state, options.samples, options.evalMode);
+    const b = evaluate(rebuilt.state, options.samples, options.evalMode);
     const cmp = compareEvaluation(b, a) || rebuilt.state.budget - keep.state.budget;
     return cmp > 0 ? rebuilt : keep;
   },
 };
 
 /** 評価が上がる手を1つずつ打ち続ける（上がる手がなければリロール、それもできなければ終わる） */
-function improve(start: RunState, prefix: Move[], { samples, maxRerolls }: BotOptions): ShiftPlan {
+function improve(
+  start: RunState,
+  prefix: Move[],
+  { samples, evalMode, maxRerolls }: BotOptions,
+): ShiftPlan {
   let state = start;
   const moves: Move[] = [...prefix];
   let rerolls = 0;
@@ -51,14 +55,14 @@ function improve(start: RunState, prefix: Move[], { samples, maxRerolls }: BotOp
   }
 
   for (let step = 0; step < MAX_STEPS; step++) {
-    const current = evaluate(state, samples);
+    const current = evaluate(state, samples, evalMode);
     let bestEval: Evaluation | null = null;
     let best: { move: Move; state: RunState } | null = null;
 
     for (const move of [...listMoves(state), ...listRearrangeMoves(state)]) {
       const next = applyMove(state, move);
       if (!next) continue;
-      const e = evaluate(next, samples);
+      const e = evaluate(next, samples, evalMode);
       // お金を使う手は出荷量か収入が増えるときだけ（貪欲ボットと同じ基準）。無料の手は評価が上がれば打つ
       const gains = e.score > current.score || e.income > current.income;
       const worthIt = move.kind === 'buyPlace' ? gains : compareEvaluation(e, current) > 0;

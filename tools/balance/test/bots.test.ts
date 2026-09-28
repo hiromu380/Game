@@ -4,7 +4,13 @@
 import { describe, expect, it } from 'vitest';
 import { playRun } from '../src/runner';
 
-const OPTIONS = { unlock: 'all' as const, samples: 2, timeLimitMs: 500, maxRerolls: 2 };
+const OPTIONS = {
+  unlock: 'all' as const,
+  samples: 2,
+  evalMode: 'mean' as const,
+  timeLimitMs: 500,
+  maxRerolls: 2,
+};
 
 describe('ボット', () => {
   it('ランダムボットは1ランを最後まで（脱落まで）遊べる', () => {
@@ -40,6 +46,7 @@ describe('ボット', () => {
     const log = playRun(3, 'greedy', {
       unlock: 'all',
       samples: 3,
+      evalMode: 'mean',
       timeLimitMs: 3000,
       maxRerolls: 3,
     });
