@@ -1155,3 +1155,54 @@ a.button.button--primary {
   outline: 3px dashed var(--met);
   outline-offset: -3px;
 }
+
+/* ---- パーツ一覧（ui/PartCatalog.tsx） ---- */
+.catalog {
+  max-width: 560px;
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+.catalog__list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+.catalog__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.catalog__item.is-locked {
+  opacity: 0.5;
+}
+.catalog__text {
+  flex: 1;
+  text-align: left;
+}
+.catalog__desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.catalog__rarity {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--secondary);
+}
+.catalog__rarity--uncommon {
+  color: var(--met);
+}
+.catalog__rarity--rare {
+  color: var(--accent);
+}
+.catalog__meta {
+  text-align: right;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.catalog__rate {
+  font-size: 0.75rem;
+  color: var(--muted);
+}

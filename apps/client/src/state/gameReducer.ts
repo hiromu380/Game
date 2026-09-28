@@ -9,6 +9,7 @@
  */
 import type { OnlineErrorCode } from '../online/api';
 import {
+  abandonRun,
   applyOp,
   applyRunToMeta,
   commitShift,
@@ -99,6 +100,8 @@ export type GameAction =
   | { type: 'loadRun'; run: RunState; mode: PlayMode }
   /** 全シフトクリア後に延長戦へ進む */
   | { type: 'startOvertime' }
+  /** ランを諦める（通常ラン・練習だけ。デイリー本番はサーバーに記録が残るので諦められない） */
+  | { type: 'giveUp' }
   | { type: 'buy'; offerIndex: number }
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
@@ -257,6 +260,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selection: { kind: 'inventory', partId: action.partId, dir: 1 },
         error: null,
       };
+
+    case 'giveUp': {
+      if (state.mode.kind === 'daily') return state;
+      const given = abandonRun(state.run);
+      if (!given) return state;
+      // 通常ランは、確定したシフトの分だけメタ進行に記録する（本番の確定と同じ扱い）
+      const recorded =
+        state.mode.kind === 'normal'
+          ? applyRunToMeta(state.meta, given)
+          : { meta: state.meta, unlocks: [], run: given };
+      return {
+        ...state,
+        run: recorded.run,
+        meta: recorded.meta,
+        unlocks: recorded.unlocks,
+        selection: null,
+        error: null,
+      };
+    }
 
     case 'deselect':
       return state.selection ? { ...state, selection: null, error: null } : state;

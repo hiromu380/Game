@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  abandonRun,
   BALANCE,
   buyOffer,
   commitShift,
@@ -270,5 +271,16 @@ describe('シフトの確定とノルマ', () => {
     }
     expect(run.phase).toBe('cleared');
     expect(run.history).toHaveLength(9);
+  });
+});
+
+describe('諦める', () => {
+  it('組み立て中なら脱落で終わる（盤面・記録はそのまま）。終わったランは諦められない', () => {
+    const run = createRun(1);
+    const given = abandonRun(run)!;
+    expect(given.phase).toBe('failed');
+    expect(given.history).toEqual(run.history);
+    expect(given.board).toEqual(run.board);
+    expect(abandonRun(given)).toBeNull();
   });
 });

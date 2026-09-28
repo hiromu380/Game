@@ -21,8 +21,8 @@ interface Props {
   unlocks: Unlock[];
 }
 
-/** 解放条件の文言 */
-function describeCondition(
+/** 解放条件の文言（パーツ一覧でも使う） */
+export function describeCondition(
   t: TranslateFn,
   formatScore: ScoreFormatter,
   condition: MetaCondition,

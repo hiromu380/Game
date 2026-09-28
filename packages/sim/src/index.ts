@@ -54,6 +54,7 @@ export {
   sellPart,
 } from './run/build';
 export {
+  abandonRun,
   commitShift,
   getCurrentEconomy,
   getCurrentRules,

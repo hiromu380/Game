@@ -323,5 +323,19 @@
   "capture.loaded": "読み込みました",
   "capture.invalid": "盤面の JSON が正しくありません（盤面の大きさも同じにしてください）",
   "controls.keysHint.keys": "矢印: 移動　Enter: 置く・選ぶ　R: 回転　Esc: 選択解除　Q / E: ショップ・手持ち　T: 試運転　P: 本番",
-  "controls.keysHint.gamepad": "十字キー: 移動　A: 置く・選ぶ　X: 回転　B: 選択解除　L / R: ショップ・手持ち　Y: 試運転　Start: 本番"
+  "controls.keysHint.gamepad": "十字キー: 移動　A: 置く・選ぶ　X: 回転　B: 選択解除　L / R: ショップ・手持ち　Y: 試運転　Start: 本番",
+  "giveUp.button": "諦める",
+  "giveUp.confirm": "本当に諦める？",
+  "catalog.open": "一覧",
+  "catalog.title": "ショップに並ぶパーツ",
+  "catalog.hint": "このランのショップに並びうるパーツです。毎シフト {offers} 枠に、出やすさに応じてランダムに並びます",
+  "catalog.price": "{price} 円",
+  "catalog.rate": "出やすさ {rate}%",
+  "catalog.locked": "未解放",
+  "catalog.unlockBy": "解放条件: {condition}",
+  "catalog.fullOnly": "製品版で使えます",
+  "catalog.close": "閉じる",
+  "rarity.common": "コモン",
+  "rarity.uncommon": "アンコモン",
+  "rarity.rare": "レア"
 }

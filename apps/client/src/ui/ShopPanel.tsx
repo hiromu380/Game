@@ -1,16 +1,20 @@
 /**
  * ショップ: その シフトに並んだ商品を購入する
  */
-import type { PartId, RuleSet, ShopOffer } from '@chain-factory/sim';
+import type { EconomyConfig, PartId, RuleSet, ShopOffer } from '@chain-factory/sim';
+import { useState } from 'react';
 import type { PriceTrend } from '../online/market';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
+import { PartCatalog } from './PartCatalog';
 import { PartIcon } from './PartIcon';
 import { UiIcon } from './UiIcon';
 
 interface Props {
   /** 説明文に数値を差し込むためのルール */
   rules: RuleSet;
+  /** このシフトの経済設定（パーツ一覧で、並びうるパーツ・価格・出やすさを出す） */
+  economy: EconomyConfig;
   offers: ShopOffer[];
   budget: number;
   /** 次のリロール価格（リロールできないシフトでは null） */
@@ -23,12 +27,16 @@ interface Props {
 }
 
 export function ShopPanel(props: Props) {
-  const { rules, offers, budget, rerollCost, trends, disabled, onBuy, onReroll } = props;
+  const { rules, economy, offers, budget, rerollCost, trends, disabled, onBuy, onReroll } = props;
   const { t } = useI18n();
+  const [catalogOpen, setCatalogOpen] = useState(false);
   return (
     <section className="panel" data-panel="shop">
       <div className="panel__header">
         <h2 className="panel__title">{t('shop.title')}</h2>
+        <button className="button--small button--ghost" onClick={() => setCatalogOpen(true)}>
+          {t('catalog.open')}
+        </button>
         <button
           className="button--small"
           disabled={disabled || rerollCost === null || budget < rerollCost}
@@ -69,6 +77,9 @@ export function ShopPanel(props: Props) {
           );
         })}
       </ul>
+      {catalogOpen && (
+        <PartCatalog economy={economy} rules={rules} onClose={() => setCatalogOpen(false)} />
+      )}
     </section>
   );
 }

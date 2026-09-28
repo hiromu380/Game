@@ -274,3 +274,26 @@ describe('ドラッグでの移動', () => {
     expect(state.error).toBe('cellOccupied');
   });
 });
+
+describe('諦める', () => {
+  it('通常ランは脱落で終わり、確定したシフトの分をメタ進行に記録する', () => {
+    let state = apply(createGameState(createRun(1), createInitialMeta()), { type: 'startCommit' });
+    state = apply(state, { type: 'playbackFinished' }, { type: 'closePlayback' });
+    // 何も置かずに本番 → ノルマ未達で終わるので、別のランで試す
+    state = apply(state, { type: 'loadRun', run: createRun(2), mode: { kind: 'normal' } });
+    const before = state.meta.records.runsPlayed;
+    state = apply(state, { type: 'giveUp' });
+    expect(state.run.phase).toBe('failed');
+    // 1シフトも確定していないランは記録しない
+    expect(state.meta.records.runsPlayed).toBe(before);
+  });
+
+  it('デイリー本番は諦められない', () => {
+    const state = createGameState(createDailyRun('2026-10-01'), createInitialMeta(), {
+      kind: 'daily',
+      dailyId: '2026-10-01',
+      number: 1,
+    });
+    expect(apply(state, { type: 'giveUp' })).toBe(state);
+  });
+});

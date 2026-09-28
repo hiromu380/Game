@@ -323,5 +323,19 @@
   "capture.loaded": "Loaded",
   "capture.invalid": "Invalid board JSON (the board size must match)",
   "controls.keysHint.keys": "Arrows: move  Enter: place/select  R: rotate  Esc: deselect  Q / E: shop/inventory  T: trial  P: run",
-  "controls.keysHint.gamepad": "D-pad: move  A: place/select  X: rotate  B: deselect  L / R: shop/inventory  Y: trial  Start: run"
+  "controls.keysHint.gamepad": "D-pad: move  A: place/select  X: rotate  B: deselect  L / R: shop/inventory  Y: trial  Start: run",
+  "giveUp.button": "Give up",
+  "giveUp.confirm": "Really give up?",
+  "catalog.open": "List",
+  "catalog.title": "Parts in the shop",
+  "catalog.hint": "Parts that can appear in this run's shop. Each shift, {offers} slots are filled at random by how common each part is",
+  "catalog.price": "${price}",
+  "catalog.rate": "Chance {rate}%",
+  "catalog.locked": "Locked",
+  "catalog.unlockBy": "Unlock: {condition}",
+  "catalog.fullOnly": "Available in the full game",
+  "catalog.close": "Close",
+  "rarity.common": "Common",
+  "rarity.uncommon": "Uncommon",
+  "rarity.rare": "Rare"
 }

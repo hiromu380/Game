@@ -7,6 +7,7 @@
 import {
   createRunWithConfig,
   dailyRunSeed,
+  getCurrentEconomy,
   getCurrentRules,
   getRerollCost,
   scoreToString,
@@ -43,6 +44,7 @@ import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { DragGhost, isInventoryDropZone } from './ui/DragGhost';
+import { GiveUpButton } from './ui/GiveUpButton';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
@@ -331,6 +333,9 @@ export function App({ start, onTitle }: Props) {
             </button>
           </>
         )}
+        {mode.kind !== 'daily' && run.phase === 'building' && (
+          <GiveUpButton disabled={playing} onGiveUp={() => dispatch({ type: 'giveUp' })} />
+        )}
         <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
           <UiIcon name="daily" />
           {t('online.dailyButton')}
@@ -361,6 +366,7 @@ export function App({ start, onTitle }: Props) {
   const shopPanel = (
     <ShopPanel
       rules={boardView.rules}
+      economy={getCurrentEconomy(run)}
       offers={run.shop}
       budget={run.budget}
       rerollCost={getRerollCost(run)}

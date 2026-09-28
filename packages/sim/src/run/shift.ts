@@ -114,6 +114,15 @@ export function commitShift(
 }
 
 /**
+ * ランを諦める（組み立て中だけ）。ノルマ未達と同じ「脱落」で終わる。
+ * 確定済みのシフトの記録はそのまま残る（メタ進行には、確定したシフトの分だけが反映される）
+ */
+export function abandonRun(state: RunState): RunState | null {
+  if (state.phase !== 'building') return null;
+  return { ...state, phase: 'failed' };
+}
+
+/**
  * シフトを開始する（ラン開始時と、シフト移行時に使う）
  * - 予算を受け取り、ショップを並べ、リロール・試運転の回数をリセットする
  * - 使用不可マス（ボス）に置かれたパーツは手持ちへ戻す
