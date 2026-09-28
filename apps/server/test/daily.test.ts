@@ -270,6 +270,31 @@ describe('プレイヤー・レート制限', () => {
     expect((await put(42)).status).toBe(400);
   });
 
+  it('登録時に表示名が自動でつく', async () => {
+    const { ctx } = testContext();
+    const res = await testApi(ctx).call('POST', '/players');
+    expect(res.json.displayName).toMatch(/^Bolt-[0-9a-f]{4}$/);
+  });
+
+  it('書き込みはプレイヤー単位でも制限される（IP を変えても同じ人なら 429）', async () => {
+    const { ctx } = testContext();
+    await seedEasyDaily(ctx);
+    const limiter = memoryRateLimiter(2, 60_000, () => NOON);
+    const api = testApi(ctx, { write: limiter });
+    const { token } = await api.register(); // IP 'unknown' の枠を1つ使う
+    const put = (ip: string) =>
+      testApi(ctx, { write: limiter }).call(
+        'PUT',
+        '/players/me/name',
+        { displayName: ip },
+        token,
+        ip,
+      );
+    expect((await put('ip1')).status).toBe(200);
+    expect((await put('ip2')).status).toBe(200);
+    expect((await put('ip3')).json).toEqual({ error: 'rateLimited' });
+  });
+
   it('書き込みの上限を超えると 429', async () => {
     const { ctx } = testContext();
     const api = testApi(ctx, { write: memoryRateLimiter(2, 60_000, () => NOON) });

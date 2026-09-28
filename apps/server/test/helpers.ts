@@ -38,12 +38,20 @@ export function testApi(
       writeLimiter: limiters.write ?? allowAll,
     }),
   });
-  const call = async (method: string, path: string, body?: unknown, token?: string) => {
+  const call = async (
+    method: string,
+    path: string,
+    body?: unknown,
+    token?: string,
+    /** 送信元 IP（レート制限のキー） */
+    ip?: string,
+  ) => {
     const res = await app.request(`/api${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(ip ? { 'x-forwarded-for': ip } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });

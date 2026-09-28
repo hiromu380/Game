@@ -43,6 +43,9 @@ const STATUS: Record<ApiErrorCode, ContentfulStatusCode> = {
   rateLimited: 429,
 };
 
+/** プレイヤー単位のレート制限に引っかかった */
+class RateLimitedError extends Error {}
+
 const fail = (c: Context, code: ApiErrorCode) => c.json<ApiError>({ error: code }, STATUS[code]);
 
 /** 送信元の識別子（レート制限のキー）。プロキシが付けるヘッダーを順に見る */
@@ -84,7 +87,7 @@ export function createApp(options: {
     await next();
   });
 
-  /** レート制限（GET は読み取り、それ以外は書き込みの上限） */
+  /** レート制限・IP 単位（GET は読み取り、それ以外は書き込みの上限） */
   app.use('*', async (c, next) => {
     const { readLimiter, writeLimiter } = c.get('deps');
     const limiter = c.req.method === 'GET' ? readLimiter : writeLimiter;
@@ -94,12 +97,26 @@ export function createApp(options: {
 
   app.onError((err, c) => {
     if (err instanceof DomainError) return fail(c, err.code);
+    if (err instanceof RateLimitedError) return fail(c, 'rateLimited');
     console.error(err);
     return c.json({ error: 'internal' }, 500);
   });
 
   const ctxOf = (c: Context<AppEnv>) => c.get('deps').ctx;
-  const playerOf = (c: Context<AppEnv>) => authenticate(ctxOf(c), c.req.header('Authorization'));
+  /**
+   * 認証してプレイヤーを返す。書き込み系はプレイヤー単位のレート制限もかける
+   * （IP を変えながらの連打を防ぐ。認証の後で数えるので、他人の ID を騙って枠を消費させることはできない）
+   */
+  const playerOf = async (c: Context<AppEnv>) => {
+    const player = await authenticate(ctxOf(c), c.req.header('Authorization'));
+    if (
+      c.req.method !== 'GET' &&
+      !(await c.get('deps').writeLimiter.allow(`player:${player.id}`))
+    ) {
+      throw new RateLimitedError();
+    }
+    return player;
+  };
 
   // ---- プレイヤー ----
   app.post('/players', async (c) => c.json(await registerPlayer(ctxOf(c))));

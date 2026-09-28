@@ -3,7 +3,7 @@
  *
  * - 登録時に ID と秘密トークンを発行する。トークンは端末に保存してもらい、サーバーはハッシュだけ持つ
  * - 認証ヘッダー: `Authorization: Bearer <playerId>.<secret>`（ID で1行引いてハッシュを照合する）
- * - 表示名は最初は空。空のときクライアントが既定の名前（i18n）を表示する
+ * - 表示名は登録時に自動でつける（NAME_RULES.defaultPrefix + ID の先頭4文字）。あとで変更できる
  */
 import { NAME_RULES } from '../../config/names';
 import { randomHex, sha256Hex, timingSafeEqual } from '../crypto';
@@ -18,14 +18,15 @@ export async function registerPlayer(
 ): Promise<{ playerId: string; token: string; displayName: string }> {
   const playerId = randomHex(ID_BYTES);
   const secret = randomHex(SECRET_BYTES);
+  const displayName = `${NAME_RULES.defaultPrefix}${playerId.slice(0, 4)}`;
   await ctx.repos.players.create({
     id: playerId,
     tokenHash: await sha256Hex(secret),
-    displayName: '',
+    displayName,
     hidden: false,
     createdAt: ctx.now(),
   });
-  return { playerId, token: `${playerId}.${secret}`, displayName: '' };
+  return { playerId, token: `${playerId}.${secret}`, displayName };
 }
 
 /** Authorization ヘッダーからプレイヤーを特定する。失敗は unauthorized */
