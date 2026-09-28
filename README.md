@@ -1,7 +1,7 @@
 # Chain Factory（仮）
 
 工場フロアにパーツを置き、スイッチを1回押すだけで連鎖が走る「連鎖ビルダー × ノルマ上昇型ローグライク」。
-設計書は [CLAUDE.md](./CLAUDE.md) を参照。現在は **フェーズ3: オンライン** を実装中（3a: デイリーチャレンジ・サーバー検証・ランキングまで）。
+設計書は [CLAUDE.md](./CLAUDE.md) を参照。現在は **フェーズ3: オンライン** を実装中（3b: 相場・Web 体験版の公開準備まで）。
 
 ## 必要なもの
 
@@ -10,16 +10,17 @@
 
 ## よく使うコマンド
 
-| コマンド                    | 内容                                                    |
-| --------------------------- | ------------------------------------------------------- |
-| `pnpm install`              | 依存関係のインストール                                  |
-| `pnpm dev`                  | 開発サーバー起動（http://localhost:5173）               |
-| `pnpm test`                 | 全パッケージのテスト                                    |
-| `pnpm build`                | 型チェック + クライアントのビルド（`apps/client/dist`） |
-| `pnpm lint` / `pnpm format` | ESLint / Prettier                                       |
-| `pnpm balance --seeds 200`  | バランス検証（ボットが自動で遊び、レポートを出力）      |
-| `pnpm dev:server`           | API サーバー起動（wrangler dev、http://localhost:8787） |
-| `pnpm perf`                 | サーバー検証1回あたりの計算量の計測                     |
+| コマンド                                          | 内容                                                    |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| `pnpm install`                                    | 依存関係のインストール                                  |
+| `pnpm dev`                                        | 開発サーバー起動（http://localhost:5173）               |
+| `pnpm test`                                       | 全パッケージのテスト                                    |
+| `pnpm build`                                      | 型チェック + クライアントのビルド（`apps/client/dist`） |
+| `pnpm --filter @chain-factory/client build:trial` | Web 体験版のビルド（初期パーツ・7×7・延長戦なし）       |
+| `pnpm lint` / `pnpm format`                       | ESLint / Prettier                                       |
+| `pnpm balance --seeds 200`                        | バランス検証（ボットが自動で遊び、レポートを出力）      |
+| `pnpm dev:server`                                 | API サーバー起動（wrangler dev、http://localhost:8787） |
+| `pnpm perf`                                       | サーバー検証1回あたりの計算量の計測                     |
 
 `http://localhost:5173/?seed=42` のように `seed` を付けると、そのシードで新しいランを始めます。
 
@@ -49,10 +50,12 @@ pnpm dev                                                  # クライアント�
 
 画面右上の「デイリー」から、本番（1日1回・ランキング対象）・練習・ランキングを開けます。
 
-- ジョブ（Cron とは独立して実行できる）: `pnpm --filter @chain-factory/server job daily`
+- 本番と同じ形（同一オリジン・セキュリティヘッダー・PWA）で試すときは、クライアントをビルドしてから `pnpm dev:server` だけを起動し http://localhost:8787 を開く
+- 人間確認（Turnstile）は、開発時は Cloudflare 公式のテスト用キーで常に通る（通信もしない）
+- ジョブ（Cron とは独立して実行できる）: `pnpm --filter @chain-factory/server job <daily|market|ip-purge|all>`
   （`--at 2026-10-05T00:00:00Z` で時刻指定、`--db file.sqlite` で任意の SQLite に対して実行）
 - スキーマを変えたら `pnpm --filter @chain-factory/server db:generate` でマイグレーションを生成する
-- 本番の秘密値は `wrangler secret put DAILY_MASTER_SECRET` で設定する（リポジトリには置かない）
+- 本番デプロイ・バックアップの手順は [docs/ops/](./docs/ops/)、規約類の下書きは [docs/legal/](./docs/legal/)
 
 ## ディレクトリ構成
 
@@ -75,24 +78,28 @@ apps/
       index.ts          Workers の入り口（Cloudflare 固有のものはここと adapters/ だけ）
       app.ts            ルーティング・認証・レート制限・エラー変換
       env.ts            環境変数 → 設定
-      domain/           デイリー（秘密値・生成ジョブ・サーバー検証）・プレイヤー・ランキング
+      domain/           デイリー（秘密値・生成ジョブ・サーバー検証）・相場・プレイヤー（IP の扱い）・ランキング
       repositories/     DB アクセスの窓口（types.ts）と実装（drizzle.ts / memory.ts）
-      adapters/         レート制限・node:sqlite（テストとジョブのローカル実行用）
+      adapters/         レート制限・人間確認（Turnstile）・node:sqlite（テストとジョブのローカル実行用）
       db/               Drizzle スキーマとマイグレーション
       jobs/             Cron から呼ぶジョブの一覧
-      config/           サーバーの上限値・表示名のルール
-    scripts/run-job.ts  ジョブを単体で実行する
+      config/           サーバーの上限値・表示名のルール・相場の係数
+    scripts/run-job.ts  ジョブを単体で実行する（daily / market / ip-purge / all）
     test/               リポジトリ・API（不正な提出の拒否・ゴールデンデータ）
   client/         Web版クライアント（Vite + PixiJS + React）
+    build/              ビルド用のプラグイン（Service Worker の生成・OGP と Web Analytics の差し込み）と OGP 画像の元
+    public/             アイコン・OGP 画像・PWA のマニフェスト・セキュリティヘッダー（_headers）
     src/
+      Root.tsx          タイトル ⇄ ゲーム画面の切り替え（ゲーム本体は遅延読み込み）
+      boot/             ゲーム本体の遅延読み込み（進捗つき）・Service Worker の登録
       board/            PixiJS の盤面描画と演出再生（fx/ に連鎖演出）
       playback/         イベント再生のタイミング制御・途切れた理由の集計（描画に依存しない）
       state/            画面状態の reducer（操作ログの記録・プレイモード）・セーブ/ロード
-      online/           API クライアント・オンラインの身元・デイリーのラン組み立て（再開・練習）
-      ui/               React の各パネル（HUD・ショップ・手持ち・結果画面など。online/ にデイリー・ランキング）
+      online/           API クライアント・オンラインの身元・デイリーのラン組み立て・相場・シェア文・Turnstile
+      ui/               React の各パネル（HUD・ショップ・手持ち・結果画面など。title/ online/ share/）
       i18n/             文言（ja.json / en.json）と大きな数の表記
       audio/            サウンドマニフェスト（合成SEのレシピ）と再生エンジン
-      config/           演出の閾値（effects.ts）・操作の設定（input.ts）
+      config/           演出の閾値（effects.ts）・操作（input.ts）・レイアウト（layout.ts）・体験版／製品版（edition.ts）
       settings/         ユーザー設定（言語・演出・音量。セーブとは別に保存）
       assets/           見た目の定義（manifest.ts）とパーツ画像（parts/*.svg、仮素材）
 tools/
@@ -100,6 +107,8 @@ tools/
   perf/           計算量の計測（サーバー検証の CPU 時間の見積もり）
 docs/
   plans/          フェーズごとの計画書
+  ops/            本番デプロイ・D1 のバックアップと復元
+  legal/          利用規約・プライバシーポリシーの下書き
   balance-log.md  バランス調整の記録
 legacy/machigai/  以前このリポジトリにあった別ゲーム（まちがい仕掛け人）
 ```
