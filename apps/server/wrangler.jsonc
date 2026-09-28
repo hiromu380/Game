@@ -36,7 +36,7 @@
 
   "vars": {
     "DAILY_OFFSET_MINUTES": "540",
-    "DAILY_EPOCH": "2026-10-01",
+    "DAILY_EPOCH": "2026-09-01",
   },
 
   "observability": { "enabled": true },

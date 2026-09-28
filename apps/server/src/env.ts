@@ -17,7 +17,7 @@ export interface Env {
   DAILY_MASTER_SECRET: string;
   /** デイリーの切り替え時刻（UTC からのずれ・分）。既定 540 = 日本時間0時 */
   DAILY_OFFSET_MINUTES?: string;
-  /** デイリー #1 の日付 */
+  /** デイリー #1 の日付（公開日に合わせて設定する） */
   DAILY_EPOCH?: string;
   /** CORS を許可するオリジン（カンマ区切り）。同一オリジン配信なら不要 */
   CORS_ORIGINS?: string;
@@ -31,7 +31,7 @@ export interface AppConfig {
 }
 
 const DEFAULT_OFFSET_MINUTES = 540;
-const DEFAULT_EPOCH = '2026-10-01';
+const DEFAULT_EPOCH = '2026-09-01';
 
 /** 生の環境変数を AppConfig に読み替える（不足・不正な値はここで早めにエラーにする） */
 export function readConfig(
