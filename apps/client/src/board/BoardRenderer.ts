@@ -33,6 +33,7 @@ import {
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
 import { chainSemitones, type SoundKey } from '../audio/manifest';
+import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
 import { loadPartTextures, type PartTextures } from './textures';
@@ -77,6 +78,8 @@ export interface BoardLabels {
 
 export interface BoardRendererOptions extends BoardLabels {
   onCellClick: (x: number, y: number) => void;
+  /** 長押し（スマホで「手持ちに戻す」に使う） */
+  onCellLongPress: (x: number, y: number) => void;
   /** 効果音を鳴らす（semitones: 上げる音程。連鎖が続くほど高くする） */
   playSound: (key: SoundKey, semitones: number) => void;
 }
@@ -158,11 +161,34 @@ export class BoardRenderer {
     // マウス・タッチ操作
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
+    // 長押しの判定: 押してから一定時間離さなければ長押し。そのときは直後のタップを無視する
+    let pressTimer: ReturnType<typeof setTimeout> | null = null;
+    let longPressed = false;
+    const cancelPress = () => {
+      if (pressTimer) clearTimeout(pressTimer);
+      pressTimer = null;
+    };
+    app.stage.on('pointerdown', (e) => {
+      longPressed = false;
+      cancelPress();
+      const cell = this.toCell(e.global.x, e.global.y);
+      if (!cell) return;
+      pressTimer = setTimeout(() => {
+        longPressed = true;
+        options.onCellLongPress(cell.x, cell.y);
+      }, INPUT_CONFIG.longPressMs);
+    });
+    app.stage.on('pointerup', cancelPress);
+    app.stage.on('pointerupoutside', cancelPress);
     app.stage.on('pointertap', (e) => {
+      if (longPressed) return;
       const cell = this.toCell(e.global.x, e.global.y);
       if (cell) options.onCellClick(cell.x, cell.y);
     });
+    // スマホの長押しで出るメニューを出さない
+    app.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     app.stage.on('pointermove', (e) => this.setHovered(this.toCell(e.global.x, e.global.y)));
+    app.stage.on('pointerleave', cancelPress);
     app.stage.on('pointerleave', () => this.setHovered(null));
 
     app.ticker.add((ticker) => this.update(ticker.deltaMS));

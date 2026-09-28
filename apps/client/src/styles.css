@@ -123,6 +123,9 @@ button:disabled {
   width: 100%;
 }
 .board-canvas {
+  /* スマホの長押しで文字選択やメニューが出ないようにする */
+  -webkit-touch-callout: none;
+  user-select: none;
   display: block;
   width: 100% !important;
   height: auto !important;

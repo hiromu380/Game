@@ -19,6 +19,7 @@ interface Props {
   labels: BoardLabels;
   effectSettings: EffectSettings;
   onCellClick: (x: number, y: number) => void;
+  onCellLongPress: (x: number, y: number) => void;
   onShip: (total: Score) => void;
   onPlaybackFinish: () => void;
 }
@@ -46,6 +47,7 @@ export function PixiBoard(props: Props) {
 
     void BoardRenderer.create(parent, {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
+      onCellLongPress: (x, y) => callbacksRef.current.onCellLongPress(x, y),
       getPartName: (partId) => labels().getPartName(partId),
       formatIncome: (amount) => labels().formatIncome(amount),
       getBreakLabel: (reason) => labels().getBreakLabel(reason),

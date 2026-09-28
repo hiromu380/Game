@@ -72,6 +72,8 @@ export type GameAction =
   | { type: 'buy'; offerIndex: number }
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
+  /** 長押し（スマホ）: そのマスのパーツを手持ちに戻す */
+  | { type: 'longPressCell'; x: number; y: number }
   | { type: 'rotate' }
   | { type: 'returnSelected' }
   | { type: 'sellSelected' }
@@ -154,6 +156,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const remaining = result.state.inventory[partId] ?? 0;
         return applyRunResult(state, result, 'place', remaining > 0 ? state.selection : null);
       }
+      // 選択中のパーツをもう一度クリック（タップ）→ 回転（スマホでも回せるように）
+      if (
+        part !== null &&
+        state.selection?.kind === 'cell' &&
+        state.selection.x === x &&
+        state.selection.y === y
+      ) {
+        return applyRunResult(state, rotatePart(state.run, x, y), 'rotate');
+      }
       // パーツのあるマス → そのマスを選択
       if (part !== null) return { ...state, selection: { kind: 'cell', x, y }, error: null };
       // 空きマス → 選択解除
@@ -179,6 +190,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ? { kind: 'inventory', partId: part.id, dir: part.dir }
         : null;
       return applyRunResult(state, result, 'returnPart', selection);
+    }
+
+    case 'longPressCell': {
+      // 長押ししたマスを選んだことにして「手持ちに戻す」と同じ処理をする
+      if (!getPart(state.run.board, action.x, action.y)) return state;
+      const selected: GameState = {
+        ...state,
+        selection: { kind: 'cell', x: action.x, y: action.y },
+      };
+      return gameReducer(selected, { type: 'returnSelected' });
     }
 
     case 'sellSelected': {

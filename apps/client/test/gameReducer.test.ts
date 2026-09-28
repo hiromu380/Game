@@ -24,6 +24,10 @@ describe('画面の状態遷移', () => {
     state = apply(state, { type: 'clickCell', x: 0, y: 0 }, { type: 'rotate' });
     expect(state.selection).toEqual({ kind: 'cell', x: 0, y: 0 });
     expect(state.run.board.cells[0]).toEqual({ id: 'switch', dir: 2 });
+
+    // 選択中のパーツをもう一度タップ → 回転（スマホ操作）
+    state = apply(state, { type: 'clickCell', x: 0, y: 0 });
+    expect(state.run.board.cells[0]).toEqual({ id: 'switch', dir: 3 });
   });
 
   it('再生中は配置などの操作を受け付けない', () => {
@@ -128,5 +132,18 @@ describe('画面の状態遷移', () => {
     );
     expect(state.feedback?.kind).toBe('error');
     expect(state.feedback?.seq).toBe(3);
+  });
+
+  it('長押しでパーツを手持ちに戻し、そのまま配置待ちになる（スマホ操作）', () => {
+    let state = createGameState(createRun(1), createInitialMeta());
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 2, y: 2 },
+      { type: 'longPressCell', x: 2, y: 2 },
+    );
+    expect(state.run.board.cells[2 * 7 + 2]).toBeNull();
+    expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'dock' });
+    expect(state.feedback?.kind).toBe('returnPart');
   });
 });

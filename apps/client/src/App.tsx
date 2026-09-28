@@ -127,6 +127,11 @@ export function App() {
     [],
   );
 
+  const onCellLongPress = useCallback(
+    (x: number, y: number) => dispatch({ type: 'longPressCell', x, y }),
+    [],
+  );
+
   const startPlayback = (type: 'startTrial' | 'startCommit') => {
     setLiveScore('0');
     dispatch({ type });
@@ -182,6 +187,7 @@ export function App() {
             playbackResult={playback?.result ?? null}
             speed={speed}
             onCellClick={onCellClick}
+            onCellLongPress={onCellLongPress}
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />
