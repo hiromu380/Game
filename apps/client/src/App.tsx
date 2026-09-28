@@ -28,6 +28,8 @@ import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
 import { createInitialState, createNewSeed, startNormalRun } from './state/newRun';
 import { useMediaQuery } from './state/useMediaQuery';
+import { useGameControls } from './input/useGameControls';
+import { useInputMode } from './input/useInputMode';
 import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
@@ -232,6 +234,27 @@ export function App({ start, onTitle }: Props) {
     setLiveScore(null);
     dispatch({ type: 'closePlayback' });
   };
+
+  // キーボード・コントローラーの操作（盤面のカーソル・一覧・試運転・本番）。ダイアログ中・ラン終了画面はメニューの操作
+  const inputMode = useInputMode();
+  const gameCursor = useGameControls({
+    active: !settingsOpen && dailyMenu === null && (playing || run.phase === 'building'),
+    width: run.board.width,
+    height: run.board.height,
+    playing,
+    playbackFinished: playback?.finished ?? false,
+    onPlace: onCellClick,
+    onDeselect: () => dispatch({ type: 'deselect' }),
+    onRotate: () => dispatch({ type: 'rotate' }),
+    onTrial: () => startPlayback('startTrial'),
+    onCommit: () => startPlayback('startCommit'),
+    onClosePlayback: closePlayback,
+    onShowPanel: setTab,
+  });
+  const cursor = useMemo(
+    () => (inputMode === 'pointer' ? null : { x: gameCursor.x, y: gameCursor.y }),
+    [inputMode, gameCursor.x, gameCursor.y],
+  );
   const newRun = () => {
     setLiveScore(null);
     // 練習は同じ条件で最初から。通常は新しいシードで
@@ -393,6 +416,7 @@ export function App({ start, onTitle }: Props) {
             effectSettings={effectSettings}
             playbackResult={playback?.result ?? null}
             speed={speed}
+            cursor={cursor}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
             onShip={onShip}
@@ -406,6 +430,7 @@ export function App({ start, onTitle }: Props) {
           <ControlsPanel
             playing={playing}
             compact={compact}
+            inputMode={inputMode}
             speed={speed}
             onTrial={() => startPlayback('startTrial')}
             onCommit={() => startPlayback('startCommit')}

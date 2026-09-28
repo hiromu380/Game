@@ -321,5 +321,7 @@
   "capture.import": "読み込む",
   "capture.commitWithSeed": "このシードで本番",
   "capture.loaded": "読み込みました",
-  "capture.invalid": "盤面の JSON が正しくありません（盤面の大きさも同じにしてください）"
+  "capture.invalid": "盤面の JSON が正しくありません（盤面の大きさも同じにしてください）",
+  "controls.keysHint.keys": "矢印: 移動　Enter: 置く・選ぶ　R: 回転　Esc: 選択解除　Q / E: ショップ・手持ち　T: 試運転　P: 本番",
+  "controls.keysHint.gamepad": "十字キー: 移動　A: 置く・選ぶ　X: 回転　B: 選択解除　L / R: ショップ・手持ち　Y: 試運転　Start: 本番"
 }

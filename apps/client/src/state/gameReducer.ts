@@ -105,6 +105,8 @@ export type GameAction =
   /** 長押し（スマホ）: そのマスのパーツを手持ちに戻す */
   | { type: 'longPressCell'; x: number; y: number }
   | { type: 'rotate' }
+  /** 選択を解除する（コントローラーの B・Esc） */
+  | { type: 'deselect' }
   | { type: 'returnSelected' }
   | { type: 'sellSelected' }
   | { type: 'reroll' }
@@ -253,6 +255,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selection: { kind: 'inventory', partId: action.partId, dir: 1 },
         error: null,
       };
+
+    case 'deselect':
+      return state.selection ? { ...state, selection: null, error: null } : state;
 
     case 'clickCell': {
       const { x, y } = action;

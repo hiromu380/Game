@@ -26,7 +26,7 @@ export function ShopPanel(props: Props) {
   const { rules, offers, budget, rerollCost, trends, disabled, onBuy, onReroll } = props;
   const { t } = useI18n();
   return (
-    <section className="panel">
+    <section className="panel" data-panel="shop">
       <div className="panel__header">
         <h2 className="panel__title">{t('shop.title')}</h2>
         <button

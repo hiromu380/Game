@@ -194,7 +194,7 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose, onRanked }: 
       <div className="modal__body panel daily" onClick={(e) => e.stopPropagation()}>
         {body}
         <div className="button-row">
-          <button className="button--ghost" onClick={onClose}>
+          <button className="button--ghost" onClick={onClose} data-close>
             {t('daily.close')}
           </button>
         </div>

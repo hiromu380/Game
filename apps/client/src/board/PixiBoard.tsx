@@ -18,6 +18,8 @@ interface Props {
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
+  /** キーボード・コントローラーのカーソル（マウス・タッチで操作中は null） */
+  cursor?: { x: number; y: number } | null;
   onCellClick: (x: number, y: number) => void;
   onCellLongPress: (x: number, y: number) => void;
   onShip: (total: Score) => void;
@@ -76,6 +78,12 @@ export function PixiBoard(props: Props) {
   useEffect(() => {
     renderer?.setState(view);
   }, [renderer, view]);
+
+  // カーソルの反映
+  const { cursor = null } = props;
+  useEffect(() => {
+    renderer?.setCursor(cursor);
+  }, [renderer, cursor]);
 
   // 演出の設定の反映
   useEffect(() => {

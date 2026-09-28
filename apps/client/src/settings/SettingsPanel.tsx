@@ -82,7 +82,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         <p className="panel__hint">{t('settings.bgmHint')}</p>
 
         <div className="button-row">
-          <button className="button--primary" onClick={onClose}>
+          <button className="button--primary" onClick={onClose} data-close>
             {t('settings.close')}
           </button>
         </div>

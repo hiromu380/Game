@@ -321,5 +321,7 @@
   "capture.import": "Load",
   "capture.commitWithSeed": "Run with this seed",
   "capture.loaded": "Loaded",
-  "capture.invalid": "Invalid board JSON (the board size must match)"
+  "capture.invalid": "Invalid board JSON (the board size must match)",
+  "controls.keysHint.keys": "Arrows: move  Enter: place/select  R: rotate  Esc: deselect  Q / E: shop/inventory  T: trial  P: run",
+  "controls.keysHint.gamepad": "D-pad: move  A: place/select  X: rotate  B: deselect  L / R: shop/inventory  Y: trial  Start: run"
 }

@@ -67,7 +67,9 @@ export function RankingView({ dailyId, number, onBack, onRanked }: Props) {
         </>
       )}
       <div className="button-row">
-        <button onClick={onBack}>{t('ranking.back')}</button>
+        <button onClick={onBack} data-close>
+          {t('ranking.back')}
+        </button>
       </div>
     </div>
   );

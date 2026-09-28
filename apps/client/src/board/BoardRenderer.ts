@@ -135,6 +135,7 @@ export class BoardRenderer {
 
   private state: BoardViewState | null = null;
   private hovered: { x: number; y: number } | null = null;
+  private cursor: { x: number; y: number } | null = null;
   private timeline: PlaybackTimeline | null = null;
   /** 直近に再生した結果（再生後の「途切れた理由」表示に使う） */
   private lastResult: SimResult | null = null;
@@ -310,6 +311,16 @@ export class BoardRenderer {
     return getPartBadge(part, this.state.board, x, y, this.state.rules);
   }
 
+  /**
+   * キーボード・コントローラーのカーソル（null で消す）。マウスのホバーと同じ表示（配置の見本・名前）に、
+   * カーソルの枠を重ねる
+   */
+  setCursor(cell: { x: number; y: number } | null): void {
+    this.cursor = cell;
+    this.hovered = cell;
+    this.drawOverlay();
+  }
+
   private setHovered(cell: { x: number; y: number } | null): void {
     if (this.hovered?.x === cell?.x && this.hovered?.y === cell?.y) return;
     this.hovered = cell;
@@ -325,6 +336,11 @@ export class BoardRenderer {
 
     if (highlight)
       this.overlayLayer.addChild(cellFrame(highlight.x, highlight.y, BOARD_THEME.selected, 4));
+    if (this.cursor && !this.timeline) {
+      this.overlayLayer.addChild(
+        cellFrame(this.cursor.x, this.cursor.y, BOARD_THEME.hazardYellow, 5),
+      );
+    }
 
     // 再生中はホバー表示を出さない（演出を見やすくするため）
     const hovered = this.timeline ? null : this.hovered;

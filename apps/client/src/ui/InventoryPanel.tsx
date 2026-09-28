@@ -22,7 +22,7 @@ export function InventoryPanel({ rules, inventory, selection, disabled, onSelect
   const selectedId = selection?.kind === 'inventory' ? selection.partId : null;
 
   return (
-    <section className="panel">
+    <section className="panel" data-panel="inventory">
       <h2 className="panel__title">{t('inventory.title')}</h2>
       {items.length === 0 ? (
         <p className="panel__hint">{t('inventory.empty')}</p>
