@@ -51,21 +51,18 @@ const FACES: Record<BoltExpression, { lamp: string; face: string[]; extras?: str
   },
   // 喜び: 目を細めて口を大きく開ける。ランプの周りにきらめき
   happy: {
+    // 喜び: 大笑いはしない性格。いつもの目のまま、口を閉じて小さく笑う（ランプがほんのり光る）
     lamp: C.lamp,
-    extras: [path('M24 4 L27 6 M42 4 L39 6 M33 -1 V1', line(C.lamp, 2))],
+    extras: [path('M27 3 L29 5 M39 3 L37 5', line(C.lamp, 1.8))],
     face: [
-      path('M16 31 Q23 23 30 31', line(C.outline, 3)),
-      path('M37 30 Q42 25 47 30', line(C.outline, 3)),
-      path('M20 40 H44 Q42 51 32 51 Q22 51 20 40 Z', {
-        fill: UI_COLORS['primary-shadow'],
-        stroke: C.outline,
-        'stroke-width': THIN,
-        'stroke-linejoin': 'round',
-      }),
-      circle(16, 40, 3, { fill: C.cheek, opacity: 0.8 }),
-      circle(48, 39, 3, { fill: C.cheek, opacity: 0.8 }),
+      eye(23, 30, 8, 24, 29, 3.5),
+      eye(42, 29, 5, 42, 28, 2),
+      path('M24 43 Q32 49 40 43', line(C.outline, 3)),
+      circle(16, 39, 2.5, { fill: C.cheek, opacity: 0.6 }),
+      circle(48, 38, 2.5, { fill: C.cheek, opacity: 0.6 }),
     ],
   },
+
   // 驚き: 両目を見開き、口は O。ランプは赤く点灯し「!」
   surprised: {
     lamp: UI_COLORS.missed,
