@@ -17,7 +17,7 @@ import {
 import { EDITION_CONFIG } from '../config/edition';
 import { getMarket } from '../online/market';
 import { achievementsOnLoad } from './achievements';
-import { loadSave } from './saveStore';
+import { loadRun, loadSave } from './saveStore';
 
 /** URL で指定されたシード（なければ null） */
 function seedFromUrl(): number | null {
@@ -63,5 +63,5 @@ export function createInitialState(): {
   const achievements = achievementsOnLoad(save?.achievements ?? createInitialAchievements(), meta);
   const urlSeed = seedFromUrl();
   if (urlSeed !== null) return { run: startNormalRun(urlSeed, meta), meta, achievements };
-  return { run: save?.run ?? startNormalRun(createNewSeed(), meta), meta, achievements };
+  return { run: loadRun() ?? startNormalRun(createNewSeed(), meta), meta, achievements };
 }

@@ -113,6 +113,8 @@ export type GameAction =
   /** 選択を解除する（コントローラーの B・Esc） */
   | { type: 'deselect' }
   | { type: 'returnSelected' }
+  /** 盤面のパーツをすべて手持ちに戻す */
+  | { type: 'returnAll' }
   | { type: 'sellSelected' }
   | { type: 'reroll' }
   | { type: 'startTrial' }
@@ -329,6 +331,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ? { kind: 'inventory', partId: part.id, dir: part.dir }
         : null;
       return applyRunOp(state, { op: 'return', x: sel.x, y: sel.y }, 'returnPart', selection);
+    }
+
+    case 'returnAll': {
+      // 1マスずつ「手持ちに戻す」操作として記録する（デイリーのサーバー検証で同じように再生できるように）
+      const { board } = state.run;
+      let next: GameState = { ...state, selection: null };
+      let returned = 0;
+      for (let y = 0; y < board.height; y++) {
+        for (let x = 0; x < board.width; x++) {
+          if (!getPart(board, x, y)) continue;
+          next = applyRunOp(next, { op: 'return', x, y }, 'returnPart', null);
+          if (next.error) return next;
+          returned++;
+        }
+      }
+      return returned > 0 ? next : state;
     }
 
     case 'movePart': {

@@ -30,4 +30,10 @@ describe('セーブ/ロード', () => {
     storage.setItem(SAVE_STORAGE_KEY, JSON.stringify({ version: 999, run: {} }));
     expect(loadRun(storage)).toBeNull();
   });
+
+  it('終わったラン（ノルマ未達・諦めた）は続きから遊べないので null', () => {
+    const storage = memoryStorage();
+    saveGame({ run: { ...createRun(99), phase: 'failed' } }, storage);
+    expect(loadRun(storage)).toBeNull();
+  });
 });

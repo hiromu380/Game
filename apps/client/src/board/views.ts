@@ -203,7 +203,7 @@ export function createFloor(width: number, height: number, textures: BoardTextur
 
 /**
  * 使用不可マス（補修工事中）の表示
- * @param upcoming true なら「今夜使えなくなる」予告（点線の枠だけ）
+ * @param upcoming true なら「夜シフトで使えなくなる」予告（点線の枠だけ）
  */
 export function createBlockedCell(
   x: number,
@@ -221,7 +221,7 @@ export function createBlockedCell(
     sprite.alpha = 0.92;
     return sprite;
   }
-  // 今夜の予告: 黄色の点線の枠（点線の代わりに短い線分を並べる）
+  // 夜シフトの予告: 黄色の点線の枠（点線の代わりに短い線分を並べる）
   const g = new Graphics();
   const inset = 5;
   const size = CELL_SIZE - inset * 2;

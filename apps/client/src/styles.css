@@ -1046,15 +1046,59 @@ a.button.button--primary {
   white-space: nowrap;
 }
 
-/* ---- 横長で高さが低い画面（Steam Deck 1280×800 など。config/layout.ts の shortQuery） ----
-   ページ全体を画面の高さに収める: 盤面の一辺 = 残りの高さ、右の列だけスクロール */
-.app--short {
-  max-width: 1280px;
+/* ---- 横長の画面（PC・Steam Deck など。config/layout.ts の fitQuery） ----
+   アプリとして画面いっぱいを使い、ページ全体を画面の高さに収める:
+   盤面の一辺 = 残りの高さ（上限 --board-max）、右の列だけスクロール */
+.app--fit {
+  max-width: none;
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 6px 16px 8px;
+  padding: 6px 12px 8px;
   overflow: hidden;
+}
+.app--fit .hud {
+  margin: 6px 0;
+}
+.app--fit .boss-notice {
+  margin-bottom: 6px;
+}
+.app--fit .layout {
+  flex: 1;
+  min-height: 0;
+  /* 盤面の一辺を .layout の高さに合わせるため、.layout を高さの基準（コンテナ）にする */
+  container-type: size;
+  grid-template-columns: auto minmax(300px, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+.app--fit .layout__board {
+  /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
+  width: min(100cqh, var(--board-max, 640px));
+}
+.app--fit .layout__side {
+  min-height: 0;
+  overflow-y: auto;
+  gap: 8px;
+  padding-right: 4px;
+  /* 右の列が広ければ、ショップと手持ちを2列に並べる（それ以外は1行を占める） */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(300px, calc(50% - 8px)), 1fr));
+  align-content: start;
+  align-items: start;
+}
+.app--fit .layout__side > * {
+  grid-column: 1 / -1;
+}
+.app--fit .layout__side > [data-panel='shop'],
+.app--fit .layout__side > [data-panel='inventory'] {
+  grid-column: auto;
+}
+
+/* ---- 横長で高さが低い画面（Steam Deck 1280×800 など。config/layout.ts の shortQuery） ----
+   上に加えて見出しなどを詰める（ショップ・手持ちはタブで切り替える） */
+.app--short .layout__side {
+  grid-template-columns: minmax(0, 1fr);
 }
 .app--short .app-header {
   padding-bottom: 4px;
@@ -1075,24 +1119,6 @@ a.button.button--primary {
   margin-bottom: 6px;
   padding-top: 4px;
   padding-bottom: 4px;
-}
-.app--short .layout {
-  flex: 1;
-  min-height: 0;
-  /* 盤面の一辺を .layout の高さに合わせるため、.layout を高さの基準（コンテナ）にする */
-  container-type: size;
-  grid-template-columns: auto minmax(300px, 1fr);
-  align-items: stretch;
-}
-.app--short .layout__board {
-  /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
-  width: min(100cqh, 640px);
-}
-.app--short .layout__side {
-  min-height: 0;
-  overflow-y: auto;
-  gap: 8px;
-  padding-right: 4px;
 }
 
 /* ---- 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） ---- */
@@ -1162,6 +1188,30 @@ a.button.button--primary {
   max-height: 85dvh;
   overflow-y: auto;
 }
+/* 本番の確認（ui/CommitConfirm.tsx） */
+.commit-confirm .button-row {
+  margin-top: 12px;
+}
+.commit-confirm .button-row > button {
+  flex: 1;
+}
+
+/* コレクション（タイトル画面から開く。ui/title/CollectionScreen.tsx） */
+.collection {
+  width: min(640px, 100%);
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+}
+.collection__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+.collection__content .meta {
+  margin: 0;
+}
 .catalog__list {
   list-style: none;
   margin: 8px 0;
@@ -1201,8 +1251,4 @@ a.button.button--primary {
   text-align: right;
   font-size: 0.85rem;
   white-space: nowrap;
-}
-.catalog__rate {
-  font-size: 0.75rem;
-  color: var(--muted);
 }

@@ -68,8 +68,10 @@ export interface BoardViewState {
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
   placing: { partId: PartId; dir: Dir4 } | null;
-  /** 今夜（ボス）に使用不可になるマス（予告表示用） */
+  /** 今日の夜シフト（ボス）に使用不可になるマス（予告表示用） */
   upcomingBlocked: number[];
+  /** どのランのどのシフトか（変わったら前の本番の表示を消す） */
+  shiftKey: string;
 }
 
 /** 盤面に表示する文言（i18n を通すため関数で受け取る。言語切り替えに追従する） */
@@ -307,6 +309,9 @@ export class BoardRenderer {
     const sizeChanged =
       this.state?.board.width !== state.board.width ||
       this.state?.board.height !== state.board.height;
+    // シフトが変わったら、前の本番の「途切れた場所」の表示を消す
+    // （盤面は次のシフトへそのまま持ち越されるので、盤面の変化だけでは気づけない）
+    if (this.state && this.state.shiftKey !== state.shiftKey) this.status.clearBreaks();
     this.state = state;
     if (!this.timeline) this.status.setBoard(state.board, state.rules);
 

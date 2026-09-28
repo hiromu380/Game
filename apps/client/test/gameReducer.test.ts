@@ -275,6 +275,33 @@ describe('ドラッグでの移動', () => {
   });
 });
 
+describe('全部戻す', () => {
+  it('盤面のパーツをすべて手持ちに戻し、1マスずつ「戻す」として記録する', () => {
+    const before = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 3, y: 1 },
+    );
+    const state = apply(before, { type: 'returnAll' });
+    expect(state.run.board.cells.every((cell) => cell === null)).toBe(true);
+    expect(state.run.inventory).toEqual(createRun(1).inventory);
+    expect(state.selection).toBeNull();
+    expect(state.pendingOps.slice(-2)).toEqual([
+      { op: 'return', x: 1, y: 1 },
+      { op: 'return', x: 3, y: 1 },
+    ]);
+    const replayed = replayOps(createRun(1), state.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(state.run);
+  });
+
+  it('盤面が空なら何もしない', () => {
+    const state = createGameState(createRun(1), createInitialMeta());
+    expect(apply(state, { type: 'returnAll' })).toBe(state);
+  });
+});
+
 describe('諦める', () => {
   it('通常ランは脱落で終わり、確定したシフトの分をメタ進行に記録する', () => {
     let state = apply(createGameState(createRun(1), createInitialMeta()), { type: 'startCommit' });

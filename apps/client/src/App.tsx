@@ -16,7 +16,15 @@ import {
   type Score,
   type PartId,
 } from '@chain-factory/sim';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
@@ -35,6 +43,7 @@ import { useInputMode } from './input/useInputMode';
 import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
+import { CommitConfirm } from './ui/CommitConfirm';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { DebugPanel } from './ui/DebugPanel';
 import { Hud } from './ui/Hud';
@@ -78,6 +87,7 @@ export function App({ start, onTitle }: Props) {
       : createGameState(initial.run, initial.meta, undefined, initial.achievements);
   });
   const compact = useMediaQuery(`(max-width: ${LAYOUT.compactMaxWidthPx}px)`);
+  const fit = useMediaQuery(LAYOUT.fitQuery);
   const short = useMediaQuery(LAYOUT.shortQuery);
   /** ショップ・手持ちをタブで切り替えるか（狭い画面・高さの低い画面） */
   const tabbed = compact || short;
@@ -188,7 +198,7 @@ export function App({ start, onTitle }: Props) {
     () => ({
       board: run.board,
       rules: getCurrentRules(run),
-      // 今夜の補修工事で使えなくなるマスを、朝・昼のうちから予告表示する
+      // 夜シフトの補修工事で使えなくなるマスを、朝・昼のうちから予告表示する
       upcomingBlocked: (() => {
         const boss = findBossToShow(run);
         return boss && !boss.isNow ? boss.entry.blockedCells : [];
@@ -196,6 +206,7 @@ export function App({ start, onTitle }: Props) {
       highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
       placing:
         selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
+      shiftKey: `${run.seed}:${run.shiftIndex}`,
     }),
     [run, selection],
   );
@@ -256,9 +267,12 @@ export function App({ start, onTitle }: Props) {
   );
 
   const startPlayback = (type: 'startTrial' | 'startCommit') => {
+    setCommitConfirm(false);
     setLiveScore('0');
     dispatch({ type });
   };
+  /** 本番の確認ダイアログ（押し間違い防止） */
+  const [commitConfirm, setCommitConfirm] = useState(false);
   const closePlayback = () => {
     setLiveScore(null);
     dispatch({ type: 'closePlayback' });
@@ -267,7 +281,11 @@ export function App({ start, onTitle }: Props) {
   // キーボード・コントローラーの操作（盤面のカーソル・一覧・試運転・本番）。ダイアログ中・ラン終了画面はメニューの操作
   const inputMode = useInputMode();
   const gameCursor = useGameControls({
-    active: !settingsOpen && dailyMenu === null && (playing || run.phase === 'building'),
+    active:
+      !settingsOpen &&
+      !commitConfirm &&
+      dailyMenu === null &&
+      (playing || run.phase === 'building'),
     width: run.board.width,
     height: run.board.height,
     playing,
@@ -276,7 +294,7 @@ export function App({ start, onTitle }: Props) {
     onDeselect: () => dispatch({ type: 'deselect' }),
     onRotate: () => dispatch({ type: 'rotate' }),
     onTrial: () => startPlayback('startTrial'),
-    onCommit: () => startPlayback('startCommit'),
+    onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,
     onShowPanel: setTab,
   });
@@ -382,7 +400,9 @@ export function App({ start, onTitle }: Props) {
       inventory={run.inventory}
       selection={selection}
       disabled={playing}
+      boardHasParts={run.board.cells.some((cell) => cell !== null)}
       onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
+      onReturnAll={() => dispatch({ type: 'returnAll' })}
     />
   );
   const selectionPanel = (
@@ -422,9 +442,17 @@ export function App({ start, onTitle }: Props) {
 
   return (
     <div
-      className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''} capture-ui--${captureUi} ${dragging ? 'is-dragging-part' : ''}`}
+      className={`app ${compact ? 'app--compact' : ''} ${fit ? 'app--fit' : ''} ${short ? 'app--short' : ''} capture-ui--${captureUi} ${dragging ? 'is-dragging-part' : ''}`}
+      style={{ '--board-max': `${LAYOUT.boardMaxPx}px` } as CSSProperties}
     >
       {dragging && <DragGhost partId={dragging} />}
+      {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
+      {commitConfirm && !playing && (
+        <CommitConfirm
+          onConfirm={() => startPlayback('startCommit')}
+          onCancel={() => setCommitConfirm(false)}
+        />
+      )}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
@@ -469,7 +497,7 @@ export function App({ start, onTitle }: Props) {
             inputMode={inputMode}
             speed={speed}
             onTrial={() => startPlayback('startTrial')}
-            onCommit={() => startPlayback('startCommit')}
+            onCommit={() => setCommitConfirm(true)}
             onSpeedChange={setSpeed}
           />
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}

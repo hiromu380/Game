@@ -3,7 +3,7 @@
  *
  * タイトルを出したらすぐ、裏でゲーム本体と最新の相場を読み込み始める。
  */
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { GameStart } from './App';
 import { loadGame, type GameModule } from './boot/loadGame';
 import { useI18n } from './i18n';
@@ -17,6 +17,9 @@ import { loadRun } from './state/saveStore';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
 
+/** コレクション（開いたときに読み込む。タイトル画面を軽く保つため） */
+const CollectionScreen = lazy(() => import('./ui/title/CollectionScreen'));
+
 /** ゲーム画面へ進む要求（start が null なら通常ラン = 保存済みの続き or 新規） */
 type Request = { start: GameStart | null };
 
@@ -28,6 +31,7 @@ export function Root() {
   const [request, setRequest] = useState<Request | null>(null);
   const [dailyOpen, setDailyOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [collectionOpen, setCollectionOpen] = useState(false);
   /** 引き継げる体験版のデータ（製品版の初回起動時だけ。答えたら null） */
   const [demoMeta, setDemoMeta] = useState<MetaProgress | null>(null);
 
@@ -57,8 +61,14 @@ export function Root() {
         hasSavedRun={loadRun() !== null}
         onPlay={() => setRequest({ start: null })}
         onDaily={() => setDailyOpen(true)}
+        onCollection={() => setCollectionOpen(true)}
         onSettings={() => setSettingsOpen(true)}
       />
+      {collectionOpen && (
+        <Suspense fallback={null}>
+          <CollectionScreen onClose={() => setCollectionOpen(false)} />
+        </Suspense>
+      )}
       {loadFailed && (
         <p className="title__error" role="alert">
           {t('title.loadFailed')}

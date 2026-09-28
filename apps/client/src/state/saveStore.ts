@@ -57,7 +57,11 @@ export function saveGame(
   }
 }
 
-/** 保存されたランだけを読み込む */
+/**
+ * 続きから遊べる保存済みのランを読み込む
+ * 終わったラン（ノルマ未達・諦めた）は続きがないので null（タイトルは「はじめから」になる）
+ */
 export function loadRun(storage = defaultStorage()): RunState | null {
-  return loadSave(storage)?.run ?? null;
+  const run = loadSave(storage)?.run ?? null;
+  return run && run.phase !== 'failed' ? run : null;
 }

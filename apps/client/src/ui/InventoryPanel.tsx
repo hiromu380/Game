@@ -13,17 +13,37 @@ interface Props {
   inventory: RunState['inventory'];
   selection: Selection;
   disabled: boolean;
+  /** 盤面にパーツが1つでもあるか（「全部戻す」の有効・無効） */
+  boardHasParts: boolean;
   onSelect: (partId: PartId) => void;
+  onReturnAll: () => void;
 }
 
-export function InventoryPanel({ rules, inventory, selection, disabled, onSelect }: Props) {
+export function InventoryPanel({
+  rules,
+  inventory,
+  selection,
+  disabled,
+  boardHasParts,
+  onSelect,
+  onReturnAll,
+}: Props) {
   const { t } = useI18n();
   const items = PART_IDS.filter((id) => (inventory[id] ?? 0) > 0);
   const selectedId = selection?.kind === 'inventory' ? selection.partId : null;
 
   return (
     <section className="panel" data-panel="inventory">
-      <h2 className="panel__title">{t('inventory.title')}</h2>
+      <div className="panel__header">
+        <h2 className="panel__title">{t('inventory.title')}</h2>
+        <button
+          className="button--small button--ghost"
+          disabled={disabled || !boardHasParts}
+          onClick={onReturnAll}
+        >
+          {t('inventory.returnAll')}
+        </button>
+      </div>
       {items.length === 0 ? (
         <p className="panel__hint">{t('inventory.empty')}</p>
       ) : (

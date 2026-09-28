@@ -1,11 +1,11 @@
 /**
- * ボスシフトの表示: 夜は「適用中のルール」、同じ日の朝・昼は「今夜の予告」を出す
+ * ボスシフトの表示: 夜は「適用中のルール」、同じ日の朝・昼は「夜シフトの予告」を出す
  */
 import type { BossPlanEntry, RunState } from '@chain-factory/sim';
 import { useI18n, type TranslateFn } from '../i18n';
 import { BOSS_ICONS } from '../assets/manifest';
 
-/** 今表示すべきボス情報（適用中 or 今夜の予告）。なければ null */
+/** 今表示すべきボス情報（適用中 or 夜シフトの予告）。なければ null */
 export function findBossToShow(run: RunState): { entry: BossPlanEntry; isNow: boolean } | null {
   const now = run.config.bossPlan[run.shiftIndex];
   if (now) return { entry: now, isNow: true };
@@ -58,7 +58,7 @@ export function BossNotice({ run }: { run: RunState }) {
         <div className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}>
           <img className="boss-notice__icon" src={BOSS_ICONS[boss.entry.id]} alt="" />
           <span className="boss-notice__label">
-            {boss.isNow ? t('boss.now') : t('boss.tonight')}
+            {boss.isNow ? t('boss.now') : t('boss.upcoming')}
           </span>
           <strong>{t(`boss.${boss.entry.id}.name`)}</strong>
           <span className="boss-notice__desc">{describeBoss(t, run, boss.entry)}</span>

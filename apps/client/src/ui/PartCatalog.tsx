@@ -1,7 +1,6 @@
 /**
- * パーツ一覧（このランのショップに並びうるパーツ）: 価格・レア度・出やすさ・効果
+ * パーツ一覧（このランのショップに並びうるパーツ）: 価格・レア度・効果
  *
- * 出やすさは、ショップの抽選の重み（RunConfig の shopPool）から計算した「1枠あたりの出る確率」。
  * まだ解放していないパーツは、解放の条件と一緒に薄く表示する（体験版では「製品版で使える」）。
  */
 import {
@@ -11,6 +10,7 @@ import {
   type PartId,
   type RuleSet,
 } from '@chain-factory/sim';
+import { createPortal } from 'react-dom';
 import { EDITION_CONFIG } from '../config/edition';
 import { useI18n } from '../i18n';
 import { describeCondition } from './MetaPanel';
@@ -27,7 +27,6 @@ const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
 
 export function PartCatalog({ economy, rules, onClose }: Props) {
   const { t, formatScore } = useI18n();
-  const total = economy.shopPool.reduce((sum, p) => sum + p.weight, 0);
   const available = [...economy.shopPool].sort(
     (a, b) =>
       RARITY_ORDER[BALANCE.parts[a.partId].rarity ?? 'common'] -
@@ -38,13 +37,14 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
   const locked = PART_IDS.filter((id) => !inPool.has(id) && BALANCE.parts[id].rarity !== null);
   const unlockOf = (id: PartId) => BALANCE.meta.partUnlocks.find((u) => u.partId === id);
 
-  return (
+  // ショップの中（盤面の大きさの基準になる .layout の中）から開くので、固定配置がずれないよう body 直下に出す
+  return createPortal(
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__body panel catalog" onClick={(e) => e.stopPropagation()}>
         <h2 className="panel__title">{t('catalog.title')}</h2>
         <p className="panel__hint">{t('catalog.hint', { offers: economy.offersPerShift })}</p>
         <ul className="catalog__list">
-          {available.map(({ partId, weight }) => {
+          {available.map(({ partId }) => {
             const rarity = BALANCE.parts[partId].rarity ?? 'common';
             return (
               <li key={partId} className="catalog__item">
@@ -57,10 +57,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
                   <div className="catalog__desc">{describePart(t, partId, rules)}</div>
                 </div>
                 <div className="catalog__meta">
-                  <div>{t('catalog.price', { price: economy.prices[partId] })}</div>
-                  <div className="catalog__rate">
-                    {t('catalog.rate', { rate: Math.round((weight / total) * 1000) / 10 })}
-                  </div>
+                  {t('catalog.price', { price: economy.prices[partId] })}
                 </div>
               </li>
             );
@@ -91,6 +88,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
