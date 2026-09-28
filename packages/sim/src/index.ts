@@ -13,8 +13,9 @@ export {
   type ShiftSpec,
 } from './balance';
 
+export { SIM_VERSION } from './version';
 export * from './core/score';
-export { createPrng, deriveSeed, type Prng } from './core/prng';
+export { createPrng, deriveSeed, hashString, type Prng } from './core/prng';
 export * from './core/direction';
 export * from './core/board';
 
@@ -32,9 +33,16 @@ export {
   type RunConfig,
 } from './config/runConfig';
 export { BOSS_MODIFIERS, getShiftEconomy, getShiftRules } from './config/bossModifiers';
+export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
 
 export * from './run/types';
-export { createRun, type CreateRunOptions } from './run/create';
+export {
+  createDailyRun,
+  createRun,
+  createRunWithConfig,
+  type CreateRunOptions,
+} from './run/create';
+export { applyOp, isRunOp, replayOps, type ReplayResult, type RunOp } from './run/ops';
 export {
   buyOffer,
   getRefund,

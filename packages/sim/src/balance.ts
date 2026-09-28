@@ -128,6 +128,14 @@ export interface Balance {
     clearReward: number;
   };
 
+  /** デイリーチャレンジ（1日＝3シフトの短縮版。全員同じ条件） */
+  daily: {
+    /** シフト表（朝・昼・夜。夜はボス） */
+    shifts: ShiftSpec[];
+    /** 「今日の特殊ルール」の候補（ボス修正ルールの仕組みを流用し、3シフト全体にかける） */
+    specialRules: BossModifierId[];
+  };
+
   /** メタ進行（新パーツの解放・工場拡張） */
   meta: {
     /** 最初からショップに並ぶパーツ */
@@ -228,6 +236,16 @@ export const BALANCE: Balance = {
     { quota: 8000, budget: 14, clearReward: 0, kind: 'boss' },
   ],
   shiftsPerDay: 3,
+
+  daily: {
+    // 仮の値。デイリーは全パーツが出るので、通常ランの1日目より少し高め
+    shifts: [
+      { quota: 5, budget: 14, clearReward: 5, kind: 'normal' },
+      { quota: 20, budget: 10, clearReward: 5, kind: 'normal' },
+      { quota: 60, budget: 10, clearReward: 0, kind: 'boss' },
+    ],
+    specialRules: ['lowOil', 'repairWork', 'strictInspection', 'shortShift', 'partShortage'],
+  },
 
   overtime: {
     quotaGrowthPercent: 250,

@@ -57,18 +57,21 @@ export const BOSS_MODIFIERS: Record<BossModifierId, BossModifier> = {
 
 /** そのシフトで使う RuleSet（ボス修正込み） */
 export function getShiftRules(config: RunConfig, shiftIndex: number): RuleSet {
-  const entry = config.bossPlan[shiftIndex];
-  if (!entry) return config.rules;
-  return (
-    BOSS_MODIFIERS[entry.id].applyRules?.(config.rules, entry, config.bossParams) ?? config.rules
-  );
+  // ラン全体の修正（デイリーの特殊ルール）→ そのシフトのボス修正 の順に重ねる
+  let rules = config.rules;
+  for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
+    if (!entry) continue;
+    rules = BOSS_MODIFIERS[entry.id].applyRules?.(rules, entry, config.bossParams) ?? rules;
+  }
+  return rules;
 }
 
 /** そのシフトで使う経済設定（ボス修正込み） */
 export function getShiftEconomy(config: RunConfig, shiftIndex: number): EconomyConfig {
-  const entry = config.bossPlan[shiftIndex];
-  if (!entry) return config.economy;
-  return (
-    BOSS_MODIFIERS[entry.id].applyEconomy?.(config.economy, config.bossParams) ?? config.economy
-  );
+  let economy = config.economy;
+  for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
+    if (!entry) continue;
+    economy = BOSS_MODIFIERS[entry.id].applyEconomy?.(economy, config.bossParams) ?? economy;
+  }
+  return economy;
 }

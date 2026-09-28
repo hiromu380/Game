@@ -9,6 +9,7 @@
 import { BALANCE, type Balance, type BossModifierId, type ShiftSpec } from '../balance';
 import { createPrng, type Prng } from '../core/prng';
 import { PART_IDS, type PartId, type RuleSet } from '../types';
+import { SIM_VERSION } from '../version';
 import { createRuleSet } from './rules';
 
 /** ショップ・売却・リロールの設定 */
@@ -46,6 +47,25 @@ export interface RunConfig {
   /** ボス修正ルールの効果量（balance.ts の boss の写し） */
   bossParams: Balance['boss'];
   starterKit: Partial<Record<PartId, number>>;
+  /** このランを作ったシミュレーションのバージョン（デイリーの提出で照合する） */
+  simVersion: string;
+  /**
+   * 本番シードの決め方
+   * - derived: ランシードから派生させる（通常ラン。クライアントだけで遊べる）
+   * - external: 外から渡す（デイリー。サーバーが秘密値から作ったシードを渡す）
+   */
+  commitSeedMode: 'derived' | 'external';
+  /** ラン全体にかかる修正ルール（デイリーの「今日の特殊ルール」。通常ランは null） */
+  globalModifier: BossPlanEntry | null;
+  /**
+   * ランの種類
+   * - normal: 通常ラン（オフラインで完結・ランキング対象外）
+   * - daily: デイリー本番（本番シードはサーバーから受け取る）
+   * - practice: デイリーの練習（条件は同じ、本番シードはクライアント側）
+   */
+  mode: 'normal' | 'daily' | 'practice';
+  /** 延長戦に進めるか（通常ランのみ） */
+  overtimeAllowed: boolean;
 }
 
 /**
@@ -106,6 +126,11 @@ export function buildRunConfig({
     bossPlan: planBosses(balance, board, bossSeed),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },
     starterKit: { ...balance.economy.starterKit },
+    simVersion: SIM_VERSION,
+    commitSeedMode: 'derived',
+    globalModifier: null,
+    mode: 'normal',
+    overtimeAllowed: true,
   };
 }
 

@@ -74,7 +74,9 @@ export type RunError =
   | 'cellBlocked'
   | 'outOfBoard'
   | 'cannotSell'
-  | 'rerollDisabled';
+  | 'rerollDisabled'
+  /** 本番シードを外から渡す設定（デイリー）なのに渡されなかった */
+  | 'seedRequired';
 
 /** シフトを確定した結果 */
 export interface ShiftOutcome {

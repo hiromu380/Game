@@ -59,14 +59,20 @@ export function runTrial(state: RunState): { state: RunState; result: SimResult 
  * スイッチを押してシフトを確定する（本番シードを使う）。
  * ノルマ達成なら報酬・収入と次シフトの予算を受け取り次へ（最終シフトならクリア）。未達ならラン終了。
  */
-export function commitShift(state: RunState): CommitResult | { error: RunError } {
+export function commitShift(
+  state: RunState,
+  options: { seed?: number } = {},
+): CommitResult | { error: RunError } {
   if (state.phase !== 'building') return { error: 'notBuilding' };
 
-  const result = simulate({
-    board: state.board,
-    seed: commitSeed(state.seed, state.shiftIndex),
-    rules: getCurrentRules(state),
-  });
+  // デイリーは本番シードをサーバーから受け取る（クライアントでは計算できない）
+  let seed = options.seed;
+  if (seed === undefined) {
+    if (state.config.commitSeedMode === 'external') return { error: 'seedRequired' };
+    seed = commitSeed(state.seed, state.shiftIndex);
+  }
+
+  const result = simulate({ board: state.board, seed, rules: getCurrentRules(state) });
   const spec = getCurrentShift(state);
   const cleared = scoreCompare(result.score, scoreOf(spec.quota)) >= 0;
   const outcome: ShiftOutcome = {
@@ -147,7 +153,7 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
  * ノルマは毎シフト overtime.quotaGrowthPercent% ずつ上がり、1日の最後のシフトはボスになる
  */
 export function startOvertime(state: RunState): RunState | null {
-  if (state.phase !== 'cleared' || state.overtime) return null;
+  if (state.phase !== 'cleared' || state.overtime || !state.config.overtimeAllowed) return null;
   const extended = appendOvertimeDay(
     { ...state, overtime: true, phase: 'building' },
     state.shiftIndex + 1,
