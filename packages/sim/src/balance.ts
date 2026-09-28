@@ -142,14 +142,14 @@ export const BALANCE: Balance = {
     press: { price: 4, maxActivations: 1, rarity: 'uncommon' },
     splitter: { price: 3, maxActivations: 1, rarity: 'common' },
     barrel: { price: 5, maxActivations: 1, rarity: 'uncommon' },
-    rebooter: { price: 6, maxActivations: 1, rarity: 'rare' },
+    rebooter: { price: 4, maxActivations: 1, rarity: 'rare' },
     // フェーズ2で追加
-    merger: { price: 5, maxActivations: 2, rarity: 'uncommon' },
+    merger: { price: 3, maxActivations: 2, rarity: 'uncommon' },
     chainMeter: { price: 7, maxActivations: 1, rarity: 'rare' },
     spreader: { price: 3, maxActivations: 1, rarity: 'common' },
     copier: { price: 4, maxActivations: 1, rarity: 'uncommon' },
-    reflector: { price: 2, maxActivations: 2, rarity: 'common' },
-    turntable: { price: 4, maxActivations: 4, rarity: 'uncommon' },
+    reflector: { price: 1, maxActivations: 2, rarity: 'common' },
+    turntable: { price: 2, maxActivations: 4, rarity: 'uncommon' },
     // 信号には反応しない（常時効果のみ）ので発動回数は 0
     oiler: { price: 6, maxActivations: 0, rarity: 'rare' },
     coil: { price: 2, maxActivations: 1, rarity: 'common' },
@@ -177,30 +177,30 @@ export const BALANCE: Balance = {
     offersPerShift: 5,
     reroll: { baseCost: 1, costStep: 1 },
     refundPercent: 50,
-    starterKit: { switch: 1, dock: 1 },
+    starterKit: { switch: 1, dock: 2, gear: 1 },
   },
 
   // 仮の値。`pnpm balance` のレポートを見て調整する
   shifts: [
     // 1日目
-    { quota: 5, budget: 12, clearReward: 4, kind: 'normal' },
-    { quota: 15, budget: 8, clearReward: 4, kind: 'normal' },
-    { quota: 40, budget: 8, clearReward: 6, kind: 'boss' },
+    { quota: 3, budget: 14, clearReward: 5, kind: 'normal' },
+    { quota: 10, budget: 10, clearReward: 5, kind: 'normal' },
+    { quota: 25, budget: 10, clearReward: 6, kind: 'boss' },
     // 2日目
-    { quota: 100, budget: 10, clearReward: 4, kind: 'normal' },
-    { quota: 250, budget: 10, clearReward: 4, kind: 'normal' },
-    { quota: 600, budget: 10, clearReward: 6, kind: 'boss' },
+    { quota: 60, budget: 12, clearReward: 5, kind: 'normal' },
+    { quota: 140, budget: 12, clearReward: 5, kind: 'normal' },
+    { quota: 300, budget: 12, clearReward: 6, kind: 'boss' },
     // 3日目
-    { quota: 1500, budget: 12, clearReward: 4, kind: 'normal' },
-    { quota: 4000, budget: 12, clearReward: 4, kind: 'normal' },
-    { quota: 10000, budget: 12, clearReward: 0, kind: 'boss' },
+    { quota: 700, budget: 14, clearReward: 5, kind: 'normal' },
+    { quota: 1600, budget: 14, clearReward: 5, kind: 'normal' },
+    { quota: 3500, budget: 14, clearReward: 0, kind: 'boss' },
   ],
   shiftsPerDay: 3,
 
   boss: {
     candidates: ['lowOil', 'repairWork', 'strictInspection', 'shortShift', 'partShortage'],
     lowOilConveyorDelta: -1,
-    repairWorkCells: 3,
+    repairWorkCells: 2,
     strictInspectionDivisor: 2,
     shortShiftTickLimit: 30,
     partShortageOffersDelta: -2,

@@ -125,8 +125,8 @@ describe('購入・配置・回転', () => {
 
   it('配置・回転ができ、手持ちがなければ置けない', () => {
     let run = minimalRun();
-    expect(run.inventory).toEqual({});
-    expect(placePart(run, 'dock', 2, 0, 1)).toEqual({ ok: false, error: 'notInInventory' });
+    expect(run.inventory.switch).toBeUndefined();
+    expect(placePart(run, 'barrel', 2, 0, 1)).toEqual({ ok: false, error: 'notInInventory' });
     run = unwrap(rotatePart(run, 1, 0));
     expect(run.board.cells[1]).toEqual({ id: 'dock', dir: 2 });
   });
@@ -139,7 +139,7 @@ describe('手持ちに戻す・売却', () => {
     run = unwrap(returnPart(run, 1, 0));
     run = unwrap(placePart(run, 'dock', 3, 3, 1));
     run = unwrap(returnPart(run, 3, 3));
-    expect(run.inventory.dock).toBe(1);
+    expect(run.inventory.dock).toBe(BALANCE.economy.starterKit.dock);
     expect(run.budget).toBe(budget);
   });
 
@@ -151,7 +151,8 @@ describe('手持ちに戻す・売却', () => {
     expect(getRefund(run, 'dock')).toBe(
       Math.floor((BALANCE.parts.dock.price * BALANCE.economy.refundPercent) / 100),
     );
-    expect(run.inventory.dock).toBeUndefined();
+    // 売ったパーツは手持ちに戻らない（初期キットで配られた残りだけが残る）
+    expect(run.inventory.dock ?? 0).toBe((BALANCE.economy.starterKit.dock ?? 0) - 1);
   });
 
   it('スイッチ（価格0）は売却できない', () => {
