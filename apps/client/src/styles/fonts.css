@@ -1,0 +1,19 @@
+/*
+ * 同梱フォント（M PLUS Rounded 1c・SIL Open Font License 1.1。ライセンス文は src/assets/fonts/OFL.txt）
+ * 使う文字だけに絞ったもの（tools/fonts/subset.mjs で作る）。収録外の文字は FONT_STACK の日本語フォントで表示される
+ */
+@font-face {
+  font-family: 'M PLUS Rounded 1c';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/m-plus-rounded-1c-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c';
+  font-style: normal;
+  /* 700・900 の指定にもこの太さを使う */
+  font-weight: 700 900;
+  font-display: swap;
+  src: url('../assets/fonts/m-plus-rounded-1c-800.woff2') format('woff2');
+}
