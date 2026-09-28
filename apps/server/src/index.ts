@@ -1,12 +1,13 @@
 /**
  * Cloudflare Workers のエントリポイント
  *
- * Cloudflare 固有のもの（D1・Rate Limiting バインディング・Cron の scheduled）はこのファイルと
+ * Cloudflare 固有のもの（D1・Rate Limiting バインディング・Turnstile・Cron の scheduled）はこのファイルと
  * adapters/ だけに閉じ込める。ドメイン・ルーティングは Workers に依存しない。
  *
  * 静的ファイル（Web 版クライアント）は wrangler.jsonc の assets で配信し、/api/* だけがこの Worker に来る。
  */
 import { drizzle } from 'drizzle-orm/d1';
+import { turnstileVerifier } from './adapters/humanCheck';
 import { cloudflareRateLimiter } from './adapters/rateLimiter';
 import { createApp, type AppDeps } from './app';
 import * as schema from './db/schema';
@@ -26,10 +27,12 @@ function domainContext(env: Env): DomainContext {
 const app = createApp({
   resolveDeps: (raw): AppDeps => {
     const env = raw as Env;
+    const ctx = domainContext(env);
     return {
-      ctx: domainContext(env),
+      ctx,
       readLimiter: cloudflareRateLimiter(env.RATE_LIMIT_READ),
       writeLimiter: cloudflareRateLimiter(env.RATE_LIMIT_WRITE),
+      humanVerifier: turnstileVerifier(ctx.config.turnstileSecretKey),
     };
   },
   corsOrigins: (raw) => readConfig(raw as Env).corsOrigins,

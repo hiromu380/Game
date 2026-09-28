@@ -29,6 +29,11 @@ export function nextDailyId(dailyId: string): string {
   return new Date(Date.parse(`${dailyId}T00:00:00.000Z`) + DAY_MS).toISOString().slice(0, 10);
 }
 
+/** 前日の ID */
+export function previousDailyId(dailyId: string): string {
+  return new Date(Date.parse(`${dailyId}T00:00:00.000Z`) - DAY_MS).toISOString().slice(0, 10);
+}
+
 /** 通し番号（epochDailyId を 1 として数える。シェア文の「#123」に使う） */
 export function dailyNumber(dailyId: string, epochDailyId: string): number {
   const days =

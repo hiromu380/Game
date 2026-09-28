@@ -3,6 +3,9 @@
  *
  * 使い方（apps/server で）:
  *   pnpm job daily               … wrangler dev のローカル D1 に対して今日のデイリーを用意
+ *   pnpm job market              … 今日の相場を計算（前日の集計から）
+ *   pnpm job ip-purge            … 保存期間を過ぎた IP ハッシュを消す
+ *   pnpm job all                 … Cron と同じ順番ですべて
  *   pnpm job daily --db x.sqlite … 任意の SQLite ファイルに対して実行（マイグレーションも流す）
  *   pnpm job daily --at 2026-10-05T00:00:00Z … 時刻を指定して実行
  *
@@ -13,12 +16,16 @@ import { join } from 'node:path';
 import { applyMigrations, openNodeSqlite } from '../src/adapters/nodeSqlite';
 import type { DomainContext } from '../src/domain/context';
 import { runDailyJob } from '../src/domain/daily/dailyJob';
+import { runMarketJob } from '../src/domain/market/market';
+import { runIpPurgeJob } from '../src/domain/players/privacy';
 import { readConfig, type Env } from '../src/env';
 import { runScheduledJobs } from '../src/jobs/scheduled';
 import { createDrizzleRepositories } from '../src/repositories/drizzle';
 
 const JOBS: Record<string, (ctx: DomainContext) => Promise<unknown>> = {
   daily: runDailyJob,
+  market: runMarketJob,
+  'ip-purge': runIpPurgeJob,
   /** Cron と同じ順番ですべて実行 */
   all: runScheduledJobs,
 };

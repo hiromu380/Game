@@ -9,6 +9,11 @@ import type { PartId, RunConfig, RunOp } from '@chain-factory/sim';
 
 // ---- プレイヤー ----
 
+/** 匿名登録（人間確認のトークンを添える） */
+export interface RegisterPlayerRequest {
+  turnstileToken: string;
+}
+
 export interface RegisterPlayerResponse {
   playerId: string;
   /** 以後の認証に使う秘密トークン（サーバーはハッシュだけを保存する） */
@@ -114,6 +119,8 @@ export interface MarketResponse {
 export type ApiErrorCode =
   | 'badRequest'
   | 'unauthorized'
+  /** 人間確認（Turnstile）に失敗した（登録時のみ） */
+  | 'humanCheckFailed'
   | 'rateLimited'
   | 'notFound'
   | 'dailyClosed'

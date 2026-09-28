@@ -19,6 +19,7 @@ export class DomainError extends Error {
     readonly code:
       | 'badRequest'
       | 'unauthorized'
+      | 'humanCheckFailed'
       | 'notFound'
       | 'dailyClosed'
       | 'alreadyPlayed'

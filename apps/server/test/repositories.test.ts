@@ -25,7 +25,14 @@ const implementations: [string, () => Repositories][] = [
 const DAY = '2026-10-01';
 
 async function addPlayer(repos: Repositories, id: string, hidden = false) {
-  await repos.players.create({ id, tokenHash: 'h', displayName: `P${id}`, hidden, createdAt: 0 });
+  await repos.players.create({
+    id,
+    tokenHash: 'h',
+    displayName: `P${id}`,
+    hidden,
+    createdAt: 0,
+    registeredIpHash: null,
+  });
 }
 
 function result(

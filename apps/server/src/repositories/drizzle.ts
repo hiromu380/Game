@@ -9,7 +9,7 @@
  * 桁数が同じ数字の文字列は、辞書順 = 数値の大小になる（数字だけなので照合順序の違いも出ない）。
  * そのため head が同じでも score_text の比較で完全な順位が SQL だけで決まる。
  */
-import { and, asc, desc, eq, gt, lt, or, sql, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, isNotNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { PartId, RunConfig, RunOp } from '@chain-factory/sim';
 import type { RankKey } from '@chain-factory/shared';
@@ -73,6 +73,14 @@ export function createDrizzleRepositories(db: AsyncSqliteDb): Repositories {
       },
       async updateName(id, displayName) {
         await db.update(players).set({ displayName }).where(eq(players.id, id));
+      },
+      async clearIpHashesBefore(before) {
+        const cleared = await db
+          .update(players)
+          .set({ registeredIpHash: null })
+          .where(and(lt(players.createdAt, before), isNotNull(players.registeredIpHash)))
+          .returning({ id: players.id });
+        return cleared.length;
       },
     },
 

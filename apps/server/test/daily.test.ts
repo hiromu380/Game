@@ -22,7 +22,7 @@ import type { DomainContext } from '../src/domain/context';
 import { ensureDaily } from '../src/domain/daily/dailyJob';
 import { createDrizzleRepositories } from '../src/repositories/drizzle';
 import { createMemoryRepositories } from '../src/repositories/memory';
-import { DAY, NOON, testApi, testContext } from './helpers';
+import { DAY, NOON, REGISTER_BODY, testApi, testContext } from './helpers';
 
 /** スイッチ → 出荷口 の最小の盤面（どのシードでも出荷量 1） */
 const SIMPLE_OPS: RunOp[] = [
@@ -272,7 +272,7 @@ describe('プレイヤー・レート制限', () => {
 
   it('登録時に表示名が自動でつく', async () => {
     const { ctx } = testContext();
-    const res = await testApi(ctx).call('POST', '/players');
+    const res = await testApi(ctx).call('POST', '/players', REGISTER_BODY);
     expect(res.json.displayName).toMatch(/^Bolt-[0-9a-f]{4}$/);
   });
 
@@ -298,9 +298,9 @@ describe('プレイヤー・レート制限', () => {
   it('書き込みの上限を超えると 429', async () => {
     const { ctx } = testContext();
     const api = testApi(ctx, { write: memoryRateLimiter(2, 60_000, () => NOON) });
-    expect((await api.call('POST', '/players')).status).toBe(200);
-    expect((await api.call('POST', '/players')).status).toBe(200);
-    expect(await api.call('POST', '/players')).toEqual({
+    expect((await api.call('POST', '/players', REGISTER_BODY)).status).toBe(200);
+    expect((await api.call('POST', '/players', REGISTER_BODY)).status).toBe(200);
+    expect(await api.call('POST', '/players', REGISTER_BODY)).toEqual({
       status: 429,
       json: { error: 'rateLimited' },
     });

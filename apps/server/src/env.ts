@@ -21,6 +21,10 @@ export interface Env {
   DAILY_EPOCH?: string;
   /** CORS を許可するオリジン（カンマ区切り）。同一オリジン配信なら不要 */
   CORS_ORIGINS?: string;
+  /** Turnstile の秘密キー（Secrets。ローカルはテスト用キー） */
+  TURNSTILE_SECRET_KEY: string;
+  /** 登録時の IP ハッシュの保存日数 */
+  IP_HASH_RETENTION_DAYS?: string;
 }
 
 export interface AppConfig {
@@ -28,10 +32,13 @@ export interface AppConfig {
   dailyOffsetMinutes: number;
   dailyEpoch: string;
   corsOrigins: string[];
+  turnstileSecretKey: string;
+  ipHashRetentionDays: number;
 }
 
 const DEFAULT_OFFSET_MINUTES = 540;
 const DEFAULT_EPOCH = '2026-09-01';
+const DEFAULT_IP_HASH_RETENTION_DAYS = 30;
 
 /** 生の環境変数を AppConfig に読み替える（不足・不正な値はここで早めにエラーにする） */
 export function readConfig(
@@ -44,7 +51,16 @@ export function readConfig(
   }
   const offset = Number(env.DAILY_OFFSET_MINUTES ?? DEFAULT_OFFSET_MINUTES);
   if (!Number.isInteger(offset)) throw new Error('DAILY_OFFSET_MINUTES must be an integer');
+  if (!env.TURNSTILE_SECRET_KEY) {
+    throw new Error('TURNSTILE_SECRET_KEY must be set. See apps/server/.dev.vars.example');
+  }
+  const retention = Number(env.IP_HASH_RETENTION_DAYS ?? DEFAULT_IP_HASH_RETENTION_DAYS);
+  if (!Number.isInteger(retention) || retention < 0) {
+    throw new Error('IP_HASH_RETENTION_DAYS must be a non-negative integer');
+  }
   return {
+    turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
+    ipHashRetentionDays: retention,
     masterSecret: env.DAILY_MASTER_SECRET,
     dailyOffsetMinutes: offset,
     dailyEpoch: env.DAILY_EPOCH ?? DEFAULT_EPOCH,

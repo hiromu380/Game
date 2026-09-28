@@ -9,12 +9,18 @@ import { NAME_RULES } from '../../config/names';
 import { randomHex, sha256Hex, timingSafeEqual } from '../crypto';
 import { DomainError, type DomainContext } from '../context';
 import type { PlayerRecord } from '../../repositories/types';
+import { hashIp } from './privacy';
 
 const ID_BYTES = 12;
 const SECRET_BYTES = 24;
 
+/**
+ * 匿名登録。人間確認（Turnstile）は呼び出し側（app.ts）で済ませてから呼ぶ
+ * @param ip 送信元 IP（HMAC にして保存する。不明なら null）
+ */
 export async function registerPlayer(
   ctx: DomainContext,
+  ip: string | null,
 ): Promise<{ playerId: string; token: string; displayName: string }> {
   const playerId = randomHex(ID_BYTES);
   const secret = randomHex(SECRET_BYTES);
@@ -25,6 +31,7 @@ export async function registerPlayer(
     displayName,
     hidden: false,
     createdAt: ctx.now(),
+    registeredIpHash: ip ? await hashIp(ctx.config.masterSecret, ip) : null,
   });
   return { playerId, token: `${playerId}.${secret}`, displayName };
 }

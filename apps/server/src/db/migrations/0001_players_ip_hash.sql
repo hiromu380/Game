@@ -1,0 +1,1 @@
+ALTER TABLE `players` ADD `registered_ip_hash` text;

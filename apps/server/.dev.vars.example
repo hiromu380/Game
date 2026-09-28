@@ -1,5 +1,7 @@
 # ローカル開発用の秘密値の見本。.dev.vars にコピーして値を変えて使う（.dev.vars は git 管理外）
-# 本番は `wrangler secret put DAILY_MASTER_SECRET` で設定する
+# 本番は `wrangler secret put <名前>` で設定する（docs/ops/deploy.md）
 DAILY_MASTER_SECRET=local-dev-secret-change-me-0123456789abcdef
-# ローカルで Vite（別オリジン）から呼ぶ場合
-CORS_ORIGINS=http://localhost:5173
+# Turnstile: Cloudflare 公式のテスト用秘密キー（常に成功する）。本番は管理画面で発行したキー
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+# 開発時は Vite のプロキシで同一オリジンになるので CORS は不要。別オリジンから呼ぶときだけ指定する
+# CORS_ORIGINS=http://localhost:5173

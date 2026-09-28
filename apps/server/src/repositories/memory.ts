@@ -50,6 +50,16 @@ export function createMemoryRepositories(): Repositories {
         const p = players.get(id);
         if (p) p.displayName = displayName;
       },
+      async clearIpHashesBefore(before) {
+        let count = 0;
+        for (const p of players.values()) {
+          if (p.createdAt < before && p.registeredIpHash !== null) {
+            p.registeredIpHash = null;
+            count++;
+          }
+        }
+        return count;
+      },
     },
     dailies: {
       async find(id) {

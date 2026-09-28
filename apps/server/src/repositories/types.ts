@@ -15,6 +15,8 @@ export interface PlayerRecord {
   /** 管理用: true ならランキングに表示しない（不適切な名前など） */
   hidden: boolean;
   createdAt: number;
+  /** 登録時の IP の HMAC（保存期間を過ぎると null） */
+  registeredIpHash: string | null;
 }
 
 export interface DailyRecord {
@@ -71,6 +73,8 @@ export interface PlayerRepository {
   create(player: PlayerRecord): Promise<void>;
   findById(id: string): Promise<PlayerRecord | null>;
   updateName(id: string, displayName: string): Promise<void>;
+  /** createdAt が before より前のプレイヤーの IP ハッシュを消し、消した件数を返す */
+  clearIpHashesBefore(before: number): Promise<number>;
 }
 
 export interface DailyRepository {

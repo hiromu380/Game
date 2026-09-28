@@ -172,6 +172,7 @@
   "error.seedRequired": "本番シードの取得に失敗しました",
   "error.online.badRequest": "リクエストが正しくありません。画面を再読み込みしてください",
   "error.online.unauthorized": "認証に失敗しました",
+  "error.online.humanCheckFailed": "人間確認に失敗しました。もう一度お試しください",
   "error.online.rateLimited": "アクセスが集中しています。少し待ってからもう一度お試しください",
   "error.online.notFound": "見つかりません",
   "error.online.dailyClosed": "このデイリーは締め切られました",

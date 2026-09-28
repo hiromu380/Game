@@ -6,11 +6,12 @@
  * - 秘密値はマスター秘密鍵から導き出すので DB には保存しない
  * - DB への書き込みは「なければ作る」
  *
- * 相場は「前日の購入数」から決まるため、前日が締め切られてからでないと当日分を作れない。
+ * 相場は「前日の購入率」から決まるため、前日が締め切られてからでないと当日分を作れない。
  * そのため翌日分を前もって作ることはせず、切り替え時刻の Cron と、API の初回アクセスの両方で呼ぶ。
  */
 import { buildDailyConfig, type PartId, SIM_VERSION } from '@chain-factory/sim';
 import type { DomainContext } from '../context';
+import { ensureMarket } from '../market/market';
 import type { DailyRecord } from '../../repositories/types';
 import { dailyIdAt, dailyNumber, dailyWindow } from './calendar';
 import { commitmentOf, deriveDailySecret } from './dailySecret';
@@ -20,9 +21,9 @@ export async function ensureDaily(ctx: DomainContext, dailyId: string): Promise<
   const existing = await ctx.repos.dailies.find(dailyId);
   if (existing) return existing;
 
-  const market = await ctx.repos.market.get(dailyId);
+  // その日の相場（なければ前日の集計から計算する）を価格として埋め込む
   const prices: Partial<Record<PartId, number>> = {};
-  for (const row of market ?? []) prices[row.partId] = row.price;
+  for (const row of await ensureMarket(ctx, dailyId)) prices[row.partId] = row.price;
 
   const secret = await deriveDailySecret(ctx.config.masterSecret, dailyId);
   const record: DailyRecord = {

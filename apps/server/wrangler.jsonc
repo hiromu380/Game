@@ -39,5 +39,9 @@
     "DAILY_EPOCH": "2026-09-01",
   },
 
+  // 1リクエストあたりの CPU 上限。計測（pnpm perf）で検証1回は通常 約0.6ms・理論上の最悪で 約80ms。
+  // 余裕を持たせて 500ms にする（既定の上限のままにしない: 料金の暴走防止）
+  "limits": { "cpu_ms": 500 },
+
   "observability": { "enabled": true },
 }

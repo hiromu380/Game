@@ -18,9 +18,11 @@ export const players = sqliteTable('players', {
   /** 1 ならランキングに出さない（管理用） */
   hidden: integer('hidden').notNull().default(0),
   createdAt: integer('created_at').notNull(),
+  /** 登録時の IP の HMAC（生の IP は保存しない）。保存期間を過ぎたらジョブが null にする */
+  registeredIpHash: text('registered_ip_hash'),
 });
 
-/** デイリーチャレンジ（1日1行。生成ジョブが前日までに作る） */
+/** デイリーチャレンジ（1日1行。切り替え直後に生成ジョブ or その日の最初のアクセスで作る） */
 export const dailies = sqliteTable('dailies', {
   /** 'YYYY-MM-DD' */
   id: text('id').primaryKey(),

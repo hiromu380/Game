@@ -172,6 +172,7 @@
   "error.seedRequired": "Could not get the shift seed",
   "error.online.badRequest": "Invalid request. Please reload the page",
   "error.online.unauthorized": "Authentication failed",
+  "error.online.humanCheckFailed": "Human verification failed. Please try again",
   "error.online.rateLimited": "Too many requests. Please wait a moment and try again",
   "error.online.notFound": "Not found",
   "error.online.dailyClosed": "This daily challenge has closed",

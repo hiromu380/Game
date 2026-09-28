@@ -8,7 +8,9 @@ import type { ApiError, ApiErrorCode } from '@chain-factory/shared';
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import type { HumanVerifier } from './adapters/humanCheck';
 import type { RateLimiter } from './adapters/rateLimiter';
 import { SERVER_LIMITS } from './config/server';
 import { DomainError, type DomainContext } from './domain/context';
@@ -20,6 +22,7 @@ import {
   startDaily,
 } from './domain/daily/dailyService';
 import { authenticate, registerPlayer, updateName } from './domain/players/players';
+import { getLatestMarket } from './domain/market/market';
 import { getRanking } from './domain/ranking/ranking';
 
 export interface AppDeps {
@@ -27,6 +30,8 @@ export interface AppDeps {
   /** 読み取り系（ランキングなど）と書き込み系（登録・本番）で別の上限 */
   readLimiter: RateLimiter;
   writeLimiter: RateLimiter;
+  /** 匿名登録時の人間確認（Turnstile） */
+  humanVerifier: HumanVerifier;
 }
 
 type AppEnv = { Variables: { deps: AppDeps } };
@@ -36,6 +41,7 @@ const STATUS: Record<ApiErrorCode, ContentfulStatusCode> = {
   invalidName: 400,
   invalidSubmission: 400,
   unauthorized: 401,
+  humanCheckFailed: 403,
   notFound: 404,
   alreadyPlayed: 409,
   simVersionMismatch: 409,
@@ -48,12 +54,12 @@ class RateLimitedError extends Error {}
 
 const fail = (c: Context, code: ApiErrorCode) => c.json<ApiError>({ error: code }, STATUS[code]);
 
-/** 送信元の識別子（レート制限のキー）。プロキシが付けるヘッダーを順に見る */
-function clientKey(c: Context): string {
+/** 送信元の IP（プロキシが付けるヘッダーを順に見る）。わからなければ null */
+function clientIp(c: Context): string | null {
   return (
     c.req.header('cf-connecting-ip') ??
     c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'unknown'
+    null
   );
 }
 
@@ -72,7 +78,10 @@ export function createApp(options: {
 }) {
   const app = new Hono<AppEnv>().basePath('/api');
 
-  // 別オリジン（ローカル開発の Vite など）から呼ぶ場合だけ CORS を許可する
+  // API の応答にもセキュリティヘッダーを付ける（静的ファイルは apps/client/public/_headers）
+  app.use('*', secureHeaders());
+
+  // CORS は既定では出さない（同一オリジン配信）。別オリジンから呼ぶ必要がある場合だけ、設定したオリジンを許可する
   app.use('*', async (c, next) => {
     const origins = options.corsOrigins?.(c.env) ?? [];
     if (origins.length === 0) return next();
@@ -91,7 +100,7 @@ export function createApp(options: {
   app.use('*', async (c, next) => {
     const { readLimiter, writeLimiter } = c.get('deps');
     const limiter = c.req.method === 'GET' ? readLimiter : writeLimiter;
-    if (!(await limiter.allow(clientKey(c)))) return fail(c, 'rateLimited');
+    if (!(await limiter.allow(`ip:${clientIp(c) ?? 'unknown'}`))) return fail(c, 'rateLimited');
     await next();
   });
 
@@ -119,7 +128,16 @@ export function createApp(options: {
   };
 
   // ---- プレイヤー ----
-  app.post('/players', async (c) => c.json(await registerPlayer(ctxOf(c))));
+  // 匿名登録は人間確認（Turnstile）を通ったときだけ
+  app.post('/players', async (c) => {
+    const body = (await readJson(c)) as { turnstileToken?: unknown };
+    const token = typeof body?.turnstileToken === 'string' ? body.turnstileToken : '';
+    const ip = clientIp(c);
+    if (!(await c.get('deps').humanVerifier.verify(token, ip))) {
+      throw new DomainError('humanCheckFailed');
+    }
+    return c.json(await registerPlayer(ctxOf(c), ip));
+  });
   app.put('/players/me/name', async (c) => {
     const player = await playerOf(c);
     const body = (await readJson(c)) as { displayName?: unknown };
@@ -146,6 +164,9 @@ export function createApp(options: {
     const me = auth ? await playerOf(c).catch(() => null) : null;
     return c.json(await getRanking(ctxOf(c), c.req.param('id'), me));
   });
+
+  // ---- 相場（通常ランの開始時の価格・ショップの前日比の表示に使う） ----
+  app.get('/market/latest', async (c) => c.json(await getLatestMarket(ctxOf(c))));
 
   app.notFound((c) => fail(c, 'notFound'));
   return app;
