@@ -25,12 +25,14 @@ describe('停止性', () => {
     expect(result.events.at(-1)).toMatchObject({ type: 'halt', reason: 'tickLimit', tick: 100 });
   });
 
-  it('再起動装置どうしが互いをリセットし続けても tick 上限で止まる', () => {
-    // R と R が隣接 + コンベアのループで信号が回り続ける配置
-    const rules = { ...createRuleSet(), tickLimit: 200 };
-    const result = run(['S> Rv C<', '.. R^ C^'], 1, rules);
-    expect(result.stats.halted).toBe('tickLimit');
-    expect(result.stats.ticks).toBe(200);
+  it('再起動装置どうしはリセットし合わない（「1回だけ」が破れて無限に回らない）', () => {
+    // 以前はここで2つの再起動装置が互いをリセットし続け、tick 上限まで回っていた
+    const result = run(['S> Rv C<', '.. R^ C^']);
+    expect(result.stats.halted).toBeNull();
+    const rebooterActivations = result.events.filter(
+      (e) => e.type === 'activate' && e.partId === 'rebooter',
+    );
+    expect(rebooterActivations).toHaveLength(2); // それぞれ1回ずつ
   });
 
   it('ドラム缶だらけの盤面でも止まる', () => {
