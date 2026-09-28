@@ -5,7 +5,8 @@
  * キーは「画面.要素」の形で意味がわかる名前にする。
  * 文中の {name} は t() の params で置き換える。
  */
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { useSettings } from '../settings/SettingsContext';
 import en from './en.json';
 import ja from './ja.json';
 
@@ -15,8 +16,6 @@ export type TranslateFn = (key: MessageKey, params?: Record<string, string | num
 
 export const MESSAGES: Record<Lang, Record<string, string>> = { ja, en };
 export const DEFAULT_LANG: Lang = 'ja';
-
-const LANG_STORAGE_KEY = 'chain-factory:lang';
 
 /** 文言を取り出して {name} を置き換える。見つからなければ既定言語 → キーの順にフォールバック */
 export function translate(
@@ -38,27 +37,11 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-function loadLang(): Lang {
-  try {
-    const saved = localStorage.getItem(LANG_STORAGE_KEY);
-    if (saved === 'ja' || saved === 'en') return saved;
-  } catch {
-    // localStorage が使えない環境では既定言語
-  }
-  return DEFAULT_LANG;
-}
-
+/** 言語はユーザー設定の一部として保存する（settings/settingsStore.ts） */
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(loadLang);
-
-  const setLang = useCallback((next: Lang) => {
-    setLangState(next);
-    try {
-      localStorage.setItem(LANG_STORAGE_KEY, next);
-    } catch {
-      // 保存できなくても表示は切り替える
-    }
-  }, []);
+  const { settings, updateSettings } = useSettings();
+  const lang = settings.lang;
+  const setLang = useCallback((next: Lang) => updateSettings({ lang: next }), [updateSettings]);
 
   const value = useMemo<I18nContextValue>(
     () => ({ lang, setLang, t: (key, params) => translate(lang, key, params) }),

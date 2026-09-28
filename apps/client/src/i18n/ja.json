@@ -1,6 +1,5 @@
 {
   "app.title": "チェインファクトリー（仮）",
-  "app.language": "English",
   "hud.budget": "予算",
   "hud.quota": "ノルマ",
   "hud.score": "出荷量",
@@ -146,5 +145,19 @@
   "meta.condition.bestShiftScore": "1シフトで {value} 出荷",
   "meta.condition.totalShipped": "累計 {value} 出荷",
   "meta.condition.runsPlayed": "{value} 回遊ぶ",
-  "meta.condition.clears": "全シフトを {value} 回クリア"
+  "meta.condition.clears": "全シフトを {value} 回クリア",
+  "playback.chainCounter": "{count} 連鎖",
+  "playback.cutIn": "大出荷！",
+  "settings.open": "設定",
+  "settings.title": "設定",
+  "settings.language": "言語",
+  "settings.lang.ja": "日本語",
+  "settings.lang.en": "English",
+  "settings.effects": "演出の強さ",
+  "settings.effects.full": "標準",
+  "settings.effects.reduced": "控えめ",
+  "settings.effects.minimal": "最小",
+  "settings.shake": "画面の揺れ",
+  "settings.shakeHint": "画面酔いしやすい場合はオフにしてください。「最小」ではスロー・カットインも出ません",
+  "settings.close": "閉じる"
 }

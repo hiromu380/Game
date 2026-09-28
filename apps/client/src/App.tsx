@@ -3,9 +3,11 @@
  */
 import { getCurrentRules, getRerollCost, scoreToString, type Score } from '@chain-factory/sim';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import type { BoardViewState } from './board/BoardRenderer';
+import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { useI18n } from './i18n';
+import { useSettings } from './settings/SettingsContext';
+import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun } from './state/gameReducer';
 import { createInitialState, createNewSeed } from './state/newRun';
@@ -21,7 +23,7 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { ShopPanel } from './ui/ShopPanel';
 
 export function App() {
-  const { t, lang, setLang } = useI18n();
+  const { t } = useI18n();
   const [state, dispatch] = useReducer(gameReducer, undefined, () => {
     const initial = createInitialState();
     return createGameState(initial.run, initial.meta);
@@ -31,6 +33,7 @@ export function App() {
   const [liveScore, setLiveScore] = useState<string | null>(null);
   /** デバッグ表示の開閉 */
   const [debugOpen, setDebugOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { run, selection, playback, error } = state;
   const playing = playback !== null;
@@ -65,6 +68,23 @@ export function App() {
     [run, selection],
   );
 
+  // 盤面に出す文言（言語が変わったら作り直す）
+  const boardLabels = useMemo<BoardLabels>(
+    () => ({
+      getPartName: (partId) => t(`part.${partId}.name`),
+      formatIncome: (amount) => t('playback.incomePop', { amount }),
+      getBreakLabel: (reason) => t(`break.short.${reason}`),
+      formatChain: (count) => t('playback.chainCounter', { count }),
+      getCutInTitle: () => t('playback.cutIn'),
+    }),
+    [t],
+  );
+  const { settings } = useSettings();
+  const effectSettings = useMemo(
+    () => ({ strength: settings.effects, shake: settings.shake }),
+    [settings.effects, settings.shake],
+  );
+
   const onShip = useCallback((total: Score) => setLiveScore(scoreToString(total)), []);
   const onPlaybackFinish = useCallback(() => dispatch({ type: 'playbackFinished' }), []);
   const onCellClick = useCallback(
@@ -95,10 +115,11 @@ export function App() {
         <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
           {t('debug.toggle')}
         </button>
-        <button className="button--ghost" onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}>
-          {t('app.language')}
+        <button className="button--ghost" onClick={() => setSettingsOpen(true)}>
+          {t('settings.open')}
         </button>
       </div>
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </header>
   );
 
@@ -121,9 +142,8 @@ export function App() {
         <div className="layout__board">
           <PixiBoard
             view={boardView}
-            getPartName={(partId) => t(`part.${partId}.name`)}
-            formatIncome={(amount) => t('playback.incomePop', { amount })}
-            getBreakLabel={(reason) => t(`break.short.${reason}`)}
+            labels={boardLabels}
+            effectSettings={effectSettings}
             playbackResult={playback?.result ?? null}
             speed={speed}
             onCellClick={onCellClick}

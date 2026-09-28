@@ -1,6 +1,5 @@
 {
   "app.title": "Chain Factory (WIP)",
-  "app.language": "日本語",
   "hud.budget": "Budget",
   "hud.quota": "Quota",
   "hud.score": "Shipped",
@@ -146,5 +145,19 @@
   "meta.condition.bestShiftScore": "Ship {value} in one shift",
   "meta.condition.totalShipped": "Ship {value} in total",
   "meta.condition.runsPlayed": "Play {value} runs",
-  "meta.condition.clears": "Clear all shifts {value} times"
+  "meta.condition.clears": "Clear all shifts {value} times",
+  "playback.chainCounter": "{count} CHAIN",
+  "playback.cutIn": "MEGA SHIPMENT!",
+  "settings.open": "Settings",
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.lang.ja": "日本語",
+  "settings.lang.en": "English",
+  "settings.effects": "Effects",
+  "settings.effects.full": "Full",
+  "settings.effects.reduced": "Reduced",
+  "settings.effects.minimal": "Minimal",
+  "settings.shake": "Screen shake",
+  "settings.shakeHint": "Turn this off if you get motion sick. \"Minimal\" also disables slow-motion and cut-ins",
+  "settings.close": "Close"
 }

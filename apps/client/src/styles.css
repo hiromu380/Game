@@ -559,3 +559,45 @@ button:disabled {
   color: var(--met);
   font-weight: bold;
 }
+
+/* ---- モーダル（設定画面など） ---- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 16px;
+}
+.modal__body {
+  width: min(420px, 100%);
+}
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+.segmented {
+  display: flex;
+}
+.segmented button {
+  border-radius: 0;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+.segmented button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.segmented button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+.segmented button.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1c20;
+  font-weight: bold;
+}

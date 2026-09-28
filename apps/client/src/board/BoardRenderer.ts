@@ -22,9 +22,8 @@ import {
   type VanishReason,
 } from '@chain-factory/sim';
 import { Application, Container, Graphics, Text } from 'pixi.js';
-import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
+import { BOARD_THEME } from '../assets/manifest';
 import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
-import { formatScore } from '../ui/format';
 import {
   boardPixelSize,
   INITIAL_BOARD_PIXEL_SIZE,
@@ -33,6 +32,7 @@ import {
   pixelToCell,
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
+import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
 import { loadPartTextures, type PartTextures } from './textures';
 import { easeOutCubic, TweenManager } from './tweens';
@@ -42,7 +42,6 @@ import {
   createPartView,
   createSignalView,
   PART_DISPLAY_SIZE,
-  valueTier,
 } from './views';
 
 /** 盤面の表示状態（React 側から渡される） */
@@ -58,14 +57,22 @@ export interface BoardViewState {
   upcomingBlocked: number[];
 }
 
-export interface BoardRendererOptions {
-  onCellClick: (x: number, y: number) => void;
-  /** パーツの表示名（ホバー時のラベル用。言語切り替えに追従するよう関数で受け取る） */
+/** 盤面に表示する文言（i18n を通すため関数で受け取る。言語切り替えに追従する） */
+export interface BoardLabels {
+  /** パーツの表示名（ホバー時のラベル） */
   getPartName: (partId: PartId) => string;
-  /** 収入のポップアップ文言（例: +1 円）。i18n を通すため関数で受け取る */
+  /** 収入のポップアップ（例: +1円） */
   formatIncome: (amount: number) => string;
   /** 途切れた理由の短い表示名 */
   getBreakLabel: (reason: VanishReason) => string;
+  /** 連鎖数カウンター（例: 12 連鎖） */
+  formatChain: (count: number) => string;
+  /** 大出荷カットインの見出し */
+  getCutInTitle: () => string;
+}
+
+export interface BoardRendererOptions extends BoardLabels {
+  onCellClick: (x: number, y: number) => void;
 }
 
 export interface PlaybackCallbacks {
@@ -93,7 +100,8 @@ export class BoardRenderer {
   /** 残り発動回数と、途切れた理由の表示 */
   private readonly status: StatusOverlay;
   private readonly signalLayer = new Container();
-  private readonly fxLayer = new Container();
+  /** 再生中の演出（発光・パーティクル・揺れ・スロー・連鎖カウンター・カットイン） */
+  private readonly effects: EffectsLayer;
   private readonly tooltipLayer = new Container();
   private readonly tweens = new TweenManager();
 
@@ -109,14 +117,23 @@ export class BoardRenderer {
   private lastResult: SimResult | null = null;
   private callbacks: PlaybackCallbacks | null = null;
   private speed: PlaybackSpeed = 1;
-  /** 揺れの残り強さ（px） */
-  private shake = 0;
 
   private constructor(app: Application, textures: PartTextures, options: BoardRendererOptions) {
     this.app = app;
     this.textures = textures;
     this.options = options;
     this.status = new StatusOverlay(options.getBreakLabel);
+    this.effects = new EffectsLayer(
+      this.tweens,
+      textures.junkbot,
+      {
+        chain: options.formatChain,
+        cutInTitle: options.getCutInTitle,
+        income: options.formatIncome,
+      },
+      (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
+      () => ({ width: this.app.screen.width, height: this.app.screen.height }),
+    );
 
     this.root.addChild(
       this.floorLayer,
@@ -125,11 +142,11 @@ export class BoardRenderer {
       this.status.pipLayer,
       this.overlayLayer,
       this.signalLayer,
-      this.fxLayer,
+      this.effects.boardLayer,
       this.status.breakLayer,
       this.tooltipLayer,
     );
-    app.stage.addChild(this.root);
+    app.stage.addChild(this.root, this.effects.screenLayer);
 
     // マウス・タッチ操作
     app.stage.eventMode = 'static';
@@ -302,6 +319,11 @@ export class BoardRenderer {
     if (speed === 'skip') this.skip();
   }
 
+  /** 演出の強さ・揺れの設定を反映する */
+  setEffectSettings(settings: EffectSettings): void {
+    this.effects.setSettings(settings);
+  }
+
   setSpeed(speed: PlaybackSpeed): void {
     this.speed = speed;
     if (speed === 'skip') this.skip();
@@ -312,7 +334,7 @@ export class BoardRenderer {
     if (!this.timeline) return;
     for (const tickEvents of this.timeline.flush()) this.applyTick(tickEvents, 0);
     this.tweens.finishAll();
-    this.shake = 0;
+    this.effects.reset();
     this.finishPlayback();
   }
 
@@ -322,33 +344,26 @@ export class BoardRenderer {
     this.timeline = null;
     this.callbacks = null;
     this.tweens.finishAll();
-    this.shake = 0;
+    this.effects.reset();
     this.signalLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    this.fxLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.signalViews.clear();
     this.status.resetPips();
   }
 
   private update(deltaMs: number): void {
+    // スローモーション中は、再生と演出の時間をゆっくり進める
+    const scaled = deltaMs * this.effects.timeScale;
     if (this.timeline && this.speed !== 'skip') {
       const tickMs = PlaybackTimeline.tickMs(this.speed);
-      for (const tickEvents of this.timeline.advance(deltaMs, this.speed)) {
+      for (const tickEvents of this.timeline.advance(scaled, this.speed)) {
         this.applyTick(tickEvents, tickMs);
       }
     }
-    this.tweens.update(deltaMs);
+    this.tweens.update(scaled);
 
-    // 揺れ: ランダムにずらしながら減衰させる（演出のみ。シミュレーションとは無関係）
-    if (this.shake > 0.1) {
-      this.root.position.set(
-        (Math.random() - 0.5) * this.shake,
-        (Math.random() - 0.5) * this.shake,
-      );
-      this.shake *= 0.86;
-    } else if (this.shake !== 0) {
-      this.shake = 0;
-      this.root.position.set(0, 0);
-    }
+    // 揺れ（盤面全体をずらす。前面の連鎖カウンター・カットインは揺らさない）
+    const offset = this.effects.update(deltaMs);
+    this.root.position.set(offset.x, offset.y);
 
     // 全 tick を再生し終え、演出も落ち着いたら終了を通知
     if (this.timeline?.isFinished && this.tweens.isIdle) this.finishPlayback();
@@ -422,12 +437,7 @@ export class BoardRenderer {
             onComplete: () => {
               view?.destroy({ children: true });
               this.status.onActivate(event.x, event.y);
-              if (instant) return;
-              this.flashPart(event.x, event.y, event.partId, fxMs);
-              if (event.partId === 'barrel') {
-                this.sparks(event.x, event.y, PART_ASSETS.barrel.color, 16, fxMs * 2);
-                this.shake = Math.max(this.shake, 10);
-              }
+              if (!instant) this.effects.onActivate(event.x, event.y, event.partId, fxMs);
             },
           });
           break;
@@ -438,11 +448,7 @@ export class BoardRenderer {
             duration: 0,
             onComplete: () => {
               this.callbacks?.onShip(event.total);
-              if (instant) return;
-              const tier = valueTier(event.value);
-              this.popText(event.x, event.y, `+${formatScore(event.value)}`, tier, fxMs * 2.5);
-              this.sparks(event.x, event.y, BOARD_THEME.shipText, 8 + tier * 3, fxMs * 1.5);
-              if (tier >= 2) this.shake = Math.max(this.shake, 3 + tier * 2);
+              if (!instant) this.effects.onShip(event.x, event.y, event.value, fxMs);
             },
           });
           break;
@@ -452,7 +458,7 @@ export class BoardRenderer {
             duration: 0,
             onComplete: () => {
               this.status.onReset(event.x, event.y);
-              if (!instant) this.ripple(event.x, event.y, fxMs * 1.5);
+              if (!instant) this.effects.onReset(event.x, event.y, fxMs * 1.5);
             },
           });
           break;
@@ -472,15 +478,7 @@ export class BoardRenderer {
             delay: moveMs,
             duration: 0,
             onComplete: () => {
-              if (instant) return;
-              this.popText(
-                event.x,
-                event.y,
-                this.options.formatIncome(event.amount),
-                0,
-                fxMs * 2.5,
-                BOARD_THEME.incomeText,
-              );
+              if (!instant) this.effects.onIncome(event.x, event.y, event.amount, fxMs);
             },
           });
           break;
@@ -503,105 +501,6 @@ export class BoardRenderer {
         const e = easeOutCubic(t);
         view.position.set(fromX + (px - fromX) * e, fromY + (py - fromY) * e);
       },
-    });
-  }
-
-  /** パーツをテーマ色で光らせ、弾ませる */
-  private flashPart(x: number, y: number, partId: PartId, durationMs: number): void {
-    const { px, py } = cellCenter(x, y);
-    const glow = new Graphics()
-      .circle(0, 0, CELL_SIZE * 0.55)
-      .fill({ color: PART_ASSETS[partId].color, alpha: 0.55 });
-    glow.position.set(px, py);
-    this.fxLayer.addChild(glow);
-
-    const part = this.state ? this.partViews.get(y * this.state.board.width + x) : undefined;
-    this.tweens.add({
-      duration: durationMs,
-      onUpdate: (t) => {
-        glow.alpha = 1 - t;
-        glow.scale.set(0.6 + 0.6 * t);
-        part?.scale.set(1 + 0.25 * (1 - t));
-      },
-      onComplete: () => {
-        glow.destroy();
-        part?.scale.set(1);
-      },
-    });
-  }
-
-  /** 火花（小さな粒が放射状に飛び散る） */
-  private sparks(x: number, y: number, color: number, count: number, durationMs: number): void {
-    const { px, py } = cellCenter(x, y);
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-      const distance = CELL_SIZE * (0.5 + Math.random() * 0.6);
-      const dot = new Graphics().circle(0, 0, 2.5 + Math.random() * 2.5).fill(color);
-      dot.position.set(px, py);
-      this.fxLayer.addChild(dot);
-      this.tweens.add({
-        duration: durationMs,
-        onUpdate: (t) => {
-          const e = easeOutCubic(t);
-          dot.position.set(
-            px + Math.cos(angle) * distance * e,
-            py + Math.sin(angle) * distance * e,
-          );
-          dot.alpha = 1 - t;
-        },
-        onComplete: () => dot.destroy(),
-      });
-    }
-  }
-
-  /** 出荷量の数字を浮かび上がらせる（値が大きいほど大きく） */
-  private popText(
-    x: number,
-    y: number,
-    text: string,
-    tier: number,
-    durationMs: number,
-    color: number = BOARD_THEME.shipText,
-  ): void {
-    const { px, py } = cellCenter(x, y);
-    const label = new Text({
-      text,
-      style: {
-        fill: color,
-        fontSize: 20 + tier * 5,
-        fontWeight: '900',
-        stroke: { color: BOARD_THEME.background, width: 5 },
-      },
-    });
-    label.anchor.set(0.5);
-    label.position.set(px, py - 10);
-    this.fxLayer.addChild(label);
-    this.tweens.add({
-      duration: durationMs,
-      onUpdate: (t) => {
-        label.y = py - 10 - 40 * easeOutCubic(t);
-        label.scale.set(t < 0.15 ? 0.5 + (t / 0.15) * 0.7 : 1.2 - Math.min(0.2, (t - 0.15) * 0.5));
-        label.alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
-      },
-      onComplete: () => label.destroy(),
-    });
-  }
-
-  /** 発動回数リセットの波紋 */
-  private ripple(x: number, y: number, durationMs: number): void {
-    const { px, py } = cellCenter(x, y);
-    const ring = new Graphics()
-      .circle(0, 0, CELL_SIZE / 2)
-      .stroke({ width: 4, color: BOARD_THEME.reset });
-    ring.position.set(px, py);
-    this.fxLayer.addChild(ring);
-    this.tweens.add({
-      duration: durationMs,
-      onUpdate: (t) => {
-        ring.scale.set(0.4 + 0.8 * t);
-        ring.alpha = 1 - t;
-      },
-      onComplete: () => ring.destroy(),
     });
   }
 }
