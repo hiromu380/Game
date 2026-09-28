@@ -1,11 +1,10 @@
 /**
  * 盤面で選択中のパーツの操作（回転・手持ちに戻す・売却）
  *
- * 「手持ちに戻す」（無料の移動）と「売却」（返金・パーツは消える）を取り違えないよう、
- * 売却は2回押し（1回目で確認表示）にしている。
+ * 売却は確認なしですぐ行う（「手持ちに戻す」とはボタンの並びと色で区別する）。
+ * 盤面のパーツをショップへドラッグしても売却できる（App.tsx）。
  */
 import { getCurrentRules, getPart, getRefund, type RunState } from '@chain-factory/sim';
-import { useState } from 'react';
 import { useI18n } from '../i18n';
 import type { Selection } from '../state/gameReducer';
 import { describePart } from './partText';
@@ -35,11 +34,6 @@ export function SelectionPanel({
   const { t } = useI18n();
   const part = selection?.kind === 'cell' ? getPart(run.board, selection.x, selection.y) : null;
 
-  // 売却の確認状態は「どのマスを確認中か」で持ち、選択が変わったら自然に解除されるようにする
-  const selectionKey = selection?.kind === 'cell' ? `${selection.x},${selection.y}` : null;
-  const [confirmingKey, setConfirmingKey] = useState<string | null>(null);
-  const confirming = confirmingKey !== null && confirmingKey === selectionKey;
-
   if (!part) {
     if (hideWhenEmpty) return null;
     return (
@@ -52,15 +46,6 @@ export function SelectionPanel({
 
   const refund = getRefund(run, part.id);
   const sellable = run.config.economy.prices[part.id] > 0;
-
-  const handleSell = () => {
-    if (!confirming) {
-      setConfirmingKey(selectionKey);
-      return;
-    }
-    setConfirmingKey(null);
-    onSell();
-  };
 
   return (
     <section className="panel">
@@ -85,18 +70,9 @@ export function SelectionPanel({
         </button>
       </div>
       <div className="button-row selection__danger">
-        <button
-          className={confirming ? 'button--danger' : 'button--ghost'}
-          disabled={disabled || !sellable}
-          onClick={handleSell}
-          onBlur={() => setConfirmingKey(null)}
-        >
+        <button className="button--ghost" disabled={disabled || !sellable} onClick={onSell}>
           {sellable && <UiIcon name="sell" />}
-          {!sellable
-            ? t('selection.cannotSell')
-            : confirming
-              ? t('selection.sellConfirm', { refund })
-              : t('selection.sell', { refund })}
+          {sellable ? t('selection.sell', { refund }) : t('selection.cannotSell')}
         </button>
       </div>
     </section>

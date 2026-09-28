@@ -116,6 +116,8 @@ export type GameAction =
   /** 盤面のパーツをすべて手持ちに戻す */
   | { type: 'returnAll' }
   | { type: 'sellSelected' }
+  /** 盤面のパーツを売却する（ショップへドラッグしたとき） */
+  | { type: 'sellCell'; x: number; y: number }
   | { type: 'reroll' }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
@@ -383,6 +385,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
       return applyRunOp(state, { op: 'sell', x: sel.x, y: sel.y }, 'sell', null);
+    }
+
+    case 'sellCell': {
+      if (!getPart(state.run.board, action.x, action.y)) return state;
+      return applyRunOp(state, { op: 'sell', x: action.x, y: action.y }, 'sell', null);
     }
 
     case 'reroll':

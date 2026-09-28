@@ -275,6 +275,32 @@ describe('ドラッグでの移動', () => {
   });
 });
 
+describe('ドラッグで売却', () => {
+  it('ショップへ落とすと売却され、予算が増えて操作ログに sell が残る', () => {
+    const before = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 2, y: 2 },
+    );
+    const state = apply(before, { type: 'sellCell', x: 2, y: 2 });
+    expect(state.run.board.cells[2 * 7 + 2]).toBeNull();
+    expect(state.run.budget).toBeGreaterThan(before.run.budget);
+    expect(state.pendingOps.at(-1)).toEqual({ op: 'sell', x: 2, y: 2 });
+    expect(state.feedback?.kind).toBe('sell');
+  });
+
+  it('スイッチは売れない', () => {
+    const state = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'sellCell', x: 0, y: 0 },
+    );
+    expect(state.error).toBe('cannotSell');
+    expect(state.run.board.cells[0]).not.toBeNull();
+  });
+});
+
 describe('全部戻す', () => {
   it('盤面のパーツをすべて手持ちに戻し、1マスずつ「戻す」として記録する', () => {
     const before = apply(

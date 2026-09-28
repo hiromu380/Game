@@ -380,6 +380,10 @@ button:disabled {
 .panel__header .panel__title {
   margin: 0;
 }
+/* 見出しを隠す画面（タブ表示）でも、右端のボタンは右に寄せる */
+.panel__header > .button--small:last-child {
+  margin-left: auto;
+}
 .button--small {
   padding: 4px 10px;
   font-size: 0.8rem;
@@ -1175,7 +1179,34 @@ a.button.button--primary {
   opacity: 1;
   transform: scale(0.8);
 }
-/* ドラッグ中は手持ちの一覧・タブを落とし先として目立たせる */
+.drag-ghost.is-over-sell {
+  opacity: 0.6;
+  transform: scale(0.7);
+}
+/* ドラッグ中は手持ち（戻す）・ショップ（売却）の一覧・タブを落とし先として目立たせる */
+.is-dragging-part [data-panel='shop'],
+.is-dragging-part [data-drop='shop'] {
+  outline: 3px dashed var(--missed);
+  outline-offset: -3px;
+}
+.shop {
+  position: relative;
+}
+/* ドラッグ中にショップの上へ出す「ここで売却」の表示 */
+.shop__sell-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--missed);
+  font-weight: 800;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
 .is-dragging-part [data-panel='inventory'],
 .is-dragging-part [data-drop='inventory'] {
   outline: 3px dashed var(--met);

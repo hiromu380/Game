@@ -9,6 +9,7 @@ import {
   dailyRunSeed,
   getCurrentEconomy,
   getCurrentRules,
+  getRefund,
   getRerollCost,
   scoreToString,
   SIM_VERSION,
@@ -52,7 +53,7 @@ import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
-import { DragGhost, isInventoryDropZone } from './ui/DragGhost';
+import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
 import { GiveUpButton } from './ui/GiveUpButton';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
@@ -241,7 +242,8 @@ export function App({ start, onTitle }: Props) {
     [],
   );
 
-  // 置いたパーツのドラッグ: 盤面の空きマスへ落とすと移動、手持ちの一覧（またはタブ）へ落とすと手持ちに戻す
+  // 置いたパーツのドラッグ: 盤面の空きマスへ落とすと移動、手持ちの一覧（またはタブ）へ落とすと手持ちに戻す、
+  // ショップの一覧（またはタブ）へ落とすと売却
   const [dragging, setDragging] = useState<PartId | null>(null);
   const onCellDragStart = useCallback((_from: { x: number; y: number }, partId: PartId) => {
     setDragging(partId);
@@ -259,8 +261,11 @@ export function App({ start, onTitle }: Props) {
         dispatch({ type: 'movePart', from, to: target });
         return;
       }
-      if (isInventoryDropZone(document.elementFromPoint(client.x, client.y))) {
+      const el = document.elementFromPoint(client.x, client.y);
+      if (isInventoryDropZone(el)) {
         dispatch({ type: 'longPressCell', x: from.x, y: from.y });
+      } else if (isSellDropZone(el)) {
+        dispatch({ type: 'sellCell', x: from.x, y: from.y });
       }
     },
     [],
@@ -381,6 +386,9 @@ export function App({ start, onTitle }: Props) {
     </header>
   );
 
+  /** ドラッグ中のパーツをショップへ落としたときの返金額（売れないパーツなら null） */
+  const sellRefund =
+    dragging && run.config.economy.prices[dragging] > 0 ? getRefund(run, dragging) : null;
   const shopPanel = (
     <ShopPanel
       rules={boardView.rules}
@@ -390,6 +398,7 @@ export function App({ start, onTitle }: Props) {
       rerollCost={getRerollCost(run)}
       trends={trends}
       disabled={playing}
+      sellRefund={sellRefund}
       onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
       onReroll={() => dispatch({ type: 'reroll' })}
     />
@@ -504,22 +513,25 @@ export function App({ start, onTitle }: Props) {
           {tabbed && selectionPanel}
           {tabbed && (
             <div className="tabs" role="tablist">
-              {(['shop', 'inventory'] as const).map((key) => (
+              {/* 手持ちを盤面に近い側（左）に置く（ドラッグで戻すときの距離を短くする） */}
+              {(['inventory', 'shop'] as const).map((key) => (
                 <button
                   key={key}
                   role="tab"
                   aria-selected={tab === key}
                   className={`tabs__tab ${tab === key ? 'is-active' : ''}`}
-                  data-drop={key === 'inventory' ? 'inventory' : undefined}
+                  data-drop={key}
                   onClick={() => setTab(key)}
                 >
-                  {t(key === 'shop' ? 'shop.title' : 'inventory.title')}
+                  {key === 'shop' && sellRefund !== null
+                    ? t('shop.dropToSell', { refund: sellRefund })
+                    : t(key === 'shop' ? 'shop.title' : 'inventory.title')}
                 </button>
               ))}
             </div>
           )}
-          {(!tabbed || tab === 'shop') && shopPanel}
           {(!tabbed || tab === 'inventory') && inventoryPanel}
+          {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
           {!tabbed && selectionPanel}
         </aside>
