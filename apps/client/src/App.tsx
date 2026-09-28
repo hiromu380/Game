@@ -617,8 +617,6 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
-          {/* 売却エリア（盤面のパーツをドラッグして売る） */}
-          <SellZone dragging={dragging !== null} refund={sellRefund} />
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
@@ -649,6 +647,8 @@ export function App({ start, onTitle }: Props) {
           {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
           {!tabbed && selectionPanel}
+          {/* 売却エリア（盤面のパーツをドラッグして売る）。右の列の下端に固定し、スクロールしても見える */}
+          <SellZone dragging={dragging !== null} refund={sellRefund} />
         </aside>
       </main>
     </div>

@@ -2231,6 +2231,11 @@ a.button.button--primary {
 
 /* ---- 売却エリア（ui/SellZone.tsx） ---- */
 .sell-zone {
+  /* 右の列（スマホでは画面）の下端に貼りつける */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2249,13 +2254,13 @@ a.button.button--primary {
 .sell-zone.is-active {
   min-height: 64px;
   border-color: var(--missed);
-  background: rgba(255, 82, 82, 0.12);
+  background: linear-gradient(rgba(255, 82, 82, 0.12), rgba(255, 82, 82, 0.12)), var(--bg);
   color: var(--missed);
   font-size: 1.05rem;
   font-weight: 800;
 }
 .sell-zone.is-disabled {
   border-color: var(--panel-border);
-  background: none;
+  background: var(--bg);
   color: var(--muted);
 }
