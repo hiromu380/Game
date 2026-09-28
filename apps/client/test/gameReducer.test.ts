@@ -1,4 +1,4 @@
-import { createInitialMeta, createRun } from '@chain-factory/sim';
+import { createDailyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import {
   createGameState,
@@ -40,7 +40,7 @@ describe('画面の状態遷移', () => {
   it('本番の再生中は確定後のランを保存対象にし、閉じると反映される', () => {
     let state = apply(createGameState(createRun(1), createInitialMeta()), { type: 'startCommit' });
     expect(state.playback?.mode).toBe('commit');
-    expect(getPersistedRun(state).phase).toBe('failed'); // 何も置いていないのでノルマ未達
+    expect(getPersistedRun(state)?.phase).toBe('failed'); // 何も置いていないのでノルマ未達
     expect(state.run.phase).toBe('building'); // 表示は再生が終わるまで元のまま
     state = apply(state, { type: 'playbackFinished' }, { type: 'closePlayback' });
     expect(state.run.phase).toBe('failed');
@@ -145,5 +145,62 @@ describe('画面の状態遷移', () => {
     expect(state.run.board.cells[2 * 7 + 2]).toBeNull();
     expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'dock' });
     expect(state.feedback?.kind).toBe('returnPart');
+  });
+});
+
+describe('操作ログとデイリー本番', () => {
+  const daily = () => {
+    const run = createDailyRun('2026-10-01');
+    return createGameState(run, createInitialMeta(), {
+      kind: 'daily',
+      dailyId: '2026-10-01',
+      number: 1,
+    });
+  };
+
+  it('成功した操作だけが操作ログに記録され、再生すると同じ状態になる', () => {
+    let state = createGameState(createRun(1), createInitialMeta());
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'rotate' }, // 盤面のパーツを回転
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 1, y: 1 }, // 埋まっているマスへの配置は失敗（記録しない）
+      { type: 'buy', offerIndex: 99 }, // 存在しない商品（記録しない）
+      { type: 'reroll' },
+    );
+    expect(state.pendingOps.map((op) => op.op)).toEqual(['place', 'rotate', 'reroll']);
+    const replayed = replayOps(createRun(1), state.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(state.run);
+  });
+
+  it('デイリーは本番でサーバーの応答を待ち、返ってきたシードで確定する', () => {
+    let state = apply(
+      daily(),
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 1, y: 3 },
+      { type: 'startCommit' },
+    );
+    expect(state.awaitingServer).toBe(true);
+    expect(state.playback).toBeNull();
+    // 応答待ちの間は操作できない
+    expect(apply(state, { type: 'reroll' })).toBe(state);
+
+    state = apply(state, { type: 'serverCommitted', seed: 123 });
+    expect(state.awaitingServer).toBe(false);
+    expect(state.playback?.mode).toBe('commit');
+    expect(state.pendingOps).toEqual([]);
+    // デイリーは端末に保存しない・メタ進行に反映しない
+    expect(getPersistedRun(state)).toBeNull();
+    expect(state.meta).toEqual(createInitialMeta());
+  });
+
+  it('サーバーが拒否したら操作ログを残したまま組み立てに戻る', () => {
+    let state = apply(daily(), { type: 'reroll' }, { type: 'startCommit' });
+    state = apply(state, { type: 'serverCommitFailed', error: 'online.network' });
+    expect(state).toMatchObject({ awaitingServer: false, error: 'online.network', playback: null });
+    expect(state.pendingOps).toEqual([{ op: 'reroll' }]);
   });
 });

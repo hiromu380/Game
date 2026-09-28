@@ -3,27 +3,27 @@
  *
  * ゲームのルール自体は @chain-factory/sim のラン進行関数に任せ、
  * ここでは「何を選択中か」「演出を再生中か」など UI の状態だけを扱う。
+ *
+ * 組み立て中の操作は操作ログ（RunOp）としても記録する。デイリーの本番ではこれをサーバーへ送り、
+ * サーバーが同じ関数で再生して検証する（盤面や予算そのものは送らない）。
  */
+import type { ApiErrorCode } from '@chain-factory/shared';
 import {
+  applyOp,
   applyRunToMeta,
-  buyOffer,
   commitShift,
   createRun,
   getPart,
   metaToModifiers,
-  placePart,
-  rerollShop,
-  returnPart,
   runTrial,
-  sellPart,
   startOvertime,
   rotateCw,
-  rotatePart,
   type Dir4,
   type MetaProgress,
   type PartId,
   type RunActionResult,
   type RunError,
+  type RunOp,
   type RunState,
   type ShiftOutcome,
   type SimResult,
@@ -46,12 +46,31 @@ export type Playback =
       outcome: ShiftOutcome;
     };
 
+/**
+ * 遊び方
+ * - normal:   通常のラン（端末に保存・メタ進行に反映）
+ * - daily:    デイリー本番（本番シードはサーバーから。ランキング対象。端末には保存しない）
+ * - practice: デイリーの練習（同じ条件で何度でも。ランキング・メタ進行には反映しない）
+ */
+export type PlayMode =
+  | { kind: 'normal' }
+  | { kind: 'daily'; dailyId: string; number: number }
+  | { kind: 'practice'; dailyId: string; number: number };
+
+/** 画面に出すエラー（i18n の `error.<キー>`）。ラン操作のエラーと通信のエラー */
+export type GameError = RunError | `online.${ApiErrorCode | 'network'}`;
+
 export interface GameState {
   run: RunState;
+  mode: PlayMode;
+  /** 前回の本番以降の操作ログ（デイリーの本番でサーバーへ送る） */
+  pendingOps: RunOp[];
+  /** デイリーの本番でサーバーの応答を待っている */
+  awaitingServer: boolean;
   selection: Selection;
   playback: Playback | null;
   /** 直近の操作エラー（i18n キーの一部） */
-  error: RunError | null;
+  error: GameError | null;
   /** 直近に再生した結果（デバッグ表示用。再生を閉じても残す） */
   lastResult: SimResult | null;
   /** メタ進行（ランをまたいで残る） */
@@ -70,6 +89,8 @@ export type FeedbackKind = 'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'ret
 
 export type GameAction =
   | { type: 'newRun'; seed: number }
+  /** デイリー・練習のランに入る / 通常のランに戻る */
+  | { type: 'loadRun'; run: RunState; mode: PlayMode }
   /** 全シフトクリア後に延長戦へ進む */
   | { type: 'startOvertime' }
   | { type: 'buy'; offerIndex: number }
@@ -83,12 +104,22 @@ export type GameAction =
   | { type: 'reroll' }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
+  /** デイリー: サーバーが検証して返した本番シードで確定する */
+  | { type: 'serverCommitted'; seed: number }
+  | { type: 'serverCommitFailed'; error: GameError }
   | { type: 'playbackFinished' }
   | { type: 'closePlayback' };
 
-export function createGameState(run: RunState, meta: MetaProgress): GameState {
+export function createGameState(
+  run: RunState,
+  meta: MetaProgress,
+  mode: PlayMode = { kind: 'normal' },
+): GameState {
   return {
     run,
+    mode,
+    pendingOps: [],
+    awaitingServer: false,
     selection: null,
     playback: null,
     error: null,
@@ -115,9 +146,52 @@ function applyRunResult(
   return withFeedback({ ...state, run: result.state, selection, error: null }, kind);
 }
 
+/** 操作を1つ適用し、成功したら操作ログに記録する */
+function applyRunOp(
+  state: GameState,
+  op: RunOp,
+  kind: FeedbackKind,
+  selection = state.selection,
+): GameState {
+  const result = applyOp(state.run, op);
+  const next = applyRunResult(state, result, kind, selection);
+  return result.ok ? { ...next, pendingOps: [...state.pendingOps, op] } : next;
+}
+
+/** 本番の結果を再生に渡す（シードは通常・練習なら省略、デイリーはサーバーから） */
+function beginCommit(state: GameState, seed?: number): GameState {
+  const committed = commitShift(state.run, seed === undefined ? {} : { seed });
+  if ('error' in committed) return { ...state, awaitingServer: false, error: committed.error };
+  // 通常のランは、終わったらその場でメタ進行に反映する（再生中にリロードされても実績が残るように）。
+  // デイリー・練習は全員同じ条件で遊ぶモードなので、メタ進行には反映しない
+  const recorded =
+    state.mode.kind === 'normal'
+      ? applyRunToMeta(state.meta, committed.state)
+      : { meta: state.meta, unlocks: [], run: committed.state };
+  return {
+    ...state,
+    meta: recorded.meta,
+    unlocks: recorded.unlocks,
+    pendingOps: [],
+    awaitingServer: false,
+    selection: null,
+    error: null,
+    lastResult: committed.result,
+    playback: {
+      mode: 'commit',
+      result: committed.result,
+      finished: false,
+      nextRun: recorded.run,
+      outcome: committed.outcome,
+    },
+  };
+}
+
 export function gameReducer(state: GameState, action: GameAction): GameState {
-  // 演出の再生中は、再生に関する操作以外を受け付けない
-  if (state.playback && !['playbackFinished', 'closePlayback', 'newRun'].includes(action.type)) {
+  // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
+  const busyAllowed = ['playbackFinished', 'closePlayback', 'newRun', 'loadRun'];
+  if (state.playback && !busyAllowed.includes(action.type)) return state;
+  if (state.awaitingServer && !['serverCommitted', 'serverCommitFailed'].includes(action.type)) {
     return state;
   }
 
@@ -129,20 +203,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         state.meta,
       );
 
+    case 'loadRun':
+      return createGameState(action.run, state.meta, action.mode);
+
     case 'startOvertime': {
       const next = startOvertime(state.run);
       if (!next) return state;
-      return { ...createGameState(next, state.meta), lastResult: state.lastResult };
+      return { ...createGameState(next, state.meta, state.mode), lastResult: state.lastResult };
     }
 
     case 'buy': {
-      const result = buyOffer(state.run, action.offerIndex);
       // 購入したパーツをそのまま「配置待ち」にしておくと操作が速い
       const offer = state.run.shop[action.offerIndex];
       const selection: Selection = offer
         ? { kind: 'inventory', partId: offer.partId, dir: 1 }
         : null;
-      return applyRunResult(state, result, 'buy', selection);
+      return applyRunOp(state, { op: 'buy', offerIndex: action.offerIndex }, 'buy', selection);
     }
 
     case 'selectInventory':
@@ -159,11 +235,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // 手持ちのパーツを選択中で空きマスをクリック → 配置
       if (state.selection?.kind === 'inventory' && part === null) {
         const { partId, dir } = state.selection;
-        const result = placePart(state.run, partId, x, y, dir);
-        if (!result.ok) return withFeedback({ ...state, error: result.error }, 'error');
+        const next = applyRunOp(state, { op: 'place', partId, x, y, dir }, 'place');
+        if (next.error) return next;
         // まだ同じパーツが手持ちにあれば続けて置けるよう選択を維持する
-        const remaining = result.state.inventory[partId] ?? 0;
-        return applyRunResult(state, result, 'place', remaining > 0 ? state.selection : null);
+        const remaining = next.run.inventory[partId] ?? 0;
+        return { ...next, selection: remaining > 0 ? state.selection : null };
       }
       // 選択中のパーツをもう一度クリック（タップ）→ 回転（スマホでも回せるように）
       if (
@@ -172,7 +248,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         state.selection.x === x &&
         state.selection.y === y
       ) {
-        return applyRunResult(state, rotatePart(state.run, x, y), 'rotate');
+        return applyRunOp(state, { op: 'rotate', x, y }, 'rotate');
       }
       // パーツのあるマス → そのマスを選択
       if (part !== null) return { ...state, selection: { kind: 'cell', x, y }, error: null };
@@ -185,7 +261,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (sel?.kind === 'inventory')
         return withFeedback({ ...state, selection: { ...sel, dir: rotateCw(sel.dir) } }, 'rotate');
       if (sel?.kind === 'cell')
-        return applyRunResult(state, rotatePart(state.run, sel.x, sel.y), 'rotate');
+        return applyRunOp(state, { op: 'rotate', x: sel.x, y: sel.y }, 'rotate');
       return state;
     }
 
@@ -194,11 +270,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
       const part = getPart(state.run.board, sel.x, sel.y);
-      const result = returnPart(state.run, sel.x, sel.y);
       const selection: Selection = part
         ? { kind: 'inventory', partId: part.id, dir: part.dir }
         : null;
-      return applyRunResult(state, result, 'returnPart', selection);
+      return applyRunOp(state, { op: 'return', x: sel.x, y: sel.y }, 'returnPart', selection);
     }
 
     case 'longPressCell': {
@@ -214,11 +289,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'sellSelected': {
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
-      return applyRunResult(state, sellPart(state.run, sel.x, sel.y), 'sell', null);
+      return applyRunOp(state, { op: 'sell', x: sel.x, y: sel.y }, 'sell', null);
     }
 
     case 'reroll':
-      return applyRunResult(state, rerollShop(state.run), 'reroll');
+      return applyRunOp(state, { op: 'reroll' }, 'reroll');
 
     case 'startTrial': {
       // 試運転ごとにシードが変わる（試運転回数が増えた run を保持する）
@@ -232,27 +307,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'startCommit': {
-      const committed = commitShift(state.run);
-      if ('error' in committed) return { ...state, error: committed.error };
-      // ランが終わったら、その場でメタ進行に反映する（再生中にリロードされても実績が残るように）
-      const { meta, unlocks, run: recordedRun } = applyRunToMeta(state.meta, committed.state);
-      return {
-        ...state,
-        meta,
-        unlocks,
-        selection: null,
-        error: null,
-        lastResult: committed.result,
-        playback: {
-          mode: 'commit',
-          result: committed.result,
-          finished: false,
-          nextRun: recordedRun,
-          outcome: committed.outcome,
-        },
-      };
-    }
+    case 'startCommit':
+      // デイリー本番は本番シードをサーバーに求める（送信は画面側。応答で serverCommitted が来る）
+      if (state.run.config.commitSeedMode === 'external') {
+        return state.run.phase === 'building'
+          ? { ...state, awaitingServer: true, error: null }
+          : state;
+      }
+      return beginCommit(state);
+
+    case 'serverCommitted':
+      return state.awaitingServer ? beginCommit(state, action.seed) : state;
+
+    case 'serverCommitFailed':
+      return withFeedback({ ...state, awaitingServer: false, error: action.error }, 'error');
 
     case 'playbackFinished':
       return state.playback ? { ...state, playback: { ...state.playback, finished: true } } : state;
@@ -269,7 +337,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 /**
  * 保存すべきラン。本番の再生中はすでに結果が確定しているので、
  * リロードでやり直せないよう確定後のランを保存する。
+ * デイリー・練習は端末に保存しない（デイリーはサーバーから再開する）ので null
  */
-export function getPersistedRun(state: GameState): RunState {
+export function getPersistedRun(state: GameState): RunState | null {
+  if (state.mode.kind !== 'normal') return null;
   return state.playback?.mode === 'commit' ? state.playback.nextRun : state.run;
 }

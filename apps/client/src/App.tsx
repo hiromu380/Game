@@ -1,18 +1,30 @@
 /**
  * アプリのルート。ゲーム状態を持ち、盤面（PixiJS）と各 UI パネルをつなぐ
  */
-import { getCurrentRules, getRerollCost, scoreToString, type Score } from '@chain-factory/sim';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import {
+  createRun,
+  createRunWithConfig,
+  dailyRunSeed,
+  getCurrentRules,
+  getRerollCost,
+  metaToModifiers,
+  scoreToString,
+  SIM_VERSION,
+  type RunState,
+  type Score,
+} from '@chain-factory/sim';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
 import { useI18n } from './i18n';
+import { api, OnlineError } from './online/api';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
-import { createGameState, gameReducer, getPersistedRun } from './state/gameReducer';
+import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
 import { createInitialState, createNewSeed } from './state/newRun';
-import { saveGame } from './state/saveStore';
+import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { DebugPanel } from './ui/DebugPanel';
@@ -21,6 +33,7 @@ import { InventoryPanel } from './ui/InventoryPanel';
 import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
+import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 
 export function App() {
@@ -35,14 +48,43 @@ export function App() {
   /** デバッグ表示の開閉 */
   const [debugOpen, setDebugOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** デイリーのメニュー（開いていなければ null） */
+  const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
 
   const { settings } = useSettings();
-  const { run, selection, playback, error } = state;
-  const playing = playback !== null;
+  const { run, selection, playback, error, mode } = state;
+  const playing = playback !== null || state.awaitingServer;
 
-  // 状態が変わるたびに進行中のランを保存する
+  // 状態が変わるたびに進行中のランを保存する（通常モードのみ。デイリーはサーバーから再開する）
   const persistedRun = getPersistedRun(state);
-  useEffect(() => saveGame(persistedRun, state.meta), [persistedRun, state.meta]);
+  useEffect(() => {
+    if (persistedRun) saveGame(persistedRun, state.meta);
+  }, [persistedRun, state.meta]);
+
+  // デイリー本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
+  // 同じシフトを二重に送らないよう、送信中のシフトを覚えておく（開発時の StrictMode の二重実行対策も兼ねる）
+  const inflightShift = useRef<number | null>(null);
+  useEffect(() => {
+    if (!state.awaitingServer || mode.kind !== 'daily') return;
+    if (inflightShift.current === run.shiftIndex) return;
+    inflightShift.current = run.shiftIndex;
+    api
+      .commit(mode.dailyId, {
+        simVersion: SIM_VERSION,
+        shiftIndex: run.shiftIndex,
+        ops: state.pendingOps,
+      })
+      .then((res) => dispatch({ type: 'serverCommitted', seed: res.seed }))
+      .catch((e: unknown) =>
+        dispatch({
+          type: 'serverCommitFailed',
+          error: `online.${e instanceof OnlineError ? e.code : 'network'}`,
+        }),
+      )
+      .finally(() => {
+        inflightShift.current = null;
+      });
+  }, [state.awaitingServer, state.pendingOps, mode, run.shiftIndex]);
 
   // 音量の設定を反映する
   useEffect(() => {
@@ -142,8 +184,27 @@ export function App() {
   };
   const newRun = () => {
     setLiveScore(null);
+    // 練習は同じ条件で最初から。通常は新しいシードで
+    if (mode.kind === 'practice') {
+      dispatch({
+        type: 'loadRun',
+        run: createRunWithConfig(dailyRunSeed(mode.dailyId), run.config),
+        mode,
+      });
+      return;
+    }
     dispatch({ type: 'newRun', seed: createNewSeed() });
   };
+  const enterRun = (next: RunState, nextMode: PlayMode) => {
+    setLiveScore(null);
+    setDailyMenu(null);
+    dispatch({ type: 'loadRun', run: next, mode: nextMode });
+  };
+  /** 通常モードに戻る（保存済みのランがあれば続きから） */
+  const backToNormal = () =>
+    enterRun(loadRun() ?? createRun(createNewSeed(), { meta: metaToModifiers(state.meta) }), {
+      kind: 'normal',
+    });
 
   const header = (
     <header className="app-header">
@@ -152,6 +213,19 @@ export function App() {
         {t('app.title')}
       </h1>
       <div className="button-row">
+        {mode.kind !== 'normal' && (
+          <>
+            <span className="mode-badge">
+              {t(mode.kind === 'daily' ? 'mode.daily' : 'mode.practice', { number: mode.number })}
+            </span>
+            <button className="button--ghost" disabled={playing} onClick={backToNormal}>
+              {t('mode.backToNormal')}
+            </button>
+          </>
+        )}
+        <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
+          {t('online.dailyButton')}
+        </button>
         <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
           {t('debug.toggle')}
         </button>
@@ -160,6 +234,9 @@ export function App() {
         </button>
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {dailyMenu && (
+        <DailyMenu initialView={dailyMenu} onEnter={enterRun} onClose={() => setDailyMenu(null)} />
+      )}
     </header>
   );
 
@@ -172,6 +249,9 @@ export function App() {
           run={run}
           meta={state.meta}
           unlocks={state.unlocks}
+          mode={mode}
+          onViewRanking={() => setDailyMenu('ranking')}
+          onBackToNormal={backToNormal}
           onRetry={newRun}
           onOvertime={() => {
             setLiveScore(null);
@@ -202,6 +282,7 @@ export function App() {
           />
           {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
+          {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
         </div>
         <aside className="layout__side">
           <ControlsPanel

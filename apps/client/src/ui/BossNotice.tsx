@@ -39,13 +39,28 @@ export function describeBoss(t: TranslateFn, run: RunState, entry: BossPlanEntry
 export function BossNotice({ run }: { run: RunState }) {
   const { t } = useI18n();
   const boss = findBossToShow(run);
-  if (!boss) return null;
+  // デイリーの特殊ルール（全シフトにかかる）
+  const special = run.config.globalModifier;
+  if (!boss && !special) return null;
 
   return (
-    <div className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}>
-      <span className="boss-notice__label">{boss.isNow ? t('boss.now') : t('boss.tonight')}</span>
-      <strong>{t(`boss.${boss.entry.id}.name`)}</strong>
-      <span className="boss-notice__desc">{describeBoss(t, run, boss.entry)}</span>
-    </div>
+    <>
+      {special && (
+        <div className="boss-notice boss-notice--now">
+          <span className="boss-notice__label">{t('daily.specialRule')}</span>
+          <strong>{t(`boss.${special.id}.name`)}</strong>
+          <span className="boss-notice__desc">{describeBoss(t, run, special)}</span>
+        </div>
+      )}
+      {boss && (
+        <div className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}>
+          <span className="boss-notice__label">
+            {boss.isNow ? t('boss.now') : t('boss.tonight')}
+          </span>
+          <strong>{t(`boss.${boss.entry.id}.name`)}</strong>
+          <span className="boss-notice__desc">{describeBoss(t, run, boss.entry)}</span>
+        </div>
+      )}
+    </>
   );
 }
