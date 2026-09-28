@@ -12,6 +12,7 @@ import { createInitialRun, createNewSeed } from './state/newRun';
 import { saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
+import { DebugPanel } from './ui/DebugPanel';
 import { Hud } from './ui/Hud';
 import { InventoryPanel } from './ui/InventoryPanel';
 import { PlaybackPanel } from './ui/PlaybackPanel';
@@ -27,6 +28,8 @@ export function App() {
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   /** 再生中の出荷量の途中経過 */
   const [liveScore, setLiveScore] = useState<string | null>(null);
+  /** デバッグ表示の開閉 */
+  const [debugOpen, setDebugOpen] = useState(false);
 
   const { run, selection, playback, error } = state;
   const playing = playback !== null;
@@ -84,9 +87,14 @@ export function App() {
   const header = (
     <header className="app-header">
       <h1 className="app-header__title">{t('app.title')}</h1>
-      <button className="button--ghost" onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}>
-        {t('app.language')}
-      </button>
+      <div className="button-row">
+        <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
+          {t('debug.toggle')}
+        </button>
+        <button className="button--ghost" onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}>
+          {t('app.language')}
+        </button>
+      </div>
     </header>
   );
 
@@ -111,6 +119,7 @@ export function App() {
             view={boardView}
             getPartName={(partId) => t(`part.${partId}.name`)}
             formatIncome={(amount) => t('playback.incomePop', { amount })}
+            getBreakLabel={(reason) => t(`break.short.${reason}`)}
             playbackResult={playback?.result ?? null}
             speed={speed}
             onCellClick={onCellClick}
@@ -144,6 +153,7 @@ export function App() {
             disabled={playing}
             onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
           />
+          {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
           <SelectionPanel
             run={run}
             selection={selection}

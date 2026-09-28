@@ -67,6 +67,7 @@ button:disabled {
 }
 .button--ghost {
   background: transparent;
+  white-space: nowrap;
 }
 
 /* ---- 全体レイアウト ---- */
@@ -417,4 +418,78 @@ button:disabled {
 .boss-notice__desc {
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+/* ---- 途切れた理由の内訳（結果パネル） ---- */
+.break-list {
+  text-align: left;
+  font-size: 0.8rem;
+  margin: 0 auto 12px;
+  max-width: 360px;
+}
+.break-list__title {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.break-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.break-list li {
+  margin: 2px 0;
+}
+.break-chip {
+  display: inline-block;
+  min-width: 3.5em;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+/* 色は盤面のマーカー（StatusOverlay.ts の BREAK_COLORS）と揃える */
+.break-chip--outOfBoard {
+  background: #90a4ae;
+}
+.break-chip--emptyCell {
+  background: #ffb74d;
+}
+.break-chip--exhausted {
+  background: #ef5350;
+}
+.break-chip--blocked {
+  background: #c62828;
+}
+.break-chip--inert {
+  background: #9575cd;
+}
+
+/* ---- デバッグ表示 ---- */
+.debug h3 {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 10px 0 4px;
+}
+.debug__meta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  margin: 0;
+}
+.debug__table {
+  font-size: 0.75rem;
+  border-collapse: collapse;
+}
+.debug__table td {
+  padding: 1px 8px 1px 0;
+}
+.debug__ticks {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  padding-left: 2.5em;
+  white-space: nowrap;
 }

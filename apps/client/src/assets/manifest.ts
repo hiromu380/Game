@@ -92,6 +92,9 @@ export const BOARD_THEME = {
   glow: 0xffffff,
   reset: 0x4dd0e1,
   shipText: 0x69f0ae,
+  /** 残り発動回数のピップ */
+  pipFilled: 0xffeb3b,
+  pipEmpty: 0x9e9e9e,
   /** 収入（貯金箱）のポップアップ */
   incomeText: 0xffd54f,
   tooltipBg: 0x111418,

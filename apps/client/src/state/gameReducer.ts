@@ -47,6 +47,8 @@ export interface GameState {
   playback: Playback | null;
   /** 直近の操作エラー（i18n キーの一部） */
   error: RunError | null;
+  /** 直近に再生した結果（デバッグ表示用。再生を閉じても残す） */
+  lastResult: SimResult | null;
 }
 
 export type GameAction =
@@ -64,7 +66,7 @@ export type GameAction =
   | { type: 'closePlayback' };
 
 export function createGameState(run: RunState): GameState {
-  return { run, selection: null, playback: null, error: null };
+  return { run, selection: null, playback: null, error: null, lastResult: null };
 }
 
 /** ラン進行関数の結果を GameState に反映する */
@@ -155,6 +157,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         run: trial.state,
         playback: { mode: 'trial', result: trial.result, finished: false },
+        lastResult: trial.result,
         error: null,
       };
     }
@@ -166,6 +169,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         selection: null,
         error: null,
+        lastResult: committed.result,
         playback: {
           mode: 'commit',
           result: committed.result,

@@ -118,5 +118,22 @@
   "part.piggyBank.name": "Piggy Bank",
   "part.piggyBank.desc": "Passes the signal and adds ${piggyBankIncome} next shift (max ${maxIncomePerSim} per run)",
   "playback.incomePop": "+${amount}",
-  "playback.income": "Income (next shift)"
+  "playback.income": "Income (next shift)",
+  "break.short.outOfBoard": "Off",
+  "break.short.emptyCell": "Empty",
+  "break.short.exhausted": "Spent",
+  "break.short.blocked": "Repair",
+  "break.short.inert": "Inert",
+  "break.title": "Where the chain broke",
+  "break.halted": "Time limit ({count} left)",
+  "break.long.outOfBoard": "Left the floor",
+  "break.long.emptyCell": "Entered an empty cell",
+  "break.long.exhausted": "Hit a part with no activations left",
+  "break.long.blocked": "Entered a cell under repair",
+  "break.long.inert": "Hit a part that ignores signals",
+  "debug.toggle": "Debug",
+  "debug.title": "Debug",
+  "debug.activations": "Activations per part (last run / limit)",
+  "debug.ticks": "Events per tick",
+  "debug.noResult": "Nothing played yet"
 }

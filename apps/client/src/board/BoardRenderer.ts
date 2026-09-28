@@ -19,6 +19,7 @@ import {
   type Score,
   type SimEvent,
   type SimResult,
+  type VanishReason,
 } from '@chain-factory/sim';
 import { Application, Container, Graphics, Text } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
@@ -31,6 +32,8 @@ import {
   cellCenter,
   pixelToCell,
 } from './layout';
+import { summarizeBreaks } from '../playback/breaks';
+import { StatusOverlay } from './StatusOverlay';
 import { loadPartTextures, type PartTextures } from './textures';
 import { easeOutCubic, TweenManager } from './tweens';
 import {
@@ -61,6 +64,8 @@ export interface BoardRendererOptions {
   getPartName: (partId: PartId) => string;
   /** 収入のポップアップ文言（例: +1 円）。i18n を通すため関数で受け取る */
   formatIncome: (amount: number) => string;
+  /** 途切れた理由の短い表示名 */
+  getBreakLabel: (reason: VanishReason) => string;
 }
 
 export interface PlaybackCallbacks {
@@ -85,6 +90,8 @@ export class BoardRenderer {
   private readonly blockLayer = new Container();
   private readonly partLayer = new Container();
   private readonly overlayLayer = new Container();
+  /** 残り発動回数と、途切れた理由の表示 */
+  private readonly status: StatusOverlay;
   private readonly signalLayer = new Container();
   private readonly fxLayer = new Container();
   private readonly tooltipLayer = new Container();
@@ -98,6 +105,8 @@ export class BoardRenderer {
   private state: BoardViewState | null = null;
   private hovered: { x: number; y: number } | null = null;
   private timeline: PlaybackTimeline | null = null;
+  /** 直近に再生した結果（再生後の「途切れた理由」表示に使う） */
+  private lastResult: SimResult | null = null;
   private callbacks: PlaybackCallbacks | null = null;
   private speed: PlaybackSpeed = 1;
   /** 揺れの残り強さ（px） */
@@ -107,14 +116,17 @@ export class BoardRenderer {
     this.app = app;
     this.textures = textures;
     this.options = options;
+    this.status = new StatusOverlay(options.getBreakLabel);
 
     this.root.addChild(
       this.floorLayer,
       this.blockLayer,
       this.partLayer,
+      this.status.pipLayer,
       this.overlayLayer,
       this.signalLayer,
       this.fxLayer,
+      this.status.breakLayer,
       this.tooltipLayer,
     );
     app.stage.addChild(this.root);
@@ -170,6 +182,7 @@ export class BoardRenderer {
       this.state?.board.width !== state.board.width ||
       this.state?.board.height !== state.board.height;
     this.state = state;
+    if (!this.timeline) this.status.setBoard(state.board, state.rules);
 
     if (sizeChanged) {
       this.floorLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
@@ -276,6 +289,9 @@ export class BoardRenderer {
   /** シミュレーション結果の再生を始める */
   play(result: SimResult, speed: PlaybackSpeed, callbacks: PlaybackCallbacks): void {
     this.clearPlayback();
+    this.status.resetPips();
+    this.status.clearBreaks();
+    this.lastResult = result;
     this.timeline = new PlaybackTimeline(result.events);
     this.callbacks = callbacks;
     this.speed = speed;
@@ -307,6 +323,7 @@ export class BoardRenderer {
     this.signalLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.fxLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.signalViews.clear();
+    this.status.resetPips();
   }
 
   private update(deltaMs: number): void {
@@ -338,6 +355,9 @@ export class BoardRenderer {
     const callbacks = this.callbacks;
     this.timeline = null;
     this.callbacks = null;
+    if (this.lastResult && this.state) {
+      this.status.showBreaks(summarizeBreaks(this.lastResult.events, this.state.board));
+    }
     this.drawOverlay();
     callbacks?.onFinish();
   }
@@ -398,6 +418,7 @@ export class BoardRenderer {
             duration: 0,
             onComplete: () => {
               view?.destroy({ children: true });
+              this.status.onActivate(event.x, event.y);
               if (instant) return;
               this.flashPart(event.x, event.y, event.partId, fxMs);
               if (event.partId === 'barrel') {
@@ -426,7 +447,10 @@ export class BoardRenderer {
           this.tweens.add({
             delay: moveMs,
             duration: 0,
-            onComplete: () => !instant && this.ripple(event.x, event.y, fxMs * 1.5),
+            onComplete: () => {
+              this.status.onReset(event.x, event.y);
+              if (!instant) this.ripple(event.x, event.y, fxMs * 1.5);
+            },
           });
           break;
         case 'absorb': {

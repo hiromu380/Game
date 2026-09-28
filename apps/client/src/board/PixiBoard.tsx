@@ -4,7 +4,7 @@
  * 描画そのものは BoardRenderer が担当し、ここでは
  * 「React の状態が変わったら BoardRenderer に伝える」ことだけを行う。
  */
-import type { PartId, Score, SimResult } from '@chain-factory/sim';
+import type { PartId, Score, SimResult, VanishReason } from '@chain-factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import type { PlaybackSpeed } from '../playback/timeline';
 import { BoardRenderer, type BoardViewState } from './BoardRenderer';
@@ -16,6 +16,7 @@ interface Props {
   speed: PlaybackSpeed;
   getPartName: (partId: PartId) => string;
   formatIncome: (amount: number) => string;
+  getBreakLabel: (reason: VanishReason) => string;
   onCellClick: (x: number, y: number) => void;
   onShip: (total: Score) => void;
   onPlaybackFinish: () => void;
@@ -45,6 +46,7 @@ export function PixiBoard(props: Props) {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
       getPartName: (partId) => callbacksRef.current.getPartName(partId),
       formatIncome: (amount) => callbacksRef.current.formatIncome(amount),
+      getBreakLabel: (reason) => callbacksRef.current.getBreakLabel(reason),
     }).then((r) => {
       if (disposed) {
         r.destroy();

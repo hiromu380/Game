@@ -7,9 +7,12 @@ import {
   scoreOf,
   scoreToString,
   type RunState,
+  type SimResult,
+  type VanishReason,
 } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
+import { summarizeBreaks } from '../playback/breaks';
 import { formatScore } from './format';
 
 interface Props {
@@ -58,10 +61,34 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
           </>
         )}
       </dl>
-      {stats.haltedByTickLimit && <p className="panel__hint">{t('playback.halted')}</p>}
+      <BreakList result={playback.result} run={run} />
       <button className="button--primary" onClick={onClose}>
         {closeLabel}
       </button>
+    </div>
+  );
+}
+
+/** 連鎖が途切れた理由の内訳（盤面にはマーカーで場所を表示している） */
+function BreakList({ result, run }: { result: SimResult; run: RunState }) {
+  const { t } = useI18n();
+  const summary = summarizeBreaks(result.events, run.board);
+  const reasons = Object.keys(summary.counts) as VanishReason[];
+  if (reasons.length === 0 && summary.haltedSignals === 0) return null;
+  return (
+    <div className="break-list">
+      <div className="break-list__title">{t('break.title')}</div>
+      <ul>
+        {reasons.map((reason) => (
+          <li key={reason}>
+            <span className={`break-chip break-chip--${reason}`}>{t(`break.short.${reason}`)}</span>
+            {t(`break.long.${reason}`)} ×{summary.counts[reason]}
+          </li>
+        ))}
+        {summary.haltedSignals > 0 && (
+          <li>{t('break.halted', { count: summary.haltedSignals })}</li>
+        )}
+      </ul>
     </div>
   );
 }

@@ -118,5 +118,22 @@
   "part.piggyBank.name": "貯金箱",
   "part.piggyBank.desc": "信号を送り、次シフトの予算＋{piggyBankIncome}（1回の稼働で最大{maxIncomePerSim}）",
   "playback.incomePop": "+{amount}円",
-  "playback.income": "収入（次シフトの予算）"
+  "playback.income": "収入（次シフトの予算）",
+  "break.short.outOfBoard": "場外",
+  "break.short.emptyCell": "空マス",
+  "break.short.exhausted": "使い切り",
+  "break.short.blocked": "工事中",
+  "break.short.inert": "不反応",
+  "break.title": "途切れた理由",
+  "break.halted": "時間切れ（残り{count}本）",
+  "break.long.outOfBoard": "盤面の外へ出た",
+  "break.long.emptyCell": "空きマスに入った",
+  "break.long.exhausted": "発動回数を使い切ったパーツに入った",
+  "break.long.blocked": "工事中のマスに入った",
+  "break.long.inert": "信号に反応しないパーツに入った",
+  "debug.toggle": "デバッグ",
+  "debug.title": "デバッグ表示",
+  "debug.activations": "パーツ別の発動回数（直近の再生 / 上限）",
+  "debug.ticks": "tick ごとのイベント",
+  "debug.noResult": "まだ再生していません"
 }
