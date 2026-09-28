@@ -80,10 +80,14 @@ describe('メタ進行', () => {
 
   it('全シフトクリアで工場が拡張され、次のランの盤面が広くなる', () => {
     const allShifts = BALANCE.shifts.map(() => ({ score: '1', chainCount: 1 }));
-    const { meta, unlocks } = applyRunToMeta(
-      createInitialMeta(),
-      finishedRun('cleared', allShifts),
-    );
+    // 1段階目の条件（全クリア○回）を満たすまでクリアする。最後のクリアで拡張される
+    const needed = BALANCE.meta.boardExpansions[0]!.value;
+    let meta = createInitialMeta();
+    let unlocks: ReturnType<typeof applyRunToMeta>['unlocks'] = [];
+    for (let i = 0; i < needed; i++) {
+      expect(unlocks).not.toContainEqual({ kind: 'board', level: 1 });
+      ({ meta, unlocks } = applyRunToMeta(meta, finishedRun('cleared', allShifts)));
+    }
     expect(unlocks).toContainEqual({ kind: 'board', level: 1 });
     const run = createRun(1, { meta: metaToModifiers(meta) });
     expect(run.board.width).toBe(BALANCE.board.width + 1);

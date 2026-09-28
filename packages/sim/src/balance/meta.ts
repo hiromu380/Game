@@ -18,18 +18,19 @@ export const META: Balance['meta'] = {
     'coil',
     'solar',
   ],
-  // 1回目のランで1〜2種、全クリアや延長戦でさらに、と段階的に増えるようにしている
+  // 一度解放したら永続（セーブに記録。Steam 版は Steam Cloud で同期）。
+  // 1回目のランで1種、2〜3回目と全クリアでさらに、延長戦や大きな連鎖でレアを、と段階的に増えるようにしている
   partUnlocks: [
-    { partId: 'inspector', condition: { kind: 'bestShiftScore', value: 100 } },
-    { partId: 'piggyBank', condition: { kind: 'runsPlayed', value: 2 } },
-    { partId: 'turntable', condition: { kind: 'reachShift', value: 6 } },
-    { partId: 'merger', condition: { kind: 'bestChain', value: 25 } },
-    { partId: 'oiler', condition: { kind: 'reachShift', value: 9 } },
-    { partId: 'copier', condition: { kind: 'totalShipped', value: 1_000_000 } },
-    { partId: 'chainMeter', condition: { kind: 'bestChain', value: 50 } },
+    { partId: 'inspector', condition: { kind: 'bestShiftScore', value: 500 } },
+    { partId: 'piggyBank', condition: { kind: 'runsPlayed', value: 3 } },
+    { partId: 'turntable', condition: { kind: 'reachShift', value: 7 } },
+    { partId: 'merger', condition: { kind: 'bestChain', value: 40 } },
+    { partId: 'oiler', condition: { kind: 'clears', value: 1 } },
+    { partId: 'copier', condition: { kind: 'totalShipped', value: 5_000_000 } },
+    { partId: 'chainMeter', condition: { kind: 'bestChain', value: 80 } },
   ],
   boardExpansions: [
-    { kind: 'clears', value: 1 },
-    { kind: 'clears', value: 3 },
+    { kind: 'clears', value: 2 },
+    { kind: 'clears', value: 5 },
   ],
 };
