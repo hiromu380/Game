@@ -88,6 +88,11 @@ export class EffectsLayer {
       .forEach((c) => c.destroy({ children: true }));
   }
 
+  /** この再生で今までに発動したパーツの数（効果音の音程に使う） */
+  get chain(): number {
+    return this.chainCount;
+  }
+
   /** 時間の進み方（スロー中は遅くなる） */
   get timeScale(): number {
     return this.slowMoLeftMs > 0 ? EFFECTS_CONFIG.slowMo.timeScale : 1;

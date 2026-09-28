@@ -6,6 +6,7 @@
  */
 import type { Score, SimResult } from '@chain-factory/sim';
 import { useEffect, useRef, useState } from 'react';
+import { audio } from '../audio/AudioEngine';
 import type { PlaybackSpeed } from '../playback/timeline';
 import { BoardRenderer, type BoardLabels, type BoardViewState } from './BoardRenderer';
 import type { EffectSettings } from './fx/EffectsLayer';
@@ -50,6 +51,7 @@ export function PixiBoard(props: Props) {
       getBreakLabel: (reason) => labels().getBreakLabel(reason),
       formatChain: (count) => labels().formatChain(count),
       getCutInTitle: () => labels().getCutInTitle(),
+      playSound: (key, semitones) => audio.play(key, semitones),
     }).then((r) => {
       if (disposed) {
         r.destroy();

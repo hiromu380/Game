@@ -7,6 +7,7 @@ import { useSettings } from './SettingsContext';
 
 const STRENGTHS: EffectStrength[] = ['full', 'reduced', 'minimal'];
 const LANGS: Lang[] = ['ja', 'en'];
+const VOLUMES = ['masterVolume', 'seVolume', 'bgmVolume'] as const;
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
@@ -56,6 +57,29 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           />
         </label>
         <p className="panel__hint">{t('settings.shakeHint')}</p>
+
+        {VOLUMES.map((key) => (
+          <label key={key} className="settings__row">
+            <span>{t(`settings.${key}`)}</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={settings[key]}
+              disabled={settings.muted}
+              onChange={(e) => updateSettings({ [key]: Number(e.target.value) })}
+            />
+          </label>
+        ))}
+        <label className="settings__row">
+          <span>{t('settings.muted')}</span>
+          <input
+            type="checkbox"
+            checked={settings.muted}
+            onChange={(e) => updateSettings({ muted: e.target.checked })}
+          />
+        </label>
+        <p className="panel__hint">{t('settings.bgmHint')}</p>
 
         <div className="button-row">
           <button className="button--primary" onClick={onClose}>

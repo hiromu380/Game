@@ -32,6 +32,7 @@ import {
   pixelToCell,
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
+import { chainSemitones, type SoundKey } from '../audio/manifest';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
 import { loadPartTextures, type PartTextures } from './textures';
@@ -73,6 +74,8 @@ export interface BoardLabels {
 
 export interface BoardRendererOptions extends BoardLabels {
   onCellClick: (x: number, y: number) => void;
+  /** 効果音を鳴らす（semitones: 上げる音程。連鎖が続くほど高くする） */
+  playSound: (key: SoundKey, semitones: number) => void;
 }
 
 export interface PlaybackCallbacks {
@@ -385,6 +388,11 @@ export class BoardRenderer {
     const moveMs = tickMs * MOVE_RATIO;
     const fxMs = Math.max(tickMs, 1) * 1.2;
     const instant = tickMs === 0;
+    // 効果音: 信号の移動は tick ごとに1音だけ（信号が多くてもうるさくならないように）
+    const sound = (key: SoundKey) => {
+      if (!instant) this.options.playSound(key, chainSemitones(this.effects.chain));
+    };
+    if (events.some((e) => e.type === 'move')) sound('tick');
 
     for (const event of events) {
       switch (event.type) {
@@ -438,6 +446,7 @@ export class BoardRenderer {
               view?.destroy({ children: true });
               this.status.onActivate(event.x, event.y);
               if (!instant) this.effects.onActivate(event.x, event.y, event.partId, fxMs);
+              if (event.partId === 'barrel') sound('explode');
             },
           });
           break;
@@ -449,6 +458,7 @@ export class BoardRenderer {
             onComplete: () => {
               this.callbacks?.onShip(event.total);
               if (!instant) this.effects.onShip(event.x, event.y, event.value, fxMs);
+              sound('ship');
             },
           });
           break;

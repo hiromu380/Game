@@ -159,5 +159,10 @@
   "settings.effects.minimal": "最小",
   "settings.shake": "画面の揺れ",
   "settings.shakeHint": "画面酔いしやすい場合はオフにしてください。「最小」ではスロー・カットインも出ません",
-  "settings.close": "閉じる"
+  "settings.close": "閉じる",
+  "settings.masterVolume": "全体の音量",
+  "settings.seVolume": "効果音",
+  "settings.bgmVolume": "BGM",
+  "settings.muted": "ミュート",
+  "settings.bgmHint": "BGM はまだ入っていません（仕組みのみ）"
 }

@@ -110,4 +110,23 @@ describe('画面の状態遷移', () => {
     expect(state.meta.records.runsPlayed).toBe(1);
     expect(state.run.phase).toBe('building');
   });
+
+  it('操作の手応え（効果音用）を記録する: 成功は操作の種類、失敗は error', () => {
+    let state = createGameState(createRun(1), createInitialMeta());
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 0, y: 0 },
+    );
+    expect(state.feedback).toEqual({ kind: 'place', seq: 1 });
+    state = apply(state, { type: 'clickCell', x: 0, y: 0 }, { type: 'sellSelected' });
+    expect(state.feedback?.kind).toBe('sell');
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'barrel' },
+      { type: 'clickCell', x: 3, y: 3 },
+    );
+    expect(state.feedback?.kind).toBe('error');
+    expect(state.feedback?.seq).toBe(3);
+  });
 });

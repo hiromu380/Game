@@ -159,5 +159,10 @@
   "settings.effects.minimal": "Minimal",
   "settings.shake": "Screen shake",
   "settings.shakeHint": "Turn this off if you get motion sick. \"Minimal\" also disables slow-motion and cut-ins",
-  "settings.close": "Close"
+  "settings.close": "Close",
+  "settings.masterVolume": "Master volume",
+  "settings.seVolume": "Sound effects",
+  "settings.bgmVolume": "Music",
+  "settings.muted": "Mute",
+  "settings.bgmHint": "No music yet (the system is ready)"
 }

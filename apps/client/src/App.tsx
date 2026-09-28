@@ -5,6 +5,7 @@ import { getCurrentRules, getRerollCost, scoreToString, type Score } from '@chai
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
+import { audio } from './audio/AudioEngine';
 import { useI18n } from './i18n';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
@@ -35,12 +36,45 @@ export function App() {
   const [debugOpen, setDebugOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const { settings } = useSettings();
   const { run, selection, playback, error } = state;
   const playing = playback !== null;
 
   // 状態が変わるたびに進行中のランを保存する
   const persistedRun = getPersistedRun(state);
   useEffect(() => saveGame(persistedRun, state.meta), [persistedRun, state.meta]);
+
+  // 音量の設定を反映する
+  useEffect(() => {
+    audio.setVolumes(settings);
+  }, [settings]);
+
+  // 操作の手応え（配置・購入・エラーなど）の効果音。
+  // feedback は操作のたびに新しいオブジェクトになるので、変わったときに1回鳴らす
+  const { feedback } = state;
+  useEffect(() => {
+    if (feedback) audio.play(feedback.kind);
+  }, [feedback]);
+
+  // 本番の結果が出たときの効果音（ノルマ達成・全シフトクリア・ラン失敗）。
+  // playback は再生終了時に finished: true の新しいオブジェクトになる
+  useEffect(() => {
+    if (playback?.mode !== 'commit' || !playback.finished) return;
+    const next = playback.nextRun.phase;
+    audio.play(next === 'failed' ? 'runFailed' : next === 'cleared' ? 'runCleared' : 'quotaMet');
+  }, [playback]);
+
+  // BGM（曲はまだないので、今は何も流れない。曲を入れれば組み立て中・結果画面で切り替わる）
+  const bgm = run.phase === 'building' ? 'building' : 'result';
+  useEffect(() => {
+    audio.playBgm(bgm);
+  }, [bgm]);
+
+  // 新しい解放があれば結果画面で鳴らす
+  const showingUnlocks = !playing && run.phase !== 'building' && state.unlocks.length > 0;
+  useEffect(() => {
+    if (showingUnlocks) audio.play('unlock');
+  }, [showingUnlocks]);
 
   // キーボード: R で回転
   useEffect(() => {
@@ -79,7 +113,6 @@ export function App() {
     }),
     [t],
   );
-  const { settings } = useSettings();
   const effectSettings = useMemo(
     () => ({ strength: settings.effects, shake: settings.shake }),
     [settings.effects, settings.shake],

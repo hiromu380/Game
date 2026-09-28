@@ -57,7 +57,15 @@ export interface GameState {
   meta: MetaProgress;
   /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
   unlocks: Unlock[];
+  /**
+   * 直前の操作の手応え（効果音用）。seq が変わるたびに1回鳴らす。
+   * reducer は純粋関数のまま、音を鳴らすのは画面側（App）に任せるための仕組み
+   */
+  feedback: { kind: FeedbackKind; seq: number } | null;
 }
+
+/** 操作の手応えの種類（サウンドマニフェストのキーと同じ名前） */
+export type FeedbackKind = 'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'error';
 
 export type GameAction =
   | { type: 'newRun'; seed: number }
@@ -74,13 +82,32 @@ export type GameAction =
   | { type: 'closePlayback' };
 
 export function createGameState(run: RunState, meta: MetaProgress): GameState {
-  return { run, selection: null, playback: null, error: null, lastResult: null, meta, unlocks: [] };
+  return {
+    run,
+    selection: null,
+    playback: null,
+    error: null,
+    lastResult: null,
+    meta,
+    unlocks: [],
+    feedback: null,
+  };
 }
 
-/** ラン進行関数の結果を GameState に反映する */
-function applyRunResult(state: GameState, result: RunActionResult, selection = state.selection) {
-  if (!result.ok) return { ...state, error: result.error };
-  return { ...state, run: result.state, selection, error: null };
+/** 手応えを記録する */
+function withFeedback(state: GameState, kind: FeedbackKind): GameState {
+  return { ...state, feedback: { kind, seq: (state.feedback?.seq ?? 0) + 1 } };
+}
+
+/** ラン進行関数の結果を GameState に反映する（成功なら kind の手応え、失敗なら error） */
+function applyRunResult(
+  state: GameState,
+  result: RunActionResult,
+  kind: FeedbackKind,
+  selection = state.selection,
+): GameState {
+  if (!result.ok) return withFeedback({ ...state, error: result.error }, 'error');
+  return withFeedback({ ...state, run: result.state, selection, error: null }, kind);
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -104,7 +131,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const selection: Selection = offer
         ? { kind: 'inventory', partId: offer.partId, dir: 1 }
         : null;
-      return applyRunResult(state, result, selection);
+      return applyRunResult(state, result, 'buy', selection);
     }
 
     case 'selectInventory':
@@ -122,10 +149,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.selection?.kind === 'inventory' && part === null) {
         const { partId, dir } = state.selection;
         const result = placePart(state.run, partId, x, y, dir);
-        if (!result.ok) return { ...state, error: result.error };
+        if (!result.ok) return withFeedback({ ...state, error: result.error }, 'error');
         // まだ同じパーツが手持ちにあれば続けて置けるよう選択を維持する
         const remaining = result.state.inventory[partId] ?? 0;
-        return applyRunResult(state, result, remaining > 0 ? state.selection : null);
+        return applyRunResult(state, result, 'place', remaining > 0 ? state.selection : null);
       }
       // パーツのあるマス → そのマスを選択
       if (part !== null) return { ...state, selection: { kind: 'cell', x, y }, error: null };
@@ -136,8 +163,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'rotate': {
       const sel = state.selection;
       if (sel?.kind === 'inventory')
-        return { ...state, selection: { ...sel, dir: rotateCw(sel.dir) } };
-      if (sel?.kind === 'cell') return applyRunResult(state, rotatePart(state.run, sel.x, sel.y));
+        return withFeedback({ ...state, selection: { ...sel, dir: rotateCw(sel.dir) } }, 'rotate');
+      if (sel?.kind === 'cell')
+        return applyRunResult(state, rotatePart(state.run, sel.x, sel.y), 'rotate');
       return state;
     }
 
@@ -150,17 +178,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const selection: Selection = part
         ? { kind: 'inventory', partId: part.id, dir: part.dir }
         : null;
-      return applyRunResult(state, result, selection);
+      return applyRunResult(state, result, 'returnPart', selection);
     }
 
     case 'sellSelected': {
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
-      return applyRunResult(state, sellPart(state.run, sel.x, sel.y), null);
+      return applyRunResult(state, sellPart(state.run, sel.x, sel.y), 'sell', null);
     }
 
     case 'reroll':
-      return applyRunResult(state, rerollShop(state.run));
+      return applyRunResult(state, rerollShop(state.run), 'reroll');
 
     case 'startTrial': {
       // 試運転ごとにシードが変わる（試運転回数が増えた run を保持する）
