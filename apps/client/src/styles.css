@@ -1133,5 +1133,6 @@ a.button.button--primary {
 }
 .capture-ui--minimal .layout__board,
 .capture-ui--none .layout__board {
-  width: min(100%, calc(100dvh - 40px));
+  /* 高さの低い画面では .layout の高さ（cqh）、それ以外は画面の高さに合わせる */
+  width: min(100%, 100cqh, calc(100dvh - 40px));
 }

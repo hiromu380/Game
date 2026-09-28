@@ -1,0 +1,172 @@
+<!doctype html>
+<!--
+  Steam ストアのカプセル画像などの元（generate.mjs が ?kind=<種類> で開き、Chromium で撮影する）
+  素材はすべて src/assets（art/ の生成物）から読む。文字は画像のロゴだけ（フォントに頼らない）
+-->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      :root {
+        --bg: #1a1c20;
+        --floor: #4a4f57;
+        --line: #363a41;
+        --yellow: #ffc107;
+        --black: #2b2b2b;
+      }
+      html,
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      body.opaque {
+        background: var(--bg) url('../../src/assets/board/background.svg') repeat;
+        background-size: 48px 48px;
+      }
+      .stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+      /* ハザード柄の帯（上下） */
+      .hazard {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 4vh;
+        background: repeating-linear-gradient(-45deg, var(--yellow) 0 2vh, var(--black) 2vh 4vh);
+      }
+      .hazard.top {
+        top: 0;
+      }
+      .hazard.bottom {
+        bottom: 0;
+      }
+      /* 床のタイル（奥に敷く） */
+      .floor {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(var(--line) 2px, transparent 2px) 0 0 / 12vh 12vh,
+          linear-gradient(90deg, var(--line) 2px, transparent 2px) 0 0 / 12vh 12vh,
+          var(--floor);
+        opacity: 0.35;
+      }
+      .glow {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 213, 79, 0.3), transparent 65%);
+      }
+      img {
+        position: absolute;
+        display: block;
+      }
+      .part {
+        filter: drop-shadow(0 0.6vh 0 rgba(0, 0, 0, 0.35));
+      }
+      /* 信号の流れ（点線の光） */
+      .beam {
+        position: absolute;
+        height: 1.2vh;
+        border-radius: 1vh;
+        background: repeating-linear-gradient(90deg, #fff176 0 3vh, transparent 3vh 5vh);
+        box-shadow: 0 0 2vh #ffb74d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage"></div>
+    <script>
+      // 種類ごとの配置（単位は vw・vh）。logo: ロゴの位置と幅、bolt: ボルトの位置と大きさ、parts: 並べるパーツ
+      const A = '../../src/assets/';
+      const LAYOUTS = {
+        // ヘッダー（920×430）・メイン（1232×706）: ロゴ大きめ + ボルト + パーツの連鎖
+        header: {
+          logo: [36, 22, 60],
+          bolt: [3, 20, 36],
+          parts: [
+            ['switch', 38, 64, 13],
+            ['gear', 53, 64, 13],
+            ['splitter', 68, 64, 13],
+            ['dock', 83, 64, 13],
+          ],
+          beam: [44, 70, 44],
+        },
+        main: {
+          logo: [38, 20, 58],
+          bolt: [4, 22, 32],
+          parts: [
+            ['switch', 40, 64, 11],
+            ['gear', 53, 64, 11],
+            ['barrel', 66, 64, 11],
+            ['dock', 79, 64, 11],
+          ],
+          beam: [45, 69, 42],
+        },
+        // 小さいカプセル（462×174）: ロゴだけを大きく（小さくても読めるように）
+        small: { logo: [22, 12, 74], bolt: [2, 18, 22], parts: [] },
+        // 縦長（748×896）・ライブラリのカプセル（600×900）: 上にロゴ、下にボルトとパーツ
+        vertical: {
+          logo: [8, 8, 84],
+          bolt: [28, 36, 44],
+          parts: [
+            ['gear', 8, 76, 18],
+            ['splitter', 30, 80, 18],
+            ['coil', 52, 80, 18],
+            ['dock', 74, 76, 18],
+          ],
+        },
+        // ライブラリのヒーロー（3840×1240）: ロゴなし（Steam がロゴを重ねるため）。工場の床とパーツ
+        hero: {
+          logo: null,
+          bolt: [44, 18, 12],
+          parts: [
+            ['switch', 8, 50, 8],
+            ['conveyor', 18, 50, 8],
+            ['gear', 28, 50, 8],
+            ['press', 62, 50, 8],
+            ['merger', 72, 50, 8],
+            ['dock', 82, 50, 8],
+          ],
+          beam: [12, 57, 76],
+        },
+        // ライブラリのロゴ（1280×720、背景透過）
+        libraryLogo: { logo: [5, 15, 90], bolt: null, parts: [], transparent: true },
+      };
+
+      const kind = new URLSearchParams(location.search).get('kind') ?? 'header';
+      const layout = LAYOUTS[kind];
+      const stage = document.getElementById('stage');
+      const add = (html) => stage.insertAdjacentHTML('beforeend', html);
+      if (!layout.transparent) {
+        document.body.classList.add('opaque');
+        add(
+          '<div class="floor"></div><div class="hazard top"></div><div class="hazard bottom"></div>',
+        );
+      }
+      if (layout.beam) {
+        const [x, y, w] = layout.beam;
+        add(`<div class="beam" style="left:${x}vw;top:${y}vh;width:${w}vw"></div>`);
+      }
+      for (const [id, x, y, size] of layout.parts) {
+        add(
+          `<div class="glow" style="left:${x - size * 0.3}vw;top:${y - size * 0.6}vh;width:${size * 1.6}vw;height:${size * 2.2}vh"></div>`,
+        );
+        add(
+          `<img class="part" src="${A}parts/${id}.svg" style="left:${x}vw;top:${y}vh;width:${size}vw" />`,
+        );
+      }
+      if (layout.bolt) {
+        const [x, y, size] = layout.bolt;
+        add(
+          `<img class="part" src="${A}mascot/bolt-happy.svg" style="left:${x}vw;top:${y}vh;width:${size}vw" />`,
+        );
+      }
+      if (layout.logo) {
+        const [x, y, w] = layout.logo;
+        add(`<img src="${A}logo/logo-dark-bg.svg" style="left:${x}vw;top:${y}vh;width:${w}vw" />`);
+      }
+    </script>
+  </body>
+</html>
