@@ -170,6 +170,16 @@ export const ROCKET_ASSETS = {
   flame: rocketFiles['flame']!,
 };
 
+const titleFiles = byName(
+  import.meta.glob<string>('./title/*.svg', { eager: true, import: 'default' }),
+);
+
+/** タイトル画面の背景（art/title.ts で生成） */
+export const TITLE_ASSETS = {
+  factory: titleFiles['factory']!,
+  gear: titleFiles['gear']!,
+};
+
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {
   ...(Object.fromEntries(

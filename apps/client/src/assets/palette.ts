@@ -100,6 +100,18 @@ export const ROCKET_COLORS = {
   flameCore: '#ffca28',
 } as const;
 
+/** タイトル画面の背景（夕暮れの空・工場のシルエット・煙・歯車。CSS 変数 --title-<キー> にも書き出す） */
+export const TITLE_COLORS = {
+  'sky-top': '#141b33',
+  'sky-bottom': '#3d2a55',
+  glow: '#ff8a50',
+  factory: '#101218',
+  'factory-edge': '#262b38',
+  window: '#ffd54f',
+  smoke: '#8f97aa',
+  gear: '#2a3350',
+} as const;
+
 /** 盤面（床・枠・マス）とボス */
 export const BOARD_COLORS = {
   background: '#23272e',

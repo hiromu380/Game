@@ -846,6 +846,10 @@ button:disabled {
   width: min(280px, 100%);
   margin-top: 12px;
 }
+/* 枠だけのボタンも背景（工場のシルエットなど）に埋もれないよう、地の色を敷く */
+.title__actions > .button--ghost {
+  background: var(--panel);
+}
 .title__actions > .button--primary {
   font-size: 1.2rem;
   padding: 12px;
@@ -1558,32 +1562,63 @@ a.button.button--primary {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
+  /* 夕暮れの空: 上は夜、地平線（工場の後ろ）がほんのり明るい */
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 100%, var(--title-glow), transparent 70%),
+    linear-gradient(to bottom, var(--title-sky-top), var(--title-sky-bottom));
 }
-/* 星空: 2種類の間隔の点を重ね、ゆっくりまたたかせる */
+/* 星: 空の上のほうだけ。2種類の間隔の点を重ね、ゆっくりまたたかせる */
 .title-backdrop__stars {
   position: absolute;
-  inset: 0 0 90px;
+  inset: 0 0 45%;
   background:
     radial-gradient(circle, var(--white) 1px, transparent 1.6px) 0 0 / 53px 47px,
     radial-gradient(circle, var(--muted) 1px, transparent 1.6px) 19px 23px / 37px 41px;
-  opacity: 0.35;
-  animation: title-twinkle 4s ease-in-out infinite alternate;
+  mask-image: linear-gradient(to bottom, black, transparent);
+  opacity: 0.45;
+  animation: title-twinkle 3s ease-in-out infinite alternate;
 }
 @keyframes title-twinkle {
   to {
-    opacity: 0.7;
+    opacity: 0.9;
   }
 }
-/* ロケット: 左下から右上へ、ときどき飛んでいく */
-.title-backdrop__rocket {
+/* 大きな歯車: 空の奥でゆっくり逆向きに回る */
+.title-backdrop__gear {
   position: absolute;
-  left: 8%;
-  bottom: 100px;
+  opacity: 0.55;
+}
+.title-backdrop__gear--a {
+  width: 340px;
+  top: -110px;
+  left: -90px;
+  animation: title-spin 40s linear infinite;
+}
+.title-backdrop__gear--b {
+  width: 220px;
+  top: 18%;
+  right: -70px;
+  animation: title-spin 28s linear infinite reverse;
+}
+@keyframes title-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ロケット: レーンを機首の角度に傾け、その中でまっすぐ上へ進める（機首と進む向きがそろう） */
+.title-backdrop__rocket-lane {
+  position: absolute;
+  left: 12%;
+  bottom: 140px;
+  transform: rotate(35deg);
+  transform-origin: bottom center;
+}
+.title-backdrop__rocket {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: rotate(35deg);
-  animation: title-rocket 11s ease-in infinite;
+  opacity: 0;
+  animation: title-rocket 9s ease-in infinite;
 }
 .title-backdrop__flame {
   margin-top: -6px;
@@ -1591,23 +1626,119 @@ a.button.button--primary {
 }
 @keyframes title-rocket {
   0%,
-  55% {
-    transform: translate(0, 40vh) rotate(35deg);
+  45% {
+    transform: translateY(0);
     opacity: 0;
   }
-  60% {
+  50% {
+    transform: translateY(0);
     opacity: 1;
   }
   100% {
-    transform: translate(90vw, -80vh) rotate(35deg);
+    transform: translateY(-170vmax);
     opacity: 1;
   }
 }
-/* ボルト: ベルトの横で小さく跳ねる */
+/* 工場の街並み（ベルトコンベアの上） */
+.title-backdrop__city {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 74px;
+  height: 150px;
+}
+.title-backdrop__factory {
+  position: absolute;
+  bottom: 0;
+  width: 260px;
+  height: 150px;
+}
+.title-backdrop__factory > img {
+  display: block;
+}
+/* 煙: 煙突の口（素材の x=40,y=4 と x=196,y=22）から粒が昇って広がり、消える */
+.title-backdrop__smoke {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.title-backdrop__smoke--a {
+  left: 40px;
+  top: 6px;
+}
+.title-backdrop__smoke--b {
+  left: 196px;
+  top: 24px;
+}
+.title-backdrop__smoke > span {
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--title-smoke);
+  opacity: 0;
+  animation: title-smoke 3.6s ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.title-backdrop__smoke > span:nth-child(2) {
+  animation-delay: calc(var(--delay, 0s) - 1.2s);
+}
+.title-backdrop__smoke > span:nth-child(3) {
+  animation-delay: calc(var(--delay, 0s) - 2.4s);
+}
+.title-backdrop__smoke--b > span {
+  animation-duration: 4.2s;
+}
+@keyframes title-smoke {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(26px, -90px) scale(2.4);
+    opacity: 0;
+  }
+}
+/* 窓の明かり: ときどき明るく灯る */
+.title-backdrop__blink {
+  position: absolute;
+  width: 18px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--title-window);
+  box-shadow: 0 0 10px var(--title-window);
+  opacity: 0;
+  animation: title-blink 5s steps(1) infinite;
+  animation-delay: var(--delay, 0s);
+}
+.title-backdrop__blink--a {
+  left: 48px;
+  top: 95px;
+}
+.title-backdrop__blink--b {
+  left: 197px;
+  top: 100px;
+  height: 14px;
+  animation-duration: 7s;
+}
+@keyframes title-blink {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  61%,
+  90% {
+    opacity: 0.95;
+  }
+}
+/* ボルト: ベルトの上で小さく跳ねる */
 .title-backdrop__bolt {
   position: absolute;
-  right: 6%;
+  right: 5%;
   bottom: 70px;
+  z-index: 1;
   animation: title-bob 1.6s ease-in-out infinite;
 }
 @keyframes title-bob {
@@ -1640,9 +1771,6 @@ a.button.button--primary {
   padding: 2px 14px;
   animation: title-belt 40s linear infinite;
 }
-.title-backdrop__items img {
-  opacity: 0.85;
-}
 /* 2周分並べているので、半分動かしたら最初に戻すとつなぎ目が見えない */
 @keyframes title-belt {
   from {
@@ -1652,18 +1780,20 @@ a.button.button--primary {
     transform: translateX(0);
   }
 }
-.title-backdrop.is-still *,
-.title-backdrop.is-still {
+.title-backdrop.is-still,
+.title-backdrop.is-still * {
   animation: none !important;
 }
-.title-backdrop.is-still .title-backdrop__rocket {
+.title-backdrop.is-still .title-backdrop__rocket,
+.title-backdrop.is-still .title-backdrop__smoke {
   display: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .title-backdrop * {
     animation: none !important;
   }
-  .title-backdrop__rocket {
+  .title-backdrop__rocket,
+  .title-backdrop__smoke {
     display: none;
   }
 }
@@ -1671,6 +1801,14 @@ a.button.button--primary {
   .title-backdrop__bolt {
     width: 52px;
     height: 52px;
+  }
+  .title-backdrop__city {
+    transform: scale(0.7);
+    transform-origin: bottom left;
+    width: 143%;
+  }
+  .title-backdrop__gear--a {
+    width: 220px;
   }
 }
 

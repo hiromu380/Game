@@ -17,6 +17,7 @@ Steam のストアページ（Steamworks の「コンテンツに関するアン
 | ロゴ              | `apps/client/src/assets/logo/*.svg`                             | AI が描画コード（`art/logo.ts`・文字も線で描いた独自の字形）     | AI 生成             |
 | 実績アイコン      | `apps/client/src/assets/achievements/*.svg`（30個）と PNG       | AI が描画コード（`art/achievements.ts`）                         | AI 生成             |
 | ロケット          | `apps/client/src/assets/rocket/*.svg`（組み上がりの10段階と炎） | AI が描画コード（`art/rocket.ts`）                               | AI 生成             |
+| タイトルの背景    | `apps/client/src/assets/title/*.svg`（工場のシルエット・歯車）  | AI が描画コード（`art/title.ts`）                                | AI 生成             |
 | OGP 画像          | `apps/client/public/ogp.png`                                    | ロゴ・ボルトを HTML に並べて撮影（`build/ogp/`）                 | AI 生成             |
 | 効果音            | `apps/client/src/audio/`（Web Audio API で合成）                | AI が合成レシピ（コード）を書いた。録音・外部素材なし            | AI 生成             |
 | 文言              | `apps/client/src/i18n/ja.json`・`en.json`                       | AI が下書きし、開発者が確認・修正                                | AI 生成（人が確認） |
@@ -33,7 +34,7 @@ Steam のストアページ（Steamworks の「コンテンツに関するアン
 
 > 日本語: 本作のイラスト（マスコット、パーツ、盤面、アイコン、ロゴ、実績アイコン）と効果音は、開発中に AI コーディングアシスタントが作成したプログラム（SVG の描画コード・音の合成コード）から生成しています。画像生成 AI は使用していません。すべての素材は開発者が確認し、ゲームに合わせて調整しています。ゲーム内の文章も AI が下書きし、開発者が確認・修正しています。
 >
-> English: The game's artwork (mascot, parts, board, icons, logo, achievement icons, rocket) and sound effects were generated from code (SVG drawing code and audio synthesis code) written with the help of an AI coding assistant during development. No text-to-image AI models were used. All assets were reviewed and adjusted by the developer. In-game text was drafted with AI assistance and reviewed/edited by the developer.
+> English: The game's artwork (mascot, parts, board, icons, logo, achievement icons, rocket, title background) and sound effects were generated from code (SVG drawing code and audio synthesis code) written with the help of an AI coding assistant during development. No text-to-image AI models were used. All assets were reviewed and adjusted by the developer. In-game text was drafted with AI assistance and reviewed/edited by the developer.
 
 **ゲーム中に生成するコンテンツ（Live-Generated）**
 
