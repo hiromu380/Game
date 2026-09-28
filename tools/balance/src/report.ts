@@ -19,6 +19,8 @@ export interface BotSummary {
     ratioP90: number;
   }[];
   parts: Record<PartId, { offered: number; bought: number; onBoard: number }>;
+  /** ボス修正ルール別: 挑戦回数とクリア回数 */
+  bosses: Record<string, { attempts: number; cleared: number }>;
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
@@ -58,9 +60,20 @@ export function summarize(bot: BotName, logs: RunLog[]): BotSummary {
     };
   }
 
+  const bosses: BotSummary['bosses'] = {};
+  for (const log of logs) {
+    for (const shift of log.shifts) {
+      if (!shift.boss) continue;
+      const entry = (bosses[shift.boss] ??= { attempts: 0, cleared: 0 });
+      entry.attempts++;
+      if (shift.cleared) entry.cleared++;
+    }
+  }
+
   return {
     bot,
     runs: logs.length,
+    bosses,
     clearRate: logs.filter((l) => l.cleared).length / logs.length,
     shifts,
     parts,
@@ -103,6 +116,21 @@ export function toMarkdown(summaries: BotSummary[], meta: Record<string, string 
       `| ${i + 1}${shift.kind === 'boss' ? '（夜）' : ''} | ${shift.quota} | ${cells.join(' | ')} |`,
     );
   });
+  lines.push('');
+
+  lines.push('## ボス修正ルール別のクリア率（挑戦回数）', '');
+  const bossIds = [...new Set(summaries.flatMap((s) => Object.keys(s.bosses)))].sort();
+  lines.push(
+    `| ルール | ${summaries.map((s) => s.bot).join(' | ')} |`,
+    `|---|${summaries.map(() => '---').join('|')}|`,
+  );
+  for (const id of bossIds) {
+    const cells = summaries.map((s) => {
+      const b = s.bosses[id];
+      return b ? `${pct(b.cleared / b.attempts)}（${b.attempts}）` : '-';
+    });
+    lines.push(`| ${id} | ${cells.join(' | ')} |`);
+  }
   lines.push('');
 
   lines.push('## パーツ別（購入率 = 購入 ÷ 出現、盤面 = 本番時に盤面にあった延べ数 ÷ ラン数）', '');

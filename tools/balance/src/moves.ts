@@ -45,8 +45,19 @@ export type Move =
   /** 盤面のパーツを手持ちに戻す（組み直し用） */
   | { kind: 'return'; x: number; y: number };
 
+/**
+ * 置くのを避けるマス: 今使えないマス＋同じ日の夜に工事で使えなくなるマス（予告は画面に出ているので、
+ * プレイヤーと同じ情報でボットも避ける）
+ */
 function isBlocked(state: RunState, x: number, y: number): boolean {
-  return getCurrentRules(state).blockedCells.includes(y * state.board.width + x);
+  const index = y * state.board.width + x;
+  if (getCurrentRules(state).blockedCells.includes(index)) return true;
+  const perDay = state.config.shiftsPerDay;
+  const dayEnd = (Math.floor(state.shiftIndex / perDay) + 1) * perDay;
+  for (let i = state.shiftIndex + 1; i < dayEnd; i++) {
+    if (state.config.bossPlan[i]?.blockedCells.includes(index)) return true;
+  }
+  return false;
 }
 
 function isFree(state: RunState, x: number, y: number): boolean {

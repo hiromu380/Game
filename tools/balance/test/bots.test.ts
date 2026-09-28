@@ -25,4 +25,11 @@ describe('ボット', () => {
     const search = playRun(7, 'search', { ...OPTIONS, timeLimitMs: 2000 });
     expect(search.shiftsCleared).toBeGreaterThanOrEqual(greedy.shiftsCleared);
   });
+
+  it('現在のバランスで、貪欲ボットがシード1の9シフトを最後までクリアできる（通しプレイの回帰確認）', () => {
+    // バランス調整でこのテストが落ちたら、クリアできるシードを選び直すか、難しくなりすぎていないか確認する
+    const log = playRun(1, 'greedy', { samples: 3, timeLimitMs: 3000, maxRerolls: 3 });
+    expect(log.shifts).toHaveLength(9);
+    expect(log.cleared).toBe(true);
+  });
 });

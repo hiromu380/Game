@@ -14,7 +14,8 @@ import type { Bot, BotOptions, ShiftPlan } from './types';
 const BEAM_WIDTH = 6;
 /** 1つの状態から次の段階へ残す手の数 */
 const BRANCH = 8;
-const MAX_DEPTH = 12;
+/** 1シフトで重ねる手の上限（組み直しでは多くのパーツを置き直すため大きめ。実際は思考時間で止まる） */
+const MAX_DEPTH = 40;
 const REROLL_RESERVE = 4;
 
 interface Node {
