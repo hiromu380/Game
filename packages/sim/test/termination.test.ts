@@ -21,6 +21,8 @@ describe('停止性', () => {
     expect(result.stats.haltedByTickLimit).toBe(true);
     expect(result.stats.ticks).toBe(100);
     expect(result.events.every((e) => e.tick <= 100)).toBe(true);
+    // 打ち切ったことが events の最後に記録される（途切れた理由の表示に使う）
+    expect(result.events.at(-1)).toMatchObject({ type: 'halt', reason: 'tickLimit', tick: 100 });
   });
 
   it('再起動装置どうしが互いをリセットし続けても tick 上限で止まる', () => {

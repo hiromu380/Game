@@ -9,45 +9,108 @@
  * 1 tick の流れ:
  *   1. 生きている信号を id の昇順に1つずつ処理する（処理順を固定して決定論にする）
  *   2. 信号は進行方向の隣マスへ移動する
- *      - 盤面外 → 消滅 / 空マス → 消滅
+ *      - 盤面外 / 使用不可マス / 空マス → 消滅
  *      - パーツ → 発動回数が残っていれば発動（信号は消費される）、尽きていれば消滅
- *   3. 発動したパーツが出した信号は、次の tick から移動を始める
+ *   3. tick の終わりに、合流するパーツ（合流炉）がまとめて処理する（マス番号の昇順）
+ *   4. 遅れて発射する予定の信号（コピー機の2発目など）のうち、この tick の分を発射する
+ *   5. この tick に発射された信号は、次の tick から移動を始める
  */
 import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
 import { SCORE_ZERO, scoreAdd, scoreMax, scoreOf, type Score } from '../core/score';
-import type { Dir8, SimEvent, SimInput, SimResult, Signal } from '../types';
+import type { Part, SimEvent, SimInput, SimResult, Signal } from '../types';
+import { computeActivationLimits } from './limits';
 import { PART_BEHAVIORS } from './parts';
+import type { Emission, Reaction } from './parts/types';
+
+/** 遅れて発射する予定の信号 */
+interface PendingEmission {
+  tick: number;
+  x: number;
+  y: number;
+  emission: Emission;
+}
+
+/** 合流するパーツが、この tick に受けた信号 */
+interface CollectBuffer {
+  index: number;
+  x: number;
+  y: number;
+  part: Part;
+  values: Score[];
+}
 
 export function simulate(input: SimInput): SimResult {
   const { board, seed, rules } = input;
   const rng = createPrng(seed);
   const events: SimEvent[] = [];
 
-  // マスごとの発動済み回数
+  // マスごとの発動回数の上限（常時効果込み）と、発動済み回数・パーツの状態
+  const limits = computeActivationLimits(board, rules);
   const used = new Array<number>(board.cells.length).fill(0);
-  // 1回でも発動したマス（統計用）
+  const partState = new Array<number>(board.cells.length).fill(0);
   const activatedCells = new Set<number>();
 
   let signals: Signal[] = [];
+  let pending: PendingEmission[] = [];
   let nextSignalId = 0;
   let score: Score = SCORE_ZERO;
+  let income = 0;
   let maxValue: Score = SCORE_ZERO;
   let chainCount = 0;
   let shipCount = 0;
 
+  const canActivate = (index: number): boolean => {
+    const limit = limits[index];
+    return limit === null || (used[index] ?? 0) < (limit ?? 0);
+  };
+
+  const markActivated = (index: number): void => {
+    used[index] = (used[index] ?? 0) + 1;
+    activatedCells.add(index);
+  };
+
   /** 信号を1つ生成し、emit イベントを記録する */
-  const emit = (tick: number, x: number, y: number, dir: Dir8, value: Score): Signal => {
-    const signal: Signal = { id: nextSignalId++, x, y, dir, value };
-    maxValue = scoreMax(maxValue, value);
-    events.push({ tick, type: 'emit', signalId: signal.id, x, y, dir, value });
+  const emit = (tick: number, x: number, y: number, e: Emission): Signal => {
+    const signal: Signal = { id: nextSignalId++, x, y, dir: e.dir, value: e.value };
+    maxValue = scoreMax(maxValue, e.value);
+    events.push({ tick, type: 'emit', signalId: signal.id, x, y, dir: e.dir, value: e.value });
     return signal;
   };
 
-  /** そのマスのパーツがまだ発動できるか */
-  const canActivate = (index: number, limit: number | null): boolean =>
-    limit === null || (used[index] ?? 0) < limit;
+  /** パーツの反応結果（出荷・収入・リセット・状態・発射）を反映する */
+  const applyReaction = (
+    tick: number,
+    x: number,
+    y: number,
+    reaction: Reaction,
+    out: Signal[],
+  ): void => {
+    const index = cellIndex(board, x, y);
+    if (reaction.ship !== undefined) {
+      score = scoreAdd(score, reaction.ship);
+      shipCount++;
+      events.push({ tick, type: 'ship', x, y, value: reaction.ship, total: score });
+    }
+    if (reaction.income !== undefined) {
+      const amount = Math.min(reaction.income, rules.maxIncomePerSim - income);
+      if (amount > 0) {
+        income += amount;
+        events.push({ tick, type: 'income', x, y, amount, total: income });
+      }
+    }
+    for (const [rx, ry] of reaction.resets ?? []) {
+      used[cellIndex(board, rx, ry)] = 0;
+      events.push({ tick, type: 'reset', x: rx, y: ry });
+    }
+    if (reaction.nextState !== undefined) partState[index] = reaction.nextState;
+    for (const emission of reaction.emits ?? []) {
+      const delay = emission.delay ?? 0;
+      if (delay > 0) pending.push({ tick: tick + delay, x, y, emission });
+      else out.push(emit(tick, x, y, emission));
+    }
+  };
 
   // ---- tick 0: すべてのスイッチが発射（行優先の順） ----
   for (let y = 0; y < board.height; y++) {
@@ -55,18 +118,21 @@ export function simulate(input: SimInput): SimResult {
       const part = getPart(board, x, y);
       if (part?.id !== 'switch') continue;
       const index = cellIndex(board, x, y);
-      if (!canActivate(index, rules.maxActivations.switch)) continue;
-      used[index] = (used[index] ?? 0) + 1;
-      activatedCells.add(index);
-      signals.push(emit(0, x, y, dir4ToDir8(part.dir), scoreOf(rules.switchSignalValue)));
+      if (rules.blockedCells.includes(index) || !canActivate(index)) continue;
+      markActivated(index);
+      signals.push(
+        emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }),
+      );
     }
   }
 
   // ---- tick 1 以降: 信号の移動と反応 ----
   let tick = 0;
-  while (signals.length > 0 && tick < rules.tickLimit) {
+  while ((signals.length > 0 || pending.length > 0) && tick < rules.tickLimit) {
     tick++;
     const nextSignals: Signal[] = [];
+    /** この tick に信号を受けた合流パーツ（マス番号 → 取り込んだ値） */
+    const buffers = new Map<number, CollectBuffer>();
 
     // signals は生成順（= id 昇順）に並んでいる
     for (const signal of signals) {
@@ -80,7 +146,8 @@ export function simulate(input: SimInput): SimResult {
       }
       events.push({ tick, type: 'move', signalId: signal.id, x, y });
 
-      if (rules.blockedCells.includes(cellIndex(board, x, y))) {
+      const index = cellIndex(board, x, y);
+      if (rules.blockedCells.includes(index)) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'blocked' });
         continue;
       }
@@ -92,23 +159,36 @@ export function simulate(input: SimInput): SimResult {
       }
 
       const behavior = PART_BEHAVIORS[part.id];
+
+      // 合流するパーツ: 同じ tick の2本目以降は取り込むだけ（発動回数は消費しない）
+      if (behavior.collect) {
+        const buffer = buffers.get(index);
+        if (buffer) {
+          buffer.values.push(signal.value);
+          events.push({ tick, type: 'absorb', signalId: signal.id, x, y });
+          continue;
+        }
+        if (!canActivate(index)) {
+          events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'exhausted' });
+          continue;
+        }
+        markActivated(index);
+        chainCount++;
+        events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
+        buffers.set(index, { index, x, y, part, values: [signal.value] });
+        continue;
+      }
+
       if (behavior.react === null) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'inert' });
         continue;
       }
-
-      const index = cellIndex(board, x, y);
-      if (!canActivate(index, rules.maxActivations[part.id])) {
+      if (!canActivate(index)) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'exhausted' });
         continue;
       }
 
       // 発動
-      used[index] = (used[index] ?? 0) + 1;
-      activatedCells.add(index);
-      chainCount++;
-      events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
-
       const reaction = behavior.react({
         part,
         x,
@@ -118,28 +198,47 @@ export function simulate(input: SimInput): SimResult {
         board,
         rules,
         rng,
+        chainCount,
+        state: partState[index] ?? 0,
       });
-
-      if (reaction.ship !== undefined) {
-        score = scoreAdd(score, reaction.ship);
-        shipCount++;
-        events.push({ tick, type: 'ship', x, y, value: reaction.ship, total: score });
-      }
-      for (const [rx, ry] of reaction.resets ?? []) {
-        used[cellIndex(board, rx, ry)] = 0;
-        events.push({ tick, type: 'reset', x: rx, y: ry });
-      }
-      for (const out of reaction.emits ?? []) {
-        nextSignals.push(emit(tick, x, y, out.dir, out.value));
-      }
+      markActivated(index);
+      chainCount++;
+      events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
+      applyReaction(tick, x, y, reaction, nextSignals);
     }
+
+    // tick の終わり: 合流するパーツをマス番号の昇順に処理する
+    for (const buffer of [...buffers.values()].sort((a, b) => a.index - b.index)) {
+      const reaction = PART_BEHAVIORS[buffer.part.id].collect!({
+        part: buffer.part,
+        x: buffer.x,
+        y: buffer.y,
+        values: buffer.values,
+        board,
+        rules,
+        rng,
+        chainCount,
+        state: partState[buffer.index] ?? 0,
+      });
+      applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals);
+    }
+
+    // 遅れて発射する予定の信号のうち、この tick の分を発射する（登録順）
+    const due = pending.filter((p) => p.tick === tick);
+    pending = pending.filter((p) => p.tick !== tick);
+    for (const p of due) nextSignals.push(emit(tick, p.x, p.y, p.emission));
 
     signals = nextSignals;
   }
 
+  const remaining = signals.length + pending.length;
+  if (remaining > 0) {
+    events.push({ tick, type: 'halt', reason: 'tickLimit', remainingSignals: remaining });
+  }
+
   return {
     score,
-    income: 0,
+    income,
     events,
     stats: {
       chainCount,
@@ -147,7 +246,7 @@ export function simulate(input: SimInput): SimResult {
       shipCount,
       maxValue,
       ticks: tick,
-      haltedByTickLimit: signals.length > 0,
+      haltedByTickLimit: remaining > 0,
     },
   };
 }

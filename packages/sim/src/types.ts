@@ -93,7 +93,13 @@ export type SimEvent =
   /** (x,y) のパーツの発動回数がリセットされた */
   | { tick: number; type: 'reset'; x: number; y: number }
   /** 信号が消滅した */
-  | { tick: number; type: 'vanish'; signalId: number; x: number; y: number; reason: VanishReason };
+  | { tick: number; type: 'vanish'; signalId: number; x: number; y: number; reason: VanishReason }
+  /** 合流するパーツ（合流炉）が、同じ tick の2本目以降の信号を取り込んだ */
+  | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
+  /** 経済系パーツが予算を生んだ。total はその時点の累計 */
+  | { tick: number; type: 'income'; x: number; y: number; amount: number; total: number }
+  /** tick 上限に達し、信号が残ったまま打ち切った */
+  | { tick: number; type: 'halt'; reason: 'tickLimit'; remainingSignals: number };
 
 /** 1回のシミュレーションの統計 */
 export interface SimStats {
