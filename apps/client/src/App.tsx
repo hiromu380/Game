@@ -226,6 +226,12 @@ export function App({ start, onTitle }: Props) {
     [],
   );
 
+  const onCellDrag = useCallback(
+    (from: { x: number; y: number }, to: { x: number; y: number }) =>
+      dispatch({ type: 'movePart', from, to }),
+    [],
+  );
+
   const startPlayback = (type: 'startTrial' | 'startCommit') => {
     setLiveScore('0');
     dispatch({ type });
@@ -419,6 +425,7 @@ export function App({ start, onTitle }: Props) {
             cursor={cursor}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
+            onCellDrag={onCellDrag}
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />

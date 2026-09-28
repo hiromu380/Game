@@ -241,3 +241,36 @@ describe('実績', () => {
     expect(state.achievements.dailyDays).toBe(0);
   });
 });
+
+describe('ドラッグでの移動', () => {
+  const placed = () =>
+    apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'gear' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'rotate' }, // 置いたギアを選んで回す（向きを変えておく）
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 3, y: 1 },
+    );
+
+  it('空きマスへ動かすと向きはそのまま。操作ログは「戻す → 置く」で、再生すると同じ盤面になる', () => {
+    const before = placed();
+    const gear = before.run.board.cells[1 * before.run.board.width + 1]!;
+    const state = apply(before, { type: 'movePart', from: { x: 1, y: 1 }, to: { x: 2, y: 4 } });
+    const width = state.run.board.width;
+    expect(state.run.board.cells[1 * width + 1]).toBeNull();
+    expect(state.run.board.cells[4 * width + 2]).toEqual(gear);
+    expect(state.selection).toEqual({ kind: 'cell', x: 2, y: 4 });
+    expect(state.pendingOps.slice(-2).map((op) => op.op)).toEqual(['return', 'place']);
+    const replayed = replayOps(createRun(1), state.pendingOps);
+    expect(replayed.ok && replayed.state.board).toEqual(state.run.board);
+  });
+
+  it('ふさがっているマスへは動かせない（盤面も操作ログも変わらない）', () => {
+    const before = placed();
+    const state = apply(before, { type: 'movePart', from: { x: 1, y: 1 }, to: { x: 3, y: 1 } });
+    expect(state.run).toBe(before.run);
+    expect(state.pendingOps).toBe(before.pendingOps);
+    expect(state.error).toBe('cellOccupied');
+  });
+});

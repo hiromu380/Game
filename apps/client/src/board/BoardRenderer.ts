@@ -91,8 +91,10 @@ export interface BoardLabels {
 
 export interface BoardRendererOptions extends BoardLabels {
   onCellClick: (x: number, y: number) => void;
-  /** 長押し（スマホで「手持ちに戻す」に使う） */
+  /** 長押し・ダブルクリック（「手持ちに戻す」に使う） */
   onCellLongPress: (x: number, y: number) => void;
+  /** 置いたパーツをドラッグして別のマスに落とした */
+  onCellDrag: (from: { x: number; y: number }, to: { x: number; y: number }) => void;
   /** 効果音を鳴らす（semitones: 上げる音程。連鎖が続くほど高くする） */
   playSound: (key: SoundKey, semitones: number) => void;
 }
@@ -136,6 +138,13 @@ export class BoardRenderer {
   private state: BoardViewState | null = null;
   private hovered: { x: number; y: number } | null = null;
   private cursor: { x: number; y: number } | null = null;
+  /** ドラッグ中の状態（pointer は、しきい値を超えて動かし始めてからの指・マウスの位置） */
+  private drag: {
+    from: { x: number; y: number };
+    startX: number;
+    startY: number;
+    pointer: { x: number; y: number } | null;
+  } | null = null;
   private timeline: PlaybackTimeline | null = null;
   /** 直近に再生した結果（再生後の「途切れた理由」表示に使う） */
   private lastResult: SimResult | null = null;
@@ -184,7 +193,10 @@ export class BoardRenderer {
     app.stage.hitArea = app.screen;
     // 長押しの判定: 押してから一定時間離さなければ長押し。そのときは直後のタップを無視する
     let pressTimer: ReturnType<typeof setTimeout> | null = null;
+    /** 長押し・ドラッグをしたら、そのあとのタップ（クリック）を無視する */
     let longPressed = false;
+    /** ダブルクリックの判定用: 直前のクリック */
+    let lastTap: { x: number; y: number; at: number } | null = null;
     const cancelPress = () => {
       if (pressTimer) clearTimeout(pressTimer);
       pressTimer = null;
@@ -194,21 +206,71 @@ export class BoardRenderer {
       cancelPress();
       const cell = this.toCell(e.global.x, e.global.y);
       if (!cell) return;
+      // 置いたパーツの上で押したら、ドラッグの候補にする（再生中は動かせない）
+      if (!this.timeline && this.state && getPart(this.state.board, cell.x, cell.y)) {
+        this.drag = { from: cell, startX: e.global.x, startY: e.global.y, pointer: null };
+      }
       pressTimer = setTimeout(() => {
         longPressed = true;
         options.onCellLongPress(cell.x, cell.y);
       }, INPUT_CONFIG.longPressMs);
     });
-    app.stage.on('pointerup', cancelPress);
-    app.stage.on('pointerupoutside', cancelPress);
+    const endDrag = (x: number, y: number) => {
+      cancelPress();
+      const drag = this.drag;
+      this.drag = null;
+      if (!drag?.pointer) return;
+      const target = this.toCell(x, y);
+      if (target && (target.x !== drag.from.x || target.y !== drag.from.y)) {
+        options.onCellDrag(drag.from, target);
+      }
+      this.drawOverlay();
+    };
+    app.stage.on('pointerup', (e) => endDrag(e.global.x, e.global.y));
+    app.stage.on('pointerupoutside', (e) => endDrag(e.global.x, e.global.y));
     app.stage.on('pointertap', (e) => {
       if (longPressed) return;
       const cell = this.toCell(e.global.x, e.global.y);
-      if (cell) options.onCellClick(cell.x, cell.y);
+      if (!cell) return;
+      // 同じマスを続けて2回クリック → 手持ちに戻す（1回目のクリックは選択として扱われている）
+      const now = performance.now();
+      if (
+        lastTap &&
+        lastTap.x === cell.x &&
+        lastTap.y === cell.y &&
+        now - lastTap.at < INPUT_CONFIG.doubleClickMs &&
+        this.state &&
+        getPart(this.state.board, cell.x, cell.y)
+      ) {
+        lastTap = null;
+        options.onCellLongPress(cell.x, cell.y);
+        return;
+      }
+      // 1回目は「パーツのあるマス」のクリックだけ数える（置いた直後のクリックで戻らないように）
+      const hasPart = !!this.state && !!getPart(this.state.board, cell.x, cell.y);
+      lastTap = hasPart ? { ...cell, at: now } : null;
+      options.onCellClick(cell.x, cell.y);
     });
     // スマホの長押しで出るメニューを出さない
     app.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-    app.stage.on('pointermove', (e) => this.setHovered(this.toCell(e.global.x, e.global.y)));
+    app.stage.on('pointermove', (e) => {
+      const drag = this.drag;
+      if (drag) {
+        const moved = Math.hypot(e.global.x - drag.startX, e.global.y - drag.startY);
+        if (!drag.pointer && moved >= INPUT_CONFIG.dragThresholdPx) {
+          // ドラッグ開始: 長押しをやめ、指を離したときのクリックも無視する
+          cancelPress();
+          longPressed = true;
+        }
+        if (drag.pointer || moved >= INPUT_CONFIG.dragThresholdPx) {
+          drag.pointer = { x: e.global.x, y: e.global.y };
+          this.hovered = this.toCell(e.global.x, e.global.y);
+          this.drawOverlay();
+          return;
+        }
+      }
+      this.setHovered(this.toCell(e.global.x, e.global.y));
+    });
     app.stage.on('pointerleave', cancelPress);
     app.stage.on('pointerleave', () => this.setHovered(null));
 
@@ -340,6 +402,26 @@ export class BoardRenderer {
       this.overlayLayer.addChild(
         cellFrame(this.cursor.x, this.cursor.y, BOARD_THEME.hazardYellow, 5),
       );
+    }
+
+    // ドラッグ中: 動かす先の枠（空きマスなら緑、ふさがっていれば赤）と、指についてくるパーツ
+    const dragging = this.drag?.pointer ? this.drag : null;
+    if (dragging && !this.timeline) {
+      const moving = getPart(board, dragging.from.x, dragging.from.y);
+      const target = this.hovered;
+      if (target && (target.x !== dragging.from.x || target.y !== dragging.from.y)) {
+        const free = !getPart(board, target.x, target.y);
+        this.overlayLayer.addChild(
+          cellFrame(target.x, target.y, free ? BOARD_THEME.ghostOk : BOARD_THEME.blocked, 3),
+        );
+      }
+      if (moving) {
+        const ghost = createPartView(moving, this.textures, null);
+        ghost.position.set(dragging.pointer!.x, dragging.pointer!.y);
+        ghost.alpha = 0.8;
+        this.overlayLayer.addChild(ghost);
+      }
+      return;
     }
 
     // 再生中はホバー表示を出さない（演出を見やすくするため）

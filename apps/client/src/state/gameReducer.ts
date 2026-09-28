@@ -102,8 +102,10 @@ export type GameAction =
   | { type: 'buy'; offerIndex: number }
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
-  /** 長押し（スマホ）: そのマスのパーツを手持ちに戻す */
+  /** 長押し（スマホ）・ダブルクリック: そのマスのパーツを手持ちに戻す */
   | { type: 'longPressCell'; x: number; y: number }
+  /** ドラッグ: 置いたパーツを空きマスへ動かす（向きはそのまま） */
+  | { type: 'movePart'; from: { x: number; y: number }; to: { x: number; y: number } }
   | { type: 'rotate' }
   /** 選択を解除する（コントローラーの B・Esc） */
   | { type: 'deselect' }
@@ -305,6 +307,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ? { kind: 'inventory', partId: part.id, dir: part.dir }
         : null;
       return applyRunOp(state, { op: 'return', x: sel.x, y: sel.y }, 'returnPart', selection);
+    }
+
+    case 'movePart': {
+      // 「手持ちに戻す → 置く」の2つの操作として記録する（デイリーのサーバー検証で同じように再生できるように）
+      const { from, to } = action;
+      const part = getPart(state.run.board, from.x, from.y);
+      if (!part || (from.x === to.x && from.y === to.y)) return state;
+      if (getPart(state.run.board, to.x, to.y)) {
+        return withFeedback({ ...state, error: 'cellOccupied' }, 'error');
+      }
+      const returned = applyRunOp(state, { op: 'return', x: from.x, y: from.y }, 'place');
+      if (returned.error) return returned;
+      const placed = applyRunOp(
+        returned,
+        { op: 'place', partId: part.id, x: to.x, y: to.y, dir: part.dir },
+        'place',
+      );
+      // 置けなかった（工事中のマスなど）ときは、動かす前に戻す
+      if (placed.error) return withFeedback({ ...state, error: placed.error }, 'error');
+      return { ...placed, selection: { kind: 'cell', x: to.x, y: to.y } };
     }
 
     case 'longPressCell': {
