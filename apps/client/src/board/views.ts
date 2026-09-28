@@ -134,8 +134,12 @@ export function createSignalView(value: Score, formatCompact: (value: Score) => 
 
 /** 床タイルの選び方（マスの位置から決まる。無地がほとんどで、鋲は時々・汚れはまれ） */
 function floorVariant(x: number, y: number): number {
-  const h = Math.imul(x + 1, 0x9e3779b1) ^ Math.imul(y + 1, 0x85ebca6b);
-  const n = ((h ^ (h >>> 15)) >>> 0) % 16;
+  // 整数ハッシュ（行や列でそろわないよう、x と y を混ぜてからかき混ぜる）
+  let h = Math.imul(x * 31 + y * 17 + 7, 0x9e3779b1);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 16;
+  const n = (h >>> 0) % 16;
   return n < 12 ? 0 : n < 15 ? 1 : 2;
 }
 
