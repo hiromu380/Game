@@ -2,7 +2,7 @@
  * デイリーチャレンジのメニュー（モーダル）
  *
  * 今日のデイリーを取得し、状況に応じて「本番に挑戦 / 続きから / 終了済み」「練習」「ランキング」を出す。
- * - 初めての参加時だけ人間確認（Turnstile）を通して匿名登録する
+ * - 初めての参加時だけ本人確認して登録する（Web 版は人間確認 Turnstile、デスクトップ版は Steam）
  * - 練習は本番を終えた後に解放する（CLAUDE.md「挑戦後は同じ条件の練習モードを遊べる」）
  * 表示名の変更もここで行う。
  */
@@ -13,7 +13,9 @@ import { useI18n } from '../../i18n';
 import { api, OnlineError, type OnlineErrorCode } from '../../online/api';
 import { buildDailyRun, buildPracticeRun } from '../../online/dailyRun';
 import { loadIdentity } from '../../online/identity';
+import { getPlatform } from '../../platform';
 import { HumanCheck } from './HumanCheck';
+import { SteamSignIn } from './SteamSignIn';
 import type { PlayMode } from '../../state/gameReducer';
 import { describeBoss } from '../BossNotice';
 import { RankingView } from './RankingView';
@@ -56,6 +58,12 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
   }, []);
 
   useEffect(load, [load]);
+
+  // 登録できたら進行状況を取り直す（Steam では別の端末で始めたデイリーの続きがあり得る）
+  const onRegistered = useCallback(() => {
+    setRegistered(true);
+    load();
+  }, [load]);
 
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -139,7 +147,7 @@ export function DailyMenu({ initialView = 'menu', onEnter, onClose }: Props) {
           })}
         </p>
 
-        {!registered && <HumanCheck onRegistered={() => setRegistered(true)} />}
+        {!registered && <SignIn onRegistered={onRegistered} />}
         <div className="button-row daily__actions">
           {finished ? (
             <p className="panel__hint">{t('daily.finished')}</p>
@@ -216,5 +224,14 @@ function NameEditor() {
       </button>
       {message && <p className="panel__hint daily__error">{message}</p>}
     </div>
+  );
+}
+
+/** 本人確認: デスクトップ版は Steam、Web 版は人間確認 */
+function SignIn({ onRegistered }: { onRegistered: () => void }) {
+  return getPlatform().kind === 'desktop' ? (
+    <SteamSignIn onRegistered={onRegistered} />
+  ) : (
+    <HumanCheck onRegistered={onRegistered} />
   );
 }

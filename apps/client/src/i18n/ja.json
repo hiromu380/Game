@@ -239,5 +239,10 @@
   "shop.trendDown": "前日より値下がり",
   "store.lead": "製品版ではパーツの解放・工場の拡張・延長戦が遊べます",
   "store.open": "Steam で見る",
-  "store.comingSoon": "製品版は Steam で近日発売予定です"
+  "store.comingSoon": "製品版は Steam で近日発売予定です",
+  "error.online.forbidden": "このバージョンではオンライン機能を使えません",
+  "error.online.serviceUnavailable": "Steam の認証サービスに接続できません。少し待ってからもう一度お試しください",
+  "error.online.steamUnavailable": "Steam を起動するとデイリーに参加できます",
+  "online.steamSignIn": "Steam アカウントで確認しています…",
+  "online.retry": "再試行"
 }

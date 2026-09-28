@@ -7,7 +7,7 @@
  * 組み立て中の操作は操作ログ（RunOp）としても記録する。デイリーの本番ではこれをサーバーへ送り、
  * サーバーが同じ関数で再生して検証する（盤面や予算そのものは送らない）。
  */
-import type { ApiErrorCode } from '@chain-factory/shared';
+import type { OnlineErrorCode } from '../online/api';
 import {
   applyOp,
   applyRunToMeta,
@@ -56,7 +56,7 @@ export type PlayMode =
   | { kind: 'practice'; dailyId: string; number: number };
 
 /** 画面に出すエラー（i18n の `error.<キー>`）。ラン操作のエラーと通信のエラー */
-export type GameError = RunError | `online.${ApiErrorCode | 'network'}`;
+export type GameError = RunError | `online.${OnlineErrorCode}`;
 
 export interface GameState {
   run: RunState;

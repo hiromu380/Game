@@ -239,5 +239,10 @@
   "shop.trendDown": "Price down since yesterday",
   "store.lead": "The full version adds part unlocks, bigger factories and overtime",
   "store.open": "View on Steam",
-  "store.comingSoon": "The full version is coming soon to Steam"
+  "store.comingSoon": "The full version is coming soon to Steam",
+  "error.online.forbidden": "Online features are not available in this version",
+  "error.online.serviceUnavailable": "Cannot reach the Steam authentication service. Please try again later",
+  "error.online.steamUnavailable": "Start Steam to join the daily challenge",
+  "online.steamSignIn": "Verifying your Steam account…",
+  "online.retry": "Retry"
 }
