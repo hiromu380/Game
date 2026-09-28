@@ -7,9 +7,12 @@
 import {
   BALANCE,
   buildRunConfig,
+  createInitialAchievements,
   createInitialMeta,
+  isAchievementId,
   seeds,
   SIM_VERSION,
+  type AchievementProgress,
   type Board,
   type MetaProgress,
   type RunState,
@@ -17,18 +20,20 @@ import {
 } from '@chain-factory/sim';
 import type { RunStateV1, SaveDataV1 } from './v1';
 import type { SaveDataV2 } from './v2';
+import type { SaveDataV3 } from './v3';
 
 /** 現在のセーブデータのバージョン */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 /** 最新バージョンのセーブデータ */
-export type SaveData = SaveDataV2;
+export type SaveData = SaveDataV3;
 
 export function createSave(
   run: RunState | null,
   meta: MetaProgress = createInitialMeta(),
+  achievements: AchievementProgress = createInitialAchievements(),
 ): SaveData {
-  return { version: SAVE_VERSION, run, meta };
+  return { version: SAVE_VERSION, run, meta, achievements };
 }
 
 /**
@@ -41,7 +46,9 @@ export function migrateSave(raw: unknown): SaveData | null {
     case 1:
       return migrateSave(convertV1toV2(raw as SaveDataV1));
     case 2:
-      return normalizeV2(raw as SaveDataV2);
+      return convertV2toV3(normalizeV2(raw as SaveDataV2));
+    case 3:
+      return normalizeV3(raw as SaveDataV3);
     default:
       return null;
   }
@@ -52,7 +59,7 @@ export function migrateSave(raw: unknown): SaveData | null {
  * - meta.records.bestShiftScore（2b: メタ進行）
  * - run.overtime / run.metaRecordedShifts / run.config.baseShiftCount / run.config.overtime（2b: 延長戦）
  */
-function normalizeV2(save: SaveDataV2): SaveDataV2 {
+function normalizeV2<T extends SaveDataV2 | SaveDataV3>(save: T): T {
   const initial = createInitialMeta();
   const meta = save.meta ?? initial;
   const run = save.run
@@ -78,6 +85,32 @@ function normalizeV2(save: SaveDataV2): SaveDataV2 {
     run,
     meta: { ...initial, ...meta, records: { ...initial.records, ...meta.records } },
   };
+}
+
+/** v3 の読み込み: ラン・メタ進行は v2 と同じ補い方。実績は知らない ID・壊れた値を落とす */
+function normalizeV3(save: SaveDataV3): SaveDataV3 {
+  const base = normalizeV2(save);
+  const initial = createInitialAchievements();
+  const raw: Partial<AchievementProgress> = save.achievements ?? {};
+  return {
+    ...base,
+    achievements: {
+      // 定義から消えた実績の ID は捨てる（Steam に送れないため）
+      unlocked: Array.isArray(raw.unlocked)
+        ? raw.unlocked.filter(isAchievementId)
+        : initial.unlocked,
+      dailyDays: Number.isInteger(raw.dailyDays) ? raw.dailyDays! : initial.dailyDays,
+      lastDailyId: typeof raw.lastDailyId === 'string' ? raw.lastDailyId : initial.lastDailyId,
+    },
+  };
+}
+
+/**
+ * v2 → v3: 実績は未解除から始める
+ * （メタ進行の記録で満たしている実績は、起動時の判定で解除される: 累計・回数・工場拡張・全パーツ）
+ */
+export function convertV2toV3(save: SaveDataV2): SaveDataV3 {
+  return { ...save, version: 3, achievements: createInitialAchievements() };
 }
 
 /**
