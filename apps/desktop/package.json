@@ -13,15 +13,18 @@
     "package": "node scripts/build.mjs --edition full --package",
     "package:demo": "node scripts/build.mjs --edition demo --package",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "achievements:export": "tsx scripts/export-achievements.ts"
   },
   "dependencies": {
     "steamworks-ffi-node": "0.11.3"
   },
   "devDependencies": {
+    "@chain-factory/shared": "workspace:*",
+    "@chain-factory/sim": "workspace:*",
     "electron": "44.4.5",
     "electron-builder": "26.15.3",
     "esbuild": "0.28.2",
-    "@chain-factory/shared": "workspace:*"
+    "tsx": "^4.23.15"
   }
 }

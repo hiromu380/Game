@@ -24,7 +24,7 @@ export interface HandlerDeps {
   steam: SteamAdapter;
   /** 既定のブラウザで開く（Electron の shell.openExternal） */
   openExternal(url: string): Promise<void>;
-  /** 定義済みの実績の ID（4b で sim の定義から渡す。未指定なら形だけ確かめる） */
+  /** 定義済みの実績の ID（sim の ACHIEVEMENT_IDS。未指定なら形だけ確かめる: テスト用） */
   achievementIds?: ReadonlySet<string>;
 }
 

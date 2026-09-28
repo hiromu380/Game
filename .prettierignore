@@ -6,3 +6,4 @@ legacy
 .wrangler
 apps/desktop/renderer
 apps/desktop/release
+docs/ops/steam-achievements-list.md

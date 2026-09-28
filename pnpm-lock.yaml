@@ -79,6 +79,9 @@ importers:
       '@chain-factory/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@chain-factory/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
       electron:
         specifier: 44.4.5
         version: 44.4.5
@@ -88,6 +91,9 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
 
   apps/server:
     dependencies:

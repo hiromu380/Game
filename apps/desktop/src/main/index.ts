@@ -7,6 +7,7 @@
  *   3. app:// を登録してページを配信する（CSP つき）
  *   4. IPC を登録してウィンドウを開く
  */
+import { ACHIEVEMENT_IDS } from '@chain-factory/sim';
 import { app, ipcMain, protocol, shell } from 'electron';
 import { join } from 'node:path';
 import { APP_SCHEME, CONFIG } from './config';
@@ -58,6 +59,8 @@ if (started.kind === 'restarting') {
         store: new FileStore(app.getPath('userData')),
         steam,
         openExternal: (url) => shell.openExternal(url),
+        // 定義済みの実績だけを Steam へ送る（レンダラーが乗っ取られても任意の ID は解除できない）
+        achievementIds: new Set(ACHIEVEMENT_IDS),
       }),
     );
 

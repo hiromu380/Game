@@ -23,7 +23,7 @@ export function validateStorageWrite(
   return { key, value };
 }
 
-/** 実績の ID（定義済みの一覧は4bで sim から渡す。ここでは形だけを確かめる） */
+/** 実績の ID（形を確かめ、定義済みの一覧 known があればそれに含まれるものだけ） */
 export function validateAchievementId(id: unknown, known?: ReadonlySet<string>): string | null {
   if (typeof id !== 'string' || !ACHIEVEMENT_ID_PATTERN.test(id)) return null;
   if (known && !known.has(id)) return null;
