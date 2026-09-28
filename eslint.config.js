@@ -5,7 +5,16 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', '**/.wrangler/**', 'legacy/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.wrangler/**',
+      'legacy/**',
+      'apps/desktop/renderer/**',
+      'apps/desktop/release/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -37,9 +46,9 @@ export default tseslint.config(
     plugins: { 'react-hooks': reactHooks },
     rules: reactHooks.configs.recommended.rules,
   },
-  // ビルド用のスクリプト（Node で動く）
+  // ビルド用のスクリプト・デスクトップ版のメインプロセス（Node で動く）
   {
-    files: ['apps/client/build/**/*.{ts,mjs}'],
+    files: ['apps/client/build/**/*.{ts,mjs}', 'apps/desktop/**/*.{ts,mjs,cjs}'],
     languageOptions: { globals: globals.node },
   },
 );

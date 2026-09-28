@@ -5,5 +5,22 @@ packages:
 
 # インストール時のスクリプト実行を許可するパッケージ（wrangler dev が使う workerd と esbuild のバイナリ取得）
 onlyBuiltDependencies:
+  - electron
   - esbuild
   - workerd
+
+# スクリプトを実行しないと明示するパッケージ（どれも不要: 案内の表示だけ／ビルド済みバイナリがあるときは使わない再コンパイル／インストーラー作成用）
+ignoredBuiltDependencies:
+  - electron-winstaller
+  - koffi
+  - steamworks-ffi-node
+
+# ネイティブの任意依存（koffi の @koromix/koffi-<os>-<cpu> など）を、開発機の OS に加えて Windows 用も取得する
+# （Linux/macOS からでも Windows 向けのデスクトップ版を正しくパッケージできるようにするため）
+supportedArchitectures:
+  os:
+    - current
+    - win32
+  cpu:
+    - current
+    - x64

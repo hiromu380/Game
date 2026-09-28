@@ -1,0 +1,25 @@
+{
+  "name": "@chain-factory/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "デスクトップ版（Electron）。Steam 連携はメインプロセスの Steam アダプターに閉じ込める",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs --edition full",
+    "build:demo": "node scripts/build.mjs --edition demo",
+    "start": "node scripts/build.mjs --edition full && electron .",
+    "package": "node scripts/build.mjs --edition full && EDITION=full electron-builder --config electron-builder.config.cjs --win",
+    "package:demo": "node scripts/build.mjs --edition demo && EDITION=demo electron-builder --config electron-builder.config.cjs --win",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "steamworks-ffi-node": "0.11.3"
+  },
+  "devDependencies": {
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "@chain-factory/shared": "workspace:*"
+  }
+}
