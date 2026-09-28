@@ -3,9 +3,13 @@
  *
  * 画面側は必ずここを経由して見た目を決める。本番イラストに差し替えるときは
  * parts/ 以下のファイルを置き換える（または src の import 先を変える）だけでよい。
- * 現在は仮素材として SVG のピクトグラムを使っている。
+ * 現在は仮素材として SVG のピクトグラムを使っている（art/ のスクリプトで生成したものを含む）。
  */
 import type { PartId } from '@chain-factory/sim';
+import boltFailSrc from './mascot/bolt-fail.svg';
+import boltHappySrc from './mascot/bolt-happy.svg';
+import boltIdleSrc from './mascot/bolt-idle.svg';
+import boltSurprisedSrc from './mascot/bolt-surprised.svg';
 import { BOARD_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
 import conveyorSrc from './parts/conveyor.svg';
@@ -64,6 +68,16 @@ export const PART_ASSETS: Record<PartId, PartAsset> = {
   inspector: { src: inspectorSrc, color: 0x66bb6a, rotates: false },
   piggyBank: { src: piggyBankSrc, color: 0xf48fb1, rotates: false },
 };
+
+/** マスコット「ボルト」の表情（art/mascot.ts で生成） */
+export const MASCOT_ASSETS = {
+  idle: boltIdleSrc,
+  happy: boltHappySrc,
+  surprised: boltSurprisedSrc,
+  fail: boltFailSrc,
+} as const;
+
+export type MascotExpression = keyof typeof MASCOT_ASSETS;
 
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {

@@ -66,6 +66,7 @@ export const BOLT_COLORS = {
   eye: '#ffffff',
   pupil: '#212121',
   cheek: '#f48fb1',
+  sweat: '#81d4fa',
 } as const;
 
 /** 盤面（床・枠・マス）とボス */
