@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: chainMeter（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M9 38 a23 23 0 0 1 46 0 Z" fill="#ffcc80" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M44 22 a23 23 0 0 1 11 16 H47 a15 15 0 0 0 -7 -11 Z" fill="#ff5252"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(-80 32 38)"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(-50 32 38)"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(-20 32 38)"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(10 32 38)"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(40 32 38)"/>
+  <path d="M32 17 v4" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(70 32 38)"/>
+  <path d="M32 38 L50 27" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="38" r="3.5" fill="#1b1f27"/>
+  <rect x="9" y="38" width="46" height="5" rx="1" fill="#fb8c00" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="26" cy="51" rx="6" ry="4" fill="none" stroke="#546e7a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="38" cy="51" rx="6" ry="4" fill="none" stroke="#90a4ae" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

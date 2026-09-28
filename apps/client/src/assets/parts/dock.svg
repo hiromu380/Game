@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: dock（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="8" y="10" width="48" height="44" rx="4" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="16" width="36" height="38" fill="#1b1f27"/>
+  <rect x="14" y="16" width="36" height="16" fill="#cfd8dc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 20 H48" fill="none" stroke="#546e7a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 24 H48" fill="none" stroke="#546e7a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 28 H48" fill="none" stroke="#546e7a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="21" y="36" width="22" height="17" rx="1.5" fill="#c8a165" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="21" y="36" width="22" height="5" fill="#8d6e3f" opacity="0.6"/>
+  <path d="M32 36 V44" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M27 48 h10" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

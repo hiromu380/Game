@@ -1,0 +1,1855 @@
+/* =============================================================================
+   Chain Factory クライアントのスタイル（仮 UI）
+   ============================================================================= */
+
+:root {
+  /* 色の CSS 変数は src/styles/palette.css（src/assets/palette.ts から生成）で定義する */
+  /* 同梱の日本語フォント（src/config/fonts.ts の FONT_STACK と同じ並び） */
+  font-family:
+    'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
+    'Meiryo', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* 縞鋼板の模様を敷き詰める（assets/board/background.svg） */
+  background: var(--bg) url('./assets/board/background.svg') repeat;
+  background-size: 32px 32px;
+}
+
+/* ボタンの文字の前に添える UI アイコン（ui/UiIcon.tsx） */
+.ui-icon {
+  vertical-align: middle;
+  margin: -3px 6px -2px 0;
+}
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: var(--secondary);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.button--primary {
+  background: var(--primary);
+  border-color: var(--primary-shadow);
+  font-weight: bold;
+  /* 押しボタン風の立体感 */
+  box-shadow: 0 4px 0 var(--primary-shadow);
+  transform: translateY(0);
+  transition: transform 0.05s;
+}
+.button--primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--primary-shadow);
+}
+.button--primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.button--ghost {
+  background: transparent;
+  white-space: nowrap;
+}
+
+/* ---- 全体レイアウト ---- */
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 16px 32px;
+}
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  /* ハザード柄のライン */
+  border-bottom: 6px solid transparent;
+  border-image: repeating-linear-gradient(
+      -45deg,
+      var(--accent) 0 10px,
+      var(--hazard-black) 10px 20px
+    )
+    6;
+}
+.app-header__icon {
+  vertical-align: middle;
+  margin-right: 8px;
+}
+.app-header__title {
+  font-size: 1.3rem;
+  margin: 4px 0;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 820px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+.layout__board {
+  position: relative;
+}
+.layout__side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- 盤面 ---- */
+.board-container {
+  width: 100%;
+}
+.board-canvas {
+  /* スマホの長押しで文字選択やメニューが出ないようにする */
+  -webkit-touch-callout: none;
+  user-select: none;
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  touch-action: manipulation;
+}
+
+/* ---- HUD ---- */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 8px 0 12px;
+}
+.hud__item {
+  display: flex;
+  flex-direction: column;
+}
+.hud__item--shift {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+.hud__label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.hud__value {
+  font-size: 1.15rem;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+.hud__value--score {
+  color: var(--met);
+}
+/* ノルマ（いちばん大事な数字なので、枠つきで大きく。達成したら緑） */
+.hud__quota {
+  padding: 2px 12px 4px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: rgba(255, 193, 7, 0.08);
+}
+.hud__quota .hud__label {
+  color: var(--accent);
+  font-weight: bold;
+}
+.hud__quota-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.hud__quota.is-met {
+  border-color: var(--met);
+  background: rgba(105, 240, 174, 0.1);
+}
+.hud__quota.is-met .hud__label,
+.hud__quota.is-met .hud__quota-value {
+  color: var(--met);
+}
+.hud__quota-bar {
+  display: block;
+  height: 4px;
+  margin-top: 2px;
+  border-radius: 2px;
+  background: var(--secondary);
+  overflow: hidden;
+}
+.hud__quota-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.15s;
+}
+.hud__quota.is-met .hud__quota-bar > span {
+  background: var(--met);
+}
+/* ロケットの進み具合（ui/RocketProgress.tsx） */
+.hud__rocket {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.hud__rocket > span {
+  display: flex;
+  flex-direction: column;
+}
+.hud__seed {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* ---- パネル共通 ---- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.panel__title {
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+  padding-left: 8px;
+  border-left: 4px solid var(--accent);
+}
+.panel__hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.button-row > button {
+  flex: 1;
+}
+
+/* ---- ショップ・手持ちの項目 ---- */
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.item-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.item-button--selected {
+  border-color: var(--selected);
+  box-shadow: 0 0 0 1px var(--selected);
+}
+.item-button__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.item-button__name {
+  font-weight: bold;
+}
+.item-button__desc {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.item-button__meta {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- パーツアイコン（仮素材: 色分けした図形 + 頭文字） ---- */
+.part-icon {
+  display: block;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ---- 選択中のパーツ ---- */
+.selection__part {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.selection__name {
+  font-weight: bold;
+}
+
+/* ---- 操作 ---- */
+.controls .button--primary {
+  flex: 2;
+}
+.speed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.speed__label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.speed__button {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+}
+.speed__button--active {
+  border-color: var(--selected);
+  color: var(--selected);
+}
+
+/* ---- 再生中・再生結果 ---- */
+.playback-banner {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.playback-panel {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  background: rgba(20, 24, 31, 0.94);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: center;
+}
+.playback-panel h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+.playback-panel__rocket {
+  margin: -4px 0 8px;
+  color: var(--accent);
+  font-weight: bold;
+}
+.playback-panel__verdict {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.is-met {
+  color: var(--met);
+}
+.is-missed {
+  color: var(--missed);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 2px 16px;
+  justify-content: center;
+  margin: 0 0 12px;
+}
+.stats dt {
+  color: var(--muted);
+  text-align: right;
+}
+.stats dd {
+  margin: 0;
+  text-align: left;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+.stats__score {
+  color: var(--met);
+}
+.stats--large {
+  font-size: 1.2rem;
+}
+
+.toast {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--missed);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+/* ---- ラン終了画面 ---- */
+.run-end {
+  max-width: 480px;
+  margin: 40px auto;
+  text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.run-end h1 {
+  margin-top: 0;
+}
+.run-end__history {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+/* ---- パネル見出し行（見出し + 小さなボタン） ---- */
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.panel__header .panel__title {
+  margin: 0;
+}
+/* 見出しを隠す画面（タブ表示）でも、右端のボタンは右に寄せる */
+.panel__header > .button--small:last-child {
+  margin-left: auto;
+}
+.button--small {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* ---- 売却（取り消せない操作）は目立たせず、確認時だけ赤くする ---- */
+.selection__danger {
+  margin-top: 6px;
+}
+.button--danger {
+  background: var(--missed);
+  border-color: var(--missed);
+  font-weight: bold;
+}
+
+/* ---- ボスシフトの予告・適用中表示 ---- */
+.boss-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: -4px 0 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--accent);
+  background: rgba(255, 193, 7, 0.08);
+}
+.boss-notice--now {
+  border: 2px solid var(--missed);
+  background: rgba(255, 82, 82, 0.12);
+}
+.boss-notice__icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-self: center;
+}
+.boss-notice__label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+.boss-notice--now .boss-notice__label {
+  color: var(--missed);
+}
+.boss-notice__desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---- 途切れた理由の内訳（結果パネル） ---- */
+.break-list {
+  text-align: left;
+  font-size: 0.8rem;
+  margin: 0 auto 12px;
+  max-width: 360px;
+}
+.break-list__title {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.break-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.break-list li {
+  margin: 2px 0;
+}
+.break-chip {
+  display: inline-block;
+  min-width: 3.5em;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  color: var(--white);
+  font-weight: bold;
+  text-align: center;
+}
+/* 色は盤面のマーカー（palette.ts の VANISH_COLORS）と同じ */
+.break-chip--outOfBoard {
+  background: var(--vanish-outOfBoard);
+}
+.break-chip--emptyCell {
+  background: var(--vanish-emptyCell);
+}
+.break-chip--exhausted {
+  background: var(--vanish-exhausted);
+}
+.break-chip--blocked {
+  background: var(--vanish-blocked);
+}
+.break-chip--inert {
+  background: var(--vanish-inert);
+}
+
+/* ---- デバッグ表示 ---- */
+.debug h3 {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 10px 0 4px;
+}
+.debug__meta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  margin: 0;
+}
+.debug__table {
+  font-size: 0.75rem;
+  border-collapse: collapse;
+}
+.debug__table td {
+  padding: 1px 8px 1px 0;
+}
+.debug__ticks {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  padding-left: 2.5em;
+  white-space: nowrap;
+}
+
+/* ---- メタ進行（結果画面） ---- */
+.meta {
+  margin-top: 24px;
+  text-align: left;
+}
+.meta h2 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+.meta__new {
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: rgba(255, 193, 7, 0.08);
+}
+.meta__new ul,
+.meta__goals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.meta__new li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.meta__goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.meta__goal-text {
+  flex: 1;
+  font-size: 0.85rem;
+}
+.meta__condition {
+  color: var(--muted);
+}
+.meta__bar {
+  height: 6px;
+  background: var(--secondary);
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.meta__bar-fill {
+  height: 100%;
+  background: var(--accent);
+}
+.meta__goal.is-done .meta__bar-fill {
+  background: var(--met);
+}
+.meta__check {
+  width: 1.2em;
+  color: var(--met);
+  font-weight: bold;
+}
+
+/* 実績の一覧（ラン終了画面。折りたたみ） */
+.achievements {
+  margin-top: 16px;
+}
+.achievements__icon.is-locked {
+  filter: grayscale(1) brightness(0.6);
+}
+/* 隠し実績は解除するまで絵も見せない */
+.achievements__icon.is-secret {
+  filter: brightness(0);
+  opacity: 0.4;
+}
+.achievements summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+/* ---- モーダル（設定画面など） ---- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 16px;
+}
+.modal__body {
+  width: min(420px, 100%);
+}
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+.segmented {
+  display: flex;
+}
+.segmented button {
+  border-radius: 0;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+.segmented button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.segmented button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+.segmented button.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: bold;
+}
+
+.run-end__actions {
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.run-end__actions > button {
+  flex: 0 1 auto;
+  min-width: 140px;
+}
+
+/* ---- デイリーチャレンジ・ランキング ---- */
+.mode-badge {
+  align-self: center;
+  line-height: 1.4;
+  background: var(--accent);
+  color: var(--hazard-black);
+  font-weight: bold;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.daily {
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.daily .boss-notice {
+  margin: 12px 0;
+}
+.daily__actions {
+  flex-wrap: wrap;
+  margin: 12px 0 4px;
+}
+.daily__error {
+  color: var(--missed);
+}
+.daily__name input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+  color: var(--text);
+}
+.daily__commitment {
+  font-size: 0.7rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+.ranking__me {
+  font-weight: bold;
+}
+.ranking__heading {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 12px 0 4px;
+}
+.ranking__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.ranking__row {
+  display: grid;
+  grid-template-columns: 2.5em 1fr auto;
+  grid-template-areas:
+    'rank name score'
+    'rank detail score';
+  column-gap: 8px;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.ranking__row.is-me {
+  background: rgba(255, 193, 7, 0.15);
+}
+.ranking__rank {
+  grid-area: rank;
+  font-weight: bold;
+  align-self: center;
+  text-align: right;
+}
+.ranking__name {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ranking__detail {
+  grid-area: detail;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.ranking__score {
+  grid-area: score;
+  align-self: center;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+/* ---- ヘッダー: アイコン＋タイトルはタイトル画面へ戻るボタン ---- */
+.app-header__home {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: bold;
+  color: inherit;
+}
+.app-header__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---- 相場の前日比 ---- */
+.trend {
+  margin-left: 4px;
+  font-size: 0.75rem;
+}
+.trend--up {
+  color: var(--missed);
+}
+.trend--down {
+  color: var(--met);
+}
+
+/* ---- タイトル画面 ---- */
+.title {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  /* 下は、ベルトコンベア（背景の飾り）にボタンが重ならないように空ける */
+  padding: 24px 16px 110px;
+  text-align: center;
+}
+.title__logo {
+  width: min(360px, 80vw);
+  height: auto;
+}
+.title__name {
+  margin: 0;
+  font-size: 2rem;
+}
+.title__tagline {
+  margin: 0;
+  color: var(--muted);
+  max-width: 28em;
+}
+.title__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(280px, 100%);
+  margin-top: 12px;
+}
+/* 枠だけのボタンも背景（工場のシルエットなど）に埋もれないよう、地の色を敷く */
+.title__actions > .button--ghost {
+  background: var(--panel);
+}
+.title__actions > .button--primary {
+  font-size: 1.2rem;
+  padding: 12px;
+}
+.title__loading {
+  position: relative;
+  width: min(280px, 100%);
+  height: 22px;
+  margin-top: 8px;
+  border-radius: 11px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+.title__loading-bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+.title__loading-label {
+  position: absolute;
+  inset: 0;
+  font-size: 0.75rem;
+  line-height: 22px;
+  color: var(--text);
+  text-shadow: 0 0 3px var(--bg);
+}
+.title__error {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--missed);
+  color: var(--white);
+  text-align: center;
+}
+
+/* ---- 人間確認・シェア・製品版への誘導 ---- */
+.human-check {
+  margin: 12px 0;
+}
+.share {
+  margin: 16px 0;
+}
+.share__preview {
+  white-space: pre-wrap;
+  text-align: left;
+  font: inherit;
+  font-size: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 8px;
+}
+.share__actions {
+  justify-content: center;
+}
+a.button {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--secondary);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+a.button.button--primary {
+  background: var(--primary);
+  border-color: var(--primary-shadow);
+}
+.store-link {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+}
+.store-link__lead {
+  margin: 0 0 8px;
+}
+
+/* ---- タブ（狭い画面のショップ／手持ち） ---- */
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+.tabs__tab {
+  flex: 1;
+  padding: 6px;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+}
+.tabs__tab.is-active {
+  background: var(--panel);
+  border-bottom-color: var(--panel);
+  font-weight: bold;
+}
+
+/* =============================================================================
+   狭い画面（スマホ縦画面）: 盤面全体をスクロールなしで操作できるように詰める
+   ブレークポイントは src/config/layout.ts の compactMaxWidthPx と合わせる
+   ============================================================================= */
+@media (max-width: 600px) {
+  .app {
+    padding: 6px 8px 16px;
+  }
+  .app-header {
+    padding-bottom: 4px;
+    border-bottom-width: 4px;
+  }
+  .app-header__title {
+    font-size: 1rem;
+    margin: 0;
+  }
+  .app-header__icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 4px;
+  }
+  /* 狭い画面ではタイトル文字を隠してアイコンだけにする */
+  .app-header__name {
+    display: none;
+  }
+  .app-header__actions {
+    gap: 4px;
+  }
+  .app-header__actions > button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+  .mode-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+  }
+  .hud {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 6px 10px;
+    margin: 6px 0;
+  }
+  .hud__item--shift {
+    font-size: 0.85rem;
+  }
+  .hud__label {
+    font-size: 0.65rem;
+  }
+  .hud__value {
+    font-size: 0.95rem;
+  }
+  .boss-notice {
+    margin: 0 0 6px;
+    padding: 4px 10px;
+    gap: 2px 8px;
+  }
+  .boss-notice__desc {
+    font-size: 0.75rem;
+  }
+  .layout {
+    gap: 6px;
+  }
+  /* 盤面は画面の高さが足りなければ縮める（下の操作ボタンまで1画面に収める） */
+  .layout__board {
+    width: min(100%, calc(100dvh - 300px));
+    min-width: 240px;
+    margin: 0 auto;
+  }
+  .layout__side {
+    gap: 6px;
+  }
+  .panel {
+    padding: 8px 10px;
+  }
+  .controls .panel__hint {
+    display: none;
+  }
+  .controls .button-row {
+    margin-bottom: 4px;
+  }
+  .item-button__desc {
+    font-size: 0.7rem;
+  }
+  .tabs + .panel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .run-end {
+    margin: 16px auto;
+    padding: 16px;
+  }
+}
+
+/* ---- 狭い画面: アプリ全体を画面の高さに固定し、ショップ・手持ちだけを中でスクロールさせる ----
+   （盤面が画面外に出ないので、商品を選んでからすぐ盤面をタップできる） */
+.app--compact {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 6px;
+}
+.app--compact .layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.app--compact .layout__side {
+  flex: 1;
+  min-height: 0;
+}
+/* タブの中身（ショップ or 手持ち）が残りの高さを使い、はみ出した分は中でスクロール */
+.app--compact .tabs ~ .panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* 見出しはタブと重複するので隠す（リロールボタンは残す） */
+.app--compact .tabs ~ .panel .panel__title,
+.app--short .tabs ~ .panel .panel__title {
+  display: none;
+}
+.app--compact .controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+.app--compact .controls .button-row {
+  flex: 1;
+  margin: 0;
+}
+.app--compact .controls button {
+  padding: 8px 6px;
+}
+.app--compact .speed {
+  flex-shrink: 0;
+  gap: 2px;
+}
+.app--compact .speed__label {
+  display: none;
+}
+.app--compact .speed__button {
+  padding: 6px 6px;
+  font-size: 0.75rem;
+}
+@media (max-width: 600px) {
+  .title__name {
+    font-size: 1.5rem;
+  }
+  .layout__board {
+    width: min(100%, calc(100dvh - 330px));
+  }
+}
+.daily__actions > button {
+  flex: 1 1 30%;
+  white-space: nowrap;
+}
+
+/* ---- 横長の画面（PC・Steam Deck など。config/layout.ts の fitQuery） ----
+   アプリとして画面いっぱいを使い、ページ全体を画面の高さに収める:
+   盤面の一辺 = 残りの高さ（上限 --board-max）、右の列だけスクロール */
+.app--fit {
+  max-width: none;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px 8px;
+  overflow: hidden;
+}
+.app--fit .hud {
+  margin: 6px 0;
+}
+.app--fit .boss-notice {
+  margin-bottom: 6px;
+}
+.app--fit .layout {
+  flex: 1;
+  min-height: 0;
+  margin-top: 8px;
+  /* 盤面の一辺を .layout の高さに合わせるため、.layout を高さの基準（コンテナ）にする */
+  container-type: size;
+  grid-template-columns: auto minmax(280px, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+.app--fit .layout__board {
+  /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
+  /* 高さいっぱい。ただし右の列（最小 280px + すき間）の分は横幅に残す */
+  width: min(100cqh, 100cqw - 290px, var(--board-max, 640px));
+}
+.app--fit .layout__side {
+  min-height: 0;
+  overflow-y: auto;
+  gap: 8px;
+  padding-right: 4px;
+  /* 右の列が広ければ、ショップと手持ちを2列に並べる（それ以外は1行を占める） */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(300px, calc(50% - 8px)), 1fr));
+  align-content: start;
+  align-items: start;
+}
+.app--fit .layout__side > * {
+  grid-column: 1 / -1;
+}
+/* 右の列の先頭: シフトの情報・目的の案内・夜シフトの予告（盤面の上から移したもの） */
+.app--fit .layout__info .hud {
+  margin: 0 0 6px;
+  padding: 6px 10px;
+  gap: 4px 14px;
+}
+.app--fit .layout__info .boss-notice,
+.app--fit .layout__info .tutorial {
+  margin-bottom: 6px;
+}
+.app--fit .app-header {
+  padding-bottom: 4px;
+}
+.app--fit .app-header__title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.app--fit .layout__side > [data-panel='shop'],
+.app--fit .layout__side > [data-panel='inventory'] {
+  grid-column: auto;
+}
+
+/* ---- 横長で高さが低い画面（Steam Deck 1280×800 など。config/layout.ts の shortQuery） ----
+   上に加えて見出しなどを詰める（ショップ・手持ちはタブで切り替える） */
+.app--short .layout__side {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app--short .app-header {
+  padding-bottom: 4px;
+}
+.app--short .app-header__title {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.app--short .hud {
+  margin: 6px 0;
+  padding: 6px 12px;
+}
+.app--short .boss-notice__icon {
+  width: 20px;
+  height: 20px;
+}
+.app--short .boss-notice {
+  margin-bottom: 6px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* ---- 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） ---- */
+.capture {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 100;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+.capture textarea {
+  font: inherit;
+  font-size: 0.7rem;
+}
+/* 最小限: 盤面と HUD だけ */
+.capture-ui--minimal .app-header,
+.capture-ui--minimal .layout__side,
+.capture-ui--none .app-header,
+.capture-ui--none .layout__side,
+.capture-ui--none .hud,
+.capture-ui--none .boss-notice,
+.capture-ui--none .toast,
+.capture-ui--none .playback-banner {
+  display: none;
+}
+.capture-ui--minimal .layout,
+.capture-ui--none .layout {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.capture-ui--minimal .layout__board,
+.capture-ui--none .layout__board {
+  /* 高さの低い画面では .layout の高さ（cqh）、それ以外は画面の高さに合わせる */
+  width: min(100%, 100cqh, calc(100dvh - 40px));
+}
+
+/* ---- 置いたパーツのドラッグ（ui/DragGhost.tsx） ---- */
+.drag-ghost {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+.drag-ghost.is-over-inventory {
+  opacity: 1;
+  transform: scale(0.8);
+}
+.drag-ghost.is-over-sell {
+  opacity: 0.6;
+  transform: scale(0.7);
+}
+/* ドラッグ中は手持ち（戻す）の一覧・タブを落とし先として目立たせる */
+.is-dragging-part [data-panel='inventory'],
+.is-dragging-part [data-drop='inventory'] {
+  outline: 3px dashed var(--met);
+  outline-offset: -3px;
+}
+
+/* ---- パーツ一覧（ui/PartCatalog.tsx） ---- */
+.catalog {
+  max-width: 560px;
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+/* 本番の確認（ui/CommitConfirm.tsx） */
+.commit-confirm .button-row {
+  margin-top: 12px;
+}
+.commit-confirm .button-row > button {
+  flex: 1;
+}
+
+/* コレクション（タイトル画面から開く。ui/title/CollectionScreen.tsx） */
+.collection {
+  width: min(640px, 100%);
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+}
+.collection__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+.collection__content .meta {
+  margin: 0;
+}
+.catalog__list {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+.catalog__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.catalog__item.is-locked {
+  opacity: 0.5;
+}
+.catalog__text {
+  flex: 1;
+  text-align: left;
+}
+.catalog__desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.catalog__rarity {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--secondary);
+}
+.catalog__rarity--uncommon {
+  color: var(--met);
+}
+.catalog__rarity--rare {
+  color: var(--accent);
+}
+.catalog__meta {
+  text-align: right;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ---- ロケット（1ランの目的。ui/RocketProgress.tsx・ui/RocketScene.tsx） ---- */
+.rocket-goal {
+  border-style: solid;
+}
+.rocket-scene {
+  margin: -8px 0 8px;
+}
+.rocket-scene__sky {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.rocket-scene.is-launched .rocket-scene__sky {
+  border-radius: 10px;
+  /* 星空: 小さな点を2種類の間隔で敷き詰める */
+  background:
+    radial-gradient(circle, var(--white) 1px, transparent 1.5px) 0 0 / 37px 29px,
+    radial-gradient(circle, var(--muted) 1px, transparent 1.5px) 11px 13px / 23px 31px,
+    var(--bg);
+}
+.rocket-scene__rocket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 8px;
+}
+.rocket-scene.is-launched .rocket-scene__rocket {
+  padding-bottom: 32px;
+}
+.rocket-scene__flame {
+  position: absolute;
+  /* ロケットの絵（高さ 104px）のノズルの真下 */
+  top: 94px;
+}
+.rocket-scene__caption {
+  margin: 8px 0 0;
+  font-weight: bold;
+}
+.rocket-scene.is-launched .rocket-scene__caption {
+  color: var(--accent);
+}
+/* 発射: 少し震えてから上へ飛んでいき、下からまた昇ってきて画面の中で止まる */
+.rocket-scene.is-animated .rocket-scene__rocket {
+  animation: rocket-launch 2.8s ease-in both;
+}
+.rocket-scene.is-animated .rocket-scene__flame {
+  animation: rocket-flame 0.12s ease-in-out infinite alternate;
+}
+@keyframes rocket-launch {
+  0% {
+    transform: translate(0, 0);
+  }
+  8% {
+    transform: translate(-2px, 0);
+  }
+  16% {
+    transform: translate(2px, 0);
+  }
+  24% {
+    transform: translate(-1px, 0);
+  }
+  55% {
+    transform: translate(0, -200px);
+  }
+  56% {
+    transform: translate(0, 200px);
+  }
+  100% {
+    transform: translate(0, -6px);
+  }
+}
+@keyframes rocket-flame {
+  from {
+    transform: scaleY(0.8);
+    transform-origin: top;
+  }
+  to {
+    transform: scaleY(1.2);
+    transform-origin: top;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rocket-scene.is-animated .rocket-scene__rocket,
+  .rocket-scene.is-animated .rocket-scene__flame {
+    animation: none;
+  }
+}
+
+/* ---- 初回ガイド（ui/TutorialGuide.tsx） ---- */
+.tutorial {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+}
+.tutorial__mascot {
+  flex: none;
+}
+.tutorial__message {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.tutorial__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* ガイドで「ここを押す」ボタン・一覧の項目を光らせる */
+.is-guided {
+  animation: guided-pulse 1.1s ease-in-out infinite;
+}
+@keyframes guided-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px var(--accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-guided {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+}
+@media (max-width: 600px) {
+  .tutorial {
+    padding: 6px 8px;
+  }
+  .tutorial__mascot {
+    width: 36px;
+    height: 36px;
+  }
+  .tutorial__message {
+    font-size: 0.85rem;
+  }
+}
+
+/* ---- 遊び方（ui/title/HowToPlay.tsx） ---- */
+.how-to {
+  width: min(560px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.how-to__page {
+  text-align: center;
+}
+.how-to__page h3 {
+  margin: 8px 0;
+  color: var(--accent);
+}
+.how-to__body {
+  margin: 0;
+  padding-left: 1.2em;
+  text-align: left;
+  line-height: 1.6;
+}
+.how-to__body li {
+  margin-bottom: 6px;
+}
+.how-to__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0;
+}
+.how-to__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+}
+.how-to__dots span.is-active {
+  background: var(--accent);
+}
+.how-to .button-row > button {
+  flex: 1;
+}
+
+/* ---- タイトル画面の背景（ui/title/TitleBackdrop.tsx） ---- */
+.title-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  /* 夕暮れの空: 上は夜、地平線（工場の後ろ）がほんのり明るい */
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 100%, var(--title-glow), transparent 70%),
+    linear-gradient(to bottom, var(--title-sky-top), var(--title-sky-bottom));
+}
+/* 星: 空の上のほうだけ。2種類の間隔の点を重ね、ゆっくりまたたかせる */
+.title-backdrop__stars {
+  position: absolute;
+  inset: 0 0 45%;
+  background:
+    radial-gradient(circle, var(--white) 1px, transparent 1.6px) 0 0 / 53px 47px,
+    radial-gradient(circle, var(--muted) 1px, transparent 1.6px) 19px 23px / 37px 41px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+  opacity: 0.45;
+  animation: title-twinkle 3s ease-in-out infinite alternate;
+}
+@keyframes title-twinkle {
+  to {
+    opacity: 0.9;
+  }
+}
+/* 大きな歯車: 空の奥でゆっくり逆向きに回る */
+.title-backdrop__gear {
+  position: absolute;
+  opacity: 0.55;
+}
+.title-backdrop__gear--a {
+  width: 340px;
+  top: -110px;
+  left: -90px;
+  animation: title-spin 40s linear infinite;
+}
+.title-backdrop__gear--b {
+  width: 220px;
+  top: 18%;
+  right: -70px;
+  animation: title-spin 28s linear infinite reverse;
+}
+@keyframes title-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ロケット: レーンを機首の角度に傾け、その中でまっすぐ上へ進める（機首と進む向きがそろう） */
+.title-backdrop__rocket-lane {
+  position: absolute;
+  left: 12%;
+  bottom: 140px;
+  transform: rotate(35deg);
+  transform-origin: bottom center;
+}
+.title-backdrop__rocket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  animation: title-rocket 9s ease-in infinite;
+}
+.title-backdrop__flame {
+  margin-top: -6px;
+  animation: rocket-flame 0.12s ease-in-out infinite alternate;
+}
+@keyframes title-rocket {
+  0%,
+  45% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-170vmax);
+    opacity: 1;
+  }
+}
+/* 工場の街並み（ベルトコンベアの上） */
+.title-backdrop__city {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 74px;
+  height: 150px;
+}
+.title-backdrop__factory {
+  position: absolute;
+  bottom: 0;
+  width: 260px;
+  height: 150px;
+}
+.title-backdrop__factory > img {
+  display: block;
+}
+/* 煙: 煙突の口（素材の x=40,y=4 と x=196,y=22）から粒が昇って広がり、消える */
+.title-backdrop__smoke {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.title-backdrop__smoke--a {
+  left: 40px;
+  top: 6px;
+}
+.title-backdrop__smoke--b {
+  left: 196px;
+  top: 24px;
+}
+.title-backdrop__smoke > span {
+  position: absolute;
+  left: -9px;
+  top: -9px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--title-smoke);
+  opacity: 0;
+  animation: title-smoke 3.6s ease-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+.title-backdrop__smoke > span:nth-child(2) {
+  animation-delay: calc(var(--delay, 0s) - 1.2s);
+}
+.title-backdrop__smoke > span:nth-child(3) {
+  animation-delay: calc(var(--delay, 0s) - 2.4s);
+}
+.title-backdrop__smoke--b > span {
+  animation-duration: 4.2s;
+}
+@keyframes title-smoke {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(26px, -90px) scale(2.4);
+    opacity: 0;
+  }
+}
+/* 窓の明かり: ときどき明るく灯る */
+.title-backdrop__blink {
+  position: absolute;
+  width: 18px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--title-window);
+  box-shadow: 0 0 10px var(--title-window);
+  opacity: 0;
+  animation: title-blink 5s steps(1) infinite;
+  animation-delay: var(--delay, 0s);
+}
+.title-backdrop__blink--a {
+  left: 48px;
+  top: 95px;
+}
+.title-backdrop__blink--b {
+  left: 197px;
+  top: 100px;
+  height: 14px;
+  animation-duration: 7s;
+}
+@keyframes title-blink {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  61%,
+  90% {
+    opacity: 0.95;
+  }
+}
+/* ボルト: ベルトの上で小さく跳ねる */
+.title-backdrop__bolt {
+  position: absolute;
+  right: 5%;
+  bottom: 70px;
+  z-index: 1;
+  animation: title-bob 1.6s ease-in-out infinite;
+}
+@keyframes title-bob {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+/* ベルトコンベア: 画面の下をパーツが左から右へ流れる */
+.title-backdrop__belt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  height: 56px;
+  overflow: hidden;
+  background: var(--panel);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-image: repeating-linear-gradient(
+      -45deg,
+      var(--hazard-yellow) 0 10px,
+      var(--hazard-black) 10px 20px
+    )
+    6;
+}
+.title-backdrop__items {
+  display: flex;
+  gap: 28px;
+  width: max-content;
+  padding: 2px 14px;
+  animation: title-belt 40s linear infinite;
+}
+/* 2周分並べているので、半分動かしたら最初に戻すとつなぎ目が見えない */
+@keyframes title-belt {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.title-backdrop.is-still,
+.title-backdrop.is-still * {
+  animation: none !important;
+}
+.title-backdrop.is-still .title-backdrop__rocket,
+.title-backdrop.is-still .title-backdrop__smoke {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-backdrop * {
+    animation: none !important;
+  }
+  .title-backdrop__rocket,
+  .title-backdrop__smoke {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .title-backdrop__bolt {
+    width: 52px;
+    height: 52px;
+  }
+  .title-backdrop__city {
+    transform: scale(0.7);
+    transform-origin: bottom left;
+    width: 143%;
+  }
+  .title-backdrop__gear--a {
+    width: 220px;
+  }
+}
+
+/* ---- 今日の出来事（ui/DayEventDialog.tsx） ---- */
+.day-event {
+  width: min(520px, 100%);
+}
+.day-event__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.day-event__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  text-align: left;
+}
+.day-event__choice strong {
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+.day-event__choice span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.day-event-notice {
+  border-style: solid;
+  border-color: var(--met);
+}
+.day-event-notice .boss-notice__label {
+  color: var(--met);
+}
+
+/* ---- 売却エリア（ui/SellZone.tsx） ---- */
+.sell-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 2px dashed var(--panel-border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+/* ドラッグ中: 赤く大きく（落とすと売れる） */
+.sell-zone.is-active {
+  min-height: 64px;
+  border-color: var(--missed);
+  background: rgba(255, 82, 82, 0.12);
+  color: var(--missed);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.sell-zone.is-disabled {
+  border-color: var(--panel-border);
+  background: none;
+  color: var(--muted);
+}

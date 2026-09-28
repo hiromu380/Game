@@ -1,0 +1,14 @@
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+coverage
+tools/balance/reports/*
+!tools/balance/reports/.gitkeep
+.dev.vars
+.wrangler
+backups/
+apps/desktop/renderer/
+apps/desktop/release/
+apps/desktop/steamworks_sdk/
+tools/fonts/.cache/

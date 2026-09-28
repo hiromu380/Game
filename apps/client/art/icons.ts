@@ -1,0 +1,155 @@
+/**
+ * ボスのアイコン（64×64・警告の標識風）と UI アイコン（24×24・線2px）
+ *
+ * - ボス: 黄色の標識に赤い縁。中のピクトグラムでルールを表す（夜のシフトの予告・今日の特殊ルールに出す）
+ * - UI: 暗いボタンの上に置くので、線は文字色（UI_COLORS.text）。アクセントに黄・赤を少しだけ使う
+ *   24px で意味がわかるよう、線の数を減らす（docs/art-style.md「読みやすさの基準」）
+ */
+import type { BossModifierId } from '@chain-factory/sim';
+import { INK, MATERIAL_COLORS as M, UI_COLORS as U } from '../src/assets/palette';
+import { circle, el, line, outlined, path, polygon, rect, svg } from './svg';
+
+const O = INK.outline;
+
+// ---- ボス ----
+
+/** 標識の土台（黄色の円・赤い縁） */
+const sign = () => [
+  circle(32, 32, 28, { fill: U.missed, stroke: O, 'stroke-width': 3 }),
+  circle(32, 32, 21, { fill: U.accent, stroke: O, 'stroke-width': 2 }),
+];
+
+const BOSS: Record<BossModifierId, string[]> = {
+  // 油切れ: 空になりかけた油滴と下向きの矢印
+  lowOil: [
+    path('M28 16 q-9 13 -9 19 a9 9 0 0 0 18 0 q0 -6 -9 -19 Z', outlined(INK.white, 3)),
+    path('M20.5 38 a8 8 0 0 0 15 0 Z', { fill: M.oil }),
+    path('M43 22 V40 M38 35 l5 6 l5 -6', line(O, 3)),
+  ],
+  // 床の補修工事: 工事のコーン
+  repairWork: [
+    polygon('32,14 42,44 22,44', outlined(M.fire, 3)),
+    path('M26.5 32 H37.5', line(INK.white, 4)),
+    rect(17, 44, 30, 5, outlined(INK.steelDark, 2.5), 2),
+  ],
+  // 出荷検査強化: 虫めがねと「½」
+  strictInspection: [
+    circle(28, 29, 10, outlined(M.glass, 3)),
+    path('M35 36 L45 46', line(O, 5)),
+    path('M25 25 v7 M23 27 l2 -2 M31 25 l-6 9 M29 30 h4 l-4 4 h4', line(O, 1.8)),
+  ],
+  // 短縮営業: 時計（針が早く進む）と早送り
+  shortShift: [
+    circle(28, 32, 12, outlined(INK.white, 3)),
+    path('M28 24 V32 L34 35', line(O, 2.5)),
+    polygon('41,26 47,32 41,38', { fill: U.missed, stroke: O, 'stroke-width': 1.5 }),
+    polygon('46,26 52,32 46,38', { fill: U.missed, stroke: O, 'stroke-width': 1.5 }),
+  ],
+  // 部品不足: 空っぽの段ボール箱
+  partShortage: [
+    path('M18 28 L32 22 L46 28 V44 L32 50 L18 44 Z', outlined(M.cardboard, 3)),
+    path('M18 28 L32 34 L46 28 M32 34 V50', line(O, 2)),
+    path('M18 28 L12 22 M46 28 L52 22', line(O, 3)),
+    path('M27 39 h10', line(U.missed, 3.5)),
+  ],
+};
+
+// ---- UI ----
+
+const S = U.text;
+const ui = (strokeWidth = 2) => line(S, strokeWidth);
+
+const UI: Record<string, string[]> = {
+  // リロール: 2本の回る矢印
+  reroll: [
+    path('M5 11 a7 7 0 0 1 12.5 -3.5', ui()),
+    polygon('19,4 19,10 13,9', { fill: S }),
+    path('M19 13 a7 7 0 0 1 -12.5 3.5', ui()),
+    polygon('5,20 5,14 11,15', { fill: S }),
+  ],
+  // 売却: 硬貨と上向きの矢印（お金が戻ってくる）
+  sell: [
+    circle(10, 14, 6, { fill: M.coin, stroke: O, 'stroke-width': 1.5 }),
+    path('M8 14 h4', line(O, 1.5)),
+    path('M18 20 V5 M14 9 l4 -4 l4 4', ui()),
+  ],
+  // 手持ちに戻す: 箱へ入る下向きの矢印
+  return: [path('M4 13 V20 H20 V13', ui()), path('M12 3 V14 M8 10 l4 4 l4 -4', ui())],
+  // 回転: 時計回りの矢印
+  rotate: [path('M18 12 a6 6 0 1 1 -2 -4.5', ui()), polygon('20,3 20,10 13,9', { fill: S })],
+  // 試運転: 再生ボタン（輪郭だけ）
+  trial: [polygon('7,4 20,12 7,20', { ...ui(), 'stroke-linejoin': 'round' })],
+  // 本番: 大きな赤い押しボタン（作り込む）
+  'commit-switch': [
+    rect(3, 14, 18, 7, { fill: U.accent, stroke: O, 'stroke-width': 1.5 }, 2),
+    path('M5 14 l3 7 M10 14 l3 7 M15 14 l3 7', line(U['hazard-black'], 1.5)),
+    path('M6 13 a6 5 0 0 1 12 0 v1 H6 Z', { fill: U.primary, stroke: O, 'stroke-width': 1.5 }),
+    path('M8.5 10 q2 -2 4 -2', line(INK.white, 1.2)),
+  ],
+  // 設定: 歯車
+  settings: [
+    circle(12, 12, 3, ui()),
+    path(
+      'M12 3 v2.5 M12 18.5 v2.5 M3 12 h2.5 M18.5 12 h2.5 M5.6 5.6 l1.8 1.8 M16.6 16.6 l1.8 1.8 M5.6 18.4 l1.8 -1.8 M16.6 7.4 l1.8 -1.8',
+      ui(2.5),
+    ),
+    circle(12, 12, 6.5, ui()),
+  ],
+  // 音量: スピーカーと音の波
+  volume: [
+    polygon('4,9 8,9 13,5 13,19 8,15 4,15', { fill: S }),
+    path('M16 9 a4 4 0 0 1 0 6 M18.5 6.5 a7.5 7.5 0 0 1 0 11', ui()),
+  ],
+  // ミュート: スピーカーと ×
+  mute: [
+    polygon('4,9 8,9 13,5 13,19 8,15 4,15', { fill: S }),
+    path('M16 9 l5 6 M21 9 l-5 6', line(U.missed, 2)),
+  ],
+  // ランキング: 表彰台
+  ranking: [
+    rect(9, 7, 6, 14, { fill: U.accent, stroke: O, 'stroke-width': 1 }),
+    rect(3, 12, 6, 9, { fill: S }),
+    rect(15, 15, 6, 6, { fill: S }),
+    path('M2 21 H22', ui()),
+  ],
+  // シェア: 箱から上へ出る矢印
+  share: [path('M8 10 H5 V21 H19 V10 H16', ui()), path('M12 15 V3 M8 7 l4 -4 l4 4', ui())],
+  // デバッグ: 虫
+  debug: [
+    el('ellipse', { cx: 12, cy: 14, rx: 5, ry: 6.5, ...ui() }),
+    path('M12 8 V21 M7 12 H3 M17 12 h4 M7 17 H3 M17 17 h4 M9 7 l-2 -3 M15 7 l2 -3', ui(1.5)),
+  ],
+  // デイリー: カレンダーと星
+  daily: [
+    rect(3, 5, 18, 16, ui(), 2),
+    path('M3 10 H21 M8 3 V7 M16 3 V7', ui()),
+    polygon('12,12 13.2,14.6 16,15 14,16.8 14.5,19.5 12,18.2 9.5,19.5 10,16.8 8,15 10.8,14.6', {
+      fill: U.accent,
+    }),
+  ],
+  // 戻る: 左向きの矢印
+  back: [path('M20 12 H5 M11 6 l-6 6 l6 6', ui())],
+  // 工場拡張: 四隅へ広がる矢印（メタ進行の工場拡張の目標）
+  expand: [
+    rect(7, 7, 10, 10, ui(), 1),
+    path('M3 7 V3 H7 M17 3 H21 V7 M21 17 V21 H17 M7 21 H3 V17', line(U.accent, 2)),
+  ],
+};
+
+export const UI_ICON_NAMES = Object.keys(UI);
+
+/** ボスのアイコンの中身（64×64。実績アイコンに流用する） */
+export const bossBody = (id: BossModifierId): string[] => [...sign(), ...BOSS[id]];
+/** UI アイコンの中身（24×24） */
+export const uiBody = (name: string): string[] => UI[name]!;
+
+export function iconFiles(): Record<string, string> {
+  const files: Record<string, string> = {};
+  for (const [id, body] of Object.entries(BOSS)) {
+    files[`src/assets/boss/${id}.svg`] = svg(`ボス: ${id}`, [...sign(), ...body]);
+  }
+  for (const [name, body] of Object.entries(UI)) {
+    files[`src/assets/ui/${name}.svg`] = svg(`UI アイコン: ${name}`, body, '0 0 24 24');
+  }
+  return files;
+}

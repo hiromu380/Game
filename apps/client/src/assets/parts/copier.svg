@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: copier（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="20" y="6" width="20" height="16" rx="1" fill="#fafafa" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="25" y="3" width="20" height="16" rx="1" fill="#fafafa" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M29 8 h12 M29 12 h9" fill="none" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="9" y="20" width="46" height="30" rx="5" fill="#ce93d8" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="9" y="38" width="46" height="12" fill="#af7db8"/>
+  <rect x="9" y="20" width="46" height="30" rx="5" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="16" y="26" width="20" height="7" rx="2" fill="#1e3a5f" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="45" cy="29" r="3" fill="#8e24aa" stroke="#1b1f27" stroke-width="1.5"/>
+  <rect x="14" y="50" width="36" height="6" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

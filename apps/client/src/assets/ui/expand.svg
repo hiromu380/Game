@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: expand（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="7" y="7" width="10" height="10" rx="1" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M3 7 V3 H7 M17 3 H21 V7 M21 17 V21 H17 M7 21 H3 V17" fill="none" stroke="#ffc107" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

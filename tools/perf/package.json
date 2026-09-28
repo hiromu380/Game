@@ -1,0 +1,17 @@
+{
+  "name": "@chain-factory/perf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "計算量の計測（サーバー検証1回あたりの CPU 時間の見積もり）",
+  "scripts": {
+    "perf": "tsx src/measure.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@chain-factory/sim": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

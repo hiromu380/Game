@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // vite.config.ts が build/*.ts を拡張子つきで読み込むため（Vite のネイティブ設定読み込みに備える）
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src", "test", "build", "art", "vite.config.ts", "vitest.config.ts"]
+}

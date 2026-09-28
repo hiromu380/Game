@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: conveyor（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="15" y="9" width="34" height="46" rx="4" fill="#546e7a" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="11" y="8" width="42" height="7" rx="3.5" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="11" y="49" width="42" height="7" rx="3.5" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M21 48 L32 40 L43 48 L43 52 L32 44 L21 52 Z" fill="#ffc107" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M21 37 L32 29 L43 37 L43 41 L32 33 L21 41 Z" fill="#ffc107" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M21 26 L32 18 L43 26 L43 30 L32 22 L21 30 Z" fill="#ffc107" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    // Workers の型（D1Database など）と、テスト・ジョブ実行用の Node の型（node:sqlite など）
+    "types": ["@cloudflare/workers-types", "node"]
+  },
+  "include": ["src", "test", "scripts"]
+}

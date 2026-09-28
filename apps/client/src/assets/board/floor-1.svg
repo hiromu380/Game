@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 床タイル: 無地（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="0" y="0" width="64" height="64" fill="#4a4f57"/>
+  <path d="M1 63 H63 V1" fill="none" stroke="#3f434a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M1 62 V1 H62" fill="none" stroke="#454a52" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="0" y="0" width="64" height="64" fill="none" stroke="#363a41" stroke-width="2"/>
+</svg>

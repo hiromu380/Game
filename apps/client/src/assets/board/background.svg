@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- ページの背景（縞鋼板の模様。目立たない濃さで敷き詰める）（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="0" y="0" width="32" height="32" fill="#1a1c20"/>
+  <rect x="3" y="6.8" width="10" height="2.4" rx="1.2" fill="#262a31" opacity="0.55" transform="rotate(45 8 8)"/>
+  <rect x="19" y="22.8" width="10" height="2.4" rx="1.2" fill="#262a31" opacity="0.55" transform="rotate(45 24 24)"/>
+  <rect x="19" y="6.8" width="10" height="2.4" rx="1.2" fill="#262a31" opacity="0.55" transform="rotate(-45 24 8)"/>
+  <rect x="3" y="22.8" width="10" height="2.4" rx="1.2" fill="#262a31" opacity="0.55" transform="rotate(-45 8 24)"/>
+</svg>

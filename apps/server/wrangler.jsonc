@@ -1,0 +1,53 @@
+// Cloudflare Workers の設定
+// - 秘密値（DAILY_MASTER_SECRET）はここに書かない。本番は `wrangler secret put`、ローカルは .dev.vars
+// - database_id は本番の D1 を作成後に差し替える（ローカルでは任意の値で動く）
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "chain-factory",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Web 版クライアント（apps/client のビルド結果）を同じオリジンで配信する。
+  // /api/* だけ Worker を通し、それ以外は静的ファイル（見つからなければ index.html = SPA）
+  "assets": {
+    "directory": "../client/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "chain-factory",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "src/db/migrations",
+    },
+  ],
+
+  // 乱用よけのレート制限（拠点ごとの近似値。不正対策の本体ではない）
+  "ratelimits": [
+    { "name": "RATE_LIMIT_READ", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } },
+    { "name": "RATE_LIMIT_WRITE", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } },
+  ],
+
+  // 1時間ごと。切り替え時刻（日本時間0時 = UTC 15:00）の直後に当日分が作られ、失敗しても次の回で再試行される
+  "triggers": { "crons": ["0 * * * *"] },
+
+  "vars": {
+    "DAILY_OFFSET_MINUTES": "540",
+    "DAILY_EPOCH": "2026-09-01",
+    // デスクトップ版（Electron）のページのオリジン（Electron 44 で確認済み）。Web 版は同一オリジンなので影響しない
+    "CORS_ORIGINS": "app://chain-factory",
+    // Steam 認証で受け付ける App ID（製品版,体験版）。App ID の取得後に設定する（docs/ops/steam-setup.md）
+    "STEAM_APP_IDS": "",
+    // デスクトップ版のビルド設定 STEAM_TICKET_IDENTITY と同じ値にする
+    "STEAM_TICKET_IDENTITY": "chain-factory-api",
+  },
+
+  // 1リクエストあたりの CPU 上限。計測（pnpm perf）で検証1回は通常 約0.6ms・理論上の最悪で 約80ms。
+  // 余裕を持たせて 500ms にする（既定の上限のままにしない: 料金の暴走防止）
+  "limits": { "cpu_ms": 500 },
+
+  "observability": { "enabled": true },
+}

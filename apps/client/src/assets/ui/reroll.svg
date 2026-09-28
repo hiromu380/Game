@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: reroll（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M5 11 a7 7 0 0 1 12.5 -3.5" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="19,4 19,10 13,9" fill="#eef0f3"/>
+  <path d="M19 13 a7 7 0 0 1 -12.5 3.5" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="5,20 5,14 11,15" fill="#eef0f3"/>
+</svg>

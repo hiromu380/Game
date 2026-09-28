@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_SHIFT_1M（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#fb8c00" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><rect x="22" y="12" width="20" height="16" rx="2" fill="#c8a165" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M32 12 V19" fill="none" stroke="#8d6e3f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="12" y="44" width="40" height="15" rx="5" fill="#1b1f27" stroke="#1b1f27" stroke-width="2"/><g transform="translate(23.75 45.5) scale(0.5)"><g fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><path transform="translate(0 0)" d="M2 5 L7 0 V24 M2 24 H11"/><path transform="translate(15 0)" d="M2 24 V0 L9 14 L16 0 V24"/></g></g></g>
+</svg>

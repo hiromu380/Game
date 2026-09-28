@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: spreader（art/ のスクリプトで生成。手で編集しない） -->
+  <g transform="rotate(0 32 32)"><path d="M32 20 V12" fill="none" stroke="#ce93d8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><polygon points="32,6 38,12 26,12" fill="#ce93d8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g transform="rotate(-90 32 32)"><path d="M32 20 V12" fill="none" stroke="#ce93d8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><polygon points="32,6 38,12 26,12" fill="#ce93d8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g transform="rotate(90 32 32)"><path d="M32 20 V12" fill="none" stroke="#ce93d8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><polygon points="32,6 38,12 26,12" fill="#ce93d8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <rect x="28" y="36" width="8" height="18" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="11" fill="#8e24aa" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="4" fill="#791f91" stroke="#1b1f27" stroke-width="1.5"/>
+</svg>

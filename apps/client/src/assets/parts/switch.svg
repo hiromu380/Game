@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: switch（art/ のスクリプトで生成。手で編集しない） -->
+  <defs><pattern id="hazard" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect x="0" y="0" width="4" height="8" fill="#ffc107"/><rect x="4" y="0" width="4" height="8" fill="#2b2b2b"/></pattern></defs>
+  <rect x="9" y="36" width="46" height="17" rx="5" fill="url(#hazard)" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="28" width="24" height="12" rx="3" fill="#546e7a" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 30 a16 13 0 0 1 32 0 v2 a16 6 0 0 1 -32 0 Z" fill="#e53935" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M17 32 a15 6 0 0 0 30 0 v-2 a15 6 0 0 1 -30 0 Z" fill="#8e1414"/>
+  <path d="M23 22 q5 -5 12 -4" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

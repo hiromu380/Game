@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: debug（art/ のスクリプトで生成。手で編集しない） -->
+  <ellipse cx="12" cy="14" rx="5" ry="6.5" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 8 V21 M7 12 H3 M17 12 h4 M7 17 H3 M17 17 h4 M9 7 l-2 -3 M15 7 l2 -3" fill="none" stroke="#eef0f3" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

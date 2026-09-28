@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_BOSS_SHORTAGE（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#ff5252" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g transform="translate(10.879999999999999 8.879999999999999) scale(0.66)"><circle cx="32" cy="32" r="28" fill="#ff5252" stroke="#1b1f27" stroke-width="3"/><circle cx="32" cy="32" r="21" fill="#ffc107" stroke="#1b1f27" stroke-width="2"/><path d="M18 28 L32 22 L46 28 V44 L32 50 L18 44 Z" fill="#c8a165" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M18 28 L32 34 L46 28 M32 34 V50" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M18 28 L12 22 M46 28 L52 22" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M27 39 h10" fill="none" stroke="#ff5252" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+</svg>

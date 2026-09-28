@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: oiler（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M36 26 L54 12 L56 15 L42 30" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M14 26 H42 L46 52 H10 Z" fill="#00acc1" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 42 H44 L46 52 H10 Z" fill="#0092a4"/>
+  <rect x="20" y="18" width="16" height="8" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18 34 H32" fill="none" stroke="#80deea" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M55 19 q2.5 4 0 5.5 q-2.5 -1.5 0 -5.5 Z" fill="#4e342e" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M52 29 q2 3 0 4.5 q-2 -1.5 0 -4.5 Z" fill="#4e342e" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

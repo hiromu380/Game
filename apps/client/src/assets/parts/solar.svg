@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: solar（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="48" cy="13" r="6" fill="#ffca28" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(0 48 13)"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(60 48 13)"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(120 48 13)"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(180 48 13)"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(240 48 13)"/>
+  <path d="M48 3 V5" fill="none" stroke="#ffca28" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(300 48 13)"/>
+  <path d="M28 44 V54 M22 54 H34" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="8,46 20,20 52,24 44,50" fill="#1e3a5f" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M14 33 L48 37 M11 40 L46 44 M28 22 L22 48 M40 23 L34 49" fill="none" stroke="#3f6fa3" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M8 46 L20 20 L52 24 L44 50 Z" fill="none" stroke="#43a047" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

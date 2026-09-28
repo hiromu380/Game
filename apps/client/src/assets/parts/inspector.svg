@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: inspector（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M10 14 H36 L42 20 V52 H10 Z" fill="#fafafa" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 34 l6 6 l12 -14" fill="none" stroke="#43a047" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16 20 h14" fill="none" stroke="#90a4ae" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="44" cy="40" r="9" fill="#b3e5fc" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M40 36 a5 5 0 0 1 5 -2" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M50.5 46.5 L56 52" fill="none" stroke="#1b1f27" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M50.5 46.5 L56 52" fill="none" stroke="#43a047" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
