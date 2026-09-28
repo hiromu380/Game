@@ -49,6 +49,7 @@ import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
 import {
   advanceTutorial,
+  gearAvailability,
   startTutorial,
   tutorialCell,
   tutorialPart,
@@ -446,6 +447,7 @@ export function App({ start, onTitle }: Props) {
       disabled={playing}
       sellRefund={sellRefund}
       guidePartId={guideStep === 'buyGear' ? 'gear' : null}
+      guideReroll={guideStep === 'buyGear' && gearAvailability(run) === 'reroll'}
       onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
       onReroll={() => dispatch({ type: 'reroll' })}
     />

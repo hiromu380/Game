@@ -7,6 +7,7 @@
 import {
   getCurrentShift,
   getPart,
+  getRerollCost,
   scoreCompare,
   scoreOf,
   type PartId,
@@ -153,4 +154,19 @@ export function updateTutorial(state: TutorialState, ctx: TutorialContext): Tuto
 /** 「次へ」ボタン（intro・finish） */
 export function advanceTutorial(state: TutorialState, run: RunState): TutorialState {
   return state.step === 'intro' || state.step === 'finish' ? nextStep(state, run) : state;
+}
+
+/**
+ * ギアを買う手順で、ショップの状況に合わせた案内（リロールなどでギアが並んでいないこともある）
+ * - buy: 買えるギアが並んでいる
+ * - reroll: ギアはないが、リロールで引き直せる
+ * - stuck: ギアが並んでおらずリロールもできない（予算不足など）。自由に工夫してもらう
+ */
+export function gearAvailability(run: RunState): 'buy' | 'reroll' | 'stuck' {
+  const gear = run.shop.find((o) => o.partId === 'gear' && !o.sold);
+  if (gear) return run.budget >= gear.price ? 'buy' : 'stuck';
+  const reroll = getRerollCost(run);
+  // リロールしてもギアを買えるだけの予算が残らないなら、引き直しは勧めない
+  const gearPrice = run.config.economy.prices.gear;
+  return reroll !== null && run.budget >= reroll + gearPrice ? 'reroll' : 'stuck';
 }

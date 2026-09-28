@@ -4,7 +4,7 @@
 import { getCurrentShift, type RunState } from '@chain-factory/sim';
 import { MASCOT_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
-import type { TutorialState } from '../state/tutorial';
+import { gearAvailability, type TutorialState } from '../state/tutorial';
 
 interface Props {
   tutorial: TutorialState;
@@ -19,12 +19,16 @@ export function TutorialGuide({ tutorial, run, lastTrialScore, onNext, onSkip }:
   const { t, formatScore } = useI18n();
   const { step, hint } = tutorial;
   if (step === 'done') return null;
+  // ギアを買う手順は、ショップにギアが並んでいないとき（リロールした後など）に案内を変える
+  const gear = step === 'buyGear' ? gearAvailability(run) : 'buy';
   const message = hint
     ? t(`tutorial.hint.${hint}`)
-    : t(`tutorial.step.${step}`, {
-        score: lastTrialScore ? formatScore(lastTrialScore) : '0',
-        quota: formatScore(String(getCurrentShift(run).quota)),
-      });
+    : gear !== 'buy'
+      ? t(`tutorial.gear.${gear}`, { score: lastTrialScore ? formatScore(lastTrialScore) : '0' })
+      : t(`tutorial.step.${step}`, {
+          score: lastTrialScore ? formatScore(lastTrialScore) : '0',
+          quota: formatScore(String(getCurrentShift(run).quota)),
+        });
   const withButton = step === 'intro' || step === 'finish';
   return (
     <div className="tutorial" role="status">

@@ -9,6 +9,7 @@ import {
 } from '../src/state/gameReducer';
 import {
   advanceTutorial,
+  gearAvailability,
   startTutorial,
   tutorialCell,
   updateTutorial,
@@ -119,5 +120,20 @@ describe('初回ガイド', () => {
     expect(
       updateTutorial(tutorial, { run: game.run, lastTrialScore: null, playing: false }).step,
     ).toBe('finish');
+  });
+
+  it('ガイドのランの最初のショップには増幅ギアが並ぶ', () => {
+    expect(gearAvailability(tutorialRun())).toBe('buy');
+  });
+
+  it('リロールなどでギアがなくなったら、リロールを勧める。予算が足りなければ自由に工夫してもらう', () => {
+    const run = tutorialRun();
+    const noGear = {
+      ...run,
+      shop: run.shop.map((o) => (o.partId === 'gear' ? { ...o, partId: 'coil' as const } : o)),
+    };
+    expect(gearAvailability(noGear)).toBe('reroll');
+    expect(gearAvailability({ ...noGear, budget: 1 })).toBe('stuck');
+    expect(gearAvailability({ ...run, budget: 1 })).toBe('stuck');
   });
 });

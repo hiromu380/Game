@@ -405,5 +405,7 @@
   "howTo.chain.title": "Chain tips",
   "howTo.chain.body": "Multiply: gears and presses make values bigger. Stacked multipliers make them skyrocket\nBranch: splitters and spreaders make more signals to reach more docks\nRetrigger: reflectors and turntables send signals through the same parts again (each part has an activation limit)\nPlacement: coils and solar panels depend on where they sit. Piggy banks add budget for the next shift\nTrial runs are unlimited. Try out a layout before pressing the real switch",
   "howTo.night.title": "Night shifts and more",
-  "howTo.night.body": "Night shifts have a special rule (low oil, floor repairs and more). You get a preview during the morning and noon shifts\nAfter a run, your records unlock new parts and a bigger factory (see the Collection)\nThe Daily Challenge is 3 shifts with the same conditions for everyone, ranked worldwide"
+  "howTo.night.body": "Night shifts have a special rule (low oil, floor repairs and more). You get a preview during the morning and noon shifts\nAfter a run, your records unlock new parts and a bigger factory (see the Collection)\nThe Daily Challenge is 3 shifts with the same conditions for everyone, ranked worldwide",
+  "tutorial.gear.reroll": "You shipped {score}. Almost at the quota! But there's no Booster Gear in the shop. Try a Reroll to get new stock",
+  "tutorial.gear.stuck": "You shipped {score}. Looks like you can't get a Booster Gear right now. Try other parts and find your own way to the quota"
 }

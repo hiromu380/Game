@@ -26,6 +26,8 @@ interface Props {
   sellRefund: number | null;
   /** 初回ガイドで買ってほしいパーツ（最初の1つを光らせる） */
   guidePartId?: PartId | null;
+  /** 初回ガイドでリロールを勧めるとき（光らせる） */
+  guideReroll?: boolean;
   onBuy: (offerIndex: number) => void;
   onReroll: () => void;
 }
@@ -59,7 +61,7 @@ export function ShopPanel(props: Props) {
           {t('catalog.open')}
         </button>
         <button
-          className="button--small"
+          className={`button--small ${props.guideReroll ? 'is-guided' : ''}`}
           disabled={disabled || rerollCost === null || budget < rerollCost}
           onClick={onReroll}
         >
