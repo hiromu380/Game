@@ -1264,30 +1264,7 @@ a.button.button--primary {
   opacity: 0.6;
   transform: scale(0.7);
 }
-/* ドラッグ中は手持ち（戻す）・ショップ（売却）の一覧・タブを落とし先として目立たせる */
-.is-dragging-part [data-panel='shop'],
-.is-dragging-part [data-drop='shop'] {
-  outline: 3px dashed var(--missed);
-  outline-offset: -3px;
-}
-.shop {
-  position: relative;
-}
-/* ドラッグ中にショップの上へ出す「ここで売却」の表示 */
-.shop__sell-drop {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: inherit;
-  background: rgba(0, 0, 0, 0.6);
-  color: var(--missed);
-  font-weight: 800;
-  font-size: 1.1rem;
-  pointer-events: none;
-}
+/* ドラッグ中は手持ち（戻す）の一覧・タブを落とし先として目立たせる */
 .is-dragging-part [data-panel='inventory'],
 .is-dragging-part [data-drop='inventory'] {
   outline: 3px dashed var(--met);
@@ -1844,4 +1821,35 @@ a.button.button--primary {
 }
 .day-event-notice .boss-notice__label {
   color: var(--met);
+}
+
+/* ---- 売却エリア（ui/SellZone.tsx） ---- */
+.sell-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 2px dashed var(--panel-border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+/* ドラッグ中: 赤く大きく（落とすと売れる） */
+.sell-zone.is-active {
+  min-height: 64px;
+  border-color: var(--missed);
+  background: rgba(255, 82, 82, 0.12);
+  color: var(--missed);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.sell-zone.is-disabled {
+  border-color: var(--panel-border);
+  background: none;
+  color: var(--muted);
 }

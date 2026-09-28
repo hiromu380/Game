@@ -46,6 +46,7 @@ import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
+import { SellZone } from './ui/SellZone';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
@@ -289,7 +290,7 @@ export function App({ start, onTitle }: Props) {
   );
 
   // 置いたパーツのドラッグ: 盤面の空きマスへ落とすと移動、手持ちの一覧（またはタブ）へ落とすと手持ちに戻す、
-  // ショップの一覧（またはタブ）へ落とすと売却
+  // 売却エリアへ落とすと売却
   const [dragging, setDragging] = useState<PartId | null>(null);
   const onCellDragStart = useCallback((_from: { x: number; y: number }, partId: PartId) => {
     setDragging(partId);
@@ -436,7 +437,7 @@ export function App({ start, onTitle }: Props) {
     </header>
   );
 
-  /** ドラッグ中のパーツをショップへ落としたときの返金額（売れないパーツなら null） */
+  /** ドラッグ中のパーツを売却エリアへ落としたときの返金額（売れないパーツなら null） */
   const sellRefund =
     dragging && run.config.economy.prices[dragging] > 0 ? getRefund(run, dragging) : null;
   const shopPanel = (
@@ -448,7 +449,6 @@ export function App({ start, onTitle }: Props) {
       rerollCost={getRerollCost(run)}
       trends={trends}
       disabled={playing}
-      sellRefund={sellRefund}
       guidePartId={guideStep === 'buyGear' ? 'gear' : null}
       guideReroll={guideStep === 'buyGear' && gearAvailability(run) === 'reroll'}
       onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
@@ -597,6 +597,8 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
+          {/* 売却エリア（盤面のパーツをドラッグして売る） */}
+          <SellZone dragging={dragging !== null} refund={sellRefund} />
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
@@ -615,12 +617,10 @@ export function App({ start, onTitle }: Props) {
                       ? 'is-guided'
                       : ''
                   }`}
-                  data-drop={key}
+                  data-drop={key === 'inventory' ? 'inventory' : undefined}
                   onClick={() => setTab(key)}
                 >
-                  {key === 'shop' && sellRefund !== null
-                    ? t('shop.dropToSell', { refund: sellRefund })
-                    : t(key === 'shop' ? 'shop.title' : 'inventory.title')}
+                  {t(key === 'shop' ? 'shop.title' : 'inventory.title')}
                 </button>
               ))}
             </div>

@@ -22,8 +22,6 @@ interface Props {
   /** 相場の前日比（値上がり・値下がりしたパーツだけ） */
   trends: Partial<Record<PartId, PriceTrend>>;
   disabled: boolean;
-  /** 盤面のパーツをドラッグ中なら、ここへ落としたときの返金額（売れないパーツ・ドラッグ中でなければ null） */
-  sellRefund: number | null;
   /** 初回ガイドで買ってほしいパーツ（最初の1つを光らせる） */
   guidePartId?: PartId | null;
   /** 初回ガイドでリロールを勧めるとき（光らせる） */
@@ -33,28 +31,14 @@ interface Props {
 }
 
 export function ShopPanel(props: Props) {
-  const {
-    rules,
-    economy,
-    offers,
-    budget,
-    rerollCost,
-    trends,
-    disabled,
-    sellRefund,
-    onBuy,
-    onReroll,
-  } = props;
+  const { rules, economy, offers, budget, rerollCost, trends, disabled, onBuy, onReroll } = props;
   const guidedIndex = props.guidePartId
     ? offers.findIndex((o) => o.partId === props.guidePartId && !o.sold)
     : -1;
   const { t } = useI18n();
   const [catalogOpen, setCatalogOpen] = useState(false);
   return (
-    <section className="panel shop" data-panel="shop">
-      {sellRefund !== null && (
-        <div className="shop__sell-drop">{t('shop.dropToSell', { refund: sellRefund })}</div>
-      )}
+    <section className="panel" data-panel="shop">
       <div className="panel__header">
         <h2 className="panel__title">{t('shop.title')}</h2>
         <button className="button--small button--ghost" onClick={() => setCatalogOpen(true)}>

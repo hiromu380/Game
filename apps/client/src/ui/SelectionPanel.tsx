@@ -2,7 +2,7 @@
  * 盤面で選択中のパーツの操作（回転・手持ちに戻す・売却）
  *
  * 売却は確認なしですぐ行う（「手持ちに戻す」とはボタンの並びと色で区別する）。
- * 盤面のパーツをショップへドラッグしても売却できる（App.tsx）。
+ * 盤面のパーツを売却エリア（ui/SellZone.tsx）へドラッグしても売却できる（App.tsx）。
  */
 import { getCurrentRules, getPart, getRefund, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';

@@ -13,9 +13,9 @@ export function isInventoryDropZone(el: Element | null): boolean {
   return !!el?.closest('[data-panel="inventory"], [data-drop="inventory"]');
 }
 
-/** 売却の落とし先か（ショップの一覧・ショップのタブ） */
+/** 売却の落とし先か（売却エリア。ui/SellZone.tsx） */
 export function isSellDropZone(el: Element | null): boolean {
-  return !!el?.closest('[data-panel="shop"], [data-drop="shop"]');
+  return !!el?.closest('[data-drop="sell"]');
 }
 
 export function DragGhost({ partId }: { partId: PartId }) {

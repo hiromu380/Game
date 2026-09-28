@@ -22,9 +22,7 @@ export function factorySvg(): string {
     rect(150, 80, 110, 70, { fill: T.factory }),
     rect(150, 78, 110, 4, { fill: T['factory-edge'] }),
     // 窓（明かりの点滅は画面側で重ねる。ここでは薄く灯しておく）
-    ...[0, 1, 2, 3].map((i) =>
-      rect(12 + i * 36, 95, 18, 12, { fill: T.window, opacity: 0.55 }, 1),
-    ),
+    ...[0, 1, 2, 3].map((i) => rect(12 + i * 36, 95, 18, 12, { fill: T.window, opacity: 0.55 }, 1)),
     ...[0, 1, 2].map((i) => rect(165 + i * 32, 100, 18, 14, { fill: T.window, opacity: 0.4 }, 1)),
   ];
   return svg('タイトル画面の背景: 工場のシルエット', body, '0 0 260 150');
