@@ -1,0 +1,5 @@
+# ローカル開発用の秘密値の見本。.dev.vars にコピーして値を変えて使う（.dev.vars は git 管理外）
+# 本番は `wrangler secret put DAILY_MASTER_SECRET` で設定する
+DAILY_MASTER_SECRET=local-dev-secret-change-me-0123456789abcdef
+# ローカルで Vite（別オリジン）から呼ぶ場合
+CORS_ORIGINS=http://localhost:5173

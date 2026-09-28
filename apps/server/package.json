@@ -1,0 +1,28 @@
+{
+  "name": "@chain-factory/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API サーバー（Hono + Cloudflare Workers + D1）。デイリーチャレンジ・ランキング・相場",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply chain-factory --local",
+    "job": "tsx scripts/run-job.ts"
+  },
+  "dependencies": {
+    "@chain-factory/shared": "workspace:*",
+    "@chain-factory/sim": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "hono": "^4.13.9"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260928.1",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
+    "wrangler": "^4.142.0"
+  }
+}
