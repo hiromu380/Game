@@ -43,7 +43,8 @@ describe('メタ進行', () => {
 
   it('進行中のランでは何も変わらない', () => {
     const meta = createInitialMeta();
-    expect(applyRunToMeta(meta, createRun(1))).toEqual({ meta, unlocks: [] });
+    const run = createRun(1);
+    expect(applyRunToMeta(meta, run)).toEqual({ meta, unlocks: [], run });
   });
 
   it('ランの実績（累計出荷・最大連鎖・到達シフト・回数）を記録する', () => {
@@ -78,9 +79,10 @@ describe('メタ進行', () => {
   });
 
   it('全シフトクリアで工場が拡張され、次のランの盤面が広くなる', () => {
+    const allShifts = BALANCE.shifts.map(() => ({ score: '1', chainCount: 1 }));
     const { meta, unlocks } = applyRunToMeta(
       createInitialMeta(),
-      finishedRun('cleared', [{ score: '1', chainCount: 1 }]),
+      finishedRun('cleared', allShifts),
     );
     expect(unlocks).toContainEqual({ kind: 'board', level: 1 });
     const run = createRun(1, { meta: metaToModifiers(meta) });
@@ -99,5 +101,12 @@ describe('メタ進行', () => {
         { kind: 'totalShipped', value: 10 },
       ),
     ).toBe(true);
+  });
+
+  it('同じランを2回反映しても二重に数えない', () => {
+    const run = finishedRun('failed', [{ score: '10', chainCount: 3 }]);
+    const first = applyRunToMeta(createInitialMeta(), run);
+    const second = applyRunToMeta(first.meta, first.run);
+    expect(second.meta).toEqual(first.meta);
   });
 });

@@ -604,3 +604,12 @@ button:disabled {
   color: #1a1c20;
   font-weight: bold;
 }
+
+.run-end__actions {
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.run-end__actions > button {
+  flex: 0 1 auto;
+  min-width: 140px;
+}

@@ -35,6 +35,8 @@ export function createRun(seed: number, options: CreateRunOptions = {}): RunStat
     rerollCount: 0,
     trialCount: 0,
     history: [],
+    overtime: false,
+    metaRecordedShifts: 0,
   };
   return enterShift(initial, 0, 0);
 }

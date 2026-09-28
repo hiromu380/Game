@@ -164,5 +164,9 @@
   "settings.seVolume": "Sound effects",
   "settings.bgmVolume": "Music",
   "settings.muted": "Mute",
-  "settings.bgmHint": "No music yet (the system is ready)"
+  "settings.bgmHint": "No music yet (the system is ready)",
+  "runEnd.overtime": "Go into overtime",
+  "runEnd.overtimeHint": "In overtime, the quota grows {growth}× every shift and every night is a boss. How far can you go?",
+  "runEnd.overtimeTitle": "Overtime over (reached shift {shift})",
+  "hud.overtime": "Overtime · shift {current}"
 }

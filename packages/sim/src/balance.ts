@@ -120,6 +120,14 @@ export interface Balance {
   /** 1日あたりのシフト数（表示用: 何日目の何シフト目か） */
   shiftsPerDay: number;
 
+  /** 延長戦（全シフトクリア後に続けられるエンドレス。1日の最後のシフトはボス） */
+  overtime: {
+    /** ノルマの伸び率（%）: 次のノルマ = 前のノルマ × quotaGrowthPercent / 100（切り捨て） */
+    quotaGrowthPercent: number;
+    budget: number;
+    clearReward: number;
+  };
+
   /** メタ進行（新パーツの解放・工場拡張） */
   meta: {
     /** 最初からショップに並ぶパーツ */
@@ -220,6 +228,12 @@ export const BALANCE: Balance = {
     { quota: 8000, budget: 14, clearReward: 0, kind: 'boss' },
   ],
   shiftsPerDay: 3,
+
+  overtime: {
+    quotaGrowthPercent: 250,
+    budget: 14,
+    clearReward: 5,
+  },
 
   meta: {
     initialUnlocked: [

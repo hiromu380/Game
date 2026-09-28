@@ -54,6 +54,10 @@ export interface RunState {
   /** このシフトで試運転した回数（試運転のシードに使う） */
   trialCount: number;
   history: ShiftRecord[];
+  /** 延長戦に入っているか（全シフトクリア後に続けた） */
+  overtime: boolean;
+  /** メタ進行に記録済みのシフト数（延長戦で同じシフトを二重に記録しないため） */
+  metaRecordedShifts: number;
 }
 
 /** 操作の結果。失敗時は理由キー（i18n で表示する）を返す */

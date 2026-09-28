@@ -22,7 +22,9 @@ export function Hud({ run, liveScore }: Props) {
           {t('hud.dayPeriod', { day: day + 1, period: t(`period.${period}` as 'period.0') })}
         </span>
         <span className="hud__label">
-          {t('hud.shiftProgress', { current: run.shiftIndex + 1, total: getShiftCount(run) })}
+          {run.overtime
+            ? t('hud.overtime', { current: run.shiftIndex + 1 })
+            : t('hud.shiftProgress', { current: run.shiftIndex + 1, total: getShiftCount(run) })}
         </span>
       </div>
       <div className="hud__item">

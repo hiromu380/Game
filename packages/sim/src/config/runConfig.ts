@@ -7,7 +7,7 @@
  * - フェーズ3の相場（価格）やデイリーの条件を、ここに差し込むだけで反映できる
  */
 import { BALANCE, type Balance, type BossModifierId, type ShiftSpec } from '../balance';
-import { createPrng } from '../core/prng';
+import { createPrng, type Prng } from '../core/prng';
 import { PART_IDS, type PartId, type RuleSet } from '../types';
 import { createRuleSet } from './rules';
 
@@ -37,6 +37,10 @@ export interface RunConfig {
   economy: EconomyConfig;
   shifts: ShiftSpec[];
   shiftsPerDay: number;
+  /** 本編のシフト数（延長戦でシフトが増えても変わらない。クリア判定に使う） */
+  baseShiftCount: number;
+  /** 延長戦の設定（balance.ts の overtime の写し） */
+  overtime: Balance['overtime'];
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
   /** ボス修正ルールの効果量（balance.ts の boss の写し） */
@@ -97,6 +101,8 @@ export function buildRunConfig({
     },
     shifts: balance.shifts.map((s) => ({ ...s })),
     shiftsPerDay: balance.shiftsPerDay,
+    baseShiftCount: balance.shifts.length,
+    overtime: { ...balance.overtime },
     bossPlan: planBosses(balance, board, bossSeed),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },
     starterKit: { ...balance.economy.starterKit },
@@ -110,25 +116,40 @@ function planBosses(
   seed: number,
 ): (BossPlanEntry | null)[] {
   const rng = createPrng(seed);
-  const candidates = balance.boss.candidates;
   let previous: BossModifierId | null = null;
 
   return balance.shifts.map((shift) => {
-    if (shift.kind !== 'boss' || candidates.length === 0) return null;
-    const pool = candidates.length > 1 ? candidates.filter((c) => c !== previous) : candidates;
-    const id = pool[rng.nextInt(pool.length)]!;
-    previous = id;
-
-    const blockedCells: number[] = [];
-    if (id === 'repairWork') {
-      const cellCount = board.width * board.height;
-      const count = Math.min(balance.boss.repairWorkCells, cellCount);
-      while (blockedCells.length < count) {
-        const cell = rng.nextInt(cellCount);
-        if (!blockedCells.includes(cell)) blockedCells.push(cell);
-      }
-      blockedCells.sort((a, b) => a - b);
-    }
-    return { id, blockedCells };
+    if (shift.kind !== 'boss') return null;
+    const entry = drawBoss(rng, balance.boss, board, previous);
+    previous = entry?.id ?? previous;
+    return entry;
   });
+}
+
+/**
+ * ボス修正ルールを1つ抽選する（直前の夜と同じルールは避ける）。
+ * 延長戦でシフトを追加するときにも使う
+ */
+export function drawBoss(
+  rng: Prng,
+  params: Balance['boss'],
+  board: { width: number; height: number },
+  previous: BossModifierId | null,
+): BossPlanEntry | null {
+  const candidates = params.candidates;
+  if (candidates.length === 0) return null;
+  const pool = candidates.length > 1 ? candidates.filter((c) => c !== previous) : candidates;
+  const id = pool[rng.nextInt(pool.length)]!;
+
+  const blockedCells: number[] = [];
+  if (id === 'repairWork') {
+    const cellCount = board.width * board.height;
+    const count = Math.min(params.repairWorkCells, cellCount);
+    while (blockedCells.length < count) {
+      const cell = rng.nextInt(cellCount);
+      if (!blockedCells.includes(cell)) blockedCells.push(cell);
+    }
+    blockedCells.sort((a, b) => a - b);
+  }
+  return { id, blockedCells };
 }

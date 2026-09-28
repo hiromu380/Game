@@ -168,7 +168,16 @@ export function App() {
     return (
       <div className="app">
         {header}
-        <RunEndScreen run={run} meta={state.meta} unlocks={state.unlocks} onRetry={newRun} />
+        <RunEndScreen
+          run={run}
+          meta={state.meta}
+          unlocks={state.unlocks}
+          onRetry={newRun}
+          onOvertime={() => {
+            setLiveScore(null);
+            dispatch({ type: 'startOvertime' });
+          }}
+        />
       </div>
     );
   }

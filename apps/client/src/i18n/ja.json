@@ -164,5 +164,9 @@
   "settings.seVolume": "効果音",
   "settings.bgmVolume": "BGM",
   "settings.muted": "ミュート",
-  "settings.bgmHint": "BGM はまだ入っていません（仕組みのみ）"
+  "settings.bgmHint": "BGM はまだ入っていません（仕組みのみ）",
+  "runEnd.overtime": "延長戦へ",
+  "runEnd.overtimeHint": "延長戦ではノルマが毎シフト{growth}倍になり、夜は毎回ボス。どこまで続けられるか挑戦できます",
+  "runEnd.overtimeTitle": "延長戦終了（シフト {shift} まで到達）",
+  "hud.overtime": "延長戦 シフト {current}"
 }

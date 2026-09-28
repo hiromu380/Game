@@ -16,6 +16,7 @@ import {
   returnPart,
   runTrial,
   sellPart,
+  startOvertime,
   rotateCw,
   rotatePart,
   type Dir4,
@@ -69,6 +70,8 @@ export type FeedbackKind = 'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'ret
 
 export type GameAction =
   | { type: 'newRun'; seed: number }
+  /** 全シフトクリア後に延長戦へ進む */
+  | { type: 'startOvertime' }
   | { type: 'buy'; offerIndex: number }
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
@@ -125,6 +128,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         createRun(action.seed, { meta: metaToModifiers(state.meta) }),
         state.meta,
       );
+
+    case 'startOvertime': {
+      const next = startOvertime(state.run);
+      if (!next) return state;
+      return { ...createGameState(next, state.meta), lastResult: state.lastResult };
+    }
 
     case 'buy': {
       const result = buyOffer(state.run, action.offerIndex);
@@ -227,7 +236,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const committed = commitShift(state.run);
       if ('error' in committed) return { ...state, error: committed.error };
       // ランが終わったら、その場でメタ進行に反映する（再生中にリロードされても実績が残るように）
-      const { meta, unlocks } = applyRunToMeta(state.meta, committed.state);
+      const { meta, unlocks, run: recordedRun } = applyRunToMeta(state.meta, committed.state);
       return {
         ...state,
         meta,
@@ -239,7 +248,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           mode: 'commit',
           result: committed.result,
           finished: false,
-          nextRun: committed.state,
+          nextRun: recordedRun,
           outcome: committed.outcome,
         },
       };

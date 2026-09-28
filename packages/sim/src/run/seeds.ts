@@ -10,6 +10,7 @@ const LABEL_COMMIT = 1;
 const LABEL_SHOP = 2;
 const LABEL_TRIAL = 3;
 const LABEL_BOSS = 4;
+const LABEL_OVERTIME = 5;
 
 /** 本番（スイッチを押したとき）のシード。プレイヤーには表示しない */
 export function commitSeed(runSeed: number, shiftIndex: number): number {
@@ -29,4 +30,9 @@ export function trialSeed(runSeed: number, shiftIndex: number, trialCount: numbe
 /** ボス計画（夜ごとの修正ルール）のシード */
 export function bossSeed(runSeed: number): number {
   return deriveSeed(runSeed, LABEL_BOSS);
+}
+
+/** 延長戦で追加するシフトのボス抽選のシード */
+export function overtimeSeed(runSeed: number, shiftIndex: number): number {
+  return deriveSeed(runSeed, LABEL_OVERTIME, shiftIndex);
 }

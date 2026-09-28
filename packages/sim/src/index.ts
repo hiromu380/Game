@@ -53,6 +53,7 @@ export {
   getDayAndPeriod,
   getShiftCount,
   runTrial,
+  startOvertime,
 } from './run/shift';
 export { getBestChain, getTotalShipped } from './run/progress';
 export { generateShop } from './run/shop';
@@ -63,6 +64,7 @@ export {
   applyRunToMeta,
   conditionProgress,
   isConditionMet,
+  isMainCleared,
   metaToModifiers,
   recordRun,
   type Unlock,

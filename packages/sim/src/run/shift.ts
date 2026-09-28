@@ -3,13 +3,14 @@
  */
 import type { ShiftSpec } from '../balance';
 import { getShiftEconomy, getShiftRules } from '../config/bossModifiers';
-import type { EconomyConfig } from '../config/runConfig';
+import { drawBoss, type EconomyConfig } from '../config/runConfig';
+import { createPrng } from '../core/prng';
 import { getPart, setPart } from '../core/board';
 import { scoreCompare, scoreOf, scoreToString } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { addInventory } from './inventory';
-import { commitSeed, shopSeed, trialSeed } from './seeds';
+import { commitSeed, overtimeSeed, shopSeed, trialSeed } from './seeds';
 import { generateShop } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
@@ -91,12 +92,18 @@ export function commitShift(state: RunState): CommitResult | { error: RunError }
   if (!cleared) return { state: { ...state, phase: 'failed', history }, result, outcome };
 
   const nextIndex = state.shiftIndex + 1;
+  const carried = state.budget + spec.clearReward + result.income;
   if (nextIndex >= getShiftCount(state)) {
-    return { state: { ...state, phase: 'cleared', history }, result, outcome };
+    // 延長戦中は次のシフトを作って続ける。本編なら全シフトクリアで終了
+    if (state.overtime) {
+      const extended = appendOvertimeDay({ ...state, history }, nextIndex);
+      return { state: enterShift(extended, nextIndex, carried), result, outcome };
+    }
+    // 延長戦に入ったときのために、繰り越す予算を残しておく
+    return { state: { ...state, phase: 'cleared', history, budget: carried }, result, outcome };
   }
 
   // 残予算 + 報酬 + 収入 を持ち越して次のシフトへ
-  const carried = state.budget + spec.clearReward + result.income;
   return { state: enterShift({ ...state, history }, nextIndex, carried), result, outcome };
 }
 
@@ -133,4 +140,45 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     };
   }
   return next;
+}
+
+/**
+ * 延長戦に入る（全シフトクリア後のみ）。シフトを1つ追加して続ける
+ * ノルマは毎シフト overtime.quotaGrowthPercent% ずつ上がり、1日の最後のシフトはボスになる
+ */
+export function startOvertime(state: RunState): RunState | null {
+  if (state.phase !== 'cleared' || state.overtime) return null;
+  const extended = appendOvertimeDay(
+    { ...state, overtime: true, phase: 'building' },
+    state.shiftIndex + 1,
+  );
+  // cleared のとき budget には繰り越し分（残予算 + 報酬 + 収入）が入っている
+  return enterShift(extended, state.shiftIndex + 1, state.budget);
+}
+
+/**
+ * 延長戦のシフトを、shiftIndex を含む1日の終わりまでまとめて追加する（ノルマ・予算・ボス）。
+ * 1日分を先に作っておくことで、夜のボスを朝・昼のうちから予告できる
+ */
+function appendOvertimeDay(state: RunState, shiftIndex: number): RunState {
+  const perDay = state.config.shiftsPerDay;
+  const dayEnd = (Math.floor(shiftIndex / perDay) + 1) * perDay;
+  const shifts = [...state.config.shifts];
+  const bossPlan = [...state.config.bossPlan];
+  const { overtime, bossParams, board } = state.config;
+
+  while (shifts.length < dayEnd) {
+    const index = shifts.length;
+    const isBoss = (index + 1) % perDay === 0;
+    shifts.push({
+      quota: Math.floor((shifts[index - 1]!.quota * overtime.quotaGrowthPercent) / 100),
+      budget: overtime.budget,
+      clearReward: overtime.clearReward,
+      kind: isBoss ? 'boss' : 'normal',
+    });
+    const previousBoss = [...bossPlan].reverse().find((b) => b)?.id ?? null;
+    const rng = createPrng(overtimeSeed(state.seed, index));
+    bossPlan.push(isBoss ? drawBoss(rng, bossParams, board, previousBoss) : null);
+  }
+  return { ...state, config: { ...state.config, shifts, bossPlan } };
 }

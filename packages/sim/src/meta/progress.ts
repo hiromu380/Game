@@ -51,12 +51,22 @@ export function conditionProgress(records: MetaRecords, condition: MetaCondition
   }
 }
 
-/** 終わったランの実績を記録に反映する */
+/** 本編（延長戦を除く）の全シフトをクリアしたか */
+export function isMainCleared(run: RunState): boolean {
+  const base = run.config.baseShiftCount;
+  return run.history.length >= base && run.history.slice(0, base).every((h) => h.cleared);
+}
+
+/**
+ * 終わったランの実績を記録に反映する
+ * 延長戦で2回目の記録になる場合は、まだ記録していないシフトだけを足し、回数・クリア数は数えない
+ */
 export function recordRun(records: MetaRecords, run: RunState): MetaRecords {
   let totalShipped = scoreFromString(records.totalShipped);
   let bestShiftScore = scoreFromString(records.bestShiftScore);
   let bestChain = records.bestChain;
-  for (const shift of run.history) {
+  const firstRecord = run.metaRecordedShifts === 0;
+  for (const shift of run.history.slice(run.metaRecordedShifts)) {
     const score = scoreFromString(shift.score);
     totalShipped = scoreAdd(totalShipped, score);
     bestShiftScore = scoreMax(bestShiftScore, score);
@@ -67,21 +77,24 @@ export function recordRun(records: MetaRecords, run: RunState): MetaRecords {
     bestShiftScore: bestShiftScore.toString(),
     bestChain,
     bestShiftReached: Math.max(records.bestShiftReached, run.history.at(-1)?.shiftIndex ?? 0),
-    runsPlayed: records.runsPlayed + 1,
-    clears: records.clears + (run.phase === 'cleared' ? 1 : 0),
+    runsPlayed: records.runsPlayed + (firstRecord ? 1 : 0),
+    clears: records.clears + (firstRecord && isMainCleared(run) ? 1 : 0),
   };
 }
 
 /**
  * 終わったランをメタ進行に反映し、新しく解放されたものを返す
- * （進行中のランを渡した場合は何もしない）
+ * （進行中のランや、記録済みのランを渡した場合は何もしない）
+ * 返す run は「どこまで記録したか」を更新したもの。以後はこちらを使うこと
  */
 export function applyRunToMeta(
   meta: MetaProgress,
   run: RunState,
   balance: Balance = BALANCE,
-): { meta: MetaProgress; unlocks: Unlock[] } {
-  if (run.phase === 'building') return { meta, unlocks: [] };
+): { meta: MetaProgress; unlocks: Unlock[]; run: RunState } {
+  if (run.phase === 'building' || run.metaRecordedShifts >= run.history.length) {
+    return { meta, unlocks: [], run };
+  }
 
   const records = recordRun(meta.records, run);
   const unlocks: Unlock[] = [];
@@ -102,7 +115,11 @@ export function applyRunToMeta(
     unlocks.push({ kind: 'board', level: boardLevel });
   }
 
-  return { meta: { unlockedParts, boardLevel, records }, unlocks };
+  return {
+    meta: { unlockedParts, boardLevel, records },
+    unlocks,
+    run: { ...run, metaRecordedShifts: run.history.length },
+  };
 }
 
 /** メタ進行を、ラン開始時の設定（RunConfig の層）に変換する */

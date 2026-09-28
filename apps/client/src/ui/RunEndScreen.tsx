@@ -19,16 +19,25 @@ interface Props {
   /** このランで新しく解放されたもの */
   unlocks: Unlock[];
   onRetry: () => void;
+  /** 延長戦へ進む（全シフトクリア後のみ） */
+  onOvertime: () => void;
 }
 
-export function RunEndScreen({ run, meta, unlocks, onRetry }: Props) {
+export function RunEndScreen({ run, meta, unlocks, onRetry, onOvertime }: Props) {
   const { t, formatScore } = useI18n();
+  const canOvertime = run.phase === 'cleared' && !run.overtime;
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
 
   return (
     <div className="run-end">
-      <h1>{run.phase === 'cleared' ? t('runEnd.clearedTitle') : t('runEnd.failedTitle')}</h1>
+      <h1>
+        {run.overtime
+          ? t('runEnd.overtimeTitle', { shift: run.history.length })
+          : run.phase === 'cleared'
+            ? t('runEnd.clearedTitle')
+            : t('runEnd.failedTitle')}
+      </h1>
       <dl className="stats stats--large">
         <dt>{t('runEnd.finalScore')}</dt>
         <dd className="stats__score">{formatScore(total)}</dd>
@@ -50,9 +59,21 @@ export function RunEndScreen({ run, meta, unlocks, onRetry }: Props) {
           </li>
         ))}
       </ul>
-      <button className="button--primary" onClick={onRetry}>
-        {t('runEnd.retry')}
-      </button>
+      <div className="button-row run-end__actions">
+        {canOvertime && (
+          <button className="button--primary" onClick={onOvertime}>
+            {t('runEnd.overtime')}
+          </button>
+        )}
+        <button className={canOvertime ? '' : 'button--primary'} onClick={onRetry}>
+          {t('runEnd.retry')}
+        </button>
+      </div>
+      {canOvertime && (
+        <p className="panel__hint">
+          {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
+        </p>
+      )}
       <MetaPanel meta={meta} unlocks={unlocks} />
     </div>
   );

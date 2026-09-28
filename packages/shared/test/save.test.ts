@@ -76,3 +76,18 @@ describe('v2 の項目追加への対応', () => {
     expect(migrateSave(old)?.meta.records.bestShiftScore).toBe('0');
   });
 });
+
+describe('延長戦の項目追加への対応', () => {
+  it('延長戦の項目がない v2 のランも読み込める', () => {
+    const old = JSON.parse(JSON.stringify(createSave(createRun(1))));
+    delete old.run.overtime;
+    delete old.run.metaRecordedShifts;
+    delete old.run.config.baseShiftCount;
+    delete old.run.config.overtime;
+    const run = migrateSave(old)!.run!;
+    expect(run.overtime).toBe(false);
+    expect(run.metaRecordedShifts).toBe(0);
+    expect(run.config.baseShiftCount).toBe(run.config.shifts.length);
+    expect(run.config.overtime).toEqual(createRun(1).config.overtime);
+  });
+});

@@ -5,6 +5,7 @@
  * migrateSave に「1つ前 → 新しい形式」の変換を足す（テストも必ず追加する）。
  */
 import {
+  BALANCE,
   buildRunConfig,
   createInitialMeta,
   seeds,
@@ -47,13 +48,27 @@ export function migrateSave(raw: unknown): SaveData | null {
 
 /**
  * v2 の中で後から増えた項目を補う（バージョンを上げるほどではない、項目の追加のみの変更）
- * - meta.records.bestShiftScore（2b で追加）
+ * - meta.records.bestShiftScore（2b: メタ進行）
+ * - run.overtime / run.metaRecordedShifts / run.config.baseShiftCount / run.config.overtime（2b: 延長戦）
  */
 function normalizeV2(save: SaveDataV2): SaveDataV2 {
   const initial = createInitialMeta();
   const meta = save.meta ?? initial;
+  const run = save.run
+    ? {
+        ...save.run,
+        overtime: save.run.overtime ?? false,
+        metaRecordedShifts: save.run.metaRecordedShifts ?? 0,
+        config: {
+          ...save.run.config,
+          baseShiftCount: save.run.config.baseShiftCount ?? save.run.config.shifts.length,
+          overtime: save.run.config.overtime ?? { ...BALANCE.overtime },
+        },
+      }
+    : null;
   return {
     ...save,
+    run,
     meta: { ...initial, ...meta, records: { ...initial.records, ...meta.records } },
   };
 }
@@ -81,5 +96,7 @@ function convertRunV1(run: RunStateV1): RunState {
     rerollCount: 0,
     trialCount: 0,
     history: run.history.map((h) => ({ ...h, income: 0, boss: null })),
+    overtime: false,
+    metaRecordedShifts: 0,
   };
 }
