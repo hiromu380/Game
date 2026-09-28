@@ -1,7 +1,7 @@
 # Chain Factory（仮）
 
 工場フロアにパーツを置き、スイッチを1回押すだけで連鎖が走る「連鎖ビルダー × ノルマ上昇型ローグライク」。
-設計書は [CLAUDE.md](./CLAUDE.md) を参照。現在は **フェーズ2: ゲーム化** まで実装済み（次はフェーズ3: オンライン）。
+設計書は [CLAUDE.md](./CLAUDE.md) を参照。現在は **フェーズ3: オンライン** を実装中（3a: デイリーチャレンジ・サーバー検証・ランキングまで）。
 
 ## 必要なもの
 
@@ -18,6 +18,8 @@
 | `pnpm build`                | 型チェック + クライアントのビルド（`apps/client/dist`） |
 | `pnpm lint` / `pnpm format` | ESLint / Prettier                                       |
 | `pnpm balance --seeds 200`  | バランス検証（ボットが自動で遊び、レポートを出力）      |
+| `pnpm dev:server`           | API サーバー起動（wrangler dev、http://localhost:8787） |
+| `pnpm perf`                 | サーバー検証1回あたりの計算量の計測                     |
 
 `http://localhost:5173/?seed=42` のように `seed` を付けると、そのシードで新しいランを始めます。
 
@@ -34,6 +36,24 @@
 
 調整の記録は [docs/balance-log.md](./docs/balance-log.md) にあります。
 
+### オンライン（デイリーチャレンジ）をローカルで動かす
+
+API サーバーは Cloudflare Workers + D1（Hono）。ローカルでは wrangler が D1 ごと再現します。
+
+```sh
+cp apps/server/.dev.vars.example apps/server/.dev.vars   # 秘密値（git 管理外）。値は任意の長い文字列に変える
+pnpm --filter @chain-factory/server db:migrate:local      # ローカル D1 にテーブルを作る（初回・スキーマ変更時）
+pnpm dev:server                                           # API（:8787）
+pnpm dev                                                  # クライアント（:5173。/api は 8787 へ転送される）
+```
+
+画面右上の「デイリー」から、本番（1日1回・ランキング対象）・練習・ランキングを開けます。
+
+- ジョブ（Cron とは独立して実行できる）: `pnpm --filter @chain-factory/server job daily`
+  （`--at 2026-10-05T00:00:00Z` で時刻指定、`--db file.sqlite` で任意の SQLite に対して実行）
+- スキーマを変えたら `pnpm --filter @chain-factory/server db:generate` でマイグレーションを生成する
+- 本番の秘密値は `wrangler secret put DAILY_MASTER_SECRET` で設定する（リポジトリには置かない）
+
 ## ディレクトリ構成
 
 ```
@@ -48,14 +68,28 @@ packages/
       run/              ラン進行（開始・購入/配置/移動/売却/リロール・試運転/本番・用途別シード）
       meta/             メタ進行（ランをまたぐ進捗）
     test/               決定論・停止性・各パーツ・連鎖スナップショット・ボス・ラン進行
-  shared/         client / server 共通の型（セーブデータ形式とバージョン管理）
+  shared/         client / server 共通の型（セーブデータ形式・API の型・スコアの3列表現・ランキングの並び順）
 apps/
+  server/         API サーバー（Hono + Cloudflare Workers + D1）
+    src/
+      index.ts          Workers の入り口（Cloudflare 固有のものはここと adapters/ だけ）
+      app.ts            ルーティング・認証・レート制限・エラー変換
+      env.ts            環境変数 → 設定
+      domain/           デイリー（秘密値・生成ジョブ・サーバー検証）・プレイヤー・ランキング
+      repositories/     DB アクセスの窓口（types.ts）と実装（drizzle.ts / memory.ts）
+      adapters/         レート制限・node:sqlite（テストとジョブのローカル実行用）
+      db/               Drizzle スキーマとマイグレーション
+      jobs/             Cron から呼ぶジョブの一覧
+      config/           サーバーの上限値・表示名のルール
+    scripts/run-job.ts  ジョブを単体で実行する
+    test/               リポジトリ・API（不正な提出の拒否・ゴールデンデータ）
   client/         Web版クライアント（Vite + PixiJS + React）
     src/
       board/            PixiJS の盤面描画と演出再生（fx/ に連鎖演出）
       playback/         イベント再生のタイミング制御・途切れた理由の集計（描画に依存しない）
-      state/            画面状態の reducer・セーブ/ロード
-      ui/               React の各パネル（HUD・ショップ・手持ち・結果画面など）
+      state/            画面状態の reducer（操作ログの記録・プレイモード）・セーブ/ロード
+      online/           API クライアント・オンラインの身元・デイリーのラン組み立て（再開・練習）
+      ui/               React の各パネル（HUD・ショップ・手持ち・結果画面など。online/ にデイリー・ランキング）
       i18n/             文言（ja.json / en.json）と大きな数の表記
       audio/            サウンドマニフェスト（合成SEのレシピ）と再生エンジン
       config/           演出の閾値（effects.ts）・操作の設定（input.ts）
@@ -63,6 +97,7 @@ apps/
       assets/           見た目の定義（manifest.ts）とパーツ画像（parts/*.svg、仮素材）
 tools/
   balance/        バランス検証ツール（bots/ にボット3種、reports/ に出力）
+  perf/           計算量の計測（サーバー検証の CPU 時間の見積もり）
 docs/
   plans/          フェーズごとの計画書
   balance-log.md  バランス調整の記録
