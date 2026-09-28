@@ -1,0 +1,83 @@
+/**
+ * バランス検証 CLI
+ *
+ * 使い方:
+ *   pnpm balance --seeds 1000                  # 全ボットで 1000 シード（探索ボットは --search-seeds まで）
+ *   pnpm balance --seeds 200 --bots greedy     # ボットを指定
+ *   pnpm balance --seeds 100 --start 5000      # シード 5000〜5099
+ *
+ * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
+ */
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { cpus } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { BotName } from './bots';
+import { runParallel } from './parallel';
+import { summarize, toMarkdown, type BotSummary } from './report';
+import type { RunnerOptions } from './runner';
+
+function parseArgs(argv: string[]) {
+  const args = new Map<string, string>();
+  for (let i = 0; i < argv.length; i++) {
+    const key = argv[i]!;
+    if (key.startsWith('--')) args.set(key.slice(2), argv[i + 1] ?? '');
+  }
+  const seeds = Number(args.get('seeds') ?? 200);
+  return {
+    seeds,
+    start: Number(args.get('start') ?? 1),
+    bots: (args.get('bots') ?? 'random,greedy,search').split(',') as BotName[],
+    // 探索ボットは重いので、既定では最大 100 シードに絞る
+    searchSeeds: Number(args.get('search-seeds') ?? Math.min(seeds, 100)),
+    workers: Number(args.get('workers') ?? cpus().length),
+    samples: Number(args.get('samples') ?? 3),
+    timeLimitMs: Number(args.get('time-limit') ?? 3000),
+    maxRerolls: Number(args.get('max-rerolls') ?? 3),
+  };
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  const runnerOptions: RunnerOptions = {
+    samples: opts.samples,
+    timeLimitMs: opts.timeLimitMs,
+    maxRerolls: opts.maxRerolls,
+  };
+  const summaries: BotSummary[] = [];
+  const allLogs: Record<string, unknown> = {};
+
+  for (const bot of opts.bots) {
+    const n = bot === 'search' ? opts.searchSeeds : opts.seeds;
+    const seeds = Array.from({ length: n }, (_, i) => opts.start + i);
+    const started = Date.now();
+    const logs = await runParallel(seeds, bot, runnerOptions, opts.workers, (done) => {
+      process.stdout.write(`\r${bot}: ${done}/${n}`);
+    });
+    process.stdout.write(`\r${bot}: ${n}/${n} (${((Date.now() - started) / 1000).toFixed(1)}s)\n`);
+    summaries.push(summarize(bot, logs));
+    allLogs[bot] = logs;
+  }
+
+  const meta = {
+    日時: new Date().toISOString(),
+    シード: `${opts.start}〜（${opts.seeds} 個。search は ${opts.searchSeeds} 個）`,
+    評価の試行回数: opts.samples,
+    探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,
+    リロール上限: `${opts.maxRerolls}回/シフト`,
+  };
+  const markdown = toMarkdown(summaries, meta);
+
+  const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'reports');
+  mkdirSync(dir, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  writeFileSync(join(dir, 'latest.md'), markdown);
+  writeFileSync(join(dir, `${stamp}.md`), markdown);
+  writeFileSync(
+    join(dir, `${stamp}.json`),
+    JSON.stringify({ meta, summaries, logs: allLogs }, null, 2),
+  );
+  console.log('\n' + markdown);
+}
+
+void main();

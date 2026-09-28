@@ -3,3 +3,5 @@ dist
 *.tsbuildinfo
 .DS_Store
 coverage
+tools/balance/reports/*
+!tools/balance/reports/.gitkeep
