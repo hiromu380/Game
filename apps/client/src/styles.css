@@ -1386,3 +1386,60 @@ a.button.button--primary {
     animation: none;
   }
 }
+
+/* ---- 初回ガイド（ui/TutorialGuide.tsx） ---- */
+.tutorial {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+}
+.tutorial__mascot {
+  flex: none;
+}
+.tutorial__message {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.tutorial__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* ガイドで「ここを押す」ボタン・一覧の項目を光らせる */
+.is-guided {
+  animation: guided-pulse 1.1s ease-in-out infinite;
+}
+@keyframes guided-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px var(--accent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-guided {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+}
+@media (max-width: 600px) {
+  .tutorial {
+    padding: 6px 8px;
+  }
+  .tutorial__mascot {
+    width: 36px;
+    height: 36px;
+  }
+  .tutorial__message {
+    font-size: 0.85rem;
+  }
+}

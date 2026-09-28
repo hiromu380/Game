@@ -24,6 +24,8 @@ interface Props {
   disabled: boolean;
   /** 盤面のパーツをドラッグ中なら、ここへ落としたときの返金額（売れないパーツ・ドラッグ中でなければ null） */
   sellRefund: number | null;
+  /** 初回ガイドで買ってほしいパーツ（最初の1つを光らせる） */
+  guidePartId?: PartId | null;
   onBuy: (offerIndex: number) => void;
   onReroll: () => void;
 }
@@ -41,6 +43,9 @@ export function ShopPanel(props: Props) {
     onBuy,
     onReroll,
   } = props;
+  const guidedIndex = props.guidePartId
+    ? offers.findIndex((o) => o.partId === props.guidePartId && !o.sold)
+    : -1;
   const { t } = useI18n();
   const [catalogOpen, setCatalogOpen] = useState(false);
   return (
@@ -68,7 +73,7 @@ export function ShopPanel(props: Props) {
           return (
             <li key={index}>
               <button
-                className="item-button"
+                className={`item-button ${index === guidedIndex ? 'is-guided' : ''}`}
                 disabled={disabled || offer.sold || !affordable}
                 onClick={() => onBuy(index)}
               >

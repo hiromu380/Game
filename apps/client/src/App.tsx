@@ -37,7 +37,7 @@ import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
-import { createInitialState, createNewSeed, startNormalRun } from './state/newRun';
+import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
 import { useInputMode } from './input/useInputMode';
@@ -46,6 +46,15 @@ import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
 import { RocketGoal } from './ui/RocketProgress';
+import { TutorialGuide } from './ui/TutorialGuide';
+import {
+  advanceTutorial,
+  startTutorial,
+  tutorialCell,
+  tutorialPart,
+  updateTutorial,
+  type TutorialState,
+} from './state/tutorial';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { DebugPanel } from './ui/DebugPanel';
 import { Hud } from './ui/Hud';
@@ -106,9 +115,41 @@ export function App({ start, onTitle }: Props) {
   /** デイリーのメニュー（開いていなければ null） */
   const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
 
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { run, selection, playback, error, mode } = state;
   const playing = playback !== null || state.awaitingServer;
+
+  // 初回ガイド（ガイド用のランの1シフト目。進み方は state/tutorial.ts）。ランを始め直したら最初から
+  const [tutorial, setTutorial] = useState<TutorialState>(() => startTutorial(run));
+  const tutorialOn =
+    mode.kind === 'normal' &&
+    !settings.tutorialDone &&
+    isTutorialRun(run) &&
+    tutorial.step !== 'done' &&
+    (run.phase === 'building' || playing);
+  const lastTrialScore = state.lastResult ? scoreToString(state.lastResult.score) : null;
+  // ゲームの状態に合わせてガイドを進める（描画中に前回の値と比べて更新する。進まなければ同じオブジェクトが返る）
+  if (tutorialOn) {
+    const next = updateTutorial(tutorial, {
+      run,
+      lastTrialScore: state.lastResult?.score ?? null,
+      playing,
+    });
+    if (next !== tutorial) setTutorial(next);
+  }
+  /** ガイドを終える（最後まで進めた・閉じた）。次のランからは出さない */
+  const endTutorial = () => {
+    setTutorial((current) => ({ ...current, step: 'done' }));
+    updateSettings({ tutorialDone: true });
+  };
+  const guideStep = tutorialOn ? tutorial.step : null;
+  // タブ表示では、ガイドの手順が変わったら、その手順で使う一覧（ショップ・手持ち）を開く
+  const [tabGuideStep, setTabGuideStep] = useState(guideStep);
+  if (guideStep !== tabGuideStep) {
+    setTabGuideStep(guideStep);
+    if (guideStep === 'buyGear') setTab('shop');
+    else if (guideStep && tutorialPart(guideStep)) setTab('inventory');
+  }
 
   // 状態が変わるたびに保存する。ランは通常モードのみ（デイリーはサーバーから再開する）。
   // デイリー・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
@@ -209,8 +250,9 @@ export function App({ start, onTitle }: Props) {
       placing:
         selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
       shiftKey: `${run.seed}:${run.shiftIndex}`,
+      guideCell: guideStep ? tutorialCell(guideStep) : null,
     }),
-    [run, selection],
+    [run, selection, guideStep],
   );
 
   // 盤面に出す文言（言語が変わったら作り直す）
@@ -319,16 +361,19 @@ export function App({ start, onTitle }: Props) {
       });
       return;
     }
-    dispatch({ type: 'loadRun', run: startNormalRun(createNewSeed(), state.meta), mode });
+    const next = startNewNormalRun(state.meta);
+    setTutorial(startTutorial(next));
+    dispatch({ type: 'loadRun', run: next, mode });
   };
   const enterRun = (next: RunState, nextMode: PlayMode) => {
     setLiveScore(null);
+    setTutorial(startTutorial(next));
     setDailyMenu(null);
     dispatch({ type: 'loadRun', run: next, mode: nextMode });
   };
   /** 通常モードに戻る（保存済みのランがあれば続きから） */
   const backToNormal = () =>
-    enterRun(loadRun() ?? startNormalRun(createNewSeed(), state.meta), { kind: 'normal' });
+    enterRun(loadRun() ?? startNewNormalRun(state.meta), { kind: 'normal' });
 
   // ショップの前日比（今日の相場で始めたランだけ）
   const trends = useMemo(() => priceTrends(getMarket(), run.config.economy.prices), [run.config]);
@@ -400,6 +445,7 @@ export function App({ start, onTitle }: Props) {
       trends={trends}
       disabled={playing}
       sellRefund={sellRefund}
+      guidePartId={guideStep === 'buyGear' ? 'gear' : null}
       onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
       onReroll={() => dispatch({ type: 'reroll' })}
     />
@@ -411,6 +457,7 @@ export function App({ start, onTitle }: Props) {
       selection={selection}
       disabled={playing}
       boardHasParts={run.board.cells.some((cell) => cell !== null)}
+      guidePartId={guideStep && guideStep !== 'buyGear' ? tutorialPart(guideStep) : null}
       onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
       onReturnAll={() => dispatch({ type: 'returnAll' })}
     />
@@ -479,7 +526,20 @@ export function App({ start, onTitle }: Props) {
       )}
       {header}
       <Hud run={run} liveScore={liveScore} />
-      <RocketGoal run={run} />
+      {tutorialOn ? (
+        <TutorialGuide
+          tutorial={tutorial}
+          run={run}
+          lastTrialScore={lastTrialScore}
+          onNext={() => {
+            if (tutorial.step === 'finish') endTutorial();
+            else setTutorial(advanceTutorial(tutorial, run));
+          }}
+          onSkip={endTutorial}
+        />
+      ) : (
+        <RocketGoal run={run} />
+      )}
       <BossNotice run={run} />
       <main className="layout">
         <div className="layout__board">
@@ -510,6 +570,13 @@ export function App({ start, onTitle }: Props) {
             onTrial={() => startPlayback('startTrial')}
             onCommit={() => setCommitConfirm(true)}
             onSpeedChange={setSpeed}
+            guide={
+              guideStep === 'trial' || guideStep === 'trialAgain'
+                ? 'trial'
+                : guideStep === 'commit'
+                  ? 'commit'
+                  : null
+            }
           />
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
@@ -521,7 +588,14 @@ export function App({ start, onTitle }: Props) {
                   key={key}
                   role="tab"
                   aria-selected={tab === key}
-                  className={`tabs__tab ${tab === key ? 'is-active' : ''}`}
+                  className={`tabs__tab ${tab === key ? 'is-active' : ''} ${
+                    tab !== key &&
+                    guideStep &&
+                    (key === 'shop') === (guideStep === 'buyGear') &&
+                    tutorialPart(guideStep)
+                      ? 'is-guided'
+                      : ''
+                  }`}
                   data-drop={key}
                   onClick={() => setTab(key)}
                 >

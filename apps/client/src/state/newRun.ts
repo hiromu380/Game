@@ -18,6 +18,8 @@ import { EDITION_CONFIG } from '../config/edition';
 import { getMarket } from '../online/market';
 import { achievementsOnLoad } from './achievements';
 import { loadRun, loadSave } from './saveStore';
+import { TUTORIAL_CONFIG } from '../config/tutorial';
+import { loadSettings } from '../settings/settingsStore';
 
 /** URL で指定されたシード（なければ null） */
 function seedFromUrl(): number | null {
@@ -29,6 +31,21 @@ function seedFromUrl(): number | null {
 /** 新しいランのシード。シミュレーション外なので Math.random を使ってよい */
 export function createNewSeed(): number {
   return Math.floor(Math.random() * 2 ** 32) >>> 0;
+}
+
+/**
+ * 新しい通常ランを始める。初回ガイドがまだなら、ガイド用のラン（決まったシード・初期パーツ・7×7。
+ * config/tutorial.ts）にする。メタ進行の記録はガイドのランでもふだんどおり残る
+ */
+export function startNewNormalRun(meta: MetaProgress): RunState {
+  return loadSettings().tutorialDone
+    ? startNormalRun(createNewSeed(), meta)
+    : startNormalRun(TUTORIAL_CONFIG.seed, createInitialMeta());
+}
+
+/** ガイド用のランか（シードと、ランの最初の条件で見分ける） */
+export function isTutorialRun(run: RunState): boolean {
+  return run.seed === TUTORIAL_CONFIG.seed && !run.overtime;
 }
 
 /**
@@ -63,5 +80,5 @@ export function createInitialState(): {
   const achievements = achievementsOnLoad(save?.achievements ?? createInitialAchievements(), meta);
   const urlSeed = seedFromUrl();
   if (urlSeed !== null) return { run: startNormalRun(urlSeed, meta), meta, achievements };
-  return { run: loadRun() ?? startNormalRun(createNewSeed(), meta), meta, achievements };
+  return { run: loadRun() ?? startNewNormalRun(meta), meta, achievements };
 }

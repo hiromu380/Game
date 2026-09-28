@@ -16,6 +16,8 @@ interface Props {
   onTrial: () => void;
   onCommit: () => void;
   onSpeedChange: (speed: PlaybackSpeed) => void;
+  /** 初回ガイドで押してほしいボタン（光らせる） */
+  guide?: 'trial' | 'commit' | null;
 }
 
 const SPEEDS: PlaybackSpeed[] = [1, 2, 'skip'];
@@ -28,16 +30,25 @@ export function ControlsPanel({
   onTrial,
   onCommit,
   onSpeedChange,
+  guide = null,
 }: Props) {
   const { t } = useI18n();
   return (
     <section className="panel controls">
       <div className="button-row">
-        <button className="button--secondary" disabled={playing} onClick={onTrial}>
+        <button
+          className={`button--secondary ${guide === 'trial' ? 'is-guided' : ''}`}
+          disabled={playing}
+          onClick={onTrial}
+        >
           <UiIcon name="trial" />
           {t('controls.trial')}
         </button>
-        <button className="button--primary" disabled={playing} onClick={onCommit}>
+        <button
+          className={`button--primary ${guide === 'commit' ? 'is-guided' : ''}`}
+          disabled={playing}
+          onClick={onCommit}
+        >
           <UiIcon name="commit-switch" size={22} />
           {compact ? t('controls.commitShort') : t('controls.commit')}
         </button>

@@ -81,6 +81,18 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         <p className="panel__hint">{t('settings.bgmHint')}</p>
 
+        <div className="settings__row">
+          <span>{t('settings.tutorial')}</span>
+          <button
+            className="button--small"
+            disabled={!settings.tutorialDone}
+            onClick={() => updateSettings({ tutorialDone: false })}
+          >
+            {t('settings.tutorialAgain')}
+          </button>
+        </div>
+        {!settings.tutorialDone && <p className="panel__hint">{t('settings.tutorialPending')}</p>}
+
         <div className="button-row">
           <button className="button--primary" onClick={onClose} data-close>
             {t('settings.close')}

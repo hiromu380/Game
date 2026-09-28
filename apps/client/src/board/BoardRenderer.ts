@@ -72,6 +72,8 @@ export interface BoardViewState {
   upcomingBlocked: number[];
   /** どのランのどのシフトか（変わったら前の本番の表示を消す） */
   shiftKey: string;
+  /** 初回ガイドで「ここに置く」マス（なければ null） */
+  guideCell: { x: number; y: number } | null;
 }
 
 /** 盤面に表示する文言（i18n を通すため関数で受け取る。言語切り替えに追従する） */
@@ -391,7 +393,11 @@ export class BoardRenderer {
     this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     if (!this.state) return;
-    const { board, highlight, placing } = this.state;
+    const { board, highlight, placing, guideCell } = this.state;
+
+    if (guideCell && !this.timeline) {
+      this.overlayLayer.addChild(cellFrame(guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5));
+    }
 
     if (highlight)
       this.overlayLayer.addChild(cellFrame(highlight.x, highlight.y, BOARD_THEME.selected, 4));

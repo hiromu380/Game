@@ -15,6 +15,8 @@ interface Props {
   disabled: boolean;
   /** 盤面にパーツが1つでもあるか（「全部戻す」の有効・無効） */
   boardHasParts: boolean;
+  /** 初回ガイドで選んでほしいパーツ（光らせる） */
+  guidePartId?: PartId | null;
   onSelect: (partId: PartId) => void;
   onReturnAll: () => void;
 }
@@ -25,6 +27,7 @@ export function InventoryPanel({
   selection,
   disabled,
   boardHasParts,
+  guidePartId = null,
   onSelect,
   onReturnAll,
 }: Props) {
@@ -51,7 +54,7 @@ export function InventoryPanel({
           {items.map((id) => (
             <li key={id}>
               <button
-                className={`item-button ${selectedId === id ? 'item-button--selected' : ''}`}
+                className={`item-button ${selectedId === id ? 'item-button--selected' : ''} ${guidePartId === id && selectedId !== id ? 'is-guided' : ''}`}
                 disabled={disabled}
                 onClick={() => onSelect(id)}
               >
