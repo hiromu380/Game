@@ -75,6 +75,11 @@ export interface Balance {
     switchSignalValue: number;
     /** 経済系パーツが1回のシミュレーションで生める予算の上限 */
     maxIncomePerSim: number;
+    /**
+     * 同時に存在できる信号の数の上限。再起動装置がリセットし合う配置などでは、
+     * tick 上限より先に信号が爆発的に増えるため、これで打ち切って停止を保証する
+     */
+    maxLiveSignals: number;
   };
 
   /** パーツごとの価格・発動回数・レア度 */
@@ -125,6 +130,7 @@ export const BALANCE: Balance = {
     tickLimit: 500,
     switchSignalValue: 1,
     maxIncomePerSim: 3,
+    maxLiveSignals: 1000,
   },
 
   parts: {

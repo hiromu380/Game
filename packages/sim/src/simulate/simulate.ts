@@ -4,7 +4,7 @@
  * 原則（CLAUDE.md「3. シミュレーション仕様」）:
  * - 完全決定論: 同じ (board, seed, rules) なら必ず同じ結果
  * - 純粋関数: 描画・DOM・ネットワーク・時刻に依存しない
- * - 必ず停止: パーツの発動回数上限 + 全体の tick 上限で保証
+ * - 必ず停止: パーツの発動回数上限 + 全体の tick 上限 + 同時に存在できる信号数の上限で保証
  *
  * 1 tick の流れ:
  *   1. 生きている信号を id の昇順に1つずつ処理する（処理順を固定して決定論にする）
@@ -19,7 +19,7 @@ import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
 import { SCORE_ZERO, scoreAdd, scoreMax, scoreOf, type Score } from '../core/score';
-import type { Part, SimEvent, SimInput, SimResult, Signal } from '../types';
+import type { HaltReason, Part, SimEvent, SimInput, SimResult, Signal } from '../types';
 import { computeActivationLimits } from './limits';
 import { PART_BEHAVIORS } from './parts';
 import type { Emission, Reaction } from './parts/types';
@@ -128,7 +128,16 @@ export function simulate(input: SimInput): SimResult {
 
   // ---- tick 1 以降: 信号の移動と反応 ----
   let tick = 0;
-  while ((signals.length > 0 || pending.length > 0) && tick < rules.tickLimit) {
+  let halted: HaltReason | null = null;
+  while (signals.length > 0 || pending.length > 0) {
+    if (tick >= rules.tickLimit) {
+      halted = 'tickLimit';
+      break;
+    }
+    if (signals.length + pending.length > rules.maxLiveSignals) {
+      halted = 'signalLimit';
+      break;
+    }
     tick++;
     const nextSignals: Signal[] = [];
     /** この tick に信号を受けた合流パーツ（マス番号 → 取り込んだ値） */
@@ -232,9 +241,7 @@ export function simulate(input: SimInput): SimResult {
   }
 
   const remaining = signals.length + pending.length;
-  if (remaining > 0) {
-    events.push({ tick, type: 'halt', reason: 'tickLimit', remainingSignals: remaining });
-  }
+  if (halted) events.push({ tick, type: 'halt', reason: halted, remainingSignals: remaining });
 
   return {
     score,
@@ -246,7 +253,7 @@ export function simulate(input: SimInput): SimResult {
       shipCount,
       maxValue,
       ticks: tick,
-      haltedByTickLimit: remaining > 0,
+      halted,
     },
   };
 }

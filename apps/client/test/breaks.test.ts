@@ -15,7 +15,7 @@ describe('途切れた理由の集計', () => {
     expect(summary.counts).toEqual({ outOfBoard: 1, emptyCell: 1 });
     expect(summary.markers).toContainEqual({ x: 1, y: 0, reason: 'outOfBoard', count: 1 });
     expect(summary.markers).toContainEqual({ x: 1, y: 1, reason: 'emptyCell', count: 1 });
-    expect(summary.haltedSignals).toBe(0);
+    expect(summary.haltReason).toBeNull();
   });
 
   it('tick 上限での打ち切りを記録する', () => {
@@ -32,6 +32,7 @@ describe('途切れた理由の集計', () => {
       tickLimit: 1,
     };
     const summary = summarizeBreaks(simulate({ board, seed: 1, rules }).events, board);
+    expect(summary.haltReason).toBe('tickLimit');
     expect(summary.haltedSignals).toBe(1);
   });
 

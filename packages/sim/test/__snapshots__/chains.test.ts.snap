@@ -6,7 +6,7 @@ exports[`連鎖パターン > ギア直列: 倍々で増える 1`] = `
   "stats": {
     "activatedParts": 6,
     "chainCount": 5,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "16",
     "shipCount": 1,
     "ticks": 5,
@@ -28,7 +28,7 @@ exports[`連鎖パターン > ドラム缶の爆発で周囲の出荷口へ一�
   "stats": {
     "activatedParts": 10,
     "chainCount": 9,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "4",
     "shipCount": 6,
     "ticks": 4,
@@ -49,7 +49,7 @@ exports[`連鎖パターン > プレス機の密集: 隣接パーツが多いほ
   "stats": {
     "activatedParts": 3,
     "chainCount": 2,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "5",
     "shipCount": 1,
     "ticks": 2,
@@ -68,7 +68,7 @@ exports[`連鎖パターン > 再起動装置でギアと分岐器を2周させ�
   "stats": {
     "activatedParts": 6,
     "chainCount": 9,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "4",
     "shipCount": 2,
     "ticks": 8,
@@ -93,7 +93,7 @@ exports[`連鎖パターン > 分岐器 × 出荷口2つ 1`] = `
   "stats": {
     "activatedParts": 6,
     "chainCount": 5,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "2",
     "shipCount": 2,
     "ticks": 3,
@@ -113,7 +113,7 @@ exports[`連鎖パターン > 大型コンボ: ギア → プレス → 分岐 �
   "stats": {
     "activatedParts": 20,
     "chainCount": 21,
-    "haltedByTickLimit": false,
+    "halted": null,
     "maxValue": "32",
     "shipCount": 10,
     "ticks": 8,

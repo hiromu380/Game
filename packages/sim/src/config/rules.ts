@@ -18,6 +18,7 @@ export function createRuleSet(balance: Balance = BALANCE): RuleSet {
     blockedCells: [],
     dockDivisor: 1,
     maxIncomePerSim: balance.sim.maxIncomePerSim,
+    maxLiveSignals: balance.sim.maxLiveSignals,
   };
 }
 

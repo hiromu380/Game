@@ -77,6 +77,8 @@ export interface RuleSet {
   dockDivisor: number;
   /** 経済系パーツが1回のシミュレーションで生める予算の上限 */
   maxIncomePerSim: number;
+  /** 同時に存在できる信号の数の上限（超えたら打ち切る。メモリと計算時間を守るため） */
+  maxLiveSignals: number;
 }
 
 /** simulate の入力 */
@@ -110,8 +112,15 @@ export type SimEvent =
   | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
   /** 経済系パーツが予算を生んだ。total はその時点の累計 */
   | { tick: number; type: 'income'; x: number; y: number; amount: number; total: number }
-  /** tick 上限に達し、信号が残ったまま打ち切った */
-  | { tick: number; type: 'halt'; reason: 'tickLimit'; remainingSignals: number };
+  /** 上限に達し、信号が残ったまま打ち切った */
+  | { tick: number; type: 'halt'; reason: HaltReason; remainingSignals: number };
+
+/**
+ * 打ち切りの理由
+ * - tickLimit: tick 上限に達した
+ * - signalLimit: 同時に存在する信号の数が上限を超えた（リセットし合う配置などで信号が爆発的に増えた）
+ */
+export type HaltReason = 'tickLimit' | 'signalLimit';
 
 /** 1回のシミュレーションの統計 */
 export interface SimStats {
@@ -125,8 +134,8 @@ export interface SimStats {
   maxValue: Score;
   /** 実行した tick 数 */
   ticks: number;
-  /** tick 上限で強制終了したか */
-  haltedByTickLimit: boolean;
+  /** 上限で打ち切った場合の理由（最後まで走り切ったら null） */
+  halted: HaltReason | null;
 }
 
 /** simulate の出力 */

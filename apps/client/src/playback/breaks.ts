@@ -4,7 +4,7 @@
  * events の消滅（vanish）と打ち切り（halt）から、どこで・なぜ信号が消えたかをまとめる。
  * 盤面外で消えた信号は、盤面の端のマスに寄せて表示する。
  */
-import type { Board, SimEvent, VanishReason } from '@chain-factory/sim';
+import type { Board, HaltReason, SimEvent, VanishReason } from '@chain-factory/sim';
 
 /** 盤面に表示する「途切れた場所」 */
 export interface BreakMarker {
@@ -19,7 +19,9 @@ export interface BreakSummary {
   markers: BreakMarker[];
   /** 理由ごとの件数 */
   counts: Partial<Record<VanishReason, number>>;
-  /** tick 上限で打ち切ったか（そのとき残っていた信号の数） */
+  /** 上限で打ち切った場合の理由（なければ null） */
+  haltReason: HaltReason | null;
+  /** 打ち切ったときに残っていた信号の数 */
   haltedSignals: number;
 }
 
@@ -27,9 +29,11 @@ export function summarizeBreaks(events: SimEvent[], board: Board): BreakSummary 
   const markers = new Map<string, BreakMarker>();
   const counts: BreakSummary['counts'] = {};
   let haltedSignals = 0;
+  let haltReason: HaltReason | null = null;
 
   for (const e of events) {
     if (e.type === 'halt') {
+      haltReason = e.reason;
       haltedSignals = e.remainingSignals;
       continue;
     }
@@ -44,7 +48,7 @@ export function summarizeBreaks(events: SimEvent[], board: Board): BreakSummary 
     if (marker) marker.count++;
     else markers.set(key, { x, y, reason: e.reason, count: 1 });
   }
-  return { markers: [...markers.values()], counts, haltedSignals };
+  return { markers: [...markers.values()], counts, haltReason, haltedSignals };
 }
 
 /** パーツごと（マスごと）の発動回数（デバッグ表示用） */

@@ -74,7 +74,7 @@ function BreakList({ result, run }: { result: SimResult; run: RunState }) {
   const { t } = useI18n();
   const summary = summarizeBreaks(result.events, run.board);
   const reasons = Object.keys(summary.counts) as VanishReason[];
-  if (reasons.length === 0 && summary.haltedSignals === 0) return null;
+  if (reasons.length === 0 && !summary.haltReason) return null;
   return (
     <div className="break-list">
       <div className="break-list__title">{t('break.title')}</div>
@@ -85,8 +85,8 @@ function BreakList({ result, run }: { result: SimResult; run: RunState }) {
             {t(`break.long.${reason}`)} ×{summary.counts[reason]}
           </li>
         ))}
-        {summary.haltedSignals > 0 && (
-          <li>{t('break.halted', { count: summary.haltedSignals })}</li>
+        {summary.haltReason && (
+          <li>{t(`break.halted.${summary.haltReason}`, { count: summary.haltedSignals })}</li>
         )}
       </ul>
     </div>

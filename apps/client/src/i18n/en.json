@@ -30,7 +30,6 @@
   "playback.quota": "Quota",
   "playback.chain": "Chain",
   "playback.maxValue": "Max value",
-  "playback.halted": "Stopped by the time limit",
   "playback.quotaMet": "Quota met!",
   "playback.quotaMissed": "Quota missed…",
   "playback.close": "Back to building",
@@ -125,7 +124,6 @@
   "break.short.blocked": "Repair",
   "break.short.inert": "Inert",
   "break.title": "Where the chain broke",
-  "break.halted": "Time limit ({count} left)",
   "break.long.outOfBoard": "Left the floor",
   "break.long.emptyCell": "Entered an empty cell",
   "break.long.exhausted": "Hit a part with no activations left",
@@ -135,5 +133,7 @@
   "debug.title": "Debug",
   "debug.activations": "Activations per part (last run / limit)",
   "debug.ticks": "Events per tick",
-  "debug.noResult": "Nothing played yet"
+  "debug.noResult": "Nothing played yet",
+  "break.halted.tickLimit": "Stopped by the time limit ({count} left)",
+  "break.halted.signalLimit": "Stopped: too many signals ({count})"
 }
