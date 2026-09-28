@@ -10,6 +10,7 @@ import {
   createRun,
   getPart,
   placePart,
+  rerollShop,
   returnPart,
   runTrial,
   sellPart,
@@ -54,7 +55,9 @@ export type GameAction =
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
   | { type: 'rotate' }
-  | { type: 'removeSelected' }
+  | { type: 'returnSelected' }
+  | { type: 'sellSelected' }
+  | { type: 'reroll' }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
   | { type: 'playbackFinished' }
@@ -124,17 +127,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return state;
     }
 
-    case 'removeSelected': {
+    case 'returnSelected': {
+      // 手持ちに戻したパーツはそのまま「配置待ち」にして、移動を1クリックで済ませる
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
-      // スイッチは売れないので手持ちに戻す（移動と売却の UI は手順5で分ける）
       const part = getPart(state.run.board, sel.x, sel.y);
-      const result =
-        part?.id === 'switch'
-          ? returnPart(state.run, sel.x, sel.y)
-          : sellPart(state.run, sel.x, sel.y);
-      return applyRunResult(state, result, null);
+      const result = returnPart(state.run, sel.x, sel.y);
+      const selection: Selection = part
+        ? { kind: 'inventory', partId: part.id, dir: part.dir }
+        : null;
+      return applyRunResult(state, result, selection);
     }
+
+    case 'sellSelected': {
+      const sel = state.selection;
+      if (sel?.kind !== 'cell') return state;
+      return applyRunResult(state, sellPart(state.run, sel.x, sel.y), null);
+    }
+
+    case 'reroll':
+      return applyRunResult(state, rerollShop(state.run));
 
     case 'startTrial': {
       // 試運転ごとにシードが変わる（試運転回数が増えた run を保持する）

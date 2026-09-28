@@ -363,3 +363,29 @@ button:disabled {
   padding: 0;
   margin: 0 0 20px;
 }
+
+/* ---- パネル見出し行（見出し + 小さなボタン） ---- */
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.panel__header .panel__title {
+  margin: 0;
+}
+.button--small {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+}
+
+/* ---- 売却（取り消せない操作）は目立たせず、確認時だけ赤くする ---- */
+.selection__danger {
+  margin-top: 6px;
+}
+.button--danger {
+  background: var(--missed);
+  border-color: var(--missed);
+  font-weight: bold;
+}

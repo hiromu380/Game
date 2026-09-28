@@ -1,7 +1,7 @@
 /**
  * アプリのルート。ゲーム状態を持ち、盤面（PixiJS）と各 UI パネルをつなぐ
  */
-import { getCurrentRules, scoreToString, type Score } from '@chain-factory/sim';
+import { getCurrentRules, getRerollCost, scoreToString, type Score } from '@chain-factory/sim';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
@@ -123,8 +123,10 @@ export function App() {
           <ShopPanel
             offers={run.shop}
             budget={run.budget}
+            rerollCost={getRerollCost(run)}
             disabled={playing}
             onBuy={(offerIndex) => dispatch({ type: 'buy', offerIndex })}
+            onReroll={() => dispatch({ type: 'reroll' })}
           />
           <InventoryPanel
             inventory={run.inventory}
@@ -137,7 +139,8 @@ export function App() {
             selection={selection}
             disabled={playing}
             onRotate={() => dispatch({ type: 'rotate' })}
-            onRemove={() => dispatch({ type: 'removeSelected' })}
+            onReturn={() => dispatch({ type: 'returnSelected' })}
+            onSell={() => dispatch({ type: 'sellSelected' })}
           />
         </aside>
       </main>

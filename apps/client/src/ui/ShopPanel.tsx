@@ -8,15 +8,27 @@ import { PartIcon } from './PartIcon';
 interface Props {
   offers: ShopOffer[];
   budget: number;
+  /** 次のリロール価格（リロールできないシフトでは null） */
+  rerollCost: number | null;
   disabled: boolean;
   onBuy: (offerIndex: number) => void;
+  onReroll: () => void;
 }
 
-export function ShopPanel({ offers, budget, disabled, onBuy }: Props) {
+export function ShopPanel({ offers, budget, rerollCost, disabled, onBuy, onReroll }: Props) {
   const { t } = useI18n();
   return (
     <section className="panel">
-      <h2 className="panel__title">{t('shop.title')}</h2>
+      <div className="panel__header">
+        <h2 className="panel__title">{t('shop.title')}</h2>
+        <button
+          className="button--small"
+          disabled={disabled || rerollCost === null || budget < rerollCost}
+          onClick={onReroll}
+        >
+          {rerollCost === null ? t('shop.rerollDisabled') : t('shop.reroll', { cost: rerollCost })}
+        </button>
+      </div>
       <ul className="item-list">
         {offers.map((offer, index) => {
           const affordable = budget >= offer.price;

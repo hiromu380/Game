@@ -41,4 +41,60 @@ describe('画面の状態遷移', () => {
     state = apply(state, { type: 'playbackFinished' }, { type: 'closePlayback' });
     expect(state.run.phase).toBe('failed');
   });
+
+  it('試運転するたびに試運転回数が増える（シードが変わる）', () => {
+    let state = createGameState(createRun(1));
+    state = apply(
+      state,
+      { type: 'startTrial' },
+      { type: 'playbackFinished' },
+      { type: 'closePlayback' },
+    );
+    state = apply(state, { type: 'startTrial' });
+    expect(state.run.trialCount).toBe(2);
+  });
+
+  it('手持ちに戻すとそのまま配置待ちになり、別のマスへ移動できる', () => {
+    let state = createGameState(createRun(1));
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'returnSelected' },
+    );
+    expect(state.selection).toEqual({ kind: 'inventory', partId: 'dock', dir: 1 });
+    state = apply(state, { type: 'clickCell', x: 4, y: 4 });
+    expect(state.run.board.cells[4 * 7 + 4]).toEqual({ id: 'dock', dir: 1 });
+    expect(state.run.board.cells[1 * 7 + 1]).toBeNull();
+  });
+
+  it('売却すると予算が増え、スイッチは売却できない', () => {
+    let state = createGameState(createRun(1));
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 0, y: 0 },
+    );
+    const budget = state.run.budget;
+    state = apply(state, { type: 'sellSelected' });
+    expect(state.run.budget).toBeGreaterThan(budget);
+
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'sellSelected' },
+    );
+    expect(state.error).toBe('cannotSell');
+  });
+
+  it('リロールで品揃えが変わり、予算が減る', () => {
+    const before = createGameState(createRun(1));
+    const after = apply(before, { type: 'reroll' });
+    expect(after.run.rerollCount).toBe(1);
+    expect(after.run.budget).toBeLessThan(before.run.budget);
+  });
 });

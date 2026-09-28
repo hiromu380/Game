@@ -34,7 +34,6 @@ export function Hud({ run, liveScore }: Props) {
           {liveScore ? formatScore(liveScore) : '—'}
         </span>
       </div>
-      <div className="hud__seed">{t('hud.seed', { seed: run.seed })}</div>
     </div>
   );
 }
