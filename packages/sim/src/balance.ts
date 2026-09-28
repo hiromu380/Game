@@ -45,6 +45,13 @@ export interface PartParams {
   inspectorMultiplier: number;
   /** 貯金箱: 1回の発動で生む予算 */
   piggyBankIncome: number;
+  /**
+   * ポンコツロボ: 値に掛ける倍率 = （junkbotMinSteps〜junkbotMaxSteps の乱数）÷ junkbotStepDivisor（切り捨て）。
+   * シミュレーションでは小数を使わないため、倍率を「整数 ÷ 整数」で表す（既定: 1〜6 ÷ 2 = ×0.5〜×3、0.5 刻み）
+   */
+  junkbotMinSteps: number;
+  junkbotMaxSteps: number;
+  junkbotStepDivisor: number;
 }
 
 /** ボスシフトの修正ルールの種類 */
@@ -189,7 +196,8 @@ export const BALANCE: Balance = {
     spreader: { price: 3, maxActivations: 1, rarity: 'common' },
     copier: { price: 4, maxActivations: 1, rarity: 'uncommon' },
     reflector: { price: 1, maxActivations: 2, rarity: 'common' },
-    turntable: { price: 2, maxActivations: 4, rarity: 'uncommon' },
+    // フェーズ3c: ほとんど買われていなかった（購入率 4〜11%）ため、挙動は変えず発動回数と価格を調整
+    turntable: { price: 1, maxActivations: 8, rarity: 'uncommon' },
     // 信号には反応しない（常時効果のみ）ので発動回数は 0
     oiler: { price: 6, maxActivations: 0, rarity: 'rare' },
     coil: { price: 2, maxActivations: 1, rarity: 'common' },
@@ -209,6 +217,9 @@ export const BALANCE: Balance = {
     solarPerEmpty: 1,
     inspectorMultiplier: 3,
     piggyBankIncome: 1,
+    junkbotMinSteps: 1,
+    junkbotMaxSteps: 6,
+    junkbotStepDivisor: 2,
   },
 
   rarityWeights: { common: 10, uncommon: 5, rare: 2 },

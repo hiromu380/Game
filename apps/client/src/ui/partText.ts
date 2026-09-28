@@ -8,5 +8,12 @@ import type { PartId, RuleSet } from '@chain-factory/sim';
 import type { TranslateFn } from '../i18n';
 
 export function describePart(t: TranslateFn, partId: PartId, rules: RuleSet): string {
-  return t(`part.${partId}.desc`, { ...rules.params, maxIncomePerSim: rules.maxIncomePerSim });
+  const p = rules.params;
+  return t(`part.${partId}.desc`, {
+    ...p,
+    maxIncomePerSim: rules.maxIncomePerSim,
+    // ポンコツロボの倍率は「整数 ÷ 整数」で持っているので、表示用に小数へ直す
+    junkbotMin: p.junkbotMinSteps / p.junkbotStepDivisor,
+    junkbotMax: p.junkbotMaxSteps / p.junkbotStepDivisor,
+  });
 }

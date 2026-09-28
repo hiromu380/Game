@@ -63,7 +63,7 @@
   "part.barrel.name": "爆発ドラム缶",
   "part.barrel.desc": "周囲8方向へ同じ値で同時に発射（1回のみ）",
   "part.junkbot.name": "ポンコツロボ",
-  "part.junkbot.desc": "ランダムな方向へ送る（シードで決まる）",
+  "part.junkbot.desc": "ランダムな方向へ、値をランダムに×{junkbotMin}〜×{junkbotMax}して送る（シードで決まる）",
   "part.rebooter.name": "再起動装置",
   "part.rebooter.desc": "1回だけ、隣接パーツの発動回数をリセットして送る",
   "part.dock.name": "出荷口",

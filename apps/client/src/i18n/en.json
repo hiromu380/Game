@@ -63,7 +63,7 @@
   "part.barrel.name": "Blast Barrel",
   "part.barrel.desc": "Fires in all 8 directions (once)",
   "part.junkbot.name": "Junkbot",
-  "part.junkbot.desc": "Sends signals in a random (seeded) direction",
+  "part.junkbot.desc": "Sends signals in a random direction, multiplying the value by a random ×{junkbotMin}–×{junkbotMax} (seeded)",
   "part.rebooter.name": "Rebooter",
   "part.rebooter.desc": "Once: resets adjacent parts' activations",
   "part.dock.name": "Shipping Dock",

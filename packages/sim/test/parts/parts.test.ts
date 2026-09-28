@@ -109,6 +109,29 @@ describe('ポンコツロボ', () => {
     }
     expect(counts.size).toBeGreaterThan(1);
   });
+
+  it('値にシード乱数の倍率（×0.5〜×3、0.5 刻み・切り捨て）を掛ける', () => {
+    // 出荷口で上・左・右を囲み、下からスイッチ（値 1）→ ギア 2 段で 4 にして入れる
+    // → 出荷量は 4 × (1〜6) ÷ 2 = 2, 4, 6, 8, 10, 12 のいずれか
+    //   （下に送った場合は発動済みのギアに入って消えるので 0）
+    const rows = ['.. D> ..', 'D> J> D>', '.. G^ ..', '.. G^ ..', '.. S^ ..'];
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 200; seed++) {
+      const { scoreText } = run(rows, seed);
+      expect(['0', '2', '4', '6', '8', '10', '12']).toContain(scoreText);
+      seen.add(scoreText);
+    }
+    // 最小（×0.5）も最大（×3）も出る
+    expect(seen).toEqual(new Set(['0', '2', '4', '6', '8', '10', '12']));
+  });
+
+  it('値が 1 のときに ×0.5 が出ると切り捨てで 0 になる（小数は使わない）', () => {
+    const values = new Set<string>();
+    for (let seed = 0; seed < 100; seed++)
+      values.add(run(['.. D> ..', 'D> J> D>', '.. S^ ..'], seed).scoreText);
+    expect(values.has('0')).toBe(true);
+    expect([...values].every((v) => ['0', '1', '2', '3'].includes(v))).toBe(true);
+  });
 });
 
 describe('再起動装置', () => {
