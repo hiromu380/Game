@@ -86,6 +86,20 @@ export const BOLT_COLORS = {
   sweat: '#81d4fa',
 } as const;
 
+/** ボルトのロケット（1ランの目的。組み上がっていく様子を段階ごとの絵で見せる） */
+export const ROCKET_COLORS = {
+  body: '#eceff1',
+  bodyShade: '#b0bec5',
+  accent: '#e53935',
+  accentShade: '#b71c1c',
+  window: '#b3e5fc',
+  lamp: '#ffeb3b',
+  /** まだ組み上がっていない部分の点線 */
+  ghost: '#6b7380',
+  flame: '#ff7043',
+  flameCore: '#ffca28',
+} as const;
+
 /** 盤面（床・枠・マス）とボス */
 export const BOARD_COLORS = {
   background: '#23272e',

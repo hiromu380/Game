@@ -1,8 +1,9 @@
 /**
- * 画面上部の情報表示（シフト・予算・ノルマ・出荷量）
+ * 画面上部の情報表示（シフト・予算・ノルマ・出荷量・ロケットの進み具合）
  */
 import { getCurrentShift, getDayAndPeriod, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
+import { RocketProgress } from './RocketProgress';
 
 interface Props {
   run: RunState;
@@ -41,6 +42,7 @@ export function Hud({ run, liveScore }: Props) {
           {liveScore ? formatScore(liveScore) : '—'}
         </span>
       </div>
+      <RocketProgress run={run} />
     </div>
   );
 }

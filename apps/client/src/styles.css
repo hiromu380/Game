@@ -160,6 +160,16 @@ button:disabled {
 .hud__value--score {
   color: var(--met);
 }
+/* ロケットの進み具合（ui/RocketProgress.tsx） */
+.hud__rocket {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.hud__rocket > span {
+  display: flex;
+  flex-direction: column;
+}
 .hud__seed {
   margin-left: auto;
   font-size: 0.75rem;
@@ -298,6 +308,11 @@ button:disabled {
   margin: 0 0 4px;
   font-size: 1rem;
 }
+.playback-panel__rocket {
+  margin: -4px 0 8px;
+  color: var(--accent);
+  font-weight: bold;
+}
 .playback-panel__verdict {
   font-size: 1.3rem;
   font-weight: bold;
@@ -355,10 +370,6 @@ button:disabled {
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 24px;
-}
-.run-end__mascot {
-  display: block;
-  margin: 0 auto 4px;
 }
 .run-end h1 {
   margin-top: 0;
@@ -1282,4 +1293,96 @@ a.button.button--primary {
   text-align: right;
   font-size: 0.85rem;
   white-space: nowrap;
+}
+
+/* ---- ロケット（1ランの目的。ui/RocketProgress.tsx・ui/RocketScene.tsx） ---- */
+.rocket-goal {
+  border-style: solid;
+}
+.rocket-scene {
+  margin: -8px 0 8px;
+}
+.rocket-scene__sky {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.rocket-scene.is-launched .rocket-scene__sky {
+  border-radius: 10px;
+  /* 星空: 小さな点を2種類の間隔で敷き詰める */
+  background:
+    radial-gradient(circle, var(--white) 1px, transparent 1.5px) 0 0 / 37px 29px,
+    radial-gradient(circle, var(--muted) 1px, transparent 1.5px) 11px 13px / 23px 31px,
+    var(--bg);
+}
+.rocket-scene__rocket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 8px;
+}
+.rocket-scene.is-launched .rocket-scene__rocket {
+  padding-bottom: 32px;
+}
+.rocket-scene__flame {
+  position: absolute;
+  /* ロケットの絵（高さ 104px）のノズルの真下 */
+  top: 94px;
+}
+.rocket-scene__caption {
+  margin: 8px 0 0;
+  font-weight: bold;
+}
+.rocket-scene.is-launched .rocket-scene__caption {
+  color: var(--accent);
+}
+/* 発射: 少し震えてから上へ飛んでいき、下からまた昇ってきて画面の中で止まる */
+.rocket-scene.is-animated .rocket-scene__rocket {
+  animation: rocket-launch 2.8s ease-in both;
+}
+.rocket-scene.is-animated .rocket-scene__flame {
+  animation: rocket-flame 0.12s ease-in-out infinite alternate;
+}
+@keyframes rocket-launch {
+  0% {
+    transform: translate(0, 0);
+  }
+  8% {
+    transform: translate(-2px, 0);
+  }
+  16% {
+    transform: translate(2px, 0);
+  }
+  24% {
+    transform: translate(-1px, 0);
+  }
+  55% {
+    transform: translate(0, -200px);
+  }
+  56% {
+    transform: translate(0, 200px);
+  }
+  100% {
+    transform: translate(0, -6px);
+  }
+}
+@keyframes rocket-flame {
+  from {
+    transform: scaleY(0.8);
+    transform-origin: top;
+  }
+  to {
+    transform: scaleY(1.2);
+    transform-origin: top;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rocket-scene.is-animated .rocket-scene__rocket,
+  .rocket-scene.is-animated .rocket-scene__flame {
+    animation: none;
+  }
 }

@@ -154,6 +154,22 @@ export const ACHIEVEMENT_ICONS = byName(
   import.meta.glob<string>('./achievements/*.svg', { eager: true, import: 'default' }),
 ) as Record<AchievementId, string>;
 
+const rocketFiles = byName(
+  import.meta.glob<string>('./rocket/*.svg', { eager: true, import: 'default' }),
+);
+
+/**
+ * ボルトのロケット（art/rocket.ts で生成）
+ * stages[n] = n 個の部品が組み上がった絵（stages[0] は輪郭だけ、最後が完成形）
+ */
+export const ROCKET_ASSETS = {
+  stages: Object.keys(rocketFiles)
+    .filter((name) => name.startsWith('rocket-'))
+    .sort((a, b) => Number(a.slice(7)) - Number(b.slice(7)))
+    .map((name) => rocketFiles[name]!),
+  flame: rocketFiles['flame']!,
+};
+
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {
   ...(Object.fromEntries(

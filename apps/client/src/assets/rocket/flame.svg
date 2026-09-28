@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -4 64 52">
+  <!-- ロケットの炎（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M20 0 H44 C44 18 38 30 32 44 C26 30 20 18 20 0 Z" fill="#ff7043" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M26 0 H38 C38 12 35 20 32 28 C29 20 26 12 26 0 Z" fill="#ffca28"/>
+</svg>

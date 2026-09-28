@@ -1,5 +1,5 @@
 /**
- * ラン終了画面（最終スコア・最大連鎖数・もう一度）
+ * ラン終了画面（ロケットの発射 or 未完成・最終スコア・最大連鎖数・もう一度）
  */
 import {
   getBestChain,
@@ -13,10 +13,10 @@ import {
 } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import type { PlayMode } from '../state/gameReducer';
-import { MASCOT_ASSETS } from '../assets/manifest';
 import { EDITION_CONFIG } from '../config/edition';
 import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
+import { RocketScene } from './RocketScene';
 import { DailyShare } from './share/DailyShare';
 import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
@@ -46,13 +46,7 @@ export function RunEndScreen(props: Props) {
 
   return (
     <div className="run-end">
-      <img
-        className="run-end__mascot"
-        src={MASCOT_ASSETS[run.phase === 'cleared' ? 'happy' : 'fail']}
-        alt=""
-        width={96}
-        height={96}
-      />
+      <RocketScene run={run} />
       <h1>
         {mode.kind === 'daily'
           ? t('runEnd.dailyTitle', { number: mode.number })

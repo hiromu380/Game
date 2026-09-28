@@ -13,6 +13,7 @@ import {
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
+import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
 
 interface Props {
   playback: Playback;
@@ -44,6 +45,7 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
         {met ? t('playback.quotaMet') : t('playback.quotaMissed')}
       </div>
+      <RocketLine playback={playback} run={run} />
       <dl className="stats">
         <dt>{t('playback.score')}</dt>
         <dd className="stats__score">{formatScore(score)}</dd>
@@ -64,6 +66,23 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
       <button className="button--primary" onClick={onClose}>
         {closeLabel}
       </button>
+    </div>
+  );
+}
+
+/** 本番でノルマを達成したとき: ロケットの部品が増えたら知らせる */
+function RocketLine({ playback, run }: { playback: Playback; run: RunState }) {
+  const { t } = useI18n();
+  if (playback.mode !== 'commit') return null;
+  const before = getRocketProgress(run);
+  const after = getRocketProgress(playback.nextRun);
+  if (after.launched && !before.launched) {
+    return <div className="playback-panel__rocket">{t('rocket.readyToLaunch')}</div>;
+  }
+  if (after.parts <= before.parts) return null;
+  return (
+    <div className="playback-panel__rocket">
+      {t('rocket.partBuilt', { parts: after.parts, total: ROCKET_PARTS })}
     </div>
   );
 }

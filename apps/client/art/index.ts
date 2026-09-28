@@ -14,6 +14,7 @@ import { mascotFiles } from './mascot';
 import { partFiles } from './parts';
 import { paletteCss } from './paletteCss';
 import { previewHtml } from './preview';
+import { rocketFiles } from './rocket';
 
 export function buildArt(): Record<string, string> {
   const files: Record<string, string> = {
@@ -24,6 +25,7 @@ export function buildArt(): Record<string, string> {
     ...iconFiles(),
     ...logoFiles(),
     ...achievementFiles(),
+    ...rocketFiles(),
   };
   files['art/preview.html'] = previewHtml([
     ...Object.keys(files),

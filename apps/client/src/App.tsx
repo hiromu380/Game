@@ -45,6 +45,7 @@ import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
+import { RocketGoal } from './ui/RocketProgress';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { DebugPanel } from './ui/DebugPanel';
 import { Hud } from './ui/Hud';
@@ -478,6 +479,7 @@ export function App({ start, onTitle }: Props) {
       )}
       {header}
       <Hud run={run} liveScore={liveScore} />
+      <RocketGoal run={run} />
       <BossNotice run={run} />
       <main className="layout">
         <div className="layout__board">
