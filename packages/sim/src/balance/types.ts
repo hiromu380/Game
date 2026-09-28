@@ -48,6 +48,18 @@ export interface PartParams {
   junkbotStepDivisor: number;
 }
 
+/**
+ * 日ごとのイベント（2日目以降の朝に3つの候補から1つ選ぶ。効果はその日のうちだけ）
+ * - supplies: 差し入れ（予算が増える）
+ * - sample: 試供品（アンコモン以上のパーツを1つもらえる）
+ * - sale: 特売日（ショップが全品値引き）
+ * - clearance: 在庫整理（売却の返金率が上がる）
+ * - overtimePay: 残業手当（ノルマ達成の報酬が増える）
+ * - rollUpSleeves: 腕まくり（朝シフトのノルマが下がる）
+ */
+export type DayEventId =
+  'supplies' | 'sample' | 'sale' | 'clearance' | 'overtimePay' | 'rollUpSleeves';
+
 /** ボスシフトの修正ルールの種類 */
 export type BossModifierId =
   'lowOil' | 'repairWork' | 'strictInspection' | 'shortShift' | 'partShortage';
@@ -122,6 +134,26 @@ export interface Balance {
   shiftsPerDay: number;
   /** 2日目以降の朝（1日の最初のシフト）に、盤面のパーツをすべて手持ちに戻すか（毎日組み直す） */
   resetBoardEachDay: boolean;
+
+  /** 日ごとのイベント（2日目以降の朝に選ぶ） */
+  dayEvents: {
+    /** 抽選対象のイベント */
+    candidates: DayEventId[];
+    /** 候補の数（この中から1つ選ぶ） */
+    choices: number;
+    /** 差し入れ: 増える予算 */
+    suppliesBudget: number;
+    /** 試供品: もらえるパーツのレア度 */
+    sampleRarities: Rarity[];
+    /** 特売日: 値引き額（価格は最低 1） */
+    saleDiscount: number;
+    /** 在庫整理: 売却の返金率（%） */
+    clearanceRefundPercent: number;
+    /** 残業手当: ノルマ達成の報酬の倍率（%） */
+    overtimePayPercent: number;
+    /** 腕まくり: 朝シフトのノルマの倍率（%。切り捨て、最低 1） */
+    rollUpSleevesQuotaPercent: number;
+  };
 
   /** 延長戦（全シフトクリア後に続けられるエンドレス。1日の最後のシフトはボス） */
   overtime: {

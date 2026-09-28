@@ -1673,3 +1673,37 @@ a.button.button--primary {
     height: 52px;
   }
 }
+
+/* ---- 今日の出来事（ui/DayEventDialog.tsx） ---- */
+.day-event {
+  width: min(520px, 100%);
+}
+.day-event__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.day-event__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 14px;
+  text-align: left;
+}
+.day-event__choice strong {
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+.day-event__choice span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.day-event-notice {
+  border-style: solid;
+  border-color: var(--met);
+}
+.day-event-notice .boss-notice__label {
+  color: var(--met);
+}

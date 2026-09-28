@@ -9,16 +9,17 @@ import { getPart, setPart } from '../core/board';
 import { scoreCompare, scoreOf, scoreToString } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
+import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
 import { addInventory } from './inventory';
 import { commitSeed, overtimeSeed, shopSeed, trialSeed } from './seeds';
 import { generateShop } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
-/** 現在のシフトの設定（ノルマ・予算・報酬・種類） */
+/** 現在のシフトの設定（ノルマ・予算・報酬・種類。今日のイベント込み） */
 export function getCurrentShift(state: RunState): ShiftSpec {
   const spec = state.config.shifts[state.shiftIndex];
   if (!spec) throw new Error(`Invalid shift index: ${state.shiftIndex}`);
-  return spec;
+  return applyEventShift(state, state.shiftIndex, spec);
 }
 
 export function getShiftCount(state: RunState): number {
@@ -36,9 +37,13 @@ export function getCurrentRules(state: RunState): RuleSet {
   return getShiftRules(state.config, state.shiftIndex);
 }
 
-/** 現在のシフトで使う経済設定（ボス修正込み） */
+/** 現在のシフトで使う経済設定（ボス修正・今日のイベント込み） */
 export function getCurrentEconomy(state: RunState): EconomyConfig {
-  return getShiftEconomy(state.config, state.shiftIndex);
+  return applyEventEconomy(
+    state,
+    state.shiftIndex,
+    getShiftEconomy(state.config, state.shiftIndex),
+  );
 }
 
 /**
@@ -64,6 +69,7 @@ export function commitShift(
   options: { seed?: number } = {},
 ): CommitResult | { error: RunError } {
   if (state.phase !== 'building') return { error: 'notBuilding' };
+  if (isEventPending(state)) return { error: 'eventNotChosen' };
 
   // デイリーは本番シードをサーバーから受け取る（クライアントでは計算できない）
   let seed = options.seed;
@@ -125,26 +131,33 @@ export function abandonRun(state: RunState): RunState | null {
 /**
  * シフトを開始する（ラン開始時と、シフト移行時に使う）
  * - 予算を受け取り、ショップを並べ、リロール・試運転の回数をリセットする
- * - 2日目以降の朝（1日の最初のシフト）は、盤面のパーツをすべて手持ちへ戻す（resetBoardEachDay）
+ * - 2日目以降の朝（1日の最初のシフト）は、盤面のパーツをすべて手持ちへ戻し（resetBoardEachDay）、
+ *   今日のイベントの候補を抽選する（dayEvents。選ぶのはプレイヤー: events.ts）
  * - 使用不可マス（ボス）に置かれたパーツは手持ちへ戻す
  */
 export function enterShift(state: RunState, shiftIndex: number, carriedBudget: number): RunState {
   const spec = state.config.shifts[shiftIndex];
   if (!spec) throw new Error(`Invalid shift index: ${shiftIndex}`);
 
+  const dayStart = isDayStart(state, shiftIndex);
   let next: RunState = {
     ...state,
     shiftIndex,
     budget: carriedBudget + spec.budget,
     rerollCount: 0,
     trialCount: 0,
-    shop: generateShop(
-      shopSeed(state.seed, shiftIndex, 0),
-      getShiftEconomy(state.config, shiftIndex),
-    ),
+    // 新しい日の朝は今日のイベントを抽選する（選ぶまでは効果なし）。同じ日のうちは前のシフトのまま
+    dayEvent: dayStart
+      ? drawDayEvent(state, Math.floor(shiftIndex / state.config.shiftsPerDay))
+      : (state.dayEvent ?? null),
+  };
+  // ショップは今日のイベント（特売日など）を反映した価格で並べる
+  next = {
+    ...next,
+    shop: generateShop(shopSeed(state.seed, shiftIndex, 0), getCurrentEconomy(next)),
   };
 
-  if (state.config.resetBoardEachDay && isDayStart(state, shiftIndex)) {
+  if (state.config.resetBoardEachDay && dayStart) {
     next = returnAllParts(next);
   }
 

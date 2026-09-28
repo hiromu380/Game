@@ -6,6 +6,7 @@ export {
   BALANCE,
   type Balance,
   type BossModifierId,
+  type DayEventId,
   type MetaCondition,
   type PartBalance,
   type PartParams,
@@ -43,6 +44,7 @@ export {
   type CreateRunOptions,
 } from './run/create';
 export { applyOp, isRunOp, replayOps, type ReplayResult, type RunOp } from './run/ops';
+export { activeEvent, chooseEvent, isEventPending } from './run/events';
 export {
   buyOffer,
   getRefund,

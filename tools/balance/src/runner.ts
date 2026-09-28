@@ -13,6 +13,8 @@ import {
   PART_IDS,
   type PartId,
   type RunState,
+  chooseEvent,
+  isEventPending,
 } from '@chain-factory/sim';
 import { BOTS, type BotName, type BotOptions } from './bots';
 import type { EvalMode } from './evaluate';
@@ -91,6 +93,12 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       ? createDailyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
   while (state.phase === 'building') {
+    // 今日の出来事（2日目以降の朝）: ボットは最初の候補を選ぶ（イベントの選び方の評価はまだしない）
+    if (isEventPending(state)) {
+      const chosen = chooseEvent(state, 0);
+      if (!chosen.ok) throw new Error(chosen.error);
+      state = chosen.state;
+    }
     for (const offer of state.shop) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);

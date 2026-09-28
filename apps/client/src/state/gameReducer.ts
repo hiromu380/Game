@@ -119,6 +119,8 @@ export type GameAction =
   /** 盤面のパーツを売却する（ショップへドラッグしたとき） */
   | { type: 'sellCell'; x: number; y: number }
   | { type: 'reroll' }
+  /** 今日のイベント（2日目以降の朝）を候補から選ぶ */
+  | { type: 'chooseEvent'; index: number }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
   /** デイリー: サーバーが検証して返した本番シードで確定する */
@@ -391,6 +393,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!getPart(state.run.board, action.x, action.y)) return state;
       return applyRunOp(state, { op: 'sell', x: action.x, y: action.y }, 'sell', null);
     }
+
+    case 'chooseEvent':
+      return applyRunOp(state, { op: 'chooseEvent', index: action.index }, 'buy', null);
 
     case 'reroll':
       return applyRunOp(state, { op: 'reroll' }, 'reroll');

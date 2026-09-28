@@ -12,6 +12,7 @@ import {
   startOvertime,
   type RunState,
 } from '../src';
+import { skipEvent } from './eventHelper';
 import { easyShifts, withBalance } from './testBalance';
 
 function unwrapPlace(run: RunState): RunState {
@@ -23,7 +24,7 @@ function unwrapPlace(run: RunState): RunState {
 }
 
 function commit(run: RunState): RunState {
-  const r = commitShift(run);
+  const r = commitShift(skipEvent(run));
   if ('error' in r) throw new Error(r.error);
   return r.state;
 }

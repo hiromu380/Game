@@ -43,6 +43,11 @@ export interface RunConfig {
    * これを導入する前に始めたラン（セーブ）には無いので、無ければ戻さない
    */
   resetBoardEachDay?: boolean;
+  /**
+   * 日ごとのイベント（balance/ の写しと、試供品で出るパーツの一覧）。
+   * 導入前に始めたラン（セーブ）には無いので、無ければイベントは起きない
+   */
+  dayEvents?: Balance['dayEvents'] & { samplePool: PartId[] };
   /** 本編のシフト数（延長戦でシフトが増えても変わらない。クリア判定に使う） */
   baseShiftCount: number;
   /** 延長戦の設定（balance/ の overtime の写し） */
@@ -127,6 +132,18 @@ export function buildRunConfig({
     shifts: balance.shifts.map((s) => ({ ...s })),
     shiftsPerDay: balance.shiftsPerDay,
     resetBoardEachDay: balance.resetBoardEachDay,
+    dayEvents: {
+      ...balance.dayEvents,
+      candidates: [...balance.dayEvents.candidates],
+      sampleRarities: [...balance.dayEvents.sampleRarities],
+      // 試供品は、このランのショップに並びうるパーツのうち、指定したレア度のもの
+      samplePool: shopPool
+        .map((p) => p.partId)
+        .filter((id) => {
+          const rarity = balance.parts[id].rarity;
+          return rarity !== null && balance.dayEvents.sampleRarities.includes(rarity);
+        }),
+    },
     baseShiftCount: balance.shifts.length,
     overtime: { ...balance.overtime },
     bossPlan: planBosses(balance, board, bossSeed),

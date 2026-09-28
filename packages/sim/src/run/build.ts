@@ -75,7 +75,8 @@ export function returnPart(state: RunState, x: number, y: number): RunActionResu
 
 /** 売却したときの返金額（価格 × 返金率、切り捨て） */
 export function getRefund(state: RunState, partId: PartId): number {
-  const economy = state.config.economy;
+  // 在庫整理（今日のイベント）で返金率が変わるので、今のシフトの経済設定を使う
+  const economy = getCurrentEconomy(state);
   return Math.floor((economy.prices[partId] * economy.refundPercent) / 100);
 }
 

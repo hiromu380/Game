@@ -23,6 +23,7 @@ import {
   type RunActionResult,
   type RunState,
 } from '../src';
+import { skipEvent } from './eventHelper';
 import { easyShifts, withBalance } from './testBalance';
 
 /** 成功を前提に state を取り出す */
@@ -62,7 +63,7 @@ function placeSwitchAndDock(run: RunState): RunState {
 }
 
 function commit(run: RunState) {
-  const result = commitShift(run);
+  const result = commitShift(skipEvent(run));
   if ('error' in result) throw new Error(result.error);
   return result;
 }

@@ -1,5 +1,6 @@
 /**
- * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却）を1手ずつ記録したもの
+ * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却・今日のイベントの選択）を
+ * 1手ずつ記録したもの
  *
  * デイリーでは、クライアントはこの操作ログだけをサーバーへ送る。サーバーは同じラン進行関数で
  * 最初から再生し、予算・ショップ・盤面の整合性を確かめてから本番を実行する
@@ -8,6 +9,7 @@
  */
 import type { Dir4, PartId } from '../types';
 import { buyOffer, placePart, rerollShop, returnPart, rotatePart, sellPart } from './build';
+import { chooseEvent, isEventPending } from './events';
 import type { RunActionResult, RunError, RunState } from './types';
 
 export type RunOp =
@@ -16,10 +18,14 @@ export type RunOp =
   | { op: 'place'; partId: PartId; x: number; y: number; dir: Dir4 }
   | { op: 'rotate'; x: number; y: number }
   | { op: 'return'; x: number; y: number }
-  | { op: 'sell'; x: number; y: number };
+  | { op: 'sell'; x: number; y: number }
+  /** 今日のイベントを候補から選ぶ（2日目以降の朝。選ぶまでほかの操作はできない） */
+  | { op: 'chooseEvent'; index: number };
 
 /** 操作を1つ適用する */
 export function applyOp(state: RunState, op: RunOp): RunActionResult {
+  if (op.op === 'chooseEvent') return chooseEvent(state, op.index);
+  if (isEventPending(state)) return { ok: false, error: 'eventNotChosen' };
   switch (op.op) {
     case 'buy':
       return buyOffer(state, op.offerIndex);
@@ -66,6 +72,8 @@ export function isRunOp(value: unknown): value is RunOp {
   switch (v.op) {
     case 'buy':
       return isInt(v.offerIndex);
+    case 'chooseEvent':
+      return isInt(v.index);
     case 'reroll':
       return true;
     case 'place':

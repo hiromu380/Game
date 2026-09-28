@@ -3,7 +3,7 @@
  *
  * RunState はそのまま JSON 化して保存できる形にしている（Score は文字列で保持）。
  */
-import type { BossModifierId } from '../balance';
+import type { BossModifierId, DayEventId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
 
@@ -58,6 +58,20 @@ export interface RunState {
   overtime: boolean;
   /** メタ進行に記録済みのシフト数（延長戦で同じシフトを二重に記録しないため） */
   metaRecordedShifts: number;
+  /** 今日のイベント（2日目以降の朝に選ぶ。導入前のセーブには無い） */
+  dayEvent?: DayEventState | null;
+}
+
+/** 日ごとのイベントの状態 */
+export interface DayEventState {
+  /** 何日目のイベントか（0 始まり） */
+  day: number;
+  /** 候補（この中から1つ選ぶ） */
+  choices: DayEventId[];
+  /** 選んだイベント。選ぶまでは null（選ぶまで組み立て・本番はできない） */
+  chosen: DayEventId | null;
+  /** 試供品でもらったパーツ（表示用） */
+  samplePart: PartId | null;
 }
 
 /** 操作の結果。失敗時は理由キー（i18n で表示する）を返す */
@@ -75,6 +89,10 @@ export type RunError =
   | 'outOfBoard'
   | 'cannotSell'
   | 'rerollDisabled'
+  /** 今日のイベントをまだ選んでいない */
+  | 'eventNotChosen'
+  /** 選べるイベントがない・候補の番号が正しくない */
+  | 'noEventToChoose'
   /** 本番シードを外から渡す設定（デイリー）なのに渡されなかった */
   | 'seedRequired';
 

@@ -11,6 +11,7 @@ import {
   getCurrentRules,
   getRefund,
   getRerollCost,
+  isEventPending,
   scoreToString,
   SIM_VERSION,
   type RunState,
@@ -45,6 +46,7 @@ import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
+import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
 import {
@@ -332,6 +334,7 @@ export function App({ start, onTitle }: Props) {
   const gameCursor = useGameControls({
     active:
       !settingsOpen &&
+      !isEventPending(run) &&
       !commitConfirm &&
       dailyMenu === null &&
       (playing || run.phase === 'building'),
@@ -495,6 +498,7 @@ export function App({ start, onTitle }: Props) {
       ) : (
         <RocketGoal run={run} />
       )}
+      <DayEventNotice run={run} />
       <BossNotice run={run} />
     </>
   );
@@ -529,6 +533,10 @@ export function App({ start, onTitle }: Props) {
     >
       {dragging && <DragGhost partId={dragging} />}
       {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
+      {/* 2日目以降の朝: 今日の出来事を選ぶまでは組み立てられない */}
+      {isEventPending(run) && !playing && run.phase === 'building' && (
+        <DayEventDialog run={run} onChoose={(index) => dispatch({ type: 'chooseEvent', index })} />
+      )}
       {commitConfirm && !playing && (
         <CommitConfirm
           onConfirm={() => startPlayback('startCommit')}
