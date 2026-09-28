@@ -77,3 +77,5 @@ export {
   recordRun,
   type Unlock,
 } from './meta/progress';
+
+export * from './achievements';
