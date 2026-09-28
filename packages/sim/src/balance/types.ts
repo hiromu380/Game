@@ -120,6 +120,8 @@ export interface Balance {
   shifts: ShiftSpec[];
   /** 1日あたりのシフト数（表示用: 何日目の何シフト目か） */
   shiftsPerDay: number;
+  /** 2日目以降の朝（1日の最初のシフト）に、盤面のパーツをすべて手持ちに戻すか（毎日組み直す） */
+  resetBoardEachDay: boolean;
 
   /** 延長戦（全シフトクリア後に続けられるエンドレス。1日の最後のシフトはボス） */
   overtime: {

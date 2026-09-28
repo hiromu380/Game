@@ -21,7 +21,7 @@ import { BOSS } from './boss';
 import { ECONOMY } from './economy';
 import { META } from './meta';
 import { PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
-import { DAILY, OVERTIME, SHIFTS, SHIFTS_PER_DAY } from './shifts';
+import { DAILY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM } from './sim';
 import type { Balance } from './types';
 
@@ -36,6 +36,7 @@ export const BALANCE: Balance = {
   economy: ECONOMY,
   shifts: SHIFTS,
   shiftsPerDay: SHIFTS_PER_DAY,
+  resetBoardEachDay: RESET_BOARD_EACH_DAY,
   overtime: OVERTIME,
   daily: DAILY,
   meta: META,

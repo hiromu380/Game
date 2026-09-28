@@ -61,6 +61,7 @@ export {
   getCurrentShift,
   getDayAndPeriod,
   getShiftCount,
+  isDayStart,
   runTrial,
   startOvertime,
 } from './run/shift';

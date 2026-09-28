@@ -21,6 +21,9 @@ export const SHIFTS: Balance['shifts'] = [
 
 export const SHIFTS_PER_DAY: Balance['shiftsPerDay'] = 3;
 
+/** 2日目以降の朝に盤面を片付ける（その日にできたロケットの部品を運び出す）。パーツは手持ちに戻る */
+export const RESET_BOARD_EACH_DAY: Balance['resetBoardEachDay'] = true;
+
 export const OVERTIME: Balance['overtime'] = {
   quotaGrowthPercent: 250,
   budget: 14,

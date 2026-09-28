@@ -6,7 +6,7 @@
  * - 本編（通常ラン9シフト・デイリー3シフト）のクリアしたシフトに比例して部品が組み上がる。全部クリアで発射
  * - 延長戦は発射の後。1日クリアするごとに行き先が1つ遠くなる（config/rocket.ts）
  */
-import { BALANCE, type RunState } from '@chain-factory/sim';
+import type { RunState } from '@chain-factory/sim';
 import { ROCKET_ASSETS } from '../assets/manifest';
 import { ROCKET_CONFIG, type RocketDestination } from '../config/rocket';
 
@@ -22,12 +22,9 @@ export interface RocketProgress {
   destinations: number;
 }
 
-/**
- * 本編のシフト数。延長戦ではシフト表が1日分ずつ伸びるので、元の長さはバランス定数から取る
- * （延長戦があるのは通常ランだけで、通常ランのシフト表はバランス定数の写し）
- */
+/** 本編のシフト数（延長戦でシフト表が伸びても変わらない） */
 function mainShiftCount(run: RunState): number {
-  return run.overtime ? BALANCE.shifts.length : run.config.shifts.length;
+  return run.config.baseShiftCount;
 }
 
 export function getRocketProgress(run: RunState): RocketProgress {

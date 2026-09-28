@@ -284,3 +284,29 @@ describe('諦める', () => {
     expect(abandonRun(given)).toBeNull();
   });
 });
+
+describe('日ごとの片付け', () => {
+  // ボスなし（出荷検査強化などで出荷量が 0 にならないように）
+  const balance = withBalance({ shifts: easyShifts(6, 99) });
+
+  it('2日目の朝に盤面のパーツがすべて手持ちに戻る（同じ日のうちは残る）', () => {
+    let run = minimalRun(1, balance);
+    run = commit(run).state; // 1日目・朝 → 昼
+    expect(run.board.cells.filter(Boolean)).toHaveLength(2);
+    run = commit(placeSwitchAndDock(run)).state; // 昼 → 夜
+    run = commit(placeSwitchAndDock(run)).state; // 夜 → 2日目・朝
+    expect(run.shiftIndex).toBe(3);
+    expect(run.board.cells.every((cell) => cell === null)).toBe(true);
+    expect(run.inventory.switch).toBe(1);
+    expect(run.inventory.dock).toBe(BALANCE.economy.starterKit.dock);
+  });
+
+  it('導入前に始めたラン（設定に項目がない）は片付けない', () => {
+    let run = minimalRun(1, balance);
+    run = { ...run, config: { ...run.config, resetBoardEachDay: undefined } };
+    run = commit(run).state;
+    run = commit(placeSwitchAndDock(run)).state;
+    run = commit(placeSwitchAndDock(run)).state;
+    expect(run.board.cells.filter(Boolean)).toHaveLength(2);
+  });
+});

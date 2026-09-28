@@ -1,7 +1,7 @@
 /**
  * ロケット（1ランの目的）の表示: 画面上部の進み具合と、最初のシフトの目的の案内
  */
-import type { RunState } from '@chain-factory/sim';
+import { isDayStart, type RunState } from '@chain-factory/sim';
 import { ROCKET_ASSETS } from '../assets/manifest';
 import { useI18n, type TranslateFn } from '../i18n';
 import { getDestination, getRocketProgress, ROCKET_PARTS } from '../state/rocket';
@@ -20,9 +20,20 @@ export function destinationName(t: TranslateFn, n: number): string | null {
  * 目的の案内
  * - ランの最初のシフト: ロケットを完成させよう
  * - 延長戦: 次の行き先（その日の夜シフトまでクリアすると届く）
+ * - 2日目以降の朝: 盤面を片付けた（パーツは手持ちに戻った）
  */
 export function RocketGoal({ run }: { run: RunState }) {
   const { t } = useI18n();
+  // 2日目以降の朝: 盤面を片付けたことを知らせる
+  if (run.config.resetBoardEachDay && isDayStart(run, run.shiftIndex)) {
+    return (
+      <div className="boss-notice rocket-goal">
+        <img className="boss-notice__icon" src={ROCKET_ASSETS.stages[ROCKET_PARTS]} alt="" />
+        <span className="boss-notice__label">{t('rocket.newDayLabel')}</span>
+        <span className="boss-notice__desc">{t('rocket.newDay')}</span>
+      </div>
+    );
+  }
   if (run.overtime) {
     const next = destinationName(t, getRocketProgress(run).destinations + 1);
     return (

@@ -125,6 +125,7 @@ export function abandonRun(state: RunState): RunState | null {
 /**
  * シフトを開始する（ラン開始時と、シフト移行時に使う）
  * - 予算を受け取り、ショップを並べ、リロール・試運転の回数をリセットする
+ * - 2日目以降の朝（1日の最初のシフト）は、盤面のパーツをすべて手持ちへ戻す（resetBoardEachDay）
  * - 使用不可マス（ボス）に置かれたパーツは手持ちへ戻す
  */
 export function enterShift(state: RunState, shiftIndex: number, carriedBudget: number): RunState {
@@ -143,6 +144,10 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     ),
   };
 
+  if (state.config.resetBoardEachDay && isDayStart(state, shiftIndex)) {
+    next = returnAllParts(next);
+  }
+
   for (const cell of getShiftRules(state.config, shiftIndex).blockedCells) {
     const x = cell % next.board.width;
     const y = Math.floor(cell / next.board.width);
@@ -155,6 +160,24 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     };
   }
   return next;
+}
+
+/** 2日目以降の1日の最初のシフトか（ラン開始時の朝は含めない） */
+export function isDayStart(state: RunState, shiftIndex: number): boolean {
+  return shiftIndex > 0 && shiftIndex % state.config.shiftsPerDay === 0;
+}
+
+/** 盤面のパーツをすべて手持ちへ戻す */
+function returnAllParts(state: RunState): RunState {
+  let inventory = state.inventory;
+  for (const part of state.board.cells) {
+    if (part) inventory = addInventory(inventory, part.id, 1);
+  }
+  return {
+    ...state,
+    board: { ...state.board, cells: state.board.cells.map(() => null) },
+    inventory,
+  };
 }
 
 /**

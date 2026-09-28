@@ -38,6 +38,11 @@ export interface RunConfig {
   economy: EconomyConfig;
   shifts: ShiftSpec[];
   shiftsPerDay: number;
+  /**
+   * 2日目以降の朝に盤面のパーツをすべて手持ちに戻すか（balance/ の写し）。
+   * これを導入する前に始めたラン（セーブ）には無いので、無ければ戻さない
+   */
+  resetBoardEachDay?: boolean;
   /** 本編のシフト数（延長戦でシフトが増えても変わらない。クリア判定に使う） */
   baseShiftCount: number;
   /** 延長戦の設定（balance/ の overtime の写し） */
@@ -121,6 +126,7 @@ export function buildRunConfig({
     },
     shifts: balance.shifts.map((s) => ({ ...s })),
     shiftsPerDay: balance.shiftsPerDay,
+    resetBoardEachDay: balance.resetBoardEachDay,
     baseShiftCount: balance.shifts.length,
     overtime: { ...balance.overtime },
     bossPlan: planBosses(balance, board, bossSeed),

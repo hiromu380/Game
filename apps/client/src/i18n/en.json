@@ -407,5 +407,7 @@
   "howTo.night.title": "Night shifts and more",
   "howTo.night.body": "Night shifts have a special rule (low oil, floor repairs and more). You get a preview during the morning and noon shifts\nAfter a run, your records unlock new parts and a bigger factory (see the Collection)\nThe Daily Challenge is 3 shifts with the same conditions for everyone, ranked worldwide",
   "tutorial.gear.reroll": "You shipped {score}. Almost at the quota! But there's no Booster Gear in the shop. Try a Reroll to get new stock",
-  "tutorial.gear.stuck": "You shipped {score}. Looks like you can't get a Booster Gear right now. Try other parts and find your own way to the quota"
+  "tutorial.gear.stuck": "You shipped {score}. Looks like you can't get a Booster Gear right now. Try other parts and find your own way to the quota",
+  "rocket.newDayLabel": "New day",
+  "rocket.newDay": "Yesterday's parts were shipped out, so the floor has been cleared. All your parts are back in your inventory. Build today's factory!"
 }
