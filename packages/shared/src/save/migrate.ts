@@ -9,6 +9,7 @@ import {
   buildRunConfig,
   createInitialMeta,
   seeds,
+  SIM_VERSION,
   type Board,
   type MetaProgress,
   type RunState,
@@ -63,6 +64,12 @@ function normalizeV2(save: SaveDataV2): SaveDataV2 {
           ...save.run.config,
           baseShiftCount: save.run.config.baseShiftCount ?? save.run.config.shifts.length,
           overtime: save.run.config.overtime ?? { ...BALANCE.overtime },
+          // フェーズ3で追加（保存済みのランは通常ラン扱い）
+          simVersion: save.run.config.simVersion ?? SIM_VERSION,
+          commitSeedMode: save.run.config.commitSeedMode ?? 'derived',
+          globalModifier: save.run.config.globalModifier ?? null,
+          mode: save.run.config.mode ?? 'normal',
+          overtimeAllowed: save.run.config.overtimeAllowed ?? true,
         },
       }
     : null;
