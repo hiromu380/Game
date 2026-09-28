@@ -4,6 +4,8 @@
 import { SIM_VERSION, type RunOp } from '@chain-factory/sim';
 import { alwaysHuman, type HumanVerifier } from '../src/adapters/humanCheck';
 import { allowAll, type RateLimiter } from '../src/adapters/rateLimiter';
+import { steamDisabled } from '../src/adapters/steamAuth';
+import type { ExternalAuthProvider } from '../src/domain/players/externalAuth';
 import { createApp } from '../src/app';
 import type { DomainContext } from '../src/domain/context';
 import type { AppConfig } from '../src/env';
@@ -17,6 +19,7 @@ export const TEST_CONFIG: AppConfig = {
   corsOrigins: [],
   turnstileSecretKey: 'test-turnstile',
   ipHashRetentionDays: 30,
+  steam: { apiKey: null, allowedAppIds: [], identity: 'chain-factory-api' },
 };
 
 /** 登録リクエストの本文（テストでは人間確認を alwaysHuman で通す） */
@@ -35,7 +38,12 @@ export function testContext(repos: Repositories = createMemoryRepositories()) {
 /** API をリクエスト単位で呼べるテスト用クライアント */
 export function testApi(
   ctx: DomainContext,
-  limiters: { read?: RateLimiter; write?: RateLimiter; human?: HumanVerifier } = {},
+  limiters: {
+    read?: RateLimiter;
+    write?: RateLimiter;
+    human?: HumanVerifier;
+    steam?: ExternalAuthProvider;
+  } = {},
 ) {
   const app = createApp({
     resolveDeps: () => ({
@@ -43,6 +51,7 @@ export function testApi(
       readLimiter: limiters.read ?? allowAll,
       writeLimiter: limiters.write ?? allowAll,
       humanVerifier: limiters.human ?? alwaysHuman,
+      steamAuth: limiters.steam ?? steamDisabled,
     }),
   });
   const call = async (

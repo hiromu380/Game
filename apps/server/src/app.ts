@@ -21,6 +21,7 @@ import {
   revealDaily,
   startDaily,
 } from './domain/daily/dailyService';
+import { signInWithExternal, type ExternalAuthProvider } from './domain/players/externalAuth';
 import { authenticate, registerPlayer, updateName } from './domain/players/players';
 import { getLatestMarket } from './domain/market/market';
 import { getRanking } from './domain/ranking/ranking';
@@ -32,6 +33,8 @@ export interface AppDeps {
   writeLimiter: RateLimiter;
   /** 匿名登録時の人間確認（Turnstile） */
   humanVerifier: HumanVerifier;
+  /** Steam 版の本人確認（Web API チケットの検証） */
+  steamAuth: ExternalAuthProvider;
 }
 
 type AppEnv = { Variables: { deps: AppDeps } };
@@ -42,6 +45,8 @@ const STATUS: Record<ApiErrorCode, ContentfulStatusCode> = {
   invalidSubmission: 400,
   unauthorized: 401,
   humanCheckFailed: 403,
+  forbidden: 403,
+  serviceUnavailable: 503,
   notFound: 404,
   alreadyPlayed: 409,
   simVersionMismatch: 409,
@@ -138,6 +143,18 @@ export function createApp(options: {
     }
     return c.json(await registerPlayer(ctxOf(c), ip));
   });
+  // Steam 版: Steam のチケットで本人確認できるので人間確認は省く（IP 単位のレート制限は上でかかっている）
+  app.post('/auth/steam', async (c) =>
+    c.json(
+      await signInWithExternal(
+        ctxOf(c),
+        'steam',
+        c.get('deps').steamAuth,
+        await readJson(c),
+        clientIp(c),
+      ),
+    ),
+  );
   app.put('/players/me/name', async (c) => {
     const player = await playerOf(c);
     const body = (await readJson(c)) as { displayName?: unknown };

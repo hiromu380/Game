@@ -19,6 +19,16 @@ export interface PlayerRecord {
   registeredIpHash: string | null;
 }
 
+export interface ExternalAccountRecord {
+  provider: ExternalProvider;
+  /** 外部 ID の HMAC（外部 ID そのものは保存しない） */
+  subjectHash: string;
+  playerId: string;
+  createdAt: number;
+}
+
+export type ExternalProvider = 'steam';
+
 export interface DailyRecord {
   id: string;
   number: number;
@@ -73,8 +83,17 @@ export interface PlayerRepository {
   create(player: PlayerRecord): Promise<void>;
   findById(id: string): Promise<PlayerRecord | null>;
   updateName(id: string, displayName: string): Promise<void>;
+  /** トークンを発行し直す（外部 ID での再ログイン。前のトークンは使えなくなる） */
+  updateTokenHash(id: string, tokenHash: string): Promise<void>;
   /** createdAt が before より前のプレイヤーの IP ハッシュを消し、消した件数を返す */
   clearIpHashesBefore(before: number): Promise<number>;
+}
+
+export interface ExternalAccountRepository {
+  /** 対応するプレイヤー ID。なければ null */
+  findPlayerId(provider: ExternalProvider, subjectHash: string): Promise<string | null>;
+  /** 作成できたら true。同じ外部 ID がすでにあれば false（同時に初回ログインした場合に後の方を負けにする） */
+  create(record: ExternalAccountRecord): Promise<boolean>;
 }
 
 export interface DailyRepository {
@@ -118,6 +137,7 @@ export interface MarketRepository {
 
 export interface Repositories {
   players: PlayerRepository;
+  externalAccounts: ExternalAccountRepository;
   dailies: DailyRepository;
   sessions: SessionRepository;
   results: ResultRepository;

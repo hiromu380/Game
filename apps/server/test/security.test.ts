@@ -91,12 +91,14 @@ describe('応答ヘッダー', () => {
     const { createApp } = await import('../src/app');
     const { allowAll } = await import('../src/adapters/rateLimiter');
     const { alwaysHuman } = await import('../src/adapters/humanCheck');
+    const { steamDisabled } = await import('../src/adapters/steamAuth');
     const app = createApp({
       resolveDeps: () => ({
         ctx,
         readLimiter: allowAll,
         writeLimiter: allowAll,
         humanVerifier: alwaysHuman,
+        steamAuth: steamDisabled,
       }),
     });
     const res = await app.request('/api/daily/today', {

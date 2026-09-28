@@ -5,3 +5,6 @@ DAILY_MASTER_SECRET=local-dev-secret-change-me-0123456789abcdef
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 # 開発時は Vite のプロキシで同一オリジンになるので CORS は不要。別オリジンから呼ぶときだけ指定する
 # CORS_ORIGINS=http://localhost:5173
+# Steam のパブリッシャーキー（本番は `wrangler secret put STEAM_WEB_API_KEY`）。
+# 未設定なら Steam 認証は serviceUnavailable を返す（Web 版の匿名登録は影響を受けない）
+# STEAM_WEB_API_KEY=

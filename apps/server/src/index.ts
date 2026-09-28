@@ -9,6 +9,7 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { turnstileVerifier } from './adapters/humanCheck';
 import { cloudflareRateLimiter } from './adapters/rateLimiter';
+import { steamTicketVerifier } from './adapters/steamAuth';
 import { createApp, type AppDeps } from './app';
 import * as schema from './db/schema';
 import type { DomainContext } from './domain/context';
@@ -33,6 +34,7 @@ const app = createApp({
       readLimiter: cloudflareRateLimiter(env.RATE_LIMIT_READ),
       writeLimiter: cloudflareRateLimiter(env.RATE_LIMIT_WRITE),
       humanVerifier: turnstileVerifier(ctx.config.turnstileSecretKey),
+      steamAuth: steamTicketVerifier(ctx.config.steam),
     };
   },
   corsOrigins: (raw) => readConfig(raw as Env).corsOrigins,

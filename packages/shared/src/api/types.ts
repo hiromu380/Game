@@ -21,6 +21,17 @@ export interface RegisterPlayerResponse {
   displayName: string;
 }
 
+/**
+ * Steam 版の登録・再ログイン（デスクトップ版のみ。人間確認の代わりに Steam のチケットで本人確認する）
+ * 同じ Steam アカウントなら同じプレイヤー ID に新しいトークンを発行する（応答は匿名登録と同じ形）
+ */
+export interface SteamAuthRequest {
+  /** 起動している Steam の App ID（製品版・体験版・開発用） */
+  appId: number;
+  /** Web API 用の認証チケット（16進） */
+  ticket: string;
+}
+
 export interface UpdateNameRequest {
   displayName: string;
 }
@@ -121,6 +132,10 @@ export type ApiErrorCode =
   | 'unauthorized'
   /** 人間確認（Turnstile）に失敗した（登録時のみ） */
   | 'humanCheckFailed'
+  /** 許可されていない（Steam 認証: 許可リストにない App ID） */
+  | 'forbidden'
+  /** 外部サービス（Steam の認証 API）に問い合わせられない。時間をおいて再試行する */
+  | 'serviceUnavailable'
   | 'rateLimited'
   | 'notFound'
   | 'dailyClosed'

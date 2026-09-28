@@ -7,6 +7,7 @@
 import { compareRankKey, type RankKey } from '@chain-factory/shared';
 import type {
   DailyRecord,
+  ExternalAccountRecord,
   MarketRow,
   PlayerRecord,
   RankedRow,
@@ -27,6 +28,7 @@ const toRankKey = (r: ResultRecord): RankKey => ({
 
 export function createMemoryRepositories(): Repositories {
   const players = new Map<string, PlayerRecord>();
+  const externalAccounts = new Map<string, ExternalAccountRecord>();
   const dailies = new Map<string, DailyRecord>();
   const sessions = new Map<string, SessionRecord>();
   const results = new Map<string, ResultRecord>();
@@ -50,6 +52,10 @@ export function createMemoryRepositories(): Repositories {
         const p = players.get(id);
         if (p) p.displayName = displayName;
       },
+      async updateTokenHash(id, tokenHash) {
+        const p = players.get(id);
+        if (p) p.tokenHash = tokenHash;
+      },
       async clearIpHashesBefore(before) {
         let count = 0;
         for (const p of players.values()) {
@@ -68,6 +74,17 @@ export function createMemoryRepositories(): Repositories {
       },
       async createIfAbsent(record) {
         if (!dailies.has(record.id)) dailies.set(record.id, clone(record));
+      },
+    },
+    externalAccounts: {
+      async findPlayerId(provider, subjectHash) {
+        return externalAccounts.get(key2(provider, subjectHash))?.playerId ?? null;
+      },
+      async create(record) {
+        const k = key2(record.provider, record.subjectHash);
+        if (externalAccounts.has(k)) return false;
+        externalAccounts.set(k, clone(record));
+        return true;
       },
     },
     sessions: {

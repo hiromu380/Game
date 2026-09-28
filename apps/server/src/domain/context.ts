@@ -20,6 +20,8 @@ export class DomainError extends Error {
       | 'badRequest'
       | 'unauthorized'
       | 'humanCheckFailed'
+      | 'forbidden'
+      | 'serviceUnavailable'
       | 'notFound'
       | 'dailyClosed'
       | 'alreadyPlayed'

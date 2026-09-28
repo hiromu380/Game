@@ -52,6 +52,18 @@ function result(
 }
 
 describe.each(implementations)('repositories: %s', (_name, create) => {
+  it('外部 ID の対応: 同じ外部 ID は1人だけ・トークンの発行し直し', async () => {
+    const repos = create();
+    await addPlayer(repos, 'a');
+    const record = { provider: 'steam' as const, subjectHash: 'x', playerId: 'a', createdAt: 1 };
+    expect(await repos.externalAccounts.findPlayerId('steam', 'x')).toBeNull();
+    expect(await repos.externalAccounts.create(record)).toBe(true);
+    expect(await repos.externalAccounts.create({ ...record, playerId: 'b' })).toBe(false);
+    expect(await repos.externalAccounts.findPlayerId('steam', 'x')).toBe('a');
+    await repos.players.updateTokenHash('a', 'new-hash');
+    expect((await repos.players.findById('a'))?.tokenHash).toBe('new-hash');
+  });
+
   it('プレイヤーの作成・取得・名前変更', async () => {
     const repos = create();
     await addPlayer(repos, 'a');

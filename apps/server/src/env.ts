@@ -25,6 +25,12 @@ export interface Env {
   TURNSTILE_SECRET_KEY: string;
   /** 登録時の IP ハッシュの保存日数 */
   IP_HASH_RETENTION_DAYS?: string;
+  /** Steam のパブリッシャーキー（Secrets。未設定なら Steam 認証は使えない） */
+  STEAM_WEB_API_KEY?: string;
+  /** Steam 認証で受け付ける App ID（カンマ区切り。製品版・体験版） */
+  STEAM_APP_IDS?: string;
+  /** Web API チケットの identity（デスクトップ版のビルド設定 STEAM_TICKET_IDENTITY と同じ値） */
+  STEAM_TICKET_IDENTITY?: string;
 }
 
 export interface AppConfig {
@@ -34,11 +40,17 @@ export interface AppConfig {
   corsOrigins: string[];
   turnstileSecretKey: string;
   ipHashRetentionDays: number;
+  steam: {
+    apiKey: string | null;
+    allowedAppIds: number[];
+    identity: string;
+  };
 }
 
 const DEFAULT_OFFSET_MINUTES = 540;
 const DEFAULT_EPOCH = '2026-09-01';
 const DEFAULT_IP_HASH_RETENTION_DAYS = 30;
+const DEFAULT_STEAM_TICKET_IDENTITY = 'chain-factory-api';
 
 /** 生の環境変数を AppConfig に読み替える（不足・不正な値はここで早めにエラーにする） */
 export function readConfig(
@@ -65,7 +77,20 @@ export function readConfig(
   if (!Number.isInteger(retention) || retention < 0) {
     throw new Error('IP_HASH_RETENTION_DAYS must be a non-negative integer');
   }
+  const steamAppIds = (env.STEAM_APP_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map(Number);
+  if (steamAppIds.some((id) => !Number.isSafeInteger(id) || id <= 0)) {
+    throw new Error('STEAM_APP_IDS must be comma-separated positive integers');
+  }
   return {
+    steam: {
+      apiKey: env.STEAM_WEB_API_KEY || null,
+      allowedAppIds: steamAppIds,
+      identity: env.STEAM_TICKET_IDENTITY || DEFAULT_STEAM_TICKET_IDENTITY,
+    },
     turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
     ipHashRetentionDays: retention,
     masterSecret: env.DAILY_MASTER_SECRET,

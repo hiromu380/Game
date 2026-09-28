@@ -33,6 +33,11 @@
    - **この値をなくすと、過去のデイリーの秘密値を公開（検証）できなくなる。** 変えると進行中のデイリーの本番シードが変わるので、変更はしない
 8. 本番の D1 にテーブルを作る: `cd apps/server && npx wrangler d1 migrations apply chain-factory --remote`
 9. `apps/server/wrangler.jsonc` の `vars.DAILY_EPOCH` を公開日（デイリー #1 の日付）にする
+10. Steam 版を出すとき（フェーズ4〜。手順の詳細は docs/ops/steam-setup.md）
+    - Steamworks の管理画面でパブリッシャーキー（Web API キー）を発行し、`npx wrangler secret put STEAM_WEB_API_KEY`
+    - `wrangler.jsonc` の `vars.STEAM_APP_IDS` に製品版と体験版の App ID をカンマ区切りで書く
+    - `vars.STEAM_TICKET_IDENTITY` をデスクトップ版のビルド設定（`STEAM_TICKET_IDENTITY`）と同じ値にする
+    - `vars.CORS_ORIGINS` にデスクトップ版のオリジン（`app://chain-factory`）が入っていることを確認する
 
 ## 毎回のデプロイ
 
@@ -66,6 +71,7 @@ cd apps/server && npx wrangler deploy
 - [ ] デイリーに初めて参加すると Turnstile が表示される（**テスト用キーのままになっていないこと**。サーバーのログに `Cloudflare test key` の警告が出ていないこと）
 - [ ] Cron が動いている（管理画面の Cron の実行履歴。`scheduled jobs` のログ）
 - [ ] Web Analytics にアクセスが記録される
+- [ ] （Steam 版）デスクトップ版でデイリーを開くと Steam で本人確認され、人間確認なしで参加できる。サーバーのログに `external sign-in failed` が出ていない
 
 ## ロールバック
 
@@ -74,10 +80,11 @@ cd apps/server && npx wrangler deploy
 
 ## 秘密値の一覧
 
-| 名前                       | 置き場所                                 | 備考                                                           |
-| -------------------------- | ---------------------------------------- | -------------------------------------------------------------- |
-| `DAILY_MASTER_SECRET`      | Workers の Secrets                       | デイリーの本番シードの元。なくすと過去分の公開・検証ができない |
-| `TURNSTILE_SECRET_KEY`     | Workers の Secrets                       | 人間確認の検証用                                               |
-| Cloudflare の API トークン | デプロイする人の端末（`wrangler login`） | リポジトリ・CI には置かない                                    |
+| 名前                       | 置き場所                                 | 備考                                                                       |
+| -------------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| `DAILY_MASTER_SECRET`      | Workers の Secrets                       | デイリーの本番シードの元。なくすと過去分の公開・検証ができない             |
+| `TURNSTILE_SECRET_KEY`     | Workers の Secrets                       | 人間確認の検証用                                                           |
+| `STEAM_WEB_API_KEY`        | Workers の Secrets                       | Steam のパブリッシャーキー。**クライアント・リポジトリには絶対に置かない** |
+| Cloudflare の API トークン | デプロイする人の端末（`wrangler login`） | リポジトリ・CI には置かない                                                |
 
 公開値（`VITE_*`・`wrangler.jsonc` の `vars`・D1 の `database_id`）は秘密ではない。

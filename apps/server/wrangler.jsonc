@@ -37,6 +37,12 @@
   "vars": {
     "DAILY_OFFSET_MINUTES": "540",
     "DAILY_EPOCH": "2026-09-01",
+    // デスクトップ版（Electron）のページのオリジン。Web 版は同一オリジンなので不要（要確認: 実機の Origin ヘッダー）
+    "CORS_ORIGINS": "app://chain-factory",
+    // Steam 認証で受け付ける App ID（製品版,体験版）。App ID の取得後に設定する（docs/ops/steam-setup.md）
+    "STEAM_APP_IDS": "",
+    // デスクトップ版のビルド設定 STEAM_TICKET_IDENTITY と同じ値にする
+    "STEAM_TICKET_IDENTITY": "chain-factory-api",
   },
 
   // 1リクエストあたりの CPU 上限。計測（pnpm perf）で検証1回は通常 約0.6ms・理論上の最悪で 約80ms。

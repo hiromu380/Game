@@ -15,6 +15,13 @@
       "when": 1790581131211,
       "tag": "0001_players_ip_hash",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790588177580,
+      "tag": "0002_external_accounts",
+      "breakpoints": true
     }
   ]
 }

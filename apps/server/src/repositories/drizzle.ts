@@ -19,7 +19,8 @@ import type { RankedRow, Repositories, SessionRecord } from './types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 実行結果の型はドライバーごとに違うため
 export type AsyncSqliteDb = BaseSQLiteDatabase<'async', any, typeof schema>;
 
-const { players, dailies, dailySessions, dailyResults, shopStats, marketPrices } = schema;
+const { players, externalAccounts, dailies, dailySessions, dailyResults, shopStats, marketPrices } =
+  schema;
 
 /** 非表示でないプレイヤーの結果だけに絞る条件 */
 const visible = eq(players.hidden, 0);
@@ -74,6 +75,9 @@ export function createDrizzleRepositories(db: AsyncSqliteDb): Repositories {
       async updateName(id, displayName) {
         await db.update(players).set({ displayName }).where(eq(players.id, id));
       },
+      async updateTokenHash(id, tokenHash) {
+        await db.update(players).set({ tokenHash }).where(eq(players.id, id));
+      },
       async clearIpHashesBefore(before) {
         const cleared = await db
           .update(players)
@@ -81,6 +85,31 @@ export function createDrizzleRepositories(db: AsyncSqliteDb): Repositories {
           .where(and(lt(players.createdAt, before), isNotNull(players.registeredIpHash)))
           .returning({ id: players.id });
         return cleared.length;
+      },
+    },
+
+    externalAccounts: {
+      async findPlayerId(provider, subjectHash) {
+        const row = await db
+          .select({ playerId: externalAccounts.playerId })
+          .from(externalAccounts)
+          .where(
+            and(
+              eq(externalAccounts.provider, provider),
+              eq(externalAccounts.subjectHash, subjectHash),
+            ),
+          )
+          .get();
+        return row?.playerId ?? null;
+      },
+      async create(record) {
+        // 主キー（provider, subject_hash）が重なれば何も入らない → 1つの外部 ID に1人を DB で保証
+        const inserted = await db
+          .insert(externalAccounts)
+          .values(record)
+          .onConflictDoNothing()
+          .returning({ id: externalAccounts.playerId });
+        return inserted.length > 0;
       },
     },
 

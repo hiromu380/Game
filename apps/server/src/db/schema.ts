@@ -22,6 +22,22 @@ export const players = sqliteTable('players', {
   registeredIpHash: text('registered_ip_hash'),
 });
 
+/**
+ * 外部 ID（Steam など）とプレイヤーの対応
+ * 外部 ID そのもの（SteamID）は個人を特定しうるので保存せず、マスター秘密鍵つきの HMAC だけを持つ
+ */
+export const externalAccounts = sqliteTable(
+  'external_accounts',
+  {
+    /** 'steam' */
+    provider: text('provider').notNull(),
+    subjectHash: text('subject_hash').notNull(),
+    playerId: text('player_id').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.subjectHash] })],
+);
+
 /** デイリーチャレンジ（1日1行。切り替え直後に生成ジョブ or その日の最初のアクセスで作る） */
 export const dailies = sqliteTable('dailies', {
   /** 'YYYY-MM-DD' */
