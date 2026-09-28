@@ -6,8 +6,10 @@
   "description": "Web版クライアント（Vite + PixiJS + React）",
   "scripts": {
     "dev": "vite",
+    "dev:capture": "vite --mode capture",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "build:demo": "tsc -p tsconfig.json --noEmit && vite build --mode demo",
+    "build:capture": "tsc -p tsconfig.json --noEmit && vite build --mode capture",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

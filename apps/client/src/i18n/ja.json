@@ -312,5 +312,14 @@
   "demoImport.title": "体験版のデータを引き継ぎますか？",
   "demoImport.body": "この PC に体験版で遊んだ記録（ラン {runs} 回）があります。記録と、解放したパーツ・工場の広さを製品版に引き継げます（遊んでいる途中のランは引き継ぎません）。",
   "demoImport.yes": "引き継ぐ",
-  "demoImport.no": "最初から遊ぶ"
+  "demoImport.no": "最初から遊ぶ",
+  "capture.title": "撮影モード（C キーで隠す）",
+  "capture.ui.full": "UI: 全部",
+  "capture.ui.minimal": "UI: 最小限",
+  "capture.ui.none": "UI: なし",
+  "capture.export": "盤面を書き出す",
+  "capture.import": "読み込む",
+  "capture.commitWithSeed": "このシードで本番",
+  "capture.loaded": "読み込みました",
+  "capture.invalid": "盤面の JSON が正しくありません（盤面の大きさも同じにしてください）"
 }

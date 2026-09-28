@@ -8,7 +8,8 @@
 import type { SimEvent } from '@chain-factory/sim';
 
 /** 再生速度。'skip' は即座に最後まで進める */
-export type PlaybackSpeed = 1 | 2 | 'skip';
+/** 再生速度（0.25・0.5 は撮影モード用のスロー） */
+export type PlaybackSpeed = 0.25 | 0.5 | 1 | 2 | 'skip';
 
 /** 1x のときの 1 tick の長さ（ミリ秒） */
 export const BASE_TICK_MS = 320;

@@ -18,6 +18,7 @@ import {
   startOvertime,
   rotateCw,
   type AchievementProgress,
+  type Board,
   type Dir4,
   type MetaProgress,
   type PartId,
@@ -115,7 +116,11 @@ export type GameAction =
   | { type: 'playbackFinished' }
   | { type: 'closePlayback' }
   /** デイリーのランキングで自分の順位を受け取った（上位○% の実績） */
-  | { type: 'dailyRanked'; topPercent: number };
+  | { type: 'dailyRanked'; topPercent: number }
+  /** 撮影モード: 盤面を差し替える（書き出した JSON の読み込み。ui/CapturePanel.tsx） */
+  | { type: 'captureLoadBoard'; board: Board }
+  /** 撮影モード: 指定したシードで本番を実行する（見栄えの良い連鎖を何度でも再現する） */
+  | { type: 'captureCommit'; seed: number };
 
 export function createGameState(
   run: RunState,
@@ -345,6 +350,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'playbackFinished':
       return state.playback ? { ...state, playback: { ...state.playback, finished: true } } : state;
+
+    case 'captureLoadBoard':
+      return state.run.phase === 'building'
+        ? { ...state, run: { ...state.run, board: action.board }, selection: null, error: null }
+        : state;
+
+    case 'captureCommit':
+      return state.run.phase === 'building' ? beginCommit(state, action.seed) : state;
 
     case 'closePlayback': {
       const pb = state.playback;

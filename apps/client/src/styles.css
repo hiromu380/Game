@@ -1094,3 +1094,44 @@ a.button.button--primary {
   gap: 8px;
   padding-right: 4px;
 }
+
+/* ---- 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） ---- */
+.capture {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 100;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+.capture textarea {
+  font: inherit;
+  font-size: 0.7rem;
+}
+/* 最小限: 盤面と HUD だけ */
+.capture-ui--minimal .app-header,
+.capture-ui--minimal .layout__side,
+.capture-ui--none .app-header,
+.capture-ui--none .layout__side,
+.capture-ui--none .hud,
+.capture-ui--none .boss-notice,
+.capture-ui--none .toast,
+.capture-ui--none .playback-banner {
+  display: none;
+}
+.capture-ui--minimal .layout,
+.capture-ui--none .layout {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.capture-ui--minimal .layout__board,
+.capture-ui--none .layout__board {
+  width: min(100%, calc(100dvh - 40px));
+}

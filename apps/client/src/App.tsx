@@ -38,6 +38,7 @@ import { InventoryPanel } from './ui/InventoryPanel';
 import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
+import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
@@ -54,6 +55,9 @@ interface Props {
   /** タイトル画面へ戻る */
   onTitle: () => void;
 }
+
+/** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
+const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
 /** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す */
 const DEBUG_AVAILABLE =
@@ -79,6 +83,8 @@ export function App({ start, onTitle }: Props) {
   /** デバッグ表示の開閉 */
   const [debugOpen, setDebugOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** 撮影モードの UI の表示 */
+  const [captureUi, setCaptureUi] = useState<CaptureUi>('full');
   /** デイリーのメニュー（開いていなければ null） */
   const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
 
@@ -359,7 +365,23 @@ export function App({ start, onTitle }: Props) {
   }
 
   return (
-    <div className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''}`}>
+    <div
+      className={`app ${compact ? 'app--compact' : ''} ${short ? 'app--short' : ''} capture-ui--${captureUi}`}
+    >
+      {CAPTURE && (
+        <CapturePanel
+          board={run.board}
+          ui={captureUi}
+          speed={speed}
+          onUiChange={setCaptureUi}
+          onSpeedChange={setSpeed}
+          onLoadBoard={(board) => dispatch({ type: 'captureLoadBoard', board })}
+          onCommit={(seed) => {
+            setLiveScore(null);
+            dispatch({ type: 'captureCommit', seed });
+          }}
+        />
+      )}
       {header}
       <Hud run={run} liveScore={liveScore} />
       <BossNotice run={run} />

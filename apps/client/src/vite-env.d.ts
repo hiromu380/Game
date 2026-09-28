@@ -14,6 +14,8 @@ interface ImportMetaEnv {
   readonly VITE_CF_ANALYTICS_TOKEN?: string;
   /** シェア文に載せるサイトの URL */
   readonly VITE_SITE_URL?: string;
+  /** '1' で撮影モード（ストア用の画像・動画の撮影用。製品版・体験版の通常ビルドには含めない） */
+  readonly VITE_CAPTURE?: string;
 }
 
 interface ImportMeta {

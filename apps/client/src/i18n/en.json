@@ -312,5 +312,14 @@
   "demoImport.title": "Import your demo progress?",
   "demoImport.body": "We found demo progress on this PC ({runs} runs). You can bring your records, unlocked parts and factory size into the full game (a run in progress is not carried over).",
   "demoImport.yes": "Import",
-  "demoImport.no": "Start fresh"
+  "demoImport.no": "Start fresh",
+  "capture.title": "Capture mode (press C to hide)",
+  "capture.ui.full": "UI: all",
+  "capture.ui.minimal": "UI: minimal",
+  "capture.ui.none": "UI: none",
+  "capture.export": "Export board",
+  "capture.import": "Load",
+  "capture.commitWithSeed": "Run with this seed",
+  "capture.loaded": "Loaded",
+  "capture.invalid": "Invalid board JSON (the board size must match)"
 }
