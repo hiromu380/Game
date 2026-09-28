@@ -3,7 +3,7 @@
  *
  * - 通常ラン: 保存済みのランがあれば「続きから」
  * - デイリー: メニューを開く（デイリーのランはここからゲーム画面へ渡す）
- * - コレクション: 実績・パーツ図鑑・解放の目標
+ * - 遊び方・コレクション（実績・パーツ図鑑・解放の目標）
  * - 設定
  * ゲーム本体の読み込みが終わる前に押された場合は、進捗を見せながら待つ。
  */
@@ -20,6 +20,7 @@ interface Props {
   onPlay: () => void;
   onDaily: () => void;
   onCollection: () => void;
+  onHowTo: () => void;
   onSettings: () => void;
 }
 
@@ -30,6 +31,7 @@ export function TitleScreen({
   onPlay,
   onDaily,
   onCollection,
+  onHowTo,
   onSettings,
 }: Props) {
   const { t } = useI18n();
@@ -46,6 +48,9 @@ export function TitleScreen({
           {hasSavedRun ? t('title.continue') : t('title.play')}
         </button>
         <button onClick={onDaily}>{t('title.daily')}</button>
+        <button className="button--ghost" onClick={onHowTo}>
+          {t('title.howTo')}
+        </button>
         <button className="button--ghost" onClick={onCollection}>
           {t('title.collection')}
         </button>

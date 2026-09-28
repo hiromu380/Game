@@ -19,6 +19,7 @@ import { TitleScreen } from './ui/title/TitleScreen';
 
 /** コレクション（開いたときに読み込む。タイトル画面を軽く保つため） */
 const CollectionScreen = lazy(() => import('./ui/title/CollectionScreen'));
+const HowToPlay = lazy(() => import('./ui/title/HowToPlay'));
 
 /** ゲーム画面へ進む要求（start が null なら通常ラン = 保存済みの続き or 新規） */
 type Request = { start: GameStart | null };
@@ -32,6 +33,7 @@ export function Root() {
   const [dailyOpen, setDailyOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
+  const [howToOpen, setHowToOpen] = useState(false);
   /** 引き継げる体験版のデータ（製品版の初回起動時だけ。答えたら null） */
   const [demoMeta, setDemoMeta] = useState<MetaProgress | null>(null);
 
@@ -62,8 +64,14 @@ export function Root() {
         onPlay={() => setRequest({ start: null })}
         onDaily={() => setDailyOpen(true)}
         onCollection={() => setCollectionOpen(true)}
+        onHowTo={() => setHowToOpen(true)}
         onSettings={() => setSettingsOpen(true)}
       />
+      {howToOpen && (
+        <Suspense fallback={null}>
+          <HowToPlay onClose={() => setHowToOpen(false)} />
+        </Suspense>
+      )}
       {collectionOpen && (
         <Suspense fallback={null}>
           <CollectionScreen onClose={() => setCollectionOpen(false)} />

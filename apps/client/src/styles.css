@@ -1443,3 +1443,44 @@ a.button.button--primary {
     font-size: 0.85rem;
   }
 }
+
+/* ---- 遊び方（ui/title/HowToPlay.tsx） ---- */
+.how-to {
+  width: min(560px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.how-to__page {
+  text-align: center;
+}
+.how-to__page h3 {
+  margin: 8px 0;
+  color: var(--accent);
+}
+.how-to__body {
+  margin: 0;
+  padding-left: 1.2em;
+  text-align: left;
+  line-height: 1.6;
+}
+.how-to__body li {
+  margin-bottom: 6px;
+}
+.how-to__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0;
+}
+.how-to__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--secondary);
+}
+.how-to__dots span.is-active {
+  background: var(--accent);
+}
+.how-to .button-row > button {
+  flex: 1;
+}

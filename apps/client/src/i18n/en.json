@@ -392,5 +392,18 @@
   "tutorial.step.commit": "You hit the quota! Press the switch (real run) to lock in your shipments. The real run can't be undone, so check with a trial first",
   "tutorial.step.finish": "Nice, one rocket part is done! Now build your factory however you like. You can check what each part does in the shop's List or in the Collection on the title screen",
   "tutorial.hint.notReached": "The signal didn't reach the dock. Check that the switch, gear and dock face right in a straight line (tap a placed part to rotate it)",
-  "tutorial.hint.short": "Not at the quota yet. Check the layout and run another trial"
+  "tutorial.hint.short": "Not at the quota yet. Check the layout and run another trial",
+  "title.howTo": "How to play",
+  "howTo.title": "How to play",
+  "howTo.prev": "Back",
+  "howTo.next": "Next",
+  "howTo.close": "Close",
+  "howTo.goal.title": "Goal: send Bolt's rocket to space",
+  "howTo.goal.body": "Each day has 3 shifts: morning, noon and night. A run is 9 shifts over 3 days\nMeet a shift's quota (a shipment target) and one rocket part gets built\nClear all 9 shifts to finish the rocket and launch! Miss a quota and the run ends\nAfter the launch, Overtime lets you see how far you can go: the Moon, Mars, and beyond",
+  "howTo.build.title": "Building the factory",
+  "howTo.build.body": "Buy parts in the shop, then pick them from your inventory and place them on the floor (you get a budget each shift, and leftovers carry over)\nTap a placed part to rotate it, drag to move it. Drag it to the inventory to return it, or to the shop to sell it (half price)\nThe switch sends a signal in the direction of its arrow. Each part the signal passes changes its value, and the value that reaches a dock is shipped\nSignals that enter an empty cell or leave the floor disappear",
+  "howTo.chain.title": "Chain tips",
+  "howTo.chain.body": "Multiply: gears and presses make values bigger. Stacked multipliers make them skyrocket\nBranch: splitters and spreaders make more signals to reach more docks\nRetrigger: reflectors and turntables send signals through the same parts again (each part has an activation limit)\nPlacement: coils and solar panels depend on where they sit. Piggy banks add budget for the next shift\nTrial runs are unlimited. Try out a layout before pressing the real switch",
+  "howTo.night.title": "Night shifts and more",
+  "howTo.night.body": "Night shifts have a special rule (low oil, floor repairs and more). You get a preview during the morning and noon shifts\nAfter a run, your records unlock new parts and a bigger factory (see the Collection)\nThe Daily Challenge is 3 shifts with the same conditions for everyone, ranked worldwide"
 }
