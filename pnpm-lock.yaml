@@ -113,6 +113,16 @@ importers:
         specifier: ^4.23.15
         version: 4.23.15
 
+  tools/perf:
+    dependencies:
+      '@chain-factory/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
+    devDependencies:
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+
 packages:
 
   '@babel/code-frame@7.29.7':
