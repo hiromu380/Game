@@ -2,7 +2,7 @@
  * 再生後の結果表示（試運転 / 本番）
  */
 import {
-  getShiftConfig,
+  getCurrentShift,
   scoreCompare,
   scoreOf,
   scoreToString,
@@ -25,7 +25,7 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
   }
 
   const { score, stats } = playback.result;
-  const quota = getShiftConfig(run.shiftIndex).quota;
+  const quota = getCurrentShift(run).quota;
   const met = scoreCompare(score, scoreOf(quota)) >= 0;
 
   // 本番で次に進むときのボタン文言

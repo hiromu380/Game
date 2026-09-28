@@ -1,7 +1,7 @@
 /**
  * アプリのルート。ゲーム状態を持ち、盤面（PixiJS）と各 UI パネルをつなぐ
  */
-import { scoreToString, type Score } from '@chain-factory/sim';
+import { getCurrentRules, scoreToString, type Score } from '@chain-factory/sim';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
@@ -9,7 +9,7 @@ import { useI18n } from './i18n';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun } from './state/gameReducer';
 import { createInitialRun, createNewSeed } from './state/newRun';
-import { saveRun } from './state/saveStore';
+import { saveGame } from './state/saveStore';
 import { ControlsPanel } from './ui/ControlsPanel';
 import { Hud } from './ui/Hud';
 import { InventoryPanel } from './ui/InventoryPanel';
@@ -32,7 +32,7 @@ export function App() {
 
   // 状態が変わるたびに進行中のランを保存する
   const persistedRun = getPersistedRun(state);
-  useEffect(() => saveRun(persistedRun), [persistedRun]);
+  useEffect(() => saveGame(persistedRun), [persistedRun]);
 
   // キーボード: R で回転
   useEffect(() => {
@@ -47,11 +47,12 @@ export function App() {
   const boardView = useMemo<BoardViewState>(
     () => ({
       board: run.board,
+      rules: getCurrentRules(run),
       highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
       placing:
         selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
     }),
-    [run.board, selection],
+    [run, selection],
   );
 
   const onShip = useCallback((total: Score) => setLiveScore(scoreToString(total)), []);

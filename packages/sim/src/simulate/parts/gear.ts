@@ -7,6 +7,6 @@ import type { PartBehavior } from './types';
 
 export const gearBehavior: PartBehavior = {
   react: ({ part, value, rules }) => ({
-    emits: [{ dir: dir4ToDir8(part.dir), value: scoreMul(value, rules.gearMultiplier) }],
+    emits: [{ dir: dir4ToDir8(part.dir), value: scoreMul(value, rules.params.gearMultiplier) }],
   }),
 };

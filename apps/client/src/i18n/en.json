@@ -1,39 +1,32 @@
 {
   "app.title": "Chain Factory (WIP)",
   "app.language": "日本語",
-
   "hud.shift": "Shift {current} / {total}",
   "hud.budget": "Budget",
   "hud.quota": "Quota",
   "hud.score": "Shipped",
   "hud.seed": "Seed {seed}",
-
   "shop.title": "Shop",
   "shop.sold": "Sold",
   "shop.price": "${price}",
-
   "inventory.title": "Inventory",
   "inventory.empty": "No parts in inventory",
   "inventory.hint": "Pick a part, then click an empty cell to place it",
   "inventory.placingDir": "Facing: {dir} (R to rotate)",
-
   "selection.title": "Selected part",
   "selection.rotate": "Rotate (R)",
   "selection.remove": "Remove (+${refund})",
   "selection.removeToInventory": "Remove (back to inventory)",
   "selection.none": "Click a part on the floor to rotate or remove it",
-
   "dir.0": "Up",
   "dir.1": "Right",
   "dir.2": "Down",
   "dir.3": "Left",
-
   "controls.trial": "Test run",
   "controls.commit": "Press the switch (final)",
   "controls.commitHint": "The final run locks in this shift. Test runs are unlimited",
   "controls.speed": "Speed",
   "controls.skip": "Skip",
-
   "playback.trialTitle": "Test run result",
   "playback.commitTitle": "Shift result",
   "playback.playing": "Running…",
@@ -47,7 +40,6 @@
   "playback.close": "Back to building",
   "playback.nextShift": "Next shift",
   "playback.toResult": "See results",
-
   "runEnd.clearedTitle": "All shifts cleared!",
   "runEnd.failedTitle": "Run over",
   "runEnd.finalScore": "Final score (total shipped)",
@@ -55,7 +47,6 @@
   "runEnd.shiftsCleared": "Shifts cleared",
   "runEnd.shiftRow": "Shift {index}: {score} / quota {quota}",
   "runEnd.retry": "Play again",
-
   "error.notBuilding": "You can't do that right now",
   "error.offerNotFound": "Item not found",
   "error.alreadySold": "Already sold",
@@ -64,7 +55,6 @@
   "error.cellOccupied": "That cell is occupied",
   "error.cellEmpty": "That cell is empty",
   "error.outOfBoard": "Outside the floor",
-
   "part.switch.name": "Switch",
   "part.switch.desc": "Fires a value-1 signal in its facing direction at start",
   "part.conveyor.name": "Conveyor",
@@ -82,5 +72,8 @@
   "part.rebooter.name": "Rebooter",
   "part.rebooter.desc": "Once: resets adjacent parts' activations",
   "part.dock.name": "Shipping Dock",
-  "part.dock.desc": "Adds the signal value to your shipment"
+  "part.dock.desc": "Adds the signal value to your shipment",
+  "error.cellBlocked": "That cell is under repair",
+  "error.cannotSell": "This part can't be sold",
+  "error.rerollDisabled": "Rerolls are unavailable this shift"
 }

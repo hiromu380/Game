@@ -1,39 +1,32 @@
 {
   "app.title": "チェインファクトリー（仮）",
   "app.language": "English",
-
   "hud.shift": "シフト {current} / {total}",
   "hud.budget": "予算",
   "hud.quota": "ノルマ",
   "hud.score": "出荷量",
   "hud.seed": "シード {seed}",
-
   "shop.title": "ショップ",
   "shop.sold": "売約済み",
   "shop.price": "{price} 円",
-
   "inventory.title": "手持ち",
   "inventory.empty": "手持ちのパーツはありません",
   "inventory.hint": "パーツを選んでから盤面の空きマスをクリックすると配置します",
   "inventory.placingDir": "置く向き: {dir}（R で回転）",
-
   "selection.title": "選択中のパーツ",
   "selection.rotate": "回転（R）",
   "selection.remove": "撤去（+{refund} 円）",
   "selection.removeToInventory": "撤去（手持ちに戻す）",
   "selection.none": "盤面のパーツをクリックすると回転・撤去できます",
-
   "dir.0": "上",
   "dir.1": "右",
   "dir.2": "下",
   "dir.3": "左",
-
   "controls.trial": "試運転",
   "controls.commit": "スイッチを押す（本番）",
   "controls.commitHint": "本番の結果でシフトが確定します。試運転は何度でもできます",
   "controls.speed": "再生速度",
   "controls.skip": "スキップ",
-
   "playback.trialTitle": "試運転の結果",
   "playback.commitTitle": "シフト結果",
   "playback.playing": "稼働中…",
@@ -47,7 +40,6 @@
   "playback.close": "配置に戻る",
   "playback.nextShift": "次のシフトへ",
   "playback.toResult": "結果を見る",
-
   "runEnd.clearedTitle": "全シフト達成！",
   "runEnd.failedTitle": "ラン終了",
   "runEnd.finalScore": "最終スコア（出荷量合計）",
@@ -55,7 +47,6 @@
   "runEnd.shiftsCleared": "達成シフト",
   "runEnd.shiftRow": "シフト {index}: {score} / ノルマ {quota}",
   "runEnd.retry": "もう一度",
-
   "error.notBuilding": "今は操作できません",
   "error.offerNotFound": "商品が見つかりません",
   "error.alreadySold": "売約済みです",
@@ -64,7 +55,6 @@
   "error.cellOccupied": "そのマスには既にパーツがあります",
   "error.cellEmpty": "そのマスにはパーツがありません",
   "error.outOfBoard": "盤面の外です",
-
   "part.switch.name": "スイッチ",
   "part.switch.desc": "開始時に向いている方向へ値1の信号を発射",
   "part.conveyor.name": "ベルトコンベア",
@@ -82,5 +72,8 @@
   "part.rebooter.name": "再起動装置",
   "part.rebooter.desc": "1回だけ、隣接パーツの発動回数をリセットして送る",
   "part.dock.name": "出荷口",
-  "part.dock.desc": "受けた信号の値を出荷量に加算"
+  "part.dock.desc": "受けた信号の値を出荷量に加算",
+  "error.cellBlocked": "そのマスは補修工事中で使えません",
+  "error.cannotSell": "このパーツは売却できません",
+  "error.rerollDisabled": "このシフトはリロールできません"
 }

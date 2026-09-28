@@ -1,7 +1,7 @@
 import { SAVE_VERSION } from '@chain-factory/shared';
 import { createRun } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { loadRun, SAVE_STORAGE_KEY, saveRun, type SimpleStorage } from '../src/state/saveStore';
+import { loadRun, SAVE_STORAGE_KEY, saveGame, type SimpleStorage } from '../src/state/saveStore';
 
 /** テスト用のメモリ上の Storage */
 function memoryStorage(): SimpleStorage & { data: Map<string, string> } {
@@ -18,7 +18,7 @@ describe('セーブ/ロード', () => {
   it('保存したランをそのまま読み込める（バージョン番号付き）', () => {
     const storage = memoryStorage();
     const run = createRun(99);
-    saveRun(run, storage);
+    saveGame(run, undefined, storage);
     expect(JSON.parse(storage.data.get(SAVE_STORAGE_KEY)!).version).toBe(SAVE_VERSION);
     expect(loadRun(storage)).toEqual(run);
   });

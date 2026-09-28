@@ -1,9 +1,9 @@
 /**
- * 進行中のランを localStorage に保存・読み込みする
- * 形式とバージョン管理は @chain-factory/shared の save.ts を参照
+ * 進行中のランとメタ進行を localStorage に保存・読み込みする
+ * 形式とバージョン管理は @chain-factory/shared の save/ を参照
  */
-import { createSave, migrateSave } from '@chain-factory/shared';
-import type { RunState } from '@chain-factory/sim';
+import { createSave, migrateSave, type SaveData } from '@chain-factory/shared';
+import { createInitialMeta, type MetaProgress, type RunState } from '@chain-factory/sim';
 
 export const SAVE_STORAGE_KEY = 'chain-factory:save';
 
@@ -18,23 +18,36 @@ function defaultStorage(): SimpleStorage | null {
   }
 }
 
-export function saveRun(run: RunState | null, storage = defaultStorage()): void {
+/** 保存されたデータを読み込む（古い形式は最新形式へ変換）。無い・壊れている場合は null */
+export function loadSave(storage = defaultStorage()): SaveData | null {
+  if (!storage) return null;
+  try {
+    const text = storage.getItem(SAVE_STORAGE_KEY);
+    if (!text) return null;
+    return migrateSave(JSON.parse(text));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * ランを保存する。メタ進行は省略すると保存済みのものを引き継ぐ
+ */
+export function saveGame(
+  run: RunState | null,
+  meta?: MetaProgress,
+  storage = defaultStorage(),
+): void {
   if (!storage) return;
   try {
-    storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(createSave(run)));
+    const currentMeta = meta ?? loadSave(storage)?.meta ?? createInitialMeta();
+    storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(createSave(run, currentMeta)));
   } catch {
     // 容量不足などで保存できなくてもゲームは続行する
   }
 }
 
-/** 保存されたランを読み込む。無い・壊れている・未対応バージョンなら null */
+/** 保存されたランだけを読み込む */
 export function loadRun(storage = defaultStorage()): RunState | null {
-  if (!storage) return null;
-  try {
-    const text = storage.getItem(SAVE_STORAGE_KEY);
-    if (!text) return null;
-    return migrateSave(JSON.parse(text))?.run ?? null;
-  } catch {
-    return null;
-  }
+  return loadSave(storage)?.run ?? null;
 }

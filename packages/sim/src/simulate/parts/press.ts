@@ -16,7 +16,7 @@ export function getPressMultiplier(board: Board, x: number, y: number, rules: Ru
   const neighborCount = neighbors4(board, x, y).filter(
     ([nx, ny]) => getPart(board, nx, ny) !== null,
   ).length;
-  return rules.pressBase + neighborCount * rules.pressPerNeighbor;
+  return rules.params.pressBase + neighborCount * rules.params.pressPerNeighbor;
 }
 
 export const pressBehavior: PartBehavior = {

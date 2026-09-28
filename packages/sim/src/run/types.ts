@@ -3,7 +3,9 @@
  *
  * RunState はそのまま JSON 化して保存できる形にしている（Score は文字列で保持）。
  */
-import type { Board, PartId, SimStats } from '../types';
+import type { BossModifierId } from '../balance';
+import type { RunConfig } from '../config/runConfig';
+import type { Board, PartId, SimResult, SimStats } from '../types';
 
 /** ショップの商品1つ */
 export interface ShopOffer {
@@ -20,6 +22,10 @@ export interface ShiftRecord {
   quota: number;
   cleared: boolean;
   chainCount: number;
+  /** 経済系パーツが生んだ予算 */
+  income: number;
+  /** ボスシフトだった場合の修正ルール */
+  boss: BossModifierId | null;
 }
 
 /**
@@ -31,16 +37,22 @@ export interface ShiftRecord {
 export type RunPhase = 'building' | 'cleared' | 'failed';
 
 export interface RunState {
-  /** ランのシード。シフトごとのシミュレーション・ショップのシードはここから派生する */
+  /** ランのシード。用途別のシードはここから派生する（seeds.ts） */
   seed: number;
+  /** ラン開始時に確定した設定一式 */
+  config: RunConfig;
   /** 現在のシフト（0 始まり） */
   shiftIndex: number;
   phase: RunPhase;
   budget: number;
   board: Board;
-  /** 手持ち（購入済みで未配置のパーツ） */
+  /** 手持ち（購入済み・未配置のパーツ） */
   inventory: Partial<Record<PartId, number>>;
   shop: ShopOffer[];
+  /** このシフトでリロールした回数（リロール価格とショップのシードに使う） */
+  rerollCount: number;
+  /** このシフトで試運転した回数（試運転のシードに使う） */
+  trialCount: number;
   history: ShiftRecord[];
 }
 
@@ -55,11 +67,21 @@ export type RunError =
   | 'notInInventory'
   | 'cellOccupied'
   | 'cellEmpty'
-  | 'outOfBoard';
+  | 'cellBlocked'
+  | 'outOfBoard'
+  | 'cannotSell'
+  | 'rerollDisabled';
 
-/** simulate 結果のうち、ラン進行側で必要なもの */
+/** シフトを確定した結果 */
 export interface ShiftOutcome {
   cleared: boolean;
   quota: number;
+  income: number;
   stats: SimStats;
+}
+
+export interface CommitResult {
+  state: RunState;
+  result: SimResult;
+  outcome: ShiftOutcome;
 }

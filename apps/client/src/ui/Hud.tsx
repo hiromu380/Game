@@ -1,7 +1,7 @@
 /**
  * 画面上部の情報表示（シフト・予算・ノルマ・出荷量）
  */
-import { getShiftConfig, getShiftCount, type RunState } from '@chain-factory/sim';
+import { getCurrentShift, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import { formatScore } from './format';
 
@@ -13,12 +13,12 @@ interface Props {
 
 export function Hud({ run, liveScore }: Props) {
   const { t } = useI18n();
-  const quota = getShiftConfig(run.shiftIndex).quota;
+  const quota = getCurrentShift(run).quota;
 
   return (
     <div className="hud">
       <div className="hud__item hud__item--shift">
-        {t('hud.shift', { current: run.shiftIndex + 1, total: getShiftCount() })}
+        {t('hud.shift', { current: run.shiftIndex + 1, total: getShiftCount(run) })}
       </div>
       <div className="hud__item">
         <span className="hud__label">{t('hud.budget')}</span>

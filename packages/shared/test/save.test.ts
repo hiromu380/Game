@@ -1,11 +1,34 @@
-import { createRun } from '@chain-factory/sim';
+import { buildRunConfig, createInitialMeta, createRun, seeds } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { createSave, migrateSave, SAVE_VERSION } from '../src';
+import { convertV1toV2, createSave, migrateSave, SAVE_VERSION, type SaveDataV1 } from '../src';
+
+/** フェーズ1で実際に保存されていた形の v1 データ */
+const V1_SAVE: SaveDataV1 = {
+  version: 1,
+  run: {
+    seed: 42,
+    shiftIndex: 1,
+    phase: 'building',
+    budget: 7,
+    board: {
+      width: 2,
+      height: 1,
+      cells: [
+        { id: 'switch', dir: 1 },
+        { id: 'dock', dir: 1 },
+      ],
+    },
+    inventory: { gear: 1 },
+    shop: [{ partId: 'gear', price: 4, sold: false }],
+    history: [{ shiftIndex: 0, score: '8', quota: 5, cleared: true, chainCount: 4 }],
+  },
+};
 
 describe('セーブデータ', () => {
-  it('バージョン番号を持ち、JSON を往復しても同じ内容になる', () => {
+  it('最新バージョン（v2）で保存し、JSON を往復しても同じ内容になる', () => {
     const save = createSave(createRun(42));
     expect(save.version).toBe(SAVE_VERSION);
+    expect(SAVE_VERSION).toBe(2);
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
 
@@ -13,5 +36,34 @@ describe('セーブデータ', () => {
     expect(migrateSave({ version: 999 })).toBeNull();
     expect(migrateSave('broken')).toBeNull();
     expect(migrateSave(null)).toBeNull();
+  });
+});
+
+describe('v1 → v2 の変換', () => {
+  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う', () => {
+    const v2 = migrateSave(JSON.parse(JSON.stringify(V1_SAVE)))!;
+    expect(v2.version).toBe(2);
+    expect(v2.meta).toEqual(createInitialMeta());
+
+    const run = v2.run!;
+    expect(run.seed).toBe(42);
+    expect(run.shiftIndex).toBe(1);
+    expect(run.budget).toBe(7);
+    expect(run.board).toEqual(V1_SAVE.run!.board);
+    expect(run.inventory).toEqual({ gear: 1 });
+    expect(run.config).toEqual(buildRunConfig({ bossSeed: seeds.bossSeed(42) }));
+    expect(run.rerollCount).toBe(0);
+    expect(run.trialCount).toBe(0);
+    expect(run.history).toEqual([
+      { shiftIndex: 0, score: '8', quota: 5, cleared: true, chainCount: 4, income: 0, boss: null },
+    ]);
+  });
+
+  it('ランのない v1 も変換できる', () => {
+    expect(convertV1toV2({ version: 1, run: null })).toEqual({
+      version: 2,
+      run: null,
+      meta: createInitialMeta(),
+    });
   });
 });

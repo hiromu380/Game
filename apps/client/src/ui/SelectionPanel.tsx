@@ -1,7 +1,7 @@
 /**
  * 盤面で選択中のパーツの操作（回転・撤去）
  */
-import { BALANCE, getPart, getRefund, type RunState } from '@chain-factory/sim';
+import { getPart, getRefund, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import type { Selection } from '../state/gameReducer';
 import { PartIcon } from './PartIcon';
@@ -37,9 +37,9 @@ export function SelectionPanel({ run, selection, disabled, onRotate, onRemove }:
               {t('selection.rotate')}
             </button>
             <button disabled={disabled} onClick={onRemove}>
-              {BALANCE.run.returnToInventoryOnRemove.includes(part.id)
+              {part.id === 'switch'
                 ? t('selection.removeToInventory')
-                : t('selection.remove', { refund: getRefund(part.id) })}
+                : t('selection.remove', { refund: getRefund(run, part.id) })}
             </button>
           </div>
         </>

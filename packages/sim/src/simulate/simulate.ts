@@ -80,6 +80,11 @@ export function simulate(input: SimInput): SimResult {
       }
       events.push({ tick, type: 'move', signalId: signal.id, x, y });
 
+      if (rules.blockedCells.includes(cellIndex(board, x, y))) {
+        events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'blocked' });
+        continue;
+      }
+
       const part = getPart(board, x, y);
       if (part === null) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'emptyCell' });
@@ -134,6 +139,7 @@ export function simulate(input: SimInput): SimResult {
 
   return {
     score,
+    income: 0,
     events,
     stats: {
       chainCount,

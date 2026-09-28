@@ -10,8 +10,9 @@ import {
   createRun,
   getPart,
   placePart,
-  previewShift,
-  removePart,
+  returnPart,
+  runTrial,
+  sellPart,
   rotateCw,
   rotatePart,
   type Dir4,
@@ -126,15 +127,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'removeSelected': {
       const sel = state.selection;
       if (sel?.kind !== 'cell') return state;
-      return applyRunResult(state, removePart(state.run, sel.x, sel.y), null);
+      // スイッチは売れないので手持ちに戻す（移動と売却の UI は手順5で分ける）
+      const part = getPart(state.run.board, sel.x, sel.y);
+      const result =
+        part?.id === 'switch'
+          ? returnPart(state.run, sel.x, sel.y)
+          : sellPart(state.run, sel.x, sel.y);
+      return applyRunResult(state, result, null);
     }
 
-    case 'startTrial':
+    case 'startTrial': {
+      // 試運転ごとにシードが変わる（試運転回数が増えた run を保持する）
+      const trial = runTrial(state.run);
       return {
         ...state,
-        playback: { mode: 'trial', result: previewShift(state.run), finished: false },
+        run: trial.state,
+        playback: { mode: 'trial', result: trial.result, finished: false },
         error: null,
       };
+    }
 
     case 'startCommit': {
       const committed = commitShift(state.run);

@@ -30,6 +30,11 @@ export function scoreMul(a: Score, factor: number): Score {
   return (a * BigInt(factor)) as Score;
 }
 
+/** スコア ÷ 整数（切り捨て） */
+export function scoreDiv(a: Score, divisor: number): Score {
+  return (a / BigInt(divisor)) as Score;
+}
+
 /** 比較: a < b なら負、等しければ 0、a > b なら正 */
 export function scoreCompare(a: Score, b: Score): number {
   return a < b ? -1 : a > b ? 1 : 0;

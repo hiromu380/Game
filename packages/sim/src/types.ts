@@ -1,6 +1,7 @@
 /**
  * シミュレーションの主要な型定義
  */
+import type { PartParams } from './balance';
 import type { Score } from './core/score';
 
 /** パーツの種類 */
@@ -48,14 +49,22 @@ export interface Signal {
   value: Score;
 }
 
-/** シミュレーションのルール（balance.ts から作る。デイリー等で差し替え可能） */
+/**
+ * シミュレーションのルール
+ * ラン開始時に「基本（balance.ts）→ メタ進行 → ボス修正」の順に組み立てる（config/ を参照）
+ */
 export interface RuleSet {
   tickLimit: number;
   switchSignalValue: number;
   maxActivations: Record<PartId, number | null>;
-  gearMultiplier: number;
-  pressBase: number;
-  pressPerNeighbor: number;
+  /** パーツ固有の効果量（倍率など） */
+  params: PartParams;
+  /** 使用不可のマス（index = y * width + x）。入った信号は消滅する */
+  blockedCells: number[];
+  /** 出荷口の加算をこの値で割る（切り捨て）。通常は 1 */
+  dockDivisor: number;
+  /** 経済系パーツが1回のシミュレーションで生める予算の上限 */
+  maxIncomePerSim: number;
 }
 
 /** simulate の入力 */
@@ -66,7 +75,7 @@ export interface SimInput {
 }
 
 /** 信号が消えた理由 */
-export type VanishReason = 'outOfBoard' | 'emptyCell' | 'exhausted' | 'inert';
+export type VanishReason = 'outOfBoard' | 'emptyCell' | 'exhausted' | 'inert' | 'blocked';
 
 /**
  * tick 単位のイベントログ。クライアントはこれを再生して演出する
@@ -105,6 +114,8 @@ export interface SimStats {
 /** simulate の出力 */
 export interface SimResult {
   score: Score;
+  /** 経済系パーツが生んだ次シフトの予算 */
+  income: number;
   events: SimEvent[];
   stats: SimStats;
 }

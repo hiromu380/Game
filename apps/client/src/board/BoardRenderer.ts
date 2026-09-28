@@ -8,13 +8,13 @@
  * ゲームロジックはここでは一切計算しない。見た目はアセットマニフェスト経由で決める。
  */
 import {
-  DEFAULT_RULES,
   getPart,
   getPressMultiplier,
   type Board,
   type Dir4,
   type Part,
   type PartId,
+  type RuleSet,
   type Score,
   type SimEvent,
   type SimResult,
@@ -43,6 +43,8 @@ import {
 /** 盤面の表示状態（React 側から渡される） */
 export interface BoardViewState {
   board: Board;
+  /** 現在のシフトのルール（倍率バッジなどの表示に使う。ボス修正込み） */
+  rules: RuleSet;
   /** 選択中のマス */
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
@@ -182,11 +184,11 @@ export class BoardRenderer {
     this.drawOverlay();
   }
 
-  /** ギア・プレス機の倍率（バッジ表示用。計算は sim の関数・ルールに任せる） */
+  /** ギア・プレス機の倍率（バッジ表示用。計算は sim の関数と、ランが持つルールに任せる） */
   private multiplierOf(part: Part, x: number, y: number): number | null {
     if (!this.state) return null;
-    if (part.id === 'gear') return DEFAULT_RULES.gearMultiplier;
-    if (part.id === 'press') return getPressMultiplier(this.state.board, x, y, DEFAULT_RULES);
+    if (part.id === 'gear') return this.state.rules.params.gearMultiplier;
+    if (part.id === 'press') return getPressMultiplier(this.state.board, x, y, this.state.rules);
     return null;
   }
 

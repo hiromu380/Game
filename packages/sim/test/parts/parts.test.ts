@@ -55,17 +55,17 @@ describe('分岐器', () => {
 });
 
 describe('増幅ギア', () => {
-  it(`値を ×${BALANCE.effects.gearMultiplier} して自身の向きへ送る`, () => {
-    expect(run(['S> G> D>']).scoreText).toBe(String(BALANCE.effects.gearMultiplier));
+  it(`値を ×${BALANCE.partParams.gearMultiplier} して自身の向きへ送る`, () => {
+    expect(run(['S> G> D>']).scoreText).toBe(String(BALANCE.partParams.gearMultiplier));
   });
 
   it('ギアを重ねると倍々で増える', () => {
-    const m = BigInt(BALANCE.effects.gearMultiplier);
+    const m = BigInt(BALANCE.partParams.gearMultiplier);
     expect(run(['S> G> G> G> D>']).score).toBe(m * m * m);
   });
 
   it('倍率はルールで変えられる（コードに直書きしていない）', () => {
-    const rules = { ...DEFAULT_RULES, gearMultiplier: 10 };
+    const rules = { ...DEFAULT_RULES, params: { ...DEFAULT_RULES.params, gearMultiplier: 10 } };
     expect(run(['S> G> D>'], 1, rules).scoreText).toBe('10');
   });
 });
