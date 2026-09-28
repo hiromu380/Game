@@ -15,11 +15,23 @@ export interface HumanVerifier {
 
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
+/**
+ * Cloudflare 公式のテスト用秘密キー。結果が決まっている（常に成功 / 常に失敗）ので、
+ * 通信せずに同じ結果を返す（外部に出られない開発環境・CI でも動くように）。
+ * 本番でテスト用キーを使うと人間確認が無効になるため、readConfig が警告を出す
+ */
+export const TURNSTILE_TEST_SECRETS = {
+  alwaysPass: '1x0000000000000000000000000000000AA',
+  alwaysFail: '2x0000000000000000000000000000000AA',
+} as const;
+
 /** Turnstile のサーバー側検証（siteverify API） */
 export function turnstileVerifier(secretKey: string, fetchFn: typeof fetch = fetch): HumanVerifier {
   return {
     async verify(token, ip) {
       if (!token) return false;
+      if (secretKey === TURNSTILE_TEST_SECRETS.alwaysPass) return true;
+      if (secretKey === TURNSTILE_TEST_SECRETS.alwaysFail) return false;
       const form = new FormData();
       form.append('secret', secretKey);
       form.append('response', token);

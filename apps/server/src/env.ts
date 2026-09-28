@@ -54,6 +54,13 @@ export function readConfig(
   if (!env.TURNSTILE_SECRET_KEY) {
     throw new Error('TURNSTILE_SECRET_KEY must be set. See apps/server/.dev.vars.example');
   }
+  if (
+    env.TURNSTILE_SECRET_KEY.startsWith('1x0000') ||
+    env.TURNSTILE_SECRET_KEY.startsWith('2x0000')
+  ) {
+    // テスト用キーは開発専用（本番で使うと人間確認が働かない）。docs/ops/deploy.md の確認項目
+    console.warn('TURNSTILE_SECRET_KEY is a Cloudflare test key. Do not use it in production.');
+  }
   const retention = Number(env.IP_HASH_RETENTION_DAYS ?? DEFAULT_IP_HASH_RETENTION_DAYS);
   if (!Number.isInteger(retention) || retention < 0) {
     throw new Error('IP_HASH_RETENTION_DAYS must be a non-negative integer');

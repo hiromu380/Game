@@ -32,6 +32,19 @@ describe('人間確認（Turnstile）', () => {
     expect(sent[0]!.get('remoteip')).toBe('203.0.113.1');
   });
 
+  it('公式のテスト用キーは通信せずに決まった結果を返す', async () => {
+    const noNetwork = (async () => {
+      throw new Error('should not be called');
+    }) as unknown as typeof fetch;
+    const { TURNSTILE_TEST_SECRETS } = await import('../src/adapters/humanCheck');
+    expect(
+      await turnstileVerifier(TURNSTILE_TEST_SECRETS.alwaysPass, noNetwork).verify('x', null),
+    ).toBe(true);
+    expect(
+      await turnstileVerifier(TURNSTILE_TEST_SECRETS.alwaysFail, noNetwork).verify('x', null),
+    ).toBe(false);
+  });
+
   it('検証サービスに届かないときは通さない', async () => {
     const failing = (async () => {
       throw new Error('network');
