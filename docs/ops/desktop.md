@@ -76,7 +76,11 @@ pnpm package:demo   # 体験版 → release/demo/win-unpacked/
   - `resources/app.asar.unpacked/node_modules/steamworks-ffi-node/prebuilds/win32-x64/`
   - `resources/app.asar.unpacked/steamworks_sdk/redistributable_bin/win64/steam_api64.dll`
 
-## 5. 要確認（公式ドキュメント・実機で確認できていないこと）
+## 5. 確認済み
+
+- デスクトップ版から API への通信の `Origin` は `app://chain-factory`（Electron 44・Linux で、`CORS_ORIGINS` にこの値を入れて通信できることを確認）
+
+## 6. 要確認（公式ドキュメント・実機で確認できていないこと）
 
 - [ ] `getAuthTicketForWebApi` に渡す identity（`STEAM_TICKET_IDENTITY`）が、サーバー側の `ISteamUserAuth/AuthenticateUserTicket` の `identity` と一致すれば通ること（4b で実機確認）
 - [ ] Windows 実機で、パッケージ版がコード署名なしで Steam から起動できること（SmartScreen の警告の有無）
