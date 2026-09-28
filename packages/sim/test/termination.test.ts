@@ -2,7 +2,7 @@
  * 停止性: どんな配置でも必ず停止する
  */
 import { describe, expect, it } from 'vitest';
-import { createRuleSet, DEFAULT_RULES } from '../src';
+import { DEFAULT_RULES } from '../src';
 import { run } from './helpers';
 
 describe('停止性', () => {
