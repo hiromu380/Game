@@ -6,7 +6,8 @@
  *
  * - /api/ はキャッシュしない（デイリー・ランキング・相場は常に最新を取りに行く。オフライン時は失敗させる）
  * - ページ遷移はネット優先（新しい版があればそれを使う）、失敗したらキャッシュの index.html
- * - それ以外（JS・CSS・画像）はキャッシュ優先（ファイル名にハッシュが入っているので古くならない）
+ * - それ以外（JS・CSS・画像・フォント）はキャッシュ優先（ファイル名にハッシュが入っているので古くならない）
+ * - フォントは文字の範囲ごとに数百ファイルに分かれているので事前キャッシュせず、使ったものだけを保存する
  */
 import { createHash } from 'node:crypto';
 import type { Plugin } from 'vite';
@@ -47,7 +48,20 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(request).catch(() => caches.match('./', { ignoreSearch: true })));
     return;
   }
-  event.respondWith(caches.match(request).then((cached) => cached ?? fetch(request)));
+  event.respondWith(
+    caches.match(request).then(
+      (cached) =>
+        cached ??
+        fetch(request).then((response) => {
+          // 事前キャッシュしていないファイル（フォントなど）は、取得できたら保存してオフラインでも使えるようにする
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        }),
+    ),
+  );
 });
 `;
 }
@@ -59,6 +73,7 @@ export function serviceWorkerPlugin(): Plugin {
     generateBundle(_options, bundle) {
       const built = Object.keys(bundle)
         .filter((file) => file !== 'index.html' && !file.endsWith('.map'))
+        .filter((file) => !/\.(woff2?|ttf)$/.test(file))
         .map((file) => `./${file}`);
       const urls = [...PUBLIC_FILES, ...built].sort();
       const version = createHash('sha256').update(urls.join('\n')).digest('hex').slice(0, 12);

@@ -25,6 +25,11 @@ import { Application, Container, Graphics, Text } from 'pixi.js';
 // CSP で eval を禁止している（apps/client/public/_headers）ため、PixiJS に eval を使わない
 // シェーダー処理を読み込ませる。これがないと本番配信で盤面が描けない
 import 'pixi.js/unsafe-eval';
+import { TextStyle } from 'pixi.js';
+import { FONT_STACK } from '../config/fonts';
+
+// 盤面の文字も画面と同じ同梱フォントで描く（指定しないと端末任せになり、中国語用の字形になることがある）
+TextStyle.defaultTextStyle.fontFamily = FONT_STACK;
 import { BOARD_THEME } from '../assets/manifest';
 import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
 import {
