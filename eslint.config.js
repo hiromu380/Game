@@ -37,4 +37,9 @@ export default tseslint.config(
     plugins: { 'react-hooks': reactHooks },
     rules: reactHooks.configs.recommended.rules,
   },
+  // ビルド用のスクリプト（Node で動く）
+  {
+    files: ['apps/client/build/**/*.{ts,mjs}'],
+    languageOptions: { globals: globals.node },
+  },
 );

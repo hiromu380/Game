@@ -1,0 +1,19 @@
+# 静的ファイル（Web 版）のセキュリティヘッダー（Cloudflare Workers の静的アセット配信が読む）
+# API（/api/*）の応答ヘッダーは apps/server の secureHeaders ミドルウェアが付ける
+#
+# CSP で許可している外部の送り先:
+#   challenges.cloudflare.com      … Turnstile（匿名登録時の人間確認）
+#   static.cloudflareinsights.com  … Cloudflare Web Analytics の計測スクリプト
+#   cloudflareinsights.com         … 計測データの送信先
+# blob: は PixiJS が画像の読み込みに使うワーカー・画像のため
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Service Worker は常に最新を取りに行かせる（古い sw.js が残ると新しい版に切り替わらない）
+/sw.js
+  Cache-Control: no-cache

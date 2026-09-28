@@ -22,6 +22,9 @@ import {
   type VanishReason,
 } from '@chain-factory/sim';
 import { Application, Container, Graphics, Text } from 'pixi.js';
+// CSP で eval を禁止している（apps/client/public/_headers）ため、PixiJS に eval を使わない
+// シェーダー処理を読み込ませる。これがないと本番配信で盤面が描けない
+import 'pixi.js/unsafe-eval';
 import { BOARD_THEME } from '../assets/manifest';
 import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
 import {

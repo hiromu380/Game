@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- OGP 画像（1200×630）の元。generate.mjs が Chromium で撮影して public/ogp.png を作る -->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 56px;
+        background: #1a1c20;
+        color: #eef0f3;
+        font-family: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+        border-top: 24px solid transparent;
+        border-bottom: 24px solid transparent;
+        border-image: repeating-linear-gradient(-45deg, #ffc107 0 24px, #2b2b2b 24px 48px) 24;
+        box-sizing: border-box;
+      }
+      img {
+        width: 300px;
+        height: 300px;
+      }
+      h1 {
+        font-size: 96px;
+        margin: 0;
+        letter-spacing: 2px;
+      }
+      p {
+        font-size: 36px;
+        margin: 16px 0 0;
+        color: #a3aab5;
+      }
+      .badge {
+        display: inline-block;
+        margin-top: 28px;
+        padding: 8px 24px;
+        border-radius: 999px;
+        background: #ffc107;
+        color: #2b2b2b;
+        font-size: 32px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="../../public/icon.svg" alt="" />
+    <div>
+      <h1>Chain Factory</h1>
+      <p>置いて、押すだけ。連鎖で出荷量を跳ね上げろ</p>
+      <span class="badge">デイリーチャレンジ 毎日更新</span>
+    </div>
+  </body>
+</html>
