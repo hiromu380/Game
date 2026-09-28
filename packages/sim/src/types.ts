@@ -15,6 +15,18 @@ export const PART_IDS = [
   'junkbot',
   'rebooter',
   'dock',
+  // フェーズ2で追加
+  'merger',
+  'chainMeter',
+  'spreader',
+  'copier',
+  'reflector',
+  'turntable',
+  'oiler',
+  'coil',
+  'solar',
+  'inspector',
+  'piggyBank',
 ] as const;
 export type PartId = (typeof PART_IDS)[number];
 

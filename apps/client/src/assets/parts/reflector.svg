@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 反射板: 鏡の板と、来た方向へ戻る U ターン矢印（向きは関係ない） -->
+  <rect x="8" y="6" width="48" height="12" rx="4" fill="#cfd8dc" stroke="#37474f" stroke-width="3"/>
+  <path d="M14 12 H50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M22 58 V34 Q22 24 32 24 Q42 24 42 34 V50" fill="none" stroke="#1e88e5" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="42,61 32,46 52,46" fill="#1e88e5" stroke="#0d2c54" stroke-width="2" stroke-linejoin="round"/>
+</svg>

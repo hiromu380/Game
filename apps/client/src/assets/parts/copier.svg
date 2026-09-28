@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- コピー機: 同じ紙が2枚出てくる -->
+  <rect x="6" y="22" width="52" height="30" rx="5" fill="#90a4ae" stroke="#263238" stroke-width="3"/>
+  <rect x="10" y="16" width="44" height="9" rx="3" fill="#b0bec5" stroke="#263238" stroke-width="2.5"/>
+  <rect x="12" y="40" width="40" height="5" rx="2" fill="#455a64"/>
+  <rect x="18" y="4" width="22" height="18" fill="#ffffff" stroke="#263238" stroke-width="2"/>
+  <rect x="24" y="8" width="22" height="18" fill="#ffffff" stroke="#263238" stroke-width="2"/>
+  <path d="M28 13 H42 M28 17 H42 M28 21 H38" stroke="#90a4ae" stroke-width="2"/>
+  <circle cx="48" cy="31" r="3" fill="#66bb6a"/>
+  <rect x="14" y="52" width="8" height="6" fill="#455a64"/><rect x="42" y="52" width="8" height="6" fill="#455a64"/>
+</svg>

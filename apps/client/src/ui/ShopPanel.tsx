@@ -1,11 +1,14 @@
 /**
  * ショップ: その シフトに並んだ商品を購入する
  */
-import type { ShopOffer } from '@chain-factory/sim';
+import type { RuleSet, ShopOffer } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
+import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
 
 interface Props {
+  /** 説明文に数値を差し込むためのルール */
+  rules: RuleSet;
   offers: ShopOffer[];
   budget: number;
   /** 次のリロール価格（リロールできないシフトでは null） */
@@ -15,7 +18,7 @@ interface Props {
   onReroll: () => void;
 }
 
-export function ShopPanel({ offers, budget, rerollCost, disabled, onBuy, onReroll }: Props) {
+export function ShopPanel({ rules, offers, budget, rerollCost, disabled, onBuy, onReroll }: Props) {
   const { t } = useI18n();
   return (
     <section className="panel">
@@ -42,7 +45,7 @@ export function ShopPanel({ offers, budget, rerollCost, disabled, onBuy, onRerol
                 <PartIcon partId={offer.partId} />
                 <span className="item-button__text">
                   <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
-                  <span className="item-button__desc">{t(`part.${offer.partId}.desc`)}</span>
+                  <span className="item-button__desc">{describePart(t, offer.partId, rules)}</span>
                 </span>
                 <span className="item-button__meta">
                   {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}

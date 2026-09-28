@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 潤滑油タンク: 注ぎ口つきの油差し。周りに油のしずく -->
+  <path d="M14 30 Q14 22 22 22 H40 Q48 22 48 30 V52 Q48 58 42 58 H20 Q14 58 14 52 Z" fill="#fbc02d" stroke="#4e3b00" stroke-width="3"/>
+  <path d="M46 30 L60 16" stroke="#4e3b00" stroke-width="6" stroke-linecap="round"/>
+  <path d="M46 30 L60 16" stroke="#9e9e9e" stroke-width="3" stroke-linecap="round"/>
+  <rect x="24" y="14" width="14" height="8" rx="2" fill="#8d6e63" stroke="#4e3b00" stroke-width="2"/>
+  <rect x="18" y="36" width="26" height="12" rx="3" fill="#212121"/>
+  <text x="31" y="45.5" font-family="sans-serif" font-size="10" font-weight="900" fill="#fbc02d" text-anchor="middle">OIL</text>
+  <path d="M8 10 Q5 15 8 17 Q11 15 8 10 Z" fill="#8d6e63"/>
+  <path d="M6 42 Q3 47 6 49 Q9 47 6 42 Z" fill="#8d6e63"/>
+</svg>

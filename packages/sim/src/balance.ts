@@ -31,6 +31,20 @@ export interface PartParams {
   /** プレス機: 倍率 = pressBase + 隣接パーツ数 × pressPerNeighbor */
   pressBase: number;
   pressPerNeighbor: number;
+  /** 連鎖メーター: 倍率 = 連鎖数 ÷ chainMeterStep（切り捨て）+ 1 */
+  chainMeterStep: number;
+  /** コピー機: 2発目を何 tick 遅らせるか */
+  copierDelay: number;
+  /** 潤滑油タンク: 隣接パーツの発動回数上限に足す値 */
+  oilerBonus: number;
+  /** 共鳴コイル: 倍率 = 1 + 隣接する共鳴コイル数 × coilPerNeighbor */
+  coilPerNeighbor: number;
+  /** ソーラーパネル: 値に足す量 = 周囲8マスの空きマス数 × solarPerEmpty */
+  solarPerEmpty: number;
+  /** 検品台: 隣接4マスに出荷口があるときの倍率 */
+  inspectorMultiplier: number;
+  /** 貯金箱: 1回の発動で生む予算 */
+  piggyBankIncome: number;
 }
 
 /** ボスシフトの修正ルールの種類 */
@@ -123,12 +137,32 @@ export const BALANCE: Balance = {
     splitter: { price: 3, maxActivations: 1, rarity: 'common' },
     barrel: { price: 5, maxActivations: 1, rarity: 'uncommon' },
     rebooter: { price: 6, maxActivations: 1, rarity: 'rare' },
+    // フェーズ2で追加
+    merger: { price: 5, maxActivations: 2, rarity: 'uncommon' },
+    chainMeter: { price: 7, maxActivations: 1, rarity: 'rare' },
+    spreader: { price: 3, maxActivations: 1, rarity: 'common' },
+    copier: { price: 4, maxActivations: 1, rarity: 'uncommon' },
+    reflector: { price: 2, maxActivations: 2, rarity: 'common' },
+    turntable: { price: 4, maxActivations: 4, rarity: 'uncommon' },
+    // 信号には反応しない（常時効果のみ）ので発動回数は 0
+    oiler: { price: 6, maxActivations: 0, rarity: 'rare' },
+    coil: { price: 2, maxActivations: 1, rarity: 'common' },
+    solar: { price: 2, maxActivations: 1, rarity: 'common' },
+    inspector: { price: 4, maxActivations: 1, rarity: 'uncommon' },
+    piggyBank: { price: 3, maxActivations: 3, rarity: 'uncommon' },
   },
 
   partParams: {
     gearMultiplier: 2,
     pressBase: 1,
     pressPerNeighbor: 1,
+    chainMeterStep: 5,
+    copierDelay: 1,
+    oilerBonus: 1,
+    coilPerNeighbor: 1,
+    solarPerEmpty: 1,
+    inspectorMultiplier: 3,
+    piggyBankIncome: 1,
   },
 
   rarityWeights: { common: 10, uncommon: 5, rare: 2 },

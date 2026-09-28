@@ -9,10 +9,11 @@
  */
 import {
   getPart,
-  getPressMultiplier,
+  getPartBadge,
   type Board,
   type Dir4,
   type Part,
+  type PartBadge,
   type PartId,
   type RuleSet,
   type Score,
@@ -58,6 +59,8 @@ export interface BoardRendererOptions {
   onCellClick: (x: number, y: number) => void;
   /** パーツの表示名（ホバー時のラベル用。言語切り替えに追従するよう関数で受け取る） */
   getPartName: (partId: PartId) => string;
+  /** 収入のポップアップ文言（例: +1 円）。i18n を通すため関数で受け取る */
+  formatIncome: (amount: number) => string;
 }
 
 export interface PlaybackCallbacks {
@@ -192,7 +195,7 @@ export class BoardRenderer {
       for (let x = 0; x < board.width; x++) {
         const part = getPart(board, x, y);
         if (!part) continue;
-        const view = createPartView(part, this.textures, this.multiplierOf(part, x, y));
+        const view = createPartView(part, this.textures, this.badgeOf(part, x, y));
         const { px, py } = cellCenter(x, y);
         view.position.set(px, py);
         this.partLayer.addChild(view);
@@ -202,12 +205,10 @@ export class BoardRenderer {
     this.drawOverlay();
   }
 
-  /** ギア・プレス機の倍率（バッジ表示用。計算は sim の関数と、ランが持つルールに任せる） */
-  private multiplierOf(part: Part, x: number, y: number): number | null {
+  /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
+  private badgeOf(part: Part, x: number, y: number): PartBadge | null {
     if (!this.state) return null;
-    if (part.id === 'gear') return this.state.rules.params.gearMultiplier;
-    if (part.id === 'press') return getPressMultiplier(this.state.board, x, y, this.state.rules);
-    return null;
+    return getPartBadge(part, this.state.board, x, y, this.state.rules);
   }
 
   private setHovered(cell: { x: number; y: number } | null): void {
@@ -428,6 +429,37 @@ export class BoardRenderer {
             onComplete: () => !instant && this.ripple(event.x, event.y, fxMs * 1.5),
           });
           break;
+        case 'absorb': {
+          // 合流炉に取り込まれた信号は、到着したところで消える
+          const view = this.signalViews.get(event.signalId);
+          this.signalViews.delete(event.signalId);
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => view?.destroy({ children: true }),
+          });
+          break;
+        }
+        case 'income':
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => {
+              if (instant) return;
+              this.popText(
+                event.x,
+                event.y,
+                this.options.formatIncome(event.amount),
+                0,
+                fxMs * 2.5,
+                BOARD_THEME.incomeText,
+              );
+            },
+          });
+          break;
+        case 'halt':
+          // 打ち切りの表示は再生後の「途切れた理由」でまとめて行う
+          break;
       }
     }
   }
@@ -496,12 +528,19 @@ export class BoardRenderer {
   }
 
   /** 出荷量の数字を浮かび上がらせる（値が大きいほど大きく） */
-  private popText(x: number, y: number, text: string, tier: number, durationMs: number): void {
+  private popText(
+    x: number,
+    y: number,
+    text: string,
+    tier: number,
+    durationMs: number,
+    color: number = BOARD_THEME.shipText,
+  ): void {
     const { px, py } = cellCenter(x, y);
     const label = new Text({
       text,
       style: {
-        fill: BOARD_THEME.shipText,
+        fill: color,
         fontSize: 20 + tier * 5,
         fontWeight: '900',
         stroke: { color: BOARD_THEME.background, width: 5 },

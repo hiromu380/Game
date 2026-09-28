@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 共鳴コイル: 銅線を巻いたコイルと、左右に広がる共鳴の波 -->
+  <g fill="none" stroke="#4dd0e1" stroke-width="2.5" stroke-linecap="round">
+    <path d="M6 22 Q2 32 6 42"/><path d="M58 22 Q62 32 58 42"/>
+  </g>
+  <rect x="14" y="8" width="36" height="7" rx="3" fill="#607d8b" stroke="#263238" stroke-width="2"/>
+  <rect x="14" y="49" width="36" height="7" rx="3" fill="#607d8b" stroke="#263238" stroke-width="2"/>
+  <rect x="20" y="15" width="24" height="34" fill="#8d6e63"/>
+  <g fill="none" stroke="#e67e22" stroke-width="4" stroke-linecap="round">
+    <path d="M17 19 H47"/><path d="M17 26 H47"/><path d="M17 33 H47"/><path d="M17 40 H47"/><path d="M17 46 H47"/>
+  </g>
+  <g fill="none" stroke="#ffcc80" stroke-width="1.5"><path d="M20 18 H44"/><path d="M20 25 H44"/><path d="M20 32 H44"/><path d="M20 39 H44"/></g>
+</svg>

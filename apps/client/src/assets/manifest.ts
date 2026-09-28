@@ -15,6 +15,18 @@ import pressSrc from './parts/press.svg';
 import rebooterSrc from './parts/rebooter.svg';
 import splitterSrc from './parts/splitter.svg';
 import switchSrc from './parts/switch.svg';
+// フェーズ2で追加
+import chainMeterSrc from './parts/chainMeter.svg';
+import coilSrc from './parts/coil.svg';
+import copierSrc from './parts/copier.svg';
+import inspectorSrc from './parts/inspector.svg';
+import mergerSrc from './parts/merger.svg';
+import oilerSrc from './parts/oiler.svg';
+import piggyBankSrc from './parts/piggyBank.svg';
+import reflectorSrc from './parts/reflector.svg';
+import solarSrc from './parts/solar.svg';
+import spreaderSrc from './parts/spreader.svg';
+import turntableSrc from './parts/turntable.svg';
 
 export interface PartAsset {
   /** 画像ファイルの URL */
@@ -39,6 +51,17 @@ export const PART_ASSETS: Record<PartId, PartAsset> = {
   junkbot: { src: junkbotSrc, color: 0x7cb342, rotates: false },
   rebooter: { src: rebooterSrc, color: 0x00acc1, rotates: false },
   dock: { src: dockSrc, color: 0x1e88e5, rotates: false },
+  merger: { src: mergerSrc, color: 0xff7043, rotates: false },
+  chainMeter: { src: chainMeterSrc, color: 0xe53935, rotates: false },
+  spreader: { src: spreaderSrc, color: 0x7e57c2, rotates: true },
+  copier: { src: copierSrc, color: 0xb0bec5, rotates: false },
+  reflector: { src: reflectorSrc, color: 0x42a5f5, rotates: false },
+  turntable: { src: turntableSrc, color: 0x26a69a, rotates: false },
+  oiler: { src: oilerSrc, color: 0xfbc02d, rotates: false },
+  coil: { src: coilSrc, color: 0xe67e22, rotates: false },
+  solar: { src: solarSrc, color: 0x42a5f5, rotates: false },
+  inspector: { src: inspectorSrc, color: 0x66bb6a, rotates: false },
+  piggyBank: { src: piggyBankSrc, color: 0xf48fb1, rotates: false },
 };
 
 /** 盤面・演出の色（テーマ）。工場の床をイメージした配色 */
@@ -69,6 +92,8 @@ export const BOARD_THEME = {
   glow: 0xffffff,
   reset: 0x4dd0e1,
   shipText: 0x69f0ae,
+  /** 収入（貯金箱）のポップアップ */
+  incomeText: 0xffd54f,
   tooltipBg: 0x111418,
   tooltipText: 0xffffff,
 } as const;

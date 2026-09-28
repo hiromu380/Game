@@ -4,10 +4,11 @@
  * 「手持ちに戻す」（無料の移動）と「売却」（返金・パーツは消える）を取り違えないよう、
  * 売却は2回押し（1回目で確認表示）にしている。
  */
-import { getPart, getRefund, type RunState } from '@chain-factory/sim';
+import { getCurrentRules, getPart, getRefund, type RunState } from '@chain-factory/sim';
 import { useState } from 'react';
 import { useI18n } from '../i18n';
 import type { Selection } from '../state/gameReducer';
+import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
 
 interface Props {
@@ -58,7 +59,7 @@ export function SelectionPanel({ run, selection, disabled, onRotate, onReturn, o
           <div className="selection__name">
             {t(`part.${part.id}.name`)}（{t(`dir.${part.dir}`)}）
           </div>
-          <div className="panel__hint">{t(`part.${part.id}.desc`)}</div>
+          <div className="panel__hint">{describePart(t, part.id, getCurrentRules(run))}</div>
         </div>
       </div>
       <div className="button-row">

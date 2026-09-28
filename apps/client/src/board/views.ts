@@ -4,7 +4,7 @@
  * ここは「見た目を作る」だけで、ゲームの計算はしない。
  * 倍率などの数値は sim パッケージの関数・ルールから受け取って表示する。
  */
-import type { Dir4, Part, Score } from '@chain-factory/sim';
+import type { Dir4, Part, PartBadge, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { formatCompact } from '../ui/format';
@@ -28,6 +28,8 @@ function arrowDirs(part: Part): Dir4[] {
     case 'barrel':
     case 'junkbot':
     case 'dock':
+    case 'reflector':
+    case 'oiler':
       return [];
     default:
       return [part.dir];
@@ -68,12 +70,12 @@ function createBadge(text: string): Container {
 
 /**
  * パーツの表示（中心が原点）
- * @param multiplier 倍率バッジに出す値（ギア・プレス機のみ。なければ null）
+ * @param badge 効果量バッジ（×2 や +3。置き場所で決まる効果を持つパーツのみ）
  */
 export function createPartView(
   part: Part,
   textures: PartTextures,
-  multiplier: number | null,
+  badge: PartBadge | null,
 ): Container {
   const view = new Container();
 
@@ -86,11 +88,11 @@ export function createPartView(
 
   for (const dir of arrowDirs(part)) view.addChild(createArrow(dir));
 
-  if (multiplier !== null) {
-    const badge = createBadge(`×${multiplier}`);
+  if (badge) {
+    const label = createBadge(`${badge.kind === 'mul' ? '×' : '+'}${badge.value}`);
     // ギアは歯車の中央、それ以外は左下（向きの矢印と重ならない位置）に置く
-    if (part.id !== 'gear') badge.position.set(-CELL_SIZE * 0.24, CELL_SIZE * 0.3);
-    view.addChild(badge);
+    if (part.id !== 'gear') label.position.set(-CELL_SIZE * 0.24, CELL_SIZE * 0.3);
+    view.addChild(label);
   }
   return view;
 }

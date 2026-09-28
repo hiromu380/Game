@@ -51,6 +51,12 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
         <dd>{stats.chainCount}</dd>
         <dt>{t('playback.maxValue')}</dt>
         <dd>{formatScore(scoreToString(stats.maxValue))}</dd>
+        {playback.result.income > 0 && (
+          <>
+            <dt>{t('playback.income')}</dt>
+            <dd>{t('playback.incomePop', { amount: playback.result.income })}</dd>
+          </>
+        )}
       </dl>
       {stats.haltedByTickLimit && <p className="panel__hint">{t('playback.halted')}</p>}
       <button className="button--primary" onClick={onClose}>

@@ -19,6 +19,8 @@ export * from './core/board';
 
 export { simulate } from './simulate/simulate';
 export { getPressMultiplier } from './simulate/parts/press';
+export { getPartBadge, type PartBadge } from './simulate/badges';
+export { computeActivationLimits } from './simulate/limits';
 
 export { createRuleSet, DEFAULT_RULES } from './config/rules';
 export {

@@ -110,6 +110,7 @@ export function App() {
           <PixiBoard
             view={boardView}
             getPartName={(partId) => t(`part.${partId}.name`)}
+            formatIncome={(amount) => t('playback.incomePop', { amount })}
             playbackResult={playback?.result ?? null}
             speed={speed}
             onCellClick={onCellClick}
@@ -128,6 +129,7 @@ export function App() {
             onSpeedChange={setSpeed}
           />
           <ShopPanel
+            rules={boardView.rules}
             offers={run.shop}
             budget={run.budget}
             rerollCost={getRerollCost(run)}
@@ -136,6 +138,7 @@ export function App() {
             onReroll={() => dispatch({ type: 'reroll' })}
           />
           <InventoryPanel
+            rules={boardView.rules}
             inventory={run.inventory}
             selection={selection}
             disabled={playing}

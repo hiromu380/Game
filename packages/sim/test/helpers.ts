@@ -3,6 +3,8 @@
  *
  * 1マス = 2文字（パーツ記号 + 向き）、マス同士は空白区切り。空マスは "..".
  *   パーツ記号: S=スイッチ C=コンベア Y=分岐器 G=ギア P=プレス B=ドラム缶 J=ポンコツ R=再起動 D=出荷口
+ *             M=合流炉 K=連鎖メーター E=散布機 X=コピー機 F=反射板 U=回転台 O=潤滑油タンク
+ *             L=共鳴コイル A=ソーラーパネル I=検品台 $=貯金箱
  *   向き: ^=上 >=右 v=下 <=左
  * 例:
  *   board(['S> G> D>'])  // スイッチ → ギア → 出荷口
@@ -19,6 +21,17 @@ const PART_CODES: Record<string, PartId> = {
   J: 'junkbot',
   R: 'rebooter',
   D: 'dock',
+  M: 'merger',
+  K: 'chainMeter',
+  E: 'spreader',
+  X: 'copier',
+  F: 'reflector',
+  U: 'turntable',
+  O: 'oiler',
+  L: 'coil',
+  A: 'solar',
+  I: 'inspector',
+  $: 'piggyBank',
 };
 const DIR_CODES: Record<string, Dir4> = { '^': 0, '>': 1, v: 2, '<': 3 };
 

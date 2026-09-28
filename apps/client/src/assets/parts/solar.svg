@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ソーラーパネル: 太陽と、斜めに傾いたパネル -->
+  <circle cx="48" cy="14" r="7" fill="#ffca28"/>
+  <g stroke="#ffca28" stroke-width="2.5" stroke-linecap="round">
+    <path d="M48 2 V4 M60 14 H58 M56.5 5.5 L55 7 M56.5 22.5 L55 21 M38 14 H40 M39.5 5.5 L41 7"/>
+  </g>
+  <polygon points="6,52 18,24 50,24 44,52" fill="#1565c0" stroke="#0d2c54" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#90caf9" stroke-width="1.8">
+    <path d="M14 33 H48"/><path d="M10 43 H46"/>
+    <path d="M28.7 24 L22 52"/><path d="M39.3 24 L33 52"/>
+  </g>
+  <rect x="24" y="52" width="6" height="8" fill="#546e7a"/>
+  <rect x="16" y="58" width="22" height="4" rx="2" fill="#546e7a"/>
+</svg>

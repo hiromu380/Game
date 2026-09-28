@@ -15,6 +15,7 @@ interface Props {
   playbackResult: SimResult | null;
   speed: PlaybackSpeed;
   getPartName: (partId: PartId) => string;
+  formatIncome: (amount: number) => string;
   onCellClick: (x: number, y: number) => void;
   onShip: (total: Score) => void;
   onPlaybackFinish: () => void;
@@ -43,6 +44,7 @@ export function PixiBoard(props: Props) {
     void BoardRenderer.create(parent, {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
       getPartName: (partId) => callbacksRef.current.getPartName(partId),
+      formatIncome: (amount) => callbacksRef.current.formatIncome(amount),
     }).then((r) => {
       if (disposed) {
         r.destroy();
