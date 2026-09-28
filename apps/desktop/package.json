@@ -14,7 +14,8 @@
     "package:demo": "node scripts/build.mjs --edition demo --package",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "achievements:export": "tsx scripts/export-achievements.ts"
+    "achievements:export": "tsx scripts/export-achievements.ts",
+    "steampipe": "node scripts/steampipe.mjs"
   },
   "dependencies": {
     "steamworks-ffi-node": "0.11.3"

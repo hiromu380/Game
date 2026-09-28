@@ -1,0 +1,22 @@
+"AppBuild"
+{
+	"AppID" "{{APP_ID}}"
+	"Desc" "{{DESC}}"
+	"BuildOutput" "{{BUILD_OUTPUT}}"
+	"ContentRoot" "{{CONTENT_ROOT}}"
+	"SetLive" ""
+	"Preview" "{{PREVIEW}}"
+	"Depots"
+	{
+		"{{DEPOT_ID}}"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*.pdb"
+		}
+	}
+}
