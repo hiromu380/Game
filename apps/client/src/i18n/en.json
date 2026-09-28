@@ -135,5 +135,16 @@
   "debug.ticks": "Events per tick",
   "debug.noResult": "Nothing played yet",
   "break.halted.tickLimit": "Stopped by the time limit ({count} left)",
-  "break.halted.signalLimit": "Stopped: too many signals ({count})"
+  "break.halted.signalLimit": "Stopped: too many signals ({count})",
+  "meta.newTitle": "Unlocked!",
+  "meta.newPart": "\"{name}\" can now appear in the shop",
+  "meta.newBoard": "Factory expanded to {size}×{size}",
+  "meta.goalsTitle": "Unlock goals",
+  "meta.boardGoal": "Factory {size}×{size}",
+  "meta.condition.bestChain": "Chain {value}+ in one run",
+  "meta.condition.reachShift": "Reach shift {value}",
+  "meta.condition.bestShiftScore": "Ship {value} in one shift",
+  "meta.condition.totalShipped": "Ship {value} in total",
+  "meta.condition.runsPlayed": "Play {value} runs",
+  "meta.condition.clears": "Clear all shifts {value} times"
 }

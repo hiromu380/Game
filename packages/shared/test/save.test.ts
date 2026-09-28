@@ -67,3 +67,12 @@ describe('v1 → v2 の変換', () => {
     });
   });
 });
+
+describe('v2 の項目追加への対応', () => {
+  it('後から増えた記録項目がない v2 データも読み込める', () => {
+    const save = createSave(createRun(1));
+    const old = JSON.parse(JSON.stringify(save));
+    delete old.meta.records.bestShiftScore;
+    expect(migrateSave(old)?.meta.records.bestShiftScore).toBe('0');
+  });
+});

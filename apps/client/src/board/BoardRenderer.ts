@@ -26,8 +26,8 @@ import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
 import { formatScore } from '../ui/format';
 import {
-  BOARD_PIXEL_HEIGHT,
-  BOARD_PIXEL_WIDTH,
+  boardPixelSize,
+  INITIAL_BOARD_PIXEL_SIZE,
   CELL_SIZE,
   cellCenter,
   pixelToCell,
@@ -149,8 +149,8 @@ export class BoardRenderer {
     const app = new Application();
     const [, textures] = await Promise.all([
       app.init({
-        width: BOARD_PIXEL_WIDTH,
-        height: BOARD_PIXEL_HEIGHT,
+        width: INITIAL_BOARD_PIXEL_SIZE.width,
+        height: INITIAL_BOARD_PIXEL_SIZE.height,
         backgroundAlpha: 0,
         antialias: true,
         resolution: window.devicePixelRatio || 1,
@@ -185,6 +185,9 @@ export class BoardRenderer {
     if (!this.timeline) this.status.setBoard(state.board, state.rules);
 
     if (sizeChanged) {
+      // 工場拡張で盤面が広がったらキャンバスも広げる（CSS で横幅に合わせて縮小表示される）
+      const size = boardPixelSize(state.board.width, state.board.height);
+      this.app.renderer.resize(size.width, size.height);
       this.floorLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
       this.floorLayer.addChild(createFloor(state.board.width, state.board.height));
     }
@@ -274,7 +277,7 @@ export class BoardRenderer {
     const { px, py } = cellCenter(x, y);
     // 最上段では下に出す
     const top = y === 0 ? py + CELL_SIZE / 2 + 4 : py - CELL_SIZE / 2 - h - 4;
-    const left = Math.min(Math.max(px - w / 2, 2), BOARD_PIXEL_WIDTH - w - 2);
+    const left = Math.min(Math.max(px - w / 2, 2), this.app.screen.width - w - 2);
     const bg = new Graphics()
       .roundRect(left, top, w, h, 6)
       .fill({ color: BOARD_THEME.tooltipBg, alpha: 0.9 });

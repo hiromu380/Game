@@ -8,8 +8,16 @@ export const CELL_SIZE = 72;
 /** 盤面の外周の余白（px） */
 export const BOARD_PADDING = 16;
 
-export const BOARD_PIXEL_WIDTH = BALANCE.board.width * CELL_SIZE + BOARD_PADDING * 2;
-export const BOARD_PIXEL_HEIGHT = BALANCE.board.height * CELL_SIZE + BOARD_PADDING * 2;
+/** 盤面全体のピクセルサイズ（工場拡張で盤面が広がると大きくなる） */
+export function boardPixelSize(width: number, height: number): { width: number; height: number } {
+  return {
+    width: width * CELL_SIZE + BOARD_PADDING * 2,
+    height: height * CELL_SIZE + BOARD_PADDING * 2,
+  };
+}
+
+/** 初期化時の大きさ（最初の setState で実際の盤面サイズに合わせる） */
+export const INITIAL_BOARD_PIXEL_SIZE = boardPixelSize(BALANCE.board.width, BALANCE.board.height);
 
 /** マス座標 → マス中心のピクセル座標 */
 export function cellCenter(x: number, y: number): { px: number; py: number } {

@@ -135,5 +135,16 @@
   "debug.ticks": "tick ごとのイベント",
   "debug.noResult": "まだ再生していません",
   "break.halted.tickLimit": "時間切れで打ち切り（残り{count}本）",
-  "break.halted.signalLimit": "信号が増えすぎて打ち切り（{count}本）"
+  "break.halted.signalLimit": "信号が増えすぎて打ち切り（{count}本）",
+  "meta.newTitle": "新しく解放！",
+  "meta.newPart": "新パーツ「{name}」がショップに並ぶようになりました",
+  "meta.newBoard": "工場が {size}×{size} に拡張されました",
+  "meta.goalsTitle": "解放の目標",
+  "meta.boardGoal": "工場拡張 {size}×{size}",
+  "meta.condition.bestChain": "1回の稼働で連鎖 {value} 以上",
+  "meta.condition.reachShift": "シフト {value} に到達",
+  "meta.condition.bestShiftScore": "1シフトで {value} 出荷",
+  "meta.condition.totalShipped": "累計 {value} 出荷",
+  "meta.condition.runsPlayed": "{value} 回遊ぶ",
+  "meta.condition.clears": "全シフトを {value} 回クリア"
 }

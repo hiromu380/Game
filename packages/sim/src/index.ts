@@ -6,6 +6,7 @@ export {
   BALANCE,
   type Balance,
   type BossModifierId,
+  type MetaCondition,
   type PartBalance,
   type PartParams,
   type Rarity,
@@ -58,3 +59,11 @@ export { generateShop } from './run/shop';
 export * as seeds from './run/seeds';
 
 export { createInitialMeta, type MetaProgress, type MetaRecords } from './meta/types';
+export {
+  applyRunToMeta,
+  conditionProgress,
+  isConditionMet,
+  metaToModifiers,
+  recordRun,
+  type Unlock,
+} from './meta/progress';

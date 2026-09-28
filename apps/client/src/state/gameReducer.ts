@@ -5,10 +5,12 @@
  * ここでは「何を選択中か」「演出を再生中か」など UI の状態だけを扱う。
  */
 import {
+  applyRunToMeta,
   buyOffer,
   commitShift,
   createRun,
   getPart,
+  metaToModifiers,
   placePart,
   rerollShop,
   returnPart,
@@ -17,12 +19,14 @@ import {
   rotateCw,
   rotatePart,
   type Dir4,
+  type MetaProgress,
   type PartId,
   type RunActionResult,
   type RunError,
   type RunState,
   type ShiftOutcome,
   type SimResult,
+  type Unlock,
 } from '@chain-factory/sim';
 
 /** 選択状態: 手持ちのパーツ（配置待ち） or 盤面のマス */
@@ -49,6 +53,10 @@ export interface GameState {
   error: RunError | null;
   /** 直近に再生した結果（デバッグ表示用。再生を閉じても残す） */
   lastResult: SimResult | null;
+  /** メタ進行（ランをまたいで残る） */
+  meta: MetaProgress;
+  /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
+  unlocks: Unlock[];
 }
 
 export type GameAction =
@@ -65,8 +73,8 @@ export type GameAction =
   | { type: 'playbackFinished' }
   | { type: 'closePlayback' };
 
-export function createGameState(run: RunState): GameState {
-  return { run, selection: null, playback: null, error: null, lastResult: null };
+export function createGameState(run: RunState, meta: MetaProgress): GameState {
+  return { run, selection: null, playback: null, error: null, lastResult: null, meta, unlocks: [] };
 }
 
 /** ラン進行関数の結果を GameState に反映する */
@@ -83,7 +91,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
   switch (action.type) {
     case 'newRun':
-      return createGameState(createRun(action.seed));
+      // メタ進行（解放済みパーツ・工場拡張）を反映して始める
+      return createGameState(
+        createRun(action.seed, { meta: metaToModifiers(state.meta) }),
+        state.meta,
+      );
 
     case 'buy': {
       const result = buyOffer(state.run, action.offerIndex);
@@ -165,8 +177,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'startCommit': {
       const committed = commitShift(state.run);
       if ('error' in committed) return { ...state, error: committed.error };
+      // ランが終わったら、その場でメタ進行に反映する（再生中にリロードされても実績が残るように）
+      const { meta, unlocks } = applyRunToMeta(state.meta, committed.state);
       return {
         ...state,
+        meta,
+        unlocks,
         selection: null,
         error: null,
         lastResult: committed.result,

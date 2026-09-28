@@ -5,6 +5,7 @@
  *   pnpm balance --seeds 1000                  # 全ボットで 1000 シード（探索ボットは --search-seeds まで）
  *   pnpm balance --seeds 200 --bots greedy     # ボットを指定
  *   pnpm balance --seeds 100 --start 5000      # シード 5000〜5099
+ *   pnpm balance --unlock all                  # 全パーツ解放済みの状態で検証（既定は初期解放のみ）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
  */
@@ -34,12 +35,14 @@ function parseArgs(argv: string[]) {
     samples: Number(args.get('samples') ?? 3),
     timeLimitMs: Number(args.get('time-limit') ?? 3000),
     maxRerolls: Number(args.get('max-rerolls') ?? 3),
+    unlock: (args.get('unlock') === 'all' ? 'all' : 'initial') as 'initial' | 'all',
   };
 }
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const runnerOptions: RunnerOptions = {
+    unlock: opts.unlock,
     samples: opts.samples,
     timeLimitMs: opts.timeLimitMs,
     maxRerolls: opts.maxRerolls,
@@ -65,6 +68,10 @@ async function main() {
     評価の試行回数: opts.samples,
     探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,
     リロール上限: `${opts.maxRerolls}回/シフト`,
+    パーツの解放:
+      opts.unlock === 'all'
+        ? '全解放・工場拡張最大（やり込み相当）'
+        : '初期解放のみ・7×7（初プレイ相当）',
   };
   const markdown = toMarkdown(summaries, meta);
 

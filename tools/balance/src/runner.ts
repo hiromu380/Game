@@ -2,9 +2,12 @@
  * ボットに1ランを通しで遊ばせ、記録をとる
  */
 import {
+  BALANCE,
   commitShift,
+  createInitialMeta,
   createPrng,
   createRun,
+  metaToModifiers,
   getCurrentShift,
   PART_IDS,
   type PartId,
@@ -41,6 +44,8 @@ export interface RunLog {
 }
 
 export interface RunnerOptions {
+  /** initial: 初めて遊ぶ人と同じ（初期解放パーツのみ・7×7）／ all: やり込んだ状態（全パーツ解放・工場拡張も最大） */
+  unlock: 'initial' | 'all';
   samples: number;
   timeLimitMs: number;
   maxRerolls: number;
@@ -67,7 +72,12 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     ms: 0,
   };
 
-  let state: RunState = createRun(seed);
+  // メタ進行: 初期解放のみ（初プレイ相当）か、やり込んだ状態（全パーツ解放・工場拡張も最大）
+  const meta =
+    options.unlock === 'initial'
+      ? { meta: metaToModifiers(createInitialMeta()) }
+      : { meta: { boardExpansion: BALANCE.meta.boardExpansions.length } };
+  let state: RunState = createRun(seed, meta);
   while (state.phase === 'building') {
     for (const offer of state.shop) add(log.offered, offer.partId);
 

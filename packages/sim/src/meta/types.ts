@@ -1,9 +1,8 @@
 /**
  * メタ進行（ランをまたいで残る進捗）の型
- *
- * 解放条件の判定などのロジックは 2b で追加する。ここでは保存形式だけを先に決めておく。
  */
-import { PART_IDS, type PartId } from '../types';
+import { BALANCE, type Balance } from '../balance';
+import type { PartId } from '../types';
 
 export interface MetaRecords {
   /** 累計出荷量（scoreToString した文字列） */
@@ -12,6 +11,8 @@ export interface MetaRecords {
   bestShiftReached: number;
   /** 1回のシミュレーションでの最大連鎖数 */
   bestChain: number;
+  /** 1シフトの最大出荷量（scoreToString した文字列） */
+  bestShiftScore: string;
   runsPlayed: number;
   /** 全シフトをクリアした回数 */
   clears: number;
@@ -26,10 +27,17 @@ export interface MetaProgress {
 }
 
 /** 初めて遊ぶときのメタ進行 */
-export function createInitialMeta(): MetaProgress {
+export function createInitialMeta(balance: Balance = BALANCE): MetaProgress {
   return {
-    unlockedParts: [...PART_IDS],
+    unlockedParts: [...balance.meta.initialUnlocked],
     boardLevel: 0,
-    records: { totalShipped: '0', bestShiftReached: 0, bestChain: 0, runsPlayed: 0, clears: 0 },
+    records: {
+      totalShipped: '0',
+      bestShiftReached: 0,
+      bestChain: 0,
+      bestShiftScore: '0',
+      runsPlayed: 0,
+      clears: 0,
+    },
   };
 }

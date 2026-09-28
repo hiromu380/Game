@@ -51,6 +51,20 @@ export interface PartParams {
 export type BossModifierId =
   'lowOil' | 'repairWork' | 'strictInspection' | 'shortShift' | 'partShortage';
 
+/**
+ * メタ進行の解放条件（ランをまたいだ実績で判定する）
+ * - bestChain: 1回の稼働での最大連鎖数が value 以上
+ * - reachShift: シフト value（1 始まり）に到達したことがある
+ * - bestShiftScore: 1シフトの出荷量が value 以上になったことがある
+ * - totalShipped: 累計出荷量が value 以上
+ * - runsPlayed: ランを value 回遊んだ
+ * - clears: 全シフトを value 回クリアした
+ */
+export interface MetaCondition {
+  kind: 'bestChain' | 'reachShift' | 'bestShiftScore' | 'totalShipped' | 'runsPlayed' | 'clears';
+  value: number;
+}
+
 /** 1シフトの設定 */
 export interface ShiftSpec {
   /** ノルマ（出荷量） */
@@ -105,6 +119,16 @@ export interface Balance {
   shifts: ShiftSpec[];
   /** 1日あたりのシフト数（表示用: 何日目の何シフト目か） */
   shiftsPerDay: number;
+
+  /** メタ進行（新パーツの解放・工場拡張） */
+  meta: {
+    /** 最初からショップに並ぶパーツ */
+    initialUnlocked: PartId[];
+    /** 実績で解放されるパーツ（上から順に表示する） */
+    partUnlocks: { partId: PartId; condition: MetaCondition }[];
+    /** 工場拡張（1段階ごとに盤面の縦横 +1）の条件 */
+    boardExpansions: MetaCondition[];
+  };
 
   /** ボス修正ルールの効果量 */
   boss: {
@@ -187,15 +211,45 @@ export const BALANCE: Balance = {
     { quota: 10, budget: 10, clearReward: 5, kind: 'normal' },
     { quota: 25, budget: 10, clearReward: 6, kind: 'boss' },
     // 2日目
-    { quota: 60, budget: 12, clearReward: 5, kind: 'normal' },
-    { quota: 140, budget: 12, clearReward: 5, kind: 'normal' },
-    { quota: 300, budget: 12, clearReward: 6, kind: 'boss' },
+    { quota: 80, budget: 12, clearReward: 5, kind: 'normal' },
+    { quota: 250, budget: 12, clearReward: 5, kind: 'normal' },
+    { quota: 600, budget: 12, clearReward: 6, kind: 'boss' },
     // 3日目
-    { quota: 700, budget: 14, clearReward: 5, kind: 'normal' },
-    { quota: 1600, budget: 14, clearReward: 5, kind: 'normal' },
-    { quota: 3500, budget: 14, clearReward: 0, kind: 'boss' },
+    { quota: 2000, budget: 14, clearReward: 5, kind: 'normal' },
+    { quota: 4000, budget: 14, clearReward: 5, kind: 'normal' },
+    { quota: 8000, budget: 14, clearReward: 0, kind: 'boss' },
   ],
   shiftsPerDay: 3,
+
+  meta: {
+    initialUnlocked: [
+      'conveyor',
+      'dock',
+      'junkbot',
+      'gear',
+      'press',
+      'splitter',
+      'barrel',
+      'rebooter',
+      'spreader',
+      'reflector',
+      'coil',
+      'solar',
+    ],
+    partUnlocks: [
+      { partId: 'inspector', condition: { kind: 'bestShiftScore', value: 100 } },
+      { partId: 'piggyBank', condition: { kind: 'runsPlayed', value: 2 } },
+      { partId: 'turntable', condition: { kind: 'reachShift', value: 4 } },
+      { partId: 'merger', condition: { kind: 'bestChain', value: 15 } },
+      { partId: 'copier', condition: { kind: 'totalShipped', value: 10_000 } },
+      { partId: 'oiler', condition: { kind: 'reachShift', value: 7 } },
+      { partId: 'chainMeter', condition: { kind: 'bestChain', value: 30 } },
+    ],
+    boardExpansions: [
+      { kind: 'clears', value: 1 },
+      { kind: 'clears', value: 3 },
+    ],
+  },
 
   boss: {
     candidates: ['lowOil', 'repairWork', 'strictInspection', 'shortShift', 'partShortage'],

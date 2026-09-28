@@ -8,7 +8,7 @@ import { PixiBoard } from './board/PixiBoard';
 import { useI18n } from './i18n';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun } from './state/gameReducer';
-import { createInitialRun, createNewSeed } from './state/newRun';
+import { createInitialState, createNewSeed } from './state/newRun';
 import { saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { ControlsPanel } from './ui/ControlsPanel';
@@ -22,9 +22,10 @@ import { ShopPanel } from './ui/ShopPanel';
 
 export function App() {
   const { t, lang, setLang } = useI18n();
-  const [state, dispatch] = useReducer(gameReducer, undefined, () =>
-    createGameState(createInitialRun()),
-  );
+  const [state, dispatch] = useReducer(gameReducer, undefined, () => {
+    const initial = createInitialState();
+    return createGameState(initial.run, initial.meta);
+  });
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   /** 再生中の出荷量の途中経過 */
   const [liveScore, setLiveScore] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export function App() {
 
   // 状態が変わるたびに進行中のランを保存する
   const persistedRun = getPersistedRun(state);
-  useEffect(() => saveGame(persistedRun), [persistedRun]);
+  useEffect(() => saveGame(persistedRun, state.meta), [persistedRun, state.meta]);
 
   // キーボード: R で回転
   useEffect(() => {
@@ -106,7 +107,7 @@ export function App() {
     return (
       <div className="app">
         {header}
-        <RunEndScreen run={run} onRetry={newRun} />
+        <RunEndScreen run={run} meta={state.meta} unlocks={state.unlocks} onRetry={newRun} />
       </div>
     );
   }

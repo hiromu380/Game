@@ -39,10 +39,23 @@ export function migrateSave(raw: unknown): SaveData | null {
     case 1:
       return migrateSave(convertV1toV2(raw as SaveDataV1));
     case 2:
-      return raw as SaveDataV2;
+      return normalizeV2(raw as SaveDataV2);
     default:
       return null;
   }
+}
+
+/**
+ * v2 の中で後から増えた項目を補う（バージョンを上げるほどではない、項目の追加のみの変更）
+ * - meta.records.bestShiftScore（2b で追加）
+ */
+function normalizeV2(save: SaveDataV2): SaveDataV2 {
+  const initial = createInitialMeta();
+  const meta = save.meta ?? initial;
+  return {
+    ...save,
+    meta: { ...initial, ...meta, records: { ...initial.records, ...meta.records } },
+  };
 }
 
 /**

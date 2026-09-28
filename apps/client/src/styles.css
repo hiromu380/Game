@@ -497,3 +497,65 @@ button:disabled {
   padding-left: 2.5em;
   white-space: nowrap;
 }
+
+/* ---- メタ進行（結果画面） ---- */
+.meta {
+  margin-top: 24px;
+  text-align: left;
+}
+.meta h2 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+.meta__new {
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  background: rgba(255, 193, 7, 0.08);
+}
+.meta__new ul,
+.meta__goals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.meta__new li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.meta__goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.meta__goal-text {
+  flex: 1;
+  font-size: 0.85rem;
+}
+.meta__condition {
+  color: var(--muted);
+}
+.meta__bar {
+  height: 6px;
+  background: var(--secondary);
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.meta__bar-fill {
+  height: 100%;
+  background: var(--accent);
+}
+.meta__goal.is-done .meta__bar-fill {
+  background: var(--met);
+}
+.meta__check {
+  width: 1.2em;
+  color: var(--met);
+  font-weight: bold;
+}
