@@ -225,7 +225,7 @@
   "title.daily": "デイリーチャレンジ",
   "title.loading": "読み込み中… {percent}%",
   "title.loadFailed": "ゲームの読み込みに失敗しました。通信状態を確認して、ページを再読み込みしてください",
-  "title.trialBadge": "Web体験版",
+  "title.demoBadge": "体験版",
   "title.backToTitle": "タイトルへ戻る",
   "daily.practiceLocked": "練習は、今日の本番を終えると遊べるようになります",
   "online.humanCheck": "初めての参加です。ロボットでないことを確認させてください",

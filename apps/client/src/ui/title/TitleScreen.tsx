@@ -34,7 +34,7 @@ export function TitleScreen({
     <main className="title">
       <img className="title__icon" src="./icon.svg" alt="" width={120} height={120} />
       <h1 className="title__name">{t('app.title')}</h1>
-      {EDITION === 'trial' && <span className="mode-badge">{t('title.trialBadge')}</span>}
+      {EDITION === 'demo' && <span className="mode-badge">{t('title.demoBadge')}</span>}
       <p className="title__tagline">{t('title.tagline')}</p>
 
       <div className="title__actions">

@@ -10,17 +10,17 @@
 
 ## よく使うコマンド
 
-| コマンド                                          | 内容                                                    |
-| ------------------------------------------------- | ------------------------------------------------------- |
-| `pnpm install`                                    | 依存関係のインストール                                  |
-| `pnpm dev`                                        | 開発サーバー起動（http://localhost:5173）               |
-| `pnpm test`                                       | 全パッケージのテスト                                    |
-| `pnpm build`                                      | 型チェック + クライアントのビルド（`apps/client/dist`） |
-| `pnpm --filter @chain-factory/client build:trial` | Web 体験版のビルド（初期パーツ・7×7・延長戦なし）       |
-| `pnpm lint` / `pnpm format`                       | ESLint / Prettier                                       |
-| `pnpm balance --seeds 200`                        | バランス検証（ボットが自動で遊び、レポートを出力）      |
-| `pnpm dev:server`                                 | API サーバー起動（wrangler dev、http://localhost:8787） |
-| `pnpm perf`                                       | サーバー検証1回あたりの計算量の計測                     |
+| コマンド                                         | 内容                                                    |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `pnpm install`                                   | 依存関係のインストール                                  |
+| `pnpm dev`                                       | 開発サーバー起動（http://localhost:5173）               |
+| `pnpm test`                                      | 全パッケージのテスト                                    |
+| `pnpm build`                                     | 型チェック + クライアントのビルド（`apps/client/dist`） |
+| `pnpm --filter @chain-factory/client build:demo` | 体験版のビルド（初期パーツ・7×7・延長戦なし）           |
+| `pnpm lint` / `pnpm format`                      | ESLint / Prettier                                       |
+| `pnpm balance --seeds 200`                       | バランス検証（ボットが自動で遊び、レポートを出力）      |
+| `pnpm dev:server`                                | API サーバー起動（wrangler dev、http://localhost:8787） |
+| `pnpm perf`                                      | サーバー検証1回あたりの計算量の計測                     |
 
 `http://localhost:5173/?seed=42` のように `seed` を付けると、そのシードで新しいランを始めます。
 

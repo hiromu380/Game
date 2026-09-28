@@ -44,7 +44,7 @@ pnpm test && pnpm typecheck && pnpm lint
 VITE_SITE_URL=https://<本番のドメイン> \
 VITE_TURNSTILE_SITE_KEY=<サイトキー> \
 VITE_CF_ANALYTICS_TOKEN=<Web Analytics のトークン> \
-pnpm --filter @chain-factory/client build:trial
+pnpm --filter @chain-factory/client build:demo
 
 # スキーマを変えたときだけ（先に D1 のバックアップを取る: docs/ops/d1-backup.md）
 cd apps/server && npx wrangler d1 migrations apply chain-factory --remote

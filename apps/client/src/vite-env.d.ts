@@ -4,7 +4,7 @@
 interface ImportMetaEnv {
   /** API の置き場所（既定は同じオリジン） */
   readonly VITE_API_BASE?: string;
-  /** 'trial' で体験版 */
+  /** 'demo' で体験版（既定は製品版 'full'） */
   readonly VITE_EDITION?: string;
   /** 製品版のストアページ */
   readonly VITE_STORE_URL?: string;

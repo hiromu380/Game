@@ -1,5 +1,5 @@
 /**
- * 体験版（VITE_EDITION=trial）の通常ラン: 初期パーツ・7×7・延長戦なし（メタ進行を反映しない）
+ * 体験版（VITE_EDITION=demo）の通常ラン: 初期パーツ・7×7・延長戦なし（メタ進行を反映しない）
  */
 import { BALANCE, createInitialMeta, PART_IDS } from '@chain-factory/sim';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -11,7 +11,7 @@ afterEach(() => {
 
 describe('体験版の通常ラン', () => {
   it('メタ進行（解放・工場拡張）があっても初期パーツ・7×7、延長戦なし', async () => {
-    vi.stubEnv('VITE_EDITION', 'trial');
+    vi.stubEnv('VITE_EDITION', 'demo');
     vi.resetModules();
     const { startNormalRun } = await import('../src/state/newRun');
     const { EDITION_CONFIG } = await import('../src/config/edition');

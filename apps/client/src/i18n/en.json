@@ -225,7 +225,7 @@
   "title.daily": "Daily Challenge",
   "title.loading": "Loading… {percent}%",
   "title.loadFailed": "Failed to load the game. Check your connection and reload the page",
-  "title.trialBadge": "Web Demo",
+  "title.demoBadge": "Demo",
   "title.backToTitle": "Back to title",
   "daily.practiceLocked": "Practice unlocks after you finish today's ranked run",
   "online.humanCheck": "First time here? Please confirm you're not a robot",
