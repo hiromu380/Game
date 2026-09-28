@@ -86,7 +86,10 @@ export function App() {
 
   const header = (
     <header className="app-header">
-      <h1 className="app-header__title">{t('app.title')}</h1>
+      <h1 className="app-header__title">
+        <img className="app-header__icon" src="./icon.svg" alt="" width={36} height={36} />
+        {t('app.title')}
+      </h1>
       <div className="button-row">
         <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
           {t('debug.toggle')}
