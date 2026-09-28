@@ -8,8 +8,9 @@
     "build": "node scripts/build.mjs --edition full",
     "build:demo": "node scripts/build.mjs --edition demo",
     "start": "node scripts/build.mjs --edition full && electron .",
-    "package": "node scripts/build.mjs --edition full && EDITION=full electron-builder --config electron-builder.config.cjs --win",
-    "package:demo": "node scripts/build.mjs --edition demo && EDITION=demo electron-builder --config electron-builder.config.cjs --win",
+    "start:demo": "node scripts/build.mjs --edition demo && electron .",
+    "package": "node scripts/build.mjs --edition full --package",
+    "package:demo": "node scripts/build.mjs --edition demo --package",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },

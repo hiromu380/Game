@@ -1,12 +1,17 @@
 /**
  * デスクトップ版のビルド
- *   node scripts/build.mjs --edition full|demo [--skip-client]
+ *   node scripts/build.mjs --edition full|demo [--skip-client] [--package]
  *
  * 1. ゲーム本体（apps/client）を、API の場所と版を指定してビルドし、apps/desktop/renderer に出力する
  * 2. メインプロセスと preload を esbuild で1ファイルずつにまとめる（設定は define で埋め込む）
+ * 3. --package なら electron-builder で Windows 向けのフォルダを作る（release/<版>/win-unpacked）
+ *
+ * 本番ビルドは Windows 機で行うため、シェルの書き方（環境変数・.cmd の起動）に依存しないよう、
+ * 外部コマンドは node で直接 JS を実行する。
  */
 import { execFileSync } from 'node:child_process';
 import { rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -14,30 +19,23 @@ import { EDITIONS } from '../editions.config.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
-const editionName = args[args.indexOf('--edition') + 1] ?? 'full';
+const editionIndex = args.indexOf('--edition');
+const editionName = editionIndex >= 0 ? args[editionIndex + 1] : 'full';
 const config = EDITIONS[editionName];
 if (!config) throw new Error(`unknown edition: ${editionName}`);
 
 if (!args.includes('--skip-client')) {
   const outDir = join(root, 'renderer');
   rmSync(outDir, { recursive: true, force: true });
-  execFileSync(
-    'pnpm',
-    [
-      '--filter',
-      '@chain-factory/client',
-      'exec',
-      'vite',
-      'build',
-      '--outDir',
-      outDir,
-      '--emptyOutDir',
-    ],
-    {
-      stdio: 'inherit',
-      env: { ...process.env, VITE_EDITION: config.edition, VITE_API_BASE: config.apiOrigin },
-    },
-  );
+  const clientDir = join(root, '../client');
+  // vite の package.json は bin を exports に載せていないので、package.json の場所から辿る
+  const vitePackage = createRequire(join(clientDir, 'package.json')).resolve('vite/package.json');
+  const viteBin = join(dirname(vitePackage), 'bin/vite.js');
+  execFileSync(process.execPath, [viteBin, 'build', '--outDir', outDir, '--emptyOutDir'], {
+    cwd: clientDir,
+    stdio: 'inherit',
+    env: { ...process.env, VITE_EDITION: config.edition, VITE_API_BASE: config.apiOrigin },
+  });
 }
 
 const common = {
@@ -61,3 +59,13 @@ await build({
   outfile: join(root, 'dist/preload.cjs'),
 });
 console.log(`built desktop (${editionName})`);
+
+if (args.includes('--package')) {
+  const { build: pack, Platform } = await import('electron-builder');
+  const { builderConfig } = createRequire(import.meta.url)('../electron-builder.config.cjs');
+  await pack({
+    projectDir: root,
+    targets: Platform.WINDOWS.createTarget(),
+    config: builderConfig(editionName),
+  });
+}
