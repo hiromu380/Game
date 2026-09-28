@@ -16,6 +16,7 @@ import { Container, Graphics, Text } from 'pixi.js';
 import { BOARD_THEME } from '../assets/manifest';
 import type { BreakSummary } from '../playback/breaks';
 import { CELL_SIZE, cellCenter } from './layout';
+import { hex, VANISH_COLORS } from '../assets/palette';
 
 /** ピップを並べる最大数（これを超える上限は数字で表示）。向きの矢印と重ならない数にしている */
 const MAX_PIPS = 3;
@@ -111,11 +112,11 @@ export class StatusOverlay {
 
 /** 途切れた理由ごとのマーカー色 */
 const BREAK_COLORS: Record<VanishReason, number> = {
-  outOfBoard: 0x90a4ae,
-  emptyCell: 0xffb74d,
-  exhausted: 0xef5350,
-  blocked: 0xc62828,
-  inert: 0x9575cd,
+  outOfBoard: hex(VANISH_COLORS.outOfBoard),
+  emptyCell: hex(VANISH_COLORS.emptyCell),
+  exhausted: hex(VANISH_COLORS.exhausted),
+  blocked: hex(VANISH_COLORS.blocked),
+  inert: hex(VANISH_COLORS.inert),
 };
 
 /** 残り発動回数のピップ（右上の角から下へ縦に並べる） */

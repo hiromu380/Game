@@ -3,20 +3,7 @@
    ============================================================================= */
 
 :root {
-  --bg: #1a1c20;
-  --panel: #262a31;
-  --panel-border: #3a3f48;
-  --text: #eef0f3;
-  --muted: #a3aab5;
-  --accent: #ffc107;
-  --hazard-black: #2b2b2b;
-  --primary: #e53935;
-  --primary-hover: #f44336;
-  --primary-shadow: #8e1414;
-  --secondary: #3a404a;
-  --met: #69f0ae;
-  --missed: #ff5252;
-  --selected: #ffeb3b;
+  /* 色の CSS 変数は src/styles/palette.css（src/assets/palette.ts から生成）で定義する */
   /* 同梱の日本語フォント（src/config/fonts.ts の FONT_STACK と同じ並び） */
   font-family:
     'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
@@ -344,7 +331,7 @@ button:disabled {
   top: 10px;
   right: 10px;
   background: var(--missed);
-  color: #fff;
+  color: var(--white);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -450,25 +437,25 @@ button:disabled {
   margin-right: 6px;
   padding: 0 6px;
   border-radius: 8px;
-  color: #fff;
+  color: var(--white);
   font-weight: bold;
   text-align: center;
 }
-/* 色は盤面のマーカー（StatusOverlay.ts の BREAK_COLORS）と揃える */
+/* 色は盤面のマーカー（palette.ts の VANISH_COLORS）と同じ */
 .break-chip--outOfBoard {
-  background: #90a4ae;
+  background: var(--vanish-outOfBoard);
 }
 .break-chip--emptyCell {
-  background: #ffb74d;
+  background: var(--vanish-emptyCell);
 }
 .break-chip--exhausted {
-  background: #ef5350;
+  background: var(--vanish-exhausted);
 }
 .break-chip--blocked {
-  background: #c62828;
+  background: var(--vanish-blocked);
 }
 .break-chip--inert {
-  background: #9575cd;
+  background: var(--vanish-inert);
 }
 
 /* ---- デバッグ表示 ---- */
@@ -608,7 +595,7 @@ button:disabled {
 .segmented button.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #1a1c20;
+  color: var(--bg);
   font-weight: bold;
 }
 
@@ -807,7 +794,7 @@ button:disabled {
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--missed);
-  color: #fff;
+  color: var(--white);
   text-align: center;
 }
 

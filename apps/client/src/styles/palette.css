@@ -1,0 +1,24 @@
+/* カラーパレットの CSS 変数（src/assets/palette.ts から art/ のスクリプトで生成。手で編集しない） */
+:root {
+  --bg: #1a1c20;
+  --panel: #262a31;
+  --panel-border: #3a3f48;
+  --text: #eef0f3;
+  --muted: #a3aab5;
+  --accent: #ffc107;
+  --hazard-black: #2b2b2b;
+  --primary: #e53935;
+  --primary-hover: #f44336;
+  --primary-shadow: #8e1414;
+  --secondary: #3a404a;
+  --met: #69f0ae;
+  --missed: #ff5252;
+  --selected: #ffeb3b;
+  --white: #ffffff;
+  --hazard-yellow: #ffc107;
+  --vanish-outOfBoard: #90a4ae;
+  --vanish-emptyCell: #ffb74d;
+  --vanish-exhausted: #ef5350;
+  --vanish-blocked: #c62828;
+  --vanish-inert: #9575cd;
+}

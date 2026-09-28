@@ -6,6 +6,7 @@
  * 現在は仮素材として SVG のピクトグラムを使っている。
  */
 import type { PartId } from '@chain-factory/sim';
+import { BOARD_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
 import conveyorSrc from './parts/conveyor.svg';
 import dockSrc from './parts/dock.svg';
@@ -64,42 +65,13 @@ export const PART_ASSETS: Record<PartId, PartAsset> = {
   piggyBank: { src: piggyBankSrc, color: 0xf48fb1, rotates: false },
 };
 
-/** 盤面・演出の色（テーマ）。工場の床をイメージした配色 */
+/** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {
-  /** 盤面の外側 */
-  background: 0x23272e,
-  /** 床タイル（市松模様の2色） */
-  floorA: 0x4a4f57,
-  floorB: 0x454a52,
-  floorLine: 0x363a41,
-  /** ハザード柄の枠 */
-  hazardYellow: 0xffc107,
-  hazardBlack: 0x2b2b2b,
-  /** 使用不可マス（補修工事） */
-  blocked: 0xc62828,
-  /** 選択・配置プレビュー */
-  selected: 0xffeb3b,
-  ghostOk: 0x69f0ae,
-  /** 向きを示す矢印バッジ */
-  arrowFill: 0xffeb3b,
-  arrowStroke: 0x3e2723,
-  /** 倍率バッジ */
-  badgeFill: 0x212121,
-  badgeText: 0xffeb3b,
-  /** 信号の色（値の桁数が増えるほど派手になる） */
-  signalTiers: [0xfff176, 0xffb74d, 0xff7043, 0xf06292, 0xba68c8, 0x4dd0e1],
-  signalText: 0x1b1f27,
-  glow: 0xffffff,
-  reset: 0x4dd0e1,
-  shipText: 0x69f0ae,
-  /** 残り発動回数のピップ */
-  pipFilled: 0xffeb3b,
-  pipEmpty: 0x9e9e9e,
-  /** 収入（貯金箱）のポップアップ */
-  incomeText: 0xffd54f,
-  tooltipBg: 0x111418,
-  tooltipText: 0xffffff,
-} as const;
+  ...(Object.fromEntries(
+    Object.entries(BOARD_COLORS).map(([key, color]) => [key, hex(color)]),
+  ) as Record<keyof typeof BOARD_COLORS, number>),
+  signalTiers: SIGNAL_TIERS.map(hex),
+};
 
 /** 0xRRGGBB を CSS の色文字列へ */
 export function toCssColor(color: number): string {

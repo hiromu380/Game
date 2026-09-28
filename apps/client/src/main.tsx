@@ -11,6 +11,7 @@ import { Root } from './Root';
 import { getPlatform } from './platform';
 import { SettingsProvider } from './settings/SettingsContext';
 import { initStorage } from './storage';
+import './styles/palette.css';
 import './styles.css';
 
 // 同梱フォントの定義は大きいので、最初の表示の後に読み込む（届くまでは予備の日本語フォントで表示）

@@ -3,6 +3,8 @@
  *
  * 「桁数」は出荷した値の桁数（例: 12,345 は 5 桁）。値が大きいほど、連鎖が長いほど派手になる。
  */
+import { hex, INK, SIGNAL_TIERS } from '../assets/palette';
+
 export const EFFECTS_CONFIG = {
   /** スローモーション: 大きな出荷や、連鎖数の節目で一瞬だけ時間を遅くする */
   slowMo: {
@@ -51,7 +53,7 @@ export const EFFECTS_CONFIG = {
     /** 表示を始める連鎖数 */
     showFrom: 3,
     milestones: [10, 20, 30, 50, 100],
-    colors: [0xffffff, 0xffeb3b, 0xffb74d, 0xff7043, 0xf06292, 0xba68c8],
+    colors: [INK.white, ...SIGNAL_TIERS.slice(0, 5)].map(hex),
   },
 
   /**
