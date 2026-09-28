@@ -1,0 +1,27 @@
+{
+  "name": "@chain-factory/client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Web版クライアント（Vite + PixiJS + React）",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@chain-factory/shared": "workspace:*",
+    "@chain-factory/sim": "workspace:*",
+    "pixi.js": "^8.21.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.1"
+  }
+}

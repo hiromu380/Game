@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`連鎖パターン > ギア直列: 倍々で増える 1`] = `
+{
+  "score": "16",
+  "stats": {
+    "activatedParts": 6,
+    "chainCount": 5,
+    "haltedByTickLimit": false,
+    "maxValue": "16",
+    "shipCount": 1,
+    "ticks": 5,
+  },
+  "timeline": [
+    "t0: emit#0(0,0)d2=1",
+    "t1: move#0(1,0) gear(1,0) emit#1(1,0)d2=2",
+    "t2: move#1(2,0) gear(2,0) emit#2(2,0)d2=4",
+    "t3: move#2(3,0) gear(3,0) emit#3(3,0)d2=8",
+    "t4: move#3(4,0) gear(4,0) emit#4(4,0)d2=16",
+    "t5: move#4(5,0) dock(5,0) ship+16=16",
+  ],
+}
+`;
+
+exports[`連鎖パターン > ドラム缶の爆発で周囲の出荷口へ一斉出荷 1`] = `
+{
+  "score": "24",
+  "stats": {
+    "activatedParts": 10,
+    "chainCount": 9,
+    "haltedByTickLimit": false,
+    "maxValue": "4",
+    "shipCount": 6,
+    "ticks": 4,
+  },
+  "timeline": [
+    "t0: emit#0(0,3)d0=1",
+    "t1: move#0(0,2) gear(0,2) emit#1(0,2)d2=2",
+    "t2: move#1(1,2) gear(1,2) emit#2(1,2)d0=4",
+    "t3: move#2(1,1) barrel(1,1) emit#3(1,1)d0=4 emit#4(1,1)d1=4 emit#5(1,1)d2=4 emit#6(1,1)d3=4 emit#7(1,1)d4=4 emit#8(1,1)d5=4 emit#9(1,1)d6=4 emit#10(1,1)d7=4",
+    "t4: move#3(1,0) dock(1,0) ship+4=4 move#4(2,0) dock(2,0) ship+4=8 move#5(2,1) dock(2,1) ship+4=12 move#6(2,2) dock(2,2) ship+4=16 move#7(1,2) vanish#7:exhausted move#8(0,2) vanish#8:exhausted move#9(0,1) dock(0,1) ship+4=20 move#10(0,0) dock(0,0) ship+4=24",
+  ],
+}
+`;
+
+exports[`連鎖パターン > プレス機の密集: 隣接パーツが多いほど跳ねる 1`] = `
+{
+  "score": "5",
+  "stats": {
+    "activatedParts": 3,
+    "chainCount": 2,
+    "haltedByTickLimit": false,
+    "maxValue": "5",
+    "shipCount": 1,
+    "ticks": 2,
+  },
+  "timeline": [
+    "t0: emit#0(0,1)d2=1",
+    "t1: move#0(1,1) press(1,1) emit#1(1,1)d2=5",
+    "t2: move#1(2,1) dock(2,1) ship+5=5",
+  ],
+}
+`;
+
+exports[`連鎖パターン > 再起動装置でギアと分岐器を2周させる 1`] = `
+{
+  "score": "6",
+  "stats": {
+    "activatedParts": 6,
+    "chainCount": 9,
+    "haltedByTickLimit": false,
+    "maxValue": "4",
+    "shipCount": 2,
+    "ticks": 8,
+  },
+  "timeline": [
+    "t0: emit#0(0,2)d2=1",
+    "t1: move#0(1,2) gear(1,2) emit#1(1,2)d0=2",
+    "t2: move#1(1,1) conveyor(1,1) emit#2(1,1)d2=2",
+    "t3: move#2(2,1) splitter(2,1) emit#3(2,1)d0=2 emit#4(2,1)d4=2",
+    "t4: move#3(2,0) dock(2,0) ship+2=2 move#4(2,2) rebooter(2,2) reset(2,1) reset(1,2) emit#5(2,2)d6=2",
+    "t5: move#5(1,2) gear(1,2) emit#6(1,2)d0=4",
+    "t6: move#6(1,1) conveyor(1,1) emit#7(1,1)d2=4",
+    "t7: move#7(2,1) splitter(2,1) emit#8(2,1)d0=4 emit#9(2,1)d4=4",
+    "t8: move#8(2,0) dock(2,0) ship+4=6 move#9(2,2) vanish#9:exhausted",
+  ],
+}
+`;
+
+exports[`連鎖パターン > 分岐器 × 出荷口2つ 1`] = `
+{
+  "score": "4",
+  "stats": {
+    "activatedParts": 6,
+    "chainCount": 5,
+    "haltedByTickLimit": false,
+    "maxValue": "2",
+    "shipCount": 2,
+    "ticks": 3,
+  },
+  "timeline": [
+    "t0: emit#0(0,1)d2=1",
+    "t1: move#0(1,1) splitter(1,1) emit#1(1,1)d0=1 emit#2(1,1)d4=1",
+    "t2: move#1(1,0) gear(1,0) emit#3(1,0)d2=2 move#2(1,2) gear(1,2) emit#4(1,2)d2=2",
+    "t3: move#3(2,0) dock(2,0) ship+2=2 move#4(2,2) dock(2,2) ship+2=4",
+  ],
+}
+`;
+
+exports[`連鎖パターン > 大型コンボ: ギア → プレス → 分岐 → ドラム缶 → 出荷口群 1`] = `
+{
+  "score": "160",
+  "stats": {
+    "activatedParts": 20,
+    "chainCount": 21,
+    "haltedByTickLimit": false,
+    "maxValue": "32",
+    "shipCount": 10,
+    "ticks": 8,
+  },
+  "timeline": [
+    "t0: emit#0(0,3)d2=1",
+    "t1: move#0(1,3) gear(1,3) emit#1(1,3)d2=2",
+    "t2: move#1(2,3) gear(2,3) emit#2(2,3)d2=4",
+    "t3: move#2(3,3) press(3,3) emit#3(3,3)d2=16",
+    "t4: move#3(4,3) splitter(4,3) emit#4(4,3)d0=16 emit#5(4,3)d4=16",
+    "t5: move#4(4,2) conveyor(4,2) emit#6(4,2)d0=16 move#5(4,4) conveyor(4,4) emit#7(4,4)d4=16",
+    "t6: move#6(4,1) barrel(4,1) emit#8(4,1)d0=16 emit#9(4,1)d1=16 emit#10(4,1)d2=16 emit#11(4,1)d3=16 emit#12(4,1)d4=16 emit#13(4,1)d5=16 emit#14(4,1)d6=16 emit#15(4,1)d7=16 move#7(4,5) barrel(4,5) emit#16(4,5)d0=16 emit#17(4,5)d1=16 emit#18(4,5)d2=16 emit#19(4,5)d3=16 emit#20(4,5)d4=16 emit#21(4,5)d5=16 emit#22(4,5)d6=16 emit#23(4,5)d7=16",
+    "t7: move#8(4,0) dock(4,0) ship+16=16 move#9(5,0) dock(5,0) ship+16=32 move#10(5,1) dock(5,1) ship+16=48 move#11(5,2) vanish#11:emptyCell move#12(4,2) conveyor(4,2) emit#24(4,2)d0=16 move#13(3,2) vanish#13:emptyCell move#14(3,1) dock(3,1) ship+16=64 move#15(3,0) dock(3,0) ship+16=80 move#16(4,4) conveyor(4,4) emit#25(4,4)d4=16 move#17(5,4) vanish#17:emptyCell move#18(5,5) dock(5,5) ship+16=96 move#19(5,6) dock(5,6) ship+16=112 move#20(4,6) dock(4,6) ship+16=128 move#21(3,6) dock(3,6) ship+16=144 move#22(3,5) dock(3,5) ship+16=160 move#23(3,4) gear(3,4) emit#26(3,4)d0=32",
+    "t8: move#24(4,1) vanish#24:exhausted move#25(4,5) vanish#25:exhausted move#26(3,3) vanish#26:exhausted",
+  ],
+}
+`;
