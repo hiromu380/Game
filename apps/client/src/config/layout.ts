@@ -17,6 +17,6 @@ export const LAYOUT = {
    * 見出しなどを詰める
    */
   shortQuery: '(min-width: 821px) and (orientation: landscape) and (max-height: 860px)',
-  /** 横長の画面で、盤面の一辺の上限（px） */
-  boardMaxPx: 960,
+  /** 横長の画面で、盤面の一辺の上限（px）。シフトの情報などは右の列に置き、盤面は画面の高さいっぱいまで使う */
+  boardMaxPx: 1400,
 } as const;

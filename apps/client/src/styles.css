@@ -1081,15 +1081,17 @@ a.button.button--primary {
 .app--fit .layout {
   flex: 1;
   min-height: 0;
+  margin-top: 8px;
   /* 盤面の一辺を .layout の高さに合わせるため、.layout を高さの基準（コンテナ）にする */
   container-type: size;
-  grid-template-columns: auto minmax(300px, 1fr);
-  gap: 12px;
+  grid-template-columns: auto minmax(280px, 1fr);
+  gap: 10px;
   align-items: stretch;
 }
 .app--fit .layout__board {
   /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
-  width: min(100cqh, var(--board-max, 640px));
+  /* 高さいっぱい。ただし右の列（最小 280px + すき間）の分は横幅に残す */
+  width: min(100cqh, 100cqw - 290px, var(--board-max, 640px));
 }
 .app--fit .layout__side {
   min-height: 0;
@@ -1104,6 +1106,23 @@ a.button.button--primary {
 }
 .app--fit .layout__side > * {
   grid-column: 1 / -1;
+}
+/* 右の列の先頭: シフトの情報・目的の案内・夜シフトの予告（盤面の上から移したもの） */
+.app--fit .layout__info .hud {
+  margin: 0 0 6px;
+  padding: 6px 10px;
+  gap: 4px 14px;
+}
+.app--fit .layout__info .boss-notice,
+.app--fit .layout__info .tutorial {
+  margin-bottom: 6px;
+}
+.app--fit .app-header {
+  padding-bottom: 4px;
+}
+.app--fit .app-header__title {
+  font-size: 1.1rem;
+  margin: 0;
 }
 .app--fit .layout__side > [data-panel='shop'],
 .app--fit .layout__side > [data-panel='inventory'] {

@@ -474,6 +474,29 @@ export function App({ start, onTitle }: Props) {
     />
   );
 
+  // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
+  // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
+  const runInfo = (
+    <>
+      <Hud run={run} liveScore={liveScore} />
+      {tutorialOn ? (
+        <TutorialGuide
+          tutorial={tutorial}
+          run={run}
+          lastTrialScore={lastTrialScore}
+          onNext={() => {
+            if (tutorial.step === 'finish') endTutorial();
+            else setTutorial(advanceTutorial(tutorial, run));
+          }}
+          onSkip={endTutorial}
+        />
+      ) : (
+        <RocketGoal run={run} />
+      )}
+      <BossNotice run={run} />
+    </>
+  );
+
   // ラン終了（全シフト達成 or ノルマ未達）
   if (!playing && run.phase !== 'building') {
     return (
@@ -525,22 +548,7 @@ export function App({ start, onTitle }: Props) {
         />
       )}
       {header}
-      <Hud run={run} liveScore={liveScore} />
-      {tutorialOn ? (
-        <TutorialGuide
-          tutorial={tutorial}
-          run={run}
-          lastTrialScore={lastTrialScore}
-          onNext={() => {
-            if (tutorial.step === 'finish') endTutorial();
-            else setTutorial(advanceTutorial(tutorial, run));
-          }}
-          onSkip={endTutorial}
-        />
-      ) : (
-        <RocketGoal run={run} />
-      )}
-      <BossNotice run={run} />
+      {!fit && runInfo}
       <main className="layout">
         <div className="layout__board">
           <PixiBoard
@@ -562,6 +570,7 @@ export function App({ start, onTitle }: Props) {
           {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
         </div>
         <aside className="layout__side">
+          {fit && <div className="layout__info">{runInfo}</div>}
           <ControlsPanel
             playing={playing}
             compact={compact}
