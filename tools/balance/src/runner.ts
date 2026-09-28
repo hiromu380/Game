@@ -4,6 +4,7 @@
 import {
   BALANCE,
   commitShift,
+  createDailyRun,
   createInitialMeta,
   createPrng,
   createRun,
@@ -52,6 +53,11 @@ export interface RunnerOptions {
   evalMode: EvalMode;
   timeLimitMs: number;
   maxRerolls: number;
+  /**
+   * normal: 通常ラン（9シフト）／ daily: デイリーと同じ条件（3シフト・全パーツ・7×7・今日の特殊ルール）。
+   * daily のシード n は「デイリー ID = bal-<n>」の日として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
+   */
+  mode?: 'normal' | 'daily';
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
@@ -80,7 +86,10 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     options.unlock === 'initial'
       ? { meta: metaToModifiers(createInitialMeta()) }
       : { meta: { boardExpansion: BALANCE.meta.boardExpansions.length } };
-  let state: RunState = createRun(seed, meta);
+  let state: RunState =
+    options.mode === 'daily'
+      ? createDailyRun(`bal-${seed}`, { practice: true })
+      : createRun(seed, meta);
   while (state.phase === 'building') {
     for (const offer of state.shop) add(log.offered, offer.partId);
 

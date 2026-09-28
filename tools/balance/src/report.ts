@@ -1,7 +1,7 @@
 /**
  * 集計と Markdown レポートの作成
  */
-import { BALANCE, PART_IDS, type PartId } from '@chain-factory/sim';
+import { BALANCE, PART_IDS, type PartId, type ShiftSpec } from '@chain-factory/sim';
 import type { BotName } from './bots';
 import type { RunLog } from './runner';
 
@@ -37,8 +37,13 @@ function ratio(score: string, quota: number): number {
   return Number((BigInt(score) * 1000n) / BigInt(Math.max(1, quota))) / 1000;
 }
 
-export function summarize(bot: BotName, logs: RunLog[]): BotSummary {
-  const shiftCount = BALANCE.shifts.length;
+/** shiftSpecs: シフト表（通常ランは BALANCE.shifts、デイリーは BALANCE.daily.shifts） */
+export function summarize(
+  bot: BotName,
+  logs: RunLog[],
+  shiftSpecs: readonly ShiftSpec[] = BALANCE.shifts,
+): BotSummary {
+  const shiftCount = shiftSpecs.length;
   const shifts = Array.from({ length: shiftCount }, (_, i) => {
     const records = logs.map((l) => l.shifts[i]).filter((s) => s !== undefined);
     const ratios = records.map((s) => ratio(s.score, s.quota));
@@ -87,7 +92,11 @@ export function summarize(bot: BotName, logs: RunLog[]): BotSummary {
 const pct = (x: number) => (Number.isNaN(x) ? '-' : `${(x * 100).toFixed(0)}%`);
 const num = (x: number) => (Number.isNaN(x) ? '-' : x >= 100 ? x.toFixed(0) : x.toFixed(2));
 
-export function toMarkdown(summaries: BotSummary[], meta: Record<string, string | number>): string {
+export function toMarkdown(
+  summaries: BotSummary[],
+  meta: Record<string, string | number>,
+  shiftSpecs: readonly ShiftSpec[] = BALANCE.shifts,
+): string {
   const lines: string[] = [];
   lines.push('# バランス検証レポート', '');
   lines.push(
@@ -107,7 +116,7 @@ export function toMarkdown(summaries: BotSummary[], meta: Record<string, string 
   lines.push('## シフト別（到達率 / クリア率 / スコア÷ノルマ p10・p50・p90）', '');
   const header = ['シフト', 'ノルマ', ...summaries.map((s) => s.bot)];
   lines.push(`| ${header.join(' | ')} |`, `|${header.map(() => '---').join('|')}|`);
-  BALANCE.shifts.forEach((shift, i) => {
+  shiftSpecs.forEach((shift, i) => {
     const cells = summaries.map((s) => {
       const r = s.shifts[i]!;
       return `${pct(r.reached)} / ${pct(r.cleared)} / ${num(r.ratioP10)}・${num(r.ratioP50)}・${num(r.ratioP90)}`;
