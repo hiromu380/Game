@@ -16,8 +16,8 @@ import {
   chooseEvent,
   isEventPending,
 } from '@chain-factory/sim';
-import { BOTS, type BotName, type BotOptions } from './bots';
-import type { EvalMode } from './evaluate';
+import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
+import { evaluate, type EvalMode } from './evaluate';
 import { applyMove } from './moves';
 
 /** 1シフトの記録 */
@@ -66,6 +66,26 @@ function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
   record[id] = (record[id] ?? 0) + n;
 }
 
+/** 今日の出来事の候補を1つずつ試し、その朝の見込みがいちばん良いものを選んだ状態を返す */
+function chooseBestEvent(state: RunState, bot: Bot, options: BotOptions): RunState {
+  let best: { state: RunState; ratio: number; budget: number } | null = null;
+  const count = state.dayEvent?.choices.length ?? 0;
+  for (let i = 0; i < count; i++) {
+    const chosen = chooseEvent(state, i);
+    if (!chosen.ok) continue;
+    const plan = bot.playShift(chosen.state, options);
+    const quota = getCurrentShift(plan.state).quota;
+    const score = evaluate(plan.state, options.samples, options.evalMode).score;
+    // 大きな数どうしの比なので、桁を落としてから割る
+    const ratio = Number((score * 1000n) / BigInt(Math.max(1, quota))) / 1000;
+    if (!best || ratio > best.ratio || (ratio === best.ratio && plan.state.budget > best.budget)) {
+      best = { state: chosen.state, ratio, budget: plan.state.budget };
+    }
+  }
+  if (!best) throw new Error('今日の出来事を選べない');
+  return best.state;
+}
+
 export function playRun(seed: number, botName: BotName, options: RunnerOptions): RunLog {
   const started = performance.now();
   const bot = BOTS[botName];
@@ -93,12 +113,9 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       ? createDailyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
   while (state.phase === 'building') {
-    // 今日の出来事（2日目以降の朝）: ボットは最初の候補を選ぶ（イベントの選び方の評価はまだしない）
-    if (isEventPending(state)) {
-      const chosen = chooseEvent(state, 0);
-      if (!chosen.ok) throw new Error(chosen.error);
-      state = chosen.state;
-    }
+    // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
+    // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
+    if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
     for (const offer of state.shop) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);
