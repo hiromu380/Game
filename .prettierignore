@@ -8,3 +8,4 @@ apps/desktop/renderer
 apps/desktop/release
 docs/ops/steam-achievements-list.md
 apps/client/src/styles/palette.css
+apps/client/art/preview.html

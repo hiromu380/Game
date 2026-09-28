@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- ポンコツロボ: 目の大きさがちぐはぐな、ちょっと頼りない作業ロボ -->
-  <path d="M32 12 V5" stroke="#33691e" stroke-width="3"/>
-  <circle cx="32" cy="5" r="3.5" fill="#ffeb3b" stroke="#33691e" stroke-width="2"/>
-  <rect x="4" y="26" width="6" height="14" rx="2" fill="#9ccc65" stroke="#33691e" stroke-width="2"/>
-  <rect x="54" y="26" width="6" height="14" rx="2" fill="#9ccc65" stroke="#33691e" stroke-width="2"/>
-  <rect x="9" y="12" width="46" height="44" rx="10" fill="#7cb342" stroke="#33691e" stroke-width="3" transform="rotate(-4 32 34)"/>
-  <circle cx="23" cy="30" r="8" fill="#ffffff" stroke="#33691e" stroke-width="2.5"/>
-  <circle cx="25" cy="31" r="3.5" fill="#212121"/>
-  <circle cx="42" cy="29" r="5" fill="#ffffff" stroke="#33691e" stroke-width="2.5"/>
-  <circle cx="41" cy="28" r="2" fill="#212121"/>
-  <polyline points="20,46 25,42 30,46 35,42 40,46 44,43" fill="none" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="14" cy="18" r="1.8" fill="#33691e"/><circle cx="50" cy="50" r="1.8" fill="#33691e"/>
+  <!-- パーツ: junkbot（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M33 16 V9" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="33" cy="8" r="5" fill="#ffc107" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M31 6.5 q2 -2 3.5 0 q0 1.5 -1.5 2 v1" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="12" y="16" width="40" height="34" rx="8" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" transform="rotate(5 32 33)"/>
+  <rect x="12" y="40" width="40" height="10" fill="#7a8b94" transform="rotate(5 32 33)"/>
+  <circle cx="24" cy="30" r="6.5" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="26" cy="31" r="3" fill="#1b1f27"/>
+  <circle cx="42" cy="27" r="4" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="41" cy="26" r="1.8" fill="#1b1f27"/>
+  <path d="M23 42 h4 l2 -2 l2 2 l2 -2 l2 2 h4" fill="none" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="10" y="50" width="8" height="6" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="46" y="52" width="8" height="5" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

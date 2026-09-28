@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 爆発ドラム缶: 周囲に火花、胴に危険マーク -->
-  <g stroke="#ff9800" stroke-width="3" stroke-linecap="round">
-    <path d="M32 1 V6 M32 58 V63 M1 32 H6 M58 32 H63 M9 9 l4 4 M55 9 l-4 4 M9 55 l4 -4 M55 55 l-4 -4"/>
-  </g>
-  <path d="M18 9 H46 Q52 32 46 55 H18 Q12 32 18 9 Z" fill="#e53935" stroke="#3e2723" stroke-width="3"/>
-  <path d="M14.5 20 H49.5 M14.5 44 H49.5" stroke="#8e1414" stroke-width="3"/>
-  <polygon points="32,22 42,39 22,39" fill="#ffeb3b" stroke="#3e2723" stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="30.6" y="27" width="2.8" height="7" rx="1" fill="#3e2723"/>
-  <circle cx="32" cy="36.3" r="1.5" fill="#3e2723"/>
+  <!-- パーツ: barrel（art/ のスクリプトで生成。手で編集しない） -->
+  <defs><pattern id="hz" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect x="0" y="0" width="3" height="6" fill="#ffc107"/><rect x="3" y="0" width="3" height="6" fill="#2b2b2b"/></pattern></defs>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(0 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(45 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(90 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(135 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(180 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(225 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(270 32 32)"/>
+  <path d="M32 3 V8" fill="none" stroke="#ff7043" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" transform="rotate(315 32 32)"/>
+  <rect x="17" y="12" width="30" height="41" rx="5" fill="#8e24aa" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="17" y="27" width="30" height="11" fill="url(#hz)" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="40" y="14" width="5" height="37" fill="#791f91" opacity="0.8"/>
+  <path d="M17 20 H47 M17 45 H47" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

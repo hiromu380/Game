@@ -5,12 +5,13 @@
  * parts/ 以下のファイルを置き換える（または src の import 先を変える）だけでよい。
  * 現在は仮素材として SVG のピクトグラムを使っている（art/ のスクリプトで生成したものを含む）。
  */
-import type { PartId } from '@chain-factory/sim';
+import { PART_IDS, type PartId } from '@chain-factory/sim';
 import boltFailSrc from './mascot/bolt-fail.svg';
 import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
 import boltSurprisedSrc from './mascot/bolt-surprised.svg';
-import { BOARD_COLORS, hex, SIGNAL_TIERS } from './palette';
+import { PART_FAMILY } from './partFamily';
+import { BOARD_COLORS, FAMILY_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
 import conveyorSrc from './parts/conveyor.svg';
 import dockSrc from './parts/dock.svg';
@@ -45,29 +46,44 @@ export interface PartAsset {
   rotates: boolean;
 }
 
-/** パーツの見た目 */
-export const PART_ASSETS: Record<PartId, PartAsset> = {
-  switch: { src: switchSrc, color: 0xe53935, rotates: false },
-  conveyor: { src: conveyorSrc, color: 0xffca28, rotates: true },
-  splitter: { src: splitterSrc, color: 0xab47bc, rotates: true },
-  gear: { src: gearSrc, color: 0xfb8c00, rotates: false },
-  press: { src: pressSrc, color: 0x90a4ae, rotates: false },
-  barrel: { src: barrelSrc, color: 0xff5722, rotates: false },
-  junkbot: { src: junkbotSrc, color: 0x7cb342, rotates: false },
-  rebooter: { src: rebooterSrc, color: 0x00acc1, rotates: false },
-  dock: { src: dockSrc, color: 0x1e88e5, rotates: false },
-  merger: { src: mergerSrc, color: 0xff7043, rotates: false },
-  chainMeter: { src: chainMeterSrc, color: 0xe53935, rotates: false },
-  spreader: { src: spreaderSrc, color: 0x7e57c2, rotates: true },
-  copier: { src: copierSrc, color: 0xb0bec5, rotates: false },
-  reflector: { src: reflectorSrc, color: 0x42a5f5, rotates: false },
-  turntable: { src: turntableSrc, color: 0x26a69a, rotates: false },
-  oiler: { src: oilerSrc, color: 0xfbc02d, rotates: false },
-  coil: { src: coilSrc, color: 0xe67e22, rotates: false },
-  solar: { src: solarSrc, color: 0x42a5f5, rotates: false },
-  inspector: { src: inspectorSrc, color: 0x66bb6a, rotates: false },
-  piggyBank: { src: piggyBankSrc, color: 0xf48fb1, rotates: false },
+/** パーツの画像（art/parts.ts で生成） */
+const PART_SOURCES: Record<PartId, string> = {
+  switch: switchSrc,
+  conveyor: conveyorSrc,
+  splitter: splitterSrc,
+  gear: gearSrc,
+  press: pressSrc,
+  barrel: barrelSrc,
+  junkbot: junkbotSrc,
+  rebooter: rebooterSrc,
+  dock: dockSrc,
+  merger: mergerSrc,
+  chainMeter: chainMeterSrc,
+  spreader: spreaderSrc,
+  copier: copierSrc,
+  reflector: reflectorSrc,
+  turntable: turntableSrc,
+  oiler: oilerSrc,
+  coil: coilSrc,
+  solar: solarSrc,
+  inspector: inspectorSrc,
+  piggyBank: piggyBankSrc,
 };
+
+/** 画像が上向きに描かれていて、向きに合わせて回転表示するパーツ */
+const ROTATING_PARTS: readonly PartId[] = ['conveyor', 'splitter', 'spreader'];
+
+/** パーツの見た目（テーマ色は系統色: docs/art-style.md） */
+export const PART_ASSETS: Record<PartId, PartAsset> = Object.fromEntries(
+  PART_IDS.map((id) => [
+    id,
+    {
+      src: PART_SOURCES[id],
+      color: hex(FAMILY_COLORS[PART_FAMILY[id]].main),
+      rotates: ROTATING_PARTS.includes(id),
+    },
+  ]),
+) as Record<PartId, PartAsset>;
 
 /** マスコット「ボルト」の表情（art/mascot.ts で生成） */
 export const MASCOT_ASSETS = {

@@ -1,7 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 再起動装置: 円形の矢印（↻）で「もう一度」を表す -->
-  <rect x="6" y="6" width="52" height="52" rx="26" fill="#00acc1" stroke="#004d56" stroke-width="3"/>
-  <path d="M44.5 23 A15 15 0 1 0 47 34" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
-  <polygon points="37,14 51,15 46,28" fill="#ffffff" stroke="#004d56" stroke-width="2" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="4" fill="#e0f7fa"/>
+  <!-- パーツ: rebooter（art/ のスクリプトで生成。手で編集しない） -->
+  <polygon points="32,3 28,11 32,11 30,16 37,8 33,8 35,3" fill="#ffc107" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(0 32 32)"/>
+  <polygon points="32,3 28,11 32,11 30,16 37,8 33,8 35,3" fill="#ffc107" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(90 32 32)"/>
+  <polygon points="32,3 28,11 32,11 30,16 37,8 33,8 35,3" fill="#ffc107" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(180 32 32)"/>
+  <polygon points="32,3 28,11 32,11 30,16 37,8 33,8 35,3" fill="#ffc107" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" transform="rotate(270 32 32)"/>
+  <circle cx="32" cy="32" r="16" fill="#00acc1" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="35" r="13" fill="#0092a4"/>
+  <circle cx="32" cy="32" r="13" fill="#00acc1"/>
+  <path d="M26.5 27 a8 8 0 1 0 11 0" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 23 V31" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

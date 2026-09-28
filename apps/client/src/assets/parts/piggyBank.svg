@@ -1,14 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 貯金箱: ブタの貯金箱にコインが入る -->
-  <circle cx="34" cy="8" r="6" fill="#ffd54f" stroke="#8d6e00" stroke-width="2"/>
-  <path d="M34 5 V11" stroke="#8d6e00" stroke-width="1.8"/>
-  <ellipse cx="32" cy="36" rx="23" ry="17" fill="#f48fb1" stroke="#880e4f" stroke-width="3"/>
-  <rect x="27" y="19" width="12" height="3" rx="1.5" fill="#880e4f"/>
-  <ellipse cx="54" cy="36" rx="5" ry="6" fill="#f8bbd0" stroke="#880e4f" stroke-width="2.5"/>
-  <circle cx="53" cy="35" r="1.2" fill="#880e4f"/><circle cx="56" cy="37" r="1.2" fill="#880e4f"/>
-  <circle cx="44" cy="30" r="2.2" fill="#212121"/>
-  <path d="M40 20 L44 14 L47 22" fill="#f48fb1" stroke="#880e4f" stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="16" y="49" width="7" height="9" rx="2" fill="#f48fb1" stroke="#880e4f" stroke-width="2.5"/>
-  <rect x="38" y="49" width="7" height="9" rx="2" fill="#f48fb1" stroke="#880e4f" stroke-width="2.5"/>
-  <path d="M9 34 Q4 32 6 27" fill="none" stroke="#880e4f" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- パーツ: piggyBank（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="40" cy="11" r="6" fill="#ffd54f" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M38 11 h4" fill="none" stroke="#8d6e3f" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="30" cy="38" rx="20" ry="15" fill="#ec407a" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 44 a20 12 0 0 0 36 0" fill="#c93668"/>
+  <ellipse cx="30" cy="38" rx="20" ry="15" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 25 h8" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="36,25 40,15 45,24" fill="#ec407a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="48" y="33" width="8" height="9" rx="3" fill="#f8bbd0" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="42" cy="33" r="2" fill="#1b1f27"/>
+  <path d="M18 52 v4 M40 52 v4" fill="none" stroke="#1b1f27" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="24" cy="40" r="4.5" fill="#cfd8dc" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 38 l4 4 M26 38 l-4 4" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

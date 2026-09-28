@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 回転台: 右回りに回る円盤 -->
-  <circle cx="32" cy="32" r="27" fill="#00897b" stroke="#00352e" stroke-width="3"/>
-  <circle cx="32" cy="32" r="19" fill="#4db6ac" stroke="#00352e" stroke-width="2.5"/>
-  <path d="M32 13 A19 19 0 0 1 51 32" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-  <polygon points="51,40 44,30 58,30" fill="#ffffff" stroke="#00352e" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M32 51 A19 19 0 0 1 13 32" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-  <polygon points="13,24 20,34 6,34" fill="#ffffff" stroke="#00352e" stroke-width="1.5" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="5" fill="#00352e"/>
+  <!-- パーツ: turntable（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="23" fill="#00acc1" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="15" fill="#0092a4"/>
+  <path d="M32 17 a15 15 0 1 1 -14.5 11" fill="none" stroke="#80deea" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="32,11 40,17 32,23" fill="#80deea" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="4" fill="#cfd8dc" stroke="#1b1f27" stroke-width="2.5"/>
 </svg>

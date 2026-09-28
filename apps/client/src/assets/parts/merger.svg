@@ -1,13 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 合流炉: 左右と下から流れ込み、炉の中で1つにまとまる -->
-  <path d="M14 58 V30 Q14 10 32 10 Q50 10 50 30 V58 Z" fill="#6d4c41" stroke="#261a16" stroke-width="3"/>
-  <path d="M20 58 V32 Q20 17 32 17 Q44 17 44 32 V58 Z" fill="#3e2723"/>
-  <path d="M24 56 Q26 44 32 40 Q38 44 40 56 Z" fill="#ff7043"/>
-  <path d="M28 56 Q29 48 32 46 Q35 48 36 56 Z" fill="#ffeb3b"/>
-  <g fill="none" stroke="#ffca28" stroke-width="4" stroke-linecap="round">
-    <path d="M2 40 H11"/><path d="M62 40 H53"/>
-  </g>
-  <polygon points="12,35 12,45 17,40" fill="#ffca28"/>
-  <polygon points="52,35 52,45 47,40" fill="#ffca28"/>
-  <rect x="26" y="4" width="12" height="7" rx="2" fill="#8d6e63" stroke="#261a16" stroke-width="2"/>
+  <!-- パーツ: merger（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="10" y="7" width="8" height="12" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="28" y="5" width="8" height="12" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="46" y="7" width="8" height="12" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M9 18 H55 L39 40 H25 Z" fill="#fb8c00" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M14 25 H50 L39 40 H25 Z" fill="#d57700"/>
+  <circle cx="32" cy="27" r="4" fill="#ff7043" stroke="#1b1f27" stroke-width="1.5"/>
+  <rect x="26" y="40" width="12" height="15" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

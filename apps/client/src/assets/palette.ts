@@ -57,6 +57,23 @@ export const FAMILY_COLORS = {
 
 export type Family = keyof typeof FAMILY_COLORS;
 
+/** 素材の質感ごとの色（段ボール・銅線・硬貨など、系統色以外の細部に使う） */
+export const MATERIAL_COLORS = {
+  cardboard: '#c8a165',
+  cardboardDark: '#8d6e3f',
+  copper: '#d9822b',
+  copperLight: '#ffb74d',
+  coin: '#ffd54f',
+  glass: '#b3e5fc',
+  oil: '#4e342e',
+  paper: '#fafafa',
+  solarCell: '#1e3a5f',
+  solarCellLight: '#3f6fa3',
+  sun: '#ffca28',
+  fire: '#ff7043',
+  shadowHole: '#1b1f27',
+} as const;
+
 /** マスコット「ボルト」 */
 export const BOLT_COLORS = {
   body: '#7cb342',

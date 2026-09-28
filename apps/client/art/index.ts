@@ -7,6 +7,7 @@
  * 書き出し済みのファイルがここの結果とずれていないかはテスト（test/art.test.ts）で確かめる。
  */
 import { mascotFiles } from './mascot';
+import { partFiles } from './parts';
 import { paletteCss } from './paletteCss';
 import { previewHtml } from './preview';
 
@@ -14,6 +15,7 @@ export function buildArt(): Record<string, string> {
   const files: Record<string, string> = {
     'src/styles/palette.css': paletteCss(),
     ...mascotFiles(),
+    ...partFiles(),
   };
   files['art/preview.html'] = previewHtml([
     ...Object.keys(files),

@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- 分岐器: 入った信号が左右に分かれる T 字（向きに合わせて回転表示する） -->
-  <rect x="6" y="6" width="52" height="52" rx="14" fill="#8e24aa" stroke="#311b92" stroke-width="3"/>
-  <path d="M32 52 V30 M32 30 H17 M32 30 H47" stroke="#ffffff" stroke-width="7" stroke-linecap="round" fill="none"/>
-  <polygon points="5,30 17,20 17,40" fill="#ffffff" stroke="#311b92" stroke-width="2" stroke-linejoin="round"/>
-  <polygon points="59,30 47,20 47,40" fill="#ffffff" stroke="#311b92" stroke-width="2" stroke-linejoin="round"/>
-  <circle cx="32" cy="30" r="6" fill="#e1bee7" stroke="#311b92" stroke-width="2"/>
+  <!-- パーツ: splitter（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M32 56 V32 Q32 24 22 24 H12 M32 32 Q32 24 42 24 H52" fill="none" stroke="#1b1f27" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 56 V32 Q32 24 22 24 H12 M32 32 Q32 24 42 24 H52" fill="none" stroke="#8e24aa" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="6,24 14,17 14,31" fill="#ce93d8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="58,24 50,17 50,31" fill="#ce93d8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="26" y="44" width="12" height="10" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>
