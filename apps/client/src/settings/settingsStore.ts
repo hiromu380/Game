@@ -6,6 +6,7 @@
  */
 import type { EffectStrength } from '../config/effects';
 import type { Lang } from '../i18n';
+import { appStorage } from '../storage';
 
 export const SETTINGS_VERSION = 1;
 export const SETTINGS_STORAGE_KEY = 'chain-factory:settings';
@@ -39,12 +40,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
 
 type SimpleStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** 既定の保存先（Web 版は localStorage、デスクトップ版はファイル。storage/index.ts） */
 function defaultStorage(): SimpleStorage | null {
-  try {
-    return typeof localStorage === 'undefined' ? null : localStorage;
-  } catch {
-    return null;
-  }
+  return appStorage();
 }
 
 /** 読み込んだ値を最新形式にする（足りない項目は既定値で補う） */

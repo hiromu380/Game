@@ -5,3 +5,4 @@ export * from './save';
 export * from './api/types';
 export * from './score/columns';
 export * from './ranking/rankKey';
+export * from './desktop/contract';

@@ -4,6 +4,8 @@
  * セーブデータ・ユーザー設定とは別のキーに保存し、バージョンを持たせる。
  * トークンはこの端末だけのもの。消えると別人として扱われる（アカウント機能はフェーズ4以降で検討）。
  */
+import { appStorage } from '../storage';
+
 export const IDENTITY_VERSION = 1;
 export const IDENTITY_STORAGE_KEY = 'chain-factory:online';
 
@@ -17,12 +19,9 @@ export interface OnlineIdentity {
 
 type SimpleStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** 既定の保存先（Web 版は localStorage、デスクトップ版はファイル。storage/index.ts） */
 function defaultStorage(): SimpleStorage | null {
-  try {
-    return typeof localStorage === 'undefined' ? null : localStorage;
-  } catch {
-    return null;
-  }
+  return appStorage();
 }
 
 export function loadIdentity(storage = defaultStorage()): OnlineIdentity | null {

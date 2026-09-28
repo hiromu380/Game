@@ -4,18 +4,16 @@
  */
 import { createSave, migrateSave, type SaveData } from '@chain-factory/shared';
 import { createInitialMeta, type MetaProgress, type RunState } from '@chain-factory/sim';
+import { appStorage } from '../storage';
 
 export const SAVE_STORAGE_KEY = 'chain-factory:save';
 
 /** テストで差し替えられるよう、必要な機能だけの Storage 型 */
 export type SimpleStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
+/** 既定の保存先（Web 版は localStorage、デスクトップ版はファイル。storage/index.ts） */
 function defaultStorage(): SimpleStorage | null {
-  try {
-    return typeof localStorage === 'undefined' ? null : localStorage;
-  } catch {
-    return null;
-  }
+  return appStorage();
 }
 
 /** 保存されたデータを読み込む（古い形式は最新形式へ変換）。無い・壊れている場合は null */
