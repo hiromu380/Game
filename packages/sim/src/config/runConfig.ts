@@ -120,7 +120,7 @@ export interface BuildRunConfigOptions {
   meta?: MetaModifiers;
   /** ボス計画の抽選に使うシード（seeds.ts の bossSeed） */
   bossSeed: number;
-  /** ランシード（日ごとのステージの抽選に使う。省略時はステージなし＝床なし） */
+  /** ランシード（日ごとのステージの抽選に使う。省略時はステージ・ボーナス床なし＝床なし） */
   runSeed?: number;
   /** 1日目のステージを初回ガイド用の固定テンプレートにする */
   tutorial?: boolean;
@@ -201,11 +201,15 @@ export function buildRunConfig({
     baseShiftCount: balance.shifts.length,
     overtime: { ...balance.overtime },
     stages,
-    bonusFloors: {
-      countWeights: [...balance.bonusFloors.countWeights],
-      tileWeights: balance.bonusFloors.tileWeights.map((w) => ({ ...w })),
-      fromShift: tutorial ? balance.shiftsPerDay : 0,
-    },
+    // ランシードがない（床を使わない）組み立てでは、ボーナス床も湧かせない
+    bonusFloors:
+      runSeed === undefined
+        ? undefined
+        : {
+            countWeights: [...balance.bonusFloors.countWeights],
+            tileWeights: balance.bonusFloors.tileWeights.map((w) => ({ ...w })),
+            fromShift: tutorial ? balance.shiftsPerDay : 0,
+          },
     bossPlan: planBosses(balance, board, bossSeed, stages?.days ?? []),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },
     starterKit: { ...balance.economy.starterKit },

@@ -7,7 +7,10 @@ import {
   commitShift,
   createRunWithConfig,
   dailyRunSeed,
+  getCurrentFloor,
   getCurrentRules,
+  isBlockedCell,
+  SIM_VERSION,
   replayOps,
   scoreToString,
   simulate,
@@ -140,10 +143,9 @@ describe('デイリー: 通しのプレイ', () => {
     await api.call('POST', `/daily/${DAY}/start`, {}, token);
 
     // 特殊ルールで使えないマスを避けて置く
-    const blocked = new Set(config.globalModifier?.blockedCells ?? []);
-    const y = [3, 2, 4, 1, 5].find(
-      (row) => !blocked.has(row * 7 + 1) && !blocked.has(row * 7 + 2),
-    )!;
+    // 床（ステージ・特殊ルールの使用不可・ボーナス床）のない行に置く
+    const floor = getCurrentFloor(createRunWithConfig(dailyRunSeed(DAY), config));
+    const y = [3, 2, 4, 1, 5].find((row) => !floor[row * 7 + 1] && !floor[row * 7 + 2])!;
     const ops: RunOp[] = SIMPLE_OPS.map((op) => ({ ...op, y }) as RunOp);
     const res = await api.commit(token, 0, ops);
     expect(res.status).toBe(200);
@@ -333,6 +335,69 @@ describe('プレイヤー・レート制限', () => {
   });
 });
 
+describe('床タイル（SIM_VERSION 4）', () => {
+  it('配布された RunConfig にその日のステージがあり、床の上の出荷口の出荷量がサーバーとクライアントで一致する', async () => {
+    const { ctx } = testContext();
+    const config = await seedEasyDaily(ctx);
+    expect(config.stages?.days).toHaveLength(1);
+    const api = testApi(ctx);
+    const { token } = await api.register();
+    expect((await api.call('POST', `/daily/${DAY}/start`, {}, token)).status).toBe(200);
+
+    // 効果のある床（ステージ・ボーナス床）のマスに出荷口、その左にスイッチを置く
+    const state = createRunWithConfig(dailyRunSeed(DAY), config);
+    const floor = getCurrentFloor(state);
+    const index = floor.findIndex(
+      (c, i) => c && !isBlockedCell(floor, i) && i % 7 > 0 && !floor[i - 1],
+    );
+    expect(index).toBeGreaterThanOrEqual(0);
+    const x = index % 7;
+    const y = Math.floor(index / 7);
+    const ops: RunOp[] = [
+      { op: 'place', partId: 'switch', x: x - 1, y, dir: 1 },
+      { op: 'place', partId: 'dock', x, y, dir: 0 },
+    ];
+    const res = await api.commit(token, 0, ops);
+    expect(res.status).toBe(200);
+    const local = clientCommit(state, ops, res.json.seed as number);
+    expect(scoreToString(local.result.score)).toBe(res.json.score);
+    // 床の効果で 1 より大きくなる
+    expect(BigInt(res.json.score as string) > 1n).toBe(true);
+    expect(local.result.events.some((e) => e.type === 'floor')).toBe(true);
+  });
+
+  it('使用不可の床のマスへの配置は、サーバーの検証で拒否される', async () => {
+    const { ctx } = testContext();
+    const config = await seedEasyDaily(ctx);
+    const api = testApi(ctx);
+    const { token } = await api.register();
+    await api.call('POST', `/daily/${DAY}/start`, {}, token);
+    const floor = getCurrentFloor(createRunWithConfig(dailyRunSeed(DAY), config));
+    const blocked = floor.findIndex((_, i) => isBlockedCell(floor, i));
+    // デイリーの帯（2日目相当）のテンプレートには、どれも使用不可がある
+    expect(blocked).toBeGreaterThanOrEqual(0);
+    const ops: RunOp[] = [
+      { op: 'place', partId: 'dock', x: blocked % 7, y: Math.floor(blocked / 7), dir: 0 },
+    ];
+    expect((await api.commit(token, 0, ops)).status).toBe(400);
+  });
+
+  it('床の導入前（SIM_VERSION 3）に生成されたデイリーへの提出は拒否される', async () => {
+    const { ctx } = testContext();
+    const scratch = { ...ctx, repos: createMemoryRepositories() };
+    const real = await ensureDaily(scratch, DAY);
+    expect(real.simVersion).toBe(SIM_VERSION);
+    await ctx.repos.dailies.createIfAbsent({ ...real, simVersion: '3' });
+    const api = testApi(ctx);
+    const { token } = await api.register();
+    await api.call('POST', `/daily/${DAY}/start`, {}, token);
+    expect(await api.commit(token, 0, SIMPLE_OPS)).toEqual({
+      status: 409,
+      json: { error: 'simVersionMismatch' },
+    });
+  });
+});
+
 describe('ゴールデンデータ（秘密値・本番シード・出荷量の導出が変わっていないこと）', () => {
   it('固定のマスター鍵・日付・盤面から常に同じ値になる', async () => {
     const { ctx } = testContext();
@@ -365,6 +430,7 @@ describe('ゴールデンデータ（秘密値・本番シード・出荷量の�
     if (!replayed.ok) throw new Error('replay failed');
     const direct = simulate({
       board: replayed.state.board,
+      floor: getCurrentFloor(replayed.state),
       seed: res.json.seed as number,
       rules: getCurrentRules(replayed.state),
     });
