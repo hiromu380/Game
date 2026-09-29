@@ -155,11 +155,11 @@
   "settings.lang.ja": "日本語",
   "settings.lang.en": "English",
   "settings.effects": "Effects",
-  "settings.effects.full": "Full",
-  "settings.effects.reduced": "Reduced",
-  "settings.effects.minimal": "Minimal",
+  "settings.effects.full": "Strong",
+  "settings.effects.reduced": "Medium",
+  "settings.effects.minimal": "Weak",
   "settings.shake": "Screen shake",
-  "settings.shakeHint": "Turn this off if you get motion sick. \"Minimal\" also disables slow-motion and cut-ins",
+  "settings.shakeHint": "Turn this off if you get motion sick. \"Weak\" also removes the wind-up, hit-stop, multiplier numbers and cut-ins",
   "settings.close": "Close",
   "settings.masterVolume": "Master volume",
   "settings.seVolume": "Sound effects",
@@ -520,5 +520,7 @@
   "shareCard.unfinished": "Rocket {parts} / {total}",
   "capture.shareCard": "Preview share card",
   "share.runText": "#ChainFactory Bolt's rocket: {result}\nShipped {score} · Reached shift {shift}",
-  "playback.quotaCross": "Quota smashed!"
+  "playback.quotaCross": "Quota smashed!",
+  "settings.reduceFlashes": "Reduce flashing",
+  "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows"
 }

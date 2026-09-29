@@ -20,7 +20,7 @@ describe('ユーザー設定', () => {
   it('バージョン付きで保存・読み込みできる', () => {
     const storage = memoryStorage();
     saveSettings({ ...DEFAULT_SETTINGS, effects: 'minimal', shake: false }, storage);
-    expect(JSON.parse(storage.data.get(SETTINGS_STORAGE_KEY)!).version).toBe(2);
+    expect(JSON.parse(storage.data.get(SETTINGS_STORAGE_KEY)!).version).toBe(3);
     expect(loadSettings(storage)).toMatchObject({ effects: 'minimal', shake: false });
   });
 
@@ -31,7 +31,7 @@ describe('ユーザー設定', () => {
   });
 
   it('足りない項目は既定値で補い、未知のバージョンは既定値に戻す', () => {
-    expect(migrateSettings({ version: 2, lang: 'en' })).toEqual({
+    expect(migrateSettings({ version: 3, lang: 'en' })).toEqual({
       ...DEFAULT_SETTINGS,
       lang: 'en',
     });
@@ -46,8 +46,21 @@ describe('ユーザー設定', () => {
       effects: 'reduced',
       shake: false,
       masterVolume: 30,
-      version: 2,
+      version: 3,
       tutorialDone: false,
+      reduceFlashes: false,
+    });
+  });
+
+  it('v2 → v3: 設定はそのまま引き継ぎ、点滅を減らすは既定（オフ）にする', () => {
+    const v2 = { version: 2, lang: 'ja', effects: 'minimal', shake: false, tutorialDone: true };
+    expect(migrateSettings(v2)).toEqual({
+      ...DEFAULT_SETTINGS,
+      effects: 'minimal',
+      shake: false,
+      tutorialDone: true,
+      version: 3,
+      reduceFlashes: false,
     });
   });
 });

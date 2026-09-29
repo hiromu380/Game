@@ -296,9 +296,12 @@ export function App({ start, onTitle }: Props) {
     [t, formatScore, formatCompact],
   );
   const effectSettings = useMemo(
-    // 点滅を減らす設定は、設定画面に追加するまで既定（減らさない）
-    () => ({ strength: settings.effects, shake: settings.shake, reduceFlashes: false }),
-    [settings.effects, settings.shake],
+    () => ({
+      strength: settings.effects,
+      shake: settings.shake,
+      reduceFlashes: settings.reduceFlashes,
+    }),
+    [settings.effects, settings.shake, settings.reduceFlashes],
   );
 
   const onShip = useCallback((total: Score) => setLiveScore(scoreToString(total)), []);

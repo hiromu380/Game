@@ -155,11 +155,11 @@
   "settings.lang.ja": "日本語",
   "settings.lang.en": "English",
   "settings.effects": "演出の強さ",
-  "settings.effects.full": "標準",
-  "settings.effects.reduced": "控えめ",
-  "settings.effects.minimal": "最小",
+  "settings.effects.full": "強",
+  "settings.effects.reduced": "中",
+  "settings.effects.minimal": "弱",
   "settings.shake": "画面の揺れ",
-  "settings.shakeHint": "画面酔いしやすい場合はオフにしてください。「最小」ではスロー・カットインも出ません",
+  "settings.shakeHint": "画面酔いしやすい場合はオフにしてください。演出を「弱」にすると、溜め・止め・倍率の数字・カットインも出ません",
   "settings.close": "閉じる",
   "settings.masterVolume": "全体の音量",
   "settings.seVolume": "効果音",
@@ -520,5 +520,7 @@
   "shareCard.unfinished": "ロケット {parts} / {total}",
   "capture.shareCard": "共有カードを確認",
   "share.runText": "#ChainFactory ボルトのロケット: {result}\n出荷量 {score}・シフト {shift} まで到達",
-  "playback.quotaCross": "ノルマ突破！"
+  "playback.quotaCross": "ノルマ突破！",
+  "settings.reduceFlashes": "点滅を減らす",
+  "settings.reduceFlashesHint": "光の点滅が苦手な場合はオンにしてください。盤面が光る演出を止め、パーツの発光も控えめにします"
 }
