@@ -66,8 +66,7 @@ export function simulate(input: SimInput): SimResult {
   let shipCount = 0;
   let floorApplied = 0;
 
-  const isBlocked = (index: number): boolean =>
-    rules.blockedCells.includes(index) || isBlockedCell(floor, index);
+  const isBlocked = (index: number): boolean => isBlockedCell(floor, index);
 
   /** 発動の直前に、そのマスの床の効果を値に適用する（効果がなければそのまま） */
   const applyFloor = (tick: number, x: number, y: number, value: Score): Score => {

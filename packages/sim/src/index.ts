@@ -31,12 +31,27 @@ export { computeActivationLimits } from './simulate/limits';
 export { createRuleSet, DEFAULT_RULES } from './config/rules';
 export {
   buildRunConfig,
+  drawBoss,
   type BossPlanEntry,
   type EconomyConfig,
   type MetaModifiers,
   type RunConfig,
+  type RunStages,
 } from './config/runConfig';
-export { BOSS_MODIFIERS, getShiftEconomy, getShiftRules } from './config/bossModifiers';
+export {
+  BOSS_MODIFIERS,
+  getShiftEconomy,
+  getShiftFloor,
+  getShiftRules,
+} from './config/bossModifiers';
+export {
+  generateStage,
+  parseTemplate,
+  templateToFloor,
+  transformFloor,
+  validateStage,
+} from './floor/stage';
+export { getCurrentFloor, isCellBlocked } from './run/floor';
 export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
 
 export * from './run/types';

@@ -8,7 +8,7 @@
  */
 import {
   buyOffer,
-  getCurrentRules,
+  isCellBlocked,
   getPart,
   getRerollCost,
   isInside,
@@ -56,7 +56,7 @@ export type Move =
  */
 function isBlocked(state: RunState, x: number, y: number): boolean {
   const index = y * state.board.width + x;
-  if (getCurrentRules(state).blockedCells.includes(index)) return true;
+  if (isCellBlocked(state, index)) return true;
   const perDay = state.config.shiftsPerDay;
   const dayEnd = (Math.floor(state.shiftIndex / perDay) + 1) * perDay;
   for (let i = state.shiftIndex + 1; i < dayEnd; i++) {

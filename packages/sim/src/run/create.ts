@@ -16,6 +16,8 @@ export interface CreateRunOptions {
   meta?: MetaModifiers;
   /** 相場価格（オンライン時に取得したもの。ラン開始時に RunConfig に固定する） */
   prices?: Partial<Record<PartId, number>>;
+  /** 初回ガイドのラン（1日目のステージを固定のテンプレートにする） */
+  tutorial?: boolean;
 }
 
 /** 新しい通常ランを始める */
@@ -25,6 +27,8 @@ export function createRun(seed: number, options: CreateRunOptions = {}): RunStat
     balance: options.balance ?? BALANCE,
     meta: options.meta,
     bossSeed: bossSeed(runSeed),
+    runSeed,
+    tutorial: options.tutorial,
   });
   const withPrices: RunConfig = options.prices
     ? {

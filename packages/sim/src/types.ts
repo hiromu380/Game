@@ -74,8 +74,6 @@ export interface RuleSet {
   params: PartParams;
   /** 床タイルの効果量 */
   floorParams: FloorParams;
-  /** 使用不可のマス（index = y * width + x）。入った信号は消滅する */
-  blockedCells: number[];
   /** 出荷口の加算をこの値で割る（切り捨て）。通常は 1 */
   dockDivisor: number;
   /** 経済系パーツが1回のシミュレーションで生める予算の上限 */

@@ -4,14 +4,17 @@
 import type { ShiftSpec } from '../balance';
 import { getShiftEconomy, getShiftRules } from '../config/bossModifiers';
 import { drawBoss, type EconomyConfig } from '../config/runConfig';
+import { isBlockedCell } from '../floor/layer';
+import { generateStage } from '../floor/stage';
 import { createPrng } from '../core/prng';
 import { getPart, setPart } from '../core/board';
 import { scoreCompare, scoreOf, scoreToString } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
+import { getCurrentFloor } from './floor';
 import { addInventory } from './inventory';
-import { commitSeed, overtimeSeed, shopSeed, trialSeed } from './seeds';
+import { commitSeed, overtimeSeed, shopSeed, stageSeed, trialSeed } from './seeds';
 import { generateShop } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
@@ -54,6 +57,7 @@ export function getCurrentEconomy(state: RunState): EconomyConfig {
 export function runTrial(state: RunState): { state: RunState; result: SimResult } {
   const result = simulate({
     board: state.board,
+    floor: getCurrentFloor(state),
     seed: trialSeed(state.seed, state.shiftIndex, state.trialCount),
     rules: getCurrentRules(state),
   });
@@ -78,7 +82,12 @@ export function commitShift(
     seed = commitSeed(state.seed, state.shiftIndex);
   }
 
-  const result = simulate({ board: state.board, seed, rules: getCurrentRules(state) });
+  const result = simulate({
+    board: state.board,
+    floor: getCurrentFloor(state),
+    seed,
+    rules: getCurrentRules(state),
+  });
   const spec = getCurrentShift(state);
   const cleared = scoreCompare(result.score, scoreOf(spec.quota)) >= 0;
   const outcome: ShiftOutcome = {
@@ -161,7 +170,10 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     next = returnAllParts(next);
   }
 
-  for (const cell of getShiftRules(state.config, shiftIndex).blockedCells) {
+  // 使用不可になったマス（ステージ・ボス）のパーツは手持ちに戻す
+  const floor = getCurrentFloor(next, shiftIndex);
+  for (let cell = 0; cell < next.board.cells.length; cell++) {
+    if (!isBlockedCell(floor, cell)) continue;
     const x = cell % next.board.width;
     const y = Math.floor(cell / next.board.width);
     const part = getPart(next.board, x, y);
@@ -218,6 +230,23 @@ function appendOvertimeDay(state: RunState, shiftIndex: number): RunState {
   const bossPlan = [...state.config.bossPlan];
   const { overtime, bossParams, board } = state.config;
 
+  // その日のステージ（3日目の帯から抽選し、延長戦の日が進むほど×2床を×3床に置き換える）
+  const day = Math.floor(shiftIndex / perDay);
+  let stages = state.config.stages;
+  if (stages && !stages.days[day]) {
+    const overtimeDay = day - Math.ceil(state.config.baseShiftCount / perDay) + 1;
+    const floor = generateStage({
+      seed: stageSeed(state.seed, day),
+      band: stages.balance.overtimeBand,
+      board,
+      stages: stages.balance,
+      upgrades: Math.max(0, overtimeDay) * stages.balance.overtimeUpgradesPerDay,
+    });
+    const days = [...stages.days];
+    days[day] = floor;
+    stages = { ...stages, days };
+  }
+
   while (shifts.length < dayEnd) {
     const index = shifts.length;
     const isBoss = (index + 1) % perDay === 0;
@@ -229,7 +258,9 @@ function appendOvertimeDay(state: RunState, shiftIndex: number): RunState {
     });
     const previousBoss = [...bossPlan].reverse().find((b) => b)?.id ?? null;
     const rng = createPrng(overtimeSeed(state.seed, index));
-    bossPlan.push(isBoss ? drawBoss(rng, bossParams, board, previousBoss) : null);
+    bossPlan.push(
+      isBoss ? drawBoss(rng, bossParams, board, previousBoss, stages?.days[day]) : null,
+    );
   }
-  return { ...state, config: { ...state.config, shifts, bossPlan } };
+  return { ...state, config: { ...state.config, shifts, bossPlan, stages } };
 }

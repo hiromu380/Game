@@ -8,6 +8,7 @@ import {
   createRunWithConfig,
   dailyRunSeed,
   getCurrentEconomy,
+  getCurrentFloor,
   getCurrentRules,
   getCurrentShift,
   getDayAndPeriod,
@@ -268,6 +269,7 @@ export function App({ start, onTitle }: Props) {
     () => ({
       board: run.board,
       rules: getCurrentRules(run),
+      floor: getCurrentFloor(run),
       // 夜シフトの補修工事で使えなくなるマスを、朝・昼のうちから予告表示する
       upcomingBlocked: (() => {
         const boss = findBossToShow(run);

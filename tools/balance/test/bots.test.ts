@@ -40,11 +40,12 @@ describe('ボット', () => {
     expect(search.shiftsCleared).toBeGreaterThanOrEqual(greedy.shiftsCleared);
   });
 
-  it('現在のバランスで、貪欲ボットがシード6の9シフトを最後までクリアできる（通しプレイの回帰確認）', () => {
+  it('現在のバランスで、貪欲ボットがシード7の9シフトを最後までクリアできる（通しプレイの回帰確認）', () => {
     // バランス調整でこのテストが落ちたら、クリアできるシードを選び直すか、難しくなりすぎていないか確認する
     // フェーズ3c（SIM_VERSION 2）でシード1 → 3 に変更（ポンコツロボ・回転台の調整で購入の判断や連鎖の結果が変わったため）
     // SIM_VERSION 3（日ごとの片付け）でシード3 → 6 に変更（難易度の調整は後で行う）
-    const log = playRun(6, 'greedy', {
+    // SIM_VERSION 4（床タイルと日ごとのステージ）でシード6 → 7 に変更（ステージの使用不可で3日目の夜に届かなくなったため）
+    const log = playRun(7, 'greedy', {
       unlock: 'all',
       samples: 3,
       evalMode: 'mean',

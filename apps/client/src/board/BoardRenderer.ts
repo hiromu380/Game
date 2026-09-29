@@ -15,6 +15,8 @@ import {
   type Part,
   type PartBadge,
   type PartId,
+  isBlockedCell,
+  type FloorLayer,
   type RuleSet,
   type Score,
   type SimEvent,
@@ -72,6 +74,8 @@ export interface BoardViewState {
   board: Board;
   /** 現在のシフトのルール（倍率バッジなどの表示に使う。ボス修正込み） */
   rules: RuleSet;
+  /** 現在のシフトの床（ステージ・ボスの使用不可など） */
+  floor: FloorLayer;
   /** 選択中のマス */
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
@@ -344,7 +348,8 @@ export class BoardRenderer {
     }
 
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    for (const cell of state.rules.blockedCells) {
+    for (let cell = 0; cell < state.floor.length; cell++) {
+      if (!isBlockedCell(state.floor, cell)) continue;
       this.blockLayer.addChild(
         createBlockedCell(
           cell % state.board.width,

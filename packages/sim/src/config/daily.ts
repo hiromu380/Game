@@ -3,6 +3,7 @@
  *
  * - 全員同じ条件: メタ進行の層は外す（全パーツ・7×7）。延長戦なし
  * - 1日＝3シフト（balance/ の daily.shifts）
+ * - 床のステージ: デイリーのシードから、2日目相当の帯（balance/stages.ts の dailyBand）で1日分を生成する
  * - 今日の特殊ルール: ボス修正ルールの仕組みを流用し、3シフト全体にかける（デイリーの ID から決定論的に選ぶ）
  * - 価格: その日の相場（サーバーから渡す。なければ基準価格）
  * - 本番シードはサーバーの秘密値から作るため、commitSeedMode は external（練習モードは derived）
@@ -43,6 +44,8 @@ export function buildDailyConfig({
   const base = buildRunConfig({
     balance: { ...balance, shifts: balance.daily.shifts },
     bossSeed: bossSeed(runSeed),
+    runSeed,
+    stageBands: [balance.stages.dailyBand],
   });
 
   const globalModifier = drawBoss(
@@ -50,6 +53,7 @@ export function buildDailyConfig({
     { ...base.bossParams, candidates: [...balance.daily.specialRules] },
     base.board,
     null,
+    base.stages?.days[0],
   );
 
   return {

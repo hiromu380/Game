@@ -16,7 +16,6 @@ export function createRuleSet(balance: Balance = BALANCE): RuleSet {
     maxActivations,
     params: { ...balance.partParams },
     floorParams: { ...balance.floorParams },
-    blockedCells: [],
     dockDivisor: 1,
     maxIncomePerSim: balance.sim.maxIncomePerSim,
     maxLiveSignals: balance.sim.maxLiveSignals,

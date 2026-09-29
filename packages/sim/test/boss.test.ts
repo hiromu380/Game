@@ -10,13 +10,16 @@ import {
   createRun,
   DEFAULT_RULES,
   getShiftEconomy,
+  getShiftFloor,
   getShiftRules,
   placePart,
+  scoreToString,
+  simulate,
   type BossModifierId,
   type RunConfig,
   type RunState,
 } from '../src';
-import { run as simulateRows } from './helpers';
+import { board, run as simulateRows } from './helpers';
 
 /** 指定した夜のボスを差し替えた RunConfig */
 function configWithBoss(id: BossModifierId, blockedCells: number[] = []): RunConfig {
@@ -89,10 +92,19 @@ describe('修正ルールの効果', () => {
     expect(economy.reroll.enabled).toBe(false);
   });
 
-  it('床の補修工事: 使用不可マスに入った信号は消え、そこには置けない', () => {
-    const rules = { ...DEFAULT_RULES, blockedCells: [1] };
-    const result = simulateRows(['S> D>'], 1, rules);
-    expect(result.scoreText).toBe('0');
+  it('床の補修工事: 夜の床に使用不可が重なり、入った信号は消える', () => {
+    const config = configWithBoss('repairWork', [1]);
+    const floor = getShiftFloor(config, NIGHT);
+    expect(floor[1]).toEqual({ tile: 'blocked', source: 'boss' });
+    // 夜以外のシフトの床には重ならない
+    expect(getShiftFloor(config, NIGHT - 1)[1]?.source).not.toBe('boss');
+    const result = simulate({
+      board: board(['S> D> .. .. .. .. ..', ...Array(6).fill('.. .. .. .. .. .. ..')]),
+      floor,
+      seed: 1,
+      rules: DEFAULT_RULES,
+    });
+    expect(scoreToString(result.score)).toBe('0');
     expect(result.events.some((e) => e.type === 'vanish' && e.reason === 'blocked')).toBe(true);
   });
 

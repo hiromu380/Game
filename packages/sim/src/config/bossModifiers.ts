@@ -5,6 +5,8 @@
  * 新しいルールを足すときは BossModifierId（balance/）とここの一覧に追加する。
  */
 import type { Balance, BossModifierId } from '../balance';
+import { emptyFloor, setFloorCell } from '../floor/layer';
+import type { FloorLayer } from '../floor/types';
 import type { RuleSet } from '../types';
 import type { BossPlanEntry, EconomyConfig, RunConfig } from './runConfig';
 
@@ -24,13 +26,8 @@ export const BOSS_MODIFIERS: Record<BossModifierId, BossModifier> = {
       return { ...rules, maxActivations: { ...rules.maxActivations, conveyor: next } };
     },
   },
-  /** 床の補修工事: 一部のマスが使用不可 */
-  repairWork: {
-    applyRules: (rules, entry) => ({
-      ...rules,
-      blockedCells: [...rules.blockedCells, ...entry.blockedCells],
-    }),
-  },
+  /** 床の補修工事: 一部のマスが使用不可（ルールは変えず、そのシフトの床に使用不可を重ねる。getShiftFloor） */
+  repairWork: {},
   /** 出荷検査強化: 出荷口の加算が減る */
   strictInspection: {
     applyRules: (rules, _entry, params) => ({
@@ -74,4 +71,19 @@ export function getShiftEconomy(config: RunConfig, shiftIndex: number): EconomyC
     economy = BOSS_MODIFIERS[entry.id].applyEconomy?.(economy, config.bossParams) ?? economy;
   }
   return economy;
+}
+
+/**
+ * そのシフトの床 = その日のステージ ＋ ラン全体の修正・そのシフトのボス修正の使用不可マス
+ * （シフト開始時のボーナス床・今日の出来事の床は、ランの状態から run/floor.ts で重ねる）
+ */
+export function getShiftFloor(config: RunConfig, shiftIndex: number): FloorLayer {
+  const day = Math.floor(shiftIndex / config.shiftsPerDay);
+  let floor = config.stages?.days[day] ?? emptyFloor(config.board.width * config.board.height);
+  for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
+    for (const cell of entry?.blockedCells ?? []) {
+      floor = setFloorCell(floor, cell, { tile: 'blocked', source: 'boss' });
+    }
+  }
+  return floor;
 }

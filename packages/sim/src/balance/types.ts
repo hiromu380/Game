@@ -100,6 +100,29 @@ export interface FloorParams {
   tripleMultiplier: number;
 }
 
+/**
+ * 日ごとのステージ（床の配置）
+ * テンプレートは 7×7 の文字列（1文字 = 1マス。'.' 床なし・'2' ×2床・'+' 加算床・'3' ×3床・'#' 使用不可）。
+ * 回転・反転で水増しし、8×8・9×9 ではシードで決めた位置に埋め込む（floor/stage.ts）
+ */
+export interface StageBalance {
+  templates: Record<string, string[]>;
+  /** 本編の日ごとに抽選するテンプレート（index = 日。足りない日は最後の帯を使う） */
+  dayBands: string[][];
+  /** 延長戦の日に抽選するテンプレート */
+  overtimeBand: string[];
+  /** 延長戦の日が進むごとに、×2床を×3床に置き換える枚数（延長戦の1日目から数える） */
+  overtimeUpgradesPerDay: number;
+  /** デイリー（1日分・3シフト）で抽選するテンプレート */
+  dailyBand: string[];
+  /** 初回ガイドの1日目に使うテンプレート（抽選しない・回転しない） */
+  tutorialTemplate: string;
+  /** 使用不可を除いたマスが、盤面のこの割合（%）以上あること（テンプレートの検証） */
+  minFreePercent: number;
+  /** 生成の試行回数の上限（超えたら帯の最初のテンプレートをそのまま使う） */
+  maxAttempts: number;
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -125,6 +148,8 @@ export interface Balance {
   partParams: PartParams;
   /** 床タイルの効果量 */
   floorParams: FloorParams;
+  /** 日ごとのステージ（床の配置） */
+  stages: StageBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
 
