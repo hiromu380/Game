@@ -84,6 +84,26 @@ describe('連鎖の演出の流れ', () => {
     expect(new Set(notes).size).toBe(notes.length);
   });
 
+  it('床の効果を受けた瞬間に床の種類つきで数字を出し、パーツの倍率は床の後の値と比べる', () => {
+    // スイッチ → ×2床のギア → 出荷口: 床の「×2」とギアの「×2」が別々に出る（まとめて ×4 にはしない）
+    const floored = simulate({
+      board: row(['switch', 'gear', 'dock']),
+      floor: [null, { tile: 'double', source: 'stage' }, null],
+      seed: 1,
+      rules: DEFAULT_RULES,
+    });
+    const cues = buildChoreography(floored.events, strong).cues;
+    expect(cues.filter((c) => c.kind === 'floor')).toEqual([
+      expect.objectContaining({ x: 1, y: 0, tile: 'double', text: '×2' }),
+    ]);
+    expect(cues.filter((c) => c.kind === 'multiplier').map((c) => 'text' in c && c.text)).toEqual([
+      '×2',
+    ]);
+    // 弱では出さない
+    const weak = buildChoreography(floored.events, { ...strong, strength: 'minimal' }).cues;
+    expect(weak.some((c) => c.kind === 'floor')).toBe(false);
+  });
+
   it('合計の単位が変わる瞬間（1,000 以上）と、ノルマを超えた瞬間を出す', () => {
     const c = buildChoreography(hugeEvents(5), { ...strong, quota: 10 });
     expect(kinds(c.cues)).toEqual(expect.arrayContaining(['digitUp', 'quotaCross']));

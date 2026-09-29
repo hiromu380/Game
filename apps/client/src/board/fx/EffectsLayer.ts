@@ -7,12 +7,20 @@
  * 点滅を減らす）で弱められるようにしている。ここはあくまで見た目の処理で、ゲームの計算はしない。
  * パーティクルは使い回す（particlePool.ts）。
  */
-import type { PartId, Score } from '@chain-factory/sim';
+import type { FloorTileId, PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
 import { FX_COLORS, hex } from '../../assets/palette';
 import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
 import { CELL_SIZE, cellCenter } from '../layout';
+
+/** 床の種類ごとの演出の色（使用不可は効果がないので使わない） */
+const FLOOR_COLORS: Record<FloorTileId, number> = {
+  double: BOARD_THEME.floorDouble,
+  add: BOARD_THEME.floorAdd,
+  triple: BOARD_THEME.floorTriple,
+  blocked: BOARD_THEME.blocked,
+};
 import { easeOutCubic, type TweenManager } from '../tweens';
 import { ParticlePool } from './particlePool';
 
@@ -230,6 +238,29 @@ export class EffectsLayer {
   /** 倍率が乗った瞬間（×2・+8）: パーツの少し上に黄色い数字を浮かべる */
   multiplier(x: number, y: number, text: string, durationMs: number): void {
     this.popText(x, y - 0.35, text, 1, durationMs, BOARD_THEME.hazardYellow);
+  }
+
+  /**
+   * 床の効果を受けた: マスが床の色で光り（間引き中は省く）、床の色で「×2」「+3」が浮かぶ
+   * （パーツの倍率の数字より少し下に出し、同じマスで重ならないようにする）
+   */
+  floor(x: number, y: number, tile: FloorTileId, text: string, durationMs: number): void {
+    const color = FLOOR_COLORS[tile];
+    if (!this.thin && this.settings.strength !== 'minimal') {
+      const { px, py } = cellCenter(x, y);
+      const half = CELL_SIZE / 2 - 3;
+      const glow = new Graphics()
+        .roundRect(px - half, py - half, half * 2, half * 2, 6)
+        .fill({ color, alpha: 1 });
+      glow.alpha = 0.55;
+      this.boardLayer.addChild(glow);
+      this.tweens.add({
+        duration: durationMs * 0.6,
+        onUpdate: (t) => (glow.alpha = 0.55 * (1 - t)),
+        onComplete: () => glow.destroy(),
+      });
+    }
+    this.popText(x, y + 0.25, text, 0, durationMs, color);
   }
 
   /** 合計の単位が変わった（K → M → B）: 画面の上に大きく出す */

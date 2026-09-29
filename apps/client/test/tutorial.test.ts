@@ -18,7 +18,7 @@ import {
 
 /** ガイド用のラン（初期パーツ・7×7・決まったシード） */
 const tutorialRun = () =>
-  createRun(TUTORIAL_CONFIG.seed, { meta: metaToModifiers(createInitialMeta()) });
+  createRun(TUTORIAL_CONFIG.seed, { meta: metaToModifiers(createInitialMeta()), tutorial: true });
 
 /** 操作してからガイドを進める */
 function play(game: GameState, tutorial: TutorialState, ...actions: GameAction[]) {

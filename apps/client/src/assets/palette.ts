@@ -124,6 +124,14 @@ export const BOARD_COLORS = {
   hazardBlack: '#2b2b2b',
   /** 使用不可マス（補修工事） */
   blocked: '#c62828',
+  /** 床タイル: ×2床・加算床・×3床（盤面の下層。パーツより控えめに、地の床に重ねる） */
+  floorDouble: '#ffb300',
+  floorAdd: '#43a047',
+  floorTriple: '#e91e63',
+  /** 床タイルの数字（×2・+3・×3） */
+  floorLabel: '#fff8e1',
+  /** ボーナス床・今日の出来事の床（期間限定）の枠 */
+  floorBonus: '#4dd0e1',
   selected: '#ffeb3b',
   ghostOk: '#69f0ae',
   arrowFill: '#ffeb3b',

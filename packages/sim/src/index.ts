@@ -7,6 +7,7 @@ export {
   type Balance,
   type BossModifierId,
   type DayEventId,
+  type FloorParams,
   type MetaCondition,
   type PartBalance,
   type PartParams,

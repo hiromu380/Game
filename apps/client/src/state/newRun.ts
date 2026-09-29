@@ -40,7 +40,7 @@ export function createNewSeed(): number {
 export function startNewNormalRun(meta: MetaProgress): RunState {
   return loadSettings().tutorialDone
     ? startNormalRun(createNewSeed(), meta)
-    : startNormalRun(TUTORIAL_CONFIG.seed, createInitialMeta());
+    : startNormalRun(TUTORIAL_CONFIG.seed, createInitialMeta(), undefined, { tutorial: true });
 }
 
 /** ガイド用のランか（シードと、ランの最初の条件で見分ける） */
@@ -57,10 +57,15 @@ export function startNormalRun(
   seed: number,
   meta: MetaProgress,
   prices: Partial<Record<PartId, number>> | undefined = getMarket()?.prices,
+  options: { tutorial?: boolean } = {},
 ): RunState {
   // 体験版は「メタ進行が初期状態のまま」として扱う（メタ進行を渡さないと全パーツ解放になるため、初期値を渡す）
   const progress = EDITION_CONFIG.metaProgression ? meta : createInitialMeta();
-  const run = createRun(seed, { meta: metaToModifiers(progress), prices });
+  const run = createRun(seed, {
+    meta: metaToModifiers(progress),
+    prices,
+    tutorial: options.tutorial,
+  });
   if (EDITION_CONFIG.overtime) return run;
   return { ...run, config: { ...run.config, overtimeAllowed: false } };
 }

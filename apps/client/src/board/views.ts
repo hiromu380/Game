@@ -4,7 +4,7 @@
  * ここは「見た目を作る」だけで、ゲームの計算はしない。
  * 倍率などの数値は sim パッケージの関数・ルールから受け取って表示する。
  */
-import type { Dir4, Part, PartBadge, Score } from '@chain-factory/sim';
+import type { Dir4, FloorCell, Part, PartBadge, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, TilingSprite } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { BOARD_PADDING, CELL_SIZE } from './layout';
@@ -221,9 +221,51 @@ export function createBlockedCell(
     sprite.alpha = 0.92;
     return sprite;
   }
-  // 夜シフトの予告: 黄色の点線の枠（点線の代わりに短い線分を並べる）
+  // 夜シフトの予告: 黄色の点線の枠
+  return dashedFrame(left, top, 5).stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+}
+
+/**
+ * 床タイル（×2床・加算床・×3床）: 色つきの鉄板と、左上の数字（×2・+3。パーツを置いても見える位置）。
+ * ボーナス床・今日の出来事の床（期間限定）は、水色の点線の枠で見分けられるようにする。
+ * 使用不可は createBlockedCell で描く
+ */
+export function createFloorTile(
+  x: number,
+  y: number,
+  cell: FloorCell,
+  label: string,
+  textures: BoardTextures,
+): Container {
+  const left = BOARD_PADDING + x * CELL_SIZE;
+  const top = BOARD_PADDING + y * CELL_SIZE;
+  const view = new Container();
+  if (cell.tile !== 'blocked') {
+    const sprite = new Sprite(textures.floorTiles[cell.tile]);
+    sprite.position.set(left, top);
+    sprite.setSize(CELL_SIZE, CELL_SIZE);
+    view.addChild(sprite);
+  }
+  const text = new Text({
+    text: label,
+    style: {
+      fill: BOARD_THEME.floorLabel,
+      fontSize: 13,
+      fontWeight: '900',
+      stroke: { color: BOARD_THEME.badgeFill, width: 3 },
+    },
+  });
+  text.position.set(left + 6, top + 4);
+  view.addChild(text);
+  if (cell.source === 'bonus' || cell.source === 'event') {
+    view.addChild(dashedFrame(left, top, 3).stroke({ width: 3, color: BOARD_THEME.floorBonus }));
+  }
+  return view;
+}
+
+/** マスの内側の点線の枠（点線の代わりに短い線分を並べる。色と太さは呼び出し側で stroke する） */
+function dashedFrame(left: number, top: number, inset: number): Graphics {
   const g = new Graphics();
-  const inset = 5;
   const size = CELL_SIZE - inset * 2;
   for (let i = 0; i < size; i += 10) {
     const len = Math.min(5, size - i);
@@ -238,5 +280,5 @@ export function createBlockedCell(
       top + inset + i + len,
     );
   }
-  return g.stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+  return g;
 }

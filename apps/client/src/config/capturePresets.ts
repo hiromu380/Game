@@ -3,12 +3,19 @@
  *
  * 連鎖演出の確認・録画用。小・中は手で組んだもの、大はボットが組んだ盤面、特大は長い連鎖になるよう探した盤面
  * （連鎖の数・出荷の桁は docs/ops/effects-capture.md）。遊びのバランスとは関係ない。
+ * 「床」はギアの列の下に×2床・加算床・×3床を敷いた盤面（床の演出の確認用。読み込むとその日の床を差し替える）
  */
-import type { Board } from '@chain-factory/sim';
+import type { Board, FloorCell, FloorLayer, FloorTileId } from '@chain-factory/sim';
 
-export type CapturePresetKey = 'small' | 'medium' | 'large' | 'huge';
+export type CapturePresetKey = 'small' | 'medium' | 'large' | 'huge' | 'floor';
 
-export const CAPTURE_PRESETS: Record<CapturePresetKey, Board> = {
+export interface CapturePreset {
+  board: Board;
+  /** 床（省略時は今のランの床のまま） */
+  floor?: FloorLayer;
+}
+
+const BOARDS: Record<Exclude<CapturePresetKey, 'floor'>, Board> = {
   small: {
     width: 7,
     height: 7,
@@ -484,4 +491,28 @@ export const CAPTURE_PRESETS: Record<CapturePresetKey, Board> = {
       },
     ],
   },
+};
+
+/** 床の演出の確認用: スイッチ → ギア5つ → 出荷口。ギアの下に ×2・+3・×3・×2・×3 の床（出荷量 2,016） */
+function floorPreset(): CapturePreset {
+  const size = 7;
+  const row = 3;
+  const cells: Board['cells'] = new Array(size * size).fill(null);
+  const floor: FloorLayer = new Array(size * size).fill(null);
+  const ids = ['switch', 'gear', 'gear', 'gear', 'gear', 'gear', 'dock'] as const;
+  ids.forEach((id, x) => (cells[row * size + x] = { id, dir: 1 }));
+  const tiles: FloorTileId[] = ['double', 'add', 'triple', 'double', 'triple'];
+  tiles.forEach((tile, i) => {
+    const cell: FloorCell = { tile, source: 'stage' };
+    floor[row * size + i + 1] = cell;
+  });
+  return { board: { width: size, height: size, cells }, floor };
+}
+
+export const CAPTURE_PRESETS: Record<CapturePresetKey, CapturePreset> = {
+  small: { board: BOARDS.small },
+  medium: { board: BOARDS.medium },
+  large: { board: BOARDS.large },
+  huge: { board: BOARDS.huge },
+  floor: floorPreset(),
 };

@@ -52,6 +52,7 @@ export type SoundKey =
   | 'chain1'
   | 'chain2'
   | 'digitUp'
+  | 'floor'
   | 'quotaCross'
   | 'peak'
   | 'stamp'
@@ -230,6 +231,18 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 1047, at: 0, duration: 0.06 },
         { freq: 1568, at: 0.06, duration: 0.06 },
         { freq: 2093, at: 0.12, duration: 0.16 },
+      ],
+    },
+  },
+  /** 床の効果を受けた（金属の板を叩く短い2音。床の種類で音程を変える） */
+  floor: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.2,
+      notes: [
+        { freq: 660, at: 0, duration: 0.05 },
+        { freq: 990, at: 0.05, duration: 0.09 },
       ],
     },
   },

@@ -9,6 +9,7 @@ import {
   dailyRunSeed,
   getCurrentEconomy,
   getCurrentFloor,
+  type FloorParams,
   getCurrentRules,
   getCurrentShift,
   getDayAndPeriod,
@@ -90,6 +91,13 @@ interface Props {
   /** タイトル画面へ戻る */
   onTitle: () => void;
 }
+
+/** 床の効果量（文言に埋め込む） */
+const floorAmounts = (params: FloorParams) => ({
+  double: params.doubleMultiplier,
+  add: params.addAmount,
+  triple: params.tripleMultiplier,
+});
 
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
@@ -293,6 +301,16 @@ export function App({ start, onTitle }: Props) {
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
       getQuotaCrossLabel: () => t('playback.quotaCross'),
+      getFloorShort: (tile, params) => t(`floor.${tile}.short`, floorAmounts(params)),
+      getFloorDescription: (cell, params) =>
+        t('floor.tooltip', {
+          name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
+          desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
+          period:
+            cell.source === 'bonus' || cell.source === 'event'
+              ? t(`floor.period.${cell.source}`)
+              : '',
+        }),
       formatScore,
       formatCompact,
     }),
@@ -581,7 +599,8 @@ export function App({ start, onTitle }: Props) {
           speed={speed}
           onUiChange={setCaptureUi}
           onSpeedChange={setSpeed}
-          onLoadBoard={(board) => dispatch({ type: 'captureLoadBoard', board })}
+          floor={getCurrentFloor(run)}
+          onLoadBoard={(board, floor) => dispatch({ type: 'captureLoadBoard', board, floor })}
           peakFirst={capturePeakFirst}
           onPeakFirstChange={setCapturePeakFirst}
           onCommit={(seed) => {

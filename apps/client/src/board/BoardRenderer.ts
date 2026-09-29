@@ -16,7 +16,10 @@ import {
   type PartBadge,
   type PartId,
   isBlockedCell,
+  type FloorCell,
   type FloorLayer,
+  type FloorParams,
+  type FloorTileId,
   type RuleSet,
   type Score,
   type SimEvent,
@@ -64,6 +67,7 @@ import { easeOutCubic, TweenManager } from './tweens';
 import {
   createBlockedCell,
   createFloor,
+  createFloorTile,
   createPartView,
   createSignalView,
   PART_DISPLAY_SIZE,
@@ -88,6 +92,9 @@ export interface BoardViewState {
   guideCell: { x: number; y: number } | null;
 }
 
+/** 床の効果音の音程（倍率が大きい床ほど高い） */
+const FLOOR_SEMITONES: Record<FloorTileId, number> = { add: 0, double: 4, triple: 9, blocked: 0 };
+
 /** 盤面に表示する文言（i18n を通すため関数で受け取る。言語切り替えに追従する） */
 export interface BoardLabels {
   /** パーツの表示名（ホバー時のラベル） */
@@ -105,6 +112,10 @@ export interface BoardLabels {
   formatCompact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯の文言 */
   getQuotaCrossLabel: () => string;
+  /** 床タイルの短い表記（マスの左上・演出。例: ×2・+3） */
+  getFloorShort: (tile: FloorTileId, params: FloorParams) => string;
+  /** 床の説明（ホバー時。ボーナス床・出来事の床は期間も） */
+  getFloorDescription: (cell: FloorCell, params: FloorParams) => string;
 }
 
 export interface BoardRendererOptions extends BoardLabels {
@@ -348,15 +359,22 @@ export class BoardRenderer {
     }
 
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+    // 床タイル（盤面の下層。パーツより下に、控えめに描く）
     for (let cell = 0; cell < state.floor.length; cell++) {
-      if (!isBlockedCell(state.floor, cell)) continue;
+      const floorCell = state.floor[cell];
+      if (!floorCell) continue;
+      const x = cell % state.board.width;
+      const y = Math.floor(cell / state.board.width);
       this.blockLayer.addChild(
-        createBlockedCell(
-          cell % state.board.width,
-          Math.floor(cell / state.board.width),
-          false,
-          this.boardTextures,
-        ),
+        isBlockedCell(state.floor, cell)
+          ? createBlockedCell(x, y, false, this.boardTextures)
+          : createFloorTile(
+              x,
+              y,
+              floorCell,
+              this.options.getFloorShort(floorCell.tile, state.rules.floorParams),
+              this.boardTextures,
+            ),
       );
     }
     for (const cell of state.upcomingBlocked) {
@@ -461,13 +479,28 @@ export class BoardRenderer {
       ghost.position.set(px, py);
       ghost.alpha = 0.55;
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
-      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(placing.partId));
+      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, placing.partId));
       return;
     }
     if (part) {
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
-      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(part.id));
+      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, part.id));
+      return;
     }
+    // 空きマスの床: 効果の説明
+    const text = this.withFloor(hovered, null);
+    if (text) this.showTooltip(hovered.x, hovered.y, text);
+  }
+
+  /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */
+  private withFloor(cell: { x: number; y: number }, partId: PartId | null): string {
+    const state = this.state;
+    const floorCell = state?.floor[cell.y * state.board.width + cell.x] ?? null;
+    const lines = partId ? [this.options.getPartName(partId)] : [];
+    if (state && floorCell) {
+      lines.push(this.options.getFloorDescription(floorCell, state.rules.floorParams));
+    }
+    return lines.join('\n');
   }
 
   /** マスの上にパーツ名のラベルを出す */
@@ -478,7 +511,7 @@ export class BoardRenderer {
     });
     label.anchor.set(0.5);
     const w = label.width + 16;
-    const h = 24;
+    const h = Math.max(24, label.height + 8);
     const { px, py } = cellCenter(x, y);
     // 最上段では下に出す
     const top = y === 0 ? py + CELL_SIZE / 2 + 4 : py - CELL_SIZE / 2 - h - 4;
@@ -627,6 +660,11 @@ export class BoardRenderer {
         break;
       case 'multiplier':
         this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
+        break;
+      case 'floor':
+        // 床の効果: 倍率が大きい床ほど音程が高い
+        this.options.playSound('floor', FLOOR_SEMITONES[cue.tile]);
+        this.effects.floor(cue.x, cue.y, cue.tile, cue.text, 700 / rate);
         break;
       case 'digitUp':
         this.options.playSound('digitUp', 0);

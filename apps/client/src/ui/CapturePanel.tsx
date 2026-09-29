@@ -10,7 +10,13 @@
  * パネル自体は C キーで出し入れする（撮影時は隠す）。画面の大きさはブラウザ・撮影ツール側で決める
  * （例: Playwright の viewport 1920×1080。docs/ops/store-assets.md）
  */
-import { PART_IDS, type Board, type PartId } from '@chain-factory/sim';
+import {
+  FLOOR_TILE_IDS,
+  PART_IDS,
+  type Board,
+  type FloorLayer,
+  type PartId,
+} from '@chain-factory/sim';
 import { useEffect, useState } from 'react';
 import { CAPTURE_PRESETS, type CapturePresetKey } from '../config/capturePresets';
 import { useI18n } from '../i18n';
@@ -20,11 +26,14 @@ export type CaptureUi = 'full' | 'minimal' | 'none';
 
 interface Props {
   board: Board;
+  /** 今のシフトの床（書き出しに含める） */
+  floor: FloorLayer;
   ui: CaptureUi;
   speed: PlaybackSpeed;
   onUiChange: (ui: CaptureUi) => void;
   onSpeedChange: (speed: PlaybackSpeed) => void;
-  onLoadBoard: (board: Board) => void;
+  /** 盤面を読み込む（floor があれば、その日の床も差し替える） */
+  onLoadBoard: (board: Board, floor?: FloorLayer) => void;
   /** ピークの少し前から再生する（最初の2秒で山場を見せる録画用） */
   peakFirst: boolean;
   onPeakFirstChange: (value: boolean) => void;
@@ -33,10 +42,17 @@ interface Props {
   onPreviewShare: () => void;
 }
 
-/** 書き出した JSON を盤面として読む。形が違えば null（盤面の大きさは今のランと同じであること） */
-export function parseBoard(text: string, width: number, height: number): Board | null {
+/**
+ * 書き出した JSON を盤面として読む。形が違えば null（盤面の大きさは今のランと同じであること）。
+ * floor があれば床も読む（床の種類と置き場所の形を確かめる）
+ */
+export function parseBoard(
+  text: string,
+  width: number,
+  height: number,
+): { board: Board; floor?: FloorLayer } | null {
   try {
-    const raw = JSON.parse(text) as Partial<Board>;
+    const raw = JSON.parse(text) as Partial<Board> & { floor?: unknown };
     if (raw.width !== width || raw.height !== height || !Array.isArray(raw.cells)) return null;
     if (raw.cells.length !== width * height) return null;
     const ok = raw.cells.every(
@@ -46,7 +62,21 @@ export function parseBoard(text: string, width: number, height: number): Board |
           PART_IDS.includes(c.id as PartId) &&
           [0, 1, 2, 3].includes(c.dir as number)),
     );
-    return ok ? (raw as Board) : null;
+    if (!ok) return null;
+    const board: Board = { width, height, cells: raw.cells };
+    if (raw.floor === undefined) return { board };
+    const floor = raw.floor;
+    const floorOk =
+      Array.isArray(floor) &&
+      floor.length === width * height &&
+      floor.every(
+        (c) =>
+          c === null ||
+          (typeof c === 'object' &&
+            FLOOR_TILE_IDS.includes((c as { tile: never }).tile) &&
+            ['stage', 'boss', 'event', 'bonus'].includes((c as { source: string }).source)),
+      );
+    return floorOk ? { board, floor: floor as FloorLayer } : null;
   } catch {
     return null;
   }
@@ -76,9 +106,9 @@ export function CapturePanel(props: Props) {
 
   if (!open) return null;
   const load = () => {
-    const board = parseBoard(text, props.board.width, props.board.height);
-    if (board) props.onLoadBoard(board);
-    setMessage(t(board ? 'capture.loaded' : 'capture.invalid'));
+    const parsed = parseBoard(text, props.board.width, props.board.height);
+    if (parsed) props.onLoadBoard(parsed.board, parsed.floor);
+    setMessage(t(parsed ? 'capture.loaded' : 'capture.invalid'));
   };
 
   return (
@@ -107,7 +137,9 @@ export function CapturePanel(props: Props) {
         ))}
       </div>
       <div className="button-row">
-        <button onClick={() => setText(JSON.stringify(props.board))}>{t('capture.export')}</button>
+        <button onClick={() => setText(JSON.stringify({ ...props.board, floor: props.floor }))}>
+          {t('capture.export')}
+        </button>
         <button onClick={load}>{t('capture.import')}</button>
       </div>
       <div className="button-row">
@@ -116,8 +148,10 @@ export function CapturePanel(props: Props) {
             key={key}
             onClick={() => {
               const preset = CAPTURE_PRESETS[key];
-              const ok = preset.width === props.board.width && preset.height === props.board.height;
-              if (ok) props.onLoadBoard(preset);
+              const ok =
+                preset.board.width === props.board.width &&
+                preset.board.height === props.board.height;
+              if (ok) props.onLoadBoard(preset.board, preset.floor);
               setMessage(t(ok ? 'capture.loaded' : 'capture.invalid'));
             }}
           >

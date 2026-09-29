@@ -112,9 +112,15 @@ const bossFiles = byName(
 );
 const uiFiles = byName(import.meta.glob<string>('./ui/*.svg', { eager: true, import: 'default' }));
 
-/** 盤面の素材（床3種・使用不可マス・枠の角と辺。art/board.ts で生成） */
+/** 盤面の素材（床3種・床タイル・使用不可マス・枠の角と辺。art/board.ts で生成） */
 export const BOARD_ASSETS = {
   floors: [boardFiles['floor-1']!, boardFiles['floor-2']!, boardFiles['floor-3']!],
+  /** 床タイル（×2床・加算床・×3床）。使用不可は blocked */
+  floorTiles: {
+    double: boardFiles['floor-double']!,
+    add: boardFiles['floor-add']!,
+    triple: boardFiles['floor-triple']!,
+  },
   blocked: boardFiles['floor-blocked']!,
   frameCorner: boardFiles['frame-corner']!,
   frameEdge: boardFiles['frame-edge']!,

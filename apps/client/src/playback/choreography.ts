@@ -9,7 +9,7 @@
  * - 盤面の光は1秒に3回まで。「点滅を減らす」なら光を出さない
  * 設定値は config/effects.ts の choreography。描く側（board/）はこの命令列をそのまま再生する
  */
-import { scoreOf, type Score, type SimEvent } from '@chain-factory/sim';
+import { scoreOf, type FloorTileId, type Score, type SimEvent } from '@chain-factory/sim';
 import { EFFECTS_CONFIG, type EffectStrength } from '../config/effects';
 import { groupEventsByTick } from './timeline';
 
@@ -31,6 +31,8 @@ export type Cue =
   | { atMs: number; kind: 'note'; semitone: number; timbre: number }
   /** 倍率が乗った瞬間（×2・+8） */
   | { atMs: number; kind: 'multiplier'; x: number; y: number; text: string }
+  /** 床の効果を受けた（マスが光り、床の種類の色で「×2」「+3」が浮かぶ。倍率ポップと同じ上限で間引く） */
+  | { atMs: number; kind: 'floor'; x: number; y: number; tile: FloorTileId; text: string }
   /** 合計の桁が上がった（K → M → B の切り替わり）。digits は新しい桁数 */
   | { atMs: number; kind: 'digitUp'; digits: number; total: Score }
   /** 合計がノルマを超えた */
@@ -124,6 +126,7 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
   let lastFlashAt = -Infinity;
   let pops = 0;
   let lastPopAt = -Infinity;
+  let lastFloorPopAt = -Infinity;
   const flash = (atMs: number) => {
     if (flashAlpha <= 0 || atMs - lastFlashAt < 1000 / C.maxFlashesPerSecond) return;
     lastFlashAt = atMs;
@@ -134,24 +137,42 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
     const d = durations[i]!;
     ticks.push({ atMs: t, durationMs: d });
     const at = Math.round(t + d * MOVE_RATIO);
-    // パーツに入った信号の値（この tick に消費されたもの）
+    // 数字のポップ: 合計の数は倍率・床で共通の上限。間隔は種類ごと（同じマスの床とパーツは同時に出してよい）
+    const popAllowed = (last: number) =>
+      options.strength !== 'minimal' &&
+      pops < C.multiplierPops.max &&
+      at - last >= C.multiplierPops.minGapMs;
+    // 床の効果を受けた後の値（パーツの倍率は、床の効果を受けた後の値と比べる）
+    const floored = new Map<string, Score>();
+    for (const e of tickEvents) {
+      if (e.type !== 'floor') continue;
+      floored.set(`${e.x},${e.y}`, e.after);
+      const text = multiplierText(e.before, e.after);
+      if (text && popAllowed(lastFloorPopAt)) {
+        pops++;
+        lastFloorPopAt = at;
+        cues.push({ atMs: at, kind: 'floor', x: e.x, y: e.y, tile: e.tile, text });
+      }
+    }
+    // パーツに入った信号の値（この tick に消費されたもの。床の効果を受けたなら受けた後の値）
     const inputs = new Map<string, Score>();
     let activated = 0;
     for (const e of tickEvents) {
       if (e.type === 'activate') {
         activated++;
-        const v = values.get(e.signalId);
-        if (v !== undefined) inputs.set(`${e.x},${e.y}`, v);
+        const key = `${e.x},${e.y}`;
+        const v = floored.get(key) ?? values.get(e.signalId);
+        if (v !== undefined) inputs.set(key, v);
       }
     }
     for (const e of tickEvents) {
       if (e.type === 'emit') {
         values.set(e.signalId, e.value);
         const input = inputs.get(`${e.x},${e.y}`);
-        if (input === undefined || options.strength === 'minimal') continue;
+        if (input === undefined) continue;
         inputs.delete(`${e.x},${e.y}`); // 同じパーツの2本目以降（分岐）は数字を重ねない
         const text = multiplierText(input, e.value);
-        if (text && pops < C.multiplierPops.max && at - lastPopAt >= C.multiplierPops.minGapMs) {
+        if (text && popAllowed(lastPopAt)) {
           pops++;
           lastPopAt = at;
           cues.push({ atMs: at, kind: 'multiplier', x: e.x, y: e.y, text });
