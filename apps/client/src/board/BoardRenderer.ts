@@ -34,6 +34,7 @@ import { BOARD_THEME } from '../assets/manifest';
 import type { PlaybackSpeed } from '../playback/timeline';
 import {
   buildChoreography,
+  type Choreography,
   ChoreographyPlayer,
   MOVE_RATIO,
   type Cue,
@@ -47,6 +48,7 @@ import {
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
 import type { SoundKey } from '../audio/manifest';
+import { EFFECTS_CONFIG } from '../config/effects';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
@@ -496,6 +498,7 @@ export class BoardRenderer {
     speed: PlaybackSpeed,
     callbacks: PlaybackCallbacks,
     quota: number | null = null,
+    peakFirst = false,
   ): void {
     this.clearPlayback();
     this.status.resetPips();
@@ -512,6 +515,23 @@ export class BoardRenderer {
     this.speed = speed;
     this.drawOverlay();
     if (speed === 'skip') this.skip();
+    else if (peakFirst) this.fastForwardToPeak(choreography);
+  }
+
+  /** 撮影用: ピークの少し前まで、演出なしで盤面だけ進める */
+  private fastForwardToPeak(choreography: Choreography): void {
+    const peak = choreography.cues.find((c) => c.kind === 'peak');
+    if (!peak || !this.timeline) return;
+    const skipMs = peak.atMs - EFFECTS_CONFIG.choreography.capturePeakLeadMs;
+    if (skipMs <= 0) return;
+    let chain = 0;
+    for (const tick of this.timeline.advance(skipMs).ticks) {
+      this.applyTick(tick.events, 0);
+      chain += tick.events.filter((e) => e.type === 'activate').length;
+    }
+    this.tweens.finishAll();
+    this.effects.reset();
+    this.effects.restoreChain(chain);
   }
 
   /** 演出の強さ・揺れの設定を反映する */

@@ -5,12 +5,14 @@
  * - UI の表示: 全部 / 最小限（盤面と HUD だけ）/ なし（盤面だけ）
  * - 再生速度: 0.25×〜2×（スローで撮る）
  * - 盤面の書き出し・読み込み（JSON）と、指定したシードでの本番: 見栄えの良い連鎖を何度でも再現する
+ * - 規模別の盤面（小・中・大・特大。config/capturePresets.ts）と「ピークから再生」: 連鎖演出の確認・録画
  * - 共有カードの確認: 今の盤面・結果で、結果画面の共有カードを出す
  * パネル自体は C キーで出し入れする（撮影時は隠す）。画面の大きさはブラウザ・撮影ツール側で決める
  * （例: Playwright の viewport 1920×1080。docs/ops/store-assets.md）
  */
 import { PART_IDS, type Board, type PartId } from '@chain-factory/sim';
 import { useEffect, useState } from 'react';
+import { CAPTURE_PRESETS, type CapturePresetKey } from '../config/capturePresets';
 import { useI18n } from '../i18n';
 import type { PlaybackSpeed } from '../playback/timeline';
 
@@ -23,6 +25,9 @@ interface Props {
   onUiChange: (ui: CaptureUi) => void;
   onSpeedChange: (speed: PlaybackSpeed) => void;
   onLoadBoard: (board: Board) => void;
+  /** ピークの少し前から再生する（最初の2秒で山場を見せる録画用） */
+  peakFirst: boolean;
+  onPeakFirstChange: (value: boolean) => void;
   onCommit: (seed: number) => void;
   /** 今の盤面で共有カードの見た目を確かめる */
   onPreviewShare: () => void;
@@ -105,6 +110,29 @@ export function CapturePanel(props: Props) {
         <button onClick={() => setText(JSON.stringify(props.board))}>{t('capture.export')}</button>
         <button onClick={load}>{t('capture.import')}</button>
       </div>
+      <div className="button-row">
+        {(Object.keys(CAPTURE_PRESETS) as CapturePresetKey[]).map((key) => (
+          <button
+            key={key}
+            onClick={() => {
+              const preset = CAPTURE_PRESETS[key];
+              const ok = preset.width === props.board.width && preset.height === props.board.height;
+              if (ok) props.onLoadBoard(preset);
+              setMessage(t(ok ? 'capture.loaded' : 'capture.invalid'));
+            }}
+          >
+            {t(`capture.preset.${key}`)}
+          </button>
+        ))}
+      </div>
+      <label>
+        <input
+          type="checkbox"
+          checked={props.peakFirst}
+          onChange={(e) => props.onPeakFirstChange(e.target.checked)}
+        />
+        {t('capture.peakFirst')}
+      </label>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} />
       <div className="button-row">
         <input value={seed} onChange={(e) => setSeed(e.target.value)} size={10} />

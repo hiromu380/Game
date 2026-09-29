@@ -120,6 +120,7 @@ export function App({ start, onTitle }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** 撮影モードの UI の表示 */
   const [captureUi, setCaptureUi] = useState<CaptureUi>('full');
+  const [capturePeakFirst, setCapturePeakFirst] = useState(false);
   /** 撮影モード: 共有カードの確認 */
   const [sharePreview, setSharePreview] = useState(false);
   /** デイリーのメニュー（開いていなければ null） */
@@ -579,6 +580,8 @@ export function App({ start, onTitle }: Props) {
           onUiChange={setCaptureUi}
           onSpeedChange={setSpeed}
           onLoadBoard={(board) => dispatch({ type: 'captureLoadBoard', board })}
+          peakFirst={capturePeakFirst}
+          onPeakFirstChange={setCapturePeakFirst}
           onCommit={(seed) => {
             setLiveScore(null);
             dispatch({ type: 'captureCommit', seed });
@@ -612,6 +615,7 @@ export function App({ start, onTitle }: Props) {
             effectSettings={effectSettings}
             playbackResult={playback?.result ?? null}
             quota={getCurrentShift(run).quota}
+            peakFirst={CAPTURE && capturePeakFirst}
             speed={speed}
             cursor={cursor}
             onCellClick={onCellClick}

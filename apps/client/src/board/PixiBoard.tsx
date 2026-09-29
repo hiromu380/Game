@@ -22,6 +22,8 @@ interface Props {
   playbackResult: SimResult | null;
   /** 再生中のシフトのノルマ（超えた瞬間を見せる） */
   quota: number | null;
+  /** 撮影モードの「ピークから再生」（ピークの少し前まで早送りしてから再生する） */
+  peakFirst?: boolean;
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
@@ -125,6 +127,7 @@ export function PixiBoard(props: Props) {
         onFinish: () => callbacksRef.current.onPlaybackFinish(),
       },
       quotaRef.current,
+      callbacksRef.current.peakFirst ?? false,
     );
   }, [renderer, playbackResult]);
 

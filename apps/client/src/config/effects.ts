@@ -80,6 +80,8 @@ export const EFFECTS_CONFIG = {
     flash: { alpha: { full: 0.35, reduced: 0.2, minimal: 0 }, durationMs: 260 },
     /** 点滅の上限（光過敏性への配慮）: 1秒あたりの回数 */
     maxFlashesPerSecond: 3,
+    /** 撮影モードの「ピークから再生」: ピークの何ミリ秒前から見せるか（X の動画で最初の2秒に山場を入れる） */
+    capturePeakLeadMs: 1500,
     /** 倍率の数字（×2・+8）を浮かべる数の上限と、同じ時刻に重ならない間隔 */
     multiplierPops: { max: 30, minGapMs: 45 },
     /** 連鎖の音: 1連鎖ごとに半音上がる（上限あり）。stepsPerTimbre 段ごとに音色を変える */

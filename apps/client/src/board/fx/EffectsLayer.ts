@@ -105,6 +105,12 @@ export class EffectsLayer {
     return this.chainCount;
   }
 
+  /** 撮影用の早送りの後に、連鎖数だけ戻す（演出は消したまま） */
+  restoreChain(count: number): void {
+    this.chainCount = count;
+    this.updateCounter();
+  }
+
   /** 細かい演出を間引くか（描く側が tick の長さから決める） */
   setThin(thin: boolean): void {
     this.thin = thin;
