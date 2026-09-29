@@ -20,6 +20,8 @@ interface Props {
   view: BoardViewState;
   /** 再生する結果（null なら再生しない）。同じオブジェクトの間は再生し直さない */
   playbackResult: SimResult | null;
+  /** 再生中のシフトのノルマ（超えた瞬間を見せる） */
+  quota: number | null;
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
@@ -35,6 +37,8 @@ interface Props {
 
 export function PixiBoard(props: Props) {
   const { view, playbackResult, speed, effectSettings } = props;
+  // ノルマは再生を始めるときにだけ読む（再生中に変わっても、やり直さない）
+  const quotaRef = useRef(props.quota);
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderer, setRenderer] = useState<BoardRenderer | null>(null);
   /** 再生開始時の速度（速度変更だけで再生し直さないよう ref で持つ） */
@@ -67,6 +71,7 @@ export function PixiBoard(props: Props) {
       getCutInTitle: () => labels().getCutInTitle(),
       formatScore: (value) => labels().formatScore(value),
       formatCompact: (value) => labels().formatCompact(value),
+      getQuotaCrossLabel: () => labels().getQuotaCrossLabel(),
       playSound: (key, semitones) => audio.play(key, semitones),
     }).then((r) => {
       if (disposed) {
@@ -101,16 +106,26 @@ export function PixiBoard(props: Props) {
   }, [renderer, effectSettings]);
 
   // 再生の開始・終了
+  // 再生を始める effect より前に、最新のノルマを覚えておく
+  useEffect(() => {
+    quotaRef.current = props.quota;
+  }, [props.quota]);
+
   useEffect(() => {
     if (!renderer) return;
     if (!playbackResult) {
       renderer.clearPlayback();
       return;
     }
-    renderer.play(playbackResult, speedRef.current, {
-      onShip: (total) => callbacksRef.current.onShip(total),
-      onFinish: () => callbacksRef.current.onPlaybackFinish(),
-    });
+    renderer.play(
+      playbackResult,
+      speedRef.current,
+      {
+        onShip: (total) => callbacksRef.current.onShip(total),
+        onFinish: () => callbacksRef.current.onPlaybackFinish(),
+      },
+      quotaRef.current,
+    );
   }, [renderer, playbackResult]);
 
   // 再生速度の変更（再生を最初からやり直さないよう、別の effect にする）

@@ -9,6 +9,7 @@ import {
   dailyRunSeed,
   getCurrentEconomy,
   getCurrentRules,
+  getCurrentShift,
   getDayAndPeriod,
   getRefund,
   getRerollCost,
@@ -288,13 +289,15 @@ export function App({ start, onTitle }: Props) {
       getBreakLabel: (reason) => t(`break.short.${reason}`),
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
+      getQuotaCrossLabel: () => t('playback.quotaCross'),
       formatScore,
       formatCompact,
     }),
     [t, formatScore, formatCompact],
   );
   const effectSettings = useMemo(
-    () => ({ strength: settings.effects, shake: settings.shake }),
+    // 点滅を減らす設定は、設定画面に追加するまで既定（減らさない）
+    () => ({ strength: settings.effects, shake: settings.shake, reduceFlashes: false }),
     [settings.effects, settings.shake],
   );
 
@@ -605,6 +608,7 @@ export function App({ start, onTitle }: Props) {
             labels={boardLabels}
             effectSettings={effectSettings}
             playbackResult={playback?.result ?? null}
+            quota={getCurrentShift(run).quota}
             speed={speed}
             cursor={cursor}
             onCellClick={onCellClick}

@@ -204,3 +204,55 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
   cues.sort((a, b) => a.atMs - b.atMs);
   return { ticks, cues, totalMs: t + C.stampMs, compressed };
 }
+
+/**
+ * 演出の命令列を時間どおりに取り出す（描く側が毎フレーム呼ぶ）。時刻は再生速度 1x のミリ秒
+ */
+export class ChoreographyPlayer {
+  private elapsed = 0;
+  private nextTick = 0;
+  private nextCue = 0;
+  private readonly ticksEvents: SimEvent[][];
+
+  constructor(
+    events: SimEvent[],
+    readonly choreography: Choreography,
+  ) {
+    this.ticksEvents = groupEventsByTick(events);
+  }
+
+  get isFinished(): boolean {
+    return (
+      this.nextTick >= this.choreography.ticks.length &&
+      this.nextCue >= this.choreography.cues.length
+    );
+  }
+
+  /** 時間を進め、この間に始まる tick（イベントと長さ）と命令を返す */
+  advance(deltaMs: number): { ticks: { events: SimEvent[]; durationMs: number }[]; cues: Cue[] } {
+    this.elapsed += deltaMs;
+    return this.take((atMs) => atMs <= this.elapsed);
+  }
+
+  /** 残りをすべて返す（スキップ用） */
+  flush(): { ticks: { events: SimEvent[]; durationMs: number }[]; cues: Cue[] } {
+    return this.take(() => true);
+  }
+
+  private take(due: (atMs: number) => boolean) {
+    const { ticks, cues } = this.choreography;
+    const outTicks: { events: SimEvent[]; durationMs: number }[] = [];
+    const outCues: Cue[] = [];
+    while (this.nextTick < ticks.length && due(ticks[this.nextTick]!.atMs)) {
+      outTicks.push({
+        events: this.ticksEvents[this.nextTick] ?? [],
+        durationMs: ticks[this.nextTick]!.durationMs,
+      });
+      this.nextTick++;
+    }
+    while (this.nextCue < cues.length && due(cues[this.nextCue]!.atMs)) {
+      outCues.push(cues[this.nextCue++]!);
+    }
+    return { ticks: outTicks, cues: outCues };
+  }
+}

@@ -31,7 +31,13 @@ import { FONT_STACK } from '../config/fonts';
 // 盤面の文字も画面と同じ同梱フォントで描く（指定しないと端末任せになり、中国語用の字形になることがある）
 TextStyle.defaultTextStyle.fontFamily = FONT_STACK;
 import { BOARD_THEME } from '../assets/manifest';
-import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
+import type { PlaybackSpeed } from '../playback/timeline';
+import {
+  buildChoreography,
+  ChoreographyPlayer,
+  MOVE_RATIO,
+  type Cue,
+} from '../playback/choreography';
 import {
   boardPixelSize,
   INITIAL_BOARD_PIXEL_SIZE,
@@ -40,7 +46,7 @@ import {
   pixelToCell,
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
-import { chainSemitones, type SoundKey } from '../audio/manifest';
+import type { SoundKey } from '../audio/manifest';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
@@ -91,6 +97,8 @@ export interface BoardLabels {
   /** スコアの表記（通常 / 短い） */
   formatScore: (value: Score) => string;
   formatCompact: (value: Score) => string;
+  /** ノルマを超えた瞬間の帯の文言 */
+  getQuotaCrossLabel: () => string;
 }
 
 export interface BoardRendererOptions extends BoardLabels {
@@ -119,8 +127,8 @@ export interface PlaybackCallbacks {
   onFinish: () => void;
 }
 
-/** 1 tick のうち信号の移動にかける割合（残りで発光などの演出） */
-const MOVE_RATIO = 0.55;
+/** tick がこれより短いときは、細かい演出（パーツの発光・コインの数）を間引く */
+const THIN_TICK_MS = 70;
 
 export class BoardRenderer {
   private readonly app: Application;
@@ -158,7 +166,11 @@ export class BoardRenderer {
     startY: number;
     pointer: { x: number; y: number } | null;
   } | null = null;
-  private timeline: PlaybackTimeline | null = null;
+  /** 再生中の演出の流れ（playback/choreography.ts） */
+  private timeline: ChoreographyPlayer | null = null;
+  /** ピークで止めている残り時間（この間は再生も演出も進めない。揺れだけ続ける） */
+  private freezeMs = 0;
+  private effectSettings: EffectSettings = { strength: 'full', shake: true, reduceFlashes: false };
   /** 直近に再生した結果（再生後の「途切れた理由」表示に使う） */
   private lastResult: SimResult | null = null;
   private callbacks: PlaybackCallbacks | null = null;
@@ -183,6 +195,8 @@ export class BoardRenderer {
         cutInTitle: options.getCutInTitle,
         income: options.formatIncome,
         score: options.formatScore,
+        compact: options.formatCompact,
+        quotaCross: options.getQuotaCrossLabel,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
       () => ({ width: this.app.screen.width, height: this.app.screen.height }),
@@ -473,13 +487,27 @@ export class BoardRenderer {
   // イベント再生
   // ---------------------------------------------------------------------------
 
-  /** シミュレーション結果の再生を始める */
-  play(result: SimResult, speed: PlaybackSpeed, callbacks: PlaybackCallbacks): void {
+  /**
+   * シミュレーション結果の再生を始める
+   * quota: ノルマ（超えた瞬間を見せる。なければ null）
+   */
+  play(
+    result: SimResult,
+    speed: PlaybackSpeed,
+    callbacks: PlaybackCallbacks,
+    quota: number | null = null,
+  ): void {
     this.clearPlayback();
     this.status.resetPips();
     this.status.clearBreaks();
     this.lastResult = result;
-    this.timeline = new PlaybackTimeline(result.events);
+    const choreography = buildChoreography(result.events, {
+      strength: this.effectSettings.strength,
+      reduceFlashes: this.effectSettings.reduceFlashes,
+      quota,
+    });
+    this.timeline = new ChoreographyPlayer(result.events, choreography);
+    this.freezeMs = 0;
     this.callbacks = callbacks;
     this.speed = speed;
     this.drawOverlay();
@@ -488,6 +516,7 @@ export class BoardRenderer {
 
   /** 演出の強さ・揺れの設定を反映する */
   setEffectSettings(settings: EffectSettings): void {
+    this.effectSettings = settings;
     this.effects.setSettings(settings);
   }
 
@@ -499,7 +528,7 @@ export class BoardRenderer {
   /** 残りの演出を飛ばして最終状態にする */
   skip(): void {
     if (!this.timeline) return;
-    for (const tickEvents of this.timeline.flush()) this.applyTick(tickEvents, 0);
+    for (const tick of this.timeline.flush().ticks) this.applyTick(tick.events, 0);
     this.tweens.finishAll();
     this.effects.reset();
     this.finishPlayback();
@@ -518,13 +547,19 @@ export class BoardRenderer {
   }
 
   private update(deltaMs: number): void {
-    // スローモーション中は、再生と演出の時間をゆっくり進める
-    const scaled = deltaMs * this.effects.timeScale;
-    if (this.timeline && this.speed !== 'skip') {
-      const tickMs = PlaybackTimeline.tickMs(this.speed);
-      for (const tickEvents of this.timeline.advance(scaled, this.speed)) {
-        this.applyTick(tickEvents, tickMs);
-      }
+    // ピークで止めている間は、再生も演出も進めない（揺れだけ続ける）
+    let scaled = deltaMs;
+    if (this.freezeMs > 0) {
+      const frozen = Math.min(this.freezeMs, deltaMs);
+      this.freezeMs -= frozen;
+      scaled = deltaMs - frozen;
+    }
+    const speed = this.speed;
+    if (this.timeline && speed !== 'skip' && scaled > 0) {
+      const rate = speed;
+      const due = this.timeline.advance(scaled * rate);
+      for (const tick of due.ticks) this.applyTick(tick.events, tick.durationMs / rate);
+      for (const cue of due.cues) this.applyCue(cue, rate);
     }
     this.tweens.update(scaled);
 
@@ -547,16 +582,53 @@ export class BoardRenderer {
     callbacks?.onFinish();
   }
 
+  /** 演出の命令を見た目・音に反映する（rate: 再生速度。長さを速さに合わせて縮める） */
+  private applyCue(cue: Cue, rate: number): void {
+    switch (cue.kind) {
+      case 'windup': {
+        const switches: { x: number; y: number }[] = [];
+        const board = this.state?.board;
+        board?.cells.forEach((c, i) => {
+          if (c?.id === 'switch')
+            switches.push({ x: i % board.width, y: Math.floor(i / board.width) });
+        });
+        this.effects.windup(switches, cue.durationMs / rate);
+        break;
+      }
+      case 'note':
+        this.options.playSound('tick', cue.semitone);
+        break;
+      case 'multiplier':
+        this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
+        break;
+      case 'digitUp':
+        this.effects.digitUp(cue.total);
+        break;
+      case 'quotaCross':
+        this.effects.quotaCross();
+        break;
+      case 'flash':
+        this.effects.flash(cue.alpha, cue.durationMs / rate);
+        break;
+      case 'peak':
+        this.freezeMs = cue.hitstopMs / rate;
+        this.effects.peak();
+        break;
+      case 'stamp':
+        this.effects.stamp(cue.total, cue.durationMs / rate);
+        break;
+    }
+  }
+
   /** 1 tick 分のイベントを見た目に反映する。tickMs=0 なら即時 */
   private applyTick(events: SimEvent[], tickMs: number): void {
     const moveMs = tickMs * MOVE_RATIO;
     const fxMs = Math.max(tickMs, 1) * 1.2;
     const instant = tickMs === 0;
-    // 効果音: 信号の移動は tick ごとに1音だけ（信号が多くてもうるさくならないように）
+    this.effects.setThin(tickMs < THIN_TICK_MS);
     const sound = (key: SoundKey) => {
-      if (!instant) this.options.playSound(key, chainSemitones(this.effects.chain));
+      if (!instant) this.options.playSound(key, 0);
     };
-    if (events.some((e) => e.type === 'move')) sound('tick');
 
     for (const event of events) {
       switch (event.type) {

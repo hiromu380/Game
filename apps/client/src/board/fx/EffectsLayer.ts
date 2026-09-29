@@ -1,9 +1,11 @@
 /**
- * 再生中の演出（発光・火花・パーティクル・数字ポップ・波紋・揺れ・スロー・連鎖カウンター・カットイン）
+ * 再生中の演出（発光・火花・パーティクル・数字ポップ・波紋・揺れ・連鎖カウンター・カットイン、
+ * 溜め・倍率の数字・桁上がり・ノルマ超え・盤面の光・ピーク・合計の「ドン」）
  *
- * BoardRenderer がイベントを受け取ってここを呼ぶ。どの演出をどれくらい強く出すかの閾値は
- * config/effects.ts に集約し、ユーザー設定（演出の強さ・揺れ）で弱められるようにしている。
- * ここはあくまで見た目の処理で、ゲームの計算はしない。
+ * BoardRenderer がイベントと演出の命令（playback/choreography.ts）を受け取ってここを呼ぶ。
+ * どの演出をどれくらい強く出すかの閾値は config/effects.ts に集約し、ユーザー設定（演出の強さ・揺れ・
+ * 点滅を減らす）で弱められるようにしている。ここはあくまで見た目の処理で、ゲームの計算はしない。
+ * パーティクルは使い回す（particlePool.ts）。
  */
 import type { PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
@@ -11,10 +13,13 @@ import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
 import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
 import { CELL_SIZE, cellCenter } from '../layout';
 import { easeOutCubic, type TweenManager } from '../tweens';
+import { ParticlePool } from './particlePool';
 
 export interface EffectSettings {
   strength: EffectStrength;
   shake: boolean;
+  /** 点滅を減らす（盤面の光を出さず、パーツの発光も控えめにする） */
+  reduceFlashes: boolean;
 }
 
 export interface EffectLabels {
@@ -26,6 +31,10 @@ export interface EffectLabels {
   income: (amount: number) => string;
   /** スコアの表記 */
   score: (value: Score) => string;
+  /** 大きな数の短い表記（桁上がりの表示。例: 1.2M） */
+  compact: (value: Score) => string;
+  /** ノルマを超えた瞬間の帯（例: ノルマ突破！） */
+  quotaCross: () => string;
 }
 
 /** 値の桁数（演出の段階を決める） */
@@ -37,10 +46,11 @@ export class EffectsLayer {
   /** 揺れない前面の演出（連鎖カウンター・カットイン） */
   readonly screenLayer = new Container();
 
-  private settings: EffectSettings = { strength: 'full', shake: true };
+  private settings: EffectSettings = { strength: 'full', shake: true, reduceFlashes: false };
   private shakePower = 0;
-  /** スローモーションの残り時間（実時間ミリ秒） */
-  private slowMoLeftMs = 0;
+  private readonly particles = new ParticlePool(this.boardLayer, EFFECTS_CONFIG.particles.maxAlive);
+  /** 細かい演出を間引く（tick が短いとき・一気に進めるとき） */
+  private thin = false;
   /** この再生でカットインを出した最大の桁数（同じ規模で何度も出さないため） */
   private cutInShownDigits = 0;
   private chainCount = 0;
@@ -79,10 +89,11 @@ export class EffectsLayer {
   /** 再生の開始・終了時に状態を戻す */
   reset(): void {
     this.shakePower = 0;
-    this.slowMoLeftMs = 0;
     this.cutInShownDigits = 0;
     this.chainCount = 0;
+    this.thin = false;
     this.counter.visible = false;
+    this.particles.releaseAll();
     this.boardLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.screenLayer.children
       .filter((c) => c !== this.counter)
@@ -94,9 +105,9 @@ export class EffectsLayer {
     return this.chainCount;
   }
 
-  /** 時間の進み方（スロー中は遅くなる） */
-  get timeScale(): number {
-    return this.slowMoLeftMs > 0 ? EFFECTS_CONFIG.slowMo.timeScale : 1;
+  /** 細かい演出を間引くか（描く側が tick の長さから決める） */
+  setThin(thin: boolean): void {
+    this.thin = thin;
   }
 
   /**
@@ -104,7 +115,7 @@ export class EffectsLayer {
    * 揺れの乱数は見た目専用で、シミュレーションとは無関係
    */
   update(realDeltaMs: number): { x: number; y: number } {
-    this.slowMoLeftMs = Math.max(0, this.slowMoLeftMs - realDeltaMs);
+    void realDeltaMs;
     if (this.shakePower <= 0.1) {
       this.shakePower = 0;
       return { x: 0, y: 0 };
@@ -125,7 +136,7 @@ export class EffectsLayer {
   onActivate(x: number, y: number, partId: PartId, durationMs: number): void {
     this.chainCount++;
     this.updateCounter();
-    this.flashPart(x, y, partId, durationMs);
+    if (!this.thin) this.flashPart(x, y, partId, durationMs);
 
     if (partId === 'barrel') {
       const p = EFFECTS_CONFIG.particles;
@@ -138,9 +149,6 @@ export class EffectsLayer {
       );
       this.smoke(x, y, Math.round(p.barrelSmoke * this.power), durationMs * 3);
       this.addShake(EFFECTS_CONFIG.shake.barrel);
-    }
-    if ((EFFECTS_CONFIG.slowMo.chainMilestones as readonly number[]).includes(this.chainCount)) {
-      this.startSlowMo();
     }
   }
 
@@ -159,11 +167,10 @@ export class EffectsLayer {
 
     const p = EFFECTS_CONFIG.particles;
     const count = Math.min(p.max, p.shipBase + digits * p.shipPerDigit);
-    this.coins(x, y, Math.round(count * this.power), durationMs * 2);
+    this.coins(x, y, Math.round(count * this.power * (this.thin ? 0.3 : 1)), durationMs * 2);
 
     const s = EFFECTS_CONFIG.shake;
     if (digits >= s.minShipDigits) this.addShake((digits - s.minShipDigits + 1) * s.perDigit);
-    if (digits >= EFFECTS_CONFIG.slowMo.minShipDigits) this.startSlowMo();
     if (digits >= EFFECTS_CONFIG.cutIn.minShipDigits && digits > this.cutInShownDigits) {
       this.cutInShownDigits = digits;
       this.cutIn(value);
@@ -181,6 +188,149 @@ export class EffectsLayer {
   }
 
   // ---------------------------------------------------------------------------
+  // 演出の命令（playback/choreography.ts）
+  // ---------------------------------------------------------------------------
+
+  /** 溜め: 盤面が一瞬暗くなり、スイッチへ光が集まる */
+  windup(switches: { x: number; y: number }[], durationMs: number): void {
+    const { width, height } = this.getScreenSize();
+    const dim = new Graphics().rect(0, 0, width, height).fill({ color: 0x000000, alpha: 0.3 });
+    dim.alpha = 0;
+    this.boardLayer.addChild(dim);
+    this.tweens.add({
+      duration: durationMs,
+      onUpdate: (t) => (dim.alpha = t < 0.7 ? t / 0.7 : 1 - (t - 0.7) / 0.3),
+      onComplete: () => dim.destroy(),
+    });
+    for (const s of switches) {
+      const { px, py } = cellCenter(s.x, s.y);
+      const ring = new Graphics()
+        .circle(0, 0, CELL_SIZE)
+        .stroke({ width: 4, color: BOARD_THEME.hazardYellow });
+      ring.position.set(px, py);
+      this.boardLayer.addChild(ring);
+      this.tweens.add({
+        duration: durationMs,
+        onUpdate: (t) => {
+          ring.scale.set(1.6 - 1.3 * easeOutCubic(t));
+          ring.alpha = 0.3 + 0.7 * t;
+        },
+        onComplete: () => ring.destroy(),
+      });
+    }
+  }
+
+  /** 倍率が乗った瞬間（×2・+8）: パーツの少し上に黄色い数字を浮かべる */
+  multiplier(x: number, y: number, text: string, durationMs: number): void {
+    this.popText(x, y - 0.35, text, 1, durationMs, BOARD_THEME.hazardYellow);
+  }
+
+  /** 合計の単位が変わった（K → M → B）: 画面の上に大きく出す */
+  digitUp(total: Score): void {
+    if (this.settings.strength === 'minimal') return;
+    const { width } = this.getScreenSize();
+    const label = new Text({
+      text: this.labels.compact(total),
+      style: {
+        fill: BOARD_THEME.shipText,
+        fontSize: 54,
+        fontWeight: '900',
+        stroke: { color: 0x000000, width: 8 },
+      },
+    });
+    label.anchor.set(0.5);
+    label.position.set(width / 2, 90);
+    this.screenLayer.addChild(label);
+    this.tweens.add({
+      duration: 900,
+      onUpdate: (t) => {
+        label.scale.set(t < 0.2 ? 0.4 + (t / 0.2) * 1.0 : 1.4 - 0.4 * Math.min(1, (t - 0.2) / 0.3));
+        label.alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+      },
+      onComplete: () => label.destroy(),
+    });
+    this.addShake(EFFECTS_CONFIG.shake.perDigit * 3);
+  }
+
+  /** ノルマを超えた瞬間: 画面の上を帯が走る */
+  quotaCross(): void {
+    const { width } = this.getScreenSize();
+    const band = new Container();
+    const h = 44;
+    band.addChild(new Graphics().rect(0, 0, width, h).fill({ color: 0x000000, alpha: 0.7 }));
+    const text = new Text({
+      text: this.labels.quotaCross(),
+      style: { fill: BOARD_THEME.shipText, fontSize: 26, fontWeight: '900' },
+    });
+    text.anchor.set(0.5);
+    text.position.set(width / 2, h / 2);
+    band.addChild(text);
+    band.position.set(0, 140);
+    this.screenLayer.addChild(band);
+    this.tweens.add({
+      duration: 1100,
+      onUpdate: (t) => {
+        band.alpha = t < 0.15 ? t / 0.15 : t < 0.75 ? 1 : 1 - (t - 0.75) / 0.25;
+        text.scale.set(
+          t < 0.15 ? 0.6 + (t / 0.15) * 0.5 : 1.1 - 0.1 * Math.min(1, (t - 0.15) / 0.2),
+        );
+      },
+      onComplete: () => band.destroy({ children: true }),
+    });
+  }
+
+  /** 盤面の光（面積は盤面の中、不透明度は alpha まで。回数の上限は演出の流れ側で守る） */
+  flash(alpha: number, durationMs: number): void {
+    if (this.settings.reduceFlashes || alpha <= 0) return;
+    const { width, height } = this.getScreenSize();
+    const light = new Graphics().rect(0, 0, width, height).fill({ color: 0xfff3c4, alpha: 1 });
+    light.alpha = alpha;
+    this.boardLayer.addChild(light);
+    this.tweens.add({
+      duration: durationMs,
+      onUpdate: (t) => (light.alpha = alpha * (1 - t)),
+      onComplete: () => light.destroy(),
+    });
+  }
+
+  /** ピーク: いちばん大きく揺らす（止めるのは描く側） */
+  peak(): void {
+    this.addShake(EFFECTS_CONFIG.shake.max);
+  }
+
+  /** 最後の合計の「ドン」: 盤面の真ん中に弾ませて出す */
+  stamp(total: Score, durationMs: number): void {
+    const { width, height } = this.getScreenSize();
+    const label = new Text({
+      text: this.labels.score(total),
+      style: {
+        fill: BOARD_THEME.shipText,
+        fontSize: Math.min(
+          72,
+          Math.floor((width * 0.9) / Math.max(4, this.labels.score(total).length) / 0.62),
+        ),
+        fontWeight: '900',
+        stroke: { color: 0x000000, width: 10 },
+      },
+    });
+    label.anchor.set(0.5);
+    label.position.set(width / 2, height / 2);
+    this.screenLayer.addChild(label);
+    this.tweens.add({
+      duration: durationMs,
+      onUpdate: (t) => {
+        // 大きく落ちてきて、弾んで止まる
+        const s =
+          t < 0.25 ? 2.2 - 1.3 * easeOutCubic(t / 0.25) : 0.9 + 0.1 * Math.min(1, (t - 0.25) / 0.2);
+        label.scale.set(s);
+        label.alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2;
+      },
+      onComplete: () => label.destroy(),
+    });
+    this.addShake(EFFECTS_CONFIG.shake.perDigit * 4);
+  }
+
+  // ---------------------------------------------------------------------------
   // 個々の演出
   // ---------------------------------------------------------------------------
 
@@ -188,11 +338,6 @@ export class EffectsLayer {
     if (!this.settings.shake) return;
     const scaled = amount * this.power;
     this.shakePower = Math.min(EFFECTS_CONFIG.shake.max, Math.max(this.shakePower, scaled));
-  }
-
-  private startSlowMo(): void {
-    if (this.settings.strength === 'minimal') return;
-    this.slowMoLeftMs = EFFECTS_CONFIG.slowMo.durationMs;
   }
 
   /** 連鎖数カウンター（節目で弾ませて色を変える） */
@@ -217,7 +362,7 @@ export class EffectsLayer {
     const { px, py } = cellCenter(x, y);
     const glow = new Graphics()
       .circle(0, 0, CELL_SIZE * 0.55)
-      .fill({ color: PART_ASSETS[partId].color, alpha: 0.55 });
+      .fill({ color: PART_ASSETS[partId].color, alpha: this.settings.reduceFlashes ? 0.25 : 0.55 });
     glow.position.set(px, py);
     this.boardLayer.addChild(glow);
 
@@ -242,9 +387,10 @@ export class EffectsLayer {
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
       const distance = CELL_SIZE * (0.5 + Math.random() * 0.9);
-      const dot = new Graphics().circle(0, 0, 2.5 + Math.random() * 2.5).fill(color);
+      const dot = this.particles.acquire('dot', color);
+      if (!dot) return;
+      dot.scale.set(0.6 + Math.random() * 0.6);
       dot.position.set(px, py);
-      this.boardLayer.addChild(dot);
       this.tweens.add({
         duration: durationMs,
         onUpdate: (t) => {
@@ -255,7 +401,7 @@ export class EffectsLayer {
           );
           dot.alpha = 1 - t;
         },
-        onComplete: () => dot.destroy(),
+        onComplete: () => this.particles.release(dot),
       });
     }
   }
@@ -266,12 +412,13 @@ export class EffectsLayer {
     for (let i = 0; i < count; i++) {
       const vx = (Math.random() - 0.5) * CELL_SIZE * 1.6;
       const up = CELL_SIZE * (0.6 + Math.random() * 0.8);
-      const coin = new Graphics()
-        .rect(-3, -3, 6, 6)
-        .fill(i % 3 === 0 ? BOARD_THEME.incomeText : BOARD_THEME.shipText);
+      const coin = this.particles.acquire(
+        'square',
+        i % 3 === 0 ? BOARD_THEME.incomeText : BOARD_THEME.shipText,
+      );
+      if (!coin) return;
       coin.position.set(px, py);
       coin.rotation = Math.random() * Math.PI;
-      this.boardLayer.addChild(coin);
       this.tweens.add({
         duration: durationMs,
         onUpdate: (t) => {
@@ -280,7 +427,7 @@ export class EffectsLayer {
           coin.rotation += 0.2;
           coin.alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
         },
-        onComplete: () => coin.destroy(),
+        onComplete: () => this.particles.release(coin),
       });
     }
   }
@@ -290,11 +437,10 @@ export class EffectsLayer {
     const { px, py } = cellCenter(x, y);
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const puff = new Graphics()
-        .circle(0, 0, 10 + Math.random() * 8)
-        .fill({ color: 0x616161, alpha: 0.6 });
+      const puff = this.particles.acquire('puff', 0x616161);
+      if (!puff) return;
+      const size = 0.7 + Math.random() * 0.6;
       puff.position.set(px, py);
-      this.boardLayer.addChild(puff);
       this.tweens.add({
         duration: durationMs,
         onUpdate: (t) => {
@@ -303,10 +449,10 @@ export class EffectsLayer {
             px + Math.cos(angle) * CELL_SIZE * 0.7 * e,
             py + Math.sin(angle) * CELL_SIZE * 0.7 * e - 20 * t,
           );
-          puff.scale.set(1 + t);
+          puff.scale.set(size * (1 + t));
           puff.alpha = 0.6 * (1 - t);
         },
-        onComplete: () => puff.destroy(),
+        onComplete: () => this.particles.release(puff),
       });
     }
   }

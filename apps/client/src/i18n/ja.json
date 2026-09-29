@@ -519,5 +519,6 @@
   "shareCard.reached": "{name} に到達！",
   "shareCard.unfinished": "ロケット {parts} / {total}",
   "capture.shareCard": "共有カードを確認",
-  "share.runText": "#ChainFactory ボルトのロケット: {result}\n出荷量 {score}・シフト {shift} まで到達"
+  "share.runText": "#ChainFactory ボルトのロケット: {result}\n出荷量 {score}・シフト {shift} まで到達",
+  "playback.quotaCross": "ノルマ突破！"
 }

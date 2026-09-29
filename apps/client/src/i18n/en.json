@@ -519,5 +519,6 @@
   "shareCard.reached": "Reached {name}!",
   "shareCard.unfinished": "Rocket {parts} / {total}",
   "capture.shareCard": "Preview share card",
-  "share.runText": "#ChainFactory Bolt's rocket: {result}\nShipped {score} · Reached shift {shift}"
+  "share.runText": "#ChainFactory Bolt's rocket: {result}\nShipped {score} · Reached shift {shift}",
+  "playback.quotaCross": "Quota smashed!"
 }

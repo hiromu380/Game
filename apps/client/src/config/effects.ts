@@ -2,22 +2,11 @@
  * 連鎖演出の閾値と強さ（演出の調整はこのファイルだけで行う）
  *
  * 「桁数」は出荷した値の桁数（例: 12,345 は 5 桁）。値が大きいほど、連鎖が長いほど派手になる。
+ * 時間の流れ（溜め・加速・ピークの止め・上限時間・光の回数）は choreography にまとめる。
  */
 import { hex, INK, SIGNAL_TIERS } from '../assets/palette';
 
 export const EFFECTS_CONFIG = {
-  /** スローモーション: 大きな出荷や、連鎖数の節目で一瞬だけ時間を遅くする */
-  slowMo: {
-    /** この桁数以上の出荷でスローにする */
-    minShipDigits: 5,
-    /** この連鎖数に達した瞬間にスローにする */
-    chainMilestones: [30, 60, 100],
-    /** スロー中の時間の速さ（1 = 通常） */
-    timeScale: 0.3,
-    /** スローの長さ（実時間ミリ秒） */
-    durationMs: 650,
-  },
-
   /** カットイン: 特に大きな出荷のときに、画面を横切る帯を出す */
   cutIn: {
     /** この桁数以上の出荷で出す（1回の再生で、より大きな桁のときだけ再表示） */
@@ -46,6 +35,8 @@ export const EFFECTS_CONFIG = {
     barrelSparks: 18,
     barrelSmoke: 6,
     max: 40,
+    /** 同時に出せるパーティクルの上限（使い回し。board/fx/particlePool.ts） */
+    maxAlive: 240,
   },
 
   /** 連鎖数カウンター: この連鎖数に達したら大きく弾ませて色を変える */
@@ -58,7 +49,7 @@ export const EFFECTS_CONFIG = {
 
   /**
    * 演出の強さ（設定画面で選ぶ。full = 強・reduced = 中・minimal = 弱）。数値は揺れ・パーティクルの倍率。
-   * minimal ではスロー・カットインも出さない
+   * minimal ではカットインも出さない
    */
   strength: { full: 1, reduced: 0.5, minimal: 0 },
 
