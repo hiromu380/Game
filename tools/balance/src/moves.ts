@@ -5,9 +5,14 @@
  * 候補は「既存パーツの周囲8マス」に絞る（計算量を抑えるため）。
  * 加えて「出荷口の手前に割り込ませ、出荷口を1マス先へずらす」手も候補にする。
  * これがないと、一直線の連鎖にパーツを挿し込む手が見つけられない。
+ *
+ * 床: 効果のある床（×2・加算・×3）は、既存パーツから2マス以内なら候補に加える。
+ * スイッチは、右へ向かう列に効果のある床が多い行・位置に置く（MOVE_SETTINGS.floorAware で切り替え。
+ * 「床を見ないボット」との比較に使う）
  */
 import {
   buyOffer,
+  getCurrentFloor,
   isCellBlocked,
   getPart,
   getRerollCost,
@@ -17,9 +22,23 @@ import {
   returnPart,
   rotatePart,
   type Dir4,
+  type FloorLayer,
   type PartId,
   type RunState,
 } from '@chain-factory/sim';
+
+/** 手の生成の設定（計測用に切り替える） */
+export const MOVE_SETTINGS = {
+  /** 床を見て置き場所の候補を広げ、スイッチの位置を選ぶか */
+  floorAware: true,
+};
+
+/** 床の重み（スイッチの位置選び・候補の順に使う。効果が大きい床ほど重い） */
+const FLOOR_WEIGHT: Record<string, number> = { double: 2, add: 1, triple: 3 };
+
+/** 効果のある床か（使用不可は除く） */
+const hasFloorEffect = (floor: FloorLayer, index: number) =>
+  (FLOOR_WEIGHT[floor[index]?.tile ?? ''] ?? 0) > 0;
 
 /** 向きが挙動に関係しないパーツ（候補を1方向に絞る） */
 const DIRECTIONLESS = new Set<PartId>(['barrel', 'junkbot', 'dock', 'reflector', 'oiler']);
@@ -69,20 +88,24 @@ function isFree(state: RunState, x: number, y: number): boolean {
   return isInside(state.board, x, y) && !getPart(state.board, x, y) && !isBlocked(state, x, y);
 }
 
-/** 既存パーツの周囲8マスのうち、置ける空きマス */
+/** 既存パーツの周囲8マス（効果のある床なら2マス以内）のうち、置ける空きマス */
 export function frontierCells(state: RunState): [number, number][] {
   const { board } = state;
+  const floor = MOVE_SETTINGS.floorAware ? getCurrentFloor(state) : null;
   const result: [number, number][] = [];
+  const nearPart = (x: number, y: number, range: number) => {
+    for (let dy = -range; dy <= range; dy++) {
+      for (let dx = -range; dx <= range; dx++) {
+        if ((dx || dy) && getPart(board, x + dx, y + dy)) return true;
+      }
+    }
+    return false;
+  };
   for (let y = 0; y < board.height; y++) {
     for (let x = 0; x < board.width; x++) {
       if (!isFree(state, x, y)) continue;
-      let near = false;
-      for (let dy = -1; dy <= 1 && !near; dy++) {
-        for (let dx = -1; dx <= 1 && !near; dx++) {
-          if ((dx || dy) && getPart(board, x + dx, y + dy)) near = true;
-        }
-      }
-      if (near) result.push([x, y]);
+      const range = floor && hasFloorEffect(floor, y * board.width + x) ? 2 : 1;
+      if (nearPart(x, y, range)) result.push([x, y]);
     }
   }
   return result;
@@ -235,18 +258,32 @@ export function canReroll(state: RunState, reserve: number): boolean {
   return cost !== null && state.budget >= cost + reserve;
 }
 
-/** スイッチを盤面の左端中央（右向き）に置く。使えなければ空いている左端のマス */
+/**
+ * スイッチを右向きに置く。床を見るときは、右へ向かう列（使用不可の手前まで）に効果のある床が多い位置、
+ * 同じなら中央に近い行・左の列。床を見ないときは、左端中央から順に空いているマス
+ */
 export function placeSwitch(state: RunState): RunState {
   if (!state.inventory.switch) return state;
-  const { height } = state.board;
+  const { width, height } = state.board;
   const mid = Math.floor(height / 2);
   const rows = [mid, ...Array.from({ length: height }, (_, i) => i).filter((i) => i !== mid)];
+  const floor = MOVE_SETTINGS.floorAware ? getCurrentFloor(state) : null;
+  let best: { x: number; y: number; score: number } | null = null;
   for (const y of rows) {
-    for (let x = 0; x < state.board.width; x++) {
+    for (let x = 0; x < width; x++) {
       if (!isFree(state, x, y) || !isFree(state, x + 1, y)) continue;
-      const r = placePart(state, 'switch', x, y, 1);
-      if (r.ok) return r.state;
+      if (!floor) return placeOrKeep(state, x, y);
+      let score = 0;
+      for (let fx = x + 1; fx < width && isFree(state, fx, y); fx++) {
+        score += FLOOR_WEIGHT[floor[y * width + fx]?.tile ?? ''] ?? 0;
+      }
+      if (!best || score > best.score) best = { x, y, score };
     }
   }
-  return state;
+  return best ? placeOrKeep(state, best.x, best.y) : state;
+}
+
+function placeOrKeep(state: RunState, x: number, y: number): RunState {
+  const r = placePart(state, 'switch', x, y, 1);
+  return r.ok ? r.state : state;
 }

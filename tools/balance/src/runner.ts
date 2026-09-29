@@ -9,6 +9,7 @@ import {
   createPrng,
   createRun,
   metaToModifiers,
+  getCurrentFloor,
   getCurrentShift,
   PART_IDS,
   type PartId,
@@ -18,7 +19,7 @@ import {
 } from '@chain-factory/sim';
 import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
 import { evaluate, type EvalMode } from './evaluate';
-import { applyMove } from './moves';
+import { applyMove, MOVE_SETTINGS } from './moves';
 
 /** 1シフトの記録 */
 export interface ShiftLog {
@@ -40,6 +41,12 @@ export interface ShiftLog {
   /** その日の出来事の候補 */
   eventChoices: string[] | null;
   chainCount: number;
+  /** 本番時の、効果のある床（×2・加算・×3）のマス数 */
+  floorCells: number;
+  /** そのうちパーツを置いたマス数 */
+  partsOnFloor: number;
+  /** 本番で床の効果を受けた回数 */
+  floorApplied: number;
 }
 
 /** 1ランの記録 */
@@ -73,6 +80,8 @@ export interface RunnerOptions {
    * daily のシード n は「デイリー ID = bal-<n>」の日として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
    */
   mode?: 'normal' | 'daily';
+  /** ボットが床を見て手を選ぶか（既定 true。false は「床を見ないボット」との比較用。moves.ts） */
+  floorAware?: boolean;
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
@@ -101,6 +110,7 @@ function chooseBestEvent(state: RunState, bot: Bot, options: BotOptions): RunSta
 
 export function playRun(seed: number, botName: BotName, options: RunnerOptions): RunLog {
   const started = performance.now();
+  MOVE_SETTINGS.floorAware = options.floorAware ?? true;
   const bot = BOTS[botName];
   const botOptions: BotOptions = { ...options, rng: createPrng(seed ^ 0x5eed) };
   const log: RunLog = {
@@ -153,6 +163,8 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
 
     const quota = getCurrentShift(plan.state).quota;
     const expected = evaluate(plan.state, botOptions.samples, botOptions.evalMode).score;
+    const floor = getCurrentFloor(plan.state);
+    const effectCells = floor.flatMap((c, i) => (c && c.tile !== 'blocked' ? [i] : []));
     const committed = commitShift(plan.state);
     if ('error' in committed) throw new Error(committed.error);
     const record = committed.state.history.at(-1)!;
@@ -170,6 +182,9 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       event: dayEvent?.chosen ?? null,
       eventChoices: dayEvent ? [...dayEvent.choices] : null,
       chainCount: record.chainCount,
+      floorCells: effectCells.length,
+      partsOnFloor: effectCells.filter((i) => plan.state.board.cells[i]).length,
+      floorApplied: committed.result.stats.floorApplied,
     });
     if (record.cleared) log.shiftsCleared++;
     state = committed.state;

@@ -8,6 +8,7 @@
  *   pnpm balance --unlock all                  # 全パーツ解放済みの状態で検証（既定は初期解放のみ）
  *   pnpm balance --eval worst --samples 5      # ランダムな盤面を「5回試して最悪の回」で評価する（慎重なプレイヤー）
  *   pnpm balance --mode daily                  # デイリーと同じ条件（3シフト・全パーツ・特殊ルール）で検証
+ *   pnpm balance --floor-aware off             # 床を見ないボット（床を使うボットとの比較用）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
  */
@@ -41,6 +42,7 @@ function parseArgs(argv: string[]) {
     maxRerolls: Number(args.get('max-rerolls') ?? 3),
     unlock: (args.get('unlock') === 'all' ? 'all' : 'initial') as 'initial' | 'all',
     mode: (args.get('mode') === 'daily' ? 'daily' : 'normal') as 'normal' | 'daily',
+    floorAware: args.get('floor-aware') !== 'off',
   };
 }
 
@@ -53,6 +55,7 @@ async function main() {
     timeLimitMs: opts.timeLimitMs,
     maxRerolls: opts.maxRerolls,
     mode: opts.mode,
+    floorAware: opts.floorAware,
   };
   const summaries: BotSummary[] = [];
   const shiftSpecs = opts.mode === 'daily' ? BALANCE.daily.shifts : BALANCE.shifts;
@@ -79,6 +82,7 @@ async function main() {
     ランダムな盤面の評価: opts.evalMode === 'worst' ? '最悪の回（慎重）' : '平均（期待値）',
     探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,
     リロール上限: `${opts.maxRerolls}回/シフト`,
+    床: opts.floorAware ? '床を見て置く' : '床を見ない（比較用）',
     パーツの解放:
       opts.unlock === 'all'
         ? '全解放・工場拡張最大（やり込み相当）'
