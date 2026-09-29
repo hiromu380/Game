@@ -586,6 +586,7 @@ export class BoardRenderer {
   private applyCue(cue: Cue, rate: number): void {
     switch (cue.kind) {
       case 'windup': {
+        this.options.playSound('windup', 0);
         const switches: { x: number; y: number }[] = [];
         const board = this.state?.board;
         board?.cells.forEach((c, i) => {
@@ -596,15 +597,18 @@ export class BoardRenderer {
         break;
       }
       case 'note':
-        this.options.playSound('tick', cue.semitone);
+        // 1連鎖ごとに半音上がる音階。8段ごとに音色が変わる
+        this.options.playSound(`chain${cue.timbre}` as SoundKey, cue.semitone);
         break;
       case 'multiplier':
         this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
         break;
       case 'digitUp':
+        this.options.playSound('digitUp', 0);
         this.effects.digitUp(cue.total);
         break;
       case 'quotaCross':
+        this.options.playSound('quotaCross', 0);
         this.effects.quotaCross();
         break;
       case 'flash':
@@ -612,9 +616,11 @@ export class BoardRenderer {
         break;
       case 'peak':
         this.freezeMs = cue.hitstopMs / rate;
+        this.options.playSound('peak', 0);
         this.effects.peak();
         break;
       case 'stamp':
+        this.options.playSound('stamp', 0);
         this.effects.stamp(cue.total, cue.durationMs / rate);
         break;
     }
@@ -629,6 +635,10 @@ export class BoardRenderer {
     const sound = (key: SoundKey) => {
       if (!instant) this.options.playSound(key, 0);
     };
+    // 信号が移動するだけの tick にも小さな音を入れ、無音の間を作らない（発動した tick は連鎖の音階が鳴る）
+    if (events.some((e) => e.type === 'move') && !events.some((e) => e.type === 'activate')) {
+      sound('tick');
+    }
 
     for (const event of events) {
       switch (event.type) {
