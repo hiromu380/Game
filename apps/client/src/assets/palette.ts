@@ -160,6 +160,11 @@ export const VANISH_COLORS = {
   inert: '#9575cd',
 } as const;
 
+/** 連鎖演出の光（ピーク・ノルマ超え・桁上がりだけ。範囲と明るさの上限は docs/art-style.md） */
+export const FX_COLORS = {
+  flash: '#fff3c4',
+} as const;
+
 /** '#rrggbb' → 0xRRGGBB（PixiJS 用） */
 export function hex(color: string): number {
   return parseInt(color.slice(1), 16);

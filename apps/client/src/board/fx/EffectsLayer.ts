@@ -10,6 +10,7 @@
 import type { PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
+import { FX_COLORS, hex } from '../../assets/palette';
 import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
 import { CELL_SIZE, cellCenter } from '../layout';
 import { easeOutCubic, type TweenManager } from '../tweens';
@@ -289,7 +290,9 @@ export class EffectsLayer {
   flash(alpha: number, durationMs: number): void {
     if (this.settings.reduceFlashes || alpha <= 0) return;
     const { width, height } = this.getScreenSize();
-    const light = new Graphics().rect(0, 0, width, height).fill({ color: 0xfff3c4, alpha: 1 });
+    const light = new Graphics()
+      .rect(0, 0, width, height)
+      .fill({ color: hex(FX_COLORS.flash), alpha: 1 });
     light.alpha = alpha;
     this.boardLayer.addChild(light);
     this.tweens.add({

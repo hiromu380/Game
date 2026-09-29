@@ -40,4 +40,5 @@ node apps/client/build/store/generate.mjs --screenshots http://localhost:5173/
 ## 3. トレーラー・GIF
 
 撮影モードの再生速度（0.25×・0.5×）でスローにして、画面録画ツールで撮る（OBS など。人の作業）。
+連鎖の山場を最初の2秒に入れる録画は、effects-capture.md（規模別の盤面・「ピークの直前から再生」）。
 1920×1080 で撮る場合は、ブラウザの表示サイズを 1280×720 にして 150% 表示にすると、Steam Deck と同じ配置で大きく写る。
