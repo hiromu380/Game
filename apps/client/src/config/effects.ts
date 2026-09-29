@@ -53,6 +53,9 @@ export const EFFECTS_CONFIG = {
    */
   strength: { full: 1, reduced: 0.5, minimal: 0 },
 
+  /** 画面上部の出荷量のカウントアップの長さ（ミリ秒。ui/useCountUp.ts） */
+  countUpMs: 450,
+
   /**
    * 連鎖の演出の流れ（playback/choreography.ts）。時間はすべて再生速度 1x のときのミリ秒
    */

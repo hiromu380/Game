@@ -4,6 +4,7 @@
 import { getCurrentShift, getDayAndPeriod, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import { RocketProgress } from './RocketProgress';
+import { useCountUp } from './useCountUp';
 
 interface Props {
   run: RunState;
@@ -11,8 +12,10 @@ interface Props {
   liveScore: string | null;
 }
 
-export function Hud({ run, liveScore }: Props) {
+export function Hud({ run, liveScore: target }: Props) {
   const { t, formatScore } = useI18n();
+  // 出荷のたびに、前の値から勢いよく増えてピタッと止まる
+  const liveScore = useCountUp(target);
   const quota = getCurrentShift(run).quota;
   // 出荷量 ÷ ノルマ（表示用の目安なので、大きな数は Number の精度で十分）
   const ratio = liveScore === null ? 0 : Math.min(1, Number(liveScore) / Math.max(1, quota));
