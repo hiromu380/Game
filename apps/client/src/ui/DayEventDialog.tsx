@@ -14,6 +14,8 @@ export function describeEvent(t: TranslateFn, run: RunState, id: DayEventId): st
     discount: e.saleDiscount,
     percent: id === 'clearance' ? e.clearanceRefundPercent : e.rollUpSleevesQuotaPercent,
     multiplier: e.overtimePayPercent / 100,
+    count: e.floorAddsCount,
+    add: run.config.rules.floorParams?.addAmount,
   });
 }
 

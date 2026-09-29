@@ -9,6 +9,7 @@
 import type { DayEventId, ShiftSpec } from '../balance';
 import type { EconomyConfig } from '../config/runConfig';
 import { createPrng } from '../core/prng';
+import { canOfferFloorEvent, drawFloorEvent } from './floor';
 import { addInventory } from './inventory';
 import { dayEventSeed } from './seeds';
 import type { DayEventState, RunActionResult, RunState } from './types';
@@ -22,7 +23,10 @@ export function drawDayEvent(state: RunState, day: number): DayEventState | null
   const events = state.config.dayEvents;
   if (!events) return null;
   // 試供品で出せるパーツがなければ、試供品は候補から外す
-  const pool = events.candidates.filter((id) => id !== 'sample' || events.samplePool.length > 0);
+  // 解消できる使用不可がない日は「使用不可の解消」も外す
+  const pool = events.candidates.filter(
+    (id) => (id !== 'sample' || events.samplePool.length > 0) && canOfferFloorEvent(state, day, id),
+  );
   const rng = createPrng(dayEventSeed(state.seed, day, 0));
   const choices: DayEventId[] = [];
   const rest = [...pool];
@@ -68,6 +72,15 @@ export function chooseEvent(state: RunState, index: number): RunActionResult {
       };
       break;
     }
+    case 'floorCenter':
+    case 'floorRepair':
+    case 'floorAdds':
+      // 床の出来事: 選んだ瞬間に位置を確定する（その日のあいだ getCurrentFloor で重ねる）
+      next = {
+        ...next,
+        dayEvent: { ...event, chosen, floorChanges: drawFloorEvent(state, event.day, chosen) },
+      };
+      break;
     case 'sale':
       // 今並んでいる商品も値下げする（リロール後の商品は getCurrentEconomy の価格で並ぶ）
       next = {

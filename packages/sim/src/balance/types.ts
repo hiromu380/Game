@@ -1,6 +1,7 @@
 /**
  * バランス値の型（値そのものは同じフォルダの各ファイル）
  */
+import type { FloorTileId } from '../floor/types';
 import type { PartId } from '../types';
 
 /** レア度。ショップの出現重みの既定値を決める */
@@ -58,7 +59,15 @@ export interface PartParams {
  * - rollUpSleeves: 腕まくり（朝シフトのノルマが下がる）
  */
 export type DayEventId =
-  'supplies' | 'sample' | 'sale' | 'clearance' | 'overtimePay' | 'rollUpSleeves';
+  | 'supplies'
+  | 'sample'
+  | 'sale'
+  | 'clearance'
+  | 'overtimePay'
+  | 'rollUpSleeves'
+  | 'floorCenter'
+  | 'floorRepair'
+  | 'floorAdds';
 
 /** ボスシフトの修正ルールの種類 */
 export type BossModifierId =
@@ -123,6 +132,14 @@ export interface StageBalance {
   maxAttempts: number;
 }
 
+/** シフト開始時のボーナス床（空きマスに湧く。そのシフトのみ有効） */
+export interface BonusFloorBalance {
+  /** 湧く枚数の重み（index = 枚数。例: [0, 70, 30] なら 1枚 70・2枚 30） */
+  countWeights: number[];
+  /** 湧く床の種類の重み */
+  tileWeights: { tile: FloorTileId; weight: number }[];
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -150,6 +167,8 @@ export interface Balance {
   floorParams: FloorParams;
   /** 日ごとのステージ（床の配置） */
   stages: StageBalance;
+  /** シフト開始時のボーナス床 */
+  bonusFloors: BonusFloorBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
 
@@ -190,6 +209,10 @@ export interface Balance {
     overtimePayPercent: number;
     /** 腕まくり: 朝シフトのノルマの倍率（%。切り捨て、最低 1） */
     rollUpSleevesQuotaPercent: number;
+    /** 中央の床: 盤面の中央（床のないいちばん近いマス）に湧く床 */
+    floorCenterTile: FloorTileId;
+    /** 加算床の差し入れ: 湧く加算床の枚数 */
+    floorAddsCount: number;
   };
 
   /** 延長戦（全シフトクリア後に続けられるエンドレス。1日の最後のシフトはボス） */

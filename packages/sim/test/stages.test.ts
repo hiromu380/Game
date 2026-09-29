@@ -9,6 +9,7 @@ import {
   drawBoss,
   generateStage,
   getCurrentFloor,
+  getShiftFloor,
   isBlockedCell,
   parseTemplate,
   placePart,
@@ -140,9 +141,10 @@ describe('ランへの組み込み', () => {
     const run = createRun(123);
     const days = run.config.stages!.days;
     expect(days).toHaveLength(3);
-    expect(getCurrentFloor(run, 0)).toEqual(days[0]);
-    expect(getCurrentFloor(run, 1)).toEqual(days[0]);
-    expect(getCurrentFloor(run, 3)).toEqual(days[1]);
+    // ステージ＋ボスの床（ボーナス床・出来事の床は別のテスト）。朝と昼は同じ日の床、翌朝は次の日の床
+    expect(getShiftFloor(run.config, 0)).toEqual(days[0]);
+    expect(getShiftFloor(run.config, 1)).toEqual(days[0]);
+    expect(getShiftFloor(run.config, 3)).toEqual(days[1]);
     expect(days.flatMap((d) => d.filter((c) => c).map((c) => c!.source))).toSatisfy((s: string[]) =>
       s.every((v) => v === 'stage'),
     );

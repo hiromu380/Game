@@ -12,7 +12,7 @@ import { scoreCompare, scoreOf, scoreToString } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
-import { getCurrentFloor } from './floor';
+import { drawBonusFloor, getCurrentFloor } from './floor';
 import { addInventory } from './inventory';
 import { commitSeed, overtimeSeed, shopSeed, stageSeed, trialSeed } from './seeds';
 import { generateShop } from './shop';
@@ -171,7 +171,7 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
   }
 
   // 使用不可になったマス（ステージ・ボス）のパーツは手持ちに戻す
-  const floor = getCurrentFloor(next, shiftIndex);
+  const floor = getCurrentFloor({ ...next, bonusFloor: null }, shiftIndex);
   for (let cell = 0; cell < next.board.cells.length; cell++) {
     if (!isBlockedCell(floor, cell)) continue;
     const x = cell % next.board.width;
@@ -184,7 +184,8 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
       inventory: addInventory(next.inventory, part.id, 1),
     };
   }
-  return next;
+  // シフト開始時のボーナス床（パーツを片付けた後の盤面で、空きマスに湧く）
+  return { ...next, bonusFloor: drawBonusFloor(next, shiftIndex) };
 }
 
 /** 2日目以降の1日の最初のシフトか（ラン開始時の朝は含めない） */

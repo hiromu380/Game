@@ -3,6 +3,7 @@
  *
  * RunState はそのまま JSON 化して保存できる形にしている（Score は文字列で保持）。
  */
+import type { FloorTileId } from '../floor/types';
 import type { BossModifierId, DayEventId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
@@ -60,6 +61,8 @@ export interface RunState {
   metaRecordedShifts: number;
   /** 今日のイベント（2日目以降の朝に選ぶ。導入前のセーブには無い） */
   dayEvent?: DayEventState | null;
+  /** このシフトのボーナス床（シフト開始時に湧く。そのシフトのみ有効。導入前のセーブには無い） */
+  bonusFloor?: BonusFloorState | null;
 }
 
 /** 日ごとのイベントの状態 */
@@ -72,6 +75,17 @@ export interface DayEventState {
   chosen: DayEventId | null;
   /** 試供品でもらったパーツ（表示用） */
   samplePart: PartId | null;
+  /**
+   * 床の出来事で変わったマス（その日のあいだ有効）。tile が null なら、ステージの使用不可が解消された
+   * 導入前のセーブには無い
+   */
+  floorChanges?: { index: number; tile: FloorTileId | null }[];
+}
+
+/** シフト開始時のボーナス床 */
+export interface BonusFloorState {
+  shiftIndex: number;
+  cells: { index: number; tile: FloorTileId }[];
 }
 
 /** 操作の結果。失敗時は理由キー（i18n で表示する）を返す */
