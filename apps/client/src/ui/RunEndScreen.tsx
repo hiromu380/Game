@@ -18,6 +18,7 @@ import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
 import { RocketScene } from './RocketScene';
 import { DailyShare } from './share/DailyShare';
+import { RunShare } from './share/RunShare';
 import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
 
@@ -107,8 +108,15 @@ export function RunEndScreen(props: Props) {
           {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
         </p>
       )}
-      {mode.kind === 'daily' && (
-        <DailyShare run={run} dailyId={mode.dailyId} number={mode.number} />
+      {(mode.kind === 'daily' || mode.kind === 'normal') && (
+        <section className="run-end__share">
+          <h2>{t('shareCard.title')}</h2>
+          {mode.kind === 'daily' ? (
+            <DailyShare run={run} dailyId={mode.dailyId} number={mode.number} />
+          ) : (
+            <RunShare run={run} />
+          )}
+        </section>
       )}
       {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
         <MetaPanel meta={meta} unlocks={unlocks} />

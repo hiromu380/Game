@@ -6,7 +6,12 @@ import { BALANCE, createInitialMeta, type ShiftRecord } from '@chain-factory/sim
 import { describe, expect, it } from 'vitest';
 import { translate } from '../src/i18n';
 import { priceTrends } from '../src/online/market';
-import { buildShareText, resultSquares, xIntentUrl } from '../src/online/shareText';
+import {
+  buildRunShareText,
+  buildShareText,
+  resultSquares,
+  xIntentUrl,
+} from '../src/online/shareText';
 import { startNormalRun } from '../src/state/newRun';
 
 const record = (cleared: boolean): ShiftRecord => ({
@@ -27,37 +32,54 @@ describe('シェア文', () => {
     expect(resultSquares([], 3)).toBe('⬜⬜⬜');
   });
 
-  it('番号・結果・最大連鎖・上位○% を入れ、盤面の情報は入れない', () => {
+  it('番号・結果・出荷量・最大連鎖・順位を入れ、盤面の情報は入れない', () => {
     const text = buildShareText(t, {
       number: 12,
       history: [record(true), record(true), record(false)],
       shiftCount: 3,
       maxChain: 34,
-      topPercent: 7,
-      url: 'https://example.com',
+      score: '12.3K',
+      rank: { rank: 5, topPercent: 7 },
     });
+    expect(text).toContain('#ChainFactory');
     expect(text).toContain('#12');
     expect(text).toContain('🟩🟩🟥');
+    expect(text).toContain('12.3K');
     expect(text).toContain('34');
+    expect(text).toContain('5位');
     expect(text).toContain('7%');
-    expect(text).toContain('https://example.com');
-    expect(text).not.toMatch(/gear|ギア|dock/);
   });
 
-  it('順位が取れなければ上位○% を省く', () => {
+  it('順位が取れなければ順位・上位○% を省く', () => {
     const text = buildShareText(t, {
       number: 1,
       history: [],
       shiftCount: 3,
       maxChain: 0,
-      topPercent: null,
-      url: 'u',
+      score: '0',
+      rank: null,
     });
     expect(text).not.toContain('%');
+    expect(text).not.toContain('位');
   });
 
-  it('X の投稿画面の URL は本文をエンコードする', () => {
+  it('英語の本文も組み立てられる（通常ラン）', () => {
+    const en = ((key: string, params?: Record<string, string | number>) =>
+      translate('en', key, params)) as Parameters<typeof buildRunShareText>[0];
+    const text = buildRunShareText(en, { result: 'Launch successful!', score: '1.23M', shift: 9 });
+    expect(text).toContain('#ChainFactory');
+    expect(text).toContain('1.23M');
+    expect(text).toContain('Reached shift 9');
+    expect(buildRunShareText(t, { result: '打ち上げ成功！', score: '1.23M', shift: 9 })).toContain(
+      'シフト 9 まで到達',
+    );
+  });
+
+  it('X の投稿画面の URL は本文と URL をエンコードする', () => {
     expect(xIntentUrl('a b#c')).toBe('https://x.com/intent/post?text=a%20b%23c');
+    expect(xIntentUrl('a', 'https://e.com/?x=1')).toBe(
+      'https://x.com/intent/post?text=a&url=https%3A%2F%2Fe.com%2F%3Fx%3D1',
+    );
   });
 });
 

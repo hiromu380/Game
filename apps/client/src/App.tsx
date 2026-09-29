@@ -68,6 +68,7 @@ import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
+import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
 import { GiveUpButton } from './ui/GiveUpButton';
 import { DailyMenu } from './ui/online/DailyMenu';
@@ -118,6 +119,8 @@ export function App({ start, onTitle }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** 撮影モードの UI の表示 */
   const [captureUi, setCaptureUi] = useState<CaptureUi>('full');
+  /** 撮影モード: 共有カードの確認 */
+  const [sharePreview, setSharePreview] = useState(false);
   /** デイリーのメニュー（開いていなければ null） */
   const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
 
@@ -574,7 +577,23 @@ export function App({ start, onTitle }: Props) {
             setLiveScore(null);
             dispatch({ type: 'captureCommit', seed });
           }}
+          onPreviewShare={() => setSharePreview(true)}
         />
+      )}
+      {CAPTURE && sharePreview && (
+        <div
+          className="modal"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSharePreview(false)}
+        >
+          <div className="modal__body panel share-preview" onClick={(e) => e.stopPropagation()}>
+            <RunShare run={run} />
+            <button className="button--ghost" onClick={() => setSharePreview(false)} data-close>
+              {t('catalog.close')}
+            </button>
+          </div>
+        </div>
       )}
       {header}
       <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />

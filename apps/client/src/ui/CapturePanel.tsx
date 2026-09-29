@@ -5,6 +5,7 @@
  * - UI の表示: 全部 / 最小限（盤面と HUD だけ）/ なし（盤面だけ）
  * - 再生速度: 0.25×〜2×（スローで撮る）
  * - 盤面の書き出し・読み込み（JSON）と、指定したシードでの本番: 見栄えの良い連鎖を何度でも再現する
+ * - 共有カードの確認: 今の盤面・結果で、結果画面の共有カードを出す
  * パネル自体は C キーで出し入れする（撮影時は隠す）。画面の大きさはブラウザ・撮影ツール側で決める
  * （例: Playwright の viewport 1920×1080。docs/ops/store-assets.md）
  */
@@ -23,6 +24,8 @@ interface Props {
   onSpeedChange: (speed: PlaybackSpeed) => void;
   onLoadBoard: (board: Board) => void;
   onCommit: (seed: number) => void;
+  /** 今の盤面で共有カードの見た目を確かめる */
+  onPreviewShare: () => void;
 }
 
 /** 書き出した JSON を盤面として読む。形が違えば null（盤面の大きさは今のランと同じであること） */
@@ -109,6 +112,7 @@ export function CapturePanel(props: Props) {
           {t('capture.commitWithSeed')}
         </button>
       </div>
+      <button onClick={props.onPreviewShare}>{t('capture.shareCard')}</button>
       {message && <small>{message}</small>}
     </aside>
   );

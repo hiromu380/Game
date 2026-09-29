@@ -2264,3 +2264,36 @@ a.button.button--primary {
   background: var(--bg);
   color: var(--muted);
 }
+
+/* ---- 共有カード（ui/share/ShareCardPanel.tsx） ---- */
+.run-end__share {
+  margin-top: 16px;
+  text-align: left;
+}
+.run-end__share h2 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+.share-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.share-card__preview {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+}
+.share-card__actions > * {
+  flex: 1;
+}
+.share-card .is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.share-preview {
+  width: min(720px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
+}

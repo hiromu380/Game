@@ -1,14 +1,17 @@
 /**
  * デイリーの結果のシェア（結果画面に出す）
  *
- * 上位○% はランキングから取る（取れなければ入れずにシェアできる）。
+ * 順位・上位○% はランキングから取る（取れなければ入れずにシェアできる）。
+ * 盤面はネタバレになるので、カードにも本文にも載せない（シフトごとの結果だけ）。
  */
-import { getBestChain, type RunState } from '@chain-factory/sim';
-import { useEffect, useState } from 'react';
+import { getBestChain, getTotalShipped, scoreToString, type RunState } from '@chain-factory/sim';
+import { useEffect, useMemo, useState } from 'react';
+import { shareUrl } from '../../config/share';
 import { useI18n } from '../../i18n';
 import { api } from '../../online/api';
-import { buildShareText, siteUrl, xIntentUrl } from '../../online/shareText';
-import { UiIcon } from '../UiIcon';
+import { buildShareText } from '../../online/shareText';
+import type { ShareCardInput, ShiftResult } from '../../share/card';
+import { ShareCardPanel } from './ShareCardPanel';
 
 interface Props {
   run: RunState;
@@ -17,54 +20,57 @@ interface Props {
 }
 
 export function DailyShare({ run, dailyId, number }: Props) {
-  const { t } = useI18n();
-  const [topPercent, setTopPercent] = useState<number | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { t, formatScore } = useI18n();
+  const [rank, setRank] = useState<{ rank: number; topPercent: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     api
       .getRanking(dailyId)
-      .then((r) => !cancelled && setTopPercent(r.me?.topPercent ?? null))
+      .then((r) => !cancelled && setRank(r.me ?? null))
       .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [dailyId]);
 
+  const shiftCount = run.config.shifts.length;
+  const score = formatScore(scoreToString(getTotalShipped(run)));
   const text = buildShareText(t, {
     number,
     history: run.history,
-    shiftCount: run.config.shifts.length,
+    shiftCount,
     maxChain: getBestChain(run),
-    topPercent,
-    url: siteUrl(),
+    score,
+    rank,
   });
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-    } catch {
-      setCopied(false);
-    }
-  };
+  const card = useMemo<ShareCardInput>(
+    () => ({
+      title: t('shareCard.dailyTitle', { number }),
+      subtitle: dailyId,
+      scoreLabel: t('shareCard.score'),
+      score,
+      shifts: t('shareCard.cleared', {
+        cleared: run.history.filter((h) => h.cleared).length,
+        total: shiftCount,
+      }),
+      rank: rank ? t('shareCard.rank', { rank: rank.rank, percent: rank.topPercent }) : null,
+      board: null,
+      results: Array.from({ length: shiftCount }, (_, i): ShiftResult => {
+        const h = run.history[i];
+        return !h ? 'notPlayed' : h.cleared ? 'cleared' : 'failed';
+      }),
+      url: shareUrl(),
+    }),
+    [t, number, dailyId, score, run.history, shiftCount, rank],
+  );
 
   return (
-    <div className="share">
-      <pre className="share__preview">{text}</pre>
-      <div className="button-row share__actions">
-        <a
-          className="button share__x"
-          href={xIntentUrl(text)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <UiIcon name="share" />
-          {t('share.toX')}
-        </a>
-        <button onClick={() => void copy()}>{copied ? t('share.copied') : t('share.copy')}</button>
-      </div>
-    </div>
+    <ShareCardPanel
+      card={card}
+      text={text}
+      url={shareUrl()}
+      fileName={`chain-factory-daily-${dailyId}`}
+    />
   );
 }
