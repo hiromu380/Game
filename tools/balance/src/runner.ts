@@ -27,6 +27,19 @@ export interface ShiftLog {
   quota: number;
   cleared: boolean;
   boss: string | null;
+  /** ボット自身の見込み（本番前に評価した出荷量）。判断の甘さの分析用 */
+  expected: string;
+  /** 本番時の盤面にポンコツロボ（ランダムな挙動）があったか */
+  junkbot: boolean;
+  /** 本番時の残り予算 */
+  budgetLeft: number;
+  /** 本番時に盤面にあったパーツの数 */
+  parts: number;
+  /** その日の出来事（2日目以降。その日のどのシフトにも同じ値を入れる） */
+  event: string | null;
+  /** その日の出来事の候補 */
+  eventChoices: string[] | null;
+  chainCount: number;
 }
 
 /** 1ランの記録 */
@@ -139,15 +152,24 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     for (const part of plan.state.board.cells) if (part) add(log.onBoard, part.id);
 
     const quota = getCurrentShift(plan.state).quota;
+    const expected = evaluate(plan.state, botOptions.samples, botOptions.evalMode).score;
     const committed = commitShift(plan.state);
     if ('error' in committed) throw new Error(committed.error);
     const record = committed.state.history.at(-1)!;
+    const dayEvent = plan.state.dayEvent ?? null;
     log.shifts.push({
       shiftIndex: record.shiftIndex,
       score: record.score,
       quota,
       cleared: record.cleared,
       boss: record.boss,
+      expected: expected.toString(),
+      junkbot: plan.state.board.cells.some((c) => c?.id === 'junkbot'),
+      budgetLeft: plan.state.budget,
+      parts: plan.state.board.cells.filter(Boolean).length,
+      event: dayEvent?.chosen ?? null,
+      eventChoices: dayEvent ? [...dayEvent.choices] : null,
+      chainCount: record.chainCount,
     });
     if (record.cleared) log.shiftsCleared++;
     state = committed.state;
