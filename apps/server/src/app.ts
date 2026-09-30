@@ -59,6 +59,10 @@ class RateLimitedError extends Error {}
 
 const fail = (c: Context, code: ApiErrorCode) => c.json<ApiError>({ error: code }, STATUS[code]);
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 /** 送信元の IP（プロキシが付けるヘッダーを順に見る）。わからなければ null */
 function clientIp(c: Context): string | null {
   return (
@@ -135,8 +139,10 @@ export function createApp(options: {
   // ---- プレイヤー ----
   // 匿名登録は人間確認（Turnstile）を通ったときだけ
   app.post('/players', async (c) => {
-    const body = (await readJson(c)) as { turnstileToken?: unknown };
-    const token = typeof body?.turnstileToken === 'string' ? body.turnstileToken : '';
+    const body: unknown = await readJson(c);
+    if (!isRecord(body)) throw new DomainError('badRequest');
+    const token = body.turnstileToken;
+    if (typeof token !== 'string' || token.length === 0) throw new DomainError('badRequest');
     const ip = clientIp(c);
     if (!(await c.get('deps').humanVerifier.verify(token, ip))) {
       throw new DomainError('humanCheckFailed');
@@ -157,8 +163,9 @@ export function createApp(options: {
   );
   app.put('/players/me/name', async (c) => {
     const player = await playerOf(c);
-    const body = (await readJson(c)) as { displayName?: unknown };
-    return c.json({ displayName: await updateName(ctxOf(c), player, body?.displayName) });
+    const body: unknown = await readJson(c);
+    const displayName = isRecord(body) ? body.displayName : undefined;
+    return c.json({ displayName: await updateName(ctxOf(c), player, displayName) });
   });
 
   // ---- デイリー ----

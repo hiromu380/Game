@@ -19,16 +19,32 @@ import { toScoreColumns } from '@chain-factory/shared';
 import {
   getBestChain,
   getTotalShipped,
+  isRunOp,
   SIM_VERSION,
   scoreToString,
   type RunOp,
 } from '@chain-factory/sim';
+import { SERVER_LIMITS } from '../../config/server';
 import type { PlayerRecord, SessionRecord } from '../../repositories/types';
 import { DomainError, type DomainContext } from '../context';
 import { dailyIdAt, isDailyId } from './calendar';
 import { ensureDaily } from './dailyJob';
 import { deriveCommitSeed, deriveDailySecret } from './dailySecret';
 import { rebuildState, verifyAndCommit } from './verify';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonNegativeSafeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+}
+
+function isRunOpList(value: unknown): value is RunOp[] {
+  return (
+    Array.isArray(value) && value.length <= SERVER_LIMITS.maxOpsPerShift && value.every(isRunOp)
+  );
+}
 
 /** デイリーを取得する。今日の分はなければ作る。未来の日・存在しない日は notFound */
 async function loadDaily(ctx: DomainContext, dailyId: string) {
@@ -115,9 +131,14 @@ export async function commitDaily(
   dailyId: string,
   body: unknown,
 ): Promise<CommitResponse> {
-  const req = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;
+  if (!isRecord(body)) throw new DomainError('badRequest');
   // sim のバージョンが違うと同じ操作でも結果が変わりうるので、先に弾く（クライアントに再読み込みを促す）
-  if (req.simVersion !== SIM_VERSION) throw new DomainError('simVersionMismatch');
+  if (typeof body.simVersion !== 'string') throw new DomainError('badRequest');
+  if (body.simVersion !== SIM_VERSION) throw new DomainError('simVersionMismatch');
+  if (!isNonNegativeSafeInteger(body.shiftIndex)) throw new DomainError('badRequest');
+  if (!isRunOpList(body.ops)) throw new DomainError('invalidSubmission');
+  const shiftIndex = body.shiftIndex;
+  const ops = body.ops;
 
   const daily = await loadDaily(ctx, dailyId);
   if (daily.simVersion !== SIM_VERSION) throw new DomainError('simVersionMismatch');
@@ -125,13 +146,13 @@ export async function commitDaily(
 
   const session = await ctx.repos.sessions.find(dailyId, player.id);
   if (!session) throw new DomainError('notFound');
-  if (session.status !== 'playing' || req.shiftIndex !== session.shiftIndex) {
-    throw new DomainError('badRequest', `shift mismatch: ${String(req.shiftIndex)}`);
+  if (session.status !== 'playing' || shiftIndex !== session.shiftIndex) {
+    throw new DomainError('badRequest', `shift mismatch: ${String(shiftIndex)}`);
   }
 
   const seeds = await commitSeedsFor(ctx, dailyId, session.shiftIndex + 1);
   const current = rebuildState(dailyId, daily.config, session.ops, seeds);
-  const verified = verifyAndCommit(current, req.ops, seeds[session.shiftIndex]!);
+  const verified = verifyAndCommit(current, ops, seeds[session.shiftIndex]!);
   if (!verified.ok) {
     // 詳しい理由はサーバーのログにだけ残す（クライアントに不正のやり方の手がかりを与えない）
     console.warn(`invalid submission daily=${dailyId} player=${player.id} ${verified.reason}`);
@@ -143,7 +164,7 @@ export async function commitDaily(
   const now = ctx.now();
   const updated: SessionRecord = {
     ...session,
-    ops: [...session.ops, req.ops as RunOp[]],
+    ops: [...session.ops, ops],
     shiftIndex: session.shiftIndex + 1,
     status: finished ? 'finished' : 'playing',
     updatedAt: now,

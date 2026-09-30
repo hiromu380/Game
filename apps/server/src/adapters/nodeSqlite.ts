@@ -23,10 +23,10 @@ export function openNodeSqlite(path = ':memory:'): { db: AsyncSqliteDb; raw: Dat
         statement.run(...(params as never[]));
         return { rows: [] };
       }
-      // sqlite-proxy は行を「値の配列」で受け取る（列の順番は SELECT の順。
-      // オブジェクトで受けると JOIN で同じ列名が重なったときに潰れるため、配列で受け取る）
-      statement.setReturnArrays(true);
-      const rows = statement.all(...(params as never[])) as unknown as unknown[][];
+      // sqlite-proxy は行を値の配列で受け取るが、node:sqlite は列名つきオブジェクトを返す。
+      const rows = statement
+        .all(...(params as never[]))
+        .map((row) => Object.values(row) as unknown[]);
       // 'get' で行がないときは undefined を返す（Drizzle がそれを「なし」として扱う）
       return { rows: method === 'get' ? (rows[0] as unknown[]) : rows };
     },

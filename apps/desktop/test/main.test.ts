@@ -155,9 +155,9 @@ describe('ファイル保存', () => {
 
 describe('app:// の配信とセキュリティ', () => {
   it('配信フォルダの外は読めない', () => {
-    expect(resolveAppFile('/srv/app', 'app://chain-factory/')).toBe('/srv/app/index.html');
+    expect(resolveAppFile('/srv/app', 'app://chain-factory/')).toBe(join('/srv/app', 'index.html'));
     expect(resolveAppFile('/srv/app', 'app://chain-factory/assets/a.js')).toBe(
-      '/srv/app/assets/a.js',
+      join('/srv/app', 'assets', 'a.js'),
     );
     expect(resolveAppFile('/srv/app', 'app://chain-factory/..%2F..%2Fetc%2Fpasswd')).toBeNull();
     expect(resolveAppFile('/srv/app', 'app://other-host/index.html')).toBeNull();

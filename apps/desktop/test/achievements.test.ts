@@ -16,6 +16,8 @@ import { createHandlers } from '../src/main/ipc/handlers';
 import { unavailableSteam } from '../src/main/steam/types';
 import { buildAchievementsDoc, OUTPUT_PATH } from '../scripts/achievementsList';
 
+const normalizeLineEndings = (value: string) => value.replace(/\r\n/g, '\n');
+
 describe('実績の送信（メインプロセス）', () => {
   it('定義済みの実績だけを Steam へ送る', async () => {
     const unlockAchievement = vi.fn(async () => true);
@@ -46,6 +48,8 @@ describe('定義の整合性', () => {
 
   it('Steamworks 用の一覧（docs/ops/steam-achievements-list.md）が最新', () => {
     // 失敗したら: pnpm --filter @chain-factory/desktop achievements:export
-    expect(readFileSync(OUTPUT_PATH, 'utf8')).toBe(buildAchievementsDoc());
+    expect(normalizeLineEndings(readFileSync(OUTPUT_PATH, 'utf8'))).toBe(
+      normalizeLineEndings(buildAchievementsDoc()),
+    );
   });
 });

@@ -197,6 +197,26 @@ describe('デイリー: 不正な提出の拒否', () => {
     const { api, token } = await setup();
     expect(await api.commit(token, 0, [{ op: 'teleport' } as never])).toEqual(invalid);
     expect(await api.commit(token, 0, 'hello' as never)).toEqual(invalid);
+    expect(
+      await api.commit(token, 0, [
+        { op: 'place', partId: 'unknown-part', x: 0, y: 0, dir: 0 } as never,
+      ]),
+    ).toEqual(invalid);
+    expect(
+      await api.call('POST', `/daily/${DAY}/commit`, { simVersion: '3', shiftIndex: 0 }, token),
+    ).toEqual(invalid);
+  });
+
+  it('シフト番号は安全な非負整数に限る', async () => {
+    const { api, token } = await setup();
+    expect(
+      await api.call(
+        'POST',
+        `/daily/${DAY}/commit`,
+        { simVersion: '3', shiftIndex: Number.MAX_SAFE_INTEGER + 1, ops: [] },
+        token,
+      ),
+    ).toEqual({ status: 400, json: { error: 'badRequest' } });
   });
 
   it('sim のバージョン違い', async () => {

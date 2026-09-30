@@ -47,12 +47,31 @@ npx wrangler d1 execute chain-factory-restore --remote --file backups/chain-fact
 
 ## 3. 復元の練習
 
-公開前に一度、エクスポート → 新しい DB への取り込み → ローカル（`--local`）での確認 を通しでやっておく。
-ローカルの D1 でも同じ手順を試せる:
+公開前と、その後は定期的に、担当者がエクスポートから復元・読み取り確認までを通して実施する。
+リモートの復元先は本番とは別の新しい D1 にし、確認が終わるまで本番の `database_id` は変更しない。
+本番データを含む SQL はローカルにダウンロードせず、アクセス制限された作業端末・保管先を使う。
+
+最低限、次を記録する:
+
+- エクスポート日時と対象 DB
+- 復元先 DB と復元完了日時
+- SQL の取り込みが成功したこと
+- 復元した DB に対して `/api/daily/today` 相当のデイリー情報とランキングを読み取れたこと
+- 本番 DB の接続先を変更していないこと
+
+ローカルでは、機密情報を含まないテストデータで D1 のエクスポートとジョブ実行を確認できる:
 
 ```sh
-npx wrangler d1 export chain-factory --local --output /tmp/local.sql
+cd apps/server
+npx wrangler d1 export chain-factory --local --output .wrangler/local-backup.sql
+pnpm job all --db .wrangler/local-restore.sqlite --at 2026-10-05T00:00:00Z
+pnpm test
 ```
+
+`pnpm job all` は指定した空の SQLite にマイグレーションを適用し、相場 → デイリー → IP ハッシュ削除の順に実行する。
+これらの一時ファイルは `.wrangler/`（git 管理外）に置く。これは定期ジョブのローカル確認であり、
+`local-backup.sql` を復元する手順やリモート D1 の復元成功を代替しない。
+実際のバックアップ SQL の取り込み確認は、上記の別 D1 への復元手順で行う。
 
 ## 4. 秘密値のバックアップ
 

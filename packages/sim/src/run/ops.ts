@@ -7,7 +7,7 @@
  * （クライアントが送った盤面や予算そのものは信用しない）。
  * 試運転はランの状態を変えない（試運転回数だけ）ので、操作ログには含めない。
  */
-import type { Dir4, PartId } from '../types';
+import { PART_IDS, type Dir4, type PartId } from '../types';
 import { buyOffer, placePart, rerollShop, returnPart, rotatePart, sellPart } from './build';
 import { chooseEvent, isEventPending } from './events';
 import type { RunActionResult, RunError, RunState } from './types';
@@ -63,7 +63,11 @@ export function replayOps(state: RunState, ops: readonly unknown[]): ReplayResul
   return { ok: true, state: current };
 }
 
-const isInt = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v);
+const isInt = (v: unknown): v is number => typeof v === 'number' && Number.isSafeInteger(v);
+
+function isPartId(value: unknown): value is PartId {
+  return typeof value === 'string' && PART_IDS.some((id) => id === value);
+}
 
 /** 外部から届いた値が操作として正しい形か（値の範囲は各操作の関数で確かめる） */
 export function isRunOp(value: unknown): value is RunOp {
@@ -78,10 +82,10 @@ export function isRunOp(value: unknown): value is RunOp {
       return true;
     case 'place':
       return (
-        typeof v.partId === 'string' &&
+        isPartId(v.partId) &&
         isInt(v.x) &&
         isInt(v.y) &&
-        [0, 1, 2, 3].includes(v.dir as number)
+        (v.dir === 0 || v.dir === 1 || v.dir === 2 || v.dir === 3)
       );
     case 'rotate':
     case 'return':

@@ -48,7 +48,12 @@ export default tseslint.config(
   },
   // ビルド用のスクリプト・デスクトップ版のメインプロセス（Node で動く）
   {
-    files: ['apps/client/build/**/*.{ts,mjs}', 'apps/desktop/**/*.{ts,mjs,cjs}', 'tools/**/*.mjs'],
+    files: [
+      'apps/client/build/**/*.{ts,mjs}',
+      'apps/desktop/**/*.{ts,mjs,cjs}',
+      'tools/**/*.mjs',
+      '.github/**/*.mjs',
+    ],
     languageOptions: { globals: globals.node },
   },
 );
