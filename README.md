@@ -5,7 +5,7 @@
 
 ## 必要なもの
 
-- Node.js 22.12 以上
+- Node.js 22.13 以上
 - pnpm 10 以上（`corepack enable` で有効化できます）
 
 ## よく使うコマンド
