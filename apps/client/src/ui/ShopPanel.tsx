@@ -40,7 +40,10 @@ export function ShopPanel(props: Props) {
   return (
     <section className="panel" data-panel="shop">
       <div className="panel__header">
-        <h2 className="panel__title">{t('shop.title')}</h2>
+        <h2 className="panel__title">
+          <small className="panel__eyebrow">{t('shop.vendor')}</small>
+          {t('shop.title')}
+        </h2>
         <button className="button--small button--ghost" onClick={() => setCatalogOpen(true)}>
           {t('catalog.open')}
         </button>

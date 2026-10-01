@@ -13,7 +13,7 @@ import type { MetaProgress } from '@chain-factory/sim';
 import { recordRankingToSave } from './state/achievements';
 import { findDemoSaveToImport } from './state/demoImport';
 import { DemoImportDialog } from './ui/title/DemoImportDialog';
-import { loadRun } from './state/saveStore';
+import { loadRun, loadSave } from './state/saveStore';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
 
@@ -61,6 +61,7 @@ export function Root() {
         progress={game ? 1 : progress}
         waiting={request !== null}
         hasSavedRun={loadRun() !== null}
+        meta={loadSave()?.meta ?? null}
         onPlay={() => setRequest({ start: null })}
         onDaily={() => setDailyOpen(true)}
         onCollection={() => setCollectionOpen(true)}
