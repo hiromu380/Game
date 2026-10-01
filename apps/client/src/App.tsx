@@ -9,6 +9,7 @@ import {
   dailyRunSeed,
   getCurrentEconomy,
   getCurrentRules,
+  getDayAndPeriod,
   getRefund,
   getRerollCost,
   isEventPending,
@@ -72,6 +73,7 @@ import { GiveUpButton } from './ui/GiveUpButton';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
+import { WorkshopBackdrop } from './ui/WorkshopBackdrop';
 
 /** ゲーム画面の始め方（デイリー・練習はメニューで組み立てたランを渡す） */
 export interface GameStart {
@@ -121,6 +123,7 @@ export function App({ start, onTitle }: Props) {
 
   const { settings, updateSettings } = useSettings();
   const { run, selection, playback, error, mode } = state;
+  const previousShift = useRef(run.shiftIndex);
   const playing = playback !== null || state.awaitingServer;
 
   // 初回ガイド（ガイド用のランの1シフト目。進み方は state/tutorial.ts）。ランを始め直したら最初から
@@ -224,6 +227,21 @@ export function App({ start, onTitle }: Props) {
   useEffect(() => {
     audio.playBgm(bgm);
   }, [bgm]);
+
+  // 操作卓の奥で鳴る工場音。朝・昼・夜と、夜のトラブル発生中で音色を変える。
+  const { period: ambiencePeriod } = getDayAndPeriod(run);
+  const bossActive = findBossToShow(run)?.isNow ?? false;
+  useEffect(() => {
+    audio.playAmbience(ambiencePeriod, bossActive);
+    return () => audio.playAmbience(null, false);
+  }, [ambiencePeriod, bossActive]);
+
+  // シフトが進んだときだけ構内チャイムを鳴らす。初回表示では鳴らさない。
+  useEffect(() => {
+    if (previousShift.current === run.shiftIndex) return;
+    previousShift.current = run.shiftIndex;
+    audio.play(bossActive ? 'bossAlert' : 'shiftStart');
+  }, [run.shiftIndex, bossActive]);
 
   // 新しい解放があれば結果画面で鳴らす
   const showingUnlocks = !playing && run.phase !== 'building' && state.unlocks.length > 0;
@@ -508,6 +526,7 @@ export function App({ start, onTitle }: Props) {
     return (
       <div className="app">
         {header}
+        <WorkshopBackdrop run={run} meta={state.meta} playing={false} alert={bossActive} />
         <RunEndScreen
           run={run}
           meta={state.meta}
@@ -558,6 +577,7 @@ export function App({ start, onTitle }: Props) {
         />
       )}
       {header}
+      <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
       {!fit && runInfo}
       <main className="layout">
         <div className="layout__board">

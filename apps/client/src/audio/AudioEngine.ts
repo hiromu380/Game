@@ -28,6 +28,9 @@ export class AudioEngine {
   private lastPlayed = new Map<SoundKey, number>();
   private fileBuffers = new Map<string, Promise<AudioBuffer>>();
   private bgmSource: AudioBufferSourceNode | null = null;
+  private ambienceOscillators: OscillatorNode[] = [];
+  private ambienceGains: GainNode[] = [];
+  private ambienceKey: string | null = null;
 
   /** AudioContext を用意する（初回だけ作る）。音が出せない環境では null */
   private ensureContext(): AudioContext | null {
@@ -87,6 +90,37 @@ export class AudioEngine {
     if (!asset || !ctx || !this.bgmBus || asset.kind !== 'file') return;
     void this.playFile(ctx, this.bgmBus, asset.src, asset.volume, 1, true).then((source) => {
       this.bgmSource = source;
+    });
+  }
+
+  /**
+   * 工場の低い環境音。音源ファイルなしでも世界の時間を感じられるよう、
+   * ごく小さな2つの発振音を重ねる。SEを初めて鳴らした時にブラウザ側で再開される。
+   */
+  playAmbience(period: number | null, alert: boolean): void {
+    const key = period === null ? null : `${period}:${alert}`;
+    if (key === this.ambienceKey) return;
+    for (const oscillator of this.ambienceOscillators) oscillator.stop();
+    for (const node of [...this.ambienceOscillators, ...this.ambienceGains]) node.disconnect();
+    this.ambienceOscillators = [];
+    this.ambienceGains = [];
+    this.ambienceKey = key;
+    if (period === null) return;
+
+    const ctx = this.ensureContext();
+    if (!ctx || !this.bgmBus) return;
+    const base = [54, 62, 46][period] ?? 54;
+    const frequencies = alert ? [base, base * 1.5] : [base, base * 2.01];
+    frequencies.forEach((frequency, index) => {
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = index === 0 ? 'sine' : 'triangle';
+      oscillator.frequency.value = frequency;
+      gain.gain.value = alert ? 0.018 : 0.012;
+      oscillator.connect(gain).connect(this.bgmBus!);
+      oscillator.start();
+      this.ambienceOscillators.push(oscillator);
+      this.ambienceGains.push(gain);
     });
   }
 

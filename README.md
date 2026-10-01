@@ -70,6 +70,7 @@ pnpm dev                                                  # クライアント�
   [steam-cloud](./docs/ops/steam-cloud.md)・[steam-build](./docs/ops/steam-build.md)・[steam-testing](./docs/ops/steam-testing.md)・
   [store-assets](./docs/ops/store-assets.md)
 - 素材のスタイルガイド: [docs/art-style.md](./docs/art-style.md)。生成AIの利用記録: [docs/ops/ai-disclosure.md](./docs/ops/ai-disclosure.md)
+- 世界観・登場人物・文体のガイド: [docs/world-guide.md](./docs/world-guide.md)
 
 ## ディレクトリ構成
 
