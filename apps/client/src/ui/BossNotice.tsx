@@ -50,7 +50,10 @@ export function BossNotice({ run }: { run: RunState }) {
         <div className="boss-notice boss-notice--now">
           <img className="boss-notice__icon" src={BOSS_ICONS[special.id]} alt="" />
           <span className="boss-notice__label">{t('daily.specialRule')}</span>
-          <strong>{t(`boss.${special.id}.name`)}</strong>
+          <strong>
+            {t(`boss.${special.id}.sender`)} / {t(`boss.${special.id}.name`)}
+          </strong>
+          <span className="boss-notice__story">{t(`boss.${special.id}.story`)}</span>
           <span className="boss-notice__desc">{describeBoss(t, run, special)}</span>
         </div>
       )}
@@ -60,7 +63,10 @@ export function BossNotice({ run }: { run: RunState }) {
           <span className="boss-notice__label">
             {boss.isNow ? t('boss.now') : t('boss.upcoming')}
           </span>
-          <strong>{t(`boss.${boss.entry.id}.name`)}</strong>
+          <strong>
+            {t(`boss.${boss.entry.id}.sender`)} / {t(`boss.${boss.entry.id}.name`)}
+          </strong>
+          <span className="boss-notice__story">{t(`boss.${boss.entry.id}.story`)}</span>
           <span className="boss-notice__desc">{describeBoss(t, run, boss.entry)}</span>
         </div>
       )}

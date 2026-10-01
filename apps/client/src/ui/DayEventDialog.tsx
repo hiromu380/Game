@@ -39,7 +39,9 @@ export function DayEventDialog({ run, onChoose }: Props) {
               onClick={() => onChoose(index)}
               autoFocus={index === 0}
             >
+              <span className="day-event__sender">{t(`event.${id}.sender`)}</span>
               <strong>{t(`event.${id}.name`)}</strong>
+              <span className="day-event__story">{t(`event.${id}.story`)}</span>
               <span>{describeEvent(t, run, id)}</span>
             </button>
           ))}
@@ -58,7 +60,10 @@ export function DayEventNotice({ run }: { run: RunState }) {
   return (
     <div className="boss-notice day-event-notice">
       <span className="boss-notice__label">{t('event.today')}</span>
-      <strong>{t(`event.${id}.name`)}</strong>
+      <strong>
+        {t(`event.${id}.sender`)} / {t(`event.${id}.name`)}
+      </strong>
+      <span className="boss-notice__story">{t(`event.${id}.story`)}</span>
       <span className="boss-notice__desc">
         {id === 'sample' && sample
           ? t('event.sampleGot', { part: t(`part.${sample}.name`) })

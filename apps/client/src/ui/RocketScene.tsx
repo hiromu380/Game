@@ -5,7 +5,7 @@
  * - 延長戦の後: どこまで届いたか
  */
 import type { RunState } from '@chain-factory/sim';
-import { ROCKET_ASSETS } from '../assets/manifest';
+import { MASCOT_ASSETS, ROCKET_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
@@ -38,6 +38,23 @@ export function RocketScene({ run }: { run: RunState }) {
               ? t('rocket.launchCaption')
               : t('rocket.unfinished', { parts, total: ROCKET_PARTS })}
       </p>
+      <div className="rocket-scene__bolt">
+        <img
+          src={MASCOT_ASSETS[launched || reached ? 'happy' : 'fail']}
+          alt=""
+          width={56}
+          height={56}
+        />
+        <p>
+          {t(
+            reached
+              ? 'bolt.result.arrived'
+              : launched
+                ? 'bolt.result.launched'
+                : 'bolt.result.unfinished',
+          )}
+        </p>
+      </div>
     </div>
   );
 }

@@ -50,7 +50,9 @@ export type SoundKey =
   | 'quotaMet'
   | 'runFailed'
   | 'runCleared'
-  | 'unlock';
+  | 'unlock'
+  | 'shiftStart'
+  | 'bossAlert';
 
 export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   // ---- 組み立て操作 ----
@@ -119,6 +121,31 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       notes: [
         { freq: 180, at: 0, duration: 0.12 },
         { freq: 140, at: 0.1, duration: 0.14 },
+      ],
+    },
+  },
+
+  // ---- 工場内放送 ----
+  shiftStart: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.16,
+      notes: [
+        { freq: 659, at: 0, duration: 0.16 },
+        { freq: 784, at: 0.2, duration: 0.22 },
+      ],
+    },
+  },
+  bossAlert: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.12,
+      notes: [
+        { freq: 220, at: 0, duration: 0.14 },
+        { freq: 220, at: 0.23, duration: 0.14 },
+        { freq: 165, at: 0.46, duration: 0.28 },
       ],
     },
   },

@@ -14,6 +14,7 @@ import {
 } from '@chain-factory/sim';
 import { useMemo, useState } from 'react';
 import { EDITION_CONFIG } from '../../config/edition';
+import { MASCOT_ASSETS } from '../../assets/manifest';
 import { useI18n } from '../../i18n';
 import { achievementsOnLoad } from '../../state/achievements';
 import { loadSave } from '../../state/saveStore';
@@ -21,8 +22,9 @@ import { AchievementList } from '../AchievementList';
 import { describeCondition, MetaPanel } from '../MetaPanel';
 import { describePart } from '../partText';
 import { PartIcon } from '../PartIcon';
+import { factoryLogUnlocks } from '../worldProgress';
 
-type Tab = 'parts' | 'goals' | 'achievements';
+type Tab = 'parts' | 'logs' | 'goals' | 'achievements';
 
 const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
 
@@ -39,6 +41,7 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
 
   const tabs: Tab[] = [
     'parts',
+    'logs',
     ...(EDITION_CONFIG.metaProgression ? (['goals'] as const) : []),
     ...(EDITION_CONFIG.achievements ? (['achievements'] as const) : []),
   ];
@@ -65,6 +68,7 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
         )}
         <div className="collection__content">
           {tab === 'parts' && <PartList unlockedParts={meta.unlockedParts} />}
+          {tab === 'logs' && <FactoryLog meta={meta} />}
           {tab === 'goals' && <MetaPanel meta={meta} unlocks={[]} />}
           {tab === 'achievements' && <AchievementList progress={achievements} open />}
         </div>
@@ -75,6 +79,47 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** 工場日誌: プレイの進行に合わせて、工場で働く仲間の記録が増える。 */
+function FactoryLog({ meta }: { meta: ReturnType<typeof createInitialMeta> }) {
+  const { t } = useI18n();
+  const unlocked = factoryLogUnlocks(meta);
+  const entries = [
+    { key: 'factory', mark: '03', unlocked: unlocked.factory },
+    { key: 'bolt', mark: 'B', unlocked: unlocked.bolt, mascot: true },
+    { key: 'nut', mark: 'N', unlocked: unlocked.nut },
+    { key: 'gizmo', mark: 'G', unlocked: unlocked.gizmo },
+    { key: 'cash8', mark: '8', unlocked: unlocked.cash8 },
+    { key: 'millie', mark: 'M', unlocked: unlocked.millie },
+    { key: 'maru', mark: '+', unlocked: unlocked.maru },
+  ] as const;
+
+  return (
+    <section className="factory-log">
+      <p className="panel__hint">{t('collection.logsHint')}</p>
+      <div className="factory-log__list">
+        {entries.map((entry) => (
+          <article
+            key={entry.key}
+            className={`factory-log__entry ${entry.unlocked ? '' : 'is-locked'}`}
+          >
+            <div className="factory-log__portrait">
+              {'mascot' in entry ? (
+                <img src={MASCOT_ASSETS.idle} alt="" width={56} height={56} />
+              ) : (
+                <span>{entry.unlocked ? entry.mark : '?'}</span>
+              )}
+            </div>
+            <div>
+              <h3>{t(entry.unlocked ? `lore.${entry.key}.name` : 'collection.logLocked')}</h3>
+              <p>{t(entry.unlocked ? `lore.${entry.key}.body` : 'collection.logLockedHint')}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -111,6 +156,7 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
                 </span>
                 {locked && <span className="catalog__rarity">{t('catalog.locked')}</span>}
                 <div className="catalog__desc">{describePart(t, partId, DEFAULT_RULES)}</div>
+                {!locked && <div className="catalog__flavor">{t(`part.${partId}.flavor`)}</div>}
                 {locked && (
                   <div className="catalog__desc">
                     {!EDITION_CONFIG.metaProgression || !unlock
