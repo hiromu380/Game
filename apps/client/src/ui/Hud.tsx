@@ -20,7 +20,11 @@ export function Hud({ run, liveScore }: Props) {
   const { day, period } = getDayAndPeriod(run);
 
   return (
-    <div className="hud">
+    <div className="hud control-console">
+      <div className="control-console__plate">
+        <span>{t('world.factoryId')}</span>
+        <strong>{t('world.orderId', { id: String(run.seed).slice(-4).padStart(4, '0') })}</strong>
+      </div>
       <div className="hud__item hud__item--shift">
         <span>
           {t('hud.dayPeriod', { day: day + 1, period: t(`period.${period}` as 'period.0') })}
