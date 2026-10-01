@@ -8,6 +8,14 @@ describe('i18n ファイル', () => {
     expect(Object.keys(en).sort()).toEqual(Object.keys(ja).sort());
   });
 
+  it('翻訳ごとのプレースホルダーが一致している', () => {
+    for (const key of Object.keys(ja) as (keyof typeof ja)[]) {
+      const placeholders = (message: string) =>
+        [...message.matchAll(/\{(\w+)\}/g)].map(([, name]) => name).sort();
+      expect(placeholders(en[key])).toEqual(placeholders(ja[key]));
+    }
+  });
+
   it('全パーツの名前と説明がある', () => {
     for (const id of PART_IDS) {
       expect(ja).toHaveProperty([`part.${id}.name`]);

@@ -109,3 +109,18 @@ describe('応答ヘッダー', () => {
     expect(res.headers.get('access-control-allow-origin')).toBeNull();
   });
 });
+
+describe('リクエスト本文の検証', () => {
+  it('匿名登録はオブジェクトと空でない Turnstile トークンを要求する', async () => {
+    const { ctx } = testContext();
+    const api = testApi(ctx);
+    expect(await api.call('POST', '/players', null)).toEqual({
+      status: 400,
+      json: { error: 'badRequest' },
+    });
+    expect(await api.call('POST', '/players', {})).toEqual({
+      status: 400,
+      json: { error: 'badRequest' },
+    });
+  });
+});

@@ -3,6 +3,7 @@
  * 不正な提出（予算オーバー・ショップにないパーツ・盤面外・sim のバージョン違い）が拒否されることも確かめる。
  */
 import {
+  SIM_VERSION,
   commitShift,
   createRunWithConfig,
   dailyRunSeed,
@@ -197,6 +198,31 @@ describe('デイリー: 不正な提出の拒否', () => {
     const { api, token } = await setup();
     expect(await api.commit(token, 0, [{ op: 'teleport' } as never])).toEqual(invalid);
     expect(await api.commit(token, 0, 'hello' as never)).toEqual(invalid);
+    expect(
+      await api.commit(token, 0, [
+        { op: 'place', partId: 'unknown-part', x: 0, y: 0, dir: 0 } as never,
+      ]),
+    ).toEqual(invalid);
+    expect(
+      await api.call(
+        'POST',
+        `/daily/${DAY}/commit`,
+        { simVersion: SIM_VERSION, shiftIndex: 0 },
+        token,
+      ),
+    ).toEqual(invalid);
+  });
+
+  it('シフト番号は安全な非負整数に限る', async () => {
+    const { api, token } = await setup();
+    expect(
+      await api.call(
+        'POST',
+        `/daily/${DAY}/commit`,
+        { simVersion: SIM_VERSION, shiftIndex: Number.MAX_SAFE_INTEGER + 1, ops: [] },
+        token,
+      ),
+    ).toEqual({ status: 400, json: { error: 'badRequest' } });
   });
 
   it('sim のバージョン違い', async () => {

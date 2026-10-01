@@ -55,6 +55,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
                     {t(`rarity.${rarity}`)}
                   </span>
                   <div className="catalog__desc">{describePart(t, partId, rules)}</div>
+                  <div className="catalog__flavor">{t(`part.${partId}.flavor`)}</div>
                 </div>
                 <div className="catalog__meta">
                   {t('catalog.price', { price: economy.prices[partId] })}

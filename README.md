@@ -5,7 +5,7 @@
 
 ## 必要なもの
 
-- Node.js 22.12 以上
+- Node.js 22.13 以上
 - pnpm 10 以上（`corepack enable` で有効化できます）
 
 ## よく使うコマンド
@@ -70,6 +70,7 @@ pnpm dev                                                  # クライアント�
   [steam-cloud](./docs/ops/steam-cloud.md)・[steam-build](./docs/ops/steam-build.md)・[steam-testing](./docs/ops/steam-testing.md)・
   [store-assets](./docs/ops/store-assets.md)
 - 素材のスタイルガイド: [docs/art-style.md](./docs/art-style.md)。生成AIの利用記録: [docs/ops/ai-disclosure.md](./docs/ops/ai-disclosure.md)
+- 世界観・登場人物・文体のガイド: [docs/world-guide.md](./docs/world-guide.md)
 
 ## ディレクトリ構成
 
@@ -155,3 +156,14 @@ legacy/machigai/  以前このリポジトリにあった別ゲーム（まち�
 
 スマホでは、選択中のパーツをもう一度タップで回転、長押しで手持ちに戻せます。
 右上の「設定」で、言語・演出の強さ（標準／控えめ／最小）・画面の揺れ・音量を変えられます。
+
+## 世界観と工場の演出
+
+- ゲーム画面の工場は朝・昼・夜で外の色と環境音が変わり、夜のボスシフトでは警告灯と専用チャイムが作動します
+- 遠景のロケット、達成印、煤、記念プレートは、現在のランとこれまでのクリア状況に合わせて変化します
+- タイトル背景にも最高到達シフト、解放済みパーツ、累計操業回数、ロケットの打ち上げ状況が引き継がれます
+- 「今日の出来事」とボス予告は、工場で働く人物から届く構内連絡として表示されます
+- タイトルの「コレクション」では、パーツのフレーバーテキストと、進行に応じて増える「工場の記録」を確認できます
+
+設定と文章表現の基準は [世界観ガイド](./docs/world-guide.md)、素材の色・形・線の基準は
+[スタイルガイド](./docs/art-style.md) を参照してください。
