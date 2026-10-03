@@ -14,6 +14,8 @@ describe('キーの割り当て', () => {
     expect(actionOfKey('ArrowUp')).toBe('up');
     expect(actionOfKey('R')).toBe('rotate');
     expect(actionOfKey('Escape')).toBe('cancel');
+    expect(actionOfKey('Z')).toBe('undo');
+    expect(actionOfKey('f')).toBe('returnPart');
     expect(actionOfKey('x')).toBeNull();
   });
 });

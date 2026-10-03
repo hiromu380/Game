@@ -116,7 +116,8 @@ const floorAmounts = (params: FloorParams) => ({
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
 /** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す（体験版・製品版のビルドでは出ない） */
-const DEBUG_AVAILABLE = isDebugAvailable(import.meta.env.DEV, window.location.search);
+// 撮影モードではデバッグを出さない（ストアのスクリーンショット・動画に写らないように）
+const DEBUG_AVAILABLE = !CAPTURE && isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
   const { t, formatScore, formatCompact } = useI18n();
@@ -411,6 +412,7 @@ export function App({ start, onTitle }: Props) {
     onDeselect: () => dispatch({ type: 'deselect' }),
     onRotate: () => dispatch({ type: 'rotate' }),
     onUndo: () => dispatch({ type: 'undo' }),
+    onReturn: () => dispatch({ type: 'returnSelected' }),
     onTrial: () => startPlayback('startTrial'),
     onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,

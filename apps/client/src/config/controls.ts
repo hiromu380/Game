@@ -3,7 +3,7 @@
  *
  * - キーは KeyboardEvent.key（小文字にして比べる）
  * - コントローラーは Gamepad API の標準配置（standard mapping）のボタン番号。
- *   Steam Deck・Xbox 系: 0=A 1=B 2=X 3=Y 4=LB 5=RB 8=Back(View) 9=Start 12〜15=十字キー（上下左右）
+ *   Steam Deck・Xbox 系: 0=A 1=B 2=X 3=Y 4=LB 5=RB 6=LT 7=RT 8=Back(View) 9=Start 12〜15=十字キー（上下左右）
  *   Steam Input が Deck の操作をこの配置で渡す（要確認: 実機）
  */
 
@@ -20,6 +20,8 @@ export type ControlAction =
   | 'rotate'
   /** 直前の組み替えを元に戻す（Ctrl+Z・⌘Z でも同じ） */
   | 'undo'
+  /** 選んでいる盤面のパーツを手持ちに戻す（そのまま置き直せる） */
+  | 'returnPart'
   | 'trial'
   | 'commit'
   /** ショップの一覧へ（L） */
@@ -36,6 +38,7 @@ export const KEY_BINDINGS: Record<ControlAction, readonly string[]> = {
   cancel: ['escape', 'backspace'],
   rotate: ['r'],
   undo: ['z'],
+  returnPart: ['f'],
   trial: ['t'],
   commit: ['p'],
   shop: ['q'],
@@ -51,6 +54,7 @@ export const GAMEPAD_BUTTONS: Record<ControlAction, readonly number[]> = {
   cancel: [1],
   rotate: [2],
   undo: [8],
+  returnPart: [7],
   trial: [3],
   commit: [9],
   shop: [4],
