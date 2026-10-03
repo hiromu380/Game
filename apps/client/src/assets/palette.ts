@@ -13,7 +13,7 @@ export const UI_COLORS = {
   panel: '#262a31',
   'panel-border': '#3a3f48',
   text: '#eef0f3',
-  muted: '#a3aab5',
+  muted: '#aab1bc',
   /** ハザードイエロー（アクセント・警告・ハザード柄） */
   accent: '#ffc107',
   'hazard-black': '#2b2b2b',

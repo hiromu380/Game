@@ -2623,3 +2623,8 @@ a.button.button--primary {
   white-space: nowrap;
   scrollbar-width: none;
 }
+/* 狭い画面（指で操作）: 押せるものは高さ 44px 以上（CLAUDE.md「UI の原則」） */
+.app--compact button,
+.app--compact .tabs__tab {
+  min-height: 44px;
+}
