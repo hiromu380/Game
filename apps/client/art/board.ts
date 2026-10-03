@@ -2,6 +2,8 @@
  * 盤面の素材: 床タイル3種・使用不可マス・ハザード柄の枠（角・辺）・ページの背景
  *
  * - 床: 盤面ではマスごとに3種から決まった並びで選ぶ（毎回同じ見た目。board/views.ts）。ポンコツな工場らしく汚れ・ひび
+ * - 床タイル（×2・加算・×3）: 地の床に、色つきの鉄板を重ねる。種類は色だけでなく溝の模様でも見分けられるようにする
+ *   （×2 = 斜めの溝2本、加算 = 十字の溝、×3 = 斜めの溝3本）。数字（×2・+3）は盤面側で重ねる（効果量が変わっても追従する）
  * - 枠: 角（16×16）と、横に並べてつなげられる辺（16×16）に分け、どの盤面サイズでも並べられるようにする
  */
 import { BOARD_COLORS as B, INK, MATERIAL_COLORS as M, UI_COLORS } from '../src/assets/palette';
@@ -29,6 +31,22 @@ const stripes = (height: number) =>
     }),
   );
 
+/** 床タイルの鉄板（地の床の上に、四隅を鋲で留めた色つきの板。フラット＋1段の影） */
+const floorPlate = (color: string, grooves: string[]) => [
+  ...floorBase(),
+  rect(6, 6, 52, 52, { fill: shade(color), opacity: 0.7 }, 5),
+  rect(6, 6, 50, 50, { fill: color, opacity: 0.65 }, 5),
+  ...grooves,
+  rivet(11, 11),
+  rivet(51, 11),
+  rivet(11, 51),
+  rivet(51, 51),
+];
+
+/** 斜めの溝（左下 → 右上。c は溝の位置。色は鉄板の影の色） */
+const grooveDiagonal = (color: string, c: number) =>
+  path(`M${c - 14} ${c + 14} L${c + 14} ${c - 14}`, line(shade(color), 5));
+
 export function boardFiles(): Record<string, string> {
   return {
     'src/assets/board/floor-1.svg': svg('床タイル: 無地', floorBase(), TILE),
@@ -45,6 +63,28 @@ export function boardFiles(): Record<string, string> {
         el('ellipse', { cx: 34, cy: 49, rx: 4, ry: 2.5, fill: B.floorDetail, opacity: 0.8 }),
         path('M8 14 l7 5 l-2 6 l6 4', line(B.floorLine, 1.5)),
       ],
+      TILE,
+    ),
+    'src/assets/board/floor-double.svg': svg(
+      '床タイル: ×2床（琥珀色の鉄板・斜めの溝2本）',
+      floorPlate(B.floorDouble, [
+        grooveDiagonal(B.floorDouble, 26),
+        grooveDiagonal(B.floorDouble, 40),
+      ]),
+      TILE,
+    ),
+    'src/assets/board/floor-add.svg': svg(
+      '床タイル: 加算床（緑の鉄板・十字の溝）',
+      floorPlate(B.floorAdd, [path('M32 14 V50 M14 32 H50', line(shade(B.floorAdd), 5))]),
+      TILE,
+    ),
+    'src/assets/board/floor-triple.svg': svg(
+      '床タイル: ×3床（桃色の鉄板・斜めの溝3本）',
+      floorPlate(B.floorTriple, [
+        grooveDiagonal(B.floorTriple, 20),
+        grooveDiagonal(B.floorTriple, 32),
+        grooveDiagonal(B.floorTriple, 44),
+      ]),
       TILE,
     ),
     'src/assets/board/floor-blocked.svg': svg(

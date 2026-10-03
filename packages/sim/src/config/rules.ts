@@ -15,7 +15,7 @@ export function createRuleSet(balance: Balance = BALANCE): RuleSet {
     switchSignalValue: balance.sim.switchSignalValue,
     maxActivations,
     params: { ...balance.partParams },
-    blockedCells: [],
+    floorParams: { ...balance.floorParams },
     dockDivisor: 1,
     maxIncomePerSim: balance.sim.maxIncomePerSim,
     maxLiveSignals: balance.sim.maxLiveSignals,

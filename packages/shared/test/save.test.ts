@@ -1,5 +1,9 @@
 import {
+  BALANCE,
   buildRunConfig,
+  commitShift,
+  getCurrentFloor,
+  placePart,
   createInitialAchievements,
   createInitialMeta,
   createRun,
@@ -9,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import {
   convertV1toV2,
   convertV2toV3,
+  convertV3toV4,
   createSave,
   migrateSave,
   SAVE_VERSION,
@@ -38,10 +43,10 @@ const V1_SAVE: SaveDataV1 = {
 };
 
 describe('セーブデータ', () => {
-  it('最新バージョン（v2）で保存し、JSON を往復しても同じ内容になる', () => {
+  it('最新バージョン（v4）で保存し、JSON を往復しても同じ内容になる', () => {
     const save = createSave(createRun(42));
     expect(save.version).toBe(SAVE_VERSION);
-    expect(SAVE_VERSION).toBe(3);
+    expect(SAVE_VERSION).toBe(4);
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
 
@@ -53,9 +58,9 @@ describe('セーブデータ', () => {
 });
 
 describe('v1 → v2 の変換', () => {
-  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（v3 まで続けて変換）', () => {
+  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（v4 まで続けて変換）', () => {
     const v2 = migrateSave(JSON.parse(JSON.stringify(V1_SAVE)))!;
-    expect(v2.version).toBe(3);
+    expect(v2.version).toBe(4);
     expect(v2.meta).toEqual(createInitialMeta());
     expect(v2.achievements).toEqual(createInitialAchievements());
 
@@ -66,6 +71,8 @@ describe('v1 → v2 の変換', () => {
     expect(run.board).toEqual(V1_SAVE.run!.board);
     expect(run.inventory).toEqual({ gear: 1 });
     expect(run.config).toEqual(buildRunConfig({ bossSeed: seeds.bossSeed(42) }));
+    // 床のないラン（v4 への変換でボーナス床なし）
+    expect(run.bonusFloor).toBeNull();
     expect(run.rerollCount).toBe(0);
     expect(run.trialCount).toBe(0);
     expect(run.history).toEqual([
@@ -112,7 +119,7 @@ describe('v2 → v3（実績の追加）', () => {
     const v2 = { ...JSON.parse(JSON.stringify(v3)), version: 2 };
     delete v2.achievements;
     const migrated = migrateSave(v2)!;
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(4);
     expect(migrated.run).toEqual(v3.run);
     expect(migrated.meta).toEqual(v3.meta);
     expect(migrated.achievements).toEqual(createInitialAchievements());
@@ -129,5 +136,56 @@ describe('v2 → v3（実績の追加）', () => {
     });
     delete save.achievements;
     expect(migrateSave(save)!.achievements).toEqual(createInitialAchievements());
+  });
+});
+
+describe('v3 → v4（床タイル）', () => {
+  /** 床を導入する前（v3）に保存されていたランの形: 床の項目がなく、ルールに使用不可マスの一覧がある */
+  function v3RunSave(config = createRun(9).config) {
+    const run = JSON.parse(JSON.stringify(createRun(9)));
+    run.config = JSON.parse(JSON.stringify(config));
+    delete run.config.stages;
+    delete run.config.bonusFloors;
+    delete run.config.rules.floorParams;
+    run.config.rules.blockedCells = [];
+    delete run.bonusFloor;
+    return {
+      version: 3,
+      run,
+      meta: createInitialMeta(),
+      achievements: createInitialAchievements(),
+    };
+  }
+
+  it('床のないランとしてそのまま続けられる（床なし・ボーナス床なし・効果量は基準値で補う）', () => {
+    const migrated = migrateSave(v3RunSave())!;
+    expect(migrated.version).toBe(4);
+    expect(convertV3toV4(v3RunSave() as never).version).toBe(4);
+    const run = migrated.run!;
+    expect(run.bonusFloor).toBeNull();
+    expect(run.config.stages).toBeUndefined();
+    expect(run.config.rules.floorParams).toEqual(BALANCE.floorParams);
+    expect(getCurrentFloor(run).every((c) => c === null)).toBe(true);
+
+    // 置いて本番まで進められる
+    const a = placePart(run, 'switch', 0, 0, 1);
+    if (!a.ok) throw new Error(a.error);
+    const b = placePart(a.state, 'dock', 1, 0, 1);
+    if (!b.ok) throw new Error(b.error);
+    const committed = commitShift(b.state);
+    expect('error' in committed).toBe(false);
+    if ('error' in committed) return;
+    expect(committed.state.bonusFloor ?? null).toBeNull();
+  });
+
+  it('v3 のランの補修工事（ボス計画の使用不可マス）は、床として引き続き効く', () => {
+    const config = buildRunConfig({ bossSeed: seeds.bossSeed(9) });
+    const night = config.shifts.findIndex((s) => s.kind === 'boss');
+    const bossPlan = config.bossPlan.map((entry, i) =>
+      i === night ? { id: 'repairWork' as const, blockedCells: [5] } : entry,
+    );
+    const save = v3RunSave({ ...config, bossPlan });
+    const run = migrateSave(save)!.run!;
+    expect(getCurrentFloor(run, night)[5]).toEqual({ tile: 'blocked', source: 'boss' });
   });
 });

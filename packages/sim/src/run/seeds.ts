@@ -12,6 +12,8 @@ const LABEL_TRIAL = 3;
 const LABEL_BOSS = 4;
 const LABEL_OVERTIME = 5;
 const LABEL_DAY_EVENT = 6;
+const LABEL_STAGE = 7;
+const LABEL_BONUS_FLOOR = 8;
 
 /** 本番（スイッチを押したとき）のシード。プレイヤーには表示しない */
 export function commitSeed(runSeed: number, shiftIndex: number): number {
@@ -38,7 +40,20 @@ export function overtimeSeed(runSeed: number, shiftIndex: number): number {
   return deriveSeed(runSeed, LABEL_OVERTIME, shiftIndex);
 }
 
-/** 日ごとのイベントのシード（候補の抽選と、試供品のパーツ。day は 0 始まりの日） */
-export function dayEventSeed(runSeed: number, day: number, purpose: 0 | 1): number {
+/**
+ * 日ごとのイベントのシード（day は 0 始まりの日）
+ * purpose: 0 = 候補の抽選、1 = 試供品のパーツ、2 = 床の出来事の位置
+ */
+export function dayEventSeed(runSeed: number, day: number, purpose: 0 | 1 | 2): number {
   return deriveSeed(runSeed, LABEL_DAY_EVENT, day, purpose);
+}
+
+/** 日ごとのステージ（床の配置）のシード（day は 0 始まりの日） */
+export function stageSeed(runSeed: number, day: number): number {
+  return deriveSeed(runSeed, LABEL_STAGE, day);
+}
+
+/** シフト開始時のボーナス床のシード */
+export function bonusFloorSeed(runSeed: number, shiftIndex: number): number {
+  return deriveSeed(runSeed, LABEL_BONUS_FLOOR, shiftIndex);
 }

@@ -36,6 +36,7 @@ const emptyResult: SimResult = {
     chainCount: 0,
     activatedParts: 0,
     shipCount: 0,
+    floorApplied: 0,
     maxValue: scoreOf(0),
     ticks: 0,
     halted: null,

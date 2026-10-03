@@ -5,9 +5,10 @@
 import { cellIndex, getPart, isInside, setPart } from '../core/board';
 import { rotateCw } from '../core/direction';
 import type { Dir4, PartId } from '../types';
+import { isCellBlocked } from './floor';
 import { addInventory } from './inventory';
 import { shopSeed } from './seeds';
-import { getCurrentEconomy, getCurrentRules } from './shift';
+import { getCurrentEconomy } from './shift';
 import { generateShop } from './shop';
 import type { RunActionResult, RunError, RunState } from './types';
 
@@ -42,7 +43,7 @@ export function placePart(
   if (!isInside(state.board, x, y)) return fail('outOfBoard');
   if ((state.inventory[partId] ?? 0) <= 0) return fail('notInInventory');
   if (getPart(state.board, x, y) !== null) return fail('cellOccupied');
-  if (getCurrentRules(state).blockedCells.includes(cellIndex(state.board, x, y))) {
+  if (isCellBlocked(state, cellIndex(state.board, x, y))) {
     return fail('cellBlocked');
   }
 

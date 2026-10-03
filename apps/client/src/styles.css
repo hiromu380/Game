@@ -2231,6 +2231,11 @@ a.button.button--primary {
 
 /* ---- 売却エリア（ui/SellZone.tsx） ---- */
 .sell-zone {
+  /* 右の列（スマホでは画面）の下端に貼りつける */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2249,13 +2254,46 @@ a.button.button--primary {
 .sell-zone.is-active {
   min-height: 64px;
   border-color: var(--missed);
-  background: rgba(255, 82, 82, 0.12);
+  background: linear-gradient(rgba(255, 82, 82, 0.12), rgba(255, 82, 82, 0.12)), var(--bg);
   color: var(--missed);
   font-size: 1.05rem;
   font-weight: 800;
 }
 .sell-zone.is-disabled {
   border-color: var(--panel-border);
-  background: none;
+  background: var(--bg);
   color: var(--muted);
+}
+
+/* ---- 共有カード（ui/share/ShareCardPanel.tsx） ---- */
+.run-end__share {
+  margin-top: 16px;
+  text-align: left;
+}
+.run-end__share h2 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+.share-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.share-card__preview {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+}
+.share-card__actions > * {
+  flex: 1;
+}
+.share-card .is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+.share-preview {
+  width: min(720px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
 }

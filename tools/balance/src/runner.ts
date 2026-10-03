@@ -9,6 +9,7 @@ import {
   createPrng,
   createRun,
   metaToModifiers,
+  getCurrentFloor,
   getCurrentShift,
   PART_IDS,
   type PartId,
@@ -16,9 +17,9 @@ import {
   chooseEvent,
   isEventPending,
 } from '@chain-factory/sim';
-import { BOTS, type BotName, type BotOptions } from './bots';
-import type { EvalMode } from './evaluate';
-import { applyMove } from './moves';
+import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
+import { evaluate, type EvalMode } from './evaluate';
+import { applyMove, MOVE_SETTINGS } from './moves';
 
 /** 1シフトの記録 */
 export interface ShiftLog {
@@ -27,6 +28,25 @@ export interface ShiftLog {
   quota: number;
   cleared: boolean;
   boss: string | null;
+  /** ボット自身の見込み（本番前に評価した出荷量）。判断の甘さの分析用 */
+  expected: string;
+  /** 本番時の盤面にポンコツロボ（ランダムな挙動）があったか */
+  junkbot: boolean;
+  /** 本番時の残り予算 */
+  budgetLeft: number;
+  /** 本番時に盤面にあったパーツの数 */
+  parts: number;
+  /** その日の出来事（2日目以降。その日のどのシフトにも同じ値を入れる） */
+  event: string | null;
+  /** その日の出来事の候補 */
+  eventChoices: string[] | null;
+  chainCount: number;
+  /** 本番時の、効果のある床（×2・加算・×3）のマス数 */
+  floorCells: number;
+  /** そのうちパーツを置いたマス数 */
+  partsOnFloor: number;
+  /** 本番で床の効果を受けた回数 */
+  floorApplied: number;
 }
 
 /** 1ランの記録 */
@@ -60,14 +80,37 @@ export interface RunnerOptions {
    * daily のシード n は「デイリー ID = bal-<n>」の日として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
    */
   mode?: 'normal' | 'daily';
+  /** ボットが床を見て手を選ぶか（既定 true。false は「床を見ないボット」との比較用。moves.ts） */
+  floorAware?: boolean;
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
   record[id] = (record[id] ?? 0) + n;
 }
 
+/** 今日の出来事の候補を1つずつ試し、その朝の見込みがいちばん良いものを選んだ状態を返す */
+function chooseBestEvent(state: RunState, bot: Bot, options: BotOptions): RunState {
+  let best: { state: RunState; ratio: number; budget: number } | null = null;
+  const count = state.dayEvent?.choices.length ?? 0;
+  for (let i = 0; i < count; i++) {
+    const chosen = chooseEvent(state, i);
+    if (!chosen.ok) continue;
+    const plan = bot.playShift(chosen.state, options);
+    const quota = getCurrentShift(plan.state).quota;
+    const score = evaluate(plan.state, options.samples, options.evalMode).score;
+    // 大きな数どうしの比なので、桁を落としてから割る
+    const ratio = Number((score * 1000n) / BigInt(Math.max(1, quota))) / 1000;
+    if (!best || ratio > best.ratio || (ratio === best.ratio && plan.state.budget > best.budget)) {
+      best = { state: chosen.state, ratio, budget: plan.state.budget };
+    }
+  }
+  if (!best) throw new Error('今日の出来事を選べない');
+  return best.state;
+}
+
 export function playRun(seed: number, botName: BotName, options: RunnerOptions): RunLog {
   const started = performance.now();
+  MOVE_SETTINGS.floorAware = options.floorAware ?? true;
   const bot = BOTS[botName];
   const botOptions: BotOptions = { ...options, rng: createPrng(seed ^ 0x5eed) };
   const log: RunLog = {
@@ -93,12 +136,9 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       ? createDailyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
   while (state.phase === 'building') {
-    // 今日の出来事（2日目以降の朝）: ボットは最初の候補を選ぶ（イベントの選び方の評価はまだしない）
-    if (isEventPending(state)) {
-      const chosen = chooseEvent(state, 0);
-      if (!chosen.ok) throw new Error(chosen.error);
-      state = chosen.state;
-    }
+    // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
+    // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
+    if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
     for (const offer of state.shop) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);
@@ -122,15 +162,29 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     for (const part of plan.state.board.cells) if (part) add(log.onBoard, part.id);
 
     const quota = getCurrentShift(plan.state).quota;
+    const expected = evaluate(plan.state, botOptions.samples, botOptions.evalMode).score;
+    const floor = getCurrentFloor(plan.state);
+    const effectCells = floor.flatMap((c, i) => (c && c.tile !== 'blocked' ? [i] : []));
     const committed = commitShift(plan.state);
     if ('error' in committed) throw new Error(committed.error);
     const record = committed.state.history.at(-1)!;
+    const dayEvent = plan.state.dayEvent ?? null;
     log.shifts.push({
       shiftIndex: record.shiftIndex,
       score: record.score,
       quota,
       cleared: record.cleared,
       boss: record.boss,
+      expected: expected.toString(),
+      junkbot: plan.state.board.cells.some((c) => c?.id === 'junkbot'),
+      budgetLeft: plan.state.budget,
+      parts: plan.state.board.cells.filter(Boolean).length,
+      event: dayEvent?.chosen ?? null,
+      eventChoices: dayEvent ? [...dayEvent.choices] : null,
+      chainCount: record.chainCount,
+      floorCells: effectCells.length,
+      partsOnFloor: effectCells.filter((i) => plan.state.board.cells[i]).length,
+      floorApplied: committed.result.stats.floorApplied,
     });
     if (record.cleared) log.shiftsCleared++;
     state = committed.state;

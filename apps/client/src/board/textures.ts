@@ -33,6 +33,8 @@ async function rasterize(src: string, size: number, resolution = 1): Promise<Tex
 /** 盤面の素材のテクスチャ（床・使用不可マス・枠） */
 export interface BoardTextures {
   floors: Texture[];
+  /** 床タイル（×2床・加算床・×3床） */
+  floorTiles: Record<'double' | 'add' | 'triple', Texture>;
   blocked: Texture;
   frameCorner: Texture;
   frameEdge: Texture;
@@ -40,13 +42,21 @@ export interface BoardTextures {
 
 export async function loadBoardTextures(): Promise<BoardTextures> {
   const r = density();
-  const [floors, blocked, frameCorner, frameEdge] = await Promise.all([
+  const tile = BOARD_ASSETS.floorTiles;
+  const [floors, [double, add, triple], blocked, frameCorner, frameEdge] = await Promise.all([
     Promise.all(BOARD_ASSETS.floors.map((src) => rasterize(src, CELL_SIZE, r))),
+    Promise.all([tile.double, tile.add, tile.triple].map((src) => rasterize(src, CELL_SIZE, r))),
     rasterize(BOARD_ASSETS.blocked, CELL_SIZE, r),
     rasterize(BOARD_ASSETS.frameCorner, BOARD_PADDING, r),
     rasterize(BOARD_ASSETS.frameEdge, BOARD_PADDING, r),
   ]);
-  return { floors, blocked, frameCorner, frameEdge };
+  return {
+    floors,
+    floorTiles: { double: double!, add: add!, triple: triple! },
+    blocked,
+    frameCorner,
+    frameEdge,
+  };
 }
 
 /** 全パーツのテクスチャを読み込む。displaySize は盤面上での表示サイズ（px） */

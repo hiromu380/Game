@@ -9,7 +9,16 @@
  * 例:
  *   board(['S> G> D>'])  // スイッチ → ギア → 出荷口
  */
-import { DEFAULT_RULES, scoreToString, simulate, type Board, type Dir4, type PartId } from '../src';
+import {
+  DEFAULT_RULES,
+  scoreToString,
+  simulate,
+  type Board,
+  type Dir4,
+  type FloorLayer,
+  type FloorTileId,
+  type PartId,
+} from '../src';
 
 const PART_CODES: Record<string, PartId> = {
   S: 'switch',
@@ -59,5 +68,36 @@ export function board(rows: string[]): Board {
 /** 既定ルールでシミュレーションし、スコアを文字列で返す */
 export function run(rows: string[], seed = 1, rules = DEFAULT_RULES) {
   const result = simulate({ board: board(rows), seed, rules });
+  return { ...result, scoreText: scoreToString(result.score) };
+}
+
+const FLOOR_CODES: Record<string, FloorTileId> = {
+  '2': 'double',
+  '+': 'add',
+  '3': 'triple',
+  '#': 'blocked',
+};
+
+/**
+ * テスト用ヘルパー: 文字列から床を作る（1マス = 1文字、空白区切り。'.' は床なし）
+ *   2=×2床 +=加算床 3=×3床 #=使用不可（source は stage）
+ */
+export function floorOf(rows: string[]): FloorLayer {
+  return rows.flatMap((row) =>
+    row
+      .trim()
+      .split(/\s+/)
+      .map((c) => {
+        if (c === '.') return null;
+        const tile = FLOOR_CODES[c];
+        if (!tile) throw new Error(`不明な床: ${c}`);
+        return { tile, source: 'stage' as const };
+      }),
+  );
+}
+
+/** 床つきでシミュレーションする */
+export function runWithFloor(rows: string[], floorRows: string[], seed = 1, rules = DEFAULT_RULES) {
+  const result = simulate({ board: board(rows), floor: floorOf(floorRows), seed, rules });
   return { ...result, scoreText: scoreToString(result.score) };
 }

@@ -11,7 +11,9 @@
  *   2. 信号は進行方向の隣マスへ移動する
  *      - 盤面外 / 使用不可マス / 空マス → 消滅
  *      - パーツ → 発動回数が残っていれば発動（信号は消費される）、尽きていれば消滅
+ *        発動するときは、パーツの反応より前に、そのマスの床の効果を値に適用する（floor イベント）
  *   3. tick の終わりに、合流するパーツ（合流炉）がまとめて処理する（マス番号の昇順）
+ *      床の効果は、取り込んだ値を合算した値に1回だけ適用する
  *   4. 遅れて発射する予定の信号（コピー機の2発目など）のうち、この tick の分を発射する
  *   5. この tick に発射された信号は、次の tick から移動を始める
  */
@@ -19,6 +21,8 @@ import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
 import { SCORE_ZERO, scoreAdd, scoreMax, scoreOf, type Score } from '../core/score';
+import { getFloorCell, isBlockedCell } from '../floor/layer';
+import { FLOOR_BEHAVIORS } from '../floor/tiles';
 import type { HaltReason, Part, SimEvent, SimInput, SimResult, Signal } from '../types';
 import { computeActivationLimits } from './limits';
 import { PART_BEHAVIORS } from './parts';
@@ -42,7 +46,7 @@ interface CollectBuffer {
 }
 
 export function simulate(input: SimInput): SimResult {
-  const { board, seed, rules } = input;
+  const { board, floor, seed, rules } = input;
   const rng = createPrng(seed);
   const events: SimEvent[] = [];
 
@@ -60,6 +64,21 @@ export function simulate(input: SimInput): SimResult {
   let maxValue: Score = SCORE_ZERO;
   let chainCount = 0;
   let shipCount = 0;
+  let floorApplied = 0;
+
+  const isBlocked = (index: number): boolean => isBlockedCell(floor, index);
+
+  /** 発動の直前に、そのマスの床の効果を値に適用する（効果がなければそのまま） */
+  const applyFloor = (tick: number, x: number, y: number, value: Score): Score => {
+    const cell = getFloorCell(floor, cellIndex(board, x, y));
+    const apply = cell ? FLOOR_BEHAVIORS[cell.tile].apply : undefined;
+    if (!cell || !apply) return value;
+    const after = apply(value, rules.floorParams);
+    floorApplied++;
+    maxValue = scoreMax(maxValue, after);
+    events.push({ tick, type: 'floor', x, y, tile: cell.tile, before: value, after });
+    return after;
+  };
 
   const canActivate = (index: number): boolean => {
     const limit = limits[index];
@@ -118,7 +137,7 @@ export function simulate(input: SimInput): SimResult {
       const part = getPart(board, x, y);
       if (part?.id !== 'switch') continue;
       const index = cellIndex(board, x, y);
-      if (rules.blockedCells.includes(index) || !canActivate(index)) continue;
+      if (isBlocked(index) || !canActivate(index)) continue;
       markActivated(index);
       signals.push(
         emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }),
@@ -156,7 +175,7 @@ export function simulate(input: SimInput): SimResult {
       events.push({ tick, type: 'move', signalId: signal.id, x, y });
 
       const index = cellIndex(board, x, y);
-      if (rules.blockedCells.includes(index)) {
+      if (isBlocked(index)) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'blocked' });
         continue;
       }
@@ -197,12 +216,13 @@ export function simulate(input: SimInput): SimResult {
         continue;
       }
 
-      // 発動
+      // 発動（床の効果はパーツの反応より前に適用する）
+      const value = applyFloor(tick, x, y, signal.value);
       const reaction = behavior.react({
         part,
         x,
         y,
-        value: signal.value,
+        value,
         inDir: signal.dir,
         board,
         rules,
@@ -218,11 +238,17 @@ export function simulate(input: SimInput): SimResult {
 
     // tick の終わり: 合流するパーツをマス番号の昇順に処理する
     for (const buffer of [...buffers.values()].sort((a, b) => a.index - b.index)) {
+      // 床の効果は、取り込んだ値の合計に1回だけ適用する（効果のある床なら、合計した1本として渡す）
+      const floorCell = getFloorCell(floor, buffer.index);
+      const values =
+        floorCell && FLOOR_BEHAVIORS[floorCell.tile].apply
+          ? [applyFloor(tick, buffer.x, buffer.y, buffer.values.reduce(scoreAdd, SCORE_ZERO))]
+          : buffer.values;
       const reaction = PART_BEHAVIORS[buffer.part.id].collect!({
         part: buffer.part,
         x: buffer.x,
         y: buffer.y,
-        values: buffer.values,
+        values,
         board,
         rules,
         rng,
@@ -251,6 +277,7 @@ export function simulate(input: SimInput): SimResult {
       chainCount,
       activatedParts: activatedCells.size,
       shipCount,
+      floorApplied,
       maxValue,
       ticks: tick,
       halted,

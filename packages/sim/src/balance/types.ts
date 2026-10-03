@@ -1,6 +1,7 @@
 /**
  * バランス値の型（値そのものは同じフォルダの各ファイル）
  */
+import type { FloorTileId } from '../floor/types';
 import type { PartId } from '../types';
 
 /** レア度。ショップの出現重みの既定値を決める */
@@ -58,7 +59,15 @@ export interface PartParams {
  * - rollUpSleeves: 腕まくり（朝シフトのノルマが下がる）
  */
 export type DayEventId =
-  'supplies' | 'sample' | 'sale' | 'clearance' | 'overtimePay' | 'rollUpSleeves';
+  | 'supplies'
+  | 'sample'
+  | 'sale'
+  | 'clearance'
+  | 'overtimePay'
+  | 'rollUpSleeves'
+  | 'floorCenter'
+  | 'floorRepair'
+  | 'floorAdds';
 
 /** ボスシフトの修正ルールの種類 */
 export type BossModifierId =
@@ -90,6 +99,47 @@ export interface ShiftSpec {
   kind: 'normal' | 'boss';
 }
 
+/** 床タイルの効果量（floor/tiles/ が参照する） */
+export interface FloorParams {
+  /** ×2床の倍率 */
+  doubleMultiplier: number;
+  /** 加算床で足す値 */
+  addAmount: number;
+  /** ×3床の倍率 */
+  tripleMultiplier: number;
+}
+
+/**
+ * 日ごとのステージ（床の配置）
+ * テンプレートは 7×7 の文字列（1文字 = 1マス。'.' 床なし・'2' ×2床・'+' 加算床・'3' ×3床・'#' 使用不可）。
+ * 回転・反転で水増しし、8×8・9×9 ではシードで決めた位置に埋め込む（floor/stage.ts）
+ */
+export interface StageBalance {
+  templates: Record<string, string[]>;
+  /** 本編の日ごとに抽選するテンプレート（index = 日。足りない日は最後の帯を使う） */
+  dayBands: string[][];
+  /** 延長戦の日に抽選するテンプレート */
+  overtimeBand: string[];
+  /** 延長戦の日が進むごとに、×2床を×3床に置き換える枚数（延長戦の1日目から数える） */
+  overtimeUpgradesPerDay: number;
+  /** デイリー（1日分・3シフト）で抽選するテンプレート */
+  dailyBand: string[];
+  /** 初回ガイドの1日目に使うテンプレート（抽選しない・回転しない） */
+  tutorialTemplate: string;
+  /** 使用不可を除いたマスが、盤面のこの割合（%）以上あること（テンプレートの検証） */
+  minFreePercent: number;
+  /** 生成の試行回数の上限（超えたら帯の最初のテンプレートをそのまま使う） */
+  maxAttempts: number;
+}
+
+/** シフト開始時のボーナス床（空きマスに湧く。そのシフトのみ有効） */
+export interface BonusFloorBalance {
+  /** 湧く枚数の重み（index = 枚数。例: [0, 70, 30] なら 1枚 70・2枚 30） */
+  countWeights: number[];
+  /** 湧く床の種類の重み */
+  tileWeights: { tile: FloorTileId; weight: number }[];
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -113,6 +163,12 @@ export interface Balance {
   parts: Record<PartId, PartBalance>;
   /** パーツ固有の効果量 */
   partParams: PartParams;
+  /** 床タイルの効果量 */
+  floorParams: FloorParams;
+  /** 日ごとのステージ（床の配置） */
+  stages: StageBalance;
+  /** シフト開始時のボーナス床 */
+  bonusFloors: BonusFloorBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
 
@@ -153,6 +209,10 @@ export interface Balance {
     overtimePayPercent: number;
     /** 腕まくり: 朝シフトのノルマの倍率（%。切り捨て、最低 1） */
     rollUpSleevesQuotaPercent: number;
+    /** 中央の床: 盤面の中央（床のないいちばん近いマス）に湧く床 */
+    floorCenterTile: FloorTileId;
+    /** 加算床の差し入れ: 湧く加算床の枚数 */
+    floorAddsCount: number;
   };
 
   /** 延長戦（全シフトクリア後に続けられるエンドレス。1日の最後のシフトはボス） */

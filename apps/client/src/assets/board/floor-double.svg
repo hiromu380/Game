@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 床タイル: ×2床（琥珀色の鉄板・斜めの溝2本）（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="0" y="0" width="64" height="64" fill="#4a4f57"/>
+  <path d="M1 63 H63 V1" fill="none" stroke="#3f434a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M1 62 V1 H62" fill="none" stroke="#454a52" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="0" y="0" width="64" height="64" fill="none" stroke="#363a41" stroke-width="2"/>
+  <rect x="6" y="6" width="52" height="52" rx="5" fill="#d99800" opacity="0.7"/>
+  <rect x="6" y="6" width="50" height="50" rx="5" fill="#ffb300" opacity="0.65"/>
+  <path d="M12 40 L40 12" fill="none" stroke="#d99800" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M26 54 L54 26" fill="none" stroke="#d99800" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="11" cy="11" r="2.5" fill="#3d4249" stroke="#2e3137" stroke-width="1"/>
+  <circle cx="51" cy="11" r="2.5" fill="#3d4249" stroke="#2e3137" stroke-width="1"/>
+  <circle cx="11" cy="51" r="2.5" fill="#3d4249" stroke="#2e3137" stroke-width="1"/>
+  <circle cx="51" cy="51" r="2.5" fill="#3d4249" stroke="#2e3137" stroke-width="1"/>
+</svg>

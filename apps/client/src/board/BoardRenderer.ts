@@ -15,6 +15,11 @@ import {
   type Part,
   type PartBadge,
   type PartId,
+  isBlockedCell,
+  type FloorCell,
+  type FloorLayer,
+  type FloorParams,
+  type FloorTileId,
   type RuleSet,
   type Score,
   type SimEvent,
@@ -31,7 +36,14 @@ import { FONT_STACK } from '../config/fonts';
 // 盤面の文字も画面と同じ同梱フォントで描く（指定しないと端末任せになり、中国語用の字形になることがある）
 TextStyle.defaultTextStyle.fontFamily = FONT_STACK;
 import { BOARD_THEME } from '../assets/manifest';
-import { PlaybackTimeline, type PlaybackSpeed } from '../playback/timeline';
+import type { PlaybackSpeed } from '../playback/timeline';
+import {
+  buildChoreography,
+  type Choreography,
+  ChoreographyPlayer,
+  MOVE_RATIO,
+  type Cue,
+} from '../playback/choreography';
 import {
   boardPixelSize,
   INITIAL_BOARD_PIXEL_SIZE,
@@ -40,7 +52,8 @@ import {
   pixelToCell,
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
-import { chainSemitones, type SoundKey } from '../audio/manifest';
+import type { SoundKey } from '../audio/manifest';
+import { EFFECTS_CONFIG } from '../config/effects';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
 import { StatusOverlay } from './StatusOverlay';
@@ -54,6 +67,7 @@ import { easeOutCubic, TweenManager } from './tweens';
 import {
   createBlockedCell,
   createFloor,
+  createFloorTile,
   createPartView,
   createSignalView,
   PART_DISPLAY_SIZE,
@@ -64,6 +78,8 @@ export interface BoardViewState {
   board: Board;
   /** 現在のシフトのルール（倍率バッジなどの表示に使う。ボス修正込み） */
   rules: RuleSet;
+  /** 現在のシフトの床（ステージ・ボスの使用不可など） */
+  floor: FloorLayer;
   /** 選択中のマス */
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
@@ -75,6 +91,9 @@ export interface BoardViewState {
   /** 初回ガイドで「ここに置く」マス（なければ null） */
   guideCell: { x: number; y: number } | null;
 }
+
+/** 床の効果音の音程（倍率が大きい床ほど高い） */
+const FLOOR_SEMITONES: Record<FloorTileId, number> = { add: 0, double: 4, triple: 9, blocked: 0 };
 
 /** 盤面に表示する文言（i18n を通すため関数で受け取る。言語切り替えに追従する） */
 export interface BoardLabels {
@@ -91,6 +110,12 @@ export interface BoardLabels {
   /** スコアの表記（通常 / 短い） */
   formatScore: (value: Score) => string;
   formatCompact: (value: Score) => string;
+  /** ノルマを超えた瞬間の帯の文言 */
+  getQuotaCrossLabel: () => string;
+  /** 床タイルの短い表記（マスの左上・演出。例: ×2・+3） */
+  getFloorShort: (tile: FloorTileId, params: FloorParams) => string;
+  /** 床の説明（ホバー時。ボーナス床・出来事の床は期間も） */
+  getFloorDescription: (cell: FloorCell, params: FloorParams) => string;
 }
 
 export interface BoardRendererOptions extends BoardLabels {
@@ -119,8 +144,8 @@ export interface PlaybackCallbacks {
   onFinish: () => void;
 }
 
-/** 1 tick のうち信号の移動にかける割合（残りで発光などの演出） */
-const MOVE_RATIO = 0.55;
+/** tick がこれより短いときは、細かい演出（パーツの発光・コインの数）を間引く */
+const THIN_TICK_MS = 70;
 
 export class BoardRenderer {
   private readonly app: Application;
@@ -158,7 +183,11 @@ export class BoardRenderer {
     startY: number;
     pointer: { x: number; y: number } | null;
   } | null = null;
-  private timeline: PlaybackTimeline | null = null;
+  /** 再生中の演出の流れ（playback/choreography.ts） */
+  private timeline: ChoreographyPlayer | null = null;
+  /** ピークで止めている残り時間（この間は再生も演出も進めない。揺れだけ続ける） */
+  private freezeMs = 0;
+  private effectSettings: EffectSettings = { strength: 'full', shake: true, reduceFlashes: false };
   /** 直近に再生した結果（再生後の「途切れた理由」表示に使う） */
   private lastResult: SimResult | null = null;
   private callbacks: PlaybackCallbacks | null = null;
@@ -183,6 +212,8 @@ export class BoardRenderer {
         cutInTitle: options.getCutInTitle,
         income: options.formatIncome,
         score: options.formatScore,
+        compact: options.formatCompact,
+        quotaCross: options.getQuotaCrossLabel,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
       () => ({ width: this.app.screen.width, height: this.app.screen.height }),
@@ -328,14 +359,22 @@ export class BoardRenderer {
     }
 
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    for (const cell of state.rules.blockedCells) {
+    // 床タイル（盤面の下層。パーツより下に、控えめに描く）
+    for (let cell = 0; cell < state.floor.length; cell++) {
+      const floorCell = state.floor[cell];
+      if (!floorCell) continue;
+      const x = cell % state.board.width;
+      const y = Math.floor(cell / state.board.width);
       this.blockLayer.addChild(
-        createBlockedCell(
-          cell % state.board.width,
-          Math.floor(cell / state.board.width),
-          false,
-          this.boardTextures,
-        ),
+        isBlockedCell(state.floor, cell)
+          ? createBlockedCell(x, y, false, this.boardTextures)
+          : createFloorTile(
+              x,
+              y,
+              floorCell,
+              this.options.getFloorShort(floorCell.tile, state.rules.floorParams),
+              this.boardTextures,
+            ),
       );
     }
     for (const cell of state.upcomingBlocked) {
@@ -440,13 +479,28 @@ export class BoardRenderer {
       ghost.position.set(px, py);
       ghost.alpha = 0.55;
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
-      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(placing.partId));
+      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, placing.partId));
       return;
     }
     if (part) {
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
-      this.showTooltip(hovered.x, hovered.y, this.options.getPartName(part.id));
+      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, part.id));
+      return;
     }
+    // 空きマスの床: 効果の説明
+    const text = this.withFloor(hovered, null);
+    if (text) this.showTooltip(hovered.x, hovered.y, text);
+  }
+
+  /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */
+  private withFloor(cell: { x: number; y: number }, partId: PartId | null): string {
+    const state = this.state;
+    const floorCell = state?.floor[cell.y * state.board.width + cell.x] ?? null;
+    const lines = partId ? [this.options.getPartName(partId)] : [];
+    if (state && floorCell) {
+      lines.push(this.options.getFloorDescription(floorCell, state.rules.floorParams));
+    }
+    return lines.join('\n');
   }
 
   /** マスの上にパーツ名のラベルを出す */
@@ -457,7 +511,7 @@ export class BoardRenderer {
     });
     label.anchor.set(0.5);
     const w = label.width + 16;
-    const h = 24;
+    const h = Math.max(24, label.height + 8);
     const { px, py } = cellCenter(x, y);
     // 最上段では下に出す
     const top = y === 0 ? py + CELL_SIZE / 2 + 4 : py - CELL_SIZE / 2 - h - 4;
@@ -473,21 +527,54 @@ export class BoardRenderer {
   // イベント再生
   // ---------------------------------------------------------------------------
 
-  /** シミュレーション結果の再生を始める */
-  play(result: SimResult, speed: PlaybackSpeed, callbacks: PlaybackCallbacks): void {
+  /**
+   * シミュレーション結果の再生を始める
+   * quota: ノルマ（超えた瞬間を見せる。なければ null）
+   */
+  play(
+    result: SimResult,
+    speed: PlaybackSpeed,
+    callbacks: PlaybackCallbacks,
+    quota: number | null = null,
+    peakFirst = false,
+  ): void {
     this.clearPlayback();
     this.status.resetPips();
     this.status.clearBreaks();
     this.lastResult = result;
-    this.timeline = new PlaybackTimeline(result.events);
+    const choreography = buildChoreography(result.events, {
+      strength: this.effectSettings.strength,
+      reduceFlashes: this.effectSettings.reduceFlashes,
+      quota,
+    });
+    this.timeline = new ChoreographyPlayer(result.events, choreography);
+    this.freezeMs = 0;
     this.callbacks = callbacks;
     this.speed = speed;
     this.drawOverlay();
     if (speed === 'skip') this.skip();
+    else if (peakFirst) this.fastForwardToPeak(choreography);
+  }
+
+  /** 撮影用: ピークの少し前まで、演出なしで盤面だけ進める */
+  private fastForwardToPeak(choreography: Choreography): void {
+    const peak = choreography.cues.find((c) => c.kind === 'peak');
+    if (!peak || !this.timeline) return;
+    const skipMs = peak.atMs - EFFECTS_CONFIG.choreography.capturePeakLeadMs;
+    if (skipMs <= 0) return;
+    let chain = 0;
+    for (const tick of this.timeline.advance(skipMs).ticks) {
+      this.applyTick(tick.events, 0);
+      chain += tick.events.filter((e) => e.type === 'activate').length;
+    }
+    this.tweens.finishAll();
+    this.effects.reset();
+    this.effects.restoreChain(chain);
   }
 
   /** 演出の強さ・揺れの設定を反映する */
   setEffectSettings(settings: EffectSettings): void {
+    this.effectSettings = settings;
     this.effects.setSettings(settings);
   }
 
@@ -499,7 +586,7 @@ export class BoardRenderer {
   /** 残りの演出を飛ばして最終状態にする */
   skip(): void {
     if (!this.timeline) return;
-    for (const tickEvents of this.timeline.flush()) this.applyTick(tickEvents, 0);
+    for (const tick of this.timeline.flush().ticks) this.applyTick(tick.events, 0);
     this.tweens.finishAll();
     this.effects.reset();
     this.finishPlayback();
@@ -518,13 +605,19 @@ export class BoardRenderer {
   }
 
   private update(deltaMs: number): void {
-    // スローモーション中は、再生と演出の時間をゆっくり進める
-    const scaled = deltaMs * this.effects.timeScale;
-    if (this.timeline && this.speed !== 'skip') {
-      const tickMs = PlaybackTimeline.tickMs(this.speed);
-      for (const tickEvents of this.timeline.advance(scaled, this.speed)) {
-        this.applyTick(tickEvents, tickMs);
-      }
+    // ピークで止めている間は、再生も演出も進めない（揺れだけ続ける）
+    let scaled = deltaMs;
+    if (this.freezeMs > 0) {
+      const frozen = Math.min(this.freezeMs, deltaMs);
+      this.freezeMs -= frozen;
+      scaled = deltaMs - frozen;
+    }
+    const speed = this.speed;
+    if (this.timeline && speed !== 'skip' && scaled > 0) {
+      const rate = speed;
+      const due = this.timeline.advance(scaled * rate);
+      for (const tick of due.ticks) this.applyTick(tick.events, tick.durationMs / rate);
+      for (const cue of due.cues) this.applyCue(cue, rate);
     }
     this.tweens.update(scaled);
 
@@ -547,16 +640,68 @@ export class BoardRenderer {
     callbacks?.onFinish();
   }
 
+  /** 演出の命令を見た目・音に反映する（rate: 再生速度。長さを速さに合わせて縮める） */
+  private applyCue(cue: Cue, rate: number): void {
+    switch (cue.kind) {
+      case 'windup': {
+        this.options.playSound('windup', 0);
+        const switches: { x: number; y: number }[] = [];
+        const board = this.state?.board;
+        board?.cells.forEach((c, i) => {
+          if (c?.id === 'switch')
+            switches.push({ x: i % board.width, y: Math.floor(i / board.width) });
+        });
+        this.effects.windup(switches, cue.durationMs / rate);
+        break;
+      }
+      case 'note':
+        // 1連鎖ごとに半音上がる音階。8段ごとに音色が変わる
+        this.options.playSound(`chain${cue.timbre}` as SoundKey, cue.semitone);
+        break;
+      case 'multiplier':
+        this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
+        break;
+      case 'floor':
+        // 床の効果: 倍率が大きい床ほど音程が高い
+        this.options.playSound('floor', FLOOR_SEMITONES[cue.tile]);
+        this.effects.floor(cue.x, cue.y, cue.tile, cue.text, 700 / rate);
+        break;
+      case 'digitUp':
+        this.options.playSound('digitUp', 0);
+        this.effects.digitUp(cue.total);
+        break;
+      case 'quotaCross':
+        this.options.playSound('quotaCross', 0);
+        this.effects.quotaCross();
+        break;
+      case 'flash':
+        this.effects.flash(cue.alpha, cue.durationMs / rate);
+        break;
+      case 'peak':
+        this.freezeMs = cue.hitstopMs / rate;
+        this.options.playSound('peak', 0);
+        this.effects.peak();
+        break;
+      case 'stamp':
+        this.options.playSound('stamp', 0);
+        this.effects.stamp(cue.total, cue.durationMs / rate);
+        break;
+    }
+  }
+
   /** 1 tick 分のイベントを見た目に反映する。tickMs=0 なら即時 */
   private applyTick(events: SimEvent[], tickMs: number): void {
     const moveMs = tickMs * MOVE_RATIO;
     const fxMs = Math.max(tickMs, 1) * 1.2;
     const instant = tickMs === 0;
-    // 効果音: 信号の移動は tick ごとに1音だけ（信号が多くてもうるさくならないように）
+    this.effects.setThin(tickMs < THIN_TICK_MS);
     const sound = (key: SoundKey) => {
-      if (!instant) this.options.playSound(key, chainSemitones(this.effects.chain));
+      if (!instant) this.options.playSound(key, 0);
     };
-    if (events.some((e) => e.type === 'move')) sound('tick');
+    // 信号が移動するだけの tick にも小さな音を入れ、無音の間を作らない（発動した tick は連鎖の音階が鳴る）
+    if (events.some((e) => e.type === 'move') && !events.some((e) => e.type === 'activate')) {
+      sound('tick');
+    }
 
     for (const event of events) {
       switch (event.type) {

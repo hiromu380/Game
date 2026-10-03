@@ -10,6 +10,7 @@
 import type { OnlineErrorCode } from '../online/api';
 import {
   abandonRun,
+  BALANCE,
   applyOp,
   applyRunToMeta,
   commitShift,
@@ -21,6 +22,7 @@ import {
   type AchievementProgress,
   type Board,
   type Dir4,
+  type FloorLayer,
   type MetaProgress,
   type PartId,
   type RunActionResult,
@@ -131,7 +133,7 @@ export type GameAction =
   /** デイリーのランキングで自分の順位を受け取った（上位○% の実績） */
   | { type: 'dailyRanked'; topPercent: number }
   /** 撮影モード: 盤面を差し替える（書き出した JSON の読み込み。ui/CapturePanel.tsx） */
-  | { type: 'captureLoadBoard'; board: Board }
+  | { type: 'captureLoadBoard'; board: Board; floor?: FloorLayer }
   /** 撮影モード: 指定したシードで本番を実行する（見栄えの良い連鎖を何度でも再現する） */
   | { type: 'captureCommit'; seed: number };
 
@@ -432,7 +434,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'captureLoadBoard':
       return state.run.phase === 'building'
-        ? { ...state, run: { ...state.run, board: action.board }, selection: null, error: null }
+        ? {
+            ...state,
+            run: withCaptureFloor({ ...state.run, board: action.board }, action.floor),
+            selection: null,
+            error: null,
+          }
         : state;
 
     case 'captureCommit':
@@ -455,4 +462,23 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 export function getPersistedRun(state: GameState): RunState | null {
   if (state.mode.kind !== 'normal') return null;
   return state.playback?.mode === 'commit' ? state.playback.nextRun : state.run;
+}
+
+/**
+ * 撮影モード: その日の床を、読み込んだ床に差し替える（ボーナス床・出来事の床は消す）。
+ * 撮影専用で、通常のプレイでは使わない（床はランシードから決まる）
+ */
+function withCaptureFloor(run: RunState, floor: FloorLayer | undefined): RunState {
+  if (!floor) return run;
+  const perDay = run.config.shiftsPerDay;
+  const day = Math.floor(run.shiftIndex / perDay);
+  const stages = run.config.stages ?? { days: [], balance: BALANCE.stages };
+  const days = [...stages.days];
+  days[day] = floor;
+  return {
+    ...run,
+    config: { ...run.config, stages: { ...stages, days } },
+    bonusFloor: null,
+    dayEvent: run.dayEvent ? { ...run.dayEvent, floorChanges: [] } : run.dayEvent,
+  };
 }

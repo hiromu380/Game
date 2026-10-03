@@ -21,6 +21,8 @@ export function eventToText(e: SimEvent): string {
       return `absorb#${e.signalId}(${e.x},${e.y})`;
     case 'income':
       return `income+${e.amount}=${e.total}`;
+    case 'floor':
+      return `floor:${e.tile}(${e.x},${e.y})${e.before}→${e.after}`;
     case 'halt':
       return `halt:${e.reason}(${e.remainingSignals})`;
   }

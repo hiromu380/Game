@@ -47,6 +47,15 @@ export type SoundKey =
   | 'tick'
   | 'ship'
   | 'explode'
+  | 'windup'
+  | 'chain0'
+  | 'chain1'
+  | 'chain2'
+  | 'digitUp'
+  | 'floor'
+  | 'quotaCross'
+  | 'peak'
+  | 'stamp'
   | 'quotaMet'
   | 'runFailed'
   | 'runCleared'
@@ -172,6 +181,107 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     recipe: { wave: 'noise', volume: 0.35, notes: [{ freq: 1, at: 0, duration: 0.35 }] },
   },
 
+  // ---- 連鎖の演出（playback/choreography.ts の命令で鳴らす） ----
+  /** 溜め: 低い音がせり上がる */
+  windup: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.12,
+      notes: [{ freq: 110, at: 0, duration: 0.4, slideTo: 220 }],
+    },
+  },
+  /**
+   * 連鎖の音階（1連鎖ごとに半音上げて鳴らす）。8段ごとに音色を変え、進むほど明るく厚くする
+   */
+  chain0: {
+    kind: 'synth',
+    recipe: { wave: 'triangle', volume: 0.16, notes: [{ freq: 523, at: 0, duration: 0.07 }] },
+  },
+  chain1: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.1,
+      notes: [
+        { freq: 523, at: 0, duration: 0.06 },
+        { freq: 784, at: 0.03, duration: 0.06 },
+      ],
+    },
+  },
+  chain2: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.09,
+      notes: [
+        { freq: 523, at: 0, duration: 0.05 },
+        { freq: 659, at: 0.025, duration: 0.05 },
+        { freq: 784, at: 0.05, duration: 0.07 },
+      ],
+    },
+  },
+  /** 合計の単位が変わった（K → M → B） */
+  digitUp: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.18,
+      notes: [
+        { freq: 1047, at: 0, duration: 0.06 },
+        { freq: 1568, at: 0.06, duration: 0.06 },
+        { freq: 2093, at: 0.12, duration: 0.16 },
+      ],
+    },
+  },
+  /** 床の効果を受けた（金属の板を叩く短い2音。床の種類で音程を変える） */
+  floor: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.2,
+      notes: [
+        { freq: 660, at: 0, duration: 0.05 },
+        { freq: 990, at: 0.05, duration: 0.09 },
+      ],
+    },
+  },
+  /** ノルマを超えた瞬間 */
+  quotaCross: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.26,
+      notes: [
+        { freq: 784, at: 0, duration: 0.08 },
+        { freq: 988, at: 0.08, duration: 0.08 },
+        { freq: 1175, at: 0.16, duration: 0.08 },
+        { freq: 1568, at: 0.24, duration: 0.22 },
+      ],
+    },
+  },
+  /** ピーク（最後の出荷で一瞬止めたとき） */
+  peak: {
+    kind: 'synth',
+    recipe: {
+      wave: 'noise',
+      volume: 0.3,
+      notes: [{ freq: 1, at: 0, duration: 0.18 }],
+    },
+  },
+  /** 合計の「ドン」 */
+  stamp: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.22,
+      notes: [
+        { freq: 131, at: 0, duration: 0.12, slideTo: 98 },
+        { freq: 1047, at: 0.05, duration: 0.2 },
+      ],
+    },
+  },
+
   // ---- 結果 ----
   quotaMet: {
     kind: 'synth',
@@ -235,16 +345,3 @@ export const BGM_ASSETS: Record<BgmKey, SoundAsset | null> = {
   building: null,
   result: null,
 };
-
-/** 連鎖が続くほど音程を上げる: 連鎖数 → 半音の数（上限あり） */
-export const CHAIN_PITCH = {
-  /** 何連鎖ごとに半音上げるか */
-  chainsPerSemitone: 2,
-  /** 上げる上限（半音） */
-  maxSemitones: 24,
-};
-
-/** 連鎖数から、上げる音程（半音の数）を求める */
-export function chainSemitones(chainCount: number): number {
-  return Math.min(CHAIN_PITCH.maxSemitones, Math.floor(chainCount / CHAIN_PITCH.chainsPerSemitone));
-}

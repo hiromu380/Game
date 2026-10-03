@@ -6,8 +6,17 @@
  * - balance/ を変更しても進行中のランの挙動は変わらない（セーブの互換性）
  * - フェーズ3の相場（価格）やデイリーの条件を、ここに差し込むだけで反映できる
  */
-import { BALANCE, type Balance, type BossModifierId, type ShiftSpec } from '../balance';
+import {
+  BALANCE,
+  type Balance,
+  type BossModifierId,
+  type ShiftSpec,
+  type StageBalance,
+} from '../balance';
 import { createPrng, type Prng } from '../core/prng';
+import { generateStage, templateToFloor } from '../floor/stage';
+import type { FloorLayer } from '../floor/types';
+import { stageSeed } from '../run/seeds';
 import { PART_IDS, type PartId, type RuleSet } from '../types';
 import { SIM_VERSION } from '../version';
 import { createRuleSet } from './rules';
@@ -20,6 +29,14 @@ export interface EconomyConfig {
   offersPerShift: number;
   reroll: { baseCost: number; costStep: number; enabled: boolean };
   refundPercent: number;
+}
+
+/** 日ごとのステージ（床の配置） */
+export interface RunStages {
+  /** 日ごとの床（index = 日。延長戦の日は、延長戦に入ったときに足す） */
+  days: FloorLayer[];
+  /** 延長戦の日を生成する設定（balance/ の stages の写し） */
+  balance: StageBalance;
 }
 
 /** 夜シフトのボス修正ルール（ラン開始時に抽選して確定する） */
@@ -52,6 +69,16 @@ export interface RunConfig {
   baseShiftCount: number;
   /** 延長戦の設定（balance/ の overtime の写し） */
   overtime: Balance['overtime'];
+  /**
+   * 日ごとのステージ（床の配置）。
+   * 床を導入する前に始めたラン（セーブ）には無いので、無ければ床なし
+   */
+  stages?: RunStages;
+  /**
+   * シフト開始時のボーナス床（balance/ の写し）。fromShift より前のシフトには湧かない（初回ガイドの1日目）。
+   * 床を導入する前に始めたラン（セーブ）には無いので、無ければ湧かない
+   */
+  bonusFloors?: Balance['bonusFloors'] & { fromShift: number };
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
   /** ボス修正ルールの効果量（balance/ の boss の写し） */
@@ -93,6 +120,12 @@ export interface BuildRunConfigOptions {
   meta?: MetaModifiers;
   /** ボス計画の抽選に使うシード（seeds.ts の bossSeed） */
   bossSeed: number;
+  /** ランシード（日ごとのステージの抽選に使う。省略時はステージ・ボーナス床なし＝床なし） */
+  runSeed?: number;
+  /** 1日目のステージを初回ガイド用の固定テンプレートにする */
+  tutorial?: boolean;
+  /** 日ごとのステージを抽選する帯（省略時は balance の dayBands。デイリーは dailyBand） */
+  stageBands?: string[][];
 }
 
 /** RunConfig を組み立てる（基本 → メタ進行の順に適用） */
@@ -100,6 +133,9 @@ export function buildRunConfig({
   balance = BALANCE,
   meta = {},
   bossSeed,
+  runSeed,
+  tutorial = false,
+  stageBands = balance.stages.dayBands,
 }: BuildRunConfigOptions): RunConfig {
   const expansion = meta.boardExpansion ?? 0;
   const board = {
@@ -117,6 +153,24 @@ export function buildRunConfig({
     const weight = part.shopWeight ?? balance.rarityWeights[part.rarity];
     if (weight > 0) shopPool.push({ partId: id, weight });
   }
+
+  const dayCount = Math.ceil(balance.shifts.length / balance.shiftsPerDay);
+  const stages: RunStages | undefined =
+    runSeed === undefined
+      ? undefined
+      : {
+          days: Array.from({ length: dayCount }, (_, day) =>
+            tutorial && day === 0
+              ? templateToFloor(balance.stages.templates[balance.stages.tutorialTemplate]!, board)
+              : generateStage({
+                  seed: stageSeed(runSeed, day),
+                  band: stageBands[Math.min(day, stageBands.length - 1)] ?? [],
+                  board,
+                  stages: balance.stages,
+                }),
+          ),
+          balance: balance.stages,
+        };
 
   return {
     configVersion: 1,
@@ -146,7 +200,17 @@ export function buildRunConfig({
     },
     baseShiftCount: balance.shifts.length,
     overtime: { ...balance.overtime },
-    bossPlan: planBosses(balance, board, bossSeed),
+    stages,
+    // ランシードがない（床を使わない）組み立てでは、ボーナス床も湧かせない
+    bonusFloors:
+      runSeed === undefined
+        ? undefined
+        : {
+            countWeights: [...balance.bonusFloors.countWeights],
+            tileWeights: balance.bonusFloors.tileWeights.map((w) => ({ ...w })),
+            fromShift: tutorial ? balance.shiftsPerDay : 0,
+          },
+    bossPlan: planBosses(balance, board, bossSeed, stages?.days ?? []),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },
     starterKit: { ...balance.economy.starterKit },
     simVersion: SIM_VERSION,
@@ -162,13 +226,15 @@ function planBosses(
   balance: Balance,
   board: { width: number; height: number },
   seed: number,
+  stageDays: FloorLayer[],
 ): (BossPlanEntry | null)[] {
   const rng = createPrng(seed);
   let previous: BossModifierId | null = null;
 
-  return balance.shifts.map((shift) => {
+  return balance.shifts.map((shift, index) => {
     if (shift.kind !== 'boss') return null;
-    const entry = drawBoss(rng, balance.boss, board, previous);
+    const stage = stageDays[Math.floor(index / balance.shiftsPerDay)];
+    const entry = drawBoss(rng, balance.boss, board, previous, stage);
     previous = entry?.id ?? previous;
     return entry;
   });
@@ -176,13 +242,15 @@ function planBosses(
 
 /**
  * ボス修正ルールを1つ抽選する（直前の夜と同じルールは避ける）。
- * 延長戦でシフトを追加するときにも使う
+ * 延長戦でシフトを追加するときにも使う。
+ * 床の補修工事の使用不可マスは、その日のステージの床がないマスから選ぶ
  */
 export function drawBoss(
   rng: Prng,
   params: Balance['boss'],
   board: { width: number; height: number },
   previous: BossModifierId | null,
+  stage?: FloorLayer,
 ): BossPlanEntry | null {
   const candidates = params.candidates;
   if (candidates.length === 0) return null;
@@ -191,11 +259,12 @@ export function drawBoss(
 
   const blockedCells: number[] = [];
   if (id === 'repairWork') {
-    const cellCount = board.width * board.height;
-    const count = Math.min(params.repairWorkCells, cellCount);
+    // 候補から1つずつ抜き出す（候補が足りなければ、ある分だけ。無制限に引き直さない）
+    const candidates: number[] = [];
+    for (let i = 0; i < board.width * board.height; i++) if (!stage?.[i]) candidates.push(i);
+    const count = Math.min(params.repairWorkCells, candidates.length);
     while (blockedCells.length < count) {
-      const cell = rng.nextInt(cellCount);
-      if (!blockedCells.includes(cell)) blockedCells.push(cell);
+      blockedCells.push(candidates.splice(rng.nextInt(candidates.length), 1)[0]!);
     }
     blockedCells.sort((a, b) => a - b);
   }

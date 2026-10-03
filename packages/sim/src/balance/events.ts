@@ -4,7 +4,17 @@
 import type { Balance } from './types';
 
 export const DAY_EVENTS: Balance['dayEvents'] = {
-  candidates: ['supplies', 'sample', 'sale', 'clearance', 'overtimePay', 'rollUpSleeves'],
+  candidates: [
+    'supplies',
+    'sample',
+    'sale',
+    'clearance',
+    'overtimePay',
+    'rollUpSleeves',
+    'floorCenter',
+    'floorRepair',
+    'floorAdds',
+  ],
   choices: 3,
   suppliesBudget: 5,
   sampleRarities: ['uncommon', 'rare'],
@@ -12,4 +22,6 @@ export const DAY_EVENTS: Balance['dayEvents'] = {
   clearanceRefundPercent: 100,
   overtimePayPercent: 200,
   rollUpSleevesQuotaPercent: 50,
+  floorCenterTile: 'double',
+  floorAddsCount: 2,
 };

@@ -9,6 +9,7 @@
 import type { RunState } from '@chain-factory/sim';
 import { compareEvaluation, compareOutlook, evaluate, type Evaluation } from '../evaluate';
 import { applyMove, canReroll, listMoves, returnAll, type Move } from '../moves';
+import { greedyBot } from './greedy';
 import type { Bot, BotOptions, ShiftPlan } from './types';
 
 const BEAM_WIDTH = 6;
@@ -43,17 +44,21 @@ function keyOf(state: RunState): string {
 export const searchBot: Bot = {
   name: 'search',
   playShift(initial, options) {
-    // 案A: 今の盤面に足していく／案B: いったん全部手持ちに戻して組み直す（手持ちに戻すのは無料）
-    // 思考時間を半分ずつ使い、良い方を選ぶ
-    const half = { ...options, timeLimitMs: options.timeLimitMs / 2 };
-    const keep = beamSearch(initial, [], half);
+    // 案A: 今の盤面に足していく／案B: いったん全部手持ちに戻して組み直す（手持ちに戻すのは無料）。
+    // 盤面が空（朝の片付けの後など）なら組み直す意味がないので、思考時間を全部 案A に使う。
+    // 貪欲ボットの手も候補に入れ、探索が時間切れでも貪欲ボットより悪くならないようにする
     const cleared = returnAll(initial);
-    if (!cleared) return keep;
-    const rebuilt = beamSearch(cleared.state, cleared.moves, half);
-    const a = evaluate(keep.state, options.samples, options.evalMode);
-    const b = evaluate(rebuilt.state, options.samples, options.evalMode);
-    const cmp = compareEvaluation(b, a) || rebuilt.state.budget - keep.state.budget;
-    return cmp > 0 ? rebuilt : keep;
+    const time = cleared ? { ...options, timeLimitMs: options.timeLimitMs / 2 } : options;
+    const candidates = [beamSearch(initial, [], time), greedyBot.playShift(initial, options)];
+    if (cleared) candidates.push(beamSearch(cleared.state, cleared.moves, time));
+    const scored = candidates.map((plan) => ({
+      plan,
+      eval: evaluate(plan.state, options.samples, options.evalMode),
+    }));
+    scored.sort(
+      (a, b) => compareEvaluation(b.eval, a.eval) || b.plan.state.budget - a.plan.state.budget,
+    );
+    return scored[0]!.plan;
   },
 };
 

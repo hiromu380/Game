@@ -58,6 +58,16 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         <p className="panel__hint">{t('settings.shakeHint')}</p>
 
+        <label className="settings__row">
+          <span>{t('settings.reduceFlashes')}</span>
+          <input
+            type="checkbox"
+            checked={settings.reduceFlashes}
+            onChange={(e) => updateSettings({ reduceFlashes: e.target.checked })}
+          />
+        </label>
+        <p className="panel__hint">{t('settings.reduceFlashesHint')}</p>
+
         {VOLUMES.map((key) => (
           <label key={key} className="settings__row">
             <span>{t(`settings.${key}`)}</span>

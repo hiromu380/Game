@@ -9,6 +9,7 @@
  */
 import {
   getCurrentEconomy,
+  getCurrentFloor,
   getCurrentRules,
   seeds,
   simulate,
@@ -38,6 +39,7 @@ export type EvalMode = 'mean' | 'worst';
 
 export function evaluate(state: RunState, samples: number, mode: EvalMode = 'mean'): Evaluation {
   const rules = getCurrentRules(state);
+  const floor = getCurrentFloor(state);
   const hasRandom = state.board.cells.some((c) => c?.id === 'junkbot');
   const dockPrice = Math.max(1, getCurrentEconomy(state).prices.dock);
   const docksAvailable = (state.inventory.dock ?? 0) + Math.floor(state.budget / dockPrice);
@@ -53,6 +55,7 @@ export function evaluate(state: RunState, samples: number, mode: EvalMode = 'mea
   for (let k = 0; k < n; k++) {
     const result = simulate({
       board: state.board,
+      floor,
       seed: seeds.trialSeed(state.seed, state.shiftIndex, EVAL_TRIAL_BASE + k),
       rules,
     });

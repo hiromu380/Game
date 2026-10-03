@@ -8,7 +8,10 @@ import {
   createRunWithConfig,
   dailyRunSeed,
   getCurrentEconomy,
+  getCurrentFloor,
+  type FloorParams,
   getCurrentRules,
+  getCurrentShift,
   getDayAndPeriod,
   getRefund,
   getRerollCost,
@@ -68,6 +71,7 @@ import { PlaybackPanel } from './ui/PlaybackPanel';
 import { RunEndScreen } from './ui/RunEndScreen';
 import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
+import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
 import { GiveUpButton } from './ui/GiveUpButton';
 import { DailyMenu } from './ui/online/DailyMenu';
@@ -87,6 +91,13 @@ interface Props {
   /** タイトル画面へ戻る */
   onTitle: () => void;
 }
+
+/** 床の効果量（文言に埋め込む） */
+const floorAmounts = (params: FloorParams) => ({
+  double: params.doubleMultiplier,
+  add: params.addAmount,
+  triple: params.tripleMultiplier,
+});
 
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
@@ -118,6 +129,9 @@ export function App({ start, onTitle }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   /** 撮影モードの UI の表示 */
   const [captureUi, setCaptureUi] = useState<CaptureUi>('full');
+  const [capturePeakFirst, setCapturePeakFirst] = useState(false);
+  /** 撮影モード: 共有カードの確認 */
+  const [sharePreview, setSharePreview] = useState(false);
   /** デイリーのメニュー（開いていなければ null） */
   const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
 
@@ -263,6 +277,7 @@ export function App({ start, onTitle }: Props) {
     () => ({
       board: run.board,
       rules: getCurrentRules(run),
+      floor: getCurrentFloor(run),
       // 夜シフトの補修工事で使えなくなるマスを、朝・昼のうちから予告表示する
       upcomingBlocked: (() => {
         const boss = findBossToShow(run);
@@ -285,14 +300,29 @@ export function App({ start, onTitle }: Props) {
       getBreakLabel: (reason) => t(`break.short.${reason}`),
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
+      getQuotaCrossLabel: () => t('playback.quotaCross'),
+      getFloorShort: (tile, params) => t(`floor.${tile}.short`, floorAmounts(params)),
+      getFloorDescription: (cell, params) =>
+        t('floor.tooltip', {
+          name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
+          desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
+          period:
+            cell.source === 'bonus' || cell.source === 'event'
+              ? t(`floor.period.${cell.source}`)
+              : '',
+        }),
       formatScore,
       formatCompact,
     }),
     [t, formatScore, formatCompact],
   );
   const effectSettings = useMemo(
-    () => ({ strength: settings.effects, shake: settings.shake }),
-    [settings.effects, settings.shake],
+    () => ({
+      strength: settings.effects,
+      shake: settings.shake,
+      reduceFlashes: settings.reduceFlashes,
+    }),
+    [settings.effects, settings.shake, settings.reduceFlashes],
   );
 
   const onShip = useCallback((total: Score) => setLiveScore(scoreToString(total)), []);
@@ -569,12 +599,31 @@ export function App({ start, onTitle }: Props) {
           speed={speed}
           onUiChange={setCaptureUi}
           onSpeedChange={setSpeed}
-          onLoadBoard={(board) => dispatch({ type: 'captureLoadBoard', board })}
+          floor={getCurrentFloor(run)}
+          onLoadBoard={(board, floor) => dispatch({ type: 'captureLoadBoard', board, floor })}
+          peakFirst={capturePeakFirst}
+          onPeakFirstChange={setCapturePeakFirst}
           onCommit={(seed) => {
             setLiveScore(null);
             dispatch({ type: 'captureCommit', seed });
           }}
+          onPreviewShare={() => setSharePreview(true)}
         />
+      )}
+      {CAPTURE && sharePreview && (
+        <div
+          className="modal"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSharePreview(false)}
+        >
+          <div className="modal__body panel share-preview" onClick={(e) => e.stopPropagation()}>
+            <RunShare run={run} />
+            <button className="button--ghost" onClick={() => setSharePreview(false)} data-close>
+              {t('catalog.close')}
+            </button>
+          </div>
+        </div>
       )}
       {header}
       <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
@@ -586,6 +635,8 @@ export function App({ start, onTitle }: Props) {
             labels={boardLabels}
             effectSettings={effectSettings}
             playbackResult={playback?.result ?? null}
+            quota={getCurrentShift(run).quota}
+            peakFirst={CAPTURE && capturePeakFirst}
             speed={speed}
             cursor={cursor}
             onCellClick={onCellClick}
@@ -617,8 +668,6 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
-          {/* 売却エリア（盤面のパーツをドラッグして売る） */}
-          <SellZone dragging={dragging !== null} refund={sellRefund} />
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
@@ -649,6 +698,8 @@ export function App({ start, onTitle }: Props) {
           {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
           {!tabbed && selectionPanel}
+          {/* 売却エリア（盤面のパーツをドラッグして売る）。右の列の下端に固定し、スクロールしても見える */}
+          <SellZone dragging={dragging !== null} refund={sellRefund} />
         </aside>
       </main>
     </div>

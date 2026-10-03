@@ -21,6 +21,8 @@ export interface BotSummary {
   parts: Record<PartId, { offered: number; bought: number; onBoard: number }>;
   /** ボス修正ルール別: 挑戦回数とクリア回数 */
   bosses: Record<string, { attempts: number; cleared: number }>;
+  /** 床の利用（全シフトの合計）: 効果のある床のマス・そのうちパーツを置いたマス・床の効果を受けた回数 */
+  floor: { cells: number; onFloor: number; applied: number; shifts: number };
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
@@ -75,10 +77,19 @@ export function summarize(
     }
   }
 
+  const allShifts = logs.flatMap((l) => l.shifts);
+  const floor = {
+    cells: allShifts.reduce((n, s) => n + (s.floorCells ?? 0), 0),
+    onFloor: allShifts.reduce((n, s) => n + (s.partsOnFloor ?? 0), 0),
+    applied: allShifts.reduce((n, s) => n + (s.floorApplied ?? 0), 0),
+    shifts: allShifts.length,
+  };
+
   return {
     bot,
     runs: logs.length,
     bosses,
+    floor,
     clearRate: logs.filter((l) => l.cleared).length / logs.length,
     shifts,
     parts,
@@ -139,6 +150,19 @@ export function toMarkdown(
       return b ? `${pct(b.cleared / b.attempts)}（${b.attempts}）` : '-';
     });
     lines.push(`| ${id} | ${cells.join(' | ')} |`);
+  }
+  lines.push('');
+
+  lines.push(
+    '## 床の利用（床の上に置いた割合 = パーツを置いた床 ÷ 効果のある床、床の効果 = 1シフトあたり床の効果を受けた回数）',
+    '',
+  );
+  lines.push('| ボット | 床の上に置いた割合 | 床の効果/シフト |', '|---|---|---|');
+  for (const s of summaries) {
+    const f = s.floor;
+    lines.push(
+      `| ${s.bot} | ${f.cells ? pct(f.onFloor / f.cells) : '-'} | ${f.shifts ? num(f.applied / f.shifts) : '-'} |`,
+    );
   }
   lines.push('');
 

@@ -7,6 +7,7 @@ export {
   type Balance,
   type BossModifierId,
   type DayEventId,
+  type FloorParams,
   type MetaCondition,
   type PartBalance,
   type PartParams,
@@ -21,6 +22,9 @@ export * from './core/direction';
 export * from './core/board';
 
 export { simulate } from './simulate/simulate';
+export * from './floor/types';
+export * from './floor/layer';
+export { FLOOR_BEHAVIORS } from './floor/tiles';
 export { getPressMultiplier } from './simulate/parts/press';
 export { getPartBadge, type PartBadge } from './simulate/badges';
 export { computeActivationLimits } from './simulate/limits';
@@ -28,12 +32,27 @@ export { computeActivationLimits } from './simulate/limits';
 export { createRuleSet, DEFAULT_RULES } from './config/rules';
 export {
   buildRunConfig,
+  drawBoss,
   type BossPlanEntry,
   type EconomyConfig,
   type MetaModifiers,
   type RunConfig,
+  type RunStages,
 } from './config/runConfig';
-export { BOSS_MODIFIERS, getShiftEconomy, getShiftRules } from './config/bossModifiers';
+export {
+  BOSS_MODIFIERS,
+  getShiftEconomy,
+  getShiftFloor,
+  getShiftRules,
+} from './config/bossModifiers';
+export {
+  generateStage,
+  parseTemplate,
+  templateToFloor,
+  transformFloor,
+  validateStage,
+} from './floor/stage';
+export { getCurrentFloor, isCellBlocked } from './run/floor';
 export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
 
 export * from './run/types';
