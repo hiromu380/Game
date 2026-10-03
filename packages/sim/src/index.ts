@@ -8,6 +8,7 @@ export {
   type BossModifierId,
   type DayEventId,
   type FloorParams,
+  type ItemId,
   type MetaCondition,
   type PartBalance,
   type PartParams,
@@ -52,7 +53,8 @@ export {
   transformFloor,
   validateStage,
 } from './floor/stage';
-export { getCurrentFloor, isCellBlocked } from './run/floor';
+export { drawFloorPermit, getCurrentFloor, isCellBlocked } from './run/floor';
+export { addItem, countItems, expireItems, useFloorPermit } from './run/items';
 export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
 
 export * from './run/types';

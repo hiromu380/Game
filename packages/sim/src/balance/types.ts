@@ -140,6 +140,24 @@ export interface BonusFloorBalance {
   tileWeights: { tile: FloorTileId; weight: number }[];
 }
 
+/** 消耗品の種類（手持ちのパーツとは別に持つ。今はランダム配置権だけ） */
+export type ItemId = 'floorPermit';
+
+/**
+ * ランダム配置権: 使うと、盤面のどこかに床が1枚湧く。日が変わると、使っていない配置権も湧いた床も消える
+ */
+export interface FloorPermitBalance {
+  price: number;
+  /** ショップを引くたびに、品揃えの1枠が配置権になる確率（%）。1回の品揃えで最大1枠 */
+  offerChancePercent: number;
+  /** 同時に持てる枚数 */
+  maxHeld: number;
+  /** 湧く床の種類の重み。fromDay（0 始まり）より前の日には出さない */
+  tileWeights: { tile: FloorTileId; weight: number; fromDay?: number }[];
+  /** デイリーでも出すか */
+  inDaily: boolean;
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -169,6 +187,8 @@ export interface Balance {
   stages: StageBalance;
   /** シフト開始時のボーナス床 */
   bonusFloors: BonusFloorBalance;
+  /** ランダム配置権 */
+  floorPermit: FloorPermitBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
 
