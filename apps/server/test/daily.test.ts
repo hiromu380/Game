@@ -3,7 +3,6 @@
  * 不正な提出（予算オーバー・ショップにないパーツ・盤面外・sim のバージョン違い）が拒否されることも確かめる。
  */
 import {
-  SIM_VERSION,
   commitShift,
   createRunWithConfig,
   dailyRunSeed,
@@ -335,7 +334,7 @@ describe('プレイヤー・レート制限', () => {
   });
 });
 
-describe('床タイル（SIM_VERSION 4）', () => {
+describe('床タイル（SIM_VERSION 5）', () => {
   it('配布された RunConfig にその日のステージがあり、床の上の出荷口の出荷量がサーバーとクライアントで一致する', async () => {
     const { ctx } = testContext();
     const config = await seedEasyDaily(ctx);
@@ -382,12 +381,12 @@ describe('床タイル（SIM_VERSION 4）', () => {
     expect((await api.commit(token, 0, ops)).status).toBe(400);
   });
 
-  it('床の導入前（SIM_VERSION 3）に生成されたデイリーへの提出は拒否される', async () => {
+  it('床の導入前（SIM_VERSION 4）に生成されたデイリーへの提出は拒否される', async () => {
     const { ctx } = testContext();
     const scratch = { ...ctx, repos: createMemoryRepositories() };
     const real = await ensureDaily(scratch, DAY);
     expect(real.simVersion).toBe(SIM_VERSION);
-    await ctx.repos.dailies.createIfAbsent({ ...real, simVersion: '3' });
+    await ctx.repos.dailies.createIfAbsent({ ...real, simVersion: '4' });
     const api = testApi(ctx);
     const { token } = await api.register();
     await api.call('POST', `/daily/${DAY}/start`, {}, token);
