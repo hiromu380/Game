@@ -42,6 +42,11 @@ button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* キーボード・コントローラーで選んでいる場所をはっきり見せる（マウスのクリックでは出ない） */
+:focus-visible {
+  outline: 3px solid var(--selected);
+  outline-offset: 2px;
+}
 .button--primary {
   background: var(--primary);
   border-color: var(--primary-shadow);
@@ -443,6 +448,7 @@ button:disabled {
 .speed__button {
   padding: 4px 10px;
   font-size: 0.85rem;
+  min-height: 32px;
 }
 .speed__button--active {
   border-color: var(--selected);
@@ -483,6 +489,11 @@ button:disabled {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 8px;
+}
+.playback-panel__short {
+  margin: -4px 0 8px;
+  font-weight: bold;
+  color: var(--missed);
 }
 .is-met {
   color: var(--met);
@@ -597,6 +608,8 @@ button:disabled {
 .button--small {
   padding: 4px 10px;
   font-size: 0.8rem;
+  /* 指で押せる大きさ（小さいボタンでも高さ 32px） */
+  min-height: 32px;
 }
 
 /* ---- 売却（取り消せない操作）は目立たせず、確認時だけ赤くする ---- */
@@ -638,6 +651,20 @@ button:disabled {
 }
 .boss-notice--now .boss-notice__label {
   color: var(--missed);
+}
+/* ルールの期間（このシフトだけ・今夜だけ・今日だけ・全シフト） */
+.boss-notice__period {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: var(--muted);
+}
+/* 対象のパーツが手元にないとき（今は関係ない） */
+.boss-notice__target {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--met);
 }
 .boss-notice__desc {
   font-size: 0.85rem;

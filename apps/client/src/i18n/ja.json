@@ -601,6 +601,12 @@
   "toast.reroll": "リロール −{amount}円",
   "toast.useItem": "配置権を使った",
   "toast.undo": "元に戻した",
+  "rule.period.allShifts": "全シフト",
+  "rule.period.thisShift": "このシフトだけ",
+  "rule.period.tonight": "今夜だけ",
+  "rule.period.today": "今日だけ",
+  "rule.noTarget": "今は{part}が手元にないので影響なし",
+  "playback.shortBy": "ノルマまであと {amount}",
   "settings.reduceFlashes": "点滅を減らす",
   "settings.reduceFlashesHint": "光の点滅が苦手な場合はオンにしてください。盤面が光る演出を止め、パーツの発光も控えめにします"
 }

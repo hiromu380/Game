@@ -601,6 +601,12 @@
   "toast.reroll": "Rerolled −${amount}",
   "toast.useItem": "Permit used",
   "toast.undo": "Undone",
+  "rule.period.allShifts": "All shifts",
+  "rule.period.thisShift": "This shift only",
+  "rule.period.tonight": "Tonight only",
+  "rule.period.today": "Today only",
+  "rule.noTarget": "No effect for now: you have no {part}",
+  "playback.shortBy": "{amount} short of the quota",
   "settings.reduceFlashes": "Reduce flashing",
   "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows"
 }

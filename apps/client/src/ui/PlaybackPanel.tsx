@@ -23,7 +23,7 @@ interface Props {
 }
 
 export function PlaybackPanel({ playback, run, onClose }: Props) {
-  const { t, formatScore } = useI18n();
+  const { t, formatScore, formatCompact } = useI18n();
   if (!playback.finished) {
     return <div className="playback-banner">{t('playback.playing')}</div>;
   }
@@ -46,6 +46,13 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
         {met ? t('playback.quotaMet') : t('playback.quotaMissed')}
       </div>
+      {!met && (
+        <p className="playback-panel__short">
+          {t('playback.shortBy', {
+            amount: formatCompact((BigInt(quota) - BigInt(scoreToString(score))).toString()),
+          })}
+        </p>
+      )}
       <RocketLine playback={playback} run={run} />
       <dl className="stats">
         <dt>{t('playback.score')}</dt>
