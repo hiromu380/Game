@@ -21,6 +21,9 @@ export * from './core/direction';
 export * from './core/board';
 
 export { simulate } from './simulate/simulate';
+export * from './floor/types';
+export * from './floor/layer';
+export { FLOOR_BEHAVIORS } from './floor/tiles';
 export { getPressMultiplier } from './simulate/parts/press';
 export { getPartBadge, type PartBadge } from './simulate/badges';
 export { computeActivationLimits } from './simulate/limits';

@@ -1,7 +1,8 @@
 /**
  * シミュレーションの主要な型定義
  */
-import type { PartParams } from './balance';
+import type { FloorParams, PartParams } from './balance';
+import type { FloorLayer, FloorTileId } from './floor/types';
 import type { Score } from './core/score';
 
 /** パーツの種類 */
@@ -71,6 +72,8 @@ export interface RuleSet {
   maxActivations: Record<PartId, number | null>;
   /** パーツ固有の効果量（倍率など） */
   params: PartParams;
+  /** 床タイルの効果量 */
+  floorParams: FloorParams;
   /** 使用不可のマス（index = y * width + x）。入った信号は消滅する */
   blockedCells: number[];
   /** 出荷口の加算をこの値で割る（切り捨て）。通常は 1 */
@@ -84,6 +87,8 @@ export interface RuleSet {
 /** simulate の入力 */
 export interface SimInput {
   board: Board;
+  /** 床（盤面の下層。省略時は床なし）。長さは board.cells と同じ */
+  floor?: FloorLayer;
   seed: number;
   rules: RuleSet;
 }
@@ -112,6 +117,16 @@ export type SimEvent =
   | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
   /** 経済系パーツが予算を生んだ。total はその時点の累計 */
   | { tick: number; type: 'income'; x: number; y: number; amount: number; total: number }
+  /** 信号が (x,y) のパーツを発動させる直前に、床の効果を受けた（before → after） */
+  | {
+      tick: number;
+      type: 'floor';
+      x: number;
+      y: number;
+      tile: FloorTileId;
+      before: Score;
+      after: Score;
+    }
   /** 上限に達し、信号が残ったまま打ち切った */
   | { tick: number; type: 'halt'; reason: HaltReason; remainingSignals: number };
 
@@ -130,6 +145,8 @@ export interface SimStats {
   activatedParts: number;
   /** 出荷回数 */
   shipCount: number;
+  /** 床の効果を受けた回数 */
+  floorApplied: number;
   /** 信号が取った最大値 */
   maxValue: Score;
   /** 実行した tick 数 */

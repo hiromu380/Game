@@ -90,6 +90,16 @@ export interface ShiftSpec {
   kind: 'normal' | 'boss';
 }
 
+/** 床タイルの効果量（floor/tiles/ が参照する） */
+export interface FloorParams {
+  /** ×2床の倍率 */
+  doubleMultiplier: number;
+  /** 加算床で足す値 */
+  addAmount: number;
+  /** ×3床の倍率 */
+  tripleMultiplier: number;
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -113,6 +123,8 @@ export interface Balance {
   parts: Record<PartId, PartBalance>;
   /** パーツ固有の効果量 */
   partParams: PartParams;
+  /** 床タイルの効果量 */
+  floorParams: FloorParams;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
 

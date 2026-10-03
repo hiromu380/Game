@@ -4,6 +4,7 @@
  * 種類ごとにファイルを分けている。数値を変えるときは該当するファイルだけを開けばよい:
  * - sim.ts      盤面の広さ・tick 上限などシミュレーション全体の上限
  * - parts.ts    パーツの価格・発動回数・レア度・効果量（倍率など）・ショップの出現重み
+ * - floors.ts   床タイルの効果量（×2床・加算床・×3床）
  * - economy.ts  ショップの品数・リロール・売却・最初の手持ち
  * - shifts.ts   シフト表（ノルマ・予算・報酬）・延長戦・デイリー
  * - meta.ts     メタ進行（パーツの解放条件・工場拡張）
@@ -21,6 +22,7 @@
 import { BOSS } from './boss';
 import { ECONOMY } from './economy';
 import { DAY_EVENTS } from './events';
+import { FLOOR_PARAMS } from './floors';
 import { META } from './meta';
 import { PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { DAILY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
@@ -34,6 +36,7 @@ export const BALANCE: Balance = {
   sim: SIM,
   parts: PARTS,
   partParams: PART_PARAMS,
+  floorParams: FLOOR_PARAMS,
   rarityWeights: RARITY_WEIGHTS,
   economy: ECONOMY,
   shifts: SHIFTS,
