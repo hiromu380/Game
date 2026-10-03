@@ -14,6 +14,7 @@ import {
   rerollShop,
   returnPart,
   sellPart,
+  useFloorPermit,
   type Balance,
   type RunState,
 } from '@chain-factory/sim';
@@ -45,12 +46,19 @@ function churn(start: RunState, seed: number, steps: number): void {
   for (let i = 0; i < steps; i++) {
     const action = rng.nextInt(4);
     if (action === 0) {
-      const offer = state.shop.findIndex(
-        (o) => o.partId !== undefined && !o.sold && o.price <= state.budget,
-      );
+      // パーツも配置権も買う（配置権は売れない・取り消せない）
+      const offer = state.shop.findIndex((o) => !o.sold && o.price <= state.budget);
       if (offer < 0) continue;
       const { price, partId } = state.shop[offer]!;
-      if (partId === undefined) continue;
+      if (partId === undefined) {
+        const r = buyOffer(state, offer);
+        if (r.ok) {
+          spent += price;
+          const used = useFloorPermit(r.state);
+          state = used.ok ? used.state : r.state;
+        }
+        continue;
+      }
       const r = buyOffer(state, offer);
       if (r.ok) {
         state = r.state;

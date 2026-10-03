@@ -13,6 +13,18 @@ const OPTIONS = {
 };
 
 describe('ボット', () => {
+  it('ランダム配置権は、並べば期待値で買って使うことがあり、使わないボットとも比べられる', () => {
+    const logs = [1, 2, 3, 4, 5, 6].map((seed) => playRun(seed, 'greedy', OPTIONS));
+    const permits = logs.reduce(
+      (n, l) => ({ offered: n.offered + l.permits.offered, used: n.used + l.permits.used }),
+      { offered: 0, used: 0 },
+    );
+    expect(permits.offered).toBeGreaterThan(0);
+    expect(permits.used).toBeGreaterThan(0);
+    const off = playRun(1, 'greedy', { ...OPTIONS, permits: false });
+    expect(off.permits.used).toBe(0);
+  });
+
   it('ランダムボットは1ランを最後まで（脱落まで）遊べる', () => {
     const log = playRun(1, 'random', OPTIONS);
     expect(log.shifts.length).toBeGreaterThan(0);

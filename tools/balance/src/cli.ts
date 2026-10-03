@@ -9,6 +9,7 @@
  *   pnpm balance --eval worst --samples 5      # ランダムな盤面を「5回試して最悪の回」で評価する（慎重なプレイヤー）
  *   pnpm balance --mode daily                  # デイリーと同じ条件（3シフト・全パーツ・特殊ルール）で検証
  *   pnpm balance --floor-aware off             # 床を見ないボット（床を使うボットとの比較用）
+ *   pnpm balance --permits off                 # ランダム配置権を使わないボット（比較用）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
  */
@@ -43,6 +44,7 @@ function parseArgs(argv: string[]) {
     unlock: (args.get('unlock') === 'all' ? 'all' : 'initial') as 'initial' | 'all',
     mode: (args.get('mode') === 'daily' ? 'daily' : 'normal') as 'normal' | 'daily',
     floorAware: args.get('floor-aware') !== 'off',
+    permits: args.get('permits') !== 'off',
   };
 }
 
@@ -56,6 +58,7 @@ async function main() {
     maxRerolls: opts.maxRerolls,
     mode: opts.mode,
     floorAware: opts.floorAware,
+    permits: opts.permits,
   };
   const summaries: BotSummary[] = [];
   const shiftSpecs = opts.mode === 'daily' ? BALANCE.daily.shifts : BALANCE.shifts;
@@ -83,6 +86,7 @@ async function main() {
     探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,
     リロール上限: `${opts.maxRerolls}回/シフト`,
     床: opts.floorAware ? '床を見て置く' : '床を見ない（比較用）',
+    ランダム配置権: opts.permits ? '期待値で買って使う' : '使わない（比較用）',
     パーツの解放:
       opts.unlock === 'all'
         ? '全解放・工場拡張最大（やり込み相当）'
