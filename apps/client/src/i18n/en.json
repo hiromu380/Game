@@ -21,6 +21,8 @@
   "floor.period.item": " (floor permit: today only)",
   "shop.sold": "Sold",
   "shop.price": "${price}",
+  "shop.short": "${amount} short",
+  "shop.after": "After: ${amount}",
   "inventory.title": "Inventory",
   "inventory.empty": "No parts in inventory",
   "inventory.returnAll": "Return all",

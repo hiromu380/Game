@@ -107,7 +107,7 @@ export function InventoryPanel({
                   <span className="item-button__name">{t(`part.${id}.name`)}</span>
                   <span className="item-button__desc">{describePart(t, id, rules)}</span>
                 </span>
-                <span className="item-button__meta">×{inventory[id]}</span>
+                <span className="item-button__meta item-button__count">×{inventory[id]}</span>
               </button>
             </li>
           ))}

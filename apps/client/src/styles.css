@@ -324,10 +324,50 @@ button:disabled {
 .item-button__desc {
   font-size: 0.75rem;
   color: var(--muted);
+  /* 説明は2行まで。ポインターを重ねる・キーボードで選ぶと全文を出す（全文はパーツ一覧にもある） */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.item-button:hover .item-button__desc,
+.item-button:focus-visible .item-button__desc {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 .item-button__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* 価格・個数は大きく（買えるか・何個あるかを一目で） */
+.item-button__price,
+.item-button__count {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--text);
+}
+.item-button:disabled .item-button__price {
+  color: var(--muted);
+}
+/* 購入後の残り予算（ポインターを重ねる・キーボードで選んだときだけ） */
+.item-button__after {
+  display: none;
+  font-size: 0.7rem;
+}
+.item-button:hover .item-button__after,
+.item-button:focus-visible .item-button__after {
+  display: block;
+}
+/* 予算が足りないときの不足額 */
+.shop__short {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--missed);
 }
 
 /* ---- パーツアイコン（仮素材: 色分けした図形 + 頭文字） ---- */

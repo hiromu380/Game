@@ -21,6 +21,8 @@
   "floor.period.item": "（ランダム配置権: 今日だけ）",
   "shop.sold": "売約済み",
   "shop.price": "{price} 円",
+  "shop.short": "あと{amount}円",
+  "shop.after": "購入後 {amount}円",
   "inventory.title": "手持ち",
   "inventory.empty": "手持ちのパーツはありません",
   "inventory.returnAll": "全部戻す",

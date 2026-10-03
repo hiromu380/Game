@@ -54,6 +54,9 @@ export function ShopPanel(props: Props) {
         >
           <UiIcon name="reroll" size={16} />
           {rerollCost === null ? t('shop.rerollDisabled') : t('shop.reroll', { cost: rerollCost })}
+          {rerollCost !== null && budget < rerollCost && (
+            <span className="shop__short">{t('shop.short', { amount: rerollCost - budget })}</span>
+          )}
         </button>
       </div>
       <ul className="item-list">
@@ -88,7 +91,9 @@ export function ShopPanel(props: Props) {
                   </>
                 )}
                 <span className="item-button__meta">
-                  {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
+                  <span className="item-button__price">
+                    {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
+                  </span>
                   {!offer.sold && offer.partId && trends[offer.partId] && (
                     <span
                       className={`trend trend--${trends[offer.partId]}`}
@@ -97,6 +102,16 @@ export function ShopPanel(props: Props) {
                       {trends[offer.partId] === 'up' ? '▲' : '▼'}
                     </span>
                   )}
+                  {!offer.sold &&
+                    (affordable ? (
+                      <span className="item-button__after">
+                        {t('shop.after', { amount: budget - offer.price })}
+                      </span>
+                    ) : (
+                      <span className="shop__short">
+                        {t('shop.short', { amount: offer.price - budget })}
+                      </span>
+                    ))}
                 </span>
               </button>
             </li>
