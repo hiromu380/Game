@@ -160,6 +160,12 @@ export class BoardRenderer {
   private readonly blockLayer = new Container();
   private readonly partLayer = new Container();
   private readonly overlayLayer = new Container();
+  /** ランダム配置権のルーレット（盤面を描き直しても消えないよう、別の層に描く） */
+  private readonly revealLayer = new Container();
+  /** 今わかっている配置権の床のマス（増えたら、増えたマスをルーレットで見せる） */
+  private knownItemCells = new Set<number>();
+  /** ルーレットの演出中のマス（終わるまで床を描かない） */
+  private readonly revealing = new Set<number>();
   /** 残り発動回数と、途切れた理由の表示 */
   private readonly status: StatusOverlay;
   private readonly signalLayer = new Container();
@@ -227,6 +233,7 @@ export class BoardRenderer {
       this.overlayLayer,
       this.signalLayer,
       this.effects.boardLayer,
+      this.revealLayer,
       this.status.breakLayer,
       this.tooltipLayer,
     );
@@ -339,6 +346,7 @@ export class BoardRenderer {
 
   /** 盤面・選択状態を描き直す */
   setState(state: BoardViewState): void {
+    const previous = this.state;
     const sizeChanged =
       this.state?.board.width !== state.board.width ||
       this.state?.board.height !== state.board.height;
@@ -358,11 +366,19 @@ export class BoardRenderer {
       );
     }
 
+    // ランダム配置権で新しく湧いた床は、ルーレットで位置を見せてから描く
+    // （シフトが変わった・ランを読み込んだときは、すでにある床なので演出しない）
+    const itemCells = state.floor.flatMap((c, i) => (c?.source === 'item' ? [i] : []));
+    if (previous?.shiftKey === state.shiftKey) {
+      for (const cell of itemCells) if (!this.knownItemCells.has(cell)) this.revealPermit(cell);
+    }
+    this.knownItemCells = new Set(itemCells);
+
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     // 床タイル（盤面の下層。パーツより下に、控えめに描く）
     for (let cell = 0; cell < state.floor.length; cell++) {
       const floorCell = state.floor[cell];
-      if (!floorCell) continue;
+      if (!floorCell || this.revealing.has(cell)) continue;
       const x = cell % state.board.width;
       const y = Math.floor(cell / state.board.width);
       this.blockLayer.addChild(
@@ -490,6 +506,67 @@ export class BoardRenderer {
     // 空きマスの床: 効果の説明
     const text = this.withFloor(hovered, null);
     if (text) this.showTooltip(hovered.x, hovered.y, text);
+  }
+
+  /**
+   * ランダム配置権のルーレット: 枠が盤面のマスを跳び回り、だんだん遅くなって、床が湧くマスで止まる。
+   * 位置は sim で決まっていて、演出は見せ方だけ（跳ぶ先は演出用の乱数。sim の乱数とは別）。
+   * 演出の強さが「弱」なら跳ばずに止まる
+   */
+  private revealPermit(index: number): void {
+    const state = this.state;
+    if (!state) return;
+    const { width, height } = state.board;
+    const config = EFFECTS_CONFIG.permitRoulette;
+    const hops = config.hops[this.effectSettings.strength];
+    this.revealing.add(index);
+    let seed = (index * 2654435761) >>> 0;
+    const nextCell = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed % (width * height);
+    };
+    let at = 0;
+    for (let i = 0; i < hops; i++) {
+      const cell = i === hops - 1 ? index : nextCell();
+      // だんだん遅くなる（最後の数回は間隔が広がる）
+      at += config.baseHopMs + Math.round(config.slowdownMs * (i / Math.max(1, hops - 1)) ** 2);
+      this.tweens.add({
+        delay: at,
+        duration: config.baseHopMs,
+        onStart: () => {
+          this.revealLayer.removeChildren().forEach((c) => c.destroy());
+          this.revealLayer.addChild(
+            cellFrame(cell % width, Math.floor(cell / width), BOARD_THEME.floorItem, 4),
+          );
+          this.options.playSound('permitTick', Math.min(12, i));
+        },
+      });
+    }
+    this.tweens.add({
+      delay: at + config.baseHopMs,
+      duration: 0,
+      onComplete: () => this.landPermit(index),
+    });
+  }
+
+  /** ルーレットが止まった: 床を描き、床の色で光らせて数字を出す */
+  private landPermit(index: number): void {
+    this.revealing.delete(index);
+    this.revealLayer.removeChildren().forEach((c) => c.destroy());
+    const state = this.state;
+    const cell = state?.floor[index];
+    if (!state || !cell) return;
+    this.setState(state);
+    const x = index % state.board.width;
+    const y = Math.floor(index / state.board.width);
+    this.options.playSound('permitLand', 0);
+    this.effects.floor(
+      x,
+      y,
+      cell.tile,
+      this.options.getFloorShort(cell.tile, state.rules.floorParams),
+      700,
+    );
   }
 
   /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */

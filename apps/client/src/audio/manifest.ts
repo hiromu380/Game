@@ -53,6 +53,9 @@ export type SoundKey =
   | 'chain2'
   | 'digitUp'
   | 'floor'
+  | 'useItem'
+  | 'permitTick'
+  | 'permitLand'
   | 'quotaCross'
   | 'peak'
   | 'stamp'
@@ -243,6 +246,35 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       notes: [
         { freq: 660, at: 0, duration: 0.05 },
         { freq: 990, at: 0.05, duration: 0.09 },
+      ],
+    },
+  },
+  /** 消耗品を使った（ランダム配置権: ルーレットが回り始める） */
+  useItem: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 392, at: 0, duration: 0.05 },
+        { freq: 523, at: 0.05, duration: 0.05 },
+      ],
+    },
+  },
+  /** ルーレットの枠が1マス跳んだ（短いクリック。跳ぶたびに少しずつ高くする） */
+  permitTick: {
+    kind: 'synth',
+    recipe: { wave: 'square', volume: 0.1, notes: [{ freq: 880, at: 0, duration: 0.03 }] },
+  },
+  /** ルーレットが止まり、床が湧いた */
+  permitLand: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.24,
+      notes: [
+        { freq: 784, at: 0, duration: 0.07 },
+        { freq: 1175, at: 0.07, duration: 0.16 },
       ],
     },
   },

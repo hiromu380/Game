@@ -311,6 +311,33 @@ button:disabled {
   height: 40px;
 }
 
+/* ---- 手持ちの消耗品（ランダム配置権）: 今日だけ有効。夜は警告の色 ---- */
+.item-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 2px dashed var(--floor-item);
+  border-radius: 8px;
+}
+
+.item-row__expires {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--floor-item);
+}
+
+.item-row--expiring {
+  border-style: solid;
+  border-color: var(--missed);
+}
+
+.item-row--expiring .item-row__expires {
+  color: var(--missed);
+  font-weight: 700;
+}
+
 /* ---- 選択中のパーツ ---- */
 .selection__part {
   display: flex;

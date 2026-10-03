@@ -6,6 +6,7 @@
  * - 再生速度: 0.25×〜2×（スローで撮る）
  * - 盤面の書き出し・読み込み（JSON）と、指定したシードでの本番: 見栄えの良い連鎖を何度でも再現する
  * - 規模別の盤面（小・中・大・特大。config/capturePresets.ts）と「ピークから再生」: 連鎖演出の確認・録画
+ * - ランダム配置権を1枚もらう: 使う場面（ルーレット）の確認・録画
  * - 共有カードの確認: 今の盤面・結果で、結果画面の共有カードを出す
  * パネル自体は C キーで出し入れする（撮影時は隠す）。画面の大きさはブラウザ・撮影ツール側で決める
  * （例: Playwright の viewport 1920×1080。docs/ops/store-assets.md）
@@ -40,6 +41,8 @@ interface Props {
   onCommit: (seed: number) => void;
   /** 今の盤面で共有カードの見た目を確かめる */
   onPreviewShare: () => void;
+  /** ランダム配置権を1枚もらう（使う場面の確認・録画用） */
+  onGivePermit: () => void;
 }
 
 /**
@@ -175,6 +178,7 @@ export function CapturePanel(props: Props) {
         </button>
       </div>
       <button onClick={props.onPreviewShare}>{t('capture.shareCard')}</button>
+      <button onClick={props.onGivePermit}>{t('capture.givePermit')}</button>
       {message && <small>{message}</small>}
     </aside>
   );

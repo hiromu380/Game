@@ -10,6 +10,7 @@
 import type { OnlineErrorCode } from '../online/api';
 import {
   abandonRun,
+  addItem,
   BALANCE,
   applyOp,
   applyRunToMeta,
@@ -23,6 +24,7 @@ import {
   type Board,
   type Dir4,
   type FloorLayer,
+  type ItemId,
   type MetaProgress,
   type PartId,
   type RunActionResult,
@@ -92,7 +94,8 @@ export interface GameState {
 }
 
 /** 操作の手応えの種類（サウンドマニフェストのキーと同じ名前） */
-export type FeedbackKind = 'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'error';
+export type FeedbackKind =
+  'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'useItem' | 'error';
 
 export type GameAction =
   /**
@@ -105,6 +108,10 @@ export type GameAction =
   /** ランを諦める（通常ラン・練習だけ。デイリー本番はサーバーに記録が残るので諦められない） */
   | { type: 'giveUp' }
   | { type: 'buy'; offerIndex: number }
+  /** 消耗品を使う（ランダム配置権: 盤面のどこかに床が湧く） */
+  | { type: 'useItem'; itemId: ItemId }
+  /** 撮影モード: 配置権を1枚もらう（使う場面の確認・録画用） */
+  | { type: 'captureGivePermit' }
   | { type: 'selectInventory'; partId: PartId }
   | { type: 'clickCell'; x: number; y: number }
   /** 長押し（スマホ）・ダブルクリック: そのマスのパーツを手持ちに戻す */
@@ -441,6 +448,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             error: null,
           }
         : state;
+
+    case 'useItem':
+      return applyRunOp(state, { op: 'useItem', itemId: action.itemId }, 'useItem');
+
+    case 'captureGivePermit': {
+      if (state.run.phase !== 'building') return state;
+      const given = addItem(state.run, 'floorPermit');
+      return given.ok ? { ...state, run: given.state, error: null } : state;
+    }
 
     case 'captureCommit':
       return state.run.phase === 'building' ? beginCommit(state, action.seed) : state;

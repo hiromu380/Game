@@ -132,6 +132,8 @@ export const BOARD_COLORS = {
   floorLabel: '#fff8e1',
   /** ボーナス床・今日の出来事の床（期間限定）の枠 */
   floorBonus: '#4dd0e1',
+  /** ランダム配置権で湧いた床の枠・ルーレットの枠（今日だけ） */
+  floorItem: '#ffca28',
   selected: '#ffeb3b',
   ghostOk: '#69f0ae',
   arrowFill: '#ffeb3b',

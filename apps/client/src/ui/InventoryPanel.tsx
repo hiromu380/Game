@@ -1,11 +1,20 @@
 /**
  * 手持ち: 購入済みで未配置のパーツ。選んでから盤面をクリックして配置する
+ * 消耗品（ランダム配置権）もここに並べ、「使う」ボタンで使う（今日だけ有効）
  */
-import { PART_IDS, type PartId, type RuleSet, type RunState } from '@chain-factory/sim';
+import {
+  countItems,
+  PART_IDS,
+  type ItemId,
+  type PartId,
+  type RuleSet,
+  type RunState,
+} from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
 import type { Selection } from '../state/gameReducer';
 import { PartIcon } from './PartIcon';
+import { UiIcon } from './UiIcon';
 
 interface Props {
   /** 説明文に数値を差し込むためのルール */
@@ -19,6 +28,13 @@ interface Props {
   guidePartId?: PartId | null;
   onSelect: (partId: PartId) => void;
   onReturnAll: () => void;
+  /** 消耗品の状態（持っている数は run.items から数える） */
+  run: RunState;
+  /** 今日の最後のシフト（夜）か: 配置権は今夜で消えるので、警告の色にする */
+  lastShiftOfDay: boolean;
+  /** 配置権を使えば床が湧くマスがあるか（ないときは使えない理由を出す） */
+  permitHasCell: boolean;
+  onUseItem: (itemId: ItemId) => void;
 }
 
 export function InventoryPanel({
@@ -30,10 +46,15 @@ export function InventoryPanel({
   guidePartId = null,
   onSelect,
   onReturnAll,
+  run,
+  lastShiftOfDay,
+  permitHasCell,
+  onUseItem,
 }: Props) {
   const { t } = useI18n();
   const items = PART_IDS.filter((id) => (inventory[id] ?? 0) > 0);
   const selectedId = selection?.kind === 'inventory' ? selection.partId : null;
+  const permits = countItems(run, 'floorPermit');
 
   return (
     <section className="panel" data-panel="inventory">
@@ -47,6 +68,29 @@ export function InventoryPanel({
           {t('inventory.returnAll')}
         </button>
       </div>
+      {permits > 0 && (
+        <div className={`item-row ${lastShiftOfDay ? 'item-row--expiring' : ''}`}>
+          <span className="item-icon">
+            <UiIcon name="permit" size={36} />
+          </span>
+          <span className="item-button__text">
+            <span className="item-button__name">
+              {t('item.floorPermit.name')} ×{permits}
+            </span>
+            <span className="item-row__expires">
+              {t(lastShiftOfDay ? 'item.expiresTonight' : 'item.expiresToday')}
+            </span>
+            {!permitHasCell && <span className="item-button__desc">{t('item.noCell')}</span>}
+          </span>
+          <button
+            className="button--small"
+            disabled={disabled || !permitHasCell}
+            onClick={() => onUseItem('floorPermit')}
+          >
+            {t('item.use')}
+          </button>
+        </div>
+      )}
       {items.length === 0 ? (
         <p className="panel__hint">{t('inventory.empty')}</p>
       ) : (

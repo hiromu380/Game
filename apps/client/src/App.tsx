@@ -8,6 +8,7 @@ import {
   createRunWithConfig,
   dailyRunSeed,
   getCurrentEconomy,
+  drawFloorPermit,
   getCurrentFloor,
   type FloorParams,
   getCurrentRules,
@@ -307,7 +308,7 @@ export function App({ start, onTitle }: Props) {
           name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
           desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
           period:
-            cell.source === 'bonus' || cell.source === 'event'
+            cell.source === 'bonus' || cell.source === 'event' || cell.source === 'item'
               ? t(`floor.period.${cell.source}`)
               : '',
         }),
@@ -513,6 +514,10 @@ export function App({ start, onTitle }: Props) {
       guidePartId={guideStep && guideStep !== 'buyGear' ? tutorialPart(guideStep) : null}
       onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
       onReturnAll={() => dispatch({ type: 'returnAll' })}
+      run={run}
+      lastShiftOfDay={getDayAndPeriod(run).period === run.config.shiftsPerDay - 1}
+      permitHasCell={drawFloorPermit(run) !== null}
+      onUseItem={(itemId) => dispatch({ type: 'useItem', itemId })}
     />
   );
   const selectionPanel = (
@@ -608,6 +613,7 @@ export function App({ start, onTitle }: Props) {
             dispatch({ type: 'captureCommit', seed });
           }}
           onPreviewShare={() => setSharePreview(true)}
+          onGivePermit={() => dispatch({ type: 'captureGivePermit' })}
         />
       )}
       {CAPTURE && sharePreview && (

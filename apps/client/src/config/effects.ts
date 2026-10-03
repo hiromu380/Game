@@ -87,6 +87,15 @@ export const EFFECTS_CONFIG = {
     /** 連鎖の音: 1連鎖ごとに半音上がる（上限あり）。stepsPerTimbre 段ごとに音色を変える */
     notes: { maxSemitones: 24, stepsPerTimbre: 8, timbres: 3 },
   },
+  /**
+   * ランダム配置権のルーレット: 枠が跳ぶ回数（演出の強さごと。1 なら跳ばずに止まる）と、1回の間隔・最後の減速
+   * （強で合計およそ 0.9 秒）
+   */
+  permitRoulette: {
+    hops: { full: 10, reduced: 6, minimal: 1 },
+    baseHopMs: 55,
+    slowdownMs: 140,
+  },
 } as const;
 
 export type EffectStrength = keyof typeof EFFECTS_CONFIG.strength;

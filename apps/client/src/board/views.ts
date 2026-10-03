@@ -227,7 +227,7 @@ export function createBlockedCell(
 
 /**
  * 床タイル（×2床・加算床・×3床）: 色つきの鉄板と、左上の数字（×2・+3。パーツを置いても見える位置）。
- * ボーナス床・今日の出来事の床（期間限定）は、水色の点線の枠で見分けられるようにする。
+ * ボーナス床・今日の出来事の床（期間限定）は水色、ランダム配置権の床（今日だけ）は金色の点線の枠で見分けられるようにする。
  * 使用不可は createBlockedCell で描く
  */
 export function createFloorTile(
@@ -259,6 +259,10 @@ export function createFloorTile(
   view.addChild(text);
   if (cell.source === 'bonus' || cell.source === 'event') {
     view.addChild(dashedFrame(left, top, 3).stroke({ width: 3, color: BOARD_THEME.floorBonus }));
+  }
+  if (cell.source === 'item') {
+    // ランダム配置権の床（今日だけ）: 金色の点線の枠
+    view.addChild(dashedFrame(left, top, 3).stroke({ width: 3, color: BOARD_THEME.floorItem }));
   }
   return view;
 }
