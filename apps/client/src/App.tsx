@@ -42,7 +42,13 @@ import { getMarket, priceTrends } from './online/market';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
-import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
+import {
+  canUndo,
+  createGameState,
+  gameReducer,
+  getPersistedRun,
+  type PlayMode,
+} from './state/gameReducer';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
 import { trialStatus } from './state/trialStatus';
 import { isDebugAvailable } from './config/debug';
@@ -77,6 +83,9 @@ import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
 import { FloorLegend } from './ui/FloorLegend';
+import { nextStep } from './state/nextStep';
+import { feedbackMessage, type FeedbackMessage } from './state/feedbackMessage';
+import { FEEDBACK_NOTE_MS } from './config/effects';
 import { GameMenu } from './ui/GameMenu';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
@@ -226,9 +235,22 @@ export function App({ start, onTitle }: Props) {
 
   // 操作の手応え（配置・購入・エラーなど）の効果音。
   // feedback は操作のたびに新しいオブジェクトになるので、変わったときに1回鳴らす
+  // あわせて、お金が動いた操作などは盤面の下に短く表示する（state/feedbackMessage.ts）
   const { feedback } = state;
+  const lastBudget = useRef(run.budget);
+  const [note, setNote] = useState<{ message: FeedbackMessage; seq: number } | null>(null);
   useEffect(() => {
-    if (feedback) audio.play(feedback.kind);
+    const delta = run.budget - lastBudget.current;
+    lastBudget.current = run.budget;
+    if (!feedback) return;
+    audio.play(feedback.kind === 'undo' ? 'returnPart' : feedback.kind);
+    const message = feedbackMessage(feedback.kind, delta);
+    if (!message) return;
+    setNote({ message, seq: feedback.seq });
+    const timer = setTimeout(() => setNote(null), FEEDBACK_NOTE_MS);
+    return () => clearTimeout(timer);
+    // 予算は feedback と同時に変わる（feedback が変わったときだけ見る）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feedback]);
 
   // 本番の結果が出たときの効果音（ノルマ達成・全シフトクリア・ラン失敗）。
@@ -388,6 +410,7 @@ export function App({ start, onTitle }: Props) {
     onPlace: onCellClick,
     onDeselect: () => dispatch({ type: 'deselect' }),
     onRotate: () => dispatch({ type: 'rotate' }),
+    onUndo: () => dispatch({ type: 'undo' }),
     onTrial: () => startPlayback('startTrial'),
     onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,
@@ -530,7 +553,8 @@ export function App({ start, onTitle }: Props) {
 
   // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
-  const hud = <Hud run={run} liveScore={liveScore} trial={trialStatus(state.trials, run)} />;
+  const trial = trialStatus(state.trials, run);
+  const hud = <Hud run={run} liveScore={liveScore} trial={trial} />;
   const notices = (
     <>
       {tutorialOn ? (
@@ -663,6 +687,11 @@ export function App({ start, onTitle }: Props) {
           )}
           {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
+          {note && !error && (
+            <div key={note.seq} className="toast toast--note" role="status">
+              {t(`toast.${note.message.kind}`, { amount: note.message.amount })}
+            </div>
+          )}
           {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
         </div>
         <aside className="layout__side">
@@ -673,6 +702,9 @@ export function App({ start, onTitle }: Props) {
             compact={compact}
             inputMode={inputMode}
             speed={speed}
+            next={nextStep(run, selection, trial, getCurrentShift(run).quota)}
+            canUndo={canUndo(state)}
+            onUndo={() => dispatch({ type: 'undo' })}
             onTrial={() => startPlayback('startTrial')}
             onCommit={() => setCommitConfirm(true)}
             onSpeedChange={setSpeed}

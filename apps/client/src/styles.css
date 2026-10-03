@@ -526,6 +526,39 @@ button:disabled {
   font-size: 0.85rem;
   pointer-events: none;
 }
+/* 操作の手応え（購入 −3円 など）: 盤面の下の中央に短く出す */
+.toast--note {
+  top: auto;
+  right: auto;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-weight: bold;
+  white-space: nowrap;
+  animation: toast-note 1.6s ease-out both;
+}
+@keyframes toast-note {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  12%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast--note {
+    animation: none;
+  }
+}
 
 /* ---- ラン終了画面 ---- */
 .run-end {
@@ -1225,9 +1258,17 @@ a.button.button--primary {
 }
 .app--compact .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   padding: 6px;
+}
+/* 狭い画面: 案内はボタンの下の1行に回す */
+.app--compact .controls__next {
+  order: 1;
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
 }
 .app--compact .controls .button-row {
   flex: 1;
@@ -1290,7 +1331,8 @@ a.button.button--primary {
 .app--fit .layout__board {
   /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
   /* 高さいっぱい。ただし右の列（最小 280px + すき間）の分は横幅に残す */
-  width: min(100cqh, 100cqw - 290px, var(--board-max, 640px));
+  /* 下に床の凡例の1行（26px）を残す */
+  width: min(100cqh - 26px, 100cqw - 290px, var(--board-max, 640px));
 }
 .app--fit .layout__side {
   min-height: 0;
@@ -2533,4 +2575,24 @@ a.button.button--primary {
     color-mix(in srgb, var(--floor-blocked) 50%, transparent) 0 2px,
     transparent 2px 6px
   );
+}
+
+/* 次にすること（操作欄の1行の案内。state/nextStep.ts） */
+.controls__next {
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+.controls__next--ready {
+  color: var(--met);
+}
+.controls__next--short {
+  color: var(--accent);
+}
+/* 横長の画面では凡例を1行にする（はみ出す分は横にスクロール） */
+.app--fit .floor-legend {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
 }

@@ -82,6 +82,8 @@ const UI: Record<string, string[]> = {
   return: [path('M4 13 V20 H20 V13', ui()), path('M12 3 V14 M8 10 l4 4 l4 -4', ui())],
   // 回転: 時計回りの矢印
   rotate: [path('M18 12 a6 6 0 1 1 -2 -4.5', ui()), polygon('20,3 20,10 13,9', { fill: S })],
+  // 元に戻す: 左へ戻る曲がった矢印
+  undo: [path('M8 9 H15 a5 5 0 0 1 0 10 H9', ui()), polygon('3,9 9,4 9,14', { fill: S })],
   // 試運転: 再生ボタン（輪郭だけ）
   trial: [polygon('7,4 20,12 7,20', { ...ui(), 'stroke-linejoin': 'round' })],
   // 本番: 大きな赤い押しボタン（作り込む）

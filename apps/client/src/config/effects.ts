@@ -99,3 +99,6 @@ export const EFFECTS_CONFIG = {
 } as const;
 
 export type EffectStrength = keyof typeof EFFECTS_CONFIG.strength;
+
+/** 操作の手応えの短い表示（購入 −3円 など）を出しておく時間（ミリ秒） */
+export const FEEDBACK_NOTE_MS = 1600;

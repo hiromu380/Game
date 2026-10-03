@@ -83,6 +83,12 @@ export interface GameState {
   lastResult: SimResult | null;
   /** このシフトの試運転の記録（目標の計器に出す。保存しない。state/trialStatus.ts） */
   trials: TrialRecord | null;
+  /**
+   * 「元に戻す」の履歴（盤面の組み替えの直前の状態。新しいものが後ろ）。
+   * 戻せるのは配置・回転・移動・手持ちに戻すだけ。お金や品ぞろえが動く操作（購入・売却・リロール・
+   * 配置権・今日の出来事）や本番のあとは履歴を消す（買い物のやり直しで経済が変わらないように）
+   */
+  undo: UndoEntry[];
   /** メタ進行（ランをまたいで残る） */
   meta: MetaProgress;
   /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
@@ -96,9 +102,31 @@ export interface GameState {
   feedback: { kind: FeedbackKind; seq: number } | null;
 }
 
-/** 操作の手応えの種類（サウンドマニフェストのキーと同じ名前） */
+/** 「元に戻す」で戻す先（操作ログも同じ位置まで戻すので、デイリーの検証とずれない） */
+export interface UndoEntry {
+  run: RunState;
+  pendingOps: RunOp[];
+}
+
+/** 「元に戻す」の履歴の上限 */
+export const UNDO_LIMIT = 30;
+
+/** 戻せる操作（盤面の組み替えだけ） */
+const UNDOABLE_ACTIONS: readonly GameAction['type'][] = [
+  'clickCell',
+  'rotate',
+  'returnSelected',
+  'returnAll',
+  'movePart',
+  'longPressCell',
+];
+
+/** 盤面の状態が変わっても履歴を残す操作（試運転は試運転回数が増えるだけ） */
+const UNDO_NEUTRAL_ACTIONS: readonly GameAction['type'][] = ['startTrial', 'closePlayback'];
+
+/** 操作の手応えの種類（サウンドマニフェストのキーと同じ名前。undo だけは returnPart の音を鳴らす） */
 export type FeedbackKind =
-  'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'useItem' | 'error';
+  'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'useItem' | 'undo' | 'error';
 
 export type GameAction =
   /**
@@ -127,6 +155,8 @@ export type GameAction =
   | { type: 'returnSelected' }
   /** 盤面のパーツをすべて手持ちに戻す */
   | { type: 'returnAll' }
+  /** 直前の組み替え（配置・回転・移動・手持ちに戻す）を取り消す */
+  | { type: 'undo' }
   | { type: 'sellSelected' }
   /** 盤面のパーツを売却する（ショップへドラッグしたとき） */
   | { type: 'sellCell'; x: number; y: number }
@@ -163,6 +193,7 @@ export function createGameState(
     error: null,
     lastResult: null,
     trials: null,
+    undo: [],
     meta,
     unlocks: [],
     achievements,
@@ -235,6 +266,28 @@ function beginCommit(state: GameState, seed?: number): GameState {
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
+  const next = reduce(state, action);
+  if (action.type === 'undo' || next === state || next.run === state.run || next.error) return next;
+  if (UNDOABLE_ACTIONS.includes(action.type)) {
+    const entry: UndoEntry = { run: state.run, pendingOps: state.pendingOps };
+    return { ...next, undo: [...state.undo, entry].slice(-UNDO_LIMIT) };
+  }
+  // 試運転・試運転の再生を閉じる: 盤面は変わらないので履歴を残す（本番の再生を閉じたときは消す）
+  if (
+    UNDO_NEUTRAL_ACTIONS.includes(action.type) &&
+    !(action.type === 'closePlayback' && state.playback?.mode === 'commit')
+  ) {
+    return next;
+  }
+  return next.undo.length > 0 ? { ...next, undo: [] } : next;
+}
+
+/** 元に戻せる操作があるか */
+export function canUndo(state: GameState): boolean {
+  return state.undo.length > 0 && !state.playback && !state.awaitingServer;
+}
+
+function reduce(state: GameState, action: GameAction): GameState {
   // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
   const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun', 'dailyRanked'];
   if (state.playback && !busyAllowed.includes(action.type)) return state;
@@ -297,6 +350,23 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selection: null,
         error: null,
       };
+    }
+
+    case 'undo': {
+      const entry = state.undo.at(-1);
+      if (!entry || state.run.phase !== 'building') return state;
+      return withFeedback(
+        {
+          ...state,
+          // 試運転の回数は戻さない（試運転のたびにシードが変わるように）
+          run: { ...entry.run, trialCount: state.run.trialCount },
+          pendingOps: entry.pendingOps,
+          undo: state.undo.slice(0, -1),
+          selection: null,
+          error: null,
+        },
+        'undo',
+      );
     }
 
     case 'deselect':
@@ -393,7 +463,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         selection: { kind: 'cell', x: action.x, y: action.y },
       };
-      return gameReducer(selected, { type: 'returnSelected' });
+      return reduce(selected, { type: 'returnSelected' });
     }
 
     case 'sellSelected': {
