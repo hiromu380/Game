@@ -266,15 +266,6 @@ export function App({ start, onTitle }: Props) {
     if (showingUnlocks) audio.play('unlock');
   }, [showingUnlocks]);
 
-  // キーボード: R で回転
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'r' || e.key === 'R') dispatch({ type: 'rotate' });
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
   // 盤面に渡す表示状態（選択中のマス・配置しようとしているパーツ）
   const boardView = useMemo<BoardViewState>(
     () => ({
