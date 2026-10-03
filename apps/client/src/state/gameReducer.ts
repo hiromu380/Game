@@ -256,7 +256,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'buy': {
       // 購入したパーツをそのまま「配置待ち」にしておくと操作が速い
       const offer = state.run.shop[action.offerIndex];
-      const selection: Selection = offer
+      const selection: Selection = offer?.partId
         ? { kind: 'inventory', partId: offer.partId, dir: 1 }
         : null;
       return applyRunOp(state, { op: 'buy', offerIndex: action.offerIndex }, 'buy', selection);

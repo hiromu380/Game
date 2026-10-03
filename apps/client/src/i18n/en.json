@@ -4,6 +4,8 @@
   "hud.quota": "Quota",
   "hud.score": "Shipped",
   "shop.title": "Shop",
+  "item.floorPermit.name": "Random Floor Permit",
+  "item.floorPermit.desc": "Use it to make a floor tile (×2, add, etc.) appear somewhere on the board. Valid today only",
   "shop.sold": "Sold",
   "shop.price": "${price}",
   "inventory.title": "Inventory",

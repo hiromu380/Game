@@ -139,7 +139,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
     // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
     if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
-    for (const offer of state.shop) add(log.offered, offer.partId);
+    for (const offer of state.shop) if (offer.partId) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);
 
@@ -151,7 +151,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       if (move.kind === 'buyPlace') add(log.bought, move.partId);
       if (move.kind === 'reroll') {
         log.rerolls++;
-        for (const offer of next.shop) add(log.offered, offer.partId);
+        for (const offer of next.shop) if (offer.partId) add(log.offered, offer.partId);
       }
       replay = next;
     }

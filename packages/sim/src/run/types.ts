@@ -8,11 +8,21 @@ import type { BossModifierId, DayEventId, ItemId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
 
-/** ショップの商品1つ */
-export interface ShopOffer {
+/** ショップの商品1つ: パーツか、消耗品（ランダム配置権）。消耗品かどうかは itemId で見分ける */
+export type ShopOffer = PartOffer | ItemOffer;
+
+export interface PartOffer {
   partId: PartId;
   price: number;
   sold: boolean;
+  itemId?: undefined;
+}
+
+export interface ItemOffer {
+  itemId: ItemId;
+  price: number;
+  sold: boolean;
+  partId?: undefined;
 }
 
 /** 確定したシフトの記録 */

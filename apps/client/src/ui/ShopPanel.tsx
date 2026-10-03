@@ -66,14 +66,30 @@ export function ShopPanel(props: Props) {
                 disabled={disabled || offer.sold || !affordable}
                 onClick={() => onBuy(index)}
               >
-                <PartIcon partId={offer.partId} />
-                <span className="item-button__text">
-                  <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
-                  <span className="item-button__desc">{describePart(t, offer.partId, rules)}</span>
-                </span>
+                {offer.partId === undefined ? (
+                  <>
+                    <span className="item-icon">
+                      <UiIcon name="permit" size={36} />
+                    </span>
+                    <span className="item-button__text">
+                      <span className="item-button__name">{t(`item.${offer.itemId}.name`)}</span>
+                      <span className="item-button__desc">{t(`item.${offer.itemId}.desc`)}</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <PartIcon partId={offer.partId} />
+                    <span className="item-button__text">
+                      <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
+                      <span className="item-button__desc">
+                        {describePart(t, offer.partId, rules)}
+                      </span>
+                    </span>
+                  </>
+                )}
                 <span className="item-button__meta">
                   {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
-                  {!offer.sold && trends[offer.partId] && (
+                  {!offer.sold && offer.partId && trends[offer.partId] && (
                     <span
                       className={`trend trend--${trends[offer.partId]}`}
                       title={t(trends[offer.partId] === 'up' ? 'shop.trendUp' : 'shop.trendDown')}

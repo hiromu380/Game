@@ -90,6 +90,7 @@ describe('ランの開始', () => {
     const economy = createRun(1).config.economy;
     for (let seed = 0; seed < 50; seed++) {
       for (const offer of generateShop(seed, economy)) {
+        if (offer.partId === undefined) throw new Error('配置権を出さない設定なのに消耗品が並んだ');
         expect(offer.partId).not.toBe('switch');
         expect(offer.price).toBe(BALANCE.parts[offer.partId].price);
       }
@@ -112,11 +113,13 @@ describe('ランの開始', () => {
 describe('購入・配置・回転', () => {
   it('購入すると予算が減り手持ちに入る。同じ商品は2回買えない', () => {
     const run = createRun(1);
-    const offer = run.shop[0]!;
-    const after = unwrap(buyOffer(run, 0));
+    const index = run.shop.findIndex((o) => o.partId !== undefined);
+    const offer = run.shop[index]!;
+    if (offer.partId === undefined) throw new Error('パーツの商品がない');
+    const after = unwrap(buyOffer(run, index));
     expect(after.budget).toBe(run.budget - offer.price);
     expect(after.inventory[offer.partId]).toBe((run.inventory[offer.partId] ?? 0) + 1);
-    expect(buyOffer(after, 0)).toEqual({ ok: false, error: 'alreadySold' });
+    expect(buyOffer(after, index)).toEqual({ ok: false, error: 'alreadySold' });
   });
 
   it('予算が足りなければ買えない', () => {
@@ -171,7 +174,9 @@ describe('リロール', () => {
     expect(run.budget).toBe(before - cost1);
     expect(run.rerollCount).toBe(1);
     expect(getRerollCost(run)).toBe(cost1 + BALANCE.economy.reroll.costStep);
-    expect(run.shop).toEqual(generateShop(seeds.shopSeed(run.seed, 0, 1), getCurrentEconomy(run)));
+    expect(run.shop).toEqual(
+      generateShop(seeds.shopSeed(run.seed, 0, 1), getCurrentEconomy(run), run.config.floorPermit),
+    );
   });
 
   it('予算が足りなければリロールできない', () => {

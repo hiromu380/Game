@@ -4,6 +4,8 @@
   "hud.quota": "ノルマ",
   "hud.score": "出荷量",
   "shop.title": "ショップ",
+  "item.floorPermit.name": "ランダム配置権",
+  "item.floorPermit.desc": "使うと、盤面のどこかに床（×2・加算など）が1枚湧く。今日だけ有効",
   "shop.sold": "売約済み",
   "shop.price": "{price} 円",
   "inventory.title": "手持ち",

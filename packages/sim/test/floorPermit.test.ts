@@ -5,13 +5,17 @@ import { describe, expect, it } from 'vitest';
 import {
   addItem,
   BALANCE,
+  buildDailyConfig,
+  buyOffer,
   commitShift,
   countItems,
   createRun,
   getCurrentFloor,
   getShiftFloor,
   isBlockedCell,
+  isRunOp,
   placePart,
+  replayOps,
   seeds,
   useFloorPermit,
   type FloorLayer,
@@ -156,3 +160,73 @@ describe('ランダム配置権', () => {
     expect(seeds.floorPermitSeed(1, 0, 0)).not.toBe(seeds.floorPermitSeed(1, 0, 1));
   });
 });
+
+describe('ショップの配置権', () => {
+  const offersPermit = (run: RunState) => run.shop.some((o) => o.itemId === 'floorPermit');
+
+  it('品揃えの1枠として出ることがあり、1回の品揃えで最大1枠（リロールでも引き直される）', () => {
+    let seen = 0;
+    for (let seed = 1; seed <= 200; seed++) {
+      const run = createRun(seed);
+      const permits = run.shop.filter((o) => o.itemId === 'floorPermit');
+      expect(permits.length).toBeLessThanOrEqual(1);
+      if (permits.length > 0) {
+        seen++;
+        expect(permits[0]!.price).toBe(BALANCE.floorPermit.price);
+      }
+    }
+    // 出現率 25%（仮）: 200 シードでおおむね 30〜70 回
+    expect(seen).toBeGreaterThan(20);
+    expect(seen).toBeLessThan(80);
+  });
+
+  it('買うと消耗品の手持ちに入る（パーツの手持ちは増えない）。上限を超えては買えない', () => {
+    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find((s) =>
+      offersPermit(createRun(s)),
+    )!;
+    const run = createRun(seed);
+    const index = run.shop.findIndex((o) => o.itemId === 'floorPermit');
+    const bought = buyOffer(run, index);
+    if (!bought.ok) throw new Error(bought.error);
+    expect(countItems(bought.state, 'floorPermit')).toBe(1);
+    expect(bought.state.inventory).toEqual(run.inventory);
+    expect(bought.state.budget).toBe(run.budget - BALANCE.floorPermit.price);
+    const full = withPermits(run, BALANCE.floorPermit.maxHeld);
+    expect(buyOffer(full, index)).toEqual({ ok: false, error: 'itemLimit' });
+  });
+
+  it('操作ログで購入・使用・日替わりの消失が再現できる', () => {
+    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find((s) =>
+      offersPermit(createRun(s, { balance })),
+    )!;
+    const run = createRun(seed, { balance });
+    const index = run.shop.findIndex((o) => o.itemId === 'floorPermit');
+    const ops = [
+      { op: 'buy', offerIndex: index },
+      { op: 'useItem', itemId: 'floorPermit' },
+    ];
+    const replayed = replayOps(run, ops);
+    if (!replayed.ok) throw new Error(replayed.error);
+    const direct = use(unwrapBuy(run, index));
+    expect(replayed.state.itemFloors).toEqual(direct.itemFloors);
+    expect(getCurrentFloor(replayed.state)).toEqual(getCurrentFloor(direct));
+    expect(isRunOp({ op: 'useItem', itemId: 'lava' })).toBe(false);
+    // 翌日には消える
+    expect(advance(replayed.state, 3).itemFloors ?? null).toBeNull();
+  });
+
+  it('初回ガイドのランは1日目のショップに出ない。デイリーは設定で切り替えられる', () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      expect(offersPermit(createRun(seed, { tutorial: true }))).toBe(false);
+    }
+    expect(buildDailyConfig({ dailyId: '2026-10-05' }).floorPermit).toBeDefined();
+    const off = withBalance({ floorPermit: { ...BALANCE.floorPermit, inDaily: false } });
+    expect(buildDailyConfig({ dailyId: '2026-10-05', balance: off }).floorPermit).toBeUndefined();
+  });
+});
+
+function unwrapBuy(run: RunState, index: number): RunState {
+  const r = buyOffer(run, index);
+  if (!r.ok) throw new Error(r.error);
+  return r.state;
+}

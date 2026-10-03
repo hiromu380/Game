@@ -45,9 +45,12 @@ function churn(start: RunState, seed: number, steps: number): void {
   for (let i = 0; i < steps; i++) {
     const action = rng.nextInt(4);
     if (action === 0) {
-      const offer = state.shop.findIndex((o) => !o.sold && o.price <= state.budget);
+      const offer = state.shop.findIndex(
+        (o) => o.partId !== undefined && !o.sold && o.price <= state.budget,
+      );
       if (offer < 0) continue;
       const { price, partId } = state.shop[offer]!;
+      if (partId === undefined) continue;
       const r = buyOffer(state, offer);
       if (r.ok) {
         state = r.state;

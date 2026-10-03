@@ -1,5 +1,5 @@
 /**
- * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却・今日のイベントの選択）を
+ * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却・今日のイベントの選択・消耗品の使用）を
  * 1手ずつ記録したもの
  *
  * デイリーでは、クライアントはこの操作ログだけをサーバーへ送る。サーバーは同じラン進行関数で
@@ -7,9 +7,11 @@
  * （クライアントが送った盤面や予算そのものは信用しない）。
  * 試運転はランの状態を変えない（試運転回数だけ）ので、操作ログには含めない。
  */
+import type { ItemId } from '../balance';
 import { PART_IDS, type Dir4, type PartId } from '../types';
 import { buyOffer, placePart, rerollShop, returnPart, rotatePart, sellPart } from './build';
 import { chooseEvent, isEventPending } from './events';
+import { useFloorPermit } from './items';
 import type { RunActionResult, RunError, RunState } from './types';
 
 export type RunOp =
@@ -20,7 +22,9 @@ export type RunOp =
   | { op: 'return'; x: number; y: number }
   | { op: 'sell'; x: number; y: number }
   /** 今日のイベントを候補から選ぶ（2日目以降の朝。選ぶまでほかの操作はできない） */
-  | { op: 'chooseEvent'; index: number };
+  | { op: 'chooseEvent'; index: number }
+  /** 消耗品を使う（ランダム配置権: 床が湧く位置と種類は sim が決めるので、位置は送らない） */
+  | { op: 'useItem'; itemId: ItemId };
 
 /** 操作を1つ適用する */
 export function applyOp(state: RunState, op: RunOp): RunActionResult {
@@ -39,6 +43,8 @@ export function applyOp(state: RunState, op: RunOp): RunActionResult {
       return returnPart(state, op.x, op.y);
     case 'sell':
       return sellPart(state, op.x, op.y);
+    case 'useItem':
+      return useFloorPermit(state);
   }
 }
 
@@ -91,6 +97,8 @@ export function isRunOp(value: unknown): value is RunOp {
     case 'return':
     case 'sell':
       return isInt(v.x) && isInt(v.y);
+    case 'useItem':
+      return v.itemId === 'floorPermit';
     default:
       return false;
   }

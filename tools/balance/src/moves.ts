@@ -243,6 +243,8 @@ export function listMoves(state: RunState): Move[] {
   const seenOffers = new Set<PartId>();
   state.shop.forEach((offer, offerIndex) => {
     // 同じパーツの売れ残りが複数あっても、評価は1回で十分
+    // 消耗品（配置権）は置く手ではないので、ここでは扱わない（ボットの方針は bots/permit.ts）
+    if (offer.partId === undefined) return;
     if (offer.sold || offer.price > state.budget || seenOffers.has(offer.partId)) return;
     seenOffers.add(offer.partId);
     for (const placement of placementsFor(state, offer.partId)) {

@@ -16,7 +16,7 @@ import { drawBonusFloor, getCurrentFloor } from './floor';
 import { addInventory } from './inventory';
 import { expireItems } from './items';
 import { commitSeed, overtimeSeed, shopSeed, stageSeed, trialSeed } from './seeds';
-import { generateShop } from './shop';
+import { generateShop, permitForShift } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
 /** 現在のシフトの設定（ノルマ・予算・報酬・種類。今日のイベント込み） */
@@ -164,7 +164,11 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
   // ショップは今日のイベント（特売日など）を反映した価格で並べる
   next = {
     ...next,
-    shop: generateShop(shopSeed(state.seed, shiftIndex, 0), getCurrentEconomy(next)),
+    shop: generateShop(
+      shopSeed(state.seed, shiftIndex, 0),
+      getCurrentEconomy(next),
+      permitForShift(state.config, shiftIndex),
+    ),
   };
 
   // 日が変わったら、使っていない配置権と、配置権で湧いた床を消す

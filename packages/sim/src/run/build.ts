@@ -7,9 +7,10 @@ import { rotateCw } from '../core/direction';
 import type { Dir4, PartId } from '../types';
 import { isCellBlocked } from './floor';
 import { addInventory } from './inventory';
+import { addItem } from './items';
 import { shopSeed } from './seeds';
 import { getCurrentEconomy } from './shift';
-import { generateShop } from './shop';
+import { generateShop, permitForShift } from './shop';
 import type { RunActionResult, RunError, RunState } from './types';
 
 const fail = (error: RunError): RunActionResult => ({ ok: false, error });
@@ -23,12 +24,14 @@ export function buyOffer(state: RunState, offerIndex: number): RunActionResult {
   if (offer.sold) return fail('alreadySold');
   if (state.budget < offer.price) return fail('notEnoughBudget');
 
-  return ok({
+  const paid: RunState = {
     ...state,
     budget: state.budget - offer.price,
     shop: state.shop.map((o, i) => (i === offerIndex ? { ...o, sold: true } : o)),
-    inventory: addInventory(state.inventory, offer.partId, 1),
-  });
+  };
+  // 消耗品（ランダム配置権）は消耗品の手持ちへ（持てる枚数を超えるなら買えない）
+  if (offer.itemId !== undefined) return addItem(paid, offer.itemId);
+  return ok({ ...paid, inventory: addInventory(state.inventory, offer.partId, 1) });
 }
 
 /** 手持ちのパーツを盤面へ置く */
@@ -116,6 +119,7 @@ export function rerollShop(state: RunState): RunActionResult {
     shop: generateShop(
       shopSeed(state.seed, state.shiftIndex, rerollCount),
       getCurrentEconomy(state),
+      permitForShift(state.config, state.shiftIndex),
     ),
   });
 }

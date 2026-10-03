@@ -301,6 +301,16 @@ button:disabled {
   user-select: none;
 }
 
+/* ---- 消耗品のアイコン（ランダム配置権。パーツのアイコンと同じ大きさの枠に UI アイコンを置く） ---- */
+.item-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
 /* ---- 選択中のパーツ ---- */
 .selection__part {
   display: flex;

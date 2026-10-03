@@ -37,13 +37,13 @@ export const randomBot: Bot = {
       }
       const affordable = state.shop
         .map((o, i) => ({ o, i }))
-        .filter(({ o }) => !o.sold && o.price <= state.budget);
+        .filter(({ o }) => o.partId !== undefined && !o.sold && o.price <= state.budget);
       if (affordable.length === 0 || rng.nextInt(4) === 0) break;
       const { o, i } = affordable[rng.nextInt(affordable.length)]!;
       tryMove({
         kind: 'buyPlace',
         offerIndex: i,
-        partId: o.partId,
+        partId: o.partId!,
         placement: { type: 'cell', x, y, dir },
       });
     }

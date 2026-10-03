@@ -79,8 +79,11 @@ export interface RunConfig {
    * 床を導入する前に始めたラン（セーブ）には無いので、無ければ湧かない
    */
   bonusFloors?: Balance['bonusFloors'] & { fromShift: number };
-  /** ランダム配置権（balance/ の写し。導入前に始めたランには無いので、無ければショップに出ない） */
-  floorPermit?: Balance['floorPermit'];
+  /**
+   * ランダム配置権（balance/ の写し）。fromShift より前のシフトのショップには出ない（初回ガイドの1日目）。
+   * 導入前に始めたランには無いので、無ければショップに出ない
+   */
+  floorPermit?: Balance['floorPermit'] & { fromShift: number };
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
   /** ボス修正ルールの効果量（balance/ の boss の写し） */
@@ -219,6 +222,7 @@ export function buildRunConfig({
         : {
             ...balance.floorPermit,
             tileWeights: balance.floorPermit.tileWeights.map((w) => ({ ...w })),
+            fromShift: tutorial ? balance.shiftsPerDay : 0,
           },
     bossPlan: planBosses(balance, board, bossSeed, stages?.days ?? []),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },

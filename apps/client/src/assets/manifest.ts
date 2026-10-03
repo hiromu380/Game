@@ -148,6 +148,7 @@ export const UI_ICON_NAMES = [
   'daily',
   'back',
   'expand',
+  'permit',
 ] as const;
 export type UiIconName = (typeof UI_ICON_NAMES)[number];
 export const UI_ICONS = uiFiles as Record<UiIconName, string>;
