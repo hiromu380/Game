@@ -2042,11 +2042,12 @@ a.button.button--primary {
   color: var(--met);
 }
 
-/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ---- */
+/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ----
+   盤面を主役にするため、細い帯（64px）にする。左から: 時刻 → シフトの達成（✓）→ 今日の出来事 → ボルト → ロケット */
 .workshop {
   position: relative;
-  height: 150px;
-  margin: 8px 0 12px;
+  height: 64px;
+  margin: 6px 0 8px;
   overflow: hidden;
   pointer-events: none;
   border: 1px solid var(--panel-border);
@@ -2069,8 +2070,9 @@ a.button.button--primary {
 }
 .workshop__sky-label {
   position: absolute;
-  top: 12px;
+  top: 50%;
   left: 14px;
+  transform: translateY(-50%);
   padding: 3px 7px;
   border: 1px solid currentColor;
   color: rgba(255, 255, 255, 0.72);
@@ -2090,33 +2092,33 @@ a.button.button--primary {
 .workshop__factory {
   position: absolute;
   right: -20px;
-  bottom: -35px;
-  width: 340px;
+  bottom: -60px;
+  width: 260px;
   opacity: 0.38;
   filter: brightness(0.45);
 }
 .workshop__gantry {
   position: absolute;
-  right: 18%;
-  bottom: 12px;
-  width: 116px;
-  height: 132px;
+  right: 12%;
+  bottom: 4px;
+  width: 64px;
+  height: 56px;
   border: 5px solid rgba(20, 23, 29, 0.82);
   border-top: 0;
 }
 .workshop__gantry-top {
   position: absolute;
   top: 0;
-  left: -15px;
-  width: 136px;
-  border-top: 8px solid rgba(20, 23, 29, 0.82);
+  left: -10px;
+  width: 84px;
+  border-top: 5px solid rgba(20, 23, 29, 0.82);
 }
 .workshop__rocket {
   position: absolute;
-  left: 22px;
-  bottom: 3px;
-  width: 64px;
-  height: 70px;
+  left: 13px;
+  bottom: 2px;
+  width: 38px;
+  height: 44px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.3));
 }
@@ -2124,7 +2126,7 @@ a.button.button--primary {
   position: absolute;
   top: 0;
   width: 2px;
-  height: 65px;
+  height: 22px;
   background: var(--hazard-yellow);
 }
 .workshop__cable--a {
@@ -2132,12 +2134,13 @@ a.button.button--primary {
 }
 .workshop__cable--b {
   right: 12px;
-  height: 105px;
+  height: 34px;
 }
 .workshop__plaques {
   position: absolute;
-  top: 12px;
+  top: 50%;
   right: 14px;
+  transform: translateY(-50%);
   display: flex;
   gap: 4px;
 }
@@ -2154,8 +2157,9 @@ a.button.button--primary {
 }
 .workshop__event-prop {
   position: absolute;
-  left: 18%;
-  bottom: 12px;
+  left: 34%;
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
   flex-direction: column;
   min-width: 108px;
@@ -2210,10 +2214,11 @@ a.button.button--primary {
   }
 }
 .workshop__status {
+  /* 工場名は目標の計器の管理プレートにもあるので、細い帯では出さない */
+  display: none;
   position: absolute;
   left: 18px;
   bottom: 15px;
-  display: flex;
   flex-direction: column;
   padding: 6px 9px;
   border-left: 4px solid var(--hazard-yellow);
@@ -2225,22 +2230,31 @@ a.button.button--primary {
 }
 .workshop__bolt {
   position: absolute;
-  left: 48%;
-  bottom: 5px;
-  width: 58px;
+  left: 56%;
+  bottom: 3px;
+  width: 40px;
   transform: rotate(-4deg);
   transition: transform 0.2s;
 }
 .workshop__bolt.is-watching {
-  transform: rotate(4deg) translateY(-8px);
+  transform: rotate(4deg) translateY(-4px);
+}
+/* シフトを達成した印（✓）: 時刻の右に並べる（以前は時刻の表示に重なっていた） */
+.workshop__marks {
+  position: absolute;
+  top: 50%;
+  left: 130px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
 }
 .workshop__approval {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  margin: 7px 3px;
+  width: 20px;
+  height: 20px;
+  margin: 0 2px;
   border: 2px solid var(--met);
   border-radius: 50%;
   color: var(--met);
@@ -2295,12 +2309,15 @@ a.button.button--primary {
 
 @media (max-width: 600px) {
   .workshop {
-    height: 104px;
+    height: 48px;
   }
   .workshop__gantry {
     right: 8%;
     transform: scale(0.78);
     transform-origin: bottom;
+  }
+  .workshop__marks {
+    left: 112px;
   }
   .workshop__bolt,
   .workshop__status,
@@ -2381,4 +2398,62 @@ a.button.button--primary {
   width: min(720px, 100%);
   max-height: 90dvh;
   overflow-y: auto;
+}
+
+/* ---- ゲームのメニュー（ui/GameMenu.tsx）: 操作方法・諦める ---- */
+.game-menu {
+  position: relative;
+}
+.game-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 11rem;
+  padding: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.game-menu__list button {
+  justify-content: flex-start;
+  width: 100%;
+}
+.game-menu__danger {
+  color: var(--missed);
+}
+
+/* 横長の画面: 目標の計器を1段に収める（ロケットの進み具合は上の細い帯の ✓ とロケットの絵で見せる） */
+.app--fit .layout__goal .hud__rocket {
+  display: none;
+}
+.app--fit .layout__goal .hud__trial {
+  min-width: 8rem;
+  flex: 1;
+}
+
+/* 狭い画面: ヘッダーのボタンは絵だけにし、目標の計器は「シフト・予算・ノルマ」の1段と「試運転」の1段にする */
+@media (max-width: 600px) {
+  .app-header__actions .button--ghost {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+  .app-header__name {
+    display: none;
+  }
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 6px 12px;
+  }
+  .hud__trial {
+    grid-column: 1 / -1;
+  }
+  .hud__rocket {
+    display: none;
+  }
 }

@@ -45,6 +45,7 @@ import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
 import { trialStatus } from './state/trialStatus';
+import { isDebugAvailable } from './config/debug';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
 import { useInputMode } from './input/useInputMode';
@@ -75,7 +76,7 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
-import { GiveUpButton } from './ui/GiveUpButton';
+import { GameMenu } from './ui/GameMenu';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
@@ -104,9 +105,8 @@ const floorAmounts = (params: FloorParams) => ({
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
-/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す */
-const DEBUG_AVAILABLE =
-  import.meta.env.DEV || new URLSearchParams(window.location.search).has('debug');
+/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す（体験版・製品版のビルドでは出ない） */
+const DEBUG_AVAILABLE = isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
   const { t, formatScore, formatCompact } = useI18n();
@@ -457,9 +457,6 @@ export function App({ start, onTitle }: Props) {
             </button>
           </>
         )}
-        {mode.kind !== 'daily' && run.phase === 'building' && (
-          <GiveUpButton disabled={playing} onGiveUp={() => dispatch({ type: 'giveUp' })} />
-        )}
         <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
           <UiIcon name="daily" />
           {t('online.dailyButton')}
@@ -474,6 +471,12 @@ export function App({ start, onTitle }: Props) {
           <UiIcon name="settings" />
           {t('settings.open')}
         </button>
+        {/* 操作方法・諦める（押し間違えないよう、よく使うボタンから離してメニューの中に入れる） */}
+        <GameMenu
+          disabled={playing}
+          canGiveUp={mode.kind !== 'daily' && run.phase === 'building'}
+          onGiveUp={() => dispatch({ type: 'giveUp' })}
+        />
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {dailyMenu && (
@@ -712,7 +715,8 @@ export function App({ start, onTitle }: Props) {
           {(!tabbed || tab === 'inventory') && inventoryPanel}
           {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
-          {!tabbed && selectionPanel}
+          {/* 何も選んでいないときは出さない（空の欄で場所をとらない） */}
+          {!tabbed && selection && selectionPanel}
           {/* 売却エリア（盤面のパーツをドラッグして売る）。右の列の下端に固定し、スクロールしても見える */}
           <SellZone dragging={dragging !== null} refund={sellRefund} />
         </aside>
