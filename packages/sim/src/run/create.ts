@@ -67,6 +67,8 @@ export function createRunWithConfig(seed: number, config: RunConfig): RunState {
     history: [],
     overtime: false,
     metaRecordedShifts: 0,
+    items: [],
+    itemFloors: null,
   };
   return enterShift(initial, 0, 0);
 }

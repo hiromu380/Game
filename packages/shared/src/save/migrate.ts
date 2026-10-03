@@ -22,12 +22,13 @@ import type { RunStateV1, SaveDataV1 } from './v1';
 import type { SaveDataV2 } from './v2';
 import type { SaveDataV3 } from './v3';
 import type { SaveDataV4 } from './v4';
+import type { SaveDataV5 } from './v5';
 
 /** 現在のセーブデータのバージョン */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 /** 最新バージョンのセーブデータ */
-export type SaveData = SaveDataV4;
+export type SaveData = SaveDataV5;
 
 export function createSave(
   run: RunState | null,
@@ -47,11 +48,13 @@ export function migrateSave(raw: unknown): SaveData | null {
     case 1:
       return migrateSave(convertV1toV2(raw as SaveDataV1));
     case 2:
-      return convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2)));
+      return convertV4toV5(convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2))));
     case 3:
-      return convertV3toV4(normalizeV3(raw as SaveDataV3));
+      return convertV4toV5(convertV3toV4(normalizeV3(raw as SaveDataV3)));
     case 4:
-      return normalizeV4(raw as SaveDataV4);
+      return convertV4toV5(normalizeV3(raw as SaveDataV4));
+    case 5:
+      return normalizeV5(raw as SaveDataV5);
     default:
       return null;
   }
@@ -62,7 +65,7 @@ export function migrateSave(raw: unknown): SaveData | null {
  * - meta.records.bestShiftScore（2b: メタ進行）
  * - run.overtime / run.metaRecordedShifts / run.config.baseShiftCount / run.config.overtime（2b: 延長戦）
  */
-function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4>(save: T): T {
+function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4 | SaveDataV5>(save: T): T {
   const initial = createInitialMeta();
   const meta = save.meta ?? initial;
   const run = save.run
@@ -91,7 +94,7 @@ function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4>(save: T): T
 }
 
 /** v3 の読み込み: ラン・メタ進行は v2 と同じ補い方。実績は知らない ID・壊れた値を落とす */
-function normalizeV3<T extends SaveDataV3 | SaveDataV4>(save: T): T {
+function normalizeV3<T extends SaveDataV3 | SaveDataV4 | SaveDataV5>(save: T): T {
   const base = normalizeV2(save);
   const initial = createInitialAchievements();
   const raw: Partial<AchievementProgress> = save.achievements ?? {};
@@ -108,9 +111,21 @@ function normalizeV3<T extends SaveDataV3 | SaveDataV4>(save: T): T {
   };
 }
 
-/** v4 の読み込み: v3 と同じ補い方 */
-function normalizeV4(save: SaveDataV4): SaveDataV4 {
+/** v5 の読み込み: v3 と同じ補い方 */
+function normalizeV5(save: SaveDataV5): SaveDataV5 {
   return normalizeV3(save);
+}
+
+/**
+ * v4 → v5（ランダム配置権）: 配置権を導入する前に始めたランは、配置権の出ないランとしてそのまま続ける
+ * - RunConfig.floorPermit は足さない（無ければショップに出ない）
+ * - RunState.items は空、itemFloors は null
+ */
+export function convertV4toV5(save: SaveDataV4): SaveDataV5 {
+  const run = save.run
+    ? { ...save.run, items: save.run.items ?? [], itemFloors: save.run.itemFloors ?? null }
+    : null;
+  return { ...save, version: 5, run };
 }
 
 /**
