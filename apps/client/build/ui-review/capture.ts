@@ -1,7 +1,8 @@
 /**
  * 画面の見やすさの確認用スクリーンショット（UI 改善の前後比較: docs/ui-review/）
  *
- *   pnpm --filter @chain-factory/client ui-review <before|after> [URL]
+ *   pnpm --filter @chain-factory/client ui-review <before|after|wip> [URL]
+ *   （wip は作業中の確認用で docs/ui-review/wip/ に出す。git 管理外）
  *
  * - URL は開発サーバー（pnpm dev。既定 http://localhost:5173/）。撮影モードではないふつうのビルドを開く
  * - 状態（ラン）は sim で作ってセーブとして書き込み、画面を開いてから操作で「選択中」「試運転後」などにする
@@ -22,7 +23,9 @@ import {
   type RunState,
 } from '@chain-factory/sim';
 
-const phase = process.argv[2] === 'after' ? 'after' : 'before';
+const phase = process.argv[2] === 'after' ? 'after' : process.argv[2] === 'wip' ? 'wip' : 'before';
+/** 撮る画像を絞る（ファイル名の正規表現。例: UI_REVIEW_ONLY='1280x800-ja-trial'） */
+const only = process.env.UI_REVIEW_ONLY ? new RegExp(process.env.UI_REVIEW_ONLY) : null;
 const url = process.argv[3] ?? 'http://localhost:5173/';
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, '../../../../docs/ui-review', phase);
@@ -221,6 +224,7 @@ for (const viewport of VIEWPORTS) {
       // 英語と 200% 拡大は、主な状態だけ撮る（枚数を抑える）
       const main = scene.name === 'idle' || scene.name === 'day3-floors';
       if ((lang === 'en' || viewport.scale) && !main) continue;
+      if (only && !only.test(`${viewport.name}-${lang}-${scene.name}`)) continue;
       const page = await browser.newPage({
         viewport: { width: viewport.width, height: viewport.height },
         deviceScaleFactor: viewport.scale ?? 1,

@@ -44,6 +44,7 @@ import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
+import { trialStatus } from './state/trialStatus';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
 import { useInputMode } from './input/useInputMode';
@@ -534,9 +535,9 @@ export function App({ start, onTitle }: Props) {
 
   // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
-  const runInfo = (
+  const hud = <Hud run={run} liveScore={liveScore} trial={trialStatus(state.trials, run)} />;
+  const notices = (
     <>
-      <Hud run={run} liveScore={liveScore} />
       {tutorialOn ? (
         <TutorialGuide
           tutorial={tutorial}
@@ -553,6 +554,12 @@ export function App({ start, onTitle }: Props) {
       )}
       <DayEventNotice run={run} />
       <BossNotice run={run} />
+    </>
+  );
+  const runInfo = (
+    <>
+      {hud}
+      {notices}
     </>
   );
 
@@ -657,7 +664,8 @@ export function App({ start, onTitle }: Props) {
           {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
         </div>
         <aside className="layout__side">
-          {fit && <div className="layout__info">{runInfo}</div>}
+          {/* 目標の計器は右の列の上に固定し（スクロールしても見える）、本番ボタンをそのすぐ下に置く */}
+          {fit && <div className="layout__goal">{hud}</div>}
           <ControlsPanel
             playing={playing}
             compact={compact}
@@ -674,6 +682,7 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
+          {fit && <div className="layout__info">{notices}</div>}
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (

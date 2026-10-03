@@ -204,6 +204,42 @@ button:disabled {
 .hud__quota.is-met .hud__quota-bar > span {
   background: var(--met);
 }
+/* 試運転の結果（再生中は出荷量の途中経過）とノルマに対するゲージ。配置を変えた後の古い結果は薄く、点線のゲージ */
+.hud__trial {
+  min-width: 9.5rem;
+}
+.hud__trial .hud__quota-bar {
+  height: 6px;
+  margin-top: 4px;
+}
+.hud__trial.is-met .hud__quota-bar > span {
+  background: var(--met);
+}
+.hud__trial-percent {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.hud__trial-note {
+  margin-top: 3px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.hud__trial.is-stale .hud__value,
+.hud__trial.is-stale .hud__quota-bar {
+  opacity: 0.45;
+}
+.hud__trial.is-stale .hud__quota-bar {
+  outline: 1px dashed var(--muted);
+}
+.hud__trial.is-stale .hud__trial-note {
+  color: var(--accent);
+  font-weight: 700;
+}
+.hud__trial:not(.is-met) .hud__value--score {
+  color: var(--text);
+}
 /* ロケットの進み具合（ui/RocketProgress.tsx） */
 .hud__rocket {
   flex-direction: row;
@@ -1230,7 +1266,19 @@ a.button.button--primary {
 .app--fit .layout__side > * {
   grid-column: 1 / -1;
 }
-/* 右の列の先頭: シフトの情報・目的の案内・夜シフトの予告（盤面の上から移したもの） */
+/* 右の列の先頭: 目標の計器（右の列をスクロールしても上に残す）。その下に本番ボタン、目的の案内・夜シフトの予告 */
+.app--fit .layout__goal {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg);
+  padding-bottom: 2px;
+}
+.app--fit .layout__goal .hud {
+  margin: 0;
+  padding: 6px 10px;
+  gap: 4px 14px;
+}
 .app--fit .layout__info .hud {
   margin: 0 0 6px;
   padding: 6px 10px;
