@@ -2457,3 +2457,40 @@ a.button.button--primary {
     display: none;
   }
 }
+
+/* 床の凡例（盤面の下。盤面にある床の種類だけ） */
+.floor-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+.floor-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.floor-legend__swatch {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 2px;
+}
+.floor-legend__swatch--limited {
+  border: 2px dashed var(--floor-bonus);
+}
+.floor-legend__swatch--item {
+  border: 2px dashed var(--floor-item);
+}
+.floor-legend__swatch--upcoming {
+  border: 2px dashed var(--floor-blocked);
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--floor-blocked) 50%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}

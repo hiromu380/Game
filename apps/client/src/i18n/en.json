@@ -577,6 +577,14 @@
   "floor.blocked.desc": "No parts can be placed. Signals entering vanish",
   "floor.period.bonus": " (bonus floor: this shift only)",
   "floor.period.event": " (today's event: today only)",
+  "legend.title": "Floor legend",
+  "legend.tile.double": "×{double} floor: part value ×{double}",
+  "legend.tile.add": "Add floor: value +{add}",
+  "legend.tile.triple": "×{triple} floor: value ×{triple}",
+  "legend.tile.blocked": "Unusable",
+  "legend.limited": "Cyan dashes: limited time",
+  "legend.item": "Gold dashes: permit (today only)",
+  "legend.upcoming": "Red hatching: closed tonight",
   "settings.reduceFlashes": "Reduce flashing",
   "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows"
 }

@@ -203,7 +203,7 @@ export function createFloor(width: number, height: number, textures: BoardTextur
 
 /**
  * 使用不可マス（補修工事中）の表示
- * @param upcoming true なら「夜シフトで使えなくなる」予告（点線の枠だけ）
+ * @param upcoming true なら「夜シフトで使えなくなる」予告（赤の斜線と点線の枠）
  */
 export function createBlockedCell(
   x: number,
@@ -221,8 +221,21 @@ export function createBlockedCell(
     sprite.alpha = 0.92;
     return sprite;
   }
-  // 夜シフトの予告: 黄色の点線の枠
-  return dashedFrame(left, top, 5).stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+  // 夜シフトの予告: 赤の斜線と赤い点線の枠（金色の点線＝ランダム配置権の床と見分けられるようにする）
+  const view = new Container();
+  const hatch = new Graphics();
+  const inner = CELL_SIZE - 12;
+  for (let d = 12; d < inner * 2; d += 12) {
+    const x0 = Math.max(0, d - inner);
+    const y0 = Math.min(d, inner);
+    const x1 = Math.min(d, inner);
+    const y1 = Math.max(0, d - inner);
+    hatch.moveTo(left + 6 + x0, top + 6 + y0).lineTo(left + 6 + x1, top + 6 + y1);
+  }
+  hatch.stroke({ width: 3, color: BOARD_THEME.blocked, alpha: 0.45 });
+  view.addChild(hatch);
+  view.addChild(dashedFrame(left, top, 5).stroke({ width: 3, color: BOARD_THEME.blocked }));
+  return view;
 }
 
 /**

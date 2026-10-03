@@ -17,6 +17,8 @@
   --white: #ffffff;
   --hazard-yellow: #ffc107;
   --floor-item: #ffca28;
+  --floor-bonus: #4dd0e1;
+  --floor-blocked: #c62828;
   --vanish-outOfBoard: #90a4ae;
   --vanish-emptyCell: #ffb74d;
   --vanish-exhausted: #ef5350;

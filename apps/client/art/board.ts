@@ -2,7 +2,9 @@
  * 盤面の素材: 床タイル3種・使用不可マス・ハザード柄の枠（角・辺）・ページの背景
  *
  * - 床: 盤面ではマスごとに3種から決まった並びで選ぶ（毎回同じ見た目。board/views.ts）。ポンコツな工場らしく汚れ・ひび
- * - 床タイル（×2・加算・×3）: 地の床に、色つきの鉄板を重ねる。種類は色だけでなく溝の模様でも見分けられるようにする
+ * - 床タイル（×2・加算・×3）: 地の床に、色つきの板を「はめ込んだ」平たい表現にする（左上に影・右下に光で、
+ *   へこんで見える。パーツ＝床の上に載った立体と区別するため、鋲や浮き上がる影は付けない）。
+ *   種類は色だけでなく溝の模様でも見分けられるようにする
  *   （×2 = 斜めの溝2本、加算 = 十字の溝、×3 = 斜めの溝3本）。数字（×2・+3）は盤面側で重ねる（効果量が変わっても追従する）
  * - 枠: 角（16×16）と、横に並べてつなげられる辺（16×16）に分け、どの盤面サイズでも並べられるようにする
  */
@@ -19,9 +21,14 @@ const floorBase = () => [
   rect(0, 0, 64, 64, { fill: 'none', stroke: B.floorLine, 'stroke-width': 2 }),
 ];
 
-/** ボルトの頭（床に打ち込まれた鋲） */
+/** ボルトの頭（床に打ち込まれた鋲。床タイル・置ける場所の表示と競合しないよう薄く） */
 const rivet = (x: number, y: number) =>
-  circle(x, y, 2.5, { fill: B.floorDetail, stroke: shade(B.floorLine), 'stroke-width': 1 });
+  circle(x, y, 2.5, {
+    fill: B.floorDetail,
+    stroke: shade(B.floorLine),
+    'stroke-width': 1,
+    opacity: 0.45,
+  });
 
 /** ハザード柄の斜めじま（横方向に 16px 周期。左右につなげても柄が切れない） */
 const stripes = (height: number) =>
@@ -31,21 +38,18 @@ const stripes = (height: number) =>
     }),
   );
 
-/** 床タイルの鉄板（地の床の上に、四隅を鋲で留めた色つきの板。フラット＋1段の影） */
+/** 床タイルの板（地の床にはめ込んだ、平たい色の板。左上に影・右下に光の線で、へこんで見せる） */
 const floorPlate = (color: string, grooves: string[]) => [
   ...floorBase(),
-  rect(6, 6, 52, 52, { fill: shade(color), opacity: 0.7 }, 5),
-  rect(6, 6, 50, 50, { fill: color, opacity: 0.65 }, 5),
+  rect(4, 4, 56, 56, { fill: color, opacity: 0.55 }, 3),
+  path('M5 59 V5 H59', line(shade(shade(color)), 3)),
+  path('M6 59 H59 V6', line(INK.white, 1.5)),
   ...grooves,
-  rivet(11, 11),
-  rivet(51, 11),
-  rivet(11, 51),
-  rivet(51, 51),
 ];
 
 /** 斜めの溝（左下 → 右上。c は溝の位置。色は鉄板の影の色） */
 const grooveDiagonal = (color: string, c: number) =>
-  path(`M${c - 14} ${c + 14} L${c + 14} ${c - 14}`, line(shade(color), 5));
+  path(`M${c - 14} ${c + 14} L${c + 14} ${c - 14}`, line(shade(color), 3));
 
 export function boardFiles(): Record<string, string> {
   return {
@@ -59,9 +63,9 @@ export function boardFiles(): Record<string, string> {
       '床タイル: 油じみとひび（ポンコツな工場）',
       [
         ...floorBase(),
-        el('ellipse', { cx: 42, cy: 44, rx: 11, ry: 6, fill: B.floorDetail, opacity: 0.8 }),
-        el('ellipse', { cx: 34, cy: 49, rx: 4, ry: 2.5, fill: B.floorDetail, opacity: 0.8 }),
-        path('M8 14 l7 5 l-2 6 l6 4', line(B.floorLine, 1.5)),
+        el('ellipse', { cx: 42, cy: 44, rx: 11, ry: 6, fill: B.floorDetail, opacity: 0.4 }),
+        el('ellipse', { cx: 34, cy: 49, rx: 4, ry: 2.5, fill: B.floorDetail, opacity: 0.4 }),
+        path('M8 14 l7 5 l-2 6 l6 4', { ...line(B.floorLine, 1.5), opacity: 0.5 }),
       ],
       TILE,
     ),
@@ -75,7 +79,7 @@ export function boardFiles(): Record<string, string> {
     ),
     'src/assets/board/floor-add.svg': svg(
       '床タイル: 加算床（緑の鉄板・十字の溝）',
-      floorPlate(B.floorAdd, [path('M32 14 V50 M14 32 H50', line(shade(B.floorAdd), 5))]),
+      floorPlate(B.floorAdd, [path('M32 14 V50 M14 32 H50', line(shade(B.floorAdd), 3))]),
       TILE,
     ),
     'src/assets/board/floor-triple.svg': svg(

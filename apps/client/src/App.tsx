@@ -76,6 +76,7 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
+import { FloorLegend } from './ui/FloorLegend';
 import { GameMenu } from './ui/GameMenu';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
@@ -662,6 +663,13 @@ export function App({ start, onTitle }: Props) {
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />
+          {!playing && (
+            <FloorLegend
+              floor={boardView.floor}
+              upcomingBlocked={boardView.upcomingBlocked}
+              params={boardView.rules.floorParams}
+            />
+          )}
           {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
           {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
