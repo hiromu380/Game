@@ -5,7 +5,20 @@
  * 絵コンテ: docs/story/storyboard.html#interlude1・#interlude2
  */
 import type { ActorValue, Scene } from '../timeline';
-import { actor, at, BOLT_H, CHIEF_H, GROUND, H, key, prop, rocketBox, W, walk } from './build';
+import {
+  actor,
+  appear,
+  at,
+  BOLT_H,
+  CHIEF_H,
+  GROUND,
+  H,
+  key,
+  prop,
+  rocketBox,
+  W,
+  walk,
+} from './build';
 
 const bolt = (pose: string, x: number, extra: Partial<ActorValue> = {}): ActorValue => ({
   pose,
@@ -26,10 +39,19 @@ const night = () => [
 /** ロケット: from 段階から to 段階へ、部品を1つずつ取り付ける（times 秒に1段階ずつ） */
 const rocket = (from: number, times: number[]) =>
   prop('rocket', `rocket-${from}`, [
-    key(0, rocketBox(820, GROUND, 330)),
+    key(0, rocketBox(700, GROUND, 330)),
     ...times.map((t, i) =>
-      key(t, { ...rocketBox(820, GROUND, 330), asset: `rocket-${from + i + 1}` }),
+      key(t, { ...rocketBox(700, GROUND, 330), asset: `rocket-${from + i + 1}` }),
     ),
+  ]);
+
+/** 工場長のフックから降ろした部品が、ロケットへ運ばれて取り付けられる（受け取りを目で追えるように） */
+const carry = (t0: number, t1: number) =>
+  prop('carry', 'story:scrap', [
+    key(0, at(1110, 460, 110, 40, 0)),
+    ...appear(t0, at(1110, 460, 110, 40), 0.05),
+    key(t1, at(650, 420, 110, 40, 1), 'inOut'),
+    key(t1 + 0.3, at(650, 420, 110, 40, 0)),
   ]);
 
 const fadeInOut = (duration: number) => [
@@ -47,21 +69,22 @@ export const interlude1: Scene = {
   tracks: [
     ...night(),
     rocket(0, [4, 4.6, 5.2]),
+    carry(3.2, 3.9),
     actor('chief', 'chief', [
-      key(0, chief('offer', 1120)),
-      key(2.6, chief('offer', 1120)),
-      key(3.2, chief('neutral', 1120)),
+      key(0, chief('offer', 990)),
+      key(2.6, chief('offer', 990)),
+      key(3.2, chief('neutral', 990)),
     ]),
     actor('bolt', 'bolt', [
-      key(0, bolt('stand', 420)),
-      ...walk(0.6, 2.2, 420, 640, (p, x, b) => bolt(p, x, { y: GROUND + b })),
-      key(2.4, bolt('guts', 640, { face: 'happy' })),
-      key(3.6, bolt('jump', 640, { face: 'happy' })),
-      key(4.2, bolt('stand', 640)),
-      key(4.6, bolt('jump', 640, { face: 'happy' })),
-      key(5.2, bolt('stand', 640)),
-      key(5.6, bolt('jump', 640, { face: 'happy' })),
-      key(6.2, bolt('wave', 640)),
+      key(0, bolt('stand', 300)),
+      ...walk(0.6, 2.2, 300, 520, (p, x, b) => bolt(p, x, { y: GROUND + b })),
+      key(2.4, bolt('guts', 520, { face: 'happy' })),
+      key(3.6, bolt('jump', 520, { face: 'happy' })),
+      key(4.2, bolt('stand', 520)),
+      key(4.6, bolt('jump', 520, { face: 'happy' })),
+      key(5.2, bolt('stand', 520)),
+      key(5.6, bolt('jump', 520, { face: 'happy' })),
+      key(6.2, bolt('wave', 520)),
     ]),
   ],
   tint: fadeInOut(8),
@@ -83,17 +106,18 @@ export const interlude2: Scene = {
   tracks: [
     ...night(),
     rocket(3, [4.4, 5, 5.6]),
-    actor('chief', 'chief', [key(0, chief('offer', 1120)), key(1.2, chief('neutral', 1120))]),
+    carry(1.2, 2.2),
+    actor('chief', 'chief', [key(0, chief('offer', 990)), key(1.2, chief('neutral', 990))]),
     actor('bolt', 'bolt', [
-      key(0, bolt('stand', 760)),
-      key(0.8, bolt('stagger', 760)),
-      key(1.4, bolt('stagger', 700)),
-      key(2, bolt('stagger', 660)),
-      ...walk(2.6, 3.8, 660, 640, (p, x, b) => bolt(p, x, { y: GROUND + b })),
-      key(4.2, bolt('stand', 640, { face: 'tired' })),
-      key(5.6, bolt('stand', 640, { face: 'tired' })),
-      key(6.2, bolt('jump', 640, { face: 'tired' })),
-      key(6.8, bolt('wave', 640, { face: 'tired' })),
+      key(0, bolt('stand', 640)),
+      key(0.8, bolt('stagger', 640)),
+      key(1.4, bolt('stagger', 590)),
+      key(2, bolt('stagger', 550)),
+      ...walk(2.6, 3.8, 550, 520, (p, x, b) => bolt(p, x, { y: GROUND + b })),
+      key(4.2, bolt('stand', 520, { face: 'tired' })),
+      key(5.6, bolt('stand', 520, { face: 'tired' })),
+      key(6.2, bolt('jump', 520, { face: 'tired' })),
+      key(6.8, bolt('wave', 520, { face: 'tired' })),
     ]),
   ],
   tint: fadeInOut(8),
