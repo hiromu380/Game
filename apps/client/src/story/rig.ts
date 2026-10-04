@@ -6,6 +6,7 @@
  */
 import boltRig from '../assets/characters/bolt/rig.json';
 import chiefRig from '../assets/characters/chief/rig.json';
+import nutRig from '../assets/characters/nut/rig.json';
 import type { CharacterId } from './timeline';
 
 export interface Pose {
@@ -33,10 +34,11 @@ interface RigData {
 export const RIGS: Record<CharacterId, RigData> = {
   bolt: boltRig as unknown as RigData,
   chief: chiefRig as unknown as RigData,
+  nut: nutRig as unknown as RigData,
 };
 
 /** 表情を差し替える部品（ボルトは頭、工場長は運転席） */
-const FACE_PART: Record<CharacterId, string> = { bolt: 'head', chief: 'cab' };
+const FACE_PART: Record<CharacterId, string> = { bolt: 'head', chief: 'cab', nut: 'head' };
 
 /** ポーズ名（と表情）から、ポーズを求める。知らない名前は空のポーズ（立ち） */
 export function resolvePose(character: CharacterId, name: string, face?: string): Pose {
@@ -130,6 +132,6 @@ export function placeParts(character: CharacterId, pose: Pose): PartPlacement[] 
 }
 
 /** 立った高さ（rig の単位）: 高さの指定（px）を拡大率にするため */
-export const RIG_HEIGHT: Record<CharacterId, number> = { bolt: 150, chief: 190 };
+export const RIG_HEIGHT: Record<CharacterId, number> = { bolt: 150, chief: 190, nut: 165 };
 /** 足もと（地面）の y（rig の単位。根元からの距離） */
-export const RIG_GROUND: Record<CharacterId, number> = { bolt: 28, chief: 0 };
+export const RIG_GROUND: Record<CharacterId, number> = { bolt: 28, chief: 0, nut: 35 };

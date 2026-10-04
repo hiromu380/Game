@@ -17,7 +17,7 @@ export interface Key<T> {
   ease?: Ease;
 }
 
-export type CharacterId = 'bolt' | 'chief';
+export type CharacterId = 'bolt' | 'chief' | 'nut';
 
 /** キャラクターの状態（ポーズは rig.json のポーズ名。face で表情だけ差し替える） */
 export interface ActorValue {

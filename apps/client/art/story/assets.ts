@@ -13,6 +13,7 @@ import {
   SIGNAL_TIERS,
   TITLE_COLORS as T,
 } from '../../src/assets/palette';
+import { composeNut, NUT_POSES } from '../characters/nut';
 import { duskSky, factoryRow, filters, stars } from '../keyvisual/layers';
 import { circle, el, group, line, path, polygon, rect, sizedSvg } from '../svg';
 
@@ -175,15 +176,13 @@ const lightLine = (color: string) => [
   path('M10 20 H590', line('#fff3c4', 2.5)),
 ];
 
-/** 柱に貼った古い写真（水色のアンテナのロボと、別の手作りの水色のロケット） */
+/** 柱に貼った古い写真（ナット＝水色のアンテナのロボ と、別の手作りの水色のロケット。art/characters/nut.ts） */
 const photo = () => [
   rect(6, 6, 228, 186, fill(M.paper, 4), 4),
   rect(20, 20, 200, 136, { fill: '#2a3150' }),
   ...stars(200, 100, 10).map((s) => group({ transform: 'translate(20 20)' }, s)),
-  circle(80, 80, 20, fill(F.retrigger.main, 3)),
-  rect(64, 100, 32, 40, fill(F.retrigger.main, 3), 6),
-  path('M80 60 V40', line(O, 4)),
-  circle(80, 38, 6, { fill: F.retrigger.light, stroke: O, 'stroke-width': 2 }),
+  // ナット（設定画の「手を振る」ポーズ。写真の中なので小さく、影なし）
+  group({ transform: 'translate(82 132) scale(0.6)' }, ...composeNut(NUT_POSES.wave!.pose, false)),
   path('M160 40 Q184 64 184 100 V140 H136 V100 Q136 64 160 40 Z', fill(F.retrigger.light, 3)),
   path('M136 118 L118 146 H136 Z M184 118 L202 146 H184 Z', fill(F.retrigger.main, 3)),
   circle(160, 92, 11, fill(R.window, 2.5)),

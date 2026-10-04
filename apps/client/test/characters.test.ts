@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import boltRig from '../src/assets/characters/bolt/rig.json';
 import chiefRig from '../src/assets/characters/chief/rig.json';
+import nutRig from '../src/assets/characters/nut/rig.json';
 import { characterAssetPaths, type CharacterId } from '../src/assets/manifest';
 
 type Pose = {
@@ -63,6 +64,25 @@ const CASES: { id: CharacterId; rig: Rig; required: string[]; poses: string[] }[
     required: ['base', 'mast', 'cab', 'hat', 'jib', 'hook'],
     // 指さす・首を振る・うなずく・差し出す・腕を組む（相当）・帽子を上げる
     poses: ['point', 'shake', 'nod', 'offer', 'fold', 'tip'],
+  },
+  {
+    id: 'nut',
+    rig: nutRig as unknown as Rig,
+    required: [
+      'torso',
+      'head',
+      'scarf',
+      ...['L', 'R'].flatMap((s) => [
+        `upperArm${s}`,
+        `foreArm${s}`,
+        `hand${s}`,
+        `thigh${s}`,
+        `shin${s}`,
+        `foot${s}`,
+      ]),
+    ],
+    // 伏線の身振り（手を振って光を返す・空を指さす）と、次回作で迎える身振り
+    poses: ['stand', 'wave', 'point', 'lookUp', 'welcome', 'walk', 'walkB'],
   },
 ];
 

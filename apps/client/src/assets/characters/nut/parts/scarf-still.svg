@@ -1,0 +1,6 @@
+<svg width="80" height="44" xmlns="http://www.w3.org/2000/svg" viewBox="-22 -10 80 44">
+  <!-- ナットの部品: scarf / still（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-17" y="-6" width="34" height="9" rx="4" fill="#ffb74d" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M8 1 q4 12 2 24 l8 0 q2 -12 -2 -24 Z" fill="#ffb74d" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 14 h6 M10 20 h7" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

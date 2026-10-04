@@ -204,8 +204,8 @@ export const BOLT_BODY_ASSETS = {
   wave: boltWaveSrc,
 } as const;
 
-/** 全身で描くキャラクター（ボルト・工場長） */
-export type CharacterId = 'bolt' | 'chief';
+/** 全身で描くキャラクター（ボルト・工場長・ナット） */
+export type CharacterId = 'bolt' | 'chief' | 'nut';
 
 /** キャラクターの素材の URL を読み込む（path は rig.json の files の値・'poses/jump.svg' など） */
 export function loadCharacterAsset(character: CharacterId, path: string): Promise<string> {

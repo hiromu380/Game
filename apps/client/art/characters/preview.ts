@@ -7,9 +7,19 @@
 import type { VIEWS } from './bolt';
 import { EXPRESSIONS, POSES } from './bolt';
 import { CHIEF_MOODS, CHIEF_POSES } from './chief';
+import { NUT_EXPRESSIONS, NUT_POSES, NUT_VIEWS } from './nut';
 
 const ASSETS = '../../apps/client/src/assets/characters';
 const ROCKET = '../../apps/client/src/assets/rocket';
+
+const NUT_EXPRESSION_LABELS: Record<(typeof NUT_EXPRESSIONS)[number], string> = {
+  idle: 'いつも（静か）',
+  happy: 'にっこり',
+  surprised: '驚き',
+  sad: 'さびしげ',
+  lookUp: '見上げる',
+  blink: 'まばたき・うなずき',
+};
 
 const CHIEF_MOOD_LABELS: Record<(typeof CHIEF_MOODS)[number], string> = {
   stern: '気難しい（普段）',
@@ -95,6 +105,33 @@ export function characterPreviewHtml(extra: PreviewSection[] = []): string {
       title: '工場長: シルエット',
       html: `<div class="row">${Object.entries(CHIEF_POSES)
         .map(([k, { label }]) => figure(`${ASSETS}/chief/poses/${k}.svg`, label, 'silhouette'))
+        .join('')}</div>`,
+    },
+    {
+      title: 'ナット（仮名・見知らぬロボ）: 三面図とボルトとの比較',
+      note: 'エンディングの伏線に出る、ボルトより先に月へ旅立った先輩。六角ナットの頭・1つ目のレンズ・高いアンテナの水色のランプ・マフラー・胸の方位磁針。約 3 頭身（3案の比較: nut-roughs.html）',
+      html: `<div class="row">${Object.keys(NUT_VIEWS)
+        .map((k) =>
+          figure(`${ASSETS}/nut/views/${k}.svg`, VIEW_LABELS[k as keyof typeof VIEW_LABELS]),
+        )
+        .join('')}${figure(`${ASSETS}/bolt/views/front.svg`, '（参考）ボルト')}</div>`,
+    },
+    {
+      title: 'ナット: 表情（レンズ・まぶた・アンテナの光）',
+      html: `<div class="row">${NUT_EXPRESSIONS.map((e) =>
+        figure(`${ASSETS}/nut/expressions/${e}.svg`, NUT_EXPRESSION_LABELS[e], 'small'),
+      ).join('')}</div>`,
+    },
+    {
+      title: 'ナット: ポーズ集',
+      html: `<div class="row">${Object.entries(NUT_POSES)
+        .map(([k, { label }]) => figure(`${ASSETS}/nut/poses/${k}.svg`, label))
+        .join('')}</div>`,
+    },
+    {
+      title: 'ナット: シルエット',
+      html: `<div class="row">${Object.entries(NUT_POSES)
+        .map(([k, { label }]) => figure(`${ASSETS}/nut/poses/${k}.svg`, label, 'silhouette'))
         .join('')}</div>`,
     },
     {
