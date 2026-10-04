@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-42 -24 84 30">
+  <!-- 工場長の部品: base / default（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-38" y="-16" width="76" height="12" rx="3" fill="#546e7a" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="-26" cy="-4" r="6" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="0" cy="-4" r="6" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="26" cy="-4" r="6" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="-26" cy="-4" r="1.8" fill="#1b1f27"/>
+  <circle cx="0" cy="-4" r="1.8" fill="#1b1f27"/>
+  <circle cx="26" cy="-4" r="1.8" fill="#1b1f27"/>
+</svg>

@@ -9,6 +9,7 @@
 import { achievementFiles } from './achievements';
 import { boardFiles } from './board';
 import { boltFiles } from './characters/bolt';
+import { chiefFiles } from './characters/chief';
 import { characterPreviewHtml } from './characters/preview';
 import { iconFiles } from './icons';
 import { logoFiles } from './logo';
@@ -31,6 +32,7 @@ export function buildArt(): Record<string, string> {
     ...rocketFiles(),
     ...titleFiles(),
     ...boltFiles(),
+    ...chiefFiles(),
     // 設定画の一覧（リポジトリの docs/ へ書き出す）
     '../../docs/characters/preview.html': characterPreviewHtml(),
   };

@@ -2,8 +2,9 @@
  * キャラクターの部品・関節・ポーズのデータ（rig.json）の形と、アセットマニフェストの参照切れ
  */
 import { describe, expect, it } from 'vitest';
-import rig from '../src/assets/characters/bolt/rig.json';
-import { BOLT_ASSET_PATHS } from '../src/assets/manifest';
+import boltRig from '../src/assets/characters/bolt/rig.json';
+import chiefRig from '../src/assets/characters/chief/rig.json';
+import { characterAssetPaths, type CharacterId } from '../src/assets/manifest';
 
 type Pose = {
   angles?: Record<string, number>;
@@ -11,26 +12,66 @@ type Pose = {
   variants?: Record<string, string>;
   z?: Record<string, number>;
 };
+interface Rig {
+  parts: {
+    id: string;
+    parent: string | null;
+    pivot: number[];
+    box?: number[];
+    files: Record<string, string>;
+  }[];
+  poses: Record<string, Pose>;
+  views?: Record<string, Pose>;
+}
 
-/** 切り絵アニメに必ず要る部品 */
-const REQUIRED = [
-  'torso',
-  'head',
-  ...['L', 'R'].flatMap((s) => [
-    `upperArm${s}`,
-    `foreArm${s}`,
-    `hand${s}`,
-    `thigh${s}`,
-    `shin${s}`,
-    `foot${s}`,
-  ]),
+const CASES: { id: CharacterId; rig: Rig; required: string[]; poses: string[] }[] = [
+  {
+    id: 'bolt',
+    rig: boltRig as unknown as Rig,
+    required: [
+      'torso',
+      'head',
+      ...['L', 'R'].flatMap((s) => [
+        `upperArm${s}`,
+        `foreArm${s}`,
+        `hand${s}`,
+        `thigh${s}`,
+        `shin${s}`,
+        `foot${s}`,
+      ]),
+    ],
+    // ストーリーの身振り（character-design-prompt.md のポーズ集）
+    poses: [
+      'stand',
+      'walk',
+      'jump',
+      'nod',
+      'shake',
+      'point',
+      'lookUp',
+      'sad',
+      'stagger',
+      'guts',
+      'wave',
+      'sitStars',
+      'blueprint',
+    ],
+  },
+  {
+    id: 'chief',
+    rig: chiefRig as unknown as Rig,
+    required: ['base', 'mast', 'cab', 'hat', 'jib', 'hook'],
+    // 指さす・首を振る・うなずく・差し出す・腕を組む（相当）・帽子を上げる
+    poses: ['point', 'shake', 'nod', 'offer', 'fold', 'tip'],
+  },
 ];
 
-describe('ボルトの部品と関節（rig.json）', () => {
+describe.each(CASES)('$id の部品と関節（rig.json）', ({ id, rig, required, poses }) => {
   const ids = new Set(rig.parts.map((p) => p.id));
+  const paths = characterAssetPaths(id);
 
   it('必須の部品がそろい、親・回転の中心・書き出しの範囲が正しい形', () => {
-    for (const id of REQUIRED) expect(ids.has(id), id).toBe(true);
+    for (const part of required) expect(ids.has(part), part).toBe(true);
     for (const part of rig.parts) {
       expect(part.parent === 'root' || ids.has(part.parent!), `${part.id} の親`).toBe(true);
       expect(part.pivot).toHaveLength(2);
@@ -43,47 +84,32 @@ describe('ボルトの部品と関節（rig.json）', () => {
   it('部品のファイルがすべてアセットマニフェストにある（参照切れなし）', () => {
     for (const part of rig.parts) {
       for (const file of Object.values(part.files)) {
-        expect(BOLT_ASSET_PATHS, `${part.id}: ${file}`).toContain(file);
+        expect(paths, `${part.id}: ${file}`).toContain(file);
       }
     }
   });
 
-  it('ポーズ・三面図は、ある部品とある差し替えだけを使う', () => {
-    const poses = { ...rig.poses, ...rig.views } as Record<string, Pose>;
-    for (const [name, pose] of Object.entries(poses)) {
+  it('ポーズは、ある部品とある差し替えだけを使う', () => {
+    const all = { ...rig.poses, ...(rig.views ?? {}) };
+    for (const [name, pose] of Object.entries(all)) {
       const used = [
         ...Object.keys(pose.angles ?? {}),
         ...Object.keys(pose.offsets ?? {}),
         ...Object.keys(pose.z ?? {}),
       ];
-      for (const id of used) expect(id === 'root' || ids.has(id), `${name}: ${id}`).toBe(true);
-      for (const [id, variant] of Object.entries(pose.variants ?? {})) {
-        const part = rig.parts.find((p) => p.id === id);
-        expect(part, `${name}: ${id}`).toBeDefined();
-        expect(Object.keys(part!.files), `${name}: ${id} = ${variant}`).toContain(variant);
+      for (const part of used)
+        expect(part === 'root' || ids.has(part), `${name}: ${part}`).toBe(true);
+      for (const [part, variant] of Object.entries(pose.variants ?? {})) {
+        const def = rig.parts.find((p) => p.id === part);
+        expect(def, `${name}: ${part}`).toBeDefined();
+        expect(Object.keys(def!.files), `${name}: ${part} = ${variant}`).toContain(variant);
       }
     }
   });
 
-  it('ポーズ集にストーリーの身振りがそろっている', () => {
-    expect(Object.keys(rig.poses)).toEqual(
-      expect.arrayContaining([
-        'stand',
-        'walk',
-        'jump',
-        'nod',
-        'shake',
-        'point',
-        'lookUp',
-        'sad',
-        'stagger',
-        'guts',
-        'wave',
-        'sitStars',
-        'blueprint',
-      ]),
-    );
-    expect(BOLT_ASSET_PATHS).toEqual(
+  it('ストーリーに要る身振りがそろい、組み上げた絵もある', () => {
+    expect(Object.keys(rig.poses)).toEqual(expect.arrayContaining(poses));
+    expect(paths).toEqual(
       expect.arrayContaining(Object.keys(rig.poses).map((k) => `poses/${k}.svg`)),
     );
   });

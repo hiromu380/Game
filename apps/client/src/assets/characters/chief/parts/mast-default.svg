@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -108 32 112">
+  <!-- 工場長の部品: mast / default（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-12" y="-104" width="24" height="104" rx="2" fill="#ffc107" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -2 L12 -17 M12 -2 L-12 -17" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -19 L12 -34 M12 -19 L-12 -34" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -36 L12 -51 M12 -36 L-12 -51" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -53 L12 -68 M12 -53 L-12 -68" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -70 L12 -85 M12 -70 L-12 -85" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -87 L12 -102 M12 -87 L-12 -102" fill="none" stroke="#d9a406" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-12" y="-104" width="24" height="104" rx="2" fill="none" stroke="#1b1f27" stroke-width="3"/>
+</svg>

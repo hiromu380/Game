@@ -6,8 +6,16 @@
  */
 import type { VIEWS } from './bolt';
 import { EXPRESSIONS, POSES } from './bolt';
+import { CHIEF_MOODS, CHIEF_POSES } from './chief';
 
 const ASSETS = '../../apps/client/src/assets/characters';
+const ROCKET = '../../apps/client/src/assets/rocket';
+
+const CHIEF_MOOD_LABELS: Record<(typeof CHIEF_MOODS)[number], string> = {
+  stern: '気難しい（普段）',
+  soft: '和らぐ（エンディング）',
+  surprised: '驚く',
+};
 
 const VIEW_LABELS: Record<keyof typeof VIEWS, string> = {
   front: '正面',
@@ -69,6 +77,37 @@ export function characterPreviewHtml(extra: PreviewSection[] = []): string {
       title: 'ボルト: シルエット（黒塗りで身振りが読めるか）',
       html: `<div class="row">${silhouettes}</div>`,
     },
+    {
+      title: '工場長（天井クレーン）: 表情',
+      note: '運転席が頭。窓の帯のランプが目で、鉄板のまぶたで機嫌を表す（気難しい・和らぐ・驚く）',
+      html: `<div class="row">${CHIEF_MOODS.map((m) =>
+        figure(`${ASSETS}/chief/expressions/${m}.svg`, CHIEF_MOOD_LABELS[m], 'small'),
+      ).join('')}</div>`,
+    },
+    {
+      title: '工場長: ポーズ集',
+      note: 'フックは重さで常に真下へ下がる。腕組みの代わりにジブを体の前に畳む。帽子（ヘルメット）を上げるのはエンディングだけ',
+      html: `<div class="row">${Object.entries(CHIEF_POSES)
+        .map(([k, { label }]) => figure(`${ASSETS}/chief/poses/${k}.svg`, label, 'wide'))
+        .join('')}</div>`,
+    },
+    {
+      title: '工場長: シルエット',
+      html: `<div class="row">${Object.entries(CHIEF_POSES)
+        .map(([k, { label }]) => figure(`${ASSETS}/chief/poses/${k}.svg`, label, 'silhouette'))
+        .join('')}</div>`,
+    },
+    {
+      title: 'ロケット: 完成までの9段階（1日3部品）',
+      note: '赤白のロケットに、ガラクタの部品（じょうごのノズル・ドラム缶・洗濯機の扉の窓・バケツの先端・テープの継ぎはぎ）を混ぜる。上部の背景と日ごとの幕間で同じ絵を使う',
+      html: `<div class="row">${Array.from({ length: 10 }, (_, i) =>
+        figure(`${ROCKET}/rocket-${i}.svg`, `${i}/9`, 'rocket'),
+      ).join('')}</div>`,
+    },
+    {
+      title: 'ロケット: 打ち上げの部品（炎・煙）',
+      html: `<div class="row">${figure(`${ROCKET}/flame.svg`, '炎', 'small')}${figure(`${ROCKET}/smoke.svg`, '煙', 'small')}</div>`,
+    },
     ...extra,
   ];
   return `<!doctype html>
@@ -87,6 +126,8 @@ export function characterPreviewHtml(extra: PreviewSection[] = []): string {
       figure { margin: 0; background: #262a31; border-radius: 8px; padding: 8px; text-align: center; }
       figure img { width: 180px; height: auto; display: block; }
       figure.small img { width: 110px; }
+      figure.wide img { width: 230px; }
+      figure.rocket img { width: 80px; }
       figcaption { font-size: 0.85rem; margin-top: 4px; }
       .silhouette { background: #eef0f3; color: #1a1c20; }
       .silhouette img { width: 110px; filter: brightness(0); }

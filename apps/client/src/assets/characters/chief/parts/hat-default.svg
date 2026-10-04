@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-36 -24 72 30">
+  <!-- 工場長の部品: hat / default（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M-26 0 Q-26 -20 0 -20 Q26 -20 26 0 Z" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-32" y="-3" width="64" height="6" rx="3" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-6 -19 V-3 M6 -19 V-3" fill="none" stroke="#cfd8dc" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-4" y="-14" width="8" height="7" rx="1" fill="#e53935"/>
+</svg>

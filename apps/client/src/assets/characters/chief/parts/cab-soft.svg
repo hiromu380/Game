@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-34 -48 68 52">
+  <!-- 工場長の部品: cab / soft（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-30" y="-44" width="60" height="44" rx="6" fill="#ffc107" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-30" y="-14" width="60" height="14" fill="#d9a406"/>
+  <rect x="-30" y="-44" width="60" height="44" rx="6" fill="none" stroke="#1b1f27" stroke-width="3.5"/>
+  <rect x="-25" y="-38" width="50" height="22" rx="4" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="-12" cy="-27" r="8" fill="#ffca28" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="-12" cy="-26" r="3" fill="#1b1f27"/>
+  <path d="M-19 -16 q7 4 14 0" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="12" cy="-27" r="8" fill="#ffca28" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="12" cy="-26" r="3" fill="#1b1f27"/>
+  <path d="M5 -16 q7 4 14 0" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-10 -8 Q0 -3 10 -8" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="-25" cy="-8" r="1.8" fill="#1b1f27"/>
+  <circle cx="25" cy="-8" r="1.8" fill="#1b1f27"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 4 64 42">
+  <!-- ロケットの煙（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="18" cy="30" r="12" fill="#cfd8dc" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="46" cy="30" r="12" fill="#cfd8dc" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="24" r="15" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M24 22 q4 -5 9 -3" fill="none" stroke="#cfd8dc" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
