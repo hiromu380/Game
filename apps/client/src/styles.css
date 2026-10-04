@@ -2031,7 +2031,8 @@ a.button.button--primary {
 .title-backdrop__bolt {
   position: absolute;
   right: 5%;
-  bottom: 70px;
+  /* 全身の足もと（viewBox の下の余白）をベルトの上に合わせる */
+  bottom: 52px;
   z-index: 1;
   animation: title-bob 1.6s ease-in-out infinite;
 }
@@ -2340,13 +2341,14 @@ a.button.button--primary {
 .workshop__bolt {
   position: absolute;
   left: 56%;
-  bottom: 3px;
-  width: 40px;
-  transform: rotate(-4deg);
+  bottom: 0;
+  /* 全身（設定画の viewBox 140×162）。帯の高さに収める */
+  height: calc(100% - 4px);
+  width: auto;
   transition: transform 0.2s;
 }
 .workshop__bolt.is-watching {
-  transform: rotate(4deg) translateY(-4px);
+  transform: translateY(-2px);
 }
 /* シフトを達成した印（✓）: 時刻の右に並べる（以前は時刻の表示に重なっていた） */
 .workshop__marks {

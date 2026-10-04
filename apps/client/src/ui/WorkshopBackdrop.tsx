@@ -3,7 +3,7 @@
  * ゲーム状態から描く（装飾だけなのでセーブデータは増やさない）。
  */
 import { activeEvent, getDayAndPeriod, type MetaProgress, type RunState } from '@chain-factory/sim';
-import { MASCOT_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../assets/manifest';
+import { BOLT_BODY_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import { getRocketProgress } from '../state/rocket';
 
@@ -68,9 +68,10 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
         </div>
       )}
       <span className="workshop__beacon" />
+      {/* ボルト（全身）: ふだんは立って待ち、演出の再生中はガッツポーズで見守る */}
       <img
         className={`workshop__bolt ${playing ? 'is-watching' : ''}`}
-        src={playing ? MASCOT_ASSETS.surprised : MASCOT_ASSETS.idle}
+        src={playing ? BOLT_BODY_ASSETS.guts : BOLT_BODY_ASSETS.stand}
         alt=""
       />
     </div>

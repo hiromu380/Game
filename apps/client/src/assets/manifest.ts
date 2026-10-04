@@ -12,6 +12,9 @@ import boltFailSrc from './mascot/bolt-fail.svg';
 import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
 import boltSurprisedSrc from './mascot/bolt-surprised.svg';
+import boltGutsSrc from './characters/bolt/poses/guts.svg';
+import boltStandSrc from './characters/bolt/poses/stand.svg';
+import boltWaveSrc from './characters/bolt/poses/wave.svg';
 import { PART_FAMILY } from './partFamily';
 import { BOARD_COLORS, FAMILY_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
@@ -190,6 +193,16 @@ const characterFiles = import.meta.glob<string>('./characters/*/**/*.svg', {
   query: '?url',
   import: 'default',
 });
+
+/**
+ * ボルトの全身（よく使うポーズだけ最初から読み込む。上部の背景・タイトル画面の情景）。
+ * 顔だけのアイコン（MASCOT_ASSETS）は、吹き出し・ガイド・共有カードなどで使い続ける
+ */
+export const BOLT_BODY_ASSETS = {
+  stand: boltStandSrc,
+  guts: boltGutsSrc,
+  wave: boltWaveSrc,
+} as const;
 
 /** 全身で描くキャラクター（ボルト・工場長） */
 export type CharacterId = 'bolt' | 'chief';
