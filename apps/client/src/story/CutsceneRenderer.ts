@@ -146,11 +146,12 @@ export class CutsceneRenderer {
         sprite.setSize(p.width, p.height);
         sprite.rotation = (p.rotation * Math.PI) / 180;
         sprite.alpha = p.alpha;
-        used.add(`prop/${p.id}`);
+        // 見えない絵は描かない（画面いっぱいの背景を不透明度 0 のまま描くと重い）
+        if (p.alpha > 0.001) used.add(`prop/${p.id}`);
         continue;
       }
       const a = frame.actors.find((x) => x.id === item.id);
-      if (!a) continue;
+      if (!a || a.alpha <= 0.001) continue;
       let pose = resolvePose(a.character, a.pose, a.face);
       if (a.blend) pose = blendPose(pose, resolvePose(a.character, a.blend.to, a.face), a.blend.k);
       const s = a.height / RIG_HEIGHT[a.character];
