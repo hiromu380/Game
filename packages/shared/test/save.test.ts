@@ -15,6 +15,7 @@ import {
   convertV2toV3,
   convertV3toV4,
   convertV4toV5,
+  convertV5toV6,
   createSave,
   migrateSave,
   SAVE_VERSION,
@@ -44,10 +45,10 @@ const V1_SAVE: SaveDataV1 = {
 };
 
 describe('セーブデータ', () => {
-  it('最新バージョン（v5）で保存し、JSON を往復しても同じ内容になる', () => {
+  it('最新バージョン（v6）で保存し、JSON を往復しても同じ内容になる', () => {
     const save = createSave(createRun(42));
     expect(save.version).toBe(SAVE_VERSION);
-    expect(SAVE_VERSION).toBe(5);
+    expect(SAVE_VERSION).toBe(6);
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
 
@@ -59,9 +60,9 @@ describe('セーブデータ', () => {
 });
 
 describe('v1 → v2 の変換', () => {
-  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（v5 まで続けて変換）', () => {
+  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（最新まで続けて変換）', () => {
     const v2 = migrateSave(JSON.parse(JSON.stringify(V1_SAVE)))!;
-    expect(v2.version).toBe(5);
+    expect(v2.version).toBe(SAVE_VERSION);
     expect(v2.meta).toEqual(createInitialMeta());
     expect(v2.achievements).toEqual(createInitialAchievements());
 
@@ -120,7 +121,7 @@ describe('v2 → v3（実績の追加）', () => {
     const v2 = { ...JSON.parse(JSON.stringify(v3)), version: 2 };
     delete v2.achievements;
     const migrated = migrateSave(v2)!;
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(migrated.run).toEqual(v3.run);
     expect(migrated.meta).toEqual(v3.meta);
     expect(migrated.achievements).toEqual(createInitialAchievements());
@@ -160,7 +161,7 @@ describe('v3 → v4（床タイル）', () => {
 
   it('床のないランとしてそのまま続けられる（床なし・ボーナス床なし・効果量は基準値で補う）', () => {
     const migrated = migrateSave(v3RunSave())!;
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(convertV3toV4(v3RunSave() as never).version).toBe(4);
     const run = migrated.run!;
     expect(run.bonusFloor).toBeNull();
@@ -209,7 +210,7 @@ describe('v4 → v5（ランダム配置権）', () => {
 
   it('配置権の出ないランとしてそのまま続けられる（消耗品は空・配置権の床なし）', () => {
     const migrated = migrateSave(v4RunSave())!;
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(convertV4toV5(v4RunSave() as never).version).toBe(5);
     const run = migrated.run!;
     expect(run.items).toEqual([]);
@@ -227,5 +228,32 @@ describe('v4 → v5（ランダム配置権）', () => {
   it('v5 で保存したラン（配置権あり）は JSON を往復しても同じ', () => {
     const save = createSave(createRun(12));
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+  });
+});
+
+describe('v5 → v6（ストーリー演出）', () => {
+  function v5Save() {
+    const save = JSON.parse(JSON.stringify(createSave(createRun(3))));
+    delete save.story;
+    save.version = 5;
+    return save;
+  }
+
+  it('見たシーンの記録を足し、すでに遊んでいる人はオープニングを見た扱いにする（ランはそのまま）', () => {
+    const v5 = v5Save();
+    const migrated = migrateSave(v5)!;
+    expect(migrated.version).toBe(6);
+    expect(migrated.story).toEqual({ seen: ['opening'] });
+    expect(migrated.run).toEqual(v5.run);
+    expect(convertV5toV6(v5).story.seen).toEqual(['opening']);
+  });
+
+  it('新しく作ったセーブは何も見ていない。見たシーンは JSON を往復しても残り、壊れた項目は捨てる', () => {
+    expect(createSave(null).story).toEqual({ seen: [] });
+    const save = createSave(null, undefined, undefined, { seen: ['opening', 'interlude1'] });
+    expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+    const broken = { ...save, story: { seen: ['opening', 3, null] } };
+    expect(migrateSave(broken)!.story.seen).toEqual(['opening']);
+    expect(migrateSave({ ...save, story: undefined })!.story.seen).toEqual([]);
   });
 });

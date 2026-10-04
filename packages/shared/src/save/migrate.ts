@@ -23,19 +23,21 @@ import type { SaveDataV2 } from './v2';
 import type { SaveDataV3 } from './v3';
 import type { SaveDataV4 } from './v4';
 import type { SaveDataV5 } from './v5';
+import type { SaveDataV6, StoryProgress } from './v6';
 
 /** 現在のセーブデータのバージョン */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 /** 最新バージョンのセーブデータ */
-export type SaveData = SaveDataV5;
+export type SaveData = SaveDataV6;
 
 export function createSave(
   run: RunState | null,
   meta: MetaProgress = createInitialMeta(),
   achievements: AchievementProgress = createInitialAchievements(),
+  story: StoryProgress = { seen: [] },
 ): SaveData {
-  return { version: SAVE_VERSION, run, meta, achievements };
+  return { version: SAVE_VERSION, run, meta, achievements, story };
 }
 
 /**
@@ -48,13 +50,17 @@ export function migrateSave(raw: unknown): SaveData | null {
     case 1:
       return migrateSave(convertV1toV2(raw as SaveDataV1));
     case 2:
-      return convertV4toV5(convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2))));
+      return convertV5toV6(
+        convertV4toV5(convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2)))),
+      );
     case 3:
-      return convertV4toV5(convertV3toV4(normalizeV3(raw as SaveDataV3)));
+      return convertV5toV6(convertV4toV5(convertV3toV4(normalizeV3(raw as SaveDataV3))));
     case 4:
-      return convertV4toV5(normalizeV3(raw as SaveDataV4));
+      return convertV5toV6(convertV4toV5(normalizeV3(raw as SaveDataV4)));
     case 5:
-      return normalizeV5(raw as SaveDataV5);
+      return convertV5toV6(normalizeV5(raw as SaveDataV5));
+    case 6:
+      return normalizeV6(raw as SaveDataV6);
     default:
       return null;
   }
@@ -114,6 +120,22 @@ function normalizeV3<T extends SaveDataV3 | SaveDataV4 | SaveDataV5>(save: T): T
 /** v5 の読み込み: v3 と同じ補い方 */
 function normalizeV5(save: SaveDataV5): SaveDataV5 {
   return normalizeV3(save);
+}
+
+/** v6 の読み込み: v3 と同じ補い方に、見たシーンの一覧（文字列だけ）を補う */
+function normalizeV6(save: SaveDataV6): SaveDataV6 {
+  const seen = Array.isArray(save.story?.seen)
+    ? save.story.seen.filter((id): id is string => typeof id === 'string')
+    : [];
+  return { ...normalizeV3(save), story: { seen } };
+}
+
+/**
+ * v5 → v6（ストーリー演出）: 見たシーンの記録を足す。
+ * すでに遊んでいるプレイヤーなので、オープニングは見た扱いにする（続きのランの途中に急に出さない）
+ */
+export function convertV5toV6(save: SaveDataV5): SaveDataV6 {
+  return { ...save, version: 6, story: { seen: ['opening'] } };
 }
 
 /**
