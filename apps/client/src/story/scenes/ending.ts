@@ -151,7 +151,7 @@ export const ending: Scene = {
       key(8.4, bolt('stand', 360, { face: 'happy' })),
       key(9.6, bolt('wave', 360)),
       key(13, bolt('wave', 360)),
-      ...walk(14, 16.2, 360, 600, (p, x, b) => bolt(p, x, { y: GROUND + b })),
+      ...walk(14, 16.2, 360, 600, (p, x) => bolt(p, x)),
       // 窓へ乗り込む（ロケットの窓にボルトの顔が描いてある）
       ...vanish(16.4, bolt('jump', 640, { y: GROUND - 120, height: 160 }), 0.4),
     ]),

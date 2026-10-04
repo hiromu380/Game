@@ -48,6 +48,13 @@ export function resolvePose(character: CharacterId, name: string, face?: string)
   return { ...pose, variants: { ...pose.variants, [FACE_PART[character]]: face } };
 }
 
+/** 待機中の揺れ: 頭（工場長は運転席）を deg 度だけ傾ける */
+export function swayPose(character: CharacterId, pose: Pose, deg: number): Pose {
+  if (deg === 0) return pose;
+  const part = FACE_PART[character];
+  return { ...pose, angles: { ...pose.angles, [part]: (pose.angles?.[part] ?? 0) + deg } };
+}
+
 /** 2つのポーズの間（角度・ずれは補間、差し替え・重なり順は前のポーズ） */
 export function blendPose(a: Pose, b: Pose, k: number): Pose {
   const lerpMap = (x: Pose['angles'] = {}, y: Pose['angles'] = {}) => {

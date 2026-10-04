@@ -77,7 +77,7 @@ export const interlude1: Scene = {
     ]),
     actor('bolt', 'bolt', [
       key(0, bolt('stand', 300)),
-      ...walk(0.6, 2.2, 300, 520, (p, x, b) => bolt(p, x, { y: GROUND + b })),
+      ...walk(0.6, 2.2, 300, 520, (p, x) => bolt(p, x)),
       key(2.4, bolt('guts', 520, { face: 'happy' })),
       key(3.6, bolt('jump', 520, { face: 'happy' })),
       key(4.2, bolt('stand', 520)),
@@ -113,7 +113,7 @@ export const interlude2: Scene = {
       key(0.8, bolt('stagger', 640)),
       key(1.4, bolt('stagger', 590)),
       key(2, bolt('stagger', 550)),
-      ...walk(2.6, 3.8, 550, 520, (p, x, b) => bolt(p, x, { y: GROUND + b })),
+      ...walk(2.6, 3.8, 550, 520, (p, x) => bolt(p, x)),
       key(4.2, bolt('stand', 520, { face: 'tired' })),
       key(5.6, bolt('stand', 520, { face: 'tired' })),
       key(6.2, bolt('jump', 520, { face: 'tired' })),

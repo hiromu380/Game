@@ -718,6 +718,7 @@ export function App({ start, onTitle }: Props) {
             peakFirst={CAPTURE && capturePeakFirst}
             speed={speed}
             cursor={cursor}
+            paused={cutscene !== null}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
             onCellDragStart={onCellDragStart}

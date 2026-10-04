@@ -9,7 +9,7 @@ import { loadCharacterAsset } from '../assets/manifest';
 import { hex } from '../assets/palette';
 import { CUTSCENE_CONFIG } from '../config/cutscene';
 import { resolveStoryAsset } from './assets';
-import { blendPose, placeParts, resolvePose, RIG_GROUND, RIG_HEIGHT, RIGS } from './rig';
+import { blendPose, placeParts, resolvePose, RIG_GROUND, RIG_HEIGHT, RIGS, swayPose } from './rig';
 import type { CharacterId, FrameState, Scene } from './timeline';
 
 const { width: W, height: H } = CUTSCENE_CONFIG.stage;
@@ -67,12 +67,29 @@ async function loadSceneTextures(scene: Scene) {
   return { props, parts };
 }
 
+/**
+ * 絵を前もって GPU へ送る（1回だけ小さく描く）。
+ * 初めて画面に出る瞬間に送ると、再生の途中で止まって見える（かくつき）ため、再生を始める前に済ませる
+ */
+function warmUp(app: Application, textures: Awaited<ReturnType<typeof loadSceneTextures>>) {
+  const container = new Container();
+  for (const texture of [...textures.props.values(), ...textures.parts.values()]) {
+    const sprite = new Sprite(texture);
+    sprite.setSize(1, 1);
+    container.addChild(sprite);
+  }
+  app.renderer.render({ container });
+  container.destroy({ children: true });
+}
+
 export class CutsceneRenderer {
   private readonly world = new Container();
   private readonly stage = new Container();
   private readonly overlay = new Graphics();
   private readonly sprites = new Map<string, Sprite>();
   private readonly texts = new Map<string, Text>();
+  /** 前のフレームの色味・光（変わったときだけ描き直す） */
+  private overlayKey = '';
 
   private constructor(
     private readonly app: Application,
@@ -102,16 +119,31 @@ export class CutsceneRenderer {
           resizeTo: parent,
           background: scene.background,
           antialias: true,
-          resolution: window.devicePixelRatio || 1,
+          // 高解像度の画面でも上限まで（全画面のキャンバスは塗る量が多く、かくつきの原因になる）
+          resolution: Math.min(window.devicePixelRatio || 1, CUTSCENE_CONFIG.maxResolution),
           autoDensity: true,
         }),
         loadSceneTextures(scene),
       ]),
       timeout,
     ]);
+    warmUp(app, textures);
+    const renderer = new CutsceneRenderer(app, scene, textures, translate);
+    renderer.prepareTexts();
     app.canvas.classList.add('cutscene__canvas');
     parent.appendChild(app.canvas);
-    return new CutsceneRenderer(app, scene, textures, translate);
+    return renderer;
+  }
+
+  /** 数字・文字を前もって作り、1回描いて GPU へ送っておく（初めて出る瞬間に作ると、そこでかくつく） */
+  private prepareTexts(): void {
+    const shown = new Set<string>();
+    for (const n of this.scene.numbers ?? [])
+      this.text(`n/${n.text}/${n.x}`, n.text, n.x, n.y, n.size, shown, 1000);
+    for (const c of this.scene.captions ?? [])
+      this.text(`c/${c.key}`, this.translate(c.key), c.x, c.y, c.size, shown, 1001);
+    this.app.renderer.render(this.app.stage);
+    for (const text of this.texts.values()) text.visible = false;
   }
 
   /** 画面の大きさに合わせて、シーン全体（16:9）が収まる倍率と位置にする */
@@ -154,9 +186,19 @@ export class CutsceneRenderer {
       if (!a || a.alpha <= 0.001) continue;
       let pose = resolvePose(a.character, a.pose, a.face);
       if (a.blend) pose = blendPose(pose, resolvePose(a.character, a.blend.to, a.face), a.blend.k);
+      pose = swayPose(a.character, pose, a.sway * CUTSCENE_CONFIG.sway.headDeg);
       const s = a.height / RIG_HEIGHT[a.character];
+      // 待機中の揺れ（呼吸）: 体を少し上下させる（大きさはキャラクターの高さ 250px あたり）
+      const lift = (((a.sway + 1) / 2) * CUTSCENE_CONFIG.sway.lift * a.height) / 250;
       // キャラクターの位置: 足もと (x, y)。左右反転は横の倍率を負に
-      const actor = new Matrix(a.flip ? -s : s, 0, 0, s, a.x, a.y - RIG_GROUND[a.character] * s);
+      const actor = new Matrix(
+        a.flip ? -s : s,
+        0,
+        0,
+        s,
+        a.x,
+        a.y - RIG_GROUND[a.character] * s - lift,
+      );
       for (const part of placeParts(a.character, pose)) {
         const key = `actor/${a.id}/${part.id}`;
         const texture = this.textures.parts.get(`${a.character}/${part.file}`);
@@ -187,6 +229,9 @@ export class CutsceneRenderer {
     for (const [key, text] of this.texts) text.visible = shown.has(key);
 
     // 色味・光（シーンの範囲だけ。画面全体の白いフラッシュにはしない）
+    const overlayKey = JSON.stringify([frame.tint, frame.flash]);
+    if (overlayKey === this.overlayKey) return;
+    this.overlayKey = overlayKey;
     this.overlay.clear();
     if (frame.tint)
       this.overlay.rect(0, 0, W, H).fill({ color: hex(frame.tint.color), alpha: frame.tint.alpha });

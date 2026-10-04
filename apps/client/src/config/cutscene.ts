@@ -16,6 +16,15 @@ export const CUTSCENE_CONFIG = {
   flashesPerSecond: 3,
   /** 演出の強さごとの倍率（揺れ・光）。弱では揺れも光も出さない */
   strength: { full: 1, reduced: 0.5, minimal: 0 },
+  /** ポーズの移り変わりにかける秒数（次のキーの手前のこの秒数で、なめらかに移る） */
+  poseBlendSec: 0.3,
+  /** 待機中の揺れ（呼吸）の周期（秒）と大きさ（体の上下 px・頭の傾き 度。キャラクターの高さ 250px あたり） */
+  swayPeriodSec: 1.9,
+  sway: { lift: 2, headDeg: 1.5 },
+  /** 歩くときの体の上下（px。キャラクターの高さ 250px あたり） */
+  walkBob: 6,
+  /** 描画の解像度の上限（高解像度の画面で、全画面のキャンバスが重くなりすぎないように） */
+  maxResolution: 1.5,
   /** 素材の読み込みを待つ上限（ミリ秒）。過ぎたらシーンを飛ばしてゲームを続ける */
   loadTimeoutMs: 5000,
 } as const;

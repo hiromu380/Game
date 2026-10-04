@@ -42,7 +42,12 @@ describe('カットシーンのタイムライン', () => {
     const f = sampleScene(scene, 1, FULL);
     expect(f.actors[0]!.x).toBeCloseTo(200);
     expect(f.actors[0]!.pose).toBe('stand');
-    expect(f.actors[0]!.blend).toEqual({ to: 'jump', k: 0.5 });
+    // ポーズは区間の終わりの poseBlendSec 秒だけで移る（それまでは前のポーズのまま）
+    expect(f.actors[0]!.blend).toBeNull();
+    const half = 2 - CUTSCENE_CONFIG.poseBlendSec / 2;
+    const blend = sampleScene(scene, half, FULL).actors[0]!.blend!;
+    expect(blend.to).toBe('jump');
+    expect(blend.k).toBeCloseTo(0.5);
     // 最初のキーより前・最後のキーより後は、端の値で止まる
     expect(sampleScene(scene, 0, FULL).actors[0]!.x).toBe(100);
     expect(sampleScene(scene, 3, FULL).actors[0]!).toMatchObject({
@@ -52,6 +57,38 @@ describe('カットシーンのタイムライン', () => {
     });
     expect(sampleScene(scene, 2, FULL).props[0]).toMatchObject({ alpha: 0.5, asset: 'rocket-3' });
     expect(sampleScene(scene, 3.5, FULL).props[0]).toMatchObject({ alpha: 1, asset: 'rocket-6' });
+  });
+
+  it('歩き（cycle）は足を入れ替えながら弾み、整数の歩数では元のポーズに戻る', () => {
+    const walking: Scene = {
+      ...scene,
+      tracks: [
+        {
+          kind: 'actor',
+          id: 'bolt',
+          character: 'bolt',
+          keys: [
+            { t: 0, value: { pose: 'walk', x: 0, y: 600, height: 250, cycle: 0 }, ease: 'linear' },
+            { t: 2, value: { pose: 'walk', x: 400, y: 600, height: 250, cycle: 4 } },
+          ],
+        },
+      ],
+    };
+    const mid = sampleScene(walking, 0.25, FULL).actors[0]!;
+    // 速さは一定、半歩で足が揃い（walk と walkB の中間）、体がいちばん上がる
+    expect(mid.x).toBeCloseTo(50);
+    expect(mid.blend!.to).toBe('walkB');
+    expect(mid.blend!.k).toBeCloseTo(0.5);
+    expect(mid.y).toBeCloseTo(600 - CUTSCENE_CONFIG.walkBob);
+    expect(sampleScene(walking, 0.5, FULL).actors[0]!.blend!.k).toBeCloseTo(1);
+    expect(sampleScene(walking, 2, FULL).actors[0]!).toMatchObject({ y: 600, blend: null });
+  });
+
+  it('待機中の揺れは演出「弱」では止まる', () => {
+    const sway = (strength: 'full' | 'minimal') =>
+      sampleScene(scene, 0.7, { ...FULL, strength }).actors[0]!.sway;
+    expect(Math.abs(sway('full'))).toBeGreaterThan(0);
+    expect(sway('minimal')).toBe(0);
   });
 
   it('同じ時刻なら毎回同じ状態（乱数を使わない）', () => {

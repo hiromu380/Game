@@ -89,7 +89,7 @@ export function vanish<T extends { alpha?: number }>(t: number, value: T, fade =
 }
 
 /**
- * 歩く: x0 → x1 を t0〜t1 秒で。2つのコマ（walk・walkB）を交互に出し、上下に少し弾ませる。
+ * 歩く: x0 → x1 を t0〜t1 秒で（一定の速さ）。足の入れ替え（walk・walkB）と上下の弾みは、なめらかにつなぐ。
  * make は位置とポーズからキャラクターの状態を作る（大きさ・向きなどを決める）
  */
 export function walk(
@@ -97,16 +97,13 @@ export function walk(
   t1: number,
   x0: number,
   x1: number,
-  make: (pose: string, x: number, bob: number) => ActorValue,
+  make: (pose: string, x: number) => ActorValue,
   step = 0.32,
 ): Key<ActorValue>[] {
-  const keys: Key<ActorValue>[] = [];
-  const n = Math.max(1, Math.round((t1 - t0) / step));
-  for (let i = 0; i <= n; i++) {
-    const k = i / n;
-    const pose = i === n ? 'walk' : i % 2 === 0 ? 'walk' : 'walkB';
-    // コマの切り替えの直前まで同じコマを保つ（ポーズは前のキーのものが使われる）
-    keys.push(key(t0 + (t1 - t0) * k, make(pose, x0 + (x1 - x0) * k, i % 2 === 0 ? 0 : -6)));
-  }
-  return keys;
+  // 歩数は偶数にそろえる（歩き終わりで最初のコマに戻る）。足の入れ替えと上下は timeline.ts が cycle から求める
+  const n = Math.max(2, Math.round((t1 - t0) / step / 2) * 2);
+  return [
+    key(t0, { ...make('walk', x0), cycle: 0 }, 'linear'),
+    key(t1, { ...make('walk', x1), cycle: n }),
+  ];
 }

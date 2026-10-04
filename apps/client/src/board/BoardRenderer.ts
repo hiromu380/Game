@@ -335,6 +335,12 @@ export class BoardRenderer {
     this.app.destroy(true, { children: true });
   }
 
+  /** 描画を止める・再開する（カットシーンの間は盤面を描かず、カットシーンの描画に余力を回す） */
+  setPaused(paused: boolean): void {
+    if (paused) this.app.ticker.stop();
+    else this.app.ticker.start();
+  }
+
   private toCell(px: number, py: number) {
     if (!this.state) return null;
     return pixelToCell(px, py, this.state.board.width, this.state.board.height);

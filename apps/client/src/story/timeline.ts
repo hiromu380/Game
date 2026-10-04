@@ -32,6 +32,11 @@ export interface ActorValue {
   flip?: boolean;
   /** 表情（ボルトは頭、工場長は運転席の差し替え） */
   face?: string;
+  /**
+   * 歩きの進み具合（何歩目か。scenes/build.ts の walk が付ける）。
+   * 整数のときは pose のまま、その間は pose と「pose + B」（足を入れ替えたコマ）をなめらかに行き来し、体を上下させる
+   */
+  cycle?: number;
 }
 
 /** 絵（背景・小物）の状態。asset は story/assets.ts のキー */
@@ -104,6 +109,8 @@ export interface FrameState {
     alpha: number;
     /** 次のキーのポーズへ移る途中（k は 0〜1）。同じポーズなら null */
     blend: { to: string; k: number } | null;
+    /** 待機中の小さな揺れ（呼吸。-1〜1）。描画で体を少し上下させ、頭を少し傾ける */
+    sway: number;
   })[];
   props: (PropValue & { id: string; asset: string; alpha: number; rotation: number })[];
   camera: CameraValue;
@@ -133,17 +140,40 @@ export function ease(kind: Ease | undefined, k: number): number {
   }
 }
 
-/** t のときの前後のキーと、その間の進み具合（0〜1） */
-function around<T>(keys: Key<T>[], t: number): { a: Key<T>; b: Key<T>; k: number } | null {
+/**
+ * t のときの前後のキーと、その間の進み具合（k: イージング後 0〜1）。
+ * イージングを指定しないキーは inOut（動き出しと止まりをなめらかに。直線的な動きはかくついて見える）。
+ * pose は、ポーズの移り変わり用の進み具合（区間の終わりの poseBlendSec 秒だけで移る。区間全体でゆっくり混ざると、ふにゃっと見える）
+ */
+function around<T>(
+  keys: Key<T>[],
+  t: number,
+): { a: Key<T>; b: Key<T>; k: number; pose: number } | null {
   if (keys.length === 0) return null;
-  if (t <= keys[0]!.t) return { a: keys[0]!, b: keys[0]!, k: 0 };
+  if (t <= keys[0]!.t) return { a: keys[0]!, b: keys[0]!, k: 0, pose: 0 };
   for (let i = 0; i < keys.length - 1; i++) {
     const a = keys[i]!;
     const b = keys[i + 1]!;
-    if (t < b.t) return { a, b, k: ease(a.ease, (t - a.t) / (b.t - a.t)) };
+    if (t < b.t) {
+      const span = b.t - a.t;
+      const window = Math.min(span, CUTSCENE_CONFIG.poseBlendSec);
+      return {
+        a,
+        b,
+        k: ease(a.ease ?? 'inOut', (t - a.t) / span),
+        pose: ease('inOut', (t - (b.t - window)) / window),
+      };
+    }
   }
   const last = keys[keys.length - 1]!;
-  return { a: last, b: last, k: 0 };
+  return { a: last, b: last, k: 0, pose: 0 };
+}
+
+/** 待機中の小さな揺れ（呼吸）: キャラクターごとに位相をずらした、ゆっくりした正弦波（-1〜1） */
+function swayAt(id: string, t: number): number {
+  let phase = 0;
+  for (const c of id) phase = (phase * 31 + c.charCodeAt(0)) % 997;
+  return Math.sin((t / CUTSCENE_CONFIG.swayPeriodSec) * Math.PI * 2 + phase);
 }
 
 /** 数値の項目だけを補間し、それ以外（ポーズ名・表情・絵）は前のキーの値を使う */
@@ -183,12 +213,27 @@ export function sampleScene(scene: Scene, t: number, options: EffectOptions): Fr
       const a = at.a.value as ActorValue;
       const b = at.b.value as ActorValue;
       const v = mix(a, b, at.k);
+      // 歩き: 1歩ごとに足を入れ替え（cos で行き来）、足が揃うところで体が上がる
+      const step = v.cycle ?? null;
+      const stride = step === null ? 0 : (1 - Math.cos(step * Math.PI)) / 2;
+      const bob =
+        step === null
+          ? 0
+          : (Math.abs(Math.sin(step * Math.PI)) * CUTSCENE_CONFIG.walkBob * v.height) / 250;
       actors.push({
         ...v,
+        y: v.y - bob,
         id: track.id,
         character: track.character,
         alpha: v.alpha ?? 1,
-        blend: a.pose !== b.pose && at.k > 0 ? { to: b.pose, k: at.k } : null,
+        blend:
+          stride > 1e-9
+            ? { to: `${v.pose}B`, k: stride }
+            : a.pose !== b.pose && at.pose > 0
+              ? { to: b.pose, k: at.pose }
+              : null,
+        // 演出「弱」では揺らさない
+        sway: options.strength === 'minimal' ? 0 : swayAt(track.id, time),
       });
     } else {
       type Value = PropValue & { asset?: string };
