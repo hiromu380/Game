@@ -619,5 +619,7 @@
   "story.scene.gameOver": "ノルマに届かなかった夜",
   "story.scene.ending": "エンディング",
   "story.scene.demoTeaser": "つづきの予告",
-  "story.demoTeaser": "つづきは製品版で"
+  "story.demoTeaser": "つづきは製品版で",
+  "story.name.bolt": "ボルト",
+  "story.name.chief": "工場長"
 }

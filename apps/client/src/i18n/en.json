@@ -619,5 +619,7 @@
   "story.scene.gameOver": "The night we fell short",
   "story.scene.ending": "Ending",
   "story.scene.demoTeaser": "What comes next",
-  "story.demoTeaser": "Continue in the full game"
+  "story.demoTeaser": "Continue in the full game",
+  "story.name.bolt": "Bolt",
+  "story.name.chief": "Factory Chief"
 }

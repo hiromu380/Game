@@ -319,6 +319,15 @@ const ASSETS: Record<string, { w: number; h: number; body: () => string[] }> = {
   'rocket-empty-8': { w: 384, h: 416, body: rocketEmpty(8) },
   'rocket-empty-9': { w: 384, h: 416, body: rocketEmpty(9) },
   // 場面の上に重ねて暗くする（設計図のアップなど。不透明度はシーン側で）
+  // 名札（登場人物の初登場で、名前の文字の下に敷く。文字は i18n の文言）
+  nameplate: {
+    w: 240,
+    h: 64,
+    body: () => [
+      rect(4, 4, 232, 56, fill('#1b1f27', 4), 12),
+      rect(14, 14, 8, 36, { fill: M.sun }, 3),
+    ],
+  },
   dim: { w: 64, h: 36, body: () => [rect(0, 0, 64, 36, { fill: '#05060a' })] },
   'bubble-deal': { w: 380, h: 200, body: bubbleDeal },
   'bubble-build': { w: 370, h: 240, body: bubbleBuild },
