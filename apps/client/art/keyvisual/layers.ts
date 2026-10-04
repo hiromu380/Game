@@ -35,21 +35,17 @@ export function embed(
   return `<image href="data:image/svg+xml;base64,${data}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"${extra}/>`;
 }
 
-/** ぼかしと光のフィルター（キービジュアルの例外。各 SVG に1回だけ入れる） */
-export const FILTERS = el(
-  'defs',
-  {},
-  el(
-    'filter',
-    { id: 'kv-glow', x: '-50%', y: '-50%', width: '200%', height: '200%' },
-    el('feGaussianBlur', { stdDeviation: 6 }),
-  ),
-  el(
-    'filter',
-    { id: 'kv-glow-big', x: '-50%', y: '-50%', width: '200%', height: '200%' },
-    el('feGaussianBlur', { stdDeviation: 16 }),
-  ),
-);
+/** ぼかしと光のフィルター（キービジュアルの例外。各 SVG に1回だけ入れる。k は画像の大きさに合わせたぼかしの倍率） */
+export function filters(k = 1): string {
+  const blur = (id: string, std: number) =>
+    el(
+      'filter',
+      { id, x: '-50%', y: '-50%', width: '200%', height: '200%' },
+      el('feGaussianBlur', { stdDeviation: std * k }),
+    );
+  return el('defs', {}, blur('kv-glow', 6), blur('kv-glow-big', 16));
+}
+export const FILTERS = filters(1);
 
 // ---- 背景 ----
 
