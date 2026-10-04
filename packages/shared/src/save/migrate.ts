@@ -71,7 +71,9 @@ export function migrateSave(raw: unknown): SaveData | null {
  * - meta.records.bestShiftScore（2b: メタ進行）
  * - run.overtime / run.metaRecordedShifts / run.config.baseShiftCount / run.config.overtime（2b: 延長戦）
  */
-function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4 | SaveDataV5>(save: T): T {
+function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4 | SaveDataV5 | SaveDataV6>(
+  save: T,
+): T {
   const initial = createInitialMeta();
   const meta = save.meta ?? initial;
   const run = save.run
@@ -100,7 +102,7 @@ function normalizeV2<T extends SaveDataV2 | SaveDataV3 | SaveDataV4 | SaveDataV5
 }
 
 /** v3 の読み込み: ラン・メタ進行は v2 と同じ補い方。実績は知らない ID・壊れた値を落とす */
-function normalizeV3<T extends SaveDataV3 | SaveDataV4 | SaveDataV5>(save: T): T {
+function normalizeV3<T extends SaveDataV3 | SaveDataV4 | SaveDataV5 | SaveDataV6>(save: T): T {
   const base = normalizeV2(save);
   const initial = createInitialAchievements();
   const raw: Partial<AchievementProgress> = save.achievements ?? {};
