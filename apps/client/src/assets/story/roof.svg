@@ -1,0 +1,15 @@
+<svg width="1280" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 200">
+  <!-- カットシーンの絵: roof（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="0" y="0" width="1280" height="200" fill="#101218"/>
+  <rect x="0" y="0" width="1280" height="14" fill="#262b38"/>
+  <rect x="30" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="170" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="310" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="450" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="590" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="730" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="870" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="1010" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="1150" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+  <rect x="1290" y="40" width="60" height="40" rx="4" fill="#1a1d26"/>
+</svg>

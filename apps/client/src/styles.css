@@ -42,6 +42,11 @@ button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* キーボード・コントローラーで選んでいる場所をはっきり見せる（マウスのクリックでは出ない） */
+:focus-visible {
+  outline: 3px solid var(--selected);
+  outline-offset: 2px;
+}
 .button--primary {
   background: var(--primary);
   border-color: var(--primary-shadow);
@@ -204,6 +209,42 @@ button:disabled {
 .hud__quota.is-met .hud__quota-bar > span {
   background: var(--met);
 }
+/* 試運転の結果（再生中は出荷量の途中経過）とノルマに対するゲージ。配置を変えた後の古い結果は薄く、点線のゲージ */
+.hud__trial {
+  min-width: 9.5rem;
+}
+.hud__trial .hud__quota-bar {
+  height: 6px;
+  margin-top: 4px;
+}
+.hud__trial.is-met .hud__quota-bar > span {
+  background: var(--met);
+}
+.hud__trial-percent {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.hud__trial-note {
+  margin-top: 3px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.hud__trial.is-stale .hud__value,
+.hud__trial.is-stale .hud__quota-bar {
+  opacity: 0.45;
+}
+.hud__trial.is-stale .hud__quota-bar {
+  outline: 1px dashed var(--muted);
+}
+.hud__trial.is-stale .hud__trial-note {
+  color: var(--accent);
+  font-weight: 700;
+}
+.hud__trial:not(.is-met) .hud__value--score {
+  color: var(--text);
+}
 /* ロケットの進み具合（ui/RocketProgress.tsx） */
 .hud__rocket {
   flex-direction: row;
@@ -288,10 +329,50 @@ button:disabled {
 .item-button__desc {
   font-size: 0.75rem;
   color: var(--muted);
+  /* 説明は2行まで。ポインターを重ねる・キーボードで選ぶと全文を出す（全文はパーツ一覧にもある） */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.item-button:hover .item-button__desc,
+.item-button:focus-visible .item-button__desc {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 .item-button__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* 価格・個数は大きく（買えるか・何個あるかを一目で） */
+.item-button__price,
+.item-button__count {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--text);
+}
+.item-button:disabled .item-button__price {
+  color: var(--muted);
+}
+/* 購入後の残り予算（ポインターを重ねる・キーボードで選んだときだけ） */
+.item-button__after {
+  display: none;
+  font-size: 0.7rem;
+}
+.item-button:hover .item-button__after,
+.item-button:focus-visible .item-button__after {
+  display: block;
+}
+/* 予算が足りないときの不足額 */
+.shop__short {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--missed);
 }
 
 /* ---- パーツアイコン（仮素材: 色分けした図形 + 頭文字） ---- */
@@ -299,6 +380,43 @@ button:disabled {
   display: block;
   flex-shrink: 0;
   user-select: none;
+}
+
+/* ---- 消耗品のアイコン（ランダム配置権。パーツのアイコンと同じ大きさの枠に UI アイコンを置く） ---- */
+.item-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* ---- 手持ちの消耗品（ランダム配置権）: 今日だけ有効。夜は警告の色 ---- */
+.item-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 2px dashed var(--floor-item);
+  border-radius: 8px;
+}
+
+.item-row__expires {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--floor-item);
+}
+
+.item-row--expiring {
+  border-style: solid;
+  border-color: var(--missed);
+}
+
+.item-row--expiring .item-row__expires {
+  color: var(--missed);
+  font-weight: 700;
 }
 
 /* ---- 選択中のパーツ ---- */
@@ -330,6 +448,7 @@ button:disabled {
 .speed__button {
   padding: 4px 10px;
   font-size: 0.85rem;
+  min-height: 32px;
 }
 .speed__button--active {
   border-color: var(--selected);
@@ -370,6 +489,11 @@ button:disabled {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 8px;
+}
+.playback-panel__short {
+  margin: -4px 0 8px;
+  font-weight: bold;
+  color: var(--missed);
 }
 .is-met {
   color: var(--met);
@@ -413,6 +537,39 @@ button:disabled {
   font-size: 0.85rem;
   pointer-events: none;
 }
+/* 操作の手応え（購入 −3円 など）: 盤面の下の中央に短く出す */
+.toast--note {
+  top: auto;
+  right: auto;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-weight: bold;
+  white-space: nowrap;
+  animation: toast-note 1.6s ease-out both;
+}
+@keyframes toast-note {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  12%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast--note {
+    animation: none;
+  }
+}
 
 /* ---- ラン終了画面 ---- */
 .run-end {
@@ -451,6 +608,8 @@ button:disabled {
 .button--small {
   padding: 4px 10px;
   font-size: 0.8rem;
+  /* 指で押せる大きさ（小さいボタンでも高さ 32px） */
+  min-height: 32px;
 }
 
 /* ---- 売却（取り消せない操作）は目立たせず、確認時だけ赤くする ---- */
@@ -492,6 +651,20 @@ button:disabled {
 }
 .boss-notice--now .boss-notice__label {
   color: var(--missed);
+}
+/* ルールの期間（このシフトだけ・今夜だけ・今日だけ・全シフト） */
+.boss-notice__period {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: var(--muted);
+}
+/* 対象のパーツが手元にないとき（今は関係ない） */
+.boss-notice__target {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--met);
 }
 .boss-notice__desc {
   font-size: 0.85rem;
@@ -1112,9 +1285,17 @@ a.button.button--primary {
 }
 .app--compact .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   padding: 6px;
+}
+/* 狭い画面: 案内はボタンの下の1行に回す */
+.app--compact .controls__next {
+  order: 1;
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
 }
 .app--compact .controls .button-row {
   flex: 1;
@@ -1177,7 +1358,8 @@ a.button.button--primary {
 .app--fit .layout__board {
   /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
   /* 高さいっぱい。ただし右の列（最小 280px + すき間）の分は横幅に残す */
-  width: min(100cqh, 100cqw - 290px, var(--board-max, 640px));
+  /* 下に床の凡例の1行（26px）を残す */
+  width: min(100cqh - 26px, 100cqw - 290px, var(--board-max, 640px));
 }
 .app--fit .layout__side {
   min-height: 0;
@@ -1193,7 +1375,19 @@ a.button.button--primary {
 .app--fit .layout__side > * {
   grid-column: 1 / -1;
 }
-/* 右の列の先頭: シフトの情報・目的の案内・夜シフトの予告（盤面の上から移したもの） */
+/* 右の列の先頭: 目標の計器（右の列をスクロールしても上に残す）。その下に本番ボタン、目的の案内・夜シフトの予告 */
+.app--fit .layout__goal {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg);
+  padding-bottom: 2px;
+}
+.app--fit .layout__goal .hud {
+  margin: 0;
+  padding: 6px 10px;
+  gap: 4px 14px;
+}
 .app--fit .layout__info .hud {
   margin: 0 0 6px;
   padding: 6px 10px;
@@ -1837,7 +2031,8 @@ a.button.button--primary {
 .title-backdrop__bolt {
   position: absolute;
   right: 5%;
-  bottom: 70px;
+  /* 全身の足もと（viewBox の下の余白）をベルトの上に合わせる */
+  bottom: 52px;
   z-index: 1;
   animation: title-bob 1.6s ease-in-out infinite;
 }
@@ -1957,11 +2152,12 @@ a.button.button--primary {
   color: var(--met);
 }
 
-/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ---- */
+/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ----
+   盤面を主役にするため、細い帯（64px）にする。左から: 時刻 → シフトの達成（✓）→ 今日の出来事 → ボルト → ロケット */
 .workshop {
   position: relative;
-  height: 150px;
-  margin: 8px 0 12px;
+  height: 64px;
+  margin: 6px 0 8px;
   overflow: hidden;
   pointer-events: none;
   border: 1px solid var(--panel-border);
@@ -1984,8 +2180,9 @@ a.button.button--primary {
 }
 .workshop__sky-label {
   position: absolute;
-  top: 12px;
+  top: 50%;
   left: 14px;
+  transform: translateY(-50%);
   padding: 3px 7px;
   border: 1px solid currentColor;
   color: rgba(255, 255, 255, 0.72);
@@ -2005,33 +2202,33 @@ a.button.button--primary {
 .workshop__factory {
   position: absolute;
   right: -20px;
-  bottom: -35px;
-  width: 340px;
+  bottom: -60px;
+  width: 260px;
   opacity: 0.38;
   filter: brightness(0.45);
 }
 .workshop__gantry {
   position: absolute;
-  right: 18%;
-  bottom: 12px;
-  width: 116px;
-  height: 132px;
+  right: 12%;
+  bottom: 4px;
+  width: 64px;
+  height: 56px;
   border: 5px solid rgba(20, 23, 29, 0.82);
   border-top: 0;
 }
 .workshop__gantry-top {
   position: absolute;
   top: 0;
-  left: -15px;
-  width: 136px;
-  border-top: 8px solid rgba(20, 23, 29, 0.82);
+  left: -10px;
+  width: 84px;
+  border-top: 5px solid rgba(20, 23, 29, 0.82);
 }
 .workshop__rocket {
   position: absolute;
-  left: 22px;
-  bottom: 3px;
-  width: 64px;
-  height: 70px;
+  left: 13px;
+  bottom: 2px;
+  width: 38px;
+  height: 44px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.3));
 }
@@ -2039,7 +2236,7 @@ a.button.button--primary {
   position: absolute;
   top: 0;
   width: 2px;
-  height: 65px;
+  height: 22px;
   background: var(--hazard-yellow);
 }
 .workshop__cable--a {
@@ -2047,12 +2244,13 @@ a.button.button--primary {
 }
 .workshop__cable--b {
   right: 12px;
-  height: 105px;
+  height: 34px;
 }
 .workshop__plaques {
   position: absolute;
-  top: 12px;
+  top: 50%;
   right: 14px;
+  transform: translateY(-50%);
   display: flex;
   gap: 4px;
 }
@@ -2069,8 +2267,9 @@ a.button.button--primary {
 }
 .workshop__event-prop {
   position: absolute;
-  left: 18%;
-  bottom: 12px;
+  left: 34%;
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
   flex-direction: column;
   min-width: 108px;
@@ -2125,10 +2324,11 @@ a.button.button--primary {
   }
 }
 .workshop__status {
+  /* 工場名は目標の計器の管理プレートにもあるので、細い帯では出さない */
+  display: none;
   position: absolute;
   left: 18px;
   bottom: 15px;
-  display: flex;
   flex-direction: column;
   padding: 6px 9px;
   border-left: 4px solid var(--hazard-yellow);
@@ -2140,22 +2340,32 @@ a.button.button--primary {
 }
 .workshop__bolt {
   position: absolute;
-  left: 48%;
-  bottom: 5px;
-  width: 58px;
-  transform: rotate(-4deg);
+  left: 56%;
+  bottom: 0;
+  /* 全身（設定画の viewBox 140×162）。帯の高さに収める */
+  height: calc(100% - 4px);
+  width: auto;
   transition: transform 0.2s;
 }
 .workshop__bolt.is-watching {
-  transform: rotate(4deg) translateY(-8px);
+  transform: translateY(-2px);
+}
+/* シフトを達成した印（✓）: 時刻の右に並べる（以前は時刻の表示に重なっていた） */
+.workshop__marks {
+  position: absolute;
+  top: 50%;
+  left: 130px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
 }
 .workshop__approval {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  margin: 7px 3px;
+  width: 20px;
+  height: 20px;
+  margin: 0 2px;
   border: 2px solid var(--met);
   border-radius: 50%;
   color: var(--met);
@@ -2210,12 +2420,15 @@ a.button.button--primary {
 
 @media (max-width: 600px) {
   .workshop {
-    height: 104px;
+    height: 48px;
   }
   .workshop__gantry {
     right: 8%;
     transform: scale(0.78);
     transform-origin: bottom;
+  }
+  .workshop__marks {
+    left: 112px;
   }
   .workshop__bolt,
   .workshop__status,
@@ -2296,4 +2509,153 @@ a.button.button--primary {
   width: min(720px, 100%);
   max-height: 90dvh;
   overflow-y: auto;
+}
+
+/* ---- ゲームのメニュー（ui/GameMenu.tsx）: 操作方法・諦める ---- */
+.game-menu {
+  position: relative;
+}
+.game-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 11rem;
+  padding: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.game-menu__list button {
+  justify-content: flex-start;
+  width: 100%;
+}
+.game-menu__danger {
+  color: var(--missed);
+}
+
+/* 横長の画面: 目標の計器を1段に収める（ロケットの進み具合は上の細い帯の ✓ とロケットの絵で見せる） */
+.app--fit .layout__goal .hud__rocket {
+  display: none;
+}
+.app--fit .layout__goal .hud__trial {
+  min-width: 8rem;
+  flex: 1;
+}
+
+/* 狭い画面: ヘッダーのボタンは絵だけにし、目標の計器は「シフト・予算・ノルマ」の1段と「試運転」の1段にする */
+@media (max-width: 600px) {
+  .app-header__actions .button--ghost {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+  .app-header__name {
+    display: none;
+  }
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 6px 12px;
+  }
+  .hud__trial {
+    grid-column: 1 / -1;
+  }
+  .hud__rocket {
+    display: none;
+  }
+}
+
+/* 床の凡例（盤面の下。盤面にある床の種類だけ） */
+.floor-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+.floor-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.floor-legend__swatch {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 2px;
+}
+.floor-legend__swatch--limited {
+  border: 2px dashed var(--floor-bonus);
+}
+.floor-legend__swatch--item {
+  border: 2px dashed var(--floor-item);
+}
+.floor-legend__swatch--upcoming {
+  border: 2px dashed var(--floor-blocked);
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--floor-blocked) 50%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+/* 次にすること（操作欄の1行の案内。state/nextStep.ts） */
+.controls__next {
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+.controls__next--ready {
+  color: var(--met);
+}
+.controls__next--short {
+  color: var(--accent);
+}
+/* 横長の画面では凡例を1行にする（はみ出す分は横にスクロール） */
+.app--fit .floor-legend {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+/* 狭い画面（指で操作）: 押せるものは高さ 44px 以上（CLAUDE.md「UI の原則」） */
+.app--compact button,
+.app--compact .tabs__tab {
+  min-height: 44px;
+}
+
+/* ---- カットシーン（story/CutscenePlayer.tsx）: 画面全体に重ねる ---- */
+.cutscene {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0b0d12;
+  touch-action: none;
+  user-select: none;
+}
+.cutscene__stage {
+  position: absolute;
+  inset: 0;
+}
+.cutscene__canvas {
+  display: block;
+}
+/* スキップの案内（右下・控えめ）: 長押しの進み具合の輪 */
+.cutscene__skip {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  pointer-events: none;
 }

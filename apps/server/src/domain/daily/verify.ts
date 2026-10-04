@@ -40,7 +40,9 @@ export function applyShiftOps(start: RunState, ops: unknown): ApplyShiftResult {
     row[field]++;
     counts.set(partId, row);
   };
-  const countShop = (s: RunState) => s.shop.forEach((offer) => count(offer.partId, 'offered'));
+  // 相場の材料はパーツだけ（消耗品の配置権は相場の対象外）
+  const countShop = (s: RunState) =>
+    s.shop.forEach((offer) => offer.partId && count(offer.partId, 'offered'));
 
   let state = start;
   countShop(state);
@@ -49,7 +51,8 @@ export function applyShiftOps(start: RunState, ops: unknown): ApplyShiftResult {
     if (!isRunOp(op)) return { ok: false, reason: `op[${i}]:invalidOp` };
     const result = applyOp(state, op);
     if (!result.ok) return { ok: false, reason: `op[${i}]:${result.error}` };
-    if (op.op === 'buy') count(state.shop[op.offerIndex]!.partId, 'bought');
+    const bought = op.op === 'buy' ? state.shop[op.offerIndex]!.partId : undefined;
+    if (bought) count(bought, 'bought');
     if (op.op === 'reroll') countShop(result.state);
     state = result.state;
   }

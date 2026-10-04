@@ -8,6 +8,9 @@ export function paletteCss(): string {
     ...Object.entries(UI_COLORS).map(([k, v]) => `  --${k}: ${v};`),
     `  --white: ${INK.white};`,
     `  --hazard-yellow: ${BOARD_COLORS.hazardYellow};`,
+    `  --floor-item: ${BOARD_COLORS.floorItem};`,
+    `  --floor-bonus: ${BOARD_COLORS.floorBonus};`,
+    `  --floor-blocked: ${BOARD_COLORS.blocked};`,
     ...Object.entries(VANISH_COLORS).map(([k, v]) => `  --vanish-${k}: ${v};`),
     ...Object.entries(TITLE_COLORS).map(([k, v]) => `  --title-${k}: ${v};`),
   ];

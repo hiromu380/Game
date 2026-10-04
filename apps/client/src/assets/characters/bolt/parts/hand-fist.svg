@@ -1,0 +1,5 @@
+<svg width="28" height="30" xmlns="http://www.w3.org/2000/svg" viewBox="-14 -6 28 30">
+  <!-- ボルトの部品: handL / fist（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="0" cy="5" r="7.5" fill="#cfd8dc" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-4 3 H4" fill="none" stroke="#33691e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

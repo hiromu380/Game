@@ -60,6 +60,8 @@ export function buildDailyConfig({
     ...base,
     economy: { ...base.economy, prices: { ...base.economy.prices, ...prices } },
     globalModifier,
+    // ランダム配置権をデイリーにも出すか（balance/floors.ts の inDaily）
+    floorPermit: balance.floorPermit.inDaily ? base.floorPermit : undefined,
     commitSeedMode: practice ? 'derived' : 'external',
     mode: practice ? 'practice' : 'daily',
     overtimeAllowed: false,

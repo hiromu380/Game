@@ -11,6 +11,7 @@
     "build:demo": "tsc -p tsconfig.json --noEmit && vite build --mode demo",
     "build:capture": "tsc -p tsconfig.json --noEmit && vite build --mode capture",
     "preview": "vite preview",
+    "ui-review": "tsx build/ui-review/capture.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "art": "tsx art/build.ts"

@@ -1,6 +1,7 @@
 import { createDailyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import {
+  canUndo,
   createGameState,
   gameReducer,
   getPersistedRun,
@@ -325,6 +326,68 @@ describe('全部戻す', () => {
   it('盤面が空なら何もしない', () => {
     const state = createGameState(createRun(1), createInitialMeta());
     expect(apply(state, { type: 'returnAll' })).toBe(state);
+  });
+});
+
+describe('元に戻す', () => {
+  const placed = () =>
+    apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 3, y: 1 },
+    );
+
+  it('配置・回転・移動・全部戻すを1つずつ取り消し、操作ログも同じ位置まで戻す', () => {
+    const start = createGameState(createRun(1), createInitialMeta());
+    expect(canUndo(start)).toBe(false);
+    const two = placed();
+    const rotated = apply(two, { type: 'clickCell', x: 1, y: 1 }, { type: 'rotate' });
+    const moved = apply(rotated, { type: 'movePart', from: { x: 3, y: 1 }, to: { x: 4, y: 2 } });
+    const cleared = apply(moved, { type: 'returnAll' });
+    expect(cleared.undo).toHaveLength(5);
+
+    let state = apply(cleared, { type: 'undo' });
+    expect(state.run).toEqual(moved.run);
+    expect(state.pendingOps).toEqual(moved.pendingOps);
+    state = apply(state, { type: 'undo' });
+    expect(state.run).toEqual(rotated.run);
+    state = apply(state, { type: 'undo' }, { type: 'undo' }, { type: 'undo' });
+    expect(state.run).toEqual(start.run);
+    expect(state.pendingOps).toEqual([]);
+    expect(canUndo(state)).toBe(false);
+    expect(apply(state, { type: 'undo' })).toBe(state);
+    // 取り消したあとの操作ログを再生すると同じ状態になる（デイリーの検証とずれない）
+    const mid = apply(cleared, { type: 'undo' }, { type: 'undo' });
+    const replayed = replayOps(createRun(1), mid.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(mid.run);
+  });
+
+  it('購入・売却・リロールのあとは戻せない（買い物のやり直しはできない）', () => {
+    for (const action of [
+      { type: 'buy', offerIndex: 0 },
+      { type: 'reroll' },
+      { type: 'sellCell', x: 3, y: 1 },
+    ] satisfies GameAction[]) {
+      const state = apply(placed(), action);
+      expect(state.run).not.toEqual(placed().run);
+      expect(canUndo(state)).toBe(false);
+    }
+  });
+
+  it('試運転では履歴を消さず、試運転の回数は戻さない', () => {
+    let state = apply(placed(), { type: 'startTrial' }, { type: 'closePlayback' });
+    expect(state.undo).toHaveLength(2);
+    const trials = state.run.trialCount;
+    state = apply(state, { type: 'undo' });
+    expect(state.run.trialCount).toBe(trials);
+    expect(state.run.board.cells.filter(Boolean)).toHaveLength(1);
+  });
+
+  it('本番のあとは履歴を消す', () => {
+    const state = apply(placed(), { type: 'startCommit' }, { type: 'closePlayback' });
+    expect(state.undo).toEqual([]);
   });
 });
 

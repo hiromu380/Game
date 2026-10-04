@@ -1,0 +1,5 @@
+<svg width="120" height="46" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 46">
+  <!-- カットシーンの絵: blueprint-ground（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M4 40 L20 6 H116 L100 40 Z" fill="#b3e5fc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M50 14 q8 8 6 20 h-12 q-2 -12 6 -20 Z" fill="none" stroke="#546e7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

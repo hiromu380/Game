@@ -9,6 +9,7 @@ import {
   getCurrentFloor,
   getCurrentRules,
   isBlockedCell,
+  PART_IDS,
   SIM_VERSION,
   replayOps,
   scoreToString,
@@ -394,6 +395,70 @@ describe('床タイル（SIM_VERSION 5）', () => {
       status: 409,
       json: { error: 'simVersionMismatch' },
     });
+  });
+});
+
+describe('ランダム配置権（SIM_VERSION 6）', () => {
+  it('ショップで買って使う操作ログがサーバーで検証され、湧いた床の結果がクライアントと一致する。相場の集計に入らない', async () => {
+    const { ctx } = testContext();
+    // 配置権が必ず並ぶようにしたデイリー
+    const scratch = { ...ctx, repos: createMemoryRepositories() };
+    const real = await ensureDaily(scratch, DAY);
+    const config: RunConfig = {
+      ...real.config,
+      shifts: real.config.shifts.map((s) => ({ ...s, quota: 1, kind: 'normal' as const })),
+      bossPlan: real.config.bossPlan.map(() => null),
+      globalModifier: null,
+      floorPermit: { ...real.config.floorPermit!, offerChancePercent: 100 },
+    };
+    await ctx.repos.dailies.createIfAbsent({ ...real, config });
+    const api = testApi(ctx);
+    const { token } = await api.register();
+    expect((await api.call('POST', `/daily/${DAY}/start`, {}, token)).status).toBe(200);
+
+    const state = createRunWithConfig(dailyRunSeed(DAY), config);
+    const offerIndex = state.shop.findIndex((o) => o.itemId === 'floorPermit');
+    expect(offerIndex).toBeGreaterThanOrEqual(0);
+    const bought = replayOps(state, [
+      { op: 'buy', offerIndex },
+      { op: 'useItem', itemId: 'floorPermit' },
+    ]);
+    if (!bought.ok) throw new Error(String(bought.error));
+    // 湧いた床の左にスイッチ、床の上に出荷口（盤面の左端なら右にずらす）
+    const floor = getCurrentFloor(bought.state);
+    const cell = bought.state.itemFloors!.cells[0]!;
+    const x = cell.index % 7;
+    const y = Math.floor(cell.index / 7);
+    const sx = x > 0 && !floor[cell.index - 1] ? x - 1 : x + 1;
+    const ops: RunOp[] = [
+      { op: 'buy', offerIndex },
+      { op: 'useItem', itemId: 'floorPermit' },
+      { op: 'place', partId: 'switch', x: sx, y, dir: sx < x ? 1 : 3 },
+      { op: 'place', partId: 'dock', x, y, dir: 0 },
+    ];
+    const res = await api.commit(token, 0, ops);
+    expect(res.status).toBe(200);
+    const local = clientCommit(state, ops, res.json.seed as number);
+    expect(scoreToString(local.result.score)).toBe(res.json.score);
+    expect(local.result.events.some((e) => e.type === 'floor')).toBe(true);
+    // 相場の集計（パーツごと）に配置権は入らない
+    const stats = await ctx.repos.shopStats.get(DAY);
+    expect(stats.length).toBeGreaterThan(0);
+    expect(stats.every((row) => PART_IDS.includes(row.partId))).toBe(true);
+  });
+
+  it('知らない消耗品を使う操作は拒否される', async () => {
+    const { ctx } = testContext();
+    await seedEasyDaily(ctx);
+    const api = testApi(ctx);
+    const { token } = await api.register();
+    await api.call('POST', `/daily/${DAY}/start`, {}, token);
+    const ops = [{ op: 'useItem', itemId: 'lava' } as never];
+    expect((await api.commit(token, 0, ops)).status).toBe(400);
+    // 持っていない配置権を使う操作も拒否される
+    expect((await api.commit(token, 0, [{ op: 'useItem', itemId: 'floorPermit' }])).status).toBe(
+      400,
+    );
   });
 });
 

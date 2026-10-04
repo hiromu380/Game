@@ -1,0 +1,5 @@
+<svg width="24" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="-12 -5 24 26">
+  <!-- ナットの部品: handL / point（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-2.5" y="4" width="5" height="13" rx="2.5" fill="#cfd8dc" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="0" cy="4" r="6" fill="#cfd8dc" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

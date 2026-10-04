@@ -62,6 +62,7 @@ export function DayEventNotice({ run }: { run: RunState }) {
   return (
     <div className="boss-notice day-event-notice">
       <span className="boss-notice__label">{t('event.today')}</span>
+      <span className="boss-notice__period">{t('rule.period.today')}</span>
       <strong>
         {t(`event.${id}.sender`)} / {t(`event.${id}.name`)}
       </strong>

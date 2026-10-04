@@ -1,0 +1,14 @@
+<svg width="60" height="400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 400">
+  <!-- カットシーンの絵: ladder（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M10 0 V400 M50 0 V400" fill="none" stroke="#546e7a" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 20 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 60 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 100 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 140 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 180 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 220 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 260 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 300 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 340 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 380 H50" fill="none" stroke="#90a4ae" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

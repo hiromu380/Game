@@ -25,6 +25,8 @@ interface Props {
   onCollection: () => void;
   onHowTo: () => void;
   onSettings: () => void;
+  /** 思い出（見たカットシーン）。見たシーンがなければ undefined（ボタンを出さない） */
+  onMemories?: () => void;
 }
 
 export function TitleScreen({
@@ -37,6 +39,7 @@ export function TitleScreen({
   onCollection,
   onHowTo,
   onSettings,
+  onMemories,
 }: Props) {
   const { t } = useI18n();
   const percent = Math.round(progress * 100);
@@ -70,6 +73,11 @@ export function TitleScreen({
         <button className="button--ghost" onClick={onCollection}>
           {t('title.collection')}
         </button>
+        {onMemories && (
+          <button className="button--ghost" onClick={onMemories}>
+            {t('story.memories')}
+          </button>
+        )}
         <button className="button--ghost" onClick={onSettings}>
           {t('settings.open')}
         </button>

@@ -9,6 +9,7 @@ import {
   createPrng,
   createRun,
   metaToModifiers,
+  countItems,
   getCurrentFloor,
   getCurrentShift,
   PART_IDS,
@@ -20,6 +21,7 @@ import {
 import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
 import { evaluate, type EvalMode } from './evaluate';
 import { applyMove, MOVE_SETTINGS } from './moves';
+import { playPermits, type PermitLog } from './permit';
 
 /** 1シフトの記録 */
 export interface ShiftLog {
@@ -64,6 +66,8 @@ export interface RunLog {
   /** パーツ別: 本番時に盤面にあった数（シフトごとに足し合わせる） */
   onBoard: Partial<Record<PartId, number>>;
   rerolls: number;
+  /** ランダム配置権: 並んだ・買った・使った枚数、使わずに消えた枚数、湧いた床の種類 */
+  permits: PermitLog & { expired: number };
   ms: number;
 }
 
@@ -82,6 +86,8 @@ export interface RunnerOptions {
   mode?: 'normal' | 'daily';
   /** ボットが床を見て手を選ぶか（既定 true。false は「床を見ないボット」との比較用。moves.ts） */
   floorAware?: boolean;
+  /** ボットがランダム配置権を買って使うか（既定 true。false は「配置権を使わないボット」との比較用） */
+  permits?: boolean;
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
@@ -123,6 +129,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     bought: {},
     onBoard: {},
     rerolls: 0,
+    permits: { offered: 0, bought: 0, used: 0, expired: 0, tiles: {} },
     ms: 0,
   };
 
@@ -139,7 +146,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
     // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
     if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
-    for (const offer of state.shop) add(log.offered, offer.partId);
+    for (const offer of state.shop) if (offer.partId) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);
 
@@ -151,7 +158,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       if (move.kind === 'buyPlace') add(log.bought, move.partId);
       if (move.kind === 'reroll') {
         log.rerolls++;
-        for (const offer of next.shop) add(log.offered, offer.partId);
+        for (const offer of next.shop) if (offer.partId) add(log.offered, offer.partId);
       }
       replay = next;
     }
@@ -163,6 +170,16 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
 
     const quota = getCurrentShift(plan.state).quota;
     const expected = evaluate(plan.state, botOptions.samples, botOptions.evalMode).score;
+    // ランダム配置権（組み立て後に、期待値で買う・使う。結果は先読みしない。permit.ts）
+    const built =
+      (options.permits ?? true)
+        ? playPermits(plan.state, botOptions.samples, botOptions.evalMode, log.permits)
+        : plan.state;
+    // 今日の最後のシフトで使わずに残った配置権は、日が変わると消える
+    if ((built.shiftIndex + 1) % built.config.shiftsPerDay === 0) {
+      log.permits.expired += countItems(built, 'floorPermit');
+    }
+    plan.state = built;
     const floor = getCurrentFloor(plan.state);
     const effectCells = floor.flatMap((c, i) => (c && c.tile !== 'blocked' ? [i] : []));
     const committed = commitShift(plan.state);

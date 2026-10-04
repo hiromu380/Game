@@ -1,0 +1,7 @@
+<svg width="136" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 48">
+  <!-- カットシーンの絵: scrap（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="4" y="10" width="60" height="30" rx="4" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="4" y="22" width="60" height="8" fill="#e53935"/>
+  <path d="M70 40 L96 6 L104 14 L80 44 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="120" cy="28" r="12" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

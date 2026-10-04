@@ -8,6 +8,14 @@
  */
 import { achievementFiles } from './achievements';
 import { boardFiles } from './board';
+import { boltFiles } from './characters/bolt';
+import { chiefFiles } from './characters/chief';
+import { nutFiles } from './characters/nut';
+import { nutRocketFiles } from './characters/nutRocket';
+import { capsuleFiles } from './keyvisual/capsules';
+import { storePreviewHtml } from './keyvisual/preview';
+import { storyAssetFiles } from './story/assets';
+import { characterPreviewHtml } from './characters/preview';
 import { iconFiles } from './icons';
 import { logoFiles } from './logo';
 import { mascotFiles } from './mascot';
@@ -28,9 +36,20 @@ export function buildArt(): Record<string, string> {
     ...achievementFiles(),
     ...rocketFiles(),
     ...titleFiles(),
+    ...boltFiles(),
+    ...chiefFiles(),
+    ...nutFiles(),
+    ...nutRocketFiles(),
+    ...capsuleFiles(),
+    ...storyAssetFiles(),
+    // 設定画の一覧（リポジトリの docs/ へ書き出す）
+    '../../docs/characters/preview.html': characterPreviewHtml(),
+    // ストア用の画像の確認ページ
+    '../../docs/art-preview.html': storePreviewHtml(),
   };
   files['art/preview.html'] = previewHtml([
-    ...Object.keys(files),
+    // キャラクターは部品が多いので docs/characters/preview.html にまとめる
+    ...Object.keys(files).filter((f) => !f.includes('characters/') && !f.startsWith('build/')),
     // 生成していない既存の素材も並べる
     ...EXISTING_ASSETS,
   ]);

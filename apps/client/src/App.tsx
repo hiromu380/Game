@@ -8,6 +8,7 @@ import {
   createRunWithConfig,
   dailyRunSeed,
   getCurrentEconomy,
+  drawFloorPermit,
   getCurrentFloor,
   type FloorParams,
   getCurrentRules,
@@ -23,6 +24,8 @@ import {
   type PartId,
 } from '@chain-factory/sim';
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -35,14 +38,31 @@ import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
 import { LAYOUT } from './config/layout';
+import { EDITION } from './config/edition';
+import {
+  autoPlayScene,
+  triggerAfterCommit,
+  type SceneId,
+  type StoryTrigger,
+} from './story/playback';
+import { AVAILABLE_SCENES } from './story/scenes';
+import { loadSeenScenes, markSceneSeen } from './state/saveStore';
 import { useI18n } from './i18n';
 import { api, OnlineError } from './online/api';
 import { getMarket, priceTrends } from './online/market';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
-import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
+import {
+  canUndo,
+  createGameState,
+  gameReducer,
+  getPersistedRun,
+  type PlayMode,
+} from './state/gameReducer';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
+import { trialStatus } from './state/trialStatus';
+import { isDebugAvailable } from './config/debug';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
 import { useInputMode } from './input/useInputMode';
@@ -73,7 +93,11 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
-import { GiveUpButton } from './ui/GiveUpButton';
+import { FloorLegend } from './ui/FloorLegend';
+import { nextStep } from './state/nextStep';
+import { feedbackMessage, type FeedbackMessage } from './state/feedbackMessage';
+import { FEEDBACK_NOTE_MS } from './config/effects';
+import { GameMenu } from './ui/GameMenu';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
@@ -102,9 +126,12 @@ const floorAmounts = (params: FloorParams) => ({
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
-/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す */
-const DEBUG_AVAILABLE =
-  import.meta.env.DEV || new URLSearchParams(window.location.search).has('debug');
+/** カットシーンの再生（PixiJS と素材を、再生するときに読み込む） */
+const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
+
+/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す（体験版・製品版のビルドでは出ない） */
+// 撮影モードではデバッグを出さない（ストアのスクリーンショット・動画に写らないように）
+const DEBUG_AVAILABLE = !CAPTURE && isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
   const { t, formatScore, formatCompact } = useI18n();
@@ -223,9 +250,22 @@ export function App({ start, onTitle }: Props) {
 
   // 操作の手応え（配置・購入・エラーなど）の効果音。
   // feedback は操作のたびに新しいオブジェクトになるので、変わったときに1回鳴らす
+  // あわせて、お金が動いた操作などは盤面の下に短く表示する（state/feedbackMessage.ts）
   const { feedback } = state;
+  const lastBudget = useRef(run.budget);
+  const [note, setNote] = useState<{ message: FeedbackMessage; seq: number } | null>(null);
   useEffect(() => {
-    if (feedback) audio.play(feedback.kind);
+    const delta = run.budget - lastBudget.current;
+    lastBudget.current = run.budget;
+    if (!feedback) return;
+    audio.play(feedback.kind === 'undo' ? 'returnPart' : feedback.kind);
+    const message = feedbackMessage(feedback.kind, delta);
+    if (!message) return;
+    setNote({ message, seq: feedback.seq });
+    const timer = setTimeout(() => setNote(null), FEEDBACK_NOTE_MS);
+    return () => clearTimeout(timer);
+    // 予算は feedback と同時に変わる（feedback が変わったときだけ見る）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feedback]);
 
   // 本番の結果が出たときの効果音（ノルマ達成・全シフトクリア・ラン失敗）。
@@ -263,15 +303,6 @@ export function App({ start, onTitle }: Props) {
     if (showingUnlocks) audio.play('unlock');
   }, [showingUnlocks]);
 
-  // キーボード: R で回転
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'r' || e.key === 'R') dispatch({ type: 'rotate' });
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
   // 盤面に渡す表示状態（選択中のマス・配置しようとしているパーツ）
   const boardView = useMemo<BoardViewState>(
     () => ({
@@ -307,7 +338,7 @@ export function App({ start, onTitle }: Props) {
           name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
           desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
           period:
-            cell.source === 'bonus' || cell.source === 'event'
+            cell.source === 'bonus' || cell.source === 'event' || cell.source === 'item'
               ? t(`floor.period.${cell.source}`)
               : '',
         }),
@@ -373,9 +404,33 @@ export function App({ start, onTitle }: Props) {
   };
   /** 本番の確認ダイアログ（押し間違い防止） */
   const [commitConfirm, setCommitConfirm] = useState(false);
+  // カットシーン（初回だけ自動で再生。story/playback.ts）。終わったら見た記録を残す
+  const storyContext = () => ({
+    mode: mode.kind,
+    edition: EDITION,
+    seen: loadSeenScenes(),
+    available: AVAILABLE_SCENES,
+  });
+  // 初めてのラン（まだ何もしていない最初のシフト）を開いたら、オープニング
+  const [cutscene, setCutscene] = useState<SceneId | null>(() =>
+    !CAPTURE && run.phase === 'building' && run.shiftIndex === 0 && run.history.length === 0
+      ? autoPlayScene({ kind: 'newRun' }, storyContext())
+      : null,
+  );
+  const playStory = (trigger: StoryTrigger | null) => {
+    const scene = autoPlayScene(trigger, storyContext());
+    if (scene && !CAPTURE) setCutscene(scene);
+  };
+
   const closePlayback = () => {
     setLiveScore(null);
+    // 本番の結果を閉じたとき: 日のクリア・全クリア・未達のカットシーン
+    if (playback?.mode === 'commit') playStory(triggerAfterCommit(run, playback.nextRun));
     dispatch({ type: 'closePlayback' });
+  };
+  const finishCutscene = (scene: SceneId) => {
+    markSceneSeen(scene);
+    setCutscene(null);
   };
 
   // キーボード・コントローラーの操作（盤面のカーソル・一覧・試運転・本番）。ダイアログ中・ラン終了画面はメニューの操作
@@ -394,6 +449,8 @@ export function App({ start, onTitle }: Props) {
     onPlace: onCellClick,
     onDeselect: () => dispatch({ type: 'deselect' }),
     onRotate: () => dispatch({ type: 'rotate' }),
+    onUndo: () => dispatch({ type: 'undo' }),
+    onReturn: () => dispatch({ type: 'returnSelected' }),
     onTrial: () => startPlayback('startTrial'),
     onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,
@@ -455,9 +512,6 @@ export function App({ start, onTitle }: Props) {
             </button>
           </>
         )}
-        {mode.kind !== 'daily' && run.phase === 'building' && (
-          <GiveUpButton disabled={playing} onGiveUp={() => dispatch({ type: 'giveUp' })} />
-        )}
         <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
           <UiIcon name="daily" />
           {t('online.dailyButton')}
@@ -472,6 +526,12 @@ export function App({ start, onTitle }: Props) {
           <UiIcon name="settings" />
           {t('settings.open')}
         </button>
+        {/* 操作方法・諦める（押し間違えないよう、よく使うボタンから離してメニューの中に入れる） */}
+        <GameMenu
+          disabled={playing}
+          canGiveUp={mode.kind !== 'daily' && run.phase === 'building'}
+          onGiveUp={() => dispatch({ type: 'giveUp' })}
+        />
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {dailyMenu && (
@@ -513,6 +573,10 @@ export function App({ start, onTitle }: Props) {
       guidePartId={guideStep && guideStep !== 'buyGear' ? tutorialPart(guideStep) : null}
       onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
       onReturnAll={() => dispatch({ type: 'returnAll' })}
+      run={run}
+      lastShiftOfDay={getDayAndPeriod(run).period === run.config.shiftsPerDay - 1}
+      permitHasCell={drawFloorPermit(run) !== null}
+      onUseItem={(itemId) => dispatch({ type: 'useItem', itemId })}
     />
   );
   const selectionPanel = (
@@ -529,9 +593,10 @@ export function App({ start, onTitle }: Props) {
 
   // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
-  const runInfo = (
+  const trial = trialStatus(state.trials, run);
+  const hud = <Hud run={run} liveScore={liveScore} trial={trial} />;
+  const notices = (
     <>
-      <Hud run={run} liveScore={liveScore} />
       {tutorialOn ? (
         <TutorialGuide
           tutorial={tutorial}
@@ -548,6 +613,12 @@ export function App({ start, onTitle }: Props) {
       )}
       <DayEventNotice run={run} />
       <BossNotice run={run} />
+    </>
+  );
+  const runInfo = (
+    <>
+      {hud}
+      {notices}
     </>
   );
 
@@ -592,6 +663,11 @@ export function App({ start, onTitle }: Props) {
           onCancel={() => setCommitConfirm(false)}
         />
       )}
+      {cutscene && (
+        <Suspense fallback={null}>
+          <CutscenePlayer scene={cutscene} onDone={() => finishCutscene(cutscene)} />
+        </Suspense>
+      )}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
@@ -608,6 +684,9 @@ export function App({ start, onTitle }: Props) {
             dispatch({ type: 'captureCommit', seed });
           }}
           onPreviewShare={() => setSharePreview(true)}
+          onGivePermit={() => dispatch({ type: 'captureGivePermit' })}
+          scenes={AVAILABLE_SCENES}
+          onPlayScene={setCutscene}
         />
       )}
       {CAPTURE && sharePreview && (
@@ -646,17 +725,33 @@ export function App({ start, onTitle }: Props) {
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />
+          {!playing && (
+            <FloorLegend
+              floor={boardView.floor}
+              upcomingBlocked={boardView.upcomingBlocked}
+              params={boardView.rules.floorParams}
+            />
+          )}
           {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
+          {note && !error && (
+            <div key={note.seq} className="toast toast--note" role="status">
+              {t(`toast.${note.message.kind}`, { amount: note.message.amount })}
+            </div>
+          )}
           {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
         </div>
         <aside className="layout__side">
-          {fit && <div className="layout__info">{runInfo}</div>}
+          {/* 目標の計器は右の列の上に固定し（スクロールしても見える）、本番ボタンをそのすぐ下に置く */}
+          {fit && <div className="layout__goal">{hud}</div>}
           <ControlsPanel
             playing={playing}
             compact={compact}
             inputMode={inputMode}
             speed={speed}
+            next={nextStep(run, selection, trial, getCurrentShift(run).quota)}
+            canUndo={canUndo(state)}
+            onUndo={() => dispatch({ type: 'undo' })}
             onTrial={() => startPlayback('startTrial')}
             onCommit={() => setCommitConfirm(true)}
             onSpeedChange={setSpeed}
@@ -668,6 +763,7 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
+          {fit && <div className="layout__info">{notices}</div>}
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
@@ -697,7 +793,8 @@ export function App({ start, onTitle }: Props) {
           {(!tabbed || tab === 'inventory') && inventoryPanel}
           {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
-          {!tabbed && selectionPanel}
+          {/* 何も選んでいないときは出さない（空の欄で場所をとらない） */}
+          {!tabbed && selection && selectionPanel}
           {/* 売却エリア（盤面のパーツをドラッグして売る）。右の列の下端に固定し、スクロールしても見える */}
           <SellZone dragging={dragging !== null} refund={sellRefund} />
         </aside>

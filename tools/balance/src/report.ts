@@ -23,6 +23,14 @@ export interface BotSummary {
   bosses: Record<string, { attempts: number; cleared: number }>;
   /** 床の利用（全シフトの合計）: 効果のある床のマス・そのうちパーツを置いたマス・床の効果を受けた回数 */
   floor: { cells: number; onFloor: number; applied: number; shifts: number };
+  /** ランダム配置権（全ランの合計） */
+  permits: {
+    offered: number;
+    bought: number;
+    used: number;
+    expired: number;
+    tiles: Record<string, number>;
+  };
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
@@ -85,11 +93,30 @@ export function summarize(
     shifts: allShifts.length,
   };
 
+  const permits = {
+    offered: 0,
+    bought: 0,
+    used: 0,
+    expired: 0,
+    tiles: {} as Record<string, number>,
+  };
+  for (const log of logs) {
+    const p = log.permits;
+    if (!p) continue;
+    permits.offered += p.offered;
+    permits.bought += p.bought;
+    permits.used += p.used;
+    permits.expired += p.expired;
+    for (const [tile, n] of Object.entries(p.tiles))
+      permits.tiles[tile] = (permits.tiles[tile] ?? 0) + (n ?? 0);
+  }
+
   return {
     bot,
     runs: logs.length,
     bosses,
     floor,
+    permits,
     clearRate: logs.filter((l) => l.cleared).length / logs.length,
     shifts,
     parts,
@@ -162,6 +189,22 @@ export function toMarkdown(
     const f = s.floor;
     lines.push(
       `| ${s.bot} | ${f.cells ? pct(f.onFloor / f.cells) : '-'} | ${f.shifts ? num(f.applied / f.shifts) : '-'} |`,
+    );
+  }
+  lines.push('');
+
+  lines.push(
+    '## ランダム配置権（購入率 = 購入 ÷ 並んだ数、使用率 = 使った ÷ 手に入れた、消えた率 = 使わずに消えた ÷ 手に入れた）',
+    '',
+  );
+  lines.push(
+    '| ボット | 並んだ | 購入率 | 使用率 | 消えた率 | 湧いた床（×2 / 加算 / ×3） |',
+    '|---|---|---|---|---|---|',
+  );
+  for (const s of summaries) {
+    const p = s.permits;
+    lines.push(
+      `| ${s.bot} | ${p.offered} | ${p.offered ? pct(p.bought / p.offered) : '-'} | ${p.bought ? pct(p.used / p.bought) : '-'} | ${p.bought ? pct(p.expired / p.bought) : '-'} | ${p.tiles.double ?? 0} / ${p.tiles.add ?? 0} / ${p.tiles.triple ?? 0} |`,
     );
   }
   lines.push('');

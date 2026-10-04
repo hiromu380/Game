@@ -13,13 +13,19 @@ import type { MetaProgress } from '@chain-factory/sim';
 import { recordRankingToSave } from './state/achievements';
 import { findDemoSaveToImport } from './state/demoImport';
 import { DemoImportDialog } from './ui/title/DemoImportDialog';
-import { loadRun, loadSave } from './state/saveStore';
+import { loadRun, loadSave, loadSeenScenes } from './state/saveStore';
+import { EDITION } from './config/edition';
+import { memoryScenes, type SceneId } from './story/playback';
+import { AVAILABLE_SCENES } from './story/scenes';
+import { MemoriesDialog } from './ui/title/MemoriesDialog';
 import { DailyMenu } from './ui/online/DailyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
 
 /** コレクション（開いたときに読み込む。タイトル画面を軽く保つため） */
 const CollectionScreen = lazy(() => import('./ui/title/CollectionScreen'));
 const HowToPlay = lazy(() => import('./ui/title/HowToPlay'));
+/** カットシーンの再生（思い出から見直すとき。PixiJS を含むので、見るときに読み込む） */
+const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
 
 /** ゲーム画面へ進む要求（start が null なら通常ラン = 保存済みの続き or 新規） */
 type Request = { start: GameStart | null };
@@ -34,6 +40,9 @@ export function Root() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [howToOpen, setHowToOpen] = useState(false);
+  const [memoriesOpen, setMemoriesOpen] = useState(false);
+  const [replay, setReplay] = useState<SceneId | null>(null);
+  const memories = memoryScenes(loadSeenScenes(), EDITION, AVAILABLE_SCENES);
   /** 引き継げる体験版のデータ（製品版の初回起動時だけ。答えたら null） */
   const [demoMeta, setDemoMeta] = useState<MetaProgress | null>(null);
 
@@ -67,7 +76,23 @@ export function Root() {
         onCollection={() => setCollectionOpen(true)}
         onHowTo={() => setHowToOpen(true)}
         onSettings={() => setSettingsOpen(true)}
+        onMemories={memories.length > 0 ? () => setMemoriesOpen(true) : undefined}
       />
+      {memoriesOpen && (
+        <MemoriesDialog
+          scenes={memories}
+          onPlay={(scene) => {
+            setMemoriesOpen(false);
+            setReplay(scene);
+          }}
+          onClose={() => setMemoriesOpen(false)}
+        />
+      )}
+      {replay && (
+        <Suspense fallback={null}>
+          <CutscenePlayer scene={replay} onDone={() => setReplay(null)} />
+        </Suspense>
+      )}
       {howToOpen && (
         <Suspense fallback={null}>
           <HowToPlay onClose={() => setHowToOpen(false)} />

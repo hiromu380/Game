@@ -13,6 +13,18 @@ const OPTIONS = {
 };
 
 describe('ボット', () => {
+  it('ランダム配置権は、並べば期待値で買って使うことがあり、使わないボットとも比べられる', () => {
+    const logs = [1, 2, 3, 4, 5, 6].map((seed) => playRun(seed, 'greedy', OPTIONS));
+    const permits = logs.reduce(
+      (n, l) => ({ offered: n.offered + l.permits.offered, used: n.used + l.permits.used }),
+      { offered: 0, used: 0 },
+    );
+    expect(permits.offered).toBeGreaterThan(0);
+    expect(permits.used).toBeGreaterThan(0);
+    const off = playRun(1, 'greedy', { ...OPTIONS, permits: false });
+    expect(off.permits.used).toBe(0);
+  });
+
   it('ランダムボットは1ランを最後まで（脱落まで）遊べる', () => {
     const log = playRun(1, 'random', OPTIONS);
     expect(log.shifts.length).toBeGreaterThan(0);
@@ -27,10 +39,11 @@ describe('ボット', () => {
   });
 
   it('中級ボットは組み替え（回転・移動）を使い、貪欲ボット以上のシフトを進める（同じシード）', () => {
-    const greedy = playRun(7, 'greedy', OPTIONS);
-    const mid = playRun(7, 'mid', OPTIONS);
+    // SIM_VERSION 6（ショップに配置権の枠）でシード 7 → 2 に変更（品ぞろえが変わったため）
+    const greedy = playRun(2, 'greedy', OPTIONS);
+    const mid = playRun(2, 'mid', OPTIONS);
     expect(mid.shiftsCleared).toBeGreaterThanOrEqual(greedy.shiftsCleared);
-    expect(playRun(7, 'mid', OPTIONS).shifts).toEqual(mid.shifts); // 決定論
+    expect(playRun(2, 'mid', OPTIONS).shifts).toEqual(mid.shifts); // 決定論
   });
 
   it('探索ボットは貪欲ボット以上のシフトを進める（同じシード）', () => {

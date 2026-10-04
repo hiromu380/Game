@@ -4,7 +4,7 @@
   --panel: #262a31;
   --panel-border: #3a3f48;
   --text: #eef0f3;
-  --muted: #a3aab5;
+  --muted: #aab1bc;
   --accent: #ffc107;
   --hazard-black: #2b2b2b;
   --primary: #e53935;
@@ -16,6 +16,9 @@
   --selected: #ffeb3b;
   --white: #ffffff;
   --hazard-yellow: #ffc107;
+  --floor-item: #ffca28;
+  --floor-bonus: #4dd0e1;
+  --floor-blocked: #c62828;
   --vanish-outOfBoard: #90a4ae;
   --vanish-emptyCell: #ffb74d;
   --vanish-exhausted: #ef5350;

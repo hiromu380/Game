@@ -104,6 +104,17 @@ describe('連鎖の演出の流れ', () => {
     expect(weak.some((c) => c.kind === 'floor')).toBe(false);
   });
 
+  it('信号が1つも出ない（スイッチがない）本番でも、例外にならずに「ドン」だけで終わる', () => {
+    const empty = run({ width: 3, height: 1, cells: [null, null, null] });
+    expect(empty.events).toEqual([]);
+    const c = buildChoreography(empty.events, strong);
+    expect(c.ticks).toEqual([]);
+    expect(kinds(c.cues)).toEqual(['windup', 'stamp']);
+    // 信号は出るが出荷しない盤面も同じ（ピークなし）
+    const noShip = buildChoreography(run(row(['switch', 'gear'])).events, strong);
+    expect(noShip.cues.some((q) => q.kind === 'peak')).toBe(false);
+  });
+
   it('合計の単位が変わる瞬間（1,000 以上）と、ノルマを超えた瞬間を出す', () => {
     const c = buildChoreography(hugeEvents(5), { ...strong, quota: 10 });
     expect(kinds(c.cues)).toEqual(expect.arrayContaining(['digitUp', 'quotaCross']));

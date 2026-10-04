@@ -1,0 +1,9 @@
+<svg width="200" height="124" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 124">
+  <!-- カットシーンの絵: far-factory-3（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M0 120 V70 L30 46 V70 L60 46 V70 L90 46 V30 H110 V70 H200 V120 Z" fill="#1a1d2e" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
+  <rect x="50" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
+  <rect x="86" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
+  <rect x="122" y="84" width="18" height="14" rx="2" fill="#2a3150"/>
+  <rect x="158" y="84" width="18" height="14" rx="2" fill="#2a3150"/>
+</svg>

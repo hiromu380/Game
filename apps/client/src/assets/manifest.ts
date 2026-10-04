@@ -12,6 +12,9 @@ import boltFailSrc from './mascot/bolt-fail.svg';
 import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
 import boltSurprisedSrc from './mascot/bolt-surprised.svg';
+import boltGutsSrc from './characters/bolt/poses/guts.svg';
+import boltStandSrc from './characters/bolt/poses/stand.svg';
+import boltWaveSrc from './characters/bolt/poses/wave.svg';
 import { PART_FAMILY } from './partFamily';
 import { BOARD_COLORS, FAMILY_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
@@ -148,6 +151,8 @@ export const UI_ICON_NAMES = [
   'daily',
   'back',
   'expand',
+  'permit',
+  'undo',
 ] as const;
 export type UiIconName = (typeof UI_ICON_NAMES)[number];
 export const UI_ICONS = uiFiles as Record<UiIconName, string>;
@@ -174,7 +179,50 @@ export const ROCKET_ASSETS = {
     .sort((a, b) => Number(a.slice(7)) - Number(b.slice(7)))
     .map((name) => rocketFiles[name]!),
   flame: rocketFiles['flame']!,
+  /** 発射の煙（カットシーンの打ち上げ用） */
+  smoke: rocketFiles['smoke']!,
+  /** ナットのロケット（ボルトのものより性能が良さそうな機体。カットシーン・写真用） */
+  nut: rocketFiles['nut-rocket']!,
+  nutLaunch: rocketFiles['nut-rocket-flame']!,
 };
+
+/**
+ * キャラクターの全身（切り絵アニメの部品・ポーズ。art/characters/ で生成）
+ *
+ * 部品は数が多く、使う場面（上部の背景・カットシーン）も限られるので、必要なときに読み込む（URL を返す関数）。
+ * 部品のつながり・関節・ポーズは rig.json（docs/characters/preview.html で一覧）
+ */
+const characterFiles = import.meta.glob<string>('./characters/*/**/*.svg', {
+  query: '?url',
+  import: 'default',
+});
+
+/**
+ * ボルトの全身（よく使うポーズだけ最初から読み込む。上部の背景・タイトル画面の情景）。
+ * 顔だけのアイコン（MASCOT_ASSETS）は、吹き出し・ガイド・共有カードなどで使い続ける
+ */
+export const BOLT_BODY_ASSETS = {
+  stand: boltStandSrc,
+  guts: boltGutsSrc,
+  wave: boltWaveSrc,
+} as const;
+
+/** 全身で描くキャラクター（ボルト・工場長・ナット） */
+export type CharacterId = 'bolt' | 'chief' | 'nut';
+
+/** キャラクターの素材の URL を読み込む（path は rig.json の files の値・'poses/jump.svg' など） */
+export function loadCharacterAsset(character: CharacterId, path: string): Promise<string> {
+  const load = characterFiles[`./characters/${character}/${path}`];
+  return load ? load() : Promise.reject(new Error(`unknown ${character} asset: ${path}`));
+}
+
+/** キャラクターの素材のパスの一覧（テストで参照切れを確かめる） */
+export function characterAssetPaths(character: CharacterId): string[] {
+  const prefix = `./characters/${character}/`;
+  return Object.keys(characterFiles)
+    .filter((k) => k.startsWith(prefix))
+    .map((k) => k.slice(prefix.length));
+}
 
 const titleFiles = byName(
   import.meta.glob<string>('./title/*.svg', { eager: true, import: 'default' }),
