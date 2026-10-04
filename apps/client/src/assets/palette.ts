@@ -86,6 +86,21 @@ export const BOLT_COLORS = {
   sweat: '#81d4fa',
 } as const;
 
+/**
+ * 見知らぬロボ「ナット」（仮名。エンディングの伏線で、遠くの工場のアンテナと古い写真にだけ出る）
+ * ボルト（緑）と見分けられる水色。アンテナのランプは伏線の記号（遠くで点滅を返す光）
+ */
+export const NUT_COLORS = {
+  body: '#00acc1',
+  bodyLight: '#4dd0e1',
+  outline: '#004d5a',
+  lamp: '#80deea',
+  lens: '#e0f7fa',
+  lensRing: '#37474f',
+  scarf: '#ffb74d',
+  scarfShade: '#e65100',
+} as const;
+
 /** ボルトのロケット（1ランの目的。組み上がっていく様子を段階ごとの絵で見せる） */
 export const ROCKET_COLORS = {
   body: '#eceff1',
