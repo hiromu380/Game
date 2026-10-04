@@ -67,11 +67,13 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
           return;
         }
         renderer = created;
+        // 経過時間は実時間で測る（描画が重くてコマが落ちても、話の進み方と音がずれないように）
+        const startedAt = performance.now();
         let time = 0;
         created.render(sampleScene(scene, 0, options.current));
-        created.onTick((deltaMs) => {
+        created.onTick(() => {
           if (finished.current) return;
-          const next = time + deltaMs / 1000;
+          const next = (performance.now() - startedAt) / 1000;
           for (const key of soundsBetween(scene, time, next)) audio.play(key as SoundKey);
           time = next;
           const frame = sampleScene(scene, time, options.current);

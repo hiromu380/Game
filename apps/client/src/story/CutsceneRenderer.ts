@@ -14,11 +14,25 @@ import type { CharacterId, FrameState, Scene } from './timeline';
 
 const { width: W, height: H } = CUTSCENE_CONFIG.stage;
 
-/** SVG を拡大しても粗くならないよう、高い解像度で読み込む */
-const SVG_RESOLUTION = 4;
+/**
+ * SVG を読み込む解像度。小さな絵（部品・小物）は拡大しても粗くならないよう高く、
+ * 画面いっぱいの背景（すでに大きい）は等倍にする（大きなテクスチャで重くならないように）
+ */
+const SVG_RESOLUTION = { small: 3, large: 1.25 };
+const LARGE_ASSETS = [
+  'story:night-sky',
+  'story:earth-night',
+  'story:workshop',
+  'story:moon',
+  'story:town',
+  'story:roof',
+];
 
-async function loadTexture(url: string): Promise<Texture> {
-  return Assets.load<Texture>({ src: url, data: { resolution: SVG_RESOLUTION } });
+async function loadTexture(url: string, large = false): Promise<Texture> {
+  return Assets.load<Texture>({
+    src: url,
+    data: { resolution: large ? SVG_RESOLUTION.large : SVG_RESOLUTION.small },
+  });
 }
 
 /** シーンで使う絵（キャラクターの部品・背景・小物）をすべて読み込む */
@@ -37,7 +51,7 @@ async function loadSceneTextures(scene: Scene) {
   }
   await Promise.all([
     ...[...propKeys].map(async (key) =>
-      props.set(key, await loadTexture(await resolveStoryAsset(key))),
+      props.set(key, await loadTexture(await resolveStoryAsset(key), LARGE_ASSETS.includes(key))),
     ),
     ...[...characters].flatMap((character) =>
       RIGS[character].parts.flatMap((part) =>

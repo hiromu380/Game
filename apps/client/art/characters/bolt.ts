@@ -533,6 +533,22 @@ export const POSES: Record<string, { label: string; pose: Pose }> = {
       variants: { head: 'side' },
     }),
   },
+  // 歩くの2コマ目（脚と腕を入れ替える。カットシーンで「歩く」と交互に出して歩かせる）
+  walkB: {
+    label: '歩く（2コマ目）',
+    pose: merge(SIDE, {
+      angles: {
+        thighL: 26,
+        shinL: 24,
+        thighR: -28,
+        shinR: 10,
+        upperArmL: -30,
+        foreArmL: -20,
+        upperArmR: 28,
+      },
+      variants: { head: 'side' },
+    }),
+  },
   jump: {
     label: '跳ねる',
     pose: {

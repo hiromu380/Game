@@ -1,0 +1,11 @@
+<svg width="300" height="220" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220">
+  <!-- カットシーンの絵: bubble（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="30" cy="205" r="10" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="58" cy="180" r="15" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="150" cy="95" rx="140" ry="90" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M120 150 Q118 90 135 50 Q152 90 150 150 Z" fill="#eceff1" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M120 130 L104 158 H120 Z M150 130 L166 158 H150 Z" fill="#e53935" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="135" cy="100" r="8" fill="#b3e5fc" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M135 50 Q140 70 150 80" fill="none" stroke="#e53935" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="225,40 232,60 253,60 236,72 243,92 225,80 207,92 214,72 197,60 218,60" fill="#ffca28" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

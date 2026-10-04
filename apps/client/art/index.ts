@@ -12,6 +12,7 @@ import { boltFiles } from './characters/bolt';
 import { chiefFiles } from './characters/chief';
 import { capsuleFiles } from './keyvisual/capsules';
 import { storePreviewHtml } from './keyvisual/preview';
+import { storyAssetFiles } from './story/assets';
 import { characterPreviewHtml } from './characters/preview';
 import { iconFiles } from './icons';
 import { logoFiles } from './logo';
@@ -36,6 +37,7 @@ export function buildArt(): Record<string, string> {
     ...boltFiles(),
     ...chiefFiles(),
     ...capsuleFiles(),
+    ...storyAssetFiles(),
     // 設定画の一覧（リポジトリの docs/ へ書き出す）
     '../../docs/characters/preview.html': characterPreviewHtml(),
     // ストア用の画像の確認ページ

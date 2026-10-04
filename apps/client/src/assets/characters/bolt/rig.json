@@ -383,6 +383,49 @@
         "footL": 0
       }
     },
+    "walkB": {
+      "angles": {
+        "thighL": 26,
+        "shinL": 24,
+        "thighR": -28,
+        "shinR": 10,
+        "upperArmL": -30,
+        "foreArmL": -20,
+        "upperArmR": 28
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0
+      }
+    },
     "jump": {
       "offsets": {
         "root": [

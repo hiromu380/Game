@@ -1,0 +1,10 @@
+<svg width="310" height="190" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 310 190">
+  <!-- カットシーンの絵: junk（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M10 180 Q60 60 150 70 Q240 40 300 180 Z" fill="#546e7a" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="110" cy="120" r="26" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="110" cy="120" r="8" fill="#1b1f27"/>
+  <rect x="170" y="80" width="50" height="34" rx="4" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="60" y="140" width="70" height="24" rx="3" fill="#b3e5fc" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M220 140 l40 -30" fill="none" stroke="#cfd8dc" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="240,170 270,120 290,175" fill="#c8a165" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
