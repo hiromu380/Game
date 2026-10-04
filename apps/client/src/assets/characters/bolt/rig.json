@@ -102,7 +102,8 @@
         "shake": "parts/fx-shake.svg",
         "sweat": "parts/fx-sweat.svg",
         "zzz": "parts/fx-zzz.svg",
-        "stars": "parts/fx-stars.svg"
+        "stars": "parts/fx-stars.svg",
+        "gloom": "parts/fx-gloom.svg"
       }
     },
     {
@@ -474,26 +475,26 @@
       "offsets": {
         "root": [
           0,
-          3
+          5
         ],
         "head": [
           0,
-          6
+          10
         ]
       },
       "angles": {
-        "head": 6,
-        "upperArmL": -8,
-        "upperArmR": 8,
-        "foreArmL": 18,
-        "foreArmR": -18,
-        "thighL": -8,
-        "thighR": 8,
-        "shinL": 14,
-        "shinR": -14
+        "root": 4,
+        "head": 12,
+        "upperArmL": -3,
+        "upperArmR": 3,
+        "thighL": -14,
+        "thighR": 10,
+        "shinL": 26,
+        "shinR": -18
       },
       "variants": {
-        "head": "sad"
+        "head": "sad",
+        "fx": "gloom"
       }
     },
     "stagger": {

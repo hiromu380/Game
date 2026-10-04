@@ -374,6 +374,11 @@ export function fxPart(variant: string | undefined): string[] {
         path('M30 -56 q4 5 0 8 q-4 -3 0 -8 Z', fill(C.sweat, 1.5)),
         path('M-34 -48 q3 4 0 6 q-3 -2 0 -6 Z', fill(C.sweat, 1.5)),
       ];
+    case 'gloom':
+      // 落ち込みの縦の影線（頭の上）
+      return [
+        path('M-16 -84 V-70 M-6 -88 V-72 M4 -88 V-72 M14 -84 V-70', line(INK.steelLight, 2.5)),
+      ];
     case 'zzz':
       return [path('M22 -72 h8 l-8 8 h8 M34 -84 h6 l-6 6 h6', line(INK.white, 2.2))];
     case 'stars':
@@ -466,7 +471,7 @@ export const PART_VARIANTS: Record<string, readonly string[]> = {
   shin: ['default'],
   foot: ['front', 'side'],
   prop: ['crate', 'blueprint', 'roof'],
-  fx: ['nod', 'shake', 'sweat', 'zzz', 'stars'],
+  fx: ['nod', 'shake', 'sweat', 'zzz', 'stars', 'gloom'],
 };
 
 // =============================================================================
@@ -578,19 +583,19 @@ export const POSES: Record<string, { label: string; pose: Pose }> = {
   sad: {
     label: 'しょんぼり',
     pose: {
-      offsets: { root: [0, 3], head: [0, 6] },
+      // 頭を深く落として傾け、体ごと沈む。腕はだらりと下げ、膝は内股に曲げる。頭の上に縦の影線
+      offsets: { root: [0, 5], head: [0, 10] },
       angles: {
-        head: 6,
-        upperArmL: -8,
-        upperArmR: 8,
-        foreArmL: 18,
-        foreArmR: -18,
-        thighL: -8,
-        thighR: 8,
-        shinL: 14,
-        shinR: -14,
+        root: 4,
+        head: 12,
+        upperArmL: -3,
+        upperArmR: 3,
+        thighL: -14,
+        thighR: 10,
+        shinL: 26,
+        shinR: -18,
       },
-      variants: { head: 'sad' },
+      variants: { head: 'sad', fx: 'gloom' },
     },
   },
   stagger: {
