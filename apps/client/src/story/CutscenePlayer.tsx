@@ -70,9 +70,21 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
         // 経過時間は実時間で測る（描画が重くてコマが落ちても、話の進み方と音がずれないように）
         const startedAt = performance.now();
         let time = 0;
+        // 撮影モード（開発専用）: 指定の時刻で止めて描く（docs/ui-review の撮影・コマの確認用）
+        let frozenAt: number | null = null;
+        if (import.meta.env.VITE_CAPTURE === '1') {
+          (window as { cutsceneSeek?: (t: number) => void }).cutsceneSeek = (t) => {
+            clearTimeout(guard);
+            frozenAt = t;
+          };
+        }
         created.render(sampleScene(scene, 0, options.current));
         created.onTick(() => {
           if (finished.current) return;
+          if (frozenAt !== null) {
+            created.render(sampleScene(scene, frozenAt, options.current));
+            return;
+          }
           const next = (performance.now() - startedAt) / 1000;
           for (const key of soundsBetween(scene, time, next)) audio.play(key as SoundKey);
           time = next;
