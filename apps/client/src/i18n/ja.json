@@ -608,5 +608,16 @@
   "rule.noTarget": "今は{part}が手元にないので影響なし",
   "playback.shortBy": "ノルマまであと {amount}",
   "settings.reduceFlashes": "点滅を減らす",
-  "settings.reduceFlashesHint": "光の点滅が苦手な場合はオンにしてください。盤面が光る演出を止め、パーツの発光も控えめにします"
+  "settings.reduceFlashesHint": "光の点滅が苦手な場合はオンにしてください。盤面が光る演出を止め、パーツの発光も控えめにします",
+  "story.skipHold": "長押しでスキップ",
+  "story.memories": "思い出",
+  "story.memoriesTitle": "思い出（見たシーン）",
+  "story.memoriesEmpty": "まだ見たシーンはありません",
+  "story.scene.opening": "オープニング",
+  "story.scene.interlude1": "1日目のおわり",
+  "story.scene.interlude2": "2日目のおわり",
+  "story.scene.gameOver": "ノルマに届かなかった夜",
+  "story.scene.ending": "エンディング",
+  "story.scene.demoTeaser": "つづきの予告",
+  "story.demoTeaser": "つづきは製品版で"
 }

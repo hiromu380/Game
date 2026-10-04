@@ -18,7 +18,7 @@ import {
   UI_COLORS as U,
 } from '../../src/assets/palette';
 import { boltBody, boltHead, eye } from '../mascot';
-import { circle, el, group, line, path, polygon, rect, shade, svg } from '../svg';
+import { circle, el, group, line, path, polygon, rect, shade, sizedSvg, svg } from '../svg';
 import { renderPose, type Pose, type RigPart } from './rig';
 
 const O = C.outline;
@@ -686,7 +686,7 @@ function partSvg(id: string, variant: string): string {
   const kind = partKind(id);
   const part = BOLT_RIG.find((p) => p.id === id)!;
   const [x, y, w, h] = PART_BOX[kind]!;
-  return svg(
+  return sizedSvg(
     `ボルトの部品: ${id} / ${variant}`,
     part.draw(variant === 'default' ? undefined : variant),
     `${x} ${y} ${w} ${h}`,

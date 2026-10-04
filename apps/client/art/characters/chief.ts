@@ -14,7 +14,7 @@ import {
   MATERIAL_COLORS as M,
   ROCKET_COLORS as R,
 } from '../../src/assets/palette';
-import { circle, line, path, polygon, rect, shade, svg } from '../svg';
+import { circle, line, path, polygon, rect, shade, sizedSvg, svg } from '../svg';
 import { renderPose, type Pose, type RigPart } from './rig';
 
 const O = INK.outline;
@@ -297,7 +297,7 @@ export function chiefFiles(): Record<string, string> {
     if (part.id === 'root') continue;
     const [x, y, w, h] = CHIEF_PART_BOX[part.id]!;
     for (const v of CHIEF_VARIANTS[part.id]!) {
-      files[`${base}/parts/${part.id}-${v}.svg`] = svg(
+      files[`${base}/parts/${part.id}-${v}.svg`] = sizedSvg(
         `工場長の部品: ${part.id} / ${v}`,
         part.draw(v === 'default' ? undefined : v),
         `${x} ${y} ${w} ${h}`,

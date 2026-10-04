@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 16 28">
+<svg width="16" height="28" xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 16 28">
   <!-- ボルトの部品: foreArmL / default（art/ のスクリプトで生成。手で編集しない） -->
   <rect x="-4.5" y="-4.5" width="9" height="21" rx="4.5" fill="#90a4ae" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { CAPTURE_PRESETS, type CapturePresetKey } from '../config/capturePresets';
 import { useI18n } from '../i18n';
+import type { SceneId } from '../story/playback';
 import type { PlaybackSpeed } from '../playback/timeline';
 
 export type CaptureUi = 'full' | 'minimal' | 'none';
@@ -43,6 +44,9 @@ interface Props {
   onPreviewShare: () => void;
   /** ランダム配置権を1枚もらう（使う場面の確認・録画用） */
   onGivePermit: () => void;
+  /** 用意してあるカットシーン（録画用に、見たかどうかに関係なく再生する） */
+  scenes: readonly SceneId[];
+  onPlayScene: (scene: SceneId) => void;
 }
 
 /**
@@ -179,6 +183,15 @@ export function CapturePanel(props: Props) {
       </div>
       <button onClick={props.onPreviewShare}>{t('capture.shareCard')}</button>
       <button onClick={props.onGivePermit}>{t('capture.givePermit')}</button>
+      {props.scenes.length > 0 && (
+        <div className="button-row">
+          {props.scenes.map((scene) => (
+            <button key={scene} onClick={() => props.onPlayScene(scene)}>
+              {t(`story.scene.${scene}`)}
+            </button>
+          ))}
+        </div>
+      )}
       {message && <small>{message}</small>}
     </aside>
   );

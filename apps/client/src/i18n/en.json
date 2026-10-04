@@ -608,5 +608,16 @@
   "rule.noTarget": "No effect for now: you have no {part}",
   "playback.shortBy": "{amount} short of the quota",
   "settings.reduceFlashes": "Reduce flashing",
-  "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows"
+  "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows",
+  "story.skipHold": "Hold to skip",
+  "story.memories": "Memories",
+  "story.memoriesTitle": "Memories (scenes you've seen)",
+  "story.memoriesEmpty": "No scenes yet",
+  "story.scene.opening": "Opening",
+  "story.scene.interlude1": "End of Day 1",
+  "story.scene.interlude2": "End of Day 2",
+  "story.scene.gameOver": "The night we fell short",
+  "story.scene.ending": "Ending",
+  "story.scene.demoTeaser": "What comes next",
+  "story.demoTeaser": "Continue in the full game"
 }

@@ -24,6 +24,8 @@ import {
   type PartId,
 } from '@chain-factory/sim';
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -36,6 +38,15 @@ import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
 import { LAYOUT } from './config/layout';
+import { EDITION } from './config/edition';
+import {
+  autoPlayScene,
+  triggerAfterCommit,
+  type SceneId,
+  type StoryTrigger,
+} from './story/playback';
+import { AVAILABLE_SCENES } from './story/scenes';
+import { loadSeenScenes, markSceneSeen } from './state/saveStore';
 import { useI18n } from './i18n';
 import { api, OnlineError } from './online/api';
 import { getMarket, priceTrends } from './online/market';
@@ -114,6 +125,9 @@ const floorAmounts = (params: FloorParams) => ({
 
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
+
+/** カットシーンの再生（PixiJS と素材を、再生するときに読み込む） */
+const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
 
 /** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す（体験版・製品版のビルドでは出ない） */
 // 撮影モードではデバッグを出さない（ストアのスクリーンショット・動画に写らないように）
@@ -390,9 +404,33 @@ export function App({ start, onTitle }: Props) {
   };
   /** 本番の確認ダイアログ（押し間違い防止） */
   const [commitConfirm, setCommitConfirm] = useState(false);
+  // カットシーン（初回だけ自動で再生。story/playback.ts）。終わったら見た記録を残す
+  const storyContext = () => ({
+    mode: mode.kind,
+    edition: EDITION,
+    seen: loadSeenScenes(),
+    available: AVAILABLE_SCENES,
+  });
+  // 初めてのラン（まだ何もしていない最初のシフト）を開いたら、オープニング
+  const [cutscene, setCutscene] = useState<SceneId | null>(() =>
+    !CAPTURE && run.phase === 'building' && run.shiftIndex === 0 && run.history.length === 0
+      ? autoPlayScene({ kind: 'newRun' }, storyContext())
+      : null,
+  );
+  const playStory = (trigger: StoryTrigger | null) => {
+    const scene = autoPlayScene(trigger, storyContext());
+    if (scene && !CAPTURE) setCutscene(scene);
+  };
+
   const closePlayback = () => {
     setLiveScore(null);
+    // 本番の結果を閉じたとき: 日のクリア・全クリア・未達のカットシーン
+    if (playback?.mode === 'commit') playStory(triggerAfterCommit(run, playback.nextRun));
     dispatch({ type: 'closePlayback' });
+  };
+  const finishCutscene = (scene: SceneId) => {
+    markSceneSeen(scene);
+    setCutscene(null);
   };
 
   // キーボード・コントローラーの操作（盤面のカーソル・一覧・試運転・本番）。ダイアログ中・ラン終了画面はメニューの操作
@@ -625,6 +663,11 @@ export function App({ start, onTitle }: Props) {
           onCancel={() => setCommitConfirm(false)}
         />
       )}
+      {cutscene && (
+        <Suspense fallback={null}>
+          <CutscenePlayer scene={cutscene} onDone={() => finishCutscene(cutscene)} />
+        </Suspense>
+      )}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
@@ -642,6 +685,8 @@ export function App({ start, onTitle }: Props) {
           }}
           onPreviewShare={() => setSharePreview(true)}
           onGivePermit={() => dispatch({ type: 'captureGivePermit' })}
+          scenes={AVAILABLE_SCENES}
+          onPlayScene={setCutscene}
         />
       )}
       {CAPTURE && sharePreview && (
