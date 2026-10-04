@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -4 32 14">
+  <!-- ボルトの部品: footR / front（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M-7 -1 H8 Q12 1 11 7 H-7 Z" fill="#e53935" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-5 4 H8" fill="none" stroke="#b71c1c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

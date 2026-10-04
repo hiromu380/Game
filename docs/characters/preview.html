@@ -1,212 +1,38 @@
 <!doctype html>
+<!-- キャラクターの設定画の一覧（apps/client/art/characters/preview.ts で生成。手で編集しない） -->
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ボルトの体型 3案</title>
+    <title>キャラクター設定画</title>
     <style>
-      :root {
-        --bg: #1a1c20;
-        --panel: #262a31;
-        --text: #eef0f3;
-        --muted: #aab1bc;
-        --accent: #ffc107;
-      }
-      body {
-        margin: 0;
-        padding: 16px;
-        background: var(--bg);
-        color: var(--text);
-        font-family: system-ui, sans-serif;
-      }
-      h1,
-      h2 {
-        margin: 0 0 8px;
-      }
-      h2 {
-        color: var(--accent);
-        font-size: 1.05rem;
-        margin-top: 24px;
-      }
-      p {
-        color: var(--muted);
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 120px repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        align-items: center;
-      }
-      .cell {
-        background: var(--panel);
-        border-radius: 8px;
-        padding: 8px;
-        text-align: center;
-      }
-      .cell img {
-        width: 100%;
-        max-width: 220px;
-        height: auto;
-      }
-      .head {
-        font-weight: bold;
-      }
-      .small img {
-        height: 64px;
-        width: auto;
-        margin: 0 4px;
-      }
-      .silhouette img {
-        filter: brightness(0);
-      }
-      .silhouette {
-        background: #eef0f3;
-      }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 8px;
-      }
-      th,
-      td {
-        border: 1px solid #3a3f48;
-        padding: 6px 8px;
-        text-align: left;
-        vertical-align: top;
-        font-size: 0.9rem;
-      }
-      th {
-        background: var(--panel);
-      }
+      body { margin: 0; padding: 16px; background: #1a1c20; color: #eef0f3; font-family: system-ui, sans-serif; }
+      h1 { margin: 0 0 4px; }
+      h2 { color: #ffc107; font-size: 1.05rem; margin: 28px 0 4px; }
+      p { color: #aab1bc; margin: 0 0 8px; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+      figure { margin: 0; background: #262a31; border-radius: 8px; padding: 8px; text-align: center; }
+      figure img { width: 180px; height: auto; display: block; }
+      figure.small img { width: 110px; }
+      figcaption { font-size: 0.85rem; margin-top: 4px; }
+      .silhouette { background: #eef0f3; color: #1a1c20; }
+      .silhouette img { width: 110px; filter: brightness(0); }
+      .sizes { background: #262a31; border-radius: 8px; padding: 8px; }
     </style>
   </head>
   <body>
-    <h1>ボルトの体型 3案（段階1のラフ）</h1>
-    <p>
-      顔は既存のアイコンのまま。首から下だけを変えています。上半身（胴・腕・手）は3案で共通です。
-      すべて部品（頭・胴・上腕・前腕・手・脚／車輪／噴射口）の回転と差し替えだけでポーズを作っています。
-    </p>
-
-    <h2>正面・喜ぶ・しょんぼり</h2>
-    <div class="grid">
-      <div></div>
-      <div class="cell head">A 二本脚</div>
-      <div class="cell head">B 一輪</div>
-      <div class="cell head">C 浮遊</div>
-      <div class="head">正面</div>
-      <div class="cell"><img src="roughs/A-front.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/B-front.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/C-front.svg" alt="" /></div>
-      <div class="head">喜ぶ</div>
-      <div class="cell"><img src="roughs/A-happy.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/B-happy.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/C-happy.svg" alt="" /></div>
-      <div class="head">しょんぼり</div>
-      <div class="cell"><img src="roughs/A-sad.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/B-sad.svg" alt="" /></div>
-      <div class="cell"><img src="roughs/C-sad.svg" alt="" /></div>
-    </div>
-
-    <h2>小さく表示（64px）とシルエット</h2>
-    <div class="grid">
-      <div></div>
-      <div class="cell head">A</div>
-      <div class="cell head">B</div>
-      <div class="cell head">C</div>
-      <div class="head">64px</div>
-      <div class="cell small">
-        <img src="roughs/A-front.svg" alt="" /><img src="roughs/A-happy.svg" alt="" /><img
-          src="roughs/A-sad.svg"
-          alt=""
-        />
-      </div>
-      <div class="cell small">
-        <img src="roughs/B-front.svg" alt="" /><img src="roughs/B-happy.svg" alt="" /><img
-          src="roughs/B-sad.svg"
-          alt=""
-        />
-      </div>
-      <div class="cell small">
-        <img src="roughs/C-front.svg" alt="" /><img src="roughs/C-happy.svg" alt="" /><img
-          src="roughs/C-sad.svg"
-          alt=""
-        />
-      </div>
-      <div class="head">シルエット</div>
-      <div class="cell small silhouette">
-        <img src="roughs/A-front.svg" alt="" /><img src="roughs/A-happy.svg" alt="" /><img
-          src="roughs/A-sad.svg"
-          alt=""
-        />
-      </div>
-      <div class="cell small silhouette">
-        <img src="roughs/B-front.svg" alt="" /><img src="roughs/B-happy.svg" alt="" /><img
-          src="roughs/B-sad.svg"
-          alt=""
-        />
-      </div>
-      <div class="cell small silhouette">
-        <img src="roughs/C-front.svg" alt="" /><img src="roughs/C-happy.svg" alt="" /><img
-          src="roughs/C-sad.svg"
-          alt=""
-        />
-      </div>
-    </div>
-
-    <h2>比較</h2>
-    <table id="compare">
-      <tr>
-        <th>観点</th>
-        <th>A 二本脚</th>
-        <th>B 一輪</th>
-        <th>C 浮遊</th>
-      </tr>
-      <tr>
-        <td>身振りの伝わりやすさ</td>
-        <td>◎ 跳ねる・よろける・膝をつく・歩くが自然。うなずく・指さすは上半身で共通</td>
-        <td>
-          ○
-          前後に傾く・急停止・後ずさりで感情が大きく出る（しょんぼりの前傾は3案で最も読める）。跳ねる・よろけるは不自然
-        </td>
-        <td>△ 上下の浮き沈みで喜び・落ち込みが出る。重い部品でよろける・座るが弱い</td>
-      </tr>
-      <tr>
-        <td>小さく表示（64px）</td>
-        <td>○ 脚が細く、64px ではつぶれ気味。正面の形は安定</td>
-        <td>◎ 車輪が目印になり、64px でもボルトだとわかる</td>
-        <td>○ 炎の色が目立つが、体の下が細く、頭でっかちに見える</td>
-      </tr>
-      <tr>
-        <td>切り絵アニメの作りやすさ</td>
-        <td>△ 部品が最多（脚6つ）。歩きの動きの調整に手間</td>
-        <td>◎ 車輪は回すだけ。傾きは根元の回転1つ</td>
-        <td>◎ 部品が最少。揺れは位置のずれだけ</td>
-      </tr>
-      <tr>
-        <td>工場の世界観</td>
-        <td>○ 作業員らしさ</td>
-        <td>◎ 台車・フォークリフトのような工場の機械らしさ</td>
-        <td>△ 工場より宇宙寄り</td>
-      </tr>
-      <tr>
-        <td>ロケットの夢との相性</td>
-        <td>○ ふつう</td>
-        <td>○ ふつう</td>
-        <td>◎ 噴射口がロケットの夢と直結。ただし完成の喜びが先に出てしまう</td>
-      </tr>
-      <tr>
-        <td>ストーリーの場面（屋根に登る・座って星を見る・設計図を広げる）</td>
-        <td>◎ すべて自然</td>
-        <td>○ 屋根に登るは工夫が要る（はしごを車輪で？）。座るは車輪の上に腰を落とす</td>
-        <td>○ 登るは浮くだけで済むが、座るは不自然</td>
-      </tr>
-    </table>
-    <p>
-      おすすめ:
-      <strong>A 二本脚</strong
-      >。ストーリーの身振り（屋根に登る・座る・よろける・設計図を広げる）をすべて自然に描けるため。
-      64px での脚のつぶれは、脚を太く短くして直します。工場らしさを足したい場合は、B
-      の車輪を足の裏の小さなキャスターとして混ぜる案もあります。
-    </p>
+    <h1>キャラクター設定画</h1>
+    <p>体型の3案の比較は <a href="roughs.html" style="color:#4dd0e1">roughs.html</a>（段階1・A を採用）</p>
+    <h2>ボルト: 三面図</h2>
+    <p>約 2.3 頭身（頭 55・胴 34・脚 28）。顔は既存のアイコンのまま。部品の回転・位置・差し替えだけで組んでいます</p>
+    <div class="row"><figure class=""><img src="../../apps/client/src/assets/characters/bolt/views/front.svg" alt="" /><figcaption>正面</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/views/quarter.svg" alt="" /><figcaption>斜め（3/4）</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/views/side.svg" alt="" /><figcaption>横</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/views/back.svg" alt="" /><figcaption>背面</figcaption></figure></div>
+    <h2>ボルト: 大きさ（64・128・512px）</h2>
+    <div class="row sizes"><img src="../../apps/client/src/assets/characters/bolt/views/front.svg" alt="" style="height:64px" /><img src="../../apps/client/src/assets/characters/bolt/views/front.svg" alt="" style="height:128px" /><img src="../../apps/client/src/assets/characters/bolt/views/front.svg" alt="" style="height:512px" /></div>
+    <h2>ボルト: 表情集</h2>
+    <div class="row"><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/idle.svg" alt="" /><figcaption>待機</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/happy.svg" alt="" /><figcaption>喜び</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/surprised.svg" alt="" /><figcaption>驚き</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/fail.svg" alt="" /><figcaption>失敗</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/sad.svg" alt="" /><figcaption>しょんぼり</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/determined.svg" alt="" /><figcaption>決意</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/tired.svg" alt="" /><figcaption>疲れた笑顔</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/sparkle.svg" alt="" /><figcaption>目を輝かせる</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/sleepy.svg" alt="" /><figcaption>眠い</figcaption></figure><figure class="small"><img src="../../apps/client/src/assets/characters/bolt/expressions/lookUp.svg" alt="" /><figcaption>見上げる</figcaption></figure></div>
+    <h2>ボルト: ポーズ集（身振り）</h2>
+    <div class="row"><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/stand.svg" alt="" /><figcaption>立ち</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/walk.svg" alt="" /><figcaption>歩く</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/jump.svg" alt="" /><figcaption>跳ねる</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/nod.svg" alt="" /><figcaption>うなずく</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/shake.svg" alt="" /><figcaption>首を振る</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/point.svg" alt="" /><figcaption>指さす</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/lookUp.svg" alt="" /><figcaption>見上げる</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/sad.svg" alt="" /><figcaption>しょんぼり</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/stagger.svg" alt="" /><figcaption>よろける（重い部品）</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/guts.svg" alt="" /><figcaption>ガッツポーズ</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/wave.svg" alt="" /><figcaption>手を振る</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/sitStars.svg" alt="" /><figcaption>座って星を見る</figcaption></figure><figure class=""><img src="../../apps/client/src/assets/characters/bolt/poses/blueprint.svg" alt="" /><figcaption>設計図を広げる</figcaption></figure></div>
+    <h2>ボルト: シルエット（黒塗りで身振りが読めるか）</h2>
+    <div class="row"><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/stand.svg" alt="" /><figcaption>立ち</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/walk.svg" alt="" /><figcaption>歩く</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/jump.svg" alt="" /><figcaption>跳ねる</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/nod.svg" alt="" /><figcaption>うなずく</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/shake.svg" alt="" /><figcaption>首を振る</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/point.svg" alt="" /><figcaption>指さす</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/lookUp.svg" alt="" /><figcaption>見上げる</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/sad.svg" alt="" /><figcaption>しょんぼり</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/stagger.svg" alt="" /><figcaption>よろける（重い部品）</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/guts.svg" alt="" /><figcaption>ガッツポーズ</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/wave.svg" alt="" /><figcaption>手を振る</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/sitStars.svg" alt="" /><figcaption>座って星を見る</figcaption></figure><figure class="silhouette"><img src="../../apps/client/src/assets/characters/bolt/poses/blueprint.svg" alt="" /><figcaption>設計図を広げる</figcaption></figure></div>
   </body>
 </html>

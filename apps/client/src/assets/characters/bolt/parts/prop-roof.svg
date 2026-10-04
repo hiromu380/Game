@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-44 -24 88 40">
+  <!-- ボルトの部品: prop / roof（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-40" y="0" width="80" height="10" rx="1" fill="#546e7a" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-36 4 H36" fill="none" stroke="#90a4ae" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

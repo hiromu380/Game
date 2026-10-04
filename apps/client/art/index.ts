@@ -8,6 +8,8 @@
  */
 import { achievementFiles } from './achievements';
 import { boardFiles } from './board';
+import { boltFiles } from './characters/bolt';
+import { characterPreviewHtml } from './characters/preview';
 import { iconFiles } from './icons';
 import { logoFiles } from './logo';
 import { mascotFiles } from './mascot';
@@ -28,9 +30,13 @@ export function buildArt(): Record<string, string> {
     ...achievementFiles(),
     ...rocketFiles(),
     ...titleFiles(),
+    ...boltFiles(),
+    // 設定画の一覧（リポジトリの docs/ へ書き出す）
+    '../../docs/characters/preview.html': characterPreviewHtml(),
   };
   files['art/preview.html'] = previewHtml([
-    ...Object.keys(files),
+    // キャラクターは部品が多いので docs/characters/preview.html にまとめる
+    ...Object.keys(files).filter((f) => !f.includes('characters/')),
     // 生成していない既存の素材も並べる
     ...EXISTING_ASSETS,
   ]);

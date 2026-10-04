@@ -178,6 +178,28 @@ export const ROCKET_ASSETS = {
   flame: rocketFiles['flame']!,
 };
 
+/**
+ * キャラクターの全身（切り絵アニメの部品・ポーズ。art/characters/ で生成）
+ *
+ * 部品は数が多く、使う場面（上部の背景・カットシーン）も限られるので、必要なときに読み込む（URL を返す関数）。
+ * 部品のつながり・関節・ポーズは rig.json（docs/characters/preview.html で一覧）
+ */
+const boltFiles = import.meta.glob<string>('./characters/bolt/**/*.svg', {
+  query: '?url',
+  import: 'default',
+});
+
+/** ボルトの素材の URL を読み込む（path は rig.json の files の値・'poses/jump.svg' など） */
+export function loadBoltAsset(path: string): Promise<string> {
+  const load = boltFiles[`./characters/bolt/${path}`];
+  return load ? load() : Promise.reject(new Error(`unknown bolt asset: ${path}`));
+}
+
+/** ボルトの素材のパスの一覧（テストで参照切れを確かめる） */
+export const BOLT_ASSET_PATHS = Object.keys(boltFiles).map((k) =>
+  k.replace('./characters/bolt/', ''),
+);
+
 const titleFiles = byName(
   import.meta.glob<string>('./title/*.svg', { eager: true, import: 'default' }),
 );

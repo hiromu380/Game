@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -90 100 70">
+  <!-- ボルトの部品: fx / sweat（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M30 -56 q4 5 0 8 q-4 -3 0 -8 Z" fill="#81d4fa" stroke="#33691e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-34 -48 q3 4 0 6 q-3 -2 0 -6 Z" fill="#81d4fa" stroke="#33691e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -90 100 70">
+  <!-- ボルトの部品: fx / shake（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M-38 -52 q-8 14 0 28 M38 -52 q8 14 0 28" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-45 -46 q-5 8 0 16 M45 -46 q5 8 0 16" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

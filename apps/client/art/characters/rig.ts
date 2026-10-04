@@ -26,6 +26,8 @@ export interface Pose {
   offsets?: Partial<Record<string, [number, number]>>;
   /** 部品ごとの差し替え */
   variants?: Partial<Record<string, string>>;
+  /** 部品ごとの重なり順の上書き（横向きで奥の腕を胴の後ろへ回すなど） */
+  z?: Partial<Record<string, number>>;
 }
 
 /** 部品の関節を、先祖からつないだ transform にする */
@@ -40,6 +42,7 @@ function chain(parts: Map<string, RigPart>, id: string, pose: Pose): string {
 export function renderPose(rig: readonly RigPart[], pose: Pose): string[] {
   const parts = new Map(rig.map((p) => [p.id, p]));
   return [...rig]
+    .map((p) => ({ ...p, z: pose.z?.[p.id] ?? p.z }))
     .sort((a, b) => a.z - b.z)
     .map((p) => group({ transform: chain(parts, p.id, pose) }, ...p.draw(pose.variants?.[p.id])));
 }

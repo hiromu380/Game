@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -90 100 70">
+  <!-- ボルトの部品: fx / stars（art/ のスクリプトで生成。手で編集しない） -->
+  <polygon points="30,-80 32,-75 37,-75 33,-72 35,-67 30,-70 25,-67 27,-72 23,-75 28,-75" fill="#ffca28" stroke="#33691e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="-34,-70 -33,-67 -30,-67 -32,-65 -31,-62 -34,-64 -37,-62 -36,-65 -38,-67 -35,-67" fill="#ffca28" stroke="#33691e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-48 -90 96 96">
+  <!-- ボルトの部品: head / side（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M2 -51 V-58" fill="none" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="2" cy="-59.5" r="4" fill="#ffeb3b" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-14" y="-46" width="32" height="45" rx="10" fill="#7cb342" stroke="#33691e" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -14 H16 V-11 a9 9 0 0 1 -9 9 H-3 a9 9 0 0 1 -9 -9 Z" fill="#699838"/>
+  <rect x="-6" y="-32" width="12" height="14" rx="3" fill="#9ccc65" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="0" cy="-25" r="2.5" fill="#33691e"/>
+  <path d="M14 -36 a6 7 0 0 1 0 14" fill="#ffffff" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="16" cy="-29" r="2.2" fill="#212121"/>
+  <path d="M13 -12 L18 -14" fill="none" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
