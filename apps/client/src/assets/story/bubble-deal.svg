@@ -1,0 +1,14 @@
+<svg width="380" height="200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 200">
+  <!-- カットシーンの絵: bubble-deal（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M300 150 L370 196 L320 140 Z" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="10" y="10" width="320" height="150" rx="40" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="40" y="50" width="84" height="70" rx="6" fill="#c8a165" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M40 74 H124" fill="none" stroke="#8d6e3f" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M64 96 h36" fill="none" stroke="#1b1f27" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M98 36 l10 12 l20 -26" fill="none" stroke="#43a047" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M146 86 H196" fill="none" stroke="#1b1f27" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="196,70 220,86 196,102" fill="#1b1f27"/>
+  <rect x="236" y="58" width="70" height="48" rx="6" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="236" y="76" width="70" height="12" fill="#e53935"/>
+  <rect x="236" y="58" width="70" height="48" rx="6" fill="none" stroke="#1b1f27" stroke-width="3"/>
+</svg>

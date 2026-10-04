@@ -15,6 +15,7 @@ import {
 } from '../../src/assets/palette';
 import { composeNut, NUT_POSES } from '../characters/nut';
 import { nutRocketBody } from '../characters/nutRocket';
+import { rocketBody } from '../rocket';
 import { duskSky, factoryRow, filters, stars } from '../keyvisual/layers';
 import { circle, el, group, line, path, polygon, rect, sizedSvg } from '../svg';
 
@@ -65,15 +66,121 @@ const ladder = () => [
   ...Array.from({ length: 10 }, (_, i) => path(`M10 ${i * 40 + 20} H50`, line(INK.steel, 6))),
 ];
 
-/** ガラクタの山（設計図が埋まっている） */
+/** 歯車（cx, cy: 中心、r: 半径） */
+const gear = (cx: number, cy: number, r: number, color: string) => [
+  ...Array.from({ length: 8 }, (_, i) =>
+    rect(cx - r * 0.18, cy - r * 1.22, r * 0.36, r * 0.5, {
+      ...fill(color, 2.5),
+      transform: `rotate(${i * 45} ${cx} ${cy})`,
+    }),
+  ),
+  circle(cx, cy, r, fill(color)),
+  circle(cx, cy, r * 0.35, fill(INK.steelDark, 2.5)),
+];
+
+/** ガラクタの山（部品が突き出た山。手前に設計図の端がのぞく） */
 const junk = () => [
-  path('M10 180 Q60 60 150 70 Q240 40 300 180 Z', fill(INK.steelDark)),
-  circle(110, 120, 26, fill(INK.steel)),
-  circle(110, 120, 8, { fill: O }),
-  rect(170, 80, 50, 34, fill(R.accent), 4),
-  rect(60, 140, 70, 24, fill(R.window), 3),
-  path('M220 140 l40 -30', line(INK.steelLight, 8)),
-  polygon('240,170 270,120 290,175', fill(M.cardboard)),
+  // 奥: 突き出た管・ばね・車輪
+  path('M70 70 L40 10', line(INK.steelDark, 14)),
+  path('M70 70 L40 10', line(INK.steel, 8)),
+  path('M236 74 q10 -10 0 -18 q-10 -8 0 -16 q10 -8 0 -16', line(INK.steelLight, 5)),
+  ...gear(250, 96, 26, INK.steel),
+  // 山
+  path('M6 186 Q30 112 92 98 Q150 60 214 92 Q282 110 304 186 Z', fill(INK.steelDark)),
+  path('M30 186 Q60 140 110 130 M180 120 Q240 130 280 186', line(INK.steel, 3)),
+  // 手前のガラクタ
+  ...gear(92, 128, 22, INK.steelLight),
+  rect(150, 104, 54, 34, fill(R.accent), 4),
+  path('M150 116 H204', line(R.accentShade, 3)),
+  circle(220, 160, 18, fill(O, 3)),
+  circle(220, 160, 8, fill(INK.steelLight, 2.5)),
+  rect(36, 150, 40, 20, fill(INK.steel), 3),
+  polygon('120,186 146,140 172,186', fill(M.cardboard)),
+  // 設計図の端（青い紙の角がのぞく）
+  path('M118 176 L136 150 L184 158 L176 186 Z', fill(R.window, 2.5)),
+  path('M140 160 l20 4', line(INK.white, 2)),
+];
+
+/** 設計図のアップ（広げた瞬間に画面いっぱいに見せる）: 方眼の青い紙に、ロケットの図面と寸法の線 */
+const blueprintClose = () => {
+  const ink = { fill: 'none', stroke: INK.white, 'stroke-width': 4, 'stroke-linejoin': 'round' };
+  const thin = { fill: 'none', stroke: INK.white, 'stroke-width': 2, opacity: 0.7 };
+  return [
+    rect(8, 8, 704, 444, fill('#2f6fb0', 6), 10),
+    ...Array.from({ length: 13 }, (_, i) =>
+      path(`M${30 + i * 55} 20 V440`, { ...thin, opacity: 0.18 }),
+    ),
+    ...Array.from({ length: 8 }, (_, i) =>
+      path(`M20 ${30 + i * 55} H700`, { ...thin, opacity: 0.18 }),
+    ),
+    // ロケットの図面（art/rocket.ts と同じ形を線で: 赤いバケツの先端・窓・ドラム缶・じょうごのノズル・翼）
+    group(
+      { transform: 'translate(250 30) scale(4)' },
+      path('M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z', { ...ink, 'stroke-width': 1 }),
+      path('M32 5 V-1', { ...ink, 'stroke-width': 1 }),
+      circle(32, -3.5, 3, { ...ink, 'stroke-width': 1 }),
+      rect(20, 32, 24, 48, { ...ink, 'stroke-width': 1 }),
+      circle(32, 53, 8.5, { ...ink, 'stroke-width': 1 }),
+      path('M20 66 H44 M20 76 H44', { ...thin, 'stroke-width': 0.6 }),
+      path('M22 56 L8 74 V86 L22 80 Z M42 56 L56 74 V86 L42 80 Z', { ...ink, 'stroke-width': 1 }),
+      path('M24 80 H40 L44 90 H20 Z', { ...ink, 'stroke-width': 1 }),
+    ),
+    // 寸法の線と引き出し線（文字は使わない）
+    path('M200 46 V390 M190 46 H210 M190 390 H210', thin),
+    path('M250 420 H490 M250 410 V430 M490 410 V430', thin),
+    path('M400 240 L560 170 H640', thin),
+    circle(600, 120, 34, thin),
+    path('M584 120 h32 M600 104 v32', thin),
+    // 角に「完成予定」の星（ゴールの印）
+    polygon(
+      '640,330 652,358 682,358 658,376 667,404 640,388 613,404 622,376 598,358 628,358',
+      fill(M.sun, 3),
+    ),
+  ];
+};
+
+/** ロケット（窓の中は空。乗り込む前）: art/rocket.ts の絵を4倍で */
+const rocketEmpty = (stage: number) => () => [
+  group({ transform: 'scale(4) translate(16 8)' }, ...rocketBody(stage, true)),
+];
+
+/** 工場長の吹き出し（取引の条件）: ノルマの箱 → 部品（文字なし）。しっぽは右下（工場長の運転席）へ */
+const bubbleDeal = () => [
+  path('M300 150 L370 196 L320 140 Z', fill(INK.white, 3)),
+  rect(10, 10, 320, 150, fill(INK.white, 3), 40),
+  // ノルマの箱（段ボール）
+  rect(40, 50, 84, 70, fill(M.cardboard), 6),
+  path('M40 74 H124', line(M.cardboardDark, 5)),
+  path('M64 96 h36', line(O, 5)),
+  // チェックの印（届けたら）
+  path('M98 36 l10 12 l20 -26', line('#43a047', 7)),
+  // 矢印
+  path('M146 86 H196', line(O, 7)),
+  polygon('196,70 220,86 196,102', { fill: O }),
+  // ロケットの部品（胴体の輪切り: ボルトが抱える部品と同じ絵）
+  rect(236, 58, 70, 48, fill(R.body), 6),
+  rect(236, 76, 70, 12, { fill: R.accent }),
+  rect(236, 58, 70, 48, { fill: 'none', stroke: O, 'stroke-width': 3 }, 6),
+];
+
+/** ボルトの考えの吹き出し: 部品をいくつも重ねる → ロケット（ふわふわの雲の形、しっぽは左下の小さな丸） */
+const bubbleBuild = () => [
+  circle(26, 222, 9, fill(INK.white, 2.5)),
+  circle(50, 196, 14, fill(INK.white, 2.5)),
+  el('ellipse', { cx: 190, cy: 100, rx: 170, ry: 92, ...fill(INK.white, 3) }),
+  // 部品3つ（積み上がる）
+  ...[0, 1, 2].map((i) =>
+    group(
+      {},
+      rect(60, 120 - i * 34, 64, 30, fill(R.body), 5),
+      rect(60, 131 - i * 34, 64, 8, { fill: R.accent }),
+      rect(60, 120 - i * 34, 64, 30, { fill: 'none', stroke: O, 'stroke-width': 3 }, 5),
+    ),
+  ),
+  path('M144 100 H190', line(O, 7)),
+  polygon('190,84 214,100 190,116', { fill: O }),
+  // 完成したロケット（窓は空: これから乗る）
+  group({ transform: 'translate(234 22) scale(1.5)' }, ...rocketBody(9, true)),
 ];
 
 /** 地面に落ちた設計図（ゲームオーバーで拾う） */
@@ -168,13 +275,13 @@ const lightLine = (color: string) => [
   el('path', {
     d: 'M10 20 H590',
     stroke: color,
-    'stroke-width': 18,
-    opacity: 0.45,
+    'stroke-width': 30,
+    opacity: 0.5,
     filter: 'url(#kv-glow)',
     'stroke-linecap': 'round',
   }),
-  path('M10 20 H590', line(color, 7)),
-  path('M10 20 H590', line('#fff3c4', 2.5)),
+  path('M10 20 H590', line(color, 12)),
+  path('M10 20 H590', line('#fff3c4', 4)),
 ];
 
 /** 柱に貼った古い写真（ナット＝水色のアンテナのロボ と、別の手作りの水色のロケット。art/characters/nut.ts） */
@@ -208,6 +315,13 @@ const ASSETS: Record<string, { w: number; h: number; body: () => string[] }> = {
   roof: { w: W, h: 200, body: roof },
   ladder: { w: 60, h: 400, body: ladder },
   junk: { w: 310, h: 190, body: junk },
+  'blueprint-close': { w: 720, h: 460, body: blueprintClose },
+  'rocket-empty-8': { w: 384, h: 416, body: rocketEmpty(8) },
+  'rocket-empty-9': { w: 384, h: 416, body: rocketEmpty(9) },
+  // 場面の上に重ねて暗くする（設計図のアップなど。不透明度はシーン側で）
+  dim: { w: 64, h: 36, body: () => [rect(0, 0, 64, 36, { fill: '#05060a' })] },
+  'bubble-deal': { w: 380, h: 200, body: bubbleDeal },
+  'bubble-build': { w: 370, h: 240, body: bubbleBuild },
   'blueprint-ground': { w: 120, h: 46, body: blueprintGround },
   'quota-box': { w: 100, h: 90, body: quotaBox },
   bubble: { w: 300, h: 220, body: bubble },

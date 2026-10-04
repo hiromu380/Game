@@ -326,6 +326,13 @@ const crate = (): string[] => [
   circle(14, -11, 1.8, { fill: O }),
 ];
 
+/** 段ボール箱（工場の荷物。オープニングで片付ける） */
+const box = (): string[] => [
+  rect(-20, -18, 40, 26, fill(M.cardboard), 3),
+  path('M-20 -9 H20', line(M.cardboardDark, 3)),
+  path('M-6 -18 V-9 M6 -18 V-9', line(M.cardboardDark, 2)),
+];
+
 /** 設計図: 青い紙にロケットの線画 */
 const blueprint = (): string[] => [
   rect(-26, -20, 52, 34, fill(R.window, 2.5), 2),
@@ -346,6 +353,8 @@ export function propPart(variant: string | undefined): string[] {
       return crate();
     case 'blueprint':
       return blueprint();
+    case 'box':
+      return box();
     case 'roof':
       return roof();
     default:
@@ -381,6 +390,12 @@ export function fxPart(variant: string | undefined): string[] {
       ];
     case 'zzz':
       return [path('M22 -72 h8 l-8 8 h8 M34 -84 h6 l-6 6 h6', line(INK.white, 2.2))];
+    case 'question':
+      // 考える: 頭の横の「？」（文字ではなく記号の絵）
+      return [
+        path('M30 -82 q0 -8 8 -8 q8 0 8 7 q0 5 -7 8 v5', line(INK.white, 3.5)),
+        circle(39, -59, 2.4, { fill: INK.white }),
+      ];
     case 'stars':
       return [
         polygon(
@@ -470,8 +485,8 @@ export const PART_VARIANTS: Record<string, readonly string[]> = {
   thigh: ['default'],
   shin: ['default'],
   foot: ['front', 'side'],
-  prop: ['crate', 'blueprint', 'roof'],
-  fx: ['nod', 'shake', 'sweat', 'zzz', 'stars', 'gloom'],
+  prop: ['crate', 'blueprint', 'roof', 'box'],
+  fx: ['nod', 'shake', 'sweat', 'zzz', 'stars', 'gloom', 'question'],
 };
 
 // =============================================================================
@@ -686,6 +701,140 @@ export const POSES: Record<string, { label: string; pose: Pose }> = {
     },
   },
 };
+
+// ---- カットシーンの細かい動き（読み取りやすくするための中割り・身振り） ----
+/** しゃがむ（跳ぶ前のため・着地） */
+POSES.crouch = {
+  label: 'しゃがむ（跳ぶ前・着地）',
+  pose: {
+    offsets: { root: [0, 9] },
+    angles: {
+      upperArmL: 28,
+      upperArmR: -28,
+      foreArmL: 10,
+      foreArmR: -10,
+      thighL: 34,
+      shinL: -58,
+      thighR: -34,
+      shinR: 58,
+    },
+    variants: { head: 'happy' },
+  },
+};
+/** 荷物（item: ロケットの部品 crate・段ボール箱 box）を胸の前で抱える（正面） */
+const carryFront = (item: string): Pose => ({
+  offsets: { prop: [0, -10] },
+  angles: { upperArmL: -32, foreArmL: -62, upperArmR: 32, foreArmR: 62 },
+  variants: { head: 'happy', handL: 'grip', handR: 'grip', prop: item },
+  z: { prop: 4.5 },
+});
+POSES.carry = { label: '部品を抱える', pose: carryFront('crate') };
+POSES.carryBox = { label: '箱を抱える', pose: carryFront('box') };
+/** 荷物を抱えて歩く（横向き。carryWalk と carryWalkB を足の入れ替えでつなぐ） */
+const carrySide = (
+  thighL: number,
+  shinL: number,
+  thighR: number,
+  shinR: number,
+  item = 'crate',
+): Pose =>
+  merge(SIDE, {
+    offsets: { prop: [22, -12] },
+    angles: {
+      thighL,
+      shinL,
+      thighR,
+      shinR,
+      upperArmL: -70,
+      foreArmL: -20,
+      upperArmR: -78,
+      foreArmR: -14,
+    },
+    variants: { head: 'side', handL: 'grip', handR: 'grip', prop: item },
+    z: { prop: 4.5, upperArmR: 5, foreArmR: 5, handR: 5.5 },
+  });
+POSES.carryBoxWalk = { label: '箱を抱えて歩く', pose: carrySide(-24, 10, 22, 22, 'box') };
+POSES.carryBoxWalkB = {
+  label: '箱を抱えて歩く（2コマ目）',
+  pose: carrySide(22, 22, -24, 10, 'box'),
+};
+POSES.carryWalk = { label: '部品を抱えて歩く', pose: carrySide(-24, 10, 22, 22) };
+POSES.carryWalkB = { label: '部品を抱えて歩く（2コマ目）', pose: carrySide(22, 22, -24, 10) };
+/** 部品を前へ持ち上げて取り付ける（横向き。ロケットは前にある） */
+POSES.install = {
+  label: '部品を持ち上げて取り付ける',
+  pose: merge(SIDE, {
+    offsets: { prop: [34, -46] },
+    angles: {
+      thighL: -14,
+      shinL: 6,
+      thighR: 18,
+      shinR: 4,
+      upperArmL: -128,
+      foreArmL: -10,
+      upperArmR: -136,
+      foreArmR: -4,
+      torso: 6,
+    },
+    variants: { head: 'side', handL: 'grip', handR: 'grip', prop: 'crate' },
+    z: { prop: 4.5, upperArmR: 5, foreArmR: 5, handR: 5.5 },
+  }),
+};
+/** 汗をぬぐう（片腕で額をこする） */
+POSES.wipe = {
+  label: '汗をぬぐう',
+  pose: {
+    angles: { upperArmL: 10, foreArmL: -6, upperArmR: -172, foreArmR: -44, head: 8 },
+    variants: { head: 'tired', handR: 'open', fx: 'sweat' },
+    z: { upperArmR: 7, foreArmR: 7, handR: 7.5 },
+  },
+};
+/** 伸びをする（両腕を上へ） */
+POSES.stretch = {
+  label: '伸びをする',
+  pose: {
+    offsets: { root: [0, -3] },
+    angles: { upperArmL: 128, foreArmL: 30, upperArmR: -128, foreArmR: -30, head: -4 },
+    variants: { head: 'sleepy', handL: 'fist', handR: 'fist' },
+  },
+};
+/** 考える（あごに手・首をかしげる・？） */
+POSES.think = {
+  label: '考える',
+  pose: {
+    angles: { upperArmL: 10, foreArmL: -6, upperArmR: -28, foreArmR: 140, head: 10, torso: 2 },
+    variants: { head: 'idle', handR: 'fist', fx: 'question' },
+    z: { upperArmR: 7, foreArmR: 7, handR: 7.5 },
+  },
+};
+/** 空を指さす（流れ星・月） */
+POSES.pointUp = {
+  label: '空を指さす',
+  pose: {
+    offsets: { head: [0, -2] },
+    angles: { upperArmL: 10, foreArmL: -6, upperArmR: -158, foreArmR: 6, torso: -4, head: -6 },
+    variants: { head: 'lookUp', handR: 'point' },
+  },
+};
+/** はしごを登る（背中を見せる。climb と climbB を交互に） */
+const climbPose = (k: 1 | -1): Pose =>
+  merge(BACK, {
+    angles: {
+      upperArmL: k > 0 ? 160 : 132,
+      foreArmL: k > 0 ? -16 : 20,
+      upperArmR: k > 0 ? -132 : -160,
+      foreArmR: k > 0 ? -20 : 16,
+      thighL: k > 0 ? -50 : 0,
+      shinL: k > 0 ? 60 : 0,
+      thighR: k > 0 ? 0 : 50,
+      shinR: k > 0 ? 0 : -60,
+    },
+    variants: { handL: 'grip', handR: 'grip' },
+    // 背中側から見るので、腕は頭より手前
+    z: { upperArmL: 7, foreArmL: 7, handL: 7.5, upperArmR: 7, foreArmR: 7, handR: 7.5 },
+  });
+POSES.climb = { label: 'はしごを登る', pose: climbPose(1) };
+POSES.climbB = { label: 'はしごを登る（2コマ目）', pose: climbPose(-1) };
 
 /** 書き出しの範囲（腰が原点。地面 y = GROUND_Y） */
 export const VIEW_BOX = '-70 -122 140 162';

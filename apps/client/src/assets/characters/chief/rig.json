@@ -221,6 +221,16 @@
         "cab": "soft"
       }
     },
+    "gaze": {
+      "angles": {
+        "cab": 9,
+        "jib": 24,
+        "hook": -33
+      },
+      "variants": {
+        "cab": "soft"
+      }
+    },
     "surprised": {
       "offsets": {
         "cab": [

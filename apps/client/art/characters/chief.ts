@@ -259,6 +259,10 @@ export const CHIEF_POSES: Record<string, { label: string; pose: Pose }> = {
       variants: { cab: 'soft' },
     }),
   },
+  gaze: {
+    label: '写真を見つめる（エンディング）',
+    pose: hang({ angles: { cab: 9, jib: 24 }, variants: { cab: 'soft' } }),
+  },
   surprised: {
     label: '驚く',
     pose: hang({ offsets: { cab: [0, -4] }, angles: { jib: -35 }, variants: { cab: 'surprised' } }),

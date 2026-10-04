@@ -12,7 +12,8 @@ import { circle, group, line, outlined, path, rect, svg, THIN } from './svg';
 /** 絵の座標系（縦長。一覧の正方形の枠にも収まるよう、左右に余白を持たせる） */
 const VIEW_BOX = '-16 -8 96 104';
 
-type Piece = (built: boolean) => string;
+/** built: 組み上がったか。empty: 窓の中にボルトがいない（カットシーンで乗り込む前） */
+type Piece = (built: boolean, empty?: boolean) => string;
 
 /** 組み上がっていない部品の見た目: 点線の輪郭だけ */
 const ghost = { fill: 'none', stroke: R.ghost, 'stroke-width': 2, 'stroke-dasharray': '3 3' };
@@ -71,15 +72,19 @@ const PIECES: Piece[] = [
       detail(b, path('M22 35 V43', line(R.bodyShade, 2))),
     ),
   // 3日目: 窓（洗濯機の扉。中にボルトの顔）・先端（赤いバケツ）・アンテナ
-  (b) =>
+  (b, empty) =>
     b
       ? group(
           {},
           circle(32, 53, 8.5, outlined(INK.steelLight, 3)),
           circle(32, 53, 5.5, { fill: R.window, stroke: INK.steelDark, 'stroke-width': 1.5 }),
-          circle(32, 54, 4, { fill: B.body }),
-          circle(30.6, 53.2, 1.1, { fill: B.pupil }),
-          circle(33.4, 53.2, 0.8, { fill: B.pupil }),
+          ...(empty
+            ? [path('M29 51 q2 -2 4 -2', line(INK.white, 1.4))]
+            : [
+                circle(32, 54, 4, { fill: B.body }),
+                circle(30.6, 53.2, 1.1, { fill: B.pupil }),
+                circle(33.4, 53.2, 0.8, { fill: B.pupil }),
+              ]),
         )
       : circle(32, 53, 8.5, ghost),
   (b) =>
@@ -102,12 +107,18 @@ const PIECES: Piece[] = [
 
 export const ROCKET_STAGES = PIECES.length;
 
-/** stage 個の部品が組み上がったロケット */
-export function rocketSvg(stage: number): string {
+/** stage 個の部品が組み上がったロケットの絵（座標は ROCKET_VIEW_BOX）。empty なら窓の中は空 */
+export function rocketBody(stage: number, empty = false): string[] {
   // 翼は胴体の後ろに描く（部品の番号とは別に、描く順を決める）
   const order = [1, 2, 0, 3, 4, 5, 7, 6, 8];
-  const body = order.map((i) => PIECES[i]!(i < stage));
-  return svg(`ボルトのロケット（${stage}/${ROCKET_STAGES}）`, body, VIEW_BOX);
+  return order.map((i) => PIECES[i]!(i < stage, empty));
+}
+
+export const ROCKET_VIEW_BOX = VIEW_BOX;
+
+/** stage 個の部品が組み上がったロケット */
+export function rocketSvg(stage: number): string {
+  return svg(`ボルトのロケット（${stage}/${ROCKET_STAGES}）`, rocketBody(stage), VIEW_BOX);
 }
 
 /** 発射の炎（ロケットの下に重ねて、画面側で揺らす） */

@@ -20,7 +20,8 @@
       "files": {
         "crate": "parts/prop-crate.svg",
         "blueprint": "parts/prop-blueprint.svg",
-        "roof": "parts/prop-roof.svg"
+        "roof": "parts/prop-roof.svg",
+        "box": "parts/prop-box.svg"
       }
     },
     {
@@ -103,7 +104,8 @@
         "sweat": "parts/fx-sweat.svg",
         "zzz": "parts/fx-zzz.svg",
         "stars": "parts/fx-stars.svg",
-        "gloom": "parts/fx-gloom.svg"
+        "gloom": "parts/fx-gloom.svg",
+        "question": "parts/fx-question.svg"
       }
     },
     {
@@ -679,6 +681,482 @@
       },
       "z": {
         "prop": 4.5
+      }
+    },
+    "crouch": {
+      "offsets": {
+        "root": [
+          0,
+          9
+        ]
+      },
+      "angles": {
+        "upperArmL": 28,
+        "upperArmR": -28,
+        "foreArmL": 10,
+        "foreArmR": -10,
+        "thighL": 34,
+        "shinL": -58,
+        "thighR": -34,
+        "shinR": 58
+      },
+      "variants": {
+        "head": "happy"
+      }
+    },
+    "carry": {
+      "offsets": {
+        "prop": [
+          0,
+          -10
+        ]
+      },
+      "angles": {
+        "upperArmL": -32,
+        "foreArmL": -62,
+        "upperArmR": 32,
+        "foreArmR": 62
+      },
+      "variants": {
+        "head": "happy",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "crate"
+      },
+      "z": {
+        "prop": 4.5
+      }
+    },
+    "carryBox": {
+      "offsets": {
+        "prop": [
+          0,
+          -10
+        ]
+      },
+      "angles": {
+        "upperArmL": -32,
+        "foreArmL": -62,
+        "upperArmR": 32,
+        "foreArmR": 62
+      },
+      "variants": {
+        "head": "happy",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "box"
+      },
+      "z": {
+        "prop": 4.5
+      }
+    },
+    "carryBoxWalk": {
+      "angles": {
+        "thighL": -24,
+        "shinL": 10,
+        "thighR": 22,
+        "shinR": 22,
+        "upperArmL": -70,
+        "foreArmL": -20,
+        "upperArmR": -78,
+        "foreArmR": -14
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ],
+        "prop": [
+          22,
+          -12
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "box"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0,
+        "prop": 4.5,
+        "upperArmR": 5,
+        "foreArmR": 5,
+        "handR": 5.5
+      }
+    },
+    "carryBoxWalkB": {
+      "angles": {
+        "thighL": 22,
+        "shinL": 22,
+        "thighR": -24,
+        "shinR": 10,
+        "upperArmL": -70,
+        "foreArmL": -20,
+        "upperArmR": -78,
+        "foreArmR": -14
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ],
+        "prop": [
+          22,
+          -12
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "box"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0,
+        "prop": 4.5,
+        "upperArmR": 5,
+        "foreArmR": 5,
+        "handR": 5.5
+      }
+    },
+    "carryWalk": {
+      "angles": {
+        "thighL": -24,
+        "shinL": 10,
+        "thighR": 22,
+        "shinR": 22,
+        "upperArmL": -70,
+        "foreArmL": -20,
+        "upperArmR": -78,
+        "foreArmR": -14
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ],
+        "prop": [
+          22,
+          -12
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "crate"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0,
+        "prop": 4.5,
+        "upperArmR": 5,
+        "foreArmR": 5,
+        "handR": 5.5
+      }
+    },
+    "carryWalkB": {
+      "angles": {
+        "thighL": 22,
+        "shinL": 22,
+        "thighR": -24,
+        "shinR": 10,
+        "upperArmL": -70,
+        "foreArmL": -20,
+        "upperArmR": -78,
+        "foreArmR": -14
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ],
+        "prop": [
+          22,
+          -12
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "crate"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0,
+        "prop": 4.5,
+        "upperArmR": 5,
+        "foreArmR": 5,
+        "handR": 5.5
+      }
+    },
+    "install": {
+      "angles": {
+        "thighL": -14,
+        "shinL": 6,
+        "thighR": 18,
+        "shinR": 4,
+        "upperArmL": -128,
+        "foreArmL": -10,
+        "upperArmR": -136,
+        "foreArmR": -4,
+        "torso": 6
+      },
+      "offsets": {
+        "upperArmL": [
+          19,
+          0
+        ],
+        "upperArmR": [
+          -19,
+          0
+        ],
+        "thighL": [
+          7,
+          0
+        ],
+        "thighR": [
+          -7,
+          0
+        ],
+        "prop": [
+          34,
+          -46
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "handL": "grip",
+        "handR": "grip",
+        "prop": "crate"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0,
+        "prop": 4.5,
+        "upperArmR": 5,
+        "foreArmR": 5,
+        "handR": 5.5
+      }
+    },
+    "wipe": {
+      "angles": {
+        "upperArmL": 10,
+        "foreArmL": -6,
+        "upperArmR": -172,
+        "foreArmR": -44,
+        "head": 8
+      },
+      "variants": {
+        "head": "tired",
+        "handR": "open",
+        "fx": "sweat"
+      },
+      "z": {
+        "upperArmR": 7,
+        "foreArmR": 7,
+        "handR": 7.5
+      }
+    },
+    "stretch": {
+      "offsets": {
+        "root": [
+          0,
+          -3
+        ]
+      },
+      "angles": {
+        "upperArmL": 128,
+        "foreArmL": 30,
+        "upperArmR": -128,
+        "foreArmR": -30,
+        "head": -4
+      },
+      "variants": {
+        "head": "sleepy",
+        "handL": "fist",
+        "handR": "fist"
+      }
+    },
+    "think": {
+      "angles": {
+        "upperArmL": 10,
+        "foreArmL": -6,
+        "upperArmR": -28,
+        "foreArmR": 140,
+        "head": 10,
+        "torso": 2
+      },
+      "variants": {
+        "head": "idle",
+        "handR": "fist",
+        "fx": "question"
+      },
+      "z": {
+        "upperArmR": 7,
+        "foreArmR": 7,
+        "handR": 7.5
+      }
+    },
+    "pointUp": {
+      "offsets": {
+        "head": [
+          0,
+          -2
+        ]
+      },
+      "angles": {
+        "upperArmL": 10,
+        "foreArmL": -6,
+        "upperArmR": -158,
+        "foreArmR": 6,
+        "torso": -4,
+        "head": -6
+      },
+      "variants": {
+        "head": "lookUp",
+        "handR": "point"
+      }
+    },
+    "climb": {
+      "angles": {
+        "upperArmL": 160,
+        "foreArmL": -16,
+        "upperArmR": -132,
+        "foreArmR": -20,
+        "thighL": -50,
+        "shinL": 60,
+        "thighR": 0,
+        "shinR": 0
+      },
+      "offsets": {},
+      "variants": {
+        "head": "back",
+        "torso": "back",
+        "handL": "grip",
+        "handR": "grip"
+      },
+      "z": {
+        "upperArmL": 7,
+        "foreArmL": 7,
+        "handL": 7.5,
+        "upperArmR": 7,
+        "foreArmR": 7,
+        "handR": 7.5
+      }
+    },
+    "climbB": {
+      "angles": {
+        "upperArmL": 132,
+        "foreArmL": 20,
+        "upperArmR": -160,
+        "foreArmR": 16,
+        "thighL": 0,
+        "shinL": 0,
+        "thighR": 50,
+        "shinR": -60
+      },
+      "offsets": {},
+      "variants": {
+        "head": "back",
+        "torso": "back",
+        "handL": "grip",
+        "handR": "grip"
+      },
+      "z": {
+        "upperArmL": 7,
+        "foreArmL": 7,
+        "handL": 7.5,
+        "upperArmR": 7,
+        "foreArmR": 7,
+        "handR": 7.5
       }
     }
   },
