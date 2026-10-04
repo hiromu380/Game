@@ -14,6 +14,7 @@ import {
   TITLE_COLORS as T,
 } from '../../src/assets/palette';
 import { composeNut, NUT_POSES } from '../characters/nut';
+import { nutRocketBody } from '../characters/nutRocket';
 import { duskSky, factoryRow, filters, stars } from '../keyvisual/layers';
 import { circle, el, group, line, path, polygon, rect, sizedSvg } from '../svg';
 
@@ -183,9 +184,8 @@ const photo = () => [
   ...stars(200, 100, 10).map((s) => group({ transform: 'translate(20 20)' }, s)),
   // ナット（設定画の「手を振る」ポーズ。写真の中なので小さく、影なし）
   group({ transform: 'translate(82 132) scale(0.6)' }, ...composeNut(NUT_POSES.wave!.pose, false)),
-  path('M160 40 Q184 64 184 100 V140 H136 V100 Q136 64 160 40 Z', fill(F.retrigger.light, 3)),
-  path('M136 118 L118 146 H136 Z M184 118 L202 146 H184 Z', fill(F.retrigger.main, 3)),
-  circle(160, 92, 11, fill(R.window, 2.5)),
+  // ナットのロケット（ボルトのものより性能が良さそうな機体: art/characters/nutRocket.ts）
+  group({ transform: 'translate(132 22) scale(0.6)' }, ...nutRocketBody()),
   circle(120, 8, 8, fill(INK.steelLight, 2.5)),
 ];
 

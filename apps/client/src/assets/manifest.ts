@@ -181,6 +181,9 @@ export const ROCKET_ASSETS = {
   flame: rocketFiles['flame']!,
   /** 発射の煙（カットシーンの打ち上げ用） */
   smoke: rocketFiles['smoke']!,
+  /** ナットのロケット（ボルトのものより性能が良さそうな機体。カットシーン・写真用） */
+  nut: rocketFiles['nut-rocket']!,
+  nutLaunch: rocketFiles['nut-rocket-flame']!,
 };
 
 /**

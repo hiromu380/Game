@@ -11,6 +11,7 @@ import { boardFiles } from './board';
 import { boltFiles } from './characters/bolt';
 import { chiefFiles } from './characters/chief';
 import { nutFiles } from './characters/nut';
+import { nutRocketFiles } from './characters/nutRocket';
 import { capsuleFiles } from './keyvisual/capsules';
 import { storePreviewHtml } from './keyvisual/preview';
 import { storyAssetFiles } from './story/assets';
@@ -38,6 +39,7 @@ export function buildArt(): Record<string, string> {
     ...boltFiles(),
     ...chiefFiles(),
     ...nutFiles(),
+    ...nutRocketFiles(),
     ...capsuleFiles(),
     ...storyAssetFiles(),
     // 設定画の一覧（リポジトリの docs/ へ書き出す）

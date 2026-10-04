@@ -135,6 +135,11 @@ export function characterPreviewHtml(extra: PreviewSection[] = []): string {
         .join('')}</div>`,
     },
     {
+      title: 'ナットのロケット（ボルトのロケットとの比較）',
+      note: 'ボルトの手作りロケット（ガラクタの寄せ集め・ノズル1つ）より性能が良さそうに: 細長い流線形・補助ブースター2本・ノズル3つ・大きな翼・銀色の先端・丸窓2つ・アンテナの皿',
+      html: `<div class="row">${figure(`${ROCKET}/rocket-9.svg`, 'ボルトのロケット', 'rocket')}${figure(`${ROCKET}/nut-rocket.svg`, 'ナットのロケット', 'small')}${figure(`${ROCKET}/nut-rocket-flame.svg`, '打ち上げ', 'small')}</div>`,
+    },
+    {
       title: 'ロケット: 完成までの9段階（1日3部品）',
       note: '赤白のロケットに、ガラクタの部品（じょうごのノズル・ドラム缶・洗濯機の扉の窓・バケツの先端・テープの継ぎはぎ）を混ぜる。上部の背景と日ごとの幕間で同じ絵を使う',
       html: `<div class="row">${Array.from({ length: 10 }, (_, i) =>
