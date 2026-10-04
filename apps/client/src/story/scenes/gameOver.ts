@@ -39,22 +39,30 @@ export const gameOver: Scene = {
       ...appear(1.5, at(720, 260, 110, 40), 0.1),
       key(2.2, at(800, GROUND - 34, 110, 40, 1, { rotation: 20 }), 'in'),
     ]),
+    // 設計図: 崩れたロケットから舞い落ち、ボルトの前に落ちる（ボルトが拾う）
     prop('blueprint', 'story:blueprint-ground', [
-      key(0, at(330, GROUND - 40, 140, 54, 0)),
-      ...appear(2.3, at(330, GROUND - 40, 140, 54), 0.2),
-      key(2.9, at(330, GROUND - 40, 140, 54, 0)),
+      key(0, at(520, 360, 120, 46, 0)),
+      ...appear(1.6, at(520, 360, 120, 46, 1, { rotation: -20 }), 0.1),
+      key(2.3, at(470, GROUND - 40, 120, 46, 1, { rotation: 0 })),
+      key(2.85, at(470, GROUND - 40, 120, 46, 1)),
+      key(2.95, at(450, GROUND - 60, 120, 46, 0)),
     ]),
     actor('chief', 'chief', [
       key(0, { pose: 'shake', x: 990, y: GROUND, height: CHIEF_H }),
       key(0.6, { pose: 'neutral', x: 990, y: GROUND, height: CHIEF_H }),
       key(1.2, { pose: 'shake', x: 990, y: GROUND, height: CHIEF_H }),
+      key(2.4, { pose: 'shake', x: 990, y: GROUND, height: CHIEF_H }),
+      key(2.8, { pose: 'neutral', x: 990, y: GROUND, height: CHIEF_H }),
     ]),
     actor('bolt', 'bolt', [
-      key(0, bolt('stand', 420, { face: 'surprised' })),
-      key(1.2, bolt('stand', 420, { face: 'surprised' })),
-      key(1.6, bolt('sad', 420)),
-      key(2.6, bolt('sad', 420)),
-      key(2.9, bolt('blueprint', 420, { face: 'determined' })),
+      key(0, bolt('stand', 380, { face: 'surprised' })),
+      key(1.2, bolt('stand', 380, { face: 'surprised' })),
+      key(1.6, bolt('sad', 380)),
+      key(2.4, bolt('sad', 380)),
+      // 落ちた設計図に気づいて、しゃがんで拾い、顔を上げる
+      key(2.7, bolt('crouch', 410, { face: 'surprised' })),
+      key(2.9, bolt('crouch', 410, { face: 'idle' })),
+      key(3.2, bolt('blueprint', 410, { face: 'determined' })),
     ]),
   ],
   // 冷たい色 → 最後に暖かい色へ戻す

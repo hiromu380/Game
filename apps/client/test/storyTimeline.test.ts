@@ -84,6 +84,26 @@ describe('カットシーンのタイムライン', () => {
     expect(sampleScene(walking, 2, FULL).actors[0]!).toMatchObject({ y: 600, blend: null });
   });
 
+  it('歩き終わりから別の動きへ移る間は、足を動かさない（歩数を補間しない）', () => {
+    const walkThenClimb: Scene = {
+      ...scene,
+      tracks: [
+        {
+          kind: 'actor',
+          id: 'bolt',
+          character: 'bolt',
+          keys: [
+            { t: 0, value: { pose: 'walk', x: 0, y: 600, height: 250, cycle: 4 } },
+            { t: 1, value: { pose: 'climb', x: 0, y: 600, height: 250, cycle: 0 } },
+          ],
+        },
+      ],
+    };
+    const f = sampleScene(walkThenClimb, 0.5, FULL).actors[0]!;
+    expect(f.cycle).toBe(4);
+    expect(f.y).toBe(600);
+  });
+
   it('待機中の揺れは演出「弱」では止まる', () => {
     const sway = (strength: 'full' | 'minimal') =>
       sampleScene(scene, 0.7, { ...FULL, strength }).actors[0]!.sway;

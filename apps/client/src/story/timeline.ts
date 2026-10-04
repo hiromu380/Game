@@ -213,6 +213,8 @@ export function sampleScene(scene: Scene, t: number, options: EffectOptions): Fr
       const a = at.a.value as ActorValue;
       const b = at.b.value as ActorValue;
       const v = mix(a, b, at.k);
+      // 歩数は同じ動き（ポーズ）の間だけ進める（歩き終わりから別の動きへ移る間に、足が逆回りしないように）
+      if (a.pose !== b.pose) v.cycle = a.cycle;
       // 歩き: 1歩ごとに足を入れ替え（cos で行き来）、足が揃うところで体が上がる
       const step = v.cycle ?? null;
       const stride = step === null ? 0 : (1 - Math.cos(step * Math.PI)) / 2;

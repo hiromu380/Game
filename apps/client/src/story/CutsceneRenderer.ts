@@ -86,6 +86,8 @@ export class CutsceneRenderer {
   private readonly world = new Container();
   private readonly stage = new Container();
   private readonly overlay = new Graphics();
+  /** 光（加算: 下の絵を明るくする。半透明の色を重ねるだけだと、くすんで見える） */
+  private readonly glow = new Graphics();
   private readonly sprites = new Map<string, Sprite>();
   private readonly texts = new Map<string, Text>();
   /** 前のフレームの色味・光（変わったときだけ描き直す） */
@@ -98,7 +100,8 @@ export class CutsceneRenderer {
     private readonly translate: (key: string) => string,
   ) {
     this.stage.sortableChildren = true;
-    this.world.addChild(this.stage, this.overlay);
+    this.glow.blendMode = 'add';
+    this.world.addChild(this.stage, this.glow, this.overlay);
     app.stage.addChild(this.world);
     this.resize();
   }
@@ -233,12 +236,11 @@ export class CutsceneRenderer {
     if (overlayKey === this.overlayKey) return;
     this.overlayKey = overlayKey;
     this.overlay.clear();
+    this.glow.clear();
+    if (frame.flash)
+      this.glow.rect(0, 0, W, H).fill({ color: hex(frame.flash.color), alpha: frame.flash.alpha });
     if (frame.tint)
       this.overlay.rect(0, 0, W, H).fill({ color: hex(frame.tint.color), alpha: frame.tint.alpha });
-    if (frame.flash)
-      this.overlay
-        .rect(0, 0, W, H)
-        .fill({ color: hex(frame.flash.color), alpha: frame.flash.alpha });
   }
 
   private sprite(key: string, texture: Texture | undefined): Sprite {

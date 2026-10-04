@@ -99,11 +99,30 @@ export function walk(
   x1: number,
   make: (pose: string, x: number) => ActorValue,
   step = 0.32,
+  pose = 'walk',
 ): Key<ActorValue>[] {
   // 歩数は偶数にそろえる（歩き終わりで最初のコマに戻る）。足の入れ替えと上下は timeline.ts が cycle から求める
   const n = Math.max(2, Math.round((t1 - t0) / step / 2) * 2);
   return [
-    key(t0, { ...make('walk', x0), cycle: 0 }, 'linear'),
-    key(t1, { ...make('walk', x1), cycle: n }),
+    key(t0, { ...make(pose, x0), cycle: 0 }, 'linear'),
+    key(t1, { ...make(pose, x1), cycle: n }),
+  ];
+}
+
+/**
+ * 跳ねる: t 秒にしゃがんでため → 跳び上がる（頂点まで height px）→ しゃがんで着地 → end のポーズ。
+ * 瞬間移動に見えないよう、ため・頂点・着地を順に通す。全体で約 0.66 秒
+ */
+export function hop(
+  t: number,
+  make: (pose: string, lift: number) => ActorValue,
+  end = 'stand',
+  height = 40,
+): Key<ActorValue>[] {
+  return [
+    key(t, make('crouch', 0), 'out'),
+    key(t + 0.24, make('jump', -height), 'in'),
+    key(t + 0.46, make('crouch', 0)),
+    key(t + 0.66, make(end, 0)),
   ];
 }

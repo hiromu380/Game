@@ -5,20 +5,7 @@
  * 絵コンテ: docs/story/storyboard.html#interlude1・#interlude2
  */
 import type { ActorValue, Scene } from '../timeline';
-import {
-  actor,
-  appear,
-  at,
-  BOLT_H,
-  CHIEF_H,
-  GROUND,
-  H,
-  key,
-  prop,
-  rocketBox,
-  W,
-  walk,
-} from './build';
+import { actor, at, BOLT_H, CHIEF_H, GROUND, H, hop, key, prop, rocketBox, W, walk } from './build';
 
 const bolt = (pose: string, x: number, extra: Partial<ActorValue> = {}): ActorValue => ({
   pose,
@@ -45,15 +32,6 @@ const rocket = (from: number, times: number[]) =>
     ),
   ]);
 
-/** 工場長のフックから降ろした部品が、ロケットへ運ばれて取り付けられる（受け取りを目で追えるように） */
-const carry = (t0: number, t1: number) =>
-  prop('carry', 'story:scrap', [
-    key(0, at(1110, 460, 110, 40, 0)),
-    ...appear(t0, at(1110, 460, 110, 40), 0.05),
-    key(t1, at(650, 420, 110, 40, 1), 'inOut'),
-    key(t1 + 0.3, at(650, 420, 110, 40, 0)),
-  ]);
-
 const fadeInOut = (duration: number) => [
   key(0, { color: '#000000', alpha: 1 }),
   key(0.5, { color: '#000000', alpha: 0 }),
@@ -61,73 +39,105 @@ const fadeInOut = (duration: number) => [
   key(duration, { color: '#000000', alpha: 1 }),
 ];
 
-/** 1日目: いつもの型（受け取る → 取り付ける → 手を振る） */
+/**
+ * ボルトがフックの下へ歩いて部品を受け取り、ロケットへ運んで取り付ける（毎日同じ型）。
+ * heavy: 2日目（部品が重く、受け取るとよろけ、ゆっくり運ぶ）。stages: 取り付けで1段階ずつ進む時刻
+ */
+function receiveAndInstall(heavy: boolean, from: number): Scene['tracks'] {
+  // 工場長のフックの下（offer のポーズで部品が下がる位置）と、ロケットの右（取り付ける位置）
+  const HOOK_X = 1150;
+  const INSTALL_X = 805;
+  const face = heavy ? 'tired' : 'happy';
+  const take = heavy ? 2.4 : 2.3;
+  const carryEnd = heavy ? 4.3 : 3.6;
+  const lift = carryEnd + 0.3;
+  const stages = [lift + 0.3, lift + 0.6, lift + 0.9];
+  return [
+    rocket(from, stages),
+    actor('chief', 'chief', [
+      key(0, chief('offer', 990)),
+      key(take, chief('offer', 990)),
+      key(take + 0.3, chief('neutral', 990)),
+    ]),
+    actor('bolt', 'bolt', [
+      key(0, bolt('walk', 260)),
+      ...walk(0.4, take - 0.2, 260, HOOK_X, (p, x) => bolt(p, x)),
+      key(take, bolt(heavy ? 'stagger' : 'carry', HOOK_X, { face })),
+      ...(heavy
+        ? [
+            key(take + 0.6, bolt('stagger', HOOK_X - 20)),
+            key(take + 0.9, bolt('carryWalk', HOOK_X - 20, { flip: true })),
+            ...walk(
+              take + 0.9,
+              carryEnd,
+              HOOK_X - 20,
+              INSTALL_X,
+              (p, x) => bolt(p, x, { flip: true }),
+              0.45,
+              'carryWalk',
+            ),
+          ]
+        : [
+            key(take + 0.4, bolt('carryWalk', HOOK_X, { flip: true })),
+            ...walk(
+              take + 0.4,
+              carryEnd,
+              HOOK_X,
+              INSTALL_X,
+              (p, x) => bolt(p, x, { flip: true }),
+              0.34,
+              'carryWalk',
+            ),
+          ]),
+      key(lift, bolt('install', INSTALL_X, { flip: true })),
+      key(stages[2]! + 0.1, bolt('install', INSTALL_X, { flip: true })),
+      key(stages[2]! + 0.4, bolt(heavy ? 'wipe' : 'stand', INSTALL_X, { face })),
+      ...(heavy
+        ? [
+            key(6.4, bolt('wipe', INSTALL_X)),
+            ...hop(6.5, (p, l) => bolt(p, INSTALL_X, { y: GROUND + l, face }), 'wave', 22),
+          ]
+        : [
+            ...hop(5.6, (p, l) => bolt(p, INSTALL_X, { y: GROUND + l, face }), 'guts'),
+            key(6.6, bolt('wave', INSTALL_X, { face })),
+          ]),
+    ]),
+  ];
+}
+
+/** 1日目: いつもの型（受け取る → 運ぶ → 取り付ける → 跳ねて喜ぶ） */
 export const interlude1: Scene = {
   id: 'interlude1',
   duration: 8,
   background: '#0b0d12',
-  tracks: [
-    ...night(),
-    rocket(0, [4, 4.6, 5.2]),
-    carry(3.2, 3.9),
-    actor('chief', 'chief', [
-      key(0, chief('offer', 990)),
-      key(2.6, chief('offer', 990)),
-      key(3.2, chief('neutral', 990)),
-    ]),
-    actor('bolt', 'bolt', [
-      key(0, bolt('stand', 300)),
-      ...walk(0.6, 2.2, 300, 520, (p, x) => bolt(p, x)),
-      key(2.4, bolt('guts', 520, { face: 'happy' })),
-      key(3.6, bolt('jump', 520, { face: 'happy' })),
-      key(4.2, bolt('stand', 520)),
-      key(4.6, bolt('jump', 520, { face: 'happy' })),
-      key(5.2, bolt('stand', 520)),
-      key(5.6, bolt('jump', 520, { face: 'happy' })),
-      key(6.2, bolt('wave', 520)),
-    ]),
-  ],
+  tracks: [...night(), ...receiveAndInstall(false, 0)],
   tint: fadeInOut(8),
   sounds: [
     { t: 0.3, key: 'craneWinch' },
-    { t: 2.5, key: 'boltBeep' },
-    { t: 4, key: 'clank' },
-    { t: 4.6, key: 'clank' },
-    { t: 5.2, key: 'clank' },
-    { t: 6.3, key: 'boltHappy' },
+    ...[0.6, 1.2, 1.8].map((t) => ({ t, key: 'footstep' })),
+    { t: 2.3, key: 'boltBeep' },
+    { t: 4.2, key: 'clank' },
+    { t: 4.5, key: 'clank' },
+    { t: 4.8, key: 'clank' },
+    { t: 5.8, key: 'boltHappy' },
   ],
 };
 
-/** 2日目: 部品が大きく重くなり、よろける。汗をぬぐって小さく跳ねる */
+/** 2日目: 部品が大きく重くなり、よろけながら運ぶ。汗をぬぐって小さく跳ねる */
 export const interlude2: Scene = {
   id: 'interlude2',
   duration: 8,
   background: '#0b0d12',
-  tracks: [
-    ...night(),
-    rocket(3, [4.4, 5, 5.6]),
-    carry(1.2, 2.2),
-    actor('chief', 'chief', [key(0, chief('offer', 990)), key(1.2, chief('neutral', 990))]),
-    actor('bolt', 'bolt', [
-      key(0, bolt('stand', 640)),
-      key(0.8, bolt('stagger', 640)),
-      key(1.4, bolt('stagger', 590)),
-      key(2, bolt('stagger', 550)),
-      ...walk(2.6, 3.8, 550, 520, (p, x) => bolt(p, x)),
-      key(4.2, bolt('stand', 520, { face: 'tired' })),
-      key(5.6, bolt('stand', 520, { face: 'tired' })),
-      key(6.2, bolt('jump', 520, { face: 'tired' })),
-      key(6.8, bolt('wave', 520, { face: 'tired' })),
-    ]),
-  ],
+  tracks: [...night(), ...receiveAndInstall(true, 3)],
   tint: fadeInOut(8),
   sounds: [
-    { t: 0.5, key: 'craneWinch' },
-    { t: 1, key: 'landing' },
-    { t: 1.2, key: 'boltQuestion' },
-    { t: 4.4, key: 'clank' },
-    { t: 5, key: 'clank' },
-    { t: 5.6, key: 'clank' },
-    { t: 6.3, key: 'boltBeep' },
+    { t: 0.3, key: 'craneWinch' },
+    ...[0.6, 1.2, 1.8].map((t) => ({ t, key: 'footstep' })),
+    { t: 2.4, key: 'landing' },
+    { t: 2.5, key: 'boltQuestion' },
+    { t: 4.9, key: 'clank' },
+    { t: 5.2, key: 'clank' },
+    { t: 5.5, key: 'clank' },
+    { t: 6.6, key: 'boltBeep' },
   ],
 };
