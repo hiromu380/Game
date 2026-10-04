@@ -127,7 +127,7 @@ const COMPOSE: Record<CapsuleId, (w: number, h: number) => string[]> = {
   small: (w, h) => [
     el('rect', { width: w, height: h, fill: B.background }),
     ...backdrop(w, h, 120, 0.55),
-    ...burst(362, 70, 140, 10),
+    ...burst(384, 74, 130, 10),
     ...chainLight(
       [
         [250, 150],
@@ -138,8 +138,9 @@ const COMPOSE: Record<CapsuleId, (w: number, h: number) => string[]> = {
       7,
       1,
     ),
-    ...bigNumber(SCORE, 362, 42, 2.15, SIGNAL_TIERS[1]),
-    logo(10, 28, 246),
+    ...bigNumber(SCORE, 384, 52, 1.9, SIGNAL_TIERS[1]),
+    // 120×45 まで縮めても読めるよう、ロゴを縦いっぱいに近く
+    logo(4, 18, 286),
   ],
   // 縦長: ロゴ（上）→ 数字 → 盤面、ボルトは左下で盤面の角に重ねる
   vertical: (w, h) => [

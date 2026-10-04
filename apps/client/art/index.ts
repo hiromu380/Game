@@ -11,6 +11,7 @@ import { boardFiles } from './board';
 import { boltFiles } from './characters/bolt';
 import { chiefFiles } from './characters/chief';
 import { capsuleFiles } from './keyvisual/capsules';
+import { storePreviewHtml } from './keyvisual/preview';
 import { characterPreviewHtml } from './characters/preview';
 import { iconFiles } from './icons';
 import { logoFiles } from './logo';
@@ -37,6 +38,8 @@ export function buildArt(): Record<string, string> {
     ...capsuleFiles(),
     // 設定画の一覧（リポジトリの docs/ へ書き出す）
     '../../docs/characters/preview.html': characterPreviewHtml(),
+    // ストア用の画像の確認ページ
+    '../../docs/art-preview.html': storePreviewHtml(),
   };
   files['art/preview.html'] = previewHtml([
     // キャラクターは部品が多いので docs/characters/preview.html にまとめる
