@@ -11,7 +11,6 @@ import {
   applyOp,
   commitShift,
   createRunWithConfig,
-  weeklyRunSeed,
   isRunOp,
   type CommitResult,
   type PartId,
@@ -64,12 +63,12 @@ export function applyShiftOps(start: RunState, ops: unknown): ApplyShiftResult {
  * 保存済みの操作ログは検証済みなので、ここで失敗するのはデータ破損か sim の非互換（例外にする）
  */
 export function rebuildState(
-  dailyId: string,
+  runSeed: number,
   config: RunConfig,
   committedOps: readonly unknown[][],
   seeds: readonly number[],
 ): RunState {
-  let state = createRunWithConfig(weeklyRunSeed(dailyId), config);
+  let state = createRunWithConfig(runSeed, config);
   committedOps.forEach((ops, shiftIndex) => {
     const applied = applyShiftOps(state, ops);
     if (!applied.ok)

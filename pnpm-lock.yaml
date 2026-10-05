@@ -97,6 +97,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@chain-factory/bots':
+        specifier: workspace:*
+        version: link:../../packages/bots
       '@chain-factory/shared':
         specifier: workspace:*
         version: link:../../packages/shared
