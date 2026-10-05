@@ -17,7 +17,7 @@ import { EDITION_CONFIG } from '../config/edition';
 import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
 import { RocketScene } from './RocketScene';
-import { DailyShare } from './share/DailyShare';
+import { WeeklyShare } from './share/WeeklyShare';
 import { RunShare } from './share/RunShare';
 import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
@@ -51,8 +51,8 @@ export function RunEndScreen(props: Props) {
       <div className="run-end__main">
         <RocketScene run={run} />
         <h1>
-          {mode.kind === 'daily'
-            ? t('runEnd.dailyTitle', { number: mode.number })
+          {mode.kind === 'weekly'
+            ? t('runEnd.weeklyTitle', { number: mode.number })
             : mode.kind === 'practice'
               ? t('runEnd.practiceTitle', { number: mode.number })
               : run.overtime
@@ -112,11 +112,11 @@ export function RunEndScreen(props: Props) {
         )}
       </div>
       <div className="run-end__side">
-        {(mode.kind === 'daily' || mode.kind === 'normal') && (
+        {(mode.kind === 'weekly' || mode.kind === 'normal') && (
           <section className="run-end__share">
             <h2>{t('shareCard.title')}</h2>
-            {mode.kind === 'daily' ? (
-              <DailyShare run={run} dailyId={mode.dailyId} number={mode.number} />
+            {mode.kind === 'weekly' ? (
+              <WeeklyShare run={run} weekId={mode.weekId} number={mode.number} />
             ) : (
               <RunShare run={run} />
             )}

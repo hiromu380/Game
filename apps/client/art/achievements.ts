@@ -124,13 +124,13 @@ const DEFS: Record<AchievementId, { group: Group; body: string[] }> = {
     group: 'shift',
     body: [group({ transform: 'translate(0 -4)' }, moon()), label('9')],
   },
-  ACH_DAILY_FIRST: { group: 'daily', body: [uiArt('daily', 32)] },
+  ACH_DAILY_FIRST: { group: 'daily', body: [uiArt('weekly', 32)] },
   ACH_DAILY_CLEAR: {
     group: 'daily',
-    body: [uiArt('daily', 30), path('M36 38 l5 5 l10 -12', line(U.met, 4))],
+    body: [uiArt('weekly', 30), path('M36 38 l5 5 l10 -12', line(U.met, 4))],
   },
   ACH_DAILY_TOP10: { group: 'daily', body: [uiArt('ranking', 28), label('10%', 0.42)] },
-  ACH_DAILY_7: { group: 'daily', body: [uiArt('daily', 28), label('7')] },
+  ACH_DAILY_7: { group: 'daily', body: [uiArt('weekly', 28), label('7')] },
   ACH_JUNKBOT_JACKPOT: {
     group: 'secret',
     body: [art(partBody('junkbot'), 0.5), label('×3')],

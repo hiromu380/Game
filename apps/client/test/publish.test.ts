@@ -83,19 +83,19 @@ describe('シェア文', () => {
   });
 });
 
-describe('相場の前日比', () => {
+describe('相場の前週比', () => {
   const market: MarketResponse = {
-    date: '2026-10-02',
+    weekId: '2026-09-28',
     prices: { gear: 3, coil: 1, dock: 3 } as never,
     previous: { gear: 2, coil: 2, dock: 3 } as never,
   };
 
-  it('値上がり・値下がりしたパーツだけ（ランの価格が今日の相場のとき）', () => {
+  it('値上がり・値下がりしたパーツだけ（ランの価格が今週の相場のとき）', () => {
     const runPrices = { gear: 3, coil: 1, dock: 3 } as never;
     expect(priceTrends(market, runPrices)).toEqual({ gear: 'up', coil: 'down' });
   });
 
-  it('前日の相場がない・ランが別の価格で始まっていれば出さない', () => {
+  it('前週の相場がない・ランが別の価格で始まっていれば出さない', () => {
     expect(priceTrends({ ...market, previous: null }, { gear: 3 } as never)).toEqual({});
     expect(priceTrends(market, { gear: 2, coil: 2 } as never)).toEqual({});
   });

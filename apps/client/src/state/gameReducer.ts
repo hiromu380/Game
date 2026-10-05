@@ -57,13 +57,13 @@ export type Playback =
 /**
  * 遊び方
  * - normal:   通常のラン（端末に保存・メタ進行に反映）
- * - daily:    デイリー本番（本番シードはサーバーから。ランキング対象。端末には保存しない）
- * - practice: デイリーの練習（同じ条件で何度でも。ランキング・メタ進行には反映しない）
+ * - weekly:   週替わりチャレンジの本番（1日1回。本番シードはサーバーから。ランキング対象。端末には保存しない）
+ * - practice: 週替わりチャレンジの練習（同じ条件で何度でも。ランキング・メタ進行には反映しない）
  */
 export type PlayMode =
   | { kind: 'normal' }
-  | { kind: 'daily'; dailyId: string; number: number }
-  | { kind: 'practice'; dailyId: string; number: number };
+  | { kind: 'weekly'; weekId: string; dayId: string; number: number }
+  | { kind: 'practice'; weekId: string; number: number };
 
 /** 画面に出すエラー（i18n の `error.<キー>`）。ラン操作のエラーと通信のエラー */
 export type GameError = RunError | `online.${OnlineErrorCode}`;
@@ -131,7 +131,7 @@ export type FeedbackKind =
 export type GameAction =
   /**
    * 新しいラン・デイリー・練習に入る / 通常のランに戻る。
-   * ランの組み立て（相場・体験版の制限など）は画面側で行う（state/newRun.ts、online/dailyRun.ts）
+   * ランの組み立て（相場・体験版の制限など）は画面側で行う（state/newRun.ts、online/weeklyRun.ts）
    */
   | { type: 'loadRun'; run: RunState; mode: PlayMode }
   /** 全シフトクリア後に延長戦へ進む */
@@ -171,7 +171,7 @@ export type GameAction =
   | { type: 'playbackFinished' }
   | { type: 'closePlayback' }
   /** デイリーのランキングで自分の順位を受け取った（上位○% の実績） */
-  | { type: 'dailyRanked'; topPercent: number }
+  | { type: 'weeklyRanked'; topPercent: number }
   /** 撮影モード: 盤面を差し替える（書き出した JSON の読み込み。ui/CapturePanel.tsx） */
   | { type: 'captureLoadBoard'; board: Board; floor?: FloorLayer }
   /** 撮影モード: 指定したシードで本番を実行する（見栄えの良い連鎖を何度でも再現する） */
@@ -289,11 +289,11 @@ export function canUndo(state: GameState): boolean {
 
 function reduce(state: GameState, action: GameAction): GameState {
   // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
-  const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun', 'dailyRanked'];
+  const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun', 'weeklyRanked'];
   if (state.playback && !busyAllowed.includes(action.type)) return state;
   if (
     state.awaitingServer &&
-    !['serverCommitted', 'serverCommitFailed', 'dailyRanked'].includes(action.type)
+    !['serverCommitted', 'serverCommitFailed', 'weeklyRanked'].includes(action.type)
   ) {
     return state;
   }
@@ -302,7 +302,7 @@ function reduce(state: GameState, action: GameAction): GameState {
     case 'loadRun':
       return createGameState(action.run, state.meta, action.mode, state.achievements);
 
-    case 'dailyRanked':
+    case 'weeklyRanked':
       return {
         ...state,
         achievements: achievementsAfterRanking(state.achievements, action.topPercent),
@@ -334,7 +334,7 @@ function reduce(state: GameState, action: GameAction): GameState {
       };
 
     case 'giveUp': {
-      if (state.mode.kind === 'daily') return state;
+      if (state.mode.kind === 'weekly') return state;
       const given = abandonRun(state.run);
       if (!given) return state;
       // 通常ランは、確定したシフトの分だけメタ進行に記録する（本番の確定と同じ扱い）

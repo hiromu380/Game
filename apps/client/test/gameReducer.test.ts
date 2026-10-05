@@ -149,12 +149,14 @@ describe('画面の状態遷移', () => {
   });
 });
 
-describe('操作ログとデイリー本番', () => {
-  const daily = () => {
-    const run = createWeeklyRun('2026-10-01');
+describe('操作ログと週替わりの本番', () => {
+  // リロールを止める特殊ルール（部品不足）に当たらない週
+  const weekly = () => {
+    const run = createWeeklyRun('2026-10-12');
     return createGameState(run, createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
   };
@@ -177,9 +179,9 @@ describe('操作ログとデイリー本番', () => {
     expect(replayed.ok && replayed.state).toEqual(state.run);
   });
 
-  it('デイリーは本番でサーバーの応答を待ち、返ってきたシードで確定する', () => {
+  it('週替わりは本番でサーバーの応答を待ち、返ってきたシードで確定する', () => {
     let state = apply(
-      daily(),
+      weekly(),
       { type: 'selectInventory', partId: 'switch' },
       { type: 'clickCell', x: 1, y: 3 },
       { type: 'startCommit' },
@@ -193,13 +195,13 @@ describe('操作ログとデイリー本番', () => {
     expect(state.awaitingServer).toBe(false);
     expect(state.playback?.mode).toBe('commit');
     expect(state.pendingOps).toEqual([]);
-    // デイリーは端末に保存しない・メタ進行に反映しない
+    // 週替わりは端末に保存しない・メタ進行に反映しない
     expect(getPersistedRun(state)).toBeNull();
     expect(state.meta).toEqual(createInitialMeta());
   });
 
   it('サーバーが拒否したら操作ログを残したまま組み立てに戻る', () => {
-    let state = apply(daily(), { type: 'reroll' }, { type: 'startCommit' });
+    let state = apply(weekly(), { type: 'reroll' }, { type: 'startCommit' });
     state = apply(state, { type: 'serverCommitFailed', error: 'online.network' });
     expect(state).toMatchObject({ awaitingServer: false, error: 'online.network', playback: null });
     expect(state.pendingOps).toEqual([{ op: 'reroll' }]);
@@ -215,28 +217,29 @@ describe('実績', () => {
     expect(state.achievements.unlocked).toEqual(['ACH_ZERO']);
   });
 
-  it('デイリー本番の確定で参加日数を数え、ランキングの順位で上位の実績を判定する', () => {
-    const run = createWeeklyRun('2026-10-01');
+  it('週替わりの本番の確定で参加日数を数え、確定した結果発表の順位で上位の実績を判定する', () => {
+    const run = createWeeklyRun('2026-10-12');
     let state = createGameState(run, createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
     state = apply(state, { type: 'startCommit' }, { type: 'serverCommitted', seed: 1 });
     expect(state.achievements.dailyDays).toBe(1);
     expect(state.achievements.unlocked).toContain('ACH_DAILY_FIRST');
-    state = apply(state, { type: 'dailyRanked', topPercent: 50 });
+    state = apply(state, { type: 'weeklyRanked', topPercent: 50 });
     expect(state.achievements.unlocked).not.toContain('ACH_DAILY_TOP10');
-    state = apply(state, { type: 'dailyRanked', topPercent: 3 });
+    state = apply(state, { type: 'weeklyRanked', topPercent: 3 });
     expect(state.achievements.unlocked).toContain('ACH_DAILY_TOP10');
   });
 
-  it('練習はデイリーの参加日数に数えない', () => {
-    const run = createWeeklyRun('2026-10-01');
+  it('練習は週替わりの参加日数に数えない', () => {
+    const run = createWeeklyRun('2026-10-12');
     let state = createGameState(
       { ...run, config: { ...run.config, commitSeedMode: 'derived' } },
       createInitialMeta(),
-      { kind: 'practice', dailyId: '2026-10-01', number: 1 },
+      { kind: 'practice', weekId: '2026-09-28', number: 1 },
     );
     state = apply(state, { type: 'startCommit' });
     expect(state.achievements.dailyDays).toBe(0);
@@ -404,10 +407,11 @@ describe('諦める', () => {
     expect(state.meta.records.runsPlayed).toBe(before);
   });
 
-  it('デイリー本番は諦められない', () => {
-    const state = createGameState(createWeeklyRun('2026-10-01'), createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+  it('週替わりの本番は諦められない', () => {
+    const state = createGameState(createWeeklyRun('2026-10-12'), createInitialMeta(), {
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
     expect(apply(state, { type: 'giveUp' })).toBe(state);

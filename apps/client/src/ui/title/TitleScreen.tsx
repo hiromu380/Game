@@ -21,7 +21,12 @@ interface Props {
   hasSavedRun: boolean;
   meta: MetaProgress | null;
   onPlay: () => void;
-  onDaily: () => void;
+  /** 今週のチャレンジ */
+  onWeekly: () => void;
+  /** 結果発表（先週のランキング） */
+  onResults: () => void;
+  /** まだ見ていない結果発表がある（バッジを出す） */
+  unreadResults: boolean;
   onCollection: () => void;
   onHowTo: () => void;
   onSettings: () => void;
@@ -35,7 +40,9 @@ export function TitleScreen({
   hasSavedRun,
   meta,
   onPlay,
-  onDaily,
+  onWeekly,
+  onResults,
+  unreadResults,
   onCollection,
   onHowTo,
   onSettings,
@@ -66,7 +73,11 @@ export function TitleScreen({
         <button className="button--primary" disabled={waiting} onClick={onPlay}>
           {hasSavedRun ? t('title.continue') : t('title.play')}
         </button>
-        <button onClick={onDaily}>{t('title.daily')}</button>
+        <button onClick={onWeekly}>{t('title.weekly')}</button>
+        <button className="button--ghost title__results" onClick={onResults}>
+          {t('title.results')}
+          {unreadResults && <span className="badge">{t('title.resultsNew')}</span>}
+        </button>
         <button className="button--ghost" onClick={onHowTo}>
           {t('title.howTo')}
         </button>

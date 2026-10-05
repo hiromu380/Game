@@ -74,7 +74,7 @@ export function BossNotice({ run }: { run: RunState }) {
       {special && (
         <div className="boss-notice boss-notice--now">
           <img className="boss-notice__icon" src={BOSS_ICONS[special.id]} alt="" />
-          <span className="boss-notice__label">{t('daily.specialRule')}</span>
+          <span className="boss-notice__label">{t('weekly.specialRule')}</span>
           <span className="boss-notice__period">{t('rule.period.allShifts')}</span>
           <strong>
             {t(`boss.${special.id}.sender`)} / {t(`boss.${special.id}.name`)}

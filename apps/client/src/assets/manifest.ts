@@ -149,7 +149,7 @@ export const UI_ICON_NAMES = [
   'ranking',
   'share',
   'debug',
-  'daily',
+  'weekly',
   'back',
   'expand',
   'permit',

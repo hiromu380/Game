@@ -1,13 +1,15 @@
 /**
  * 画面の切り替え: タイトル（軽い・すぐ出る）⇄ ゲーム本体（PixiJS を含む。遅延読み込み）
  *
- * タイトルを出したらすぐ、裏でゲーム本体と最新の相場を読み込み始める。
+ * タイトルを出したらすぐ、裏でゲーム本体と最新の相場・結果発表の有無を読み込み始める。
  */
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { GameStart } from './App';
 import { loadGame, type GameModule } from './boot/loadGame';
 import { useI18n } from './i18n';
+import { api } from './online/api';
 import { loadMarket } from './online/market';
+import { hasUnreadResults, loadResultsSeen } from './online/resultsSeen';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { MetaProgress } from '@chain-factory/sim';
 import { recordRankingToSave } from './state/achievements';
@@ -18,7 +20,7 @@ import { EDITION } from './config/edition';
 import { memoryScenes, type SceneId } from './story/playback';
 import { AVAILABLE_SCENES } from './story/scenes';
 import { MemoriesDialog } from './ui/title/MemoriesDialog';
-import { DailyMenu } from './ui/online/DailyMenu';
+import { WeeklyMenu, type WeeklyView } from './ui/online/WeeklyMenu';
 import { TitleScreen } from './ui/title/TitleScreen';
 
 /** コレクション（開いたときに読み込む。タイトル画面を軽く保つため） */
@@ -36,7 +38,9 @@ export function Root() {
   const [game, setGame] = useState<GameModule | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [request, setRequest] = useState<Request | null>(null);
-  const [dailyOpen, setDailyOpen] = useState(false);
+  const [weeklyOpen, setWeeklyOpen] = useState<WeeklyView | null>(null);
+  /** 確定済みで一番新しい結果発表の週（タイトルの未読バッジ。既読は閉じたときに読み直す） */
+  const [latestResults, setLatestResults] = useState<string | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [howToOpen, setHowToOpen] = useState(false);
@@ -56,6 +60,11 @@ export function Root() {
       .catch(() => setLoadFailed(true));
     // 通常ランの価格に使う相場（オフラインなら基準価格のまま）
     void loadMarket();
+    // 新しい結果発表があるか（オフラインならバッジを出さないだけ）
+    api
+      .getLatest()
+      .then((r) => setLatestResults(r.finished[0]))
+      .catch(() => {});
   }, []);
 
   // ゲーム本体が読み込めていて、ゲーム画面へ進む要求があればゲーム画面
@@ -72,7 +81,9 @@ export function Root() {
         hasSavedRun={loadRun() !== null}
         meta={loadSave()?.meta ?? null}
         onPlay={() => setRequest({ start: null })}
-        onDaily={() => setDailyOpen(true)}
+        onWeekly={() => setWeeklyOpen('menu')}
+        onResults={() => setWeeklyOpen('results')}
+        unreadResults={weeklyOpen === null && hasUnreadResults(latestResults, loadResultsSeen())}
         onCollection={() => setCollectionOpen(true)}
         onHowTo={() => setHowToOpen(true)}
         onSettings={() => setSettingsOpen(true)}
@@ -108,13 +119,14 @@ export function Root() {
           {t('title.loadFailed')}
         </p>
       )}
-      {dailyOpen && (
-        <DailyMenu
+      {weeklyOpen && (
+        <WeeklyMenu
+          initialView={weeklyOpen}
           onEnter={(run, mode) => {
-            setDailyOpen(false);
+            setWeeklyOpen(null);
             setRequest({ start: { run, mode } });
           }}
-          onClose={() => setDailyOpen(false)}
+          onClose={() => setWeeklyOpen(null)}
           onRanked={recordRankingToSave}
         />
       )}

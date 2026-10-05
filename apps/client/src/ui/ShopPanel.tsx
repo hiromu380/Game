@@ -19,7 +19,7 @@ interface Props {
   budget: number;
   /** 次のリロール価格（リロールできないシフトでは null） */
   rerollCost: number | null;
-  /** 相場の前日比（値上がり・値下がりしたパーツだけ） */
+  /** 相場の前週比（値上がり・値下がりしたパーツだけ） */
   trends: Partial<Record<PartId, PriceTrend>>;
   disabled: boolean;
   /** 初回ガイドで買ってほしいパーツ（最初の1つを光らせる） */

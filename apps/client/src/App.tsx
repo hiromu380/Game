@@ -6,7 +6,6 @@
  */
 import {
   createRunWithConfig,
-  weeklyRunSeed,
   getCurrentEconomy,
   drawFloorPermit,
   getCurrentFloor,
@@ -98,7 +97,7 @@ import { nextStep } from './state/nextStep';
 import { feedbackMessage, type FeedbackMessage } from './state/feedbackMessage';
 import { FEEDBACK_NOTE_MS } from './config/effects';
 import { GameMenu } from './ui/GameMenu';
-import { DailyMenu } from './ui/online/DailyMenu';
+import { WeeklyMenu } from './ui/online/WeeklyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
 import { WorkshopBackdrop } from './ui/WorkshopBackdrop';
@@ -160,7 +159,7 @@ export function App({ start, onTitle }: Props) {
   /** 撮影モード: 共有カードの確認 */
   const [sharePreview, setSharePreview] = useState(false);
   /** デイリーのメニュー（開いていなければ null） */
-  const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
+  const [weeklyMenu, setWeeklyMenu] = useState<'menu' | 'ranking' | null>(null);
 
   const { settings, updateSettings } = useSettings();
   const { run, selection, playback, error, mode } = state;
@@ -214,19 +213,19 @@ export function App({ start, onTitle }: Props) {
   // 解除済みを毎回まとめて送るのは、オフラインで解除した分を後から送り直すため（Steam 側では二重に解除されない）
   useSteamAchievements(state.meta, state.achievements);
   const onRanked = useCallback(
-    (topPercent: number) => dispatch({ type: 'dailyRanked', topPercent }),
+    (topPercent: number) => dispatch({ type: 'weeklyRanked', topPercent }),
     [],
   );
 
-  // デイリー本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
+  // 週替わりの本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
   // 同じシフトを二重に送らないよう、送信中のシフトを覚えておく（開発時の StrictMode の二重実行対策も兼ねる）
   const inflightShift = useRef<number | null>(null);
   useEffect(() => {
-    if (!state.awaitingServer || mode.kind !== 'daily') return;
+    if (!state.awaitingServer || mode.kind !== 'weekly') return;
     if (inflightShift.current === run.shiftIndex) return;
     inflightShift.current = run.shiftIndex;
     api
-      .commit(mode.dailyId, {
+      .commit(mode.weekId, mode.dayId, {
         simVersion: SIM_VERSION,
         shiftIndex: run.shiftIndex,
         ops: state.pendingOps,
@@ -440,7 +439,7 @@ export function App({ start, onTitle }: Props) {
       !settingsOpen &&
       !isEventPending(run) &&
       !commitConfirm &&
-      dailyMenu === null &&
+      weeklyMenu === null &&
       (playing || run.phase === 'building'),
     width: run.board.width,
     height: run.board.height,
@@ -466,7 +465,7 @@ export function App({ start, onTitle }: Props) {
     if (mode.kind === 'practice') {
       dispatch({
         type: 'loadRun',
-        run: createRunWithConfig(weeklyRunSeed(mode.dailyId), run.config),
+        run: createRunWithConfig(run.seed, run.config),
         mode,
       });
       return;
@@ -478,14 +477,14 @@ export function App({ start, onTitle }: Props) {
   const enterRun = (next: RunState, nextMode: PlayMode) => {
     setLiveScore(null);
     setTutorial(startTutorial(next));
-    setDailyMenu(null);
+    setWeeklyMenu(null);
     dispatch({ type: 'loadRun', run: next, mode: nextMode });
   };
   /** 通常モードに戻る（保存済みのランがあれば続きから） */
   const backToNormal = () =>
     enterRun(loadRun() ?? startNewNormalRun(state.meta), { kind: 'normal' });
 
-  // ショップの前日比（今日の相場で始めたランだけ）
+  // ショップの前週比（今週の相場で始めたランだけ）
   const trends = useMemo(() => priceTrends(getMarket(), run.config.economy.prices), [run.config]);
 
   const header = (
@@ -505,16 +504,16 @@ export function App({ start, onTitle }: Props) {
         {mode.kind !== 'normal' && (
           <>
             <span className="mode-badge">
-              {t(mode.kind === 'daily' ? 'mode.daily' : 'mode.practice', { number: mode.number })}
+              {t(mode.kind === 'weekly' ? 'mode.weekly' : 'mode.practice', { number: mode.number })}
             </span>
             <button className="button--ghost" disabled={playing} onClick={backToNormal}>
               {t('mode.backToNormal')}
             </button>
           </>
         )}
-        <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
-          <UiIcon name="daily" />
-          {t('online.dailyButton')}
+        <button className="button--ghost" disabled={playing} onClick={() => setWeeklyMenu('menu')}>
+          <UiIcon name="weekly" />
+          {t('online.weeklyButton')}
         </button>
         {DEBUG_AVAILABLE && (
           <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
@@ -529,16 +528,16 @@ export function App({ start, onTitle }: Props) {
         {/* 操作方法・諦める（押し間違えないよう、よく使うボタンから離してメニューの中に入れる） */}
         <GameMenu
           disabled={playing}
-          canGiveUp={mode.kind !== 'daily' && run.phase === 'building'}
+          canGiveUp={mode.kind !== 'weekly' && run.phase === 'building'}
           onGiveUp={() => dispatch({ type: 'giveUp' })}
         />
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
-      {dailyMenu && (
-        <DailyMenu
-          initialView={dailyMenu}
+      {weeklyMenu && (
+        <WeeklyMenu
+          initialView={weeklyMenu}
           onEnter={enterRun}
-          onClose={() => setDailyMenu(null)}
+          onClose={() => setWeeklyMenu(null)}
           onRanked={onRanked}
         />
       )}
@@ -635,7 +634,7 @@ export function App({ start, onTitle }: Props) {
           unlocks={state.unlocks}
           achievements={state.achievements}
           mode={mode}
-          onViewRanking={() => setDailyMenu('ranking')}
+          onViewRanking={() => setWeeklyMenu('ranking')}
           onBackToNormal={backToNormal}
           onRetry={newRun}
           onOvertime={() => {
@@ -741,7 +740,7 @@ export function App({ start, onTitle }: Props) {
               {t(`toast.${note.message.kind}`, { amount: note.message.amount })}
             </div>
           )}
-          {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
+          {state.awaitingServer && <div className="toast">{t('weekly.committing')}</div>}
         </div>
         <aside className="layout__side">
           {/* 目標の計器は右の列の上に固定し（スクロールしても見える）、本番ボタンをそのすぐ下に置く */}

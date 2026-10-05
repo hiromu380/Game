@@ -959,7 +959,7 @@ button:disabled {
   min-width: 140px;
 }
 
-/* ---- デイリーチャレンジ・ランキング ---- */
+/* ---- 週替わりチャレンジ・ランキング・結果発表 ---- */
 .mode-badge {
   align-self: center;
   line-height: 1.4;
@@ -971,21 +971,21 @@ button:disabled {
   border-radius: 999px;
   white-space: nowrap;
 }
-.daily {
+.weekly {
   max-height: calc(100vh - 32px);
   overflow-y: auto;
 }
-.daily .boss-notice {
+.weekly .boss-notice {
   margin: 12px 0;
 }
-.daily__actions {
+.weekly__actions {
   flex-wrap: wrap;
   margin: 12px 0 4px;
 }
-.daily__error {
+.weekly__error {
   color: var(--missed);
 }
-.daily__name input {
+.weekly__name input {
   flex: 1;
   min-width: 0;
   font: inherit;
@@ -995,7 +995,7 @@ button:disabled {
   background: var(--bg);
   color: var(--text);
 }
-.daily__commitment {
+.weekly__commitment {
   font-size: 0.7rem;
   color: var(--muted);
   word-break: break-all;
@@ -1048,6 +1048,144 @@ button:disabled {
   align-self: center;
   font-weight: bold;
   color: var(--accent);
+}
+
+/* 挑戦した日（7マス）。状態は色だけでなく記号・文字でも示す */
+.weekly__days {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 4px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.weekly__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.weekly__day.is-today {
+  border: 2px solid var(--accent);
+}
+.weekly__day--cleared {
+  border-color: var(--met);
+  color: var(--text);
+}
+.weekly__day--cleared .weekly__mark {
+  color: var(--met);
+}
+.weekly__day--played,
+.weekly__day--playing {
+  color: var(--text);
+}
+.weekly__day--missed {
+  border-style: dashed;
+}
+.weekly__mark {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.weekly__best {
+  font-weight: bold;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.ranking__badge {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+}
+.ranking__badge--final {
+  border-style: solid;
+  border-color: var(--met);
+  color: var(--met);
+}
+.ranking__you {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+.results__weeks select {
+  font: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+  color: var(--text);
+}
+.results__me {
+  text-align: center;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+}
+.results__rank {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--accent);
+}
+.results__percent {
+  margin: 0 0 8px;
+  font-weight: bold;
+}
+/* 結果発表として開いたときだけ、順位を順に見せる */
+.results__me--reveal > * {
+  animation: results-reveal 0.5s ease-out both;
+}
+.results__me--reveal > :nth-child(2) {
+  animation-delay: 0.35s;
+}
+.results__me--reveal > :nth-child(3) {
+  animation-delay: 0.7s;
+}
+@keyframes results-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .results__me--reveal > * {
+    animation: none;
+  }
+}
+.results__share {
+  margin-top: 12px;
+}
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  background: var(--accent);
+  color: var(--hazard-black);
 }
 
 /* ---- ヘッダー: アイコン＋タイトルはタイトル画面へ戻るボタン ---- */
@@ -1399,7 +1537,7 @@ a.button.button--primary {
     width: min(100%, calc(100dvh - 330px));
   }
 }
-.daily__actions > button {
+.weekly__actions > button {
   flex: 1 1 30%;
   white-space: nowrap;
 }

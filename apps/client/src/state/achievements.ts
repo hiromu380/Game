@@ -44,11 +44,11 @@ export function achievementsAfterCommit(
   if (!EDITION_CONFIG.achievements) return progress;
   const { mode, before, committed } = input;
   let next = progress;
-  if (mode.kind === 'daily') next = recordWeeklyParticipation(next, mode.dailyId);
+  if (mode.kind === 'weekly') next = recordWeeklyParticipation(next, mode.dayId);
   return apply(next, {
     shift: shiftContextOf(before, committed),
     meta: input.meta,
-    weekly: mode.kind === 'daily' ? { cleared: committed.state.phase === 'cleared' } : undefined,
+    weekly: mode.kind === 'weekly' ? { cleared: committed.state.phase === 'cleared' } : undefined,
   });
 }
 
