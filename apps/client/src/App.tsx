@@ -625,7 +625,8 @@ export function App({ start, onTitle }: Props) {
   // ラン終了（全シフト達成 or ノルマ未達）
   if (!playing && run.phase !== 'building') {
     return (
-      <div className="app">
+      // ラン終了画面は情報が多いので、広い画面では横幅の上限を広げる
+      <div className="app app--wide">
         {header}
         <WorkshopBackdrop run={run} meta={state.meta} playing={false} alert={bossActive} />
         <RunEndScreen

@@ -573,21 +573,84 @@ button:disabled {
 
 /* ---- ラン終了画面 ---- */
 .run-end {
-  max-width: 480px;
-  margin: 40px auto;
+  margin: 16px 0 24px;
   text-align: center;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 24px;
 }
-.run-end h1 {
-  margin-top: 0;
+.run-end__main,
+.run-end__side {
+  min-width: 0;
 }
+.run-end h1 {
+  margin: 12px 0 8px;
+}
+/* シフトごとの結果: 達成は緑の枠、未達は赤い枠の小さな札を並べる（色だけでなく記号でも） */
 .run-end__history {
   list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
   padding: 0;
   margin: 0 0 20px;
+}
+.run-end__history li {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.run-end__history li.is-met::before {
+  content: '✓ ';
+}
+.run-end__history li.is-missed::before {
+  content: '✗ ';
+}
+/* 広い画面: 画面の幅いっぱいに2列（左は結果、右は共有・解放の目標・実績） */
+@media (min-width: 900px) {
+  .run-end {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .run-end__main {
+    position: sticky;
+    top: 16px;
+  }
+  .run-end .rocket-scene__sky {
+    height: 220px;
+  }
+  .run-end__side > :first-child {
+    margin-top: 0;
+  }
+}
+.app--wide {
+  max-width: 1600px;
+}
+/* とても広い画面: 3列（結果 ｜ 共有 ｜ 解放の目標・実績） */
+@media (min-width: 1400px) {
+  .run-end {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+  .run-end__side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+  }
+  .run-end__side > * {
+    grid-column: 2;
+    margin-top: 0;
+  }
+  .run-end__side > .run-end__share {
+    grid-column: 1;
+    grid-row: 1 / span 6;
+    margin-top: 0;
+  }
 }
 
 /* ---- パネル見出し行（見出し + 小さなボタン） ---- */
