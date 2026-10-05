@@ -10,6 +10,7 @@ import {
   type SimResult,
   type VanishReason,
 } from '@chain-factory/sim';
+import { BOLT_BODY_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
@@ -42,6 +43,12 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
 
   return (
     <div className="playback-panel">
+      {/* ボルトの反応（全身）: 達成でガッツポーズ、未達でしょんぼり */}
+      <img
+        className="playback-panel__bolt"
+        src={met ? BOLT_BODY_ASSETS.guts : BOLT_BODY_ASSETS.sad}
+        alt=""
+      />
       <h2>{playback.mode === 'trial' ? t('playback.trialTitle') : t('playback.commitTitle')}</h2>
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
         {met ? t('playback.quotaMet') : t('playback.quotaMissed')}

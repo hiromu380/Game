@@ -13,6 +13,7 @@ import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
 import boltSurprisedSrc from './mascot/bolt-surprised.svg';
 import boltGutsSrc from './characters/bolt/poses/guts.svg';
+import boltSadSrc from './characters/bolt/poses/sad.svg';
 import boltStandSrc from './characters/bolt/poses/stand.svg';
 import boltWaveSrc from './characters/bolt/poses/wave.svg';
 import { PART_FAMILY } from './partFamily';
@@ -205,6 +206,7 @@ export const BOLT_BODY_ASSETS = {
   stand: boltStandSrc,
   guts: boltGutsSrc,
   wave: boltWaveSrc,
+  sad: boltSadSrc,
 } as const;
 
 /** 全身で描くキャラクター（ボルト・工場長・ナット） */
@@ -245,6 +247,9 @@ export const BACKDROP_ASSETS = {
   beacon: backdropFiles['beacon']!,
   /** ラン終了画面の発射台（夜空・投光器・台） */
   launchpad: backdropFiles['launchpad']!,
+  /** シフト達成の印（緑のスタンプ）と、全シフトクリアの記念プレート（真鍮の札に星） */
+  approval: backdropFiles['approval']!,
+  plaque: backdropFiles['plaque']!,
 };
 
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */

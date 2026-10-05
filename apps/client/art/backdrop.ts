@@ -218,11 +218,52 @@ function launchpadSvg(): string {
   );
 }
 
+/** シフト達成の印（24×24）: 少し傾いた緑のスタンプ（二重の輪・チェック・インクのかすれ） */
+function approvalSvg(): string {
+  const green = '#43a047';
+  return sizedSvg(
+    'シフト達成の印',
+    [
+      group(
+        { transform: 'rotate(-10 12 12)' },
+        circle(12, 12, 10, { fill: '#1b2a1e', stroke: green, 'stroke-width': 2.2 }),
+        circle(12, 12, 7.2, { fill: 'none', stroke: green, 'stroke-width': 0.9 }),
+        path('M7.6 12.4 L10.6 15.2 L16.4 8.8', line(green, 2.6)),
+        // かすれ（輪の一部を背景色で欠く）
+        path('M19.5 6.5 l1.2 1.4', line('#1b2a1e', 1.6)),
+      ),
+    ],
+    '0 0 24 24',
+  );
+}
+
+/** 記念プレート（22×28）: 壁にねじ留めした真鍮の札と星 */
+function plaqueSvg(): string {
+  const brass = '#c9a227';
+  return sizedSvg(
+    '記念プレート',
+    [
+      rect(2, 2, 18, 24, fill(brass, 2), 3),
+      rect(13, 4, 5, 20, { fill: shade(brass) }, 2),
+      polygon(
+        '11,8 12.6,11.6 16.4,11.8 13.4,14.2 14.4,18 11,15.8 7.6,18 8.6,14.2 5.6,11.8 9.4,11.6',
+        fill('#fff3c4', 1.2),
+      ),
+      circle(11, 5, 1, { fill: O }),
+      circle(11, 23, 1, { fill: O }),
+      path('M4.5 5 V10', { ...line(INK.white, 1), opacity: 0.6 }),
+    ],
+    '0 0 22 28',
+  );
+}
+
 export function backdropFiles(): Record<string, string> {
   return {
     ...Object.fromEntries(SKIES.map((s, i) => [`src/assets/backdrop/sky-${i}.svg`, skySvg(s, i)])),
     'src/assets/backdrop/gantry.svg': gantrySvg(),
     'src/assets/backdrop/beacon.svg': beaconSvg(),
     'src/assets/backdrop/launchpad.svg': launchpadSvg(),
+    'src/assets/backdrop/approval.svg': approvalSvg(),
+    'src/assets/backdrop/plaque.svg': plaqueSvg(),
   };
 }

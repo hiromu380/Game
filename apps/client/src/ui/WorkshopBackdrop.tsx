@@ -49,9 +49,7 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       </div>
       <div className="workshop__marks">
         {Array.from({ length: completed }, (_, index) => (
-          <span key={index} className="workshop__approval">
-            ✓
-          </span>
+          <img key={index} className="workshop__approval" src={BACKDROP_ASSETS.approval} alt="" />
         ))}
         {Array.from({ length: soot }, (_, index) => (
           <span key={`soot-${index}`} className={`workshop__soot workshop__soot--${index + 1}`} />
@@ -59,7 +57,7 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       </div>
       <div className="workshop__plaques">
         {Array.from({ length: plaques }, (_, index) => (
-          <span key={index}>★</span>
+          <img key={index} src={BACKDROP_ASSETS.plaque} alt="" />
         ))}
       </div>
       {event && (

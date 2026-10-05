@@ -476,6 +476,19 @@ button:disabled {
   padding: 14px 18px;
   text-align: center;
 }
+/* ボルトの反応（左下に全身）。狭い画面では出さない */
+.playback-panel__bolt {
+  position: absolute;
+  left: 18px;
+  bottom: 12px;
+  height: 120px;
+  width: auto;
+}
+@media (max-width: 600px) {
+  .playback-panel__bolt {
+    display: none;
+  }
+}
 .playback-panel h2 {
   margin: 0 0 4px;
   font-size: 1rem;
@@ -2284,16 +2297,9 @@ a.button.button--primary {
   display: flex;
   gap: 4px;
 }
-.workshop__plaques span {
-  display: grid;
-  place-items: center;
+.workshop__plaques img {
   width: 22px;
-  height: 27px;
-  border: 2px solid rgba(255, 193, 7, 0.72);
-  border-radius: 2px;
-  background: rgba(20, 24, 32, 0.7);
-  color: var(--hazard-yellow);
-  font-size: 0.68rem;
+  height: 28px;
 }
 .workshop__event-prop {
   position: absolute;
@@ -2386,17 +2392,9 @@ a.button.button--primary {
   align-items: center;
 }
 .workshop__approval {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  margin: 0 2px;
-  border: 2px solid var(--met);
-  border-radius: 50%;
-  color: var(--met);
-  font-weight: 800;
-  transform: rotate(-8deg);
+  width: 22px;
+  height: 22px;
+  margin: 0 1px;
 }
 .workshop__soot {
   position: absolute;
