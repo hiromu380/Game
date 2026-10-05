@@ -81,10 +81,14 @@ export interface RunnerOptions {
   timeLimitMs: number;
   maxRerolls: number;
   /**
-   * normal: 通常ラン（9シフト）／ daily: デイリーと同じ条件（3シフト・全パーツ・7×7・今日の特殊ルール）。
-   * daily のシード n は「デイリー ID = bal-<n>」の日として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
+   * normal: 通常ラン（9シフト）／ weekly: 週替わりチャレンジと同じ条件（3シフト・全パーツ・7×7・今週の特殊ルール）。
+   * weekly のシード n は「週の ID = bal-<n>」の週として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
    */
   mode?: 'normal' | 'weekly';
+  /** 指定した状態から遊ぶ（サーバーの週の盤面の検証。mode・unlock より優先） */
+  start?: RunState;
+  /** 本番シードを外から渡す（commitSeedMode が external の設定を遊ぶとき） */
+  commitSeed?: (shiftIndex: number) => number;
   /** ボットが床を見て手を選ぶか（既定 true。false は「床を見ないボット」との比較用。moves.ts） */
   floorAware?: boolean;
   /** ボットがランダム配置権を買って使うか（既定 true。false は「配置権を使わないボット」との比較用） */
@@ -139,8 +143,9 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     options.unlock === 'initial'
       ? { meta: metaToModifiers(createInitialMeta()) }
       : { meta: { boardExpansion: BALANCE.meta.boardExpansions.length } };
-  let state: RunState =
-    options.mode === 'weekly'
+  let state: RunState = options.start
+    ? options.start
+    : options.mode === 'weekly'
       ? createWeeklyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
   while (state.phase === 'building') {
@@ -183,7 +188,10 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     plan.state = built;
     const floor = getCurrentFloor(plan.state);
     const effectCells = floor.flatMap((c, i) => (c && c.tile !== 'blocked' ? [i] : []));
-    const committed = commitShift(plan.state);
+    const committed = commitShift(
+      plan.state,
+      options.commitSeed ? { seed: options.commitSeed(plan.state.shiftIndex) } : undefined,
+    );
     if ('error' in committed) throw new Error(committed.error);
     const record = committed.state.history.at(-1)!;
     const dayEvent = plan.state.dayEvent ?? null;

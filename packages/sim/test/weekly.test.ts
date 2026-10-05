@@ -88,7 +88,7 @@ describe('本番シードの外部指定', () => {
     expect(a).toEqual(b);
   });
 
-  it('デイリーは全クリアしても延長戦に進めない', () => {
+  it('週替わりは全クリアしても延長戦に進めない', () => {
     const run = { ...createWeeklyRun('2026-09-28'), phase: 'cleared' as const };
     expect(startOvertime(run)).toBeNull();
   });
