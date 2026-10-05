@@ -12,6 +12,7 @@
     "analyze": "tsx src/analyze.ts"
   },
   "dependencies": {
+    "@chain-factory/bots": "workspace:*",
     "@chain-factory/sim": "workspace:*"
   },
   "devDependencies": {

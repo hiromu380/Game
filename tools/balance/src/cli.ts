@@ -18,10 +18,10 @@ import { cpus } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BALANCE } from '@chain-factory/sim';
-import type { BotName } from './bots';
+import type { BotName } from '@chain-factory/bots';
 import { runParallel } from './parallel';
 import { summarize, toMarkdown, type BotSummary } from './report';
-import type { RunnerOptions } from './runner';
+import type { RunnerOptions } from '@chain-factory/bots';
 
 function parseArgs(argv: string[]) {
   const args = new Map<string, string>();

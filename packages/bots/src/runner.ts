@@ -1,6 +1,7 @@
 /**
  * ボットに1ランを通しで遊ばせ、記録をとる
  */
+import { nowMs } from './clock';
 import {
   BALANCE,
   commitShift,
@@ -115,7 +116,7 @@ function chooseBestEvent(state: RunState, bot: Bot, options: BotOptions): RunSta
 }
 
 export function playRun(seed: number, botName: BotName, options: RunnerOptions): RunLog {
-  const started = performance.now();
+  const started = nowMs();
   MOVE_SETTINGS.floorAware = options.floorAware ?? true;
   const bot = BOTS[botName];
   const botOptions: BotOptions = { ...options, rng: createPrng(seed ^ 0x5eed) };
@@ -208,7 +209,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
   }
 
   log.cleared = state.phase === 'cleared';
-  log.ms = performance.now() - started;
+  log.ms = nowMs() - started;
   return log;
 }
 

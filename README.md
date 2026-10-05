@@ -94,6 +94,7 @@ packages/
       achievements/     実績の定義と解除の判定（純粋関数）
     test/               決定論・停止性・各パーツ・連鎖スナップショット・ボス・ラン進行・実績
   shared/         client / server / desktop 共通の型（セーブデータ形式・API の型・スコアの3列表現・ランキングの並び順・デスクトップ版の IPC）
+  bots/           自動プレイのボット（貪欲・中級・探索・ランダム。sim だけに依存。tools/balance と、サーバーの週替わりの盤面の自動検証が使う）
 apps/
   server/         API サーバー（Hono + Cloudflare Workers + D1）
     src/
@@ -130,7 +131,7 @@ apps/
       assets/           見た目の定義（manifest.ts・palette.ts）と素材（パーツ・マスコット・盤面・アイコン・ロゴ・実績・フォント）
   desktop/        デスクトップ版（Electron。メインプロセス・preload・Steam アダプター・ビルド設定・SteamPipe のひな形）
 tools/
-  balance/        バランス検証ツール（bots/ にボット3種、reports/ に出力）
+  balance/        バランス検証ツール（ボットは packages/bots。reports/ に出力）
   perf/           計算量の計測（サーバー検証の CPU 時間の見積もり）
   fonts/          同梱フォントのサブセット化
 docs/

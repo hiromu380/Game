@@ -2,8 +2,8 @@
  * 集計と Markdown レポートの作成
  */
 import { BALANCE, PART_IDS, type PartId, type ShiftSpec } from '@chain-factory/sim';
-import type { BotName } from './bots';
-import type { RunLog } from './runner';
+import type { BotName } from '@chain-factory/bots';
+import type { RunLog } from '@chain-factory/bots';
 
 export interface BotSummary {
   bot: BotName;

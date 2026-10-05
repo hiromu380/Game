@@ -2,7 +2,7 @@
  * ボットの動作確認（バランスの良し悪しではなく「正しく遊べるか」を見る）
  */
 import { describe, expect, it } from 'vitest';
-import { playRun } from '../src/runner';
+import { playRun } from '../src';
 
 const OPTIONS = {
   unlock: 'all' as const,

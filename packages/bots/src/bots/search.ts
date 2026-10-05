@@ -6,6 +6,7 @@
  * 2〜3手を組み合わせて初めて効く配置を見つけられる。
  * 計算量が大きいため、1シフトあたりの思考時間に上限を設けている。
  */
+import { nowMs } from '../clock';
 import type { RunState } from '@chain-factory/sim';
 import { compareEvaluation, compareOutlook, evaluate, type Evaluation } from '../evaluate';
 import { applyMove, canReroll, listMoves, returnAll, type Move } from '../moves';
@@ -67,7 +68,7 @@ function beamSearch(
   prefix: Move[],
   { samples, evalMode, timeLimitMs, maxRerolls }: BotOptions,
 ): ShiftPlan {
-  const started = performance.now();
+  const started = nowMs();
   let start = initial;
   const startMoves: Move[] = [...prefix];
   const placed = applyMove(start, { kind: 'switch' });
@@ -86,7 +87,7 @@ function beamSearch(
   let best = root;
 
   for (let depth = 0; depth < MAX_DEPTH; depth++) {
-    if (performance.now() - started > timeLimitMs) break;
+    if (nowMs() - started > timeLimitMs) break;
     const children = new Map<string, Node>();
 
     /** リロールした子（ショップが変わるので、評価が同じでも必ず探索に残す） */
@@ -111,7 +112,7 @@ function beamSearch(
         ) {
           expanded.push(child);
         }
-        if (performance.now() - started > timeLimitMs) break;
+        if (nowMs() - started > timeLimitMs) break;
       }
       expanded.sort(compareNodes);
       for (const child of expanded.slice(0, BRANCH)) {
