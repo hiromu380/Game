@@ -238,11 +238,13 @@ const backdropFiles = byName(
   import.meta.glob<string>('./backdrop/*.svg', { eager: true, import: 'default' }),
 );
 
-/** ゲーム画面の上部の帯（art/backdrop.ts で生成）: 窓の外の景色（朝・昼・夜）・組み立て台・警告灯 */
+/** ゲーム画面の上部の帯とラン終了画面の背景（art/backdrop.ts で生成）: 窓の外の景色（朝・昼・夜）・組み立て台・警告灯・発射台 */
 export const BACKDROP_ASSETS = {
   sky: [backdropFiles['sky-0']!, backdropFiles['sky-1']!, backdropFiles['sky-2']!],
   gantry: backdropFiles['gantry']!,
   beacon: backdropFiles['beacon']!,
+  /** ラン終了画面の発射台（夜空・投光器・台） */
+  launchpad: backdropFiles['launchpad']!,
 };
 
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */

@@ -1643,24 +1643,22 @@ a.button.button--primary {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-}
-.rocket-scene.is-launched .rocket-scene__sky {
+  border: 1px solid var(--panel-border);
   border-radius: 10px;
-  /* 星空: 小さな点を2種類の間隔で敷き詰める */
-  background:
-    radial-gradient(circle, var(--white) 1px, transparent 1.5px) 0 0 / 37px 29px,
-    radial-gradient(circle, var(--muted) 1px, transparent 1.5px) 11px 13px / 23px 31px,
-    var(--bg);
+  /* 発射台の絵（art/backdrop.ts。夜空・投光器・台）。台は中央の下 */
+  background: #141b33 center bottom / cover no-repeat;
 }
 .rocket-scene__rocket {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 8px;
+  /* 発射台の上面（絵の下から 22px）に立てる */
+  padding-bottom: 14px;
 }
+/* 発射後: 炎の分だけ台から浮かせる */
 .rocket-scene.is-launched .rocket-scene__rocket {
-  padding-bottom: 32px;
+  padding-bottom: 40px;
 }
 .rocket-scene__flame {
   position: absolute;

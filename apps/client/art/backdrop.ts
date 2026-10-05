@@ -172,10 +172,57 @@ function beaconSvg(): string {
   );
 }
 
+/** ラン終了画面の発射台（480×150）: 夜空・遠くの工場街・投光器・ハザード柄の発射台（ロケットは画面側で台の上に置く） */
+function launchpadSvg(): string {
+  const W = 480;
+  const style = SKIES[2]!;
+  const bandH = 120 / style.bands.length;
+  const floodlight = (x: number, flip: boolean) => {
+    const d = flip ? -1 : 1;
+    return [
+      // 台の中央へ向けた淡い光（半透明のフラットな面）
+      polygon(`${x + 6 * d},40 ${240 - 70 * d},132 ${240 + 10 * d},132`, {
+        fill: '#fff3c4',
+        opacity: 0.07,
+      }),
+      rect(x - 2, 40, 4, 92, { fill: '#2a2f3a' }),
+      path(`M${x} 132 L${x - 10} 140 M${x} 132 L${x + 10} 140`, line('#2a2f3a', 3)),
+      rect(x - 7, 32, 14, 9, fill('#3a404a', 2), 2),
+      rect(x - 5 + 2 * d, 34, 10, 5, { fill: '#fff3c4' }, 1),
+    ];
+  };
+  return sizedSvg(
+    'ラン終了画面の発射台',
+    [
+      ...style.bands.map((c, i) => rect(0, i * bandH, W, bandH + 1, { fill: c })),
+      ...stars(W, 100, 40),
+      circle(70, 30, 9, { fill: '#fff3c4' }),
+      circle(74, 26, 8, { fill: style.bands[0]! }),
+      ...range(4).flatMap((i) => block(i * 130 - 30, 132, 18, style.townFar, 0)),
+      ...range(3).flatMap((i) => block(i * 170 - 10, 132, 26, style.town, 0.7)),
+      ...floodlight(150, false),
+      ...floodlight(330, true),
+      // 地面
+      rect(0, 132, W, 18, { fill: '#1d2028' }),
+      path(`M0 132 H${W}`, line('#2c313b', 2)),
+      // 発射台（コンクリートの台・縁のハザード柄）
+      polygon('180,140 300,140 290,128 190,128', fill('#5b6270', 2.5)),
+      ...range(10).map((i) =>
+        polygon(`${184 + i * 11},140 ${190 + i * 11},140 ${195 + i * 11},134 ${189 + i * 11},134`, {
+          fill: BC.hazardYellow,
+        }),
+      ),
+      path('M182 134 H298', line(O, 1.5)),
+    ],
+    `0 0 ${W} 150`,
+  );
+}
+
 export function backdropFiles(): Record<string, string> {
   return {
     ...Object.fromEntries(SKIES.map((s, i) => [`src/assets/backdrop/sky-${i}.svg`, skySvg(s, i)])),
     'src/assets/backdrop/gantry.svg': gantrySvg(),
     'src/assets/backdrop/beacon.svg': beaconSvg(),
+    'src/assets/backdrop/launchpad.svg': launchpadSvg(),
   };
 }
