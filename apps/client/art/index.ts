@@ -7,6 +7,7 @@
  * 書き出し済みのファイルがここの結果とずれていないかはテスト（test/art.test.ts）で確かめる。
  */
 import { achievementFiles } from './achievements';
+import { backdropFiles } from './backdrop';
 import { boardFiles } from './board';
 import { boltFiles } from './characters/bolt';
 import { chiefFiles } from './characters/chief';
@@ -36,6 +37,7 @@ export function buildArt(): Record<string, string> {
     ...achievementFiles(),
     ...rocketFiles(),
     ...titleFiles(),
+    ...backdropFiles(),
     ...boltFiles(),
     ...chiefFiles(),
     ...nutFiles(),

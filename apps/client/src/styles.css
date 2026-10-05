@@ -2169,14 +2169,16 @@ a.button.button--primary {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #728a96;
-  transition: background 0.6s;
-}
-.workshop--period-1 .workshop__window {
-  background: #44677c;
-}
-.workshop--period-2 .workshop__window {
   background: #16182c;
+}
+/* 窓の外の景色（art/backdrop.ts: 朝・昼・夜）。帯の幅に合わせて切り抜き、下を揃える */
+.workshop__sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% bottom;
 }
 .workshop__sky-label {
   position: absolute;
@@ -2185,66 +2187,33 @@ a.button.button--primary {
   transform: translateY(-50%);
   padding: 3px 7px;
   border: 1px solid currentColor;
-  color: rgba(255, 255, 255, 0.72);
+  border-radius: 3px;
+  background: rgba(20, 23, 29, 0.55);
+  color: rgba(255, 255, 255, 0.85);
   font: 700 0.62rem/1 monospace;
   letter-spacing: 0.08em;
 }
-.workshop__stars {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: radial-gradient(circle, white 1px, transparent 1.5px) 0 0 / 47px 41px;
-  transition: opacity 0.6s;
-}
-.workshop--period-2 .workshop__stars {
-  opacity: 0.55;
-}
-.workshop__factory {
-  position: absolute;
-  right: -20px;
-  bottom: -60px;
-  width: 260px;
-  opacity: 0.38;
-  filter: brightness(0.45);
-}
+/* ロケットの組み立て台（art/backdrop.ts の絵）と、中に置くロケット */
 .workshop__gantry {
   position: absolute;
   right: 12%;
-  bottom: 4px;
-  width: 64px;
-  height: 56px;
-  border: 5px solid rgba(20, 23, 29, 0.82);
-  border-top: 0;
-}
-.workshop__gantry-top {
-  position: absolute;
-  top: 0;
-  left: -10px;
+  bottom: 0;
   width: 84px;
-  border-top: 5px solid rgba(20, 23, 29, 0.82);
+  height: 56px;
+}
+.workshop__gantry-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 .workshop__rocket {
   position: absolute;
-  left: 13px;
-  bottom: 2px;
+  left: 23px;
+  bottom: 4px;
   width: 38px;
   height: 44px;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.3));
-}
-.workshop__cable {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 22px;
-  background: var(--hazard-yellow);
-}
-.workshop__cable--a {
-  left: 12px;
-}
-.workshop__cable--b {
-  right: 12px;
-  height: 34px;
 }
 .workshop__plaques {
   position: absolute;
@@ -2303,24 +2272,20 @@ a.button.button--primary {
 .workshop__beacon {
   position: absolute;
   left: 50%;
-  top: 8px;
-  width: 18px;
-  height: 13px;
-  border: 3px solid rgba(20, 23, 29, 0.82);
-  border-bottom: 0;
-  border-radius: 12px 12px 2px 2px;
-  background: var(--missed);
-  opacity: 0.25;
+  top: 6px;
+  width: 24px;
+  height: 20px;
+  opacity: 0.35;
 }
 .workshop.is-alert .workshop__beacon {
   opacity: 1;
   animation: workshop-alert 0.8s steps(1) infinite;
-  box-shadow: 0 0 18px var(--missed);
+  filter: drop-shadow(0 0 6px var(--missed));
 }
 @keyframes workshop-alert {
   50% {
-    opacity: 0.3;
-    box-shadow: none;
+    opacity: 0.35;
+    filter: none;
   }
 }
 .workshop__status {

@@ -234,6 +234,17 @@ export const TITLE_ASSETS = {
   gear: titleFiles['gear']!,
 };
 
+const backdropFiles = byName(
+  import.meta.glob<string>('./backdrop/*.svg', { eager: true, import: 'default' }),
+);
+
+/** ゲーム画面の上部の帯（art/backdrop.ts で生成）: 窓の外の景色（朝・昼・夜）・組み立て台・警告灯 */
+export const BACKDROP_ASSETS = {
+  sky: [backdropFiles['sky-0']!, backdropFiles['sky-1']!, backdropFiles['sky-2']!],
+  gantry: backdropFiles['gantry']!,
+  beacon: backdropFiles['beacon']!,
+};
+
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */
 export const BOARD_THEME = {
   ...(Object.fromEntries(
