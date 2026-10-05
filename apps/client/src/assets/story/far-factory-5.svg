@@ -1,9 +1,19 @@
 <svg width="200" height="124" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 124">
   <!-- カットシーンの絵: far-factory-5（art/ のスクリプトで生成。手で編集しない） -->
-  <path d="M0 120 V70 L30 46 V70 L60 46 V70 L90 46 V30 H110 V70 H200 V120 Z" fill="#1a1d2e" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <rect x="14" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
-  <rect x="50" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
-  <rect x="86" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
-  <rect x="122" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
-  <rect x="158" y="84" width="18" height="14" rx="2" fill="#ffca28"/>
+  <rect x="150" y="20" width="16" height="60" fill="#1a1d2e" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="158" cy="20" r="7" fill="#3a3f55" opacity="0.8"/>
+  <circle cx="166" cy="10" r="9" fill="#3a3f55" opacity="0.8"/>
+  <circle cx="178" cy="0" r="8" fill="#3a3f55" opacity="0.8"/>
+  <path d="M0 120 V70 L30 46 V70 L60 46 V70 L90 46 V70 L120 46 V60 H200 V120 Z" fill="#1a1d2e" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 46 V70 M60 46 V70 M90 46 V70" fill="none" stroke="#2a2f45" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="6,66 26,51 26,66" fill="#232740"/>
+  <polygon points="36,66 56,51 56,66" fill="#232740"/>
+  <polygon points="66,66 86,51 86,66" fill="#232740"/>
+  <polygon points="96,66 116,51 116,66" fill="#232740"/>
+  <g><rect x="12" y="82" width="22" height="16" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M23 82 V98" fill="none" stroke="#c99400" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="48" y="82" width="22" height="16" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M59 82 V98" fill="none" stroke="#c99400" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="84" y="82" width="22" height="16" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M95 82 V98" fill="none" stroke="#c99400" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="120" y="82" width="22" height="16" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M131 82 V98" fill="none" stroke="#c99400" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="156" y="82" width="22" height="16" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M167 82 V98" fill="none" stroke="#c99400" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <rect x="84" y="104" width="24" height="16" rx="2" fill="#232740" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 </svg>

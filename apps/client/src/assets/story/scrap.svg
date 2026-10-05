@@ -1,7 +1,13 @@
 <svg width="136" height="48" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 136 48">
   <!-- カットシーンの絵: scrap（art/ のスクリプトで生成。手で編集しない） -->
-  <rect x="4" y="10" width="60" height="30" rx="4" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <rect x="4" y="22" width="60" height="8" fill="#e53935"/>
-  <path d="M70 40 L96 6 L104 14 L80 44 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="120" cy="28" r="12" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M4 14 L58 10 L62 18 L56 22 L64 30 L60 40 L6 42 Z" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M5 24 L60 22 L62 30 L6 32 Z" fill="#e53935"/>
+  <circle cx="14" cy="16" r="2.2" fill="#546e7a"/>
+  <circle cx="30" cy="16" r="2.2" fill="#546e7a"/>
+  <circle cx="46" cy="16" r="2.2" fill="#546e7a"/>
+  <path d="M10 14 l30 -2" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.5"/>
+  <path d="M74 42 L96 6 L108 12 L100 30 L88 26 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M96 10 L102 14" fill="none" stroke="#c3302d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="116,20 126,14 136,20 136,32 126,38 116,32" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="126" cy="26" r="5" fill="#1b1f27"/>
 </svg>

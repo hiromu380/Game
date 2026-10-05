@@ -1,7 +1,8 @@
 <svg width="300" height="60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60">
   <!-- カットシーンの絵: shooting-star（art/ のスクリプトで生成。手で編集しない） -->
-  <defs><filter id="kv-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter><filter id="kv-glow-big" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter></defs>
-  <path d="M10 10 L280 50" stroke="#fff176" stroke-width="10" opacity="0.4" filter="url(#kv-glow)" stroke-linecap="round"/>
-  <path d="M10 10 L280 50" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="282" cy="50" r="6" fill="#ffffff"/>
+  <polygon points="6,8 286,46 278,56" fill="#ffffff" opacity="0.18"/>
+  <polygon points="120,26 286,46 280,54" fill="#ffffff" opacity="0.35"/>
+  <polygon points="210,38 286,46 282,52" fill="#fff3c4" opacity="0.8"/>
+  <circle cx="284" cy="50" r="9" fill="#fff3c4" opacity="0.5"/>
+  <polygon points="284,38 287,47 296,50 287,53 284,62 281,53 272,50 281,47" fill="#ffffff"/>
 </svg>

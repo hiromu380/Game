@@ -66,7 +66,7 @@ const WINDOW = { x: 640, y: 452 };
 const moonBolt = (pose: string, x: number, extra: Partial<ActorValue> = {}) =>
   bolt(pose, x, { y: 560, height: 210, ...extra });
 const lampAt = (asset: string, alpha = 1) => ({
-  ...at(1068, 316, 64, 90, alpha),
+  ...at(1068, 362, 64, 90, alpha),
   asset: `story:stranger-lamp-${asset}`,
 });
 

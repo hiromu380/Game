@@ -1,5 +1,13 @@
 <svg width="120" height="46" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 46">
   <!-- カットシーンの絵: blueprint-ground（art/ のスクリプトで生成。手で編集しない） -->
-  <path d="M4 40 L20 6 H116 L100 40 Z" fill="#b3e5fc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M50 14 q8 8 6 20 h-12 q-2 -12 6 -20 Z" fill="none" stroke="#546e7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M8 40 L22 8 H104 L112 40 Z" fill="#b3e5fc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M34 10 L28 38" fill="none" stroke="#7fb8d6" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M52 10 L46 38" fill="none" stroke="#7fb8d6" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M70 10 L64 38" fill="none" stroke="#7fb8d6" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M88 10 L82 38" fill="none" stroke="#7fb8d6" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18 24 H108" fill="none" stroke="#7fb8d6" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M60 13 Q67 20 66 32 H54 Q53 20 60 13 Z" fill="none" stroke="#546e7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M54 28 L49 34 M66 28 L71 34" fill="none" stroke="#546e7a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="108" cy="24" rx="7" ry="17" fill="#8fcbe8" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="108" cy="24" rx="3" ry="9" fill="#5e9ec0"/>
 </svg>

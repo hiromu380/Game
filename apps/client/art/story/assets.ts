@@ -5,17 +5,28 @@
  * ここで描くのは、それ以外の背景・小物だけ。書き出し先: src/assets/story/<名前>.svg（大きさつき）
  */
 import {
-  BOARD_COLORS as BC,
-  FAMILY_COLORS as F,
   INK,
   MATERIAL_COLORS as M,
   ROCKET_COLORS as R,
   SIGNAL_TIERS,
-  TITLE_COLORS as T,
 } from '../../src/assets/palette';
 import { composeNut, NUT_POSES } from '../characters/nut';
 import { nutRocketBody } from '../characters/nutRocket';
 import { rocketBody } from '../rocket';
+import {
+  blueprintGround,
+  bubble,
+  farFactory,
+  ladder,
+  moon,
+  quotaBox,
+  roof,
+  scrap,
+  shootingStar,
+  strangerLamp,
+  thoughtCloud,
+  workshop,
+} from './scenery';
 import { duskSky, factoryRow, filters, stars } from '../keyvisual/layers';
 import { circle, el, group, line, path, polygon, rect, sizedSvg } from '../svg';
 
@@ -36,35 +47,6 @@ const nightSky = () => [filters(2), ...duskSky(W, H, 560), ...stars(W, 520, 90)]
 
 /** 工場街のシルエット（横に並べる帯。下端が地面） */
 const town = () => [...factoryRow(300, W, 1.6)];
-
-/** 工場の中（壁・窓・床・警戒線） */
-const workshop = () => [
-  rect(0, 0, W, H, { fill: BC.background }),
-  // 高い窓から夜空
-  ...[160, 520, 880].map((x) =>
-    group(
-      {},
-      rect(x, 90, 240, 170, fill('#1c2040', 6), 8),
-      ...stars(240, 170, 12).map((s) => group({ transform: `translate(${x} 90)` }, s)),
-      path(`M${x + 120} 90 V260 M${x} 175 H${x + 240}`, line(BC.floorLine, 6)),
-    ),
-  ),
-  rect(0, 600, W, 120, { fill: BC.floorA }),
-  path('M0 600 H1280', line(BC.hazardYellow, 8)),
-  ...Array.from({ length: 16 }, (_, i) => path(`M${i * 80 + 40} 640 h30`, line(BC.floorLine, 4))),
-];
-
-/** 屋根（腰かける縁・はしご） */
-const roof = () => [
-  rect(0, 0, W, 200, { fill: T.factory }),
-  rect(0, 0, W, 14, { fill: T['factory-edge'] }),
-  ...Array.from({ length: 10 }, (_, i) => rect(i * 140 + 30, 40, 60, 40, { fill: '#1a1d26' }, 4)),
-];
-
-const ladder = () => [
-  path('M10 0 V400 M50 0 V400', line(INK.steelDark, 8)),
-  ...Array.from({ length: 10 }, (_, i) => path(`M10 ${i * 40 + 20} H50`, line(INK.steel, 6))),
-];
 
 /** 歯車（cx, cy: 中心、r: 半径） */
 const gear = (cx: number, cy: number, r: number, color: string) => [
@@ -167,7 +149,18 @@ const bubbleDeal = () => [
 const bubbleBuild = () => [
   circle(26, 222, 9, fill(INK.white, 2.5)),
   circle(50, 196, 14, fill(INK.white, 2.5)),
-  el('ellipse', { cx: 190, cy: 100, rx: 170, ry: 92, ...fill(INK.white, 3) }),
+  ...thoughtCloud(
+    [
+      [76, 104, 58],
+      [140, 56, 54],
+      [222, 50, 56],
+      [300, 92, 58],
+      [262, 160, 52],
+      [180, 168, 54],
+      [100, 158, 48],
+    ],
+    [190, 108, 84],
+  ),
   // 部品3つ（積み上がる）
   ...[0, 1, 2].map((i) =>
     group(
@@ -181,92 +174,6 @@ const bubbleBuild = () => [
   polygon('190,84 214,100 190,116', { fill: O }),
   // 完成したロケット（窓は空: これから乗る）
   group({ transform: 'translate(234 22) scale(1.5)' }, ...rocketBody(9, true)),
-];
-
-/** 地面に落ちた設計図（ゲームオーバーで拾う） */
-const blueprintGround = () => [
-  path('M4 40 L20 6 H116 L100 40 Z', fill(R.window, 2.5)),
-  path('M50 14 q8 8 6 20 h-12 q-2 -12 6 -20 Z', line(INK.steelDark, 2)),
-];
-
-/** ノルマの箱（段ボール） */
-const quotaBox = () => [
-  rect(4, 10, 92, 76, fill(M.cardboard), 6),
-  path('M4 36 H96', line(M.cardboardDark, 5)),
-  path('M30 58 h40', line(O, 5)),
-];
-
-/** 絵の吹き出し（ロケットと星）: 中身は1枚の絵として描く */
-const bubble = () => [
-  circle(30, 205, 10, fill(INK.white, 2.5)),
-  circle(58, 180, 15, fill(INK.white, 2.5)),
-  el('ellipse', { cx: 150, cy: 95, rx: 140, ry: 90, ...fill(INK.white, 3) }),
-  // ロケット（簡略）
-  path('M120 150 Q118 90 135 50 Q152 90 150 150 Z', fill(R.body, 2.5)),
-  path('M120 130 L104 158 H120 Z M150 130 L166 158 H150 Z', fill(R.accent, 2.5)),
-  circle(135, 100, 8, fill(R.window, 2)),
-  path('M135 50 Q140 70 150 80', line(R.accent, 6)),
-  // 星
-  polygon(
-    '225,40 232,60 253,60 236,72 243,92 225,80 207,92 214,72 197,60 218,60',
-    fill(M.sun, 2.5),
-  ),
-];
-
-/** 流れ星（光の尾） */
-const shootingStar = () => [
-  filters(1.5),
-  el('path', {
-    d: 'M10 10 L280 50',
-    stroke: SIGNAL_TIERS[0],
-    'stroke-width': 10,
-    opacity: 0.4,
-    filter: 'url(#kv-glow)',
-    'stroke-linecap': 'round',
-  }),
-  path('M10 10 L280 50', line(INK.white, 3)),
-  circle(282, 50, 6, { fill: INK.white }),
-];
-
-/** 月面（遠くに地球）。下の地面は y 520 から */
-const moon = () => [
-  rect(0, 0, W, H, { fill: '#0b1026' }),
-  ...stars(W, 500, 120),
-  circle(170, 130, 54, fill('#3d6fb6', 4)),
-  path('M126 112 q24 -16 40 6 q16 16 40 0', line('#69f0ae', 8)),
-  path('M0 540 Q300 480 640 520 T1280 500 V720 H0 Z', fill('#cfd3dc', 4)),
-  ...[
-    [260, 620, 34],
-    [900, 640, 44],
-    [1150, 590, 22],
-  ].map(([x, y, r]) => el('ellipse', { cx: x, cy: y, rx: r, ry: r! * 0.4, fill: '#b0b5c1' })),
-];
-
-/** 地平線の向こうの、見知らぬ工場（窓が lit 個灯る） */
-const farFactory = (lit: number) => [
-  path('M0 120 V70 L30 46 V70 L60 46 V70 L90 46 V30 H110 V70 H200 V120 Z', fill('#1a1d2e', 3)),
-  ...Array.from({ length: 5 }, (_, i) =>
-    rect(14 + i * 36, 84, 18, 14, { fill: i < lit ? M.sun : '#2a3150' }, 2),
-  ),
-];
-
-/** 見知らぬロボのアンテナの光（水色） */
-const strangerLamp = (on: boolean) => [
-  filters(1),
-  ...(on
-    ? [
-        el('circle', {
-          cx: 30,
-          cy: 30,
-          r: 26,
-          fill: F.retrigger.main,
-          opacity: 0.55,
-          filter: 'url(#kv-glow)',
-        }),
-      ]
-    : []),
-  path('M30 40 V80', line('#2a3150', 5)),
-  circle(30, 30, 9, fill(on ? F.retrigger.light : '#2a3150', 2.5)),
 ];
 
 /** 光の線（連鎖の信号。ゲームの光と同じ色） */
@@ -294,14 +201,6 @@ const photo = () => [
   // ナットのロケット（ボルトのものより性能が良さそうな機体: art/characters/nutRocket.ts）
   group({ transform: 'translate(132 22) scale(0.6)' }, ...nutRocketBody()),
   circle(120, 8, 8, fill(INK.steelLight, 2.5)),
-];
-
-/** ロケットの部品の破片（崩れる場面） */
-const scrap = () => [
-  rect(4, 10, 60, 30, fill(R.body), 4),
-  rect(4, 22, 60, 8, { fill: R.accent }),
-  path('M70 40 L96 6 L104 14 L80 44 Z', fill(R.accent)),
-  circle(120, 28, 12, fill(INK.steel)),
 ];
 
 /** 地球の工場の夜（ロゴのあとの場面の背景: 少し冷たい色） */

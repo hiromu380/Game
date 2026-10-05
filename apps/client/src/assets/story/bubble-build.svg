@@ -2,7 +2,21 @@
   <!-- カットシーンの絵: bubble-build（art/ のスクリプトで生成。手で編集しない） -->
   <circle cx="26" cy="222" r="9" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="50" cy="196" r="14" fill="#ffffff" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-  <ellipse cx="190" cy="100" rx="170" ry="92" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="76" cy="104" r="58" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="140" cy="56" r="54" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="222" cy="50" r="56" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="300" cy="92" r="58" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="262" cy="160" r="52" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="180" cy="168" r="54" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="100" cy="158" r="48" fill="#ffffff" stroke="#1b1f27" stroke-width="6"/>
+  <circle cx="76" cy="104" r="55" fill="#ffffff"/>
+  <circle cx="140" cy="56" r="51" fill="#ffffff"/>
+  <circle cx="222" cy="50" r="53" fill="#ffffff"/>
+  <circle cx="300" cy="92" r="55" fill="#ffffff"/>
+  <circle cx="262" cy="160" r="49" fill="#ffffff"/>
+  <circle cx="180" cy="168" r="51" fill="#ffffff"/>
+  <circle cx="100" cy="158" r="45" fill="#ffffff"/>
+  <circle cx="190" cy="108" r="84" fill="#ffffff"/>
   <g><rect x="60" y="120" width="64" height="30" rx="5" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="60" y="131" width="64" height="8" fill="#e53935"/><rect x="60" y="120" width="64" height="30" rx="5" fill="none" stroke="#1b1f27" stroke-width="3"/></g>
   <g><rect x="60" y="86" width="64" height="30" rx="5" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="60" y="97" width="64" height="8" fill="#e53935"/><rect x="60" y="86" width="64" height="30" rx="5" fill="none" stroke="#1b1f27" stroke-width="3"/></g>
   <g><rect x="60" y="52" width="64" height="30" rx="5" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="60" y="63" width="64" height="8" fill="#e53935"/><rect x="60" y="52" width="64" height="30" rx="5" fill="none" stroke="#1b1f27" stroke-width="3"/></g>
