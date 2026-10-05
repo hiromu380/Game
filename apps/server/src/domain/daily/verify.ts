@@ -11,7 +11,7 @@ import {
   applyOp,
   commitShift,
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   isRunOp,
   type CommitResult,
   type PartId,
@@ -69,7 +69,7 @@ export function rebuildState(
   committedOps: readonly unknown[][],
   seeds: readonly number[],
 ): RunState {
-  let state = createRunWithConfig(dailyRunSeed(dailyId), config);
+  let state = createRunWithConfig(weeklyRunSeed(dailyId), config);
   committedOps.forEach((ops, shiftIndex) => {
     const applied = applyShiftOps(state, ops);
     if (!applied.ok)

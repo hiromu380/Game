@@ -6,7 +6,7 @@
  */
 import {
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   getCurrentEconomy,
   drawFloorPermit,
   getCurrentFloor,
@@ -466,7 +466,7 @@ export function App({ start, onTitle }: Props) {
     if (mode.kind === 'practice') {
       dispatch({
         type: 'loadRun',
-        run: createRunWithConfig(dailyRunSeed(mode.dailyId), run.config),
+        run: createRunWithConfig(weeklyRunSeed(mode.dailyId), run.config),
         mode,
       });
       return;

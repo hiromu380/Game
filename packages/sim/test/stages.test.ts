@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALANCE,
-  buildDailyConfig,
+  buildWeeklyConfig,
   createRun,
   drawBoss,
   generateStage,
@@ -36,7 +36,7 @@ describe('テンプレート', () => {
       }
     }
     for (const n of [7, 8, 9]) {
-      for (const band of [...STAGES.dayBands, STAGES.overtimeBand, STAGES.dailyBand]) {
+      for (const band of [...STAGES.dayBands, STAGES.overtimeBand, STAGES.weeklyBand]) {
         for (let seed = 0; seed < 20; seed++) {
           const floor = generateStage({
             seed,
@@ -52,7 +52,7 @@ describe('テンプレート', () => {
   });
 
   it('帯のテンプレートはすべて存在し、日ごとに難易度の方向性に沿う', () => {
-    const bands = [...STAGES.dayBands, STAGES.overtimeBand, STAGES.dailyBand];
+    const bands = [...STAGES.dayBands, STAGES.overtimeBand, STAGES.weeklyBand];
     for (const id of bands.flat()) expect(STAGES.templates[id], id).toBeDefined();
     const only = (ids: string[], allowed: FloorTileId[]) =>
       ids.every((id) => [...tilesOfTemplate(id)].every((t) => allowed.includes(t)));
@@ -158,9 +158,9 @@ describe('ランへの組み込み', () => {
   });
 
   it('デイリーは、デイリーの ID から全員同じステージ（2日目相当の帯）', () => {
-    const a = buildDailyConfig({ dailyId: '2026-10-05' });
+    const a = buildWeeklyConfig({ weekId: '2026-10-05' });
     expect(a.stages!.days).toHaveLength(1);
-    expect(buildDailyConfig({ dailyId: '2026-10-05' }).stages).toEqual(a.stages);
+    expect(buildWeeklyConfig({ weekId: '2026-10-05' }).stages).toEqual(a.stages);
     expect([...tilesOf(a.stages!.days[0]!)].every((t) => t !== 'triple')).toBe(true);
   });
 

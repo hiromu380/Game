@@ -8,7 +8,7 @@
 import {
   createInitialAchievements,
   evaluateAchievements,
-  recordDailyParticipation,
+  recordWeeklyParticipation,
   shiftContextOf,
   unlockAchievements,
   type AchievementContext,
@@ -44,11 +44,11 @@ export function achievementsAfterCommit(
   if (!EDITION_CONFIG.achievements) return progress;
   const { mode, before, committed } = input;
   let next = progress;
-  if (mode.kind === 'daily') next = recordDailyParticipation(next, mode.dailyId);
+  if (mode.kind === 'daily') next = recordWeeklyParticipation(next, mode.dailyId);
   return apply(next, {
     shift: shiftContextOf(before, committed),
     meta: input.meta,
-    daily: mode.kind === 'daily' ? { cleared: committed.state.phase === 'cleared' } : undefined,
+    weekly: mode.kind === 'daily' ? { cleared: committed.state.phase === 'cleared' } : undefined,
   });
 }
 
@@ -58,7 +58,7 @@ export function achievementsAfterRanking(
   topPercent: number,
 ): AchievementProgress {
   if (!EDITION_CONFIG.achievements) return progress;
-  return apply(progress, { daily: { topPercent } });
+  return apply(progress, { weekly: { topPercent } });
 }
 
 /** 起動時: メタ進行の記録で満たしている実績を解除する（セーブの移行直後・取りこぼしの回収） */

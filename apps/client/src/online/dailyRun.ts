@@ -8,14 +8,14 @@ import type { DailyInfo, DailySessionView } from '@chain-factory/shared';
 import {
   commitShift,
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   replayOps,
   type RunState,
 } from '@chain-factory/sim';
 
 /** 本番（ランキング対象）のラン。session があれば続きから */
 export function buildDailyRun(info: DailyInfo, session: DailySessionView | null): RunState {
-  let state = createRunWithConfig(dailyRunSeed(info.dailyId), info.config);
+  let state = createRunWithConfig(weeklyRunSeed(info.dailyId), info.config);
   for (const [shiftIndex, ops] of (session?.ops ?? []).entries()) {
     const replayed = replayOps(state, ops);
     if (!replayed.ok) throw new Error(`replay failed at shift ${shiftIndex}`);
@@ -32,5 +32,5 @@ export function buildDailyRun(info: DailyInfo, session: DailySessionView | null)
  */
 export function buildPracticeRun(info: DailyInfo): RunState {
   const config = { ...info.config, commitSeedMode: 'derived' as const, mode: 'practice' as const };
-  return createRunWithConfig(dailyRunSeed(info.dailyId), config);
+  return createRunWithConfig(weeklyRunSeed(info.dailyId), config);
 }

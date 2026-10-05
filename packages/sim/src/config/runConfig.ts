@@ -94,24 +94,24 @@ export interface RunConfig {
   /**
    * 本番シードの決め方
    * - derived: ランシードから派生させる（通常ラン。クライアントだけで遊べる）
-   * - external: 外から渡す（デイリー。サーバーが秘密値から作ったシードを渡す）
+   * - external: 外から渡す（週替わり。サーバーが秘密値から作ったシードを渡す）
    */
   commitSeedMode: 'derived' | 'external';
-  /** ラン全体にかかる修正ルール（デイリーの「今日の特殊ルール」。通常ランは null） */
+  /** ラン全体にかかる修正ルール（週替わりの「今週の特殊ルール」。通常ランは null） */
   globalModifier: BossPlanEntry | null;
   /**
    * ランの種類
    * - normal: 通常ラン（オフラインで完結・ランキング対象外）
-   * - daily: デイリー本番（本番シードはサーバーから受け取る）
-   * - practice: デイリーの練習（条件は同じ、本番シードはクライアント側）
+   * - weekly: 週替わりチャレンジの本番（本番シードはサーバーから受け取る）
+   * - practice: 週替わりの練習（条件は同じ、本番シードはクライアント側）
    */
-  mode: 'normal' | 'daily' | 'practice';
+  mode: 'normal' | 'weekly' | 'practice';
   /** 延長戦に進めるか（通常ランのみ） */
   overtimeAllowed: boolean;
 }
 
 /**
- * メタ進行による変更（2b で実装）。デイリーチャレンジではこの層を適用しない
+ * メタ進行による変更（2b で実装）。週替わりチャレンジではこの層を適用しない
  */
 export interface MetaModifiers {
   /** ショップに並ぶパーツ（未指定なら全パーツ） */
@@ -129,7 +129,7 @@ export interface BuildRunConfigOptions {
   runSeed?: number;
   /** 1日目のステージを初回ガイド用の固定テンプレートにする */
   tutorial?: boolean;
-  /** 日ごとのステージを抽選する帯（省略時は balance の dayBands。デイリーは dailyBand） */
+  /** 日ごとのステージを抽選する帯（省略時は balance の dayBands。週替わりは weeklyBand） */
   stageBands?: string[][];
 }
 

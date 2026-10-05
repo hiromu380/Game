@@ -5,7 +5,7 @@
 import {
   commitShift,
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   getCurrentFloor,
   getCurrentRules,
   isBlockedCell,
@@ -74,7 +74,7 @@ describe('デイリー: 通しのプレイ', () => {
 
     expect((await api.call('POST', `/daily/${DAY}/start`, {}, token)).status).toBe(200);
 
-    let state = createRunWithConfig(dailyRunSeed(DAY), config);
+    let state = createRunWithConfig(weeklyRunSeed(DAY), config);
     for (let shift = 0; shift < 3; shift++) {
       const ops = shift === 0 ? SIMPLE_OPS : [];
       const res = await api.commit(token, shift, ops);
@@ -114,7 +114,7 @@ describe('デイリー: 通しのプレイ', () => {
 
     // 返ってきた情報だけでクライアントの状態を作り直し、続きを本番できる
     const resumed = clientCommit(
-      createRunWithConfig(dailyRunSeed(DAY), config),
+      createRunWithConfig(weeklyRunSeed(DAY), config),
       SIMPLE_OPS,
       first.json.seed as number,
     );
@@ -144,13 +144,13 @@ describe('デイリー: 通しのプレイ', () => {
 
     // 特殊ルールで使えないマスを避けて置く
     // 床（ステージ・特殊ルールの使用不可・ボーナス床）のない行に置く
-    const floor = getCurrentFloor(createRunWithConfig(dailyRunSeed(DAY), config));
+    const floor = getCurrentFloor(createRunWithConfig(weeklyRunSeed(DAY), config));
     const y = [3, 2, 4, 1, 5].find((row) => !floor[row * 7 + 1] && !floor[row * 7 + 2])!;
     const ops: RunOp[] = SIMPLE_OPS.map((op) => ({ ...op, y }) as RunOp);
     const res = await api.commit(token, 0, ops);
     expect(res.status).toBe(200);
     const local = clientCommit(
-      createRunWithConfig(dailyRunSeed(DAY), config),
+      createRunWithConfig(weeklyRunSeed(DAY), config),
       ops,
       res.json.seed as number,
     );
@@ -345,7 +345,7 @@ describe('床タイル（SIM_VERSION 5）', () => {
     expect((await api.call('POST', `/daily/${DAY}/start`, {}, token)).status).toBe(200);
 
     // 効果のある床（ステージ・ボーナス床）のマスに出荷口、その左にスイッチを置く
-    const state = createRunWithConfig(dailyRunSeed(DAY), config);
+    const state = createRunWithConfig(weeklyRunSeed(DAY), config);
     const floor = getCurrentFloor(state);
     const index = floor.findIndex(
       (c, i) => c && !isBlockedCell(floor, i) && i % 7 > 0 && !floor[i - 1],
@@ -372,7 +372,7 @@ describe('床タイル（SIM_VERSION 5）', () => {
     const api = testApi(ctx);
     const { token } = await api.register();
     await api.call('POST', `/daily/${DAY}/start`, {}, token);
-    const floor = getCurrentFloor(createRunWithConfig(dailyRunSeed(DAY), config));
+    const floor = getCurrentFloor(createRunWithConfig(weeklyRunSeed(DAY), config));
     const blocked = floor.findIndex((_, i) => isBlockedCell(floor, i));
     // デイリーの帯（2日目相当）のテンプレートには、どれも使用不可がある
     expect(blocked).toBeGreaterThanOrEqual(0);
@@ -416,7 +416,7 @@ describe('ランダム配置権（SIM_VERSION 6）', () => {
     const { token } = await api.register();
     expect((await api.call('POST', `/daily/${DAY}/start`, {}, token)).status).toBe(200);
 
-    const state = createRunWithConfig(dailyRunSeed(DAY), config);
+    const state = createRunWithConfig(weeklyRunSeed(DAY), config);
     const offerIndex = state.shop.findIndex((o) => o.itemId === 'floorPermit');
     expect(offerIndex).toBeGreaterThanOrEqual(0);
     const bought = replayOps(state, [
@@ -484,13 +484,13 @@ describe('ゴールデンデータ（秘密値・本番シード・出荷量の�
       score: res.json.score,
     }).toMatchInlineSnapshot(`
       {
-        "score": "1",
+        "score": "0",
         "seed": 795447127,
         "seedCommitment": "196ea82936392d1bd8b2aef013cd3c0c5480d20c0dcdf6f61b6d5a9ba66d5c3c",
       }
     `);
     // クライアントの simulate 単体でも同じ出荷量
-    const replayed = replayOps(createRunWithConfig(dailyRunSeed(DAY), config), ops);
+    const replayed = replayOps(createRunWithConfig(weeklyRunSeed(DAY), config), ops);
     if (!replayed.ok) throw new Error('replay failed');
     const direct = simulate({
       board: replayed.state.board,

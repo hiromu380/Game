@@ -5,7 +5,7 @@ import { nowMs } from './clock';
 import {
   BALANCE,
   commitShift,
-  createDailyRun,
+  createWeeklyRun,
   createInitialMeta,
   createPrng,
   createRun,
@@ -84,7 +84,7 @@ export interface RunnerOptions {
    * normal: 通常ラン（9シフト）／ daily: デイリーと同じ条件（3シフト・全パーツ・7×7・今日の特殊ルール）。
    * daily のシード n は「デイリー ID = bal-<n>」の日として遊ぶ（本番シードは練習モードと同じくクライアント側で作る）
    */
-  mode?: 'normal' | 'daily';
+  mode?: 'normal' | 'weekly';
   /** ボットが床を見て手を選ぶか（既定 true。false は「床を見ないボット」との比較用。moves.ts） */
   floorAware?: boolean;
   /** ボットがランダム配置権を買って使うか（既定 true。false は「配置権を使わないボット」との比較用） */
@@ -140,8 +140,8 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       ? { meta: metaToModifiers(createInitialMeta()) }
       : { meta: { boardExpansion: BALANCE.meta.boardExpansions.length } };
   let state: RunState =
-    options.mode === 'daily'
-      ? createDailyRun(`bal-${seed}`, { practice: true })
+    options.mode === 'weekly'
+      ? createWeeklyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
   while (state.phase === 'building') {
     // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが

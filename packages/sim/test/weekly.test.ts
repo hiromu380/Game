@@ -1,14 +1,14 @@
 /**
- * デイリーチャレンジの設定・本番シードの外部指定・操作ログの再生のテスト
+ * 週替わりチャレンジの設定・本番シードの外部指定・操作ログの再生のテスト
  */
 import { describe, expect, it } from 'vitest';
 import {
   BALANCE,
-  buildDailyConfig,
+  buildWeeklyConfig,
   commitShift,
-  createDailyRun,
+  createWeeklyRun,
   createRun,
-  dailyRunSeed,
+  weeklyRunSeed,
   PART_IDS,
   replayOps,
   SIM_VERSION,
@@ -16,60 +16,72 @@ import {
   type RunOp,
 } from '../src';
 
-describe('デイリーの RunConfig', () => {
-  it('同じデイリー ID なら全員同じ設定・同じショップになる', () => {
-    expect(buildDailyConfig({ dailyId: '2026-09-28' })).toEqual(
-      buildDailyConfig({ dailyId: '2026-09-28' }),
+describe('週替わりの RunConfig', () => {
+  it('同じ週の ID なら全員同じ設定・同じショップになる', () => {
+    expect(buildWeeklyConfig({ weekId: '2026-09-28' })).toEqual(
+      buildWeeklyConfig({ weekId: '2026-09-28' }),
     );
-    expect(createDailyRun('2026-09-28').shop).toEqual(createDailyRun('2026-09-28').shop);
-    expect(dailyRunSeed('2026-09-28')).not.toBe(dailyRunSeed('2026-09-29'));
+    expect(createWeeklyRun('2026-09-28').shop).toEqual(createWeeklyRun('2026-09-28').shop);
+    expect(weeklyRunSeed('2026-09-28')).not.toBe(weeklyRunSeed('2026-09-29'));
   });
 
   it('メタ進行なし（全パーツ・7×7）・3シフト・延長戦なし・本番シードは外部指定', () => {
-    const config = buildDailyConfig({ dailyId: '2026-09-28' });
+    const config = buildWeeklyConfig({ weekId: '2026-09-28' });
     const shopParts = config.economy.shopPool.map((p) => p.partId);
     expect(new Set(shopParts)).toEqual(new Set(PART_IDS.filter((id) => id !== 'switch')));
     expect(config.board).toEqual(BALANCE.board);
-    expect(config.shifts).toEqual(BALANCE.daily.shifts);
+    expect(config.shifts).toEqual(BALANCE.weekly.shifts);
     expect(config.overtimeAllowed).toBe(false);
     expect(config.commitSeedMode).toBe('external');
-    expect(config.mode).toBe('daily');
+    expect(config.mode).toBe('weekly');
     expect(config.simVersion).toBe(SIM_VERSION);
   });
 
-  it('今日の特殊ルールが1つかかる（候補の中から ID で決まる）', () => {
+  it('今週の特殊ルールが1つかかる（候補の中から ID で決まる）', () => {
     const seen = new Set<string>();
     for (let d = 1; d <= 30; d++) {
-      const rule = buildDailyConfig({
-        dailyId: `2026-10-${String(d).padStart(2, '0')}`,
+      const rule = buildWeeklyConfig({
+        weekId: `2026-10-${String(d).padStart(2, '0')}`,
       }).globalModifier;
       expect(rule).not.toBeNull();
-      expect(BALANCE.daily.specialRules).toContain(rule!.id);
+      expect(BALANCE.weekly.specialRules).toContain(rule!.id);
       seen.add(rule!.id);
     }
     expect(seen.size).toBeGreaterThan(1);
   });
 
   it('相場価格を差し込める', () => {
-    const config = buildDailyConfig({ dailyId: '2026-09-28', prices: { gear: 9 } });
+    const config = buildWeeklyConfig({ weekId: '2026-09-28', prices: { gear: 9 } });
     expect(config.economy.prices.gear).toBe(9);
     expect(config.economy.prices.press).toBe(BALANCE.parts.press.price);
   });
 
+  it('候補番号を変えると盤面（ランシード）が変わり、代替設定はやさしい帯で特殊ルールなし', () => {
+    expect(weeklyRunSeed('2026-10-05', 1)).not.toBe(weeklyRunSeed('2026-10-05', 0));
+    expect(createWeeklyRun('2026-10-05', { candidate: 1 }).shop).toEqual(
+      createWeeklyRun('2026-10-05', { candidate: 1 }).shop,
+    );
+    const fallback = buildWeeklyConfig({ weekId: '2026-10-05', fallback: true });
+    expect(fallback.globalModifier).toBeNull();
+    expect(fallback.stages!.days[0]).not.toEqual(
+      buildWeeklyConfig({ weekId: '2026-10-05' }).stages!.days[0],
+    );
+  });
+
   it('練習モードは本番シードをクライアントで作る', () => {
-    const config = buildDailyConfig({ dailyId: '2026-09-28', practice: true });
+    const config = buildWeeklyConfig({ weekId: '2026-09-28', practice: true });
     expect(config.commitSeedMode).toBe('derived');
     expect(config.mode).toBe('practice');
   });
 });
 
 describe('本番シードの外部指定', () => {
-  it('デイリーはシードを渡さないと本番を実行できない', () => {
-    expect(commitShift(createDailyRun('2026-09-28'))).toEqual({ error: 'seedRequired' });
+  it('週替わりはシードを渡さないと本番を実行できない', () => {
+    expect(commitShift(createWeeklyRun('2026-09-28'))).toEqual({ error: 'seedRequired' });
   });
 
   it('シードを渡せば実行でき、同じシードなら同じ結果になる', () => {
-    const run = createDailyRun('2026-09-28');
+    const run = createWeeklyRun('2026-09-28');
     const a = commitShift(run, { seed: 123 });
     const b = commitShift(run, { seed: 123 });
     expect('error' in a).toBe(false);
@@ -77,7 +89,7 @@ describe('本番シードの外部指定', () => {
   });
 
   it('デイリーは全クリアしても延長戦に進めない', () => {
-    const run = { ...createDailyRun('2026-09-28'), phase: 'cleared' as const };
+    const run = { ...createWeeklyRun('2026-09-28'), phase: 'cleared' as const };
     expect(startOvertime(run)).toBeNull();
   });
 
@@ -87,7 +99,8 @@ describe('本番シードの外部指定', () => {
 });
 
 describe('操作ログの再生', () => {
-  const run = createDailyRun('2026-09-28');
+  // リロールを止める特殊ルール（部品不足）に当たらない週を使う
+  const run = createWeeklyRun('2026-10-12');
 
   it('正しい操作ログを再生すると、同じ操作を直接行ったのと同じ状態になる', () => {
     const ops: RunOp[] = [

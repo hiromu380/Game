@@ -7,7 +7,7 @@
  *   pnpm balance --seeds 100 --start 5000      # シード 5000〜5099
  *   pnpm balance --unlock all                  # 全パーツ解放済みの状態で検証（既定は初期解放のみ）
  *   pnpm balance --eval worst --samples 5      # ランダムな盤面を「5回試して最悪の回」で評価する（慎重なプレイヤー）
- *   pnpm balance --mode daily                  # デイリーと同じ条件（3シフト・全パーツ・特殊ルール）で検証
+ *   pnpm balance --mode weekly                 # 週替わりチャレンジと同じ条件（3シフト・全パーツ・特殊ルール）で検証
  *   pnpm balance --floor-aware off             # 床を見ないボット（床を使うボットとの比較用）
  *   pnpm balance --permits off                 # ランダム配置権を使わないボット（比較用）
  *
@@ -42,7 +42,9 @@ function parseArgs(argv: string[]) {
     timeLimitMs: Number(args.get('time-limit') ?? 3000),
     maxRerolls: Number(args.get('max-rerolls') ?? 3),
     unlock: (args.get('unlock') === 'all' ? 'all' : 'initial') as 'initial' | 'all',
-    mode: (args.get('mode') === 'daily' ? 'daily' : 'normal') as 'normal' | 'daily',
+    // daily は旧名（週替わりチャレンジの前のデイリー）。同じ条件として受け付ける
+    mode: (['weekly', 'daily'].includes(args.get('mode') ?? '') ? 'weekly' : 'normal') as
+      'normal' | 'weekly',
     floorAware: args.get('floor-aware') !== 'off',
     permits: args.get('permits') !== 'off',
   };
@@ -61,7 +63,7 @@ async function main() {
     permits: opts.permits,
   };
   const summaries: BotSummary[] = [];
-  const shiftSpecs = opts.mode === 'daily' ? BALANCE.daily.shifts : BALANCE.shifts;
+  const shiftSpecs = opts.mode === 'weekly' ? BALANCE.weekly.shifts : BALANCE.shifts;
   const allLogs: Record<string, unknown> = {};
 
   for (const bot of opts.bots) {
@@ -80,7 +82,9 @@ async function main() {
     日時: new Date().toISOString(),
     シード: `${opts.start}〜（${opts.seeds} 個。search は ${opts.searchSeeds} 個）`,
     モード:
-      opts.mode === 'daily' ? 'デイリー（3シフト・全パーツ・特殊ルール）' : '通常ラン（9シフト）',
+      opts.mode === 'weekly'
+        ? '週替わりチャレンジ（3シフト・全パーツ・特殊ルール）'
+        : '通常ラン（9シフト）',
     評価の試行回数: opts.samples,
     ランダムな盤面の評価: opts.evalMode === 'worst' ? '最悪の回（慎重）' : '平均（期待値）',
     探索の思考時間上限: `${opts.timeLimitMs}ms/シフト`,

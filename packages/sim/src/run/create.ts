@@ -2,7 +2,7 @@
  * ランの開始
  */
 import { BALANCE, type Balance } from '../balance';
-import { buildDailyConfig, dailyRunSeed } from '../config/daily';
+import { buildWeeklyConfig, weeklyRunSeed } from '../config/weekly';
 import { buildRunConfig, type MetaModifiers, type RunConfig } from '../config/runConfig';
 import { createEmptyBoard } from '../core/board';
 import type { PartId } from '../types';
@@ -40,15 +40,17 @@ export function createRun(seed: number, options: CreateRunOptions = {}): RunStat
 }
 
 /**
- * デイリー（または練習）のランを始める
- * @param config サーバーから配布された RunConfig（デイリー本番）。省略時はその場で組み立てる（練習・テスト）
+ * 週替わりチャレンジ（または練習）のランを始める
+ * @param options.config サーバーから配布された RunConfig（本番）。省略時はその場で組み立てる（練習・テスト）
+ * @param options.candidate・fallback その週の盤面の候補番号・代替設定か（サーバーの週の情報。ランシードが変わる）
  */
-export function createDailyRun(
-  dailyId: string,
-  options: { config?: RunConfig; practice?: boolean } = {},
+export function createWeeklyRun(
+  weekId: string,
+  options: { config?: RunConfig; practice?: boolean; candidate?: number; fallback?: boolean } = {},
 ): RunState {
-  const config = options.config ?? buildDailyConfig({ dailyId, practice: options.practice });
-  return createRunWithConfig(dailyRunSeed(dailyId), config);
+  const { candidate = 0, fallback = false, practice } = options;
+  const config = options.config ?? buildWeeklyConfig({ weekId, candidate, fallback, practice });
+  return createRunWithConfig(weeklyRunSeed(weekId, fallback ? -1 : candidate), config);
 }
 
 /** 確定済みの RunConfig からランを始める */

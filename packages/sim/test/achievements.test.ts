@@ -15,7 +15,7 @@ import {
   evaluateAchievements,
   getCurrentRules,
   junkbotMaxStreak,
-  recordDailyParticipation,
+  recordWeeklyParticipation,
   scoreOf,
   shiftContextOf,
   simulate,
@@ -167,21 +167,21 @@ describe('メタ進行の判定', () => {
 describe('デイリーの判定', () => {
   it('参加日数は同じ日を二重に数えない', () => {
     let progress = createInitialAchievements();
-    progress = recordDailyParticipation(progress, '2026-10-01');
-    progress = recordDailyParticipation(progress, '2026-10-01');
+    progress = recordWeeklyParticipation(progress, '2026-10-01');
+    progress = recordWeeklyParticipation(progress, '2026-10-01');
     expect(progress.dailyDays).toBe(1);
     expect(evaluate({}, progress)).toEqual(['ACH_DAILY_FIRST']);
-    for (let d = 2; d <= 7; d++) progress = recordDailyParticipation(progress, `2026-10-0${d}`);
+    for (let d = 2; d <= 7; d++) progress = recordWeeklyParticipation(progress, `2026-10-0${d}`);
     expect(progress.dailyDays).toBe(7);
     expect(evaluate({}, progress)).toContain('ACH_DAILY_7');
   });
 
   it('全シフトクリア・上位 10%', () => {
-    expect(evaluate({ daily: { cleared: true, topPercent: 10 } })).toEqual([
+    expect(evaluate({ weekly: { cleared: true, topPercent: 10 } })).toEqual([
       'ACH_DAILY_CLEAR',
       'ACH_DAILY_TOP10',
     ]);
-    expect(evaluate({ daily: { cleared: false, topPercent: 10.5 } })).toEqual([]);
+    expect(evaluate({ weekly: { cleared: false, topPercent: 10.5 } })).toEqual([]);
   });
 });
 

@@ -28,5 +28,5 @@ export const FLOOR_PERMIT: Balance['floorPermit'] = {
     { tile: 'add', weight: 35 },
     { tile: 'triple', weight: 5, fromDay: 2 },
   ],
-  inDaily: true,
+  inWeekly: true,
 };

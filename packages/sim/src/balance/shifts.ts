@@ -30,7 +30,7 @@ export const OVERTIME: Balance['overtime'] = {
   clearReward: 5,
 };
 
-export const DAILY: Balance['daily'] = {
+export const WEEKLY: Balance['weekly'] = {
   // 仮の値。デイリーは全パーツが出るので、通常ランの1日目より少し高め
   shifts: [
     { quota: 5, budget: 14, clearReward: 5, kind: 'normal' },

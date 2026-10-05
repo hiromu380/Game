@@ -9,7 +9,7 @@
  * 相場は「前日の購入率」から決まるため、前日が締め切られてからでないと当日分を作れない。
  * そのため翌日分を前もって作ることはせず、切り替え時刻の Cron と、API の初回アクセスの両方で呼ぶ。
  */
-import { buildDailyConfig, type PartId, SIM_VERSION } from '@chain-factory/sim';
+import { buildWeeklyConfig, type PartId, SIM_VERSION } from '@chain-factory/sim';
 import type { DomainContext } from '../context';
 import { ensureMarket } from '../market/market';
 import type { DailyRecord } from '../../repositories/types';
@@ -29,7 +29,7 @@ export async function ensureDaily(ctx: DomainContext, dailyId: string): Promise<
   const record: DailyRecord = {
     id: dailyId,
     number: dailyNumber(dailyId, ctx.config.dailyEpoch),
-    config: buildDailyConfig({ dailyId, prices }),
+    config: buildWeeklyConfig({ weekId: dailyId, prices }),
     seedCommitment: await commitmentOf(secret),
     simVersion: SIM_VERSION,
     ...dailyWindow(dailyId, ctx.config.dailyOffsetMinutes),

@@ -123,7 +123,9 @@ export interface StageBalance {
   /** 延長戦の日が進むごとに、×2床を×3床に置き換える枚数（延長戦の1日目から数える） */
   overtimeUpgradesPerDay: number;
   /** デイリー（1日分・3シフト）で抽選するテンプレート */
-  dailyBand: string[];
+  weeklyBand: string[];
+  /** 週替わりの盤面が自動検証に通らなかったときの代替の帯（やさしいステージ。特殊ルールなし） */
+  weeklyFallbackBand: string[];
   /** 初回ガイドの1日目に使うテンプレート（抽選しない・回転しない） */
   tutorialTemplate: string;
   /** 使用不可を除いたマスが、盤面のこの割合（%）以上あること（テンプレートの検証） */
@@ -154,8 +156,8 @@ export interface FloorPermitBalance {
   maxHeld: number;
   /** 湧く床の種類の重み。fromDay（0 始まり）より前の日には出さない */
   tileWeights: { tile: FloorTileId; weight: number; fromDay?: number }[];
-  /** デイリーでも出すか */
-  inDaily: boolean;
+  /** 週替わりチャレンジでも出すか */
+  inWeekly: boolean;
 }
 
 export interface Balance {
@@ -243,11 +245,11 @@ export interface Balance {
     clearReward: number;
   };
 
-  /** デイリーチャレンジ（1日＝3シフトの短縮版。全員同じ条件） */
-  daily: {
+  /** 週替わりチャレンジ（1回の挑戦＝3シフトの短縮版。全員同じ条件で1週間） */
+  weekly: {
     /** シフト表（朝・昼・夜。夜はボス） */
     shifts: ShiftSpec[];
-    /** 「今日の特殊ルール」の候補（ボス修正ルールの仕組みを流用し、3シフト全体にかける） */
+    /** 「今週の特殊ルール」の候補（ボス修正ルールの仕組みを流用し、3シフト全体にかける） */
     specialRules: BossModifierId[];
   };
 

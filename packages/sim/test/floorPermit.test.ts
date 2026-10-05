@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addItem,
   BALANCE,
-  buildDailyConfig,
+  buildWeeklyConfig,
   buyOffer,
   commitShift,
   countItems,
@@ -219,9 +219,9 @@ describe('ショップの配置権', () => {
     for (let seed = 1; seed <= 50; seed++) {
       expect(offersPermit(createRun(seed, { tutorial: true }))).toBe(false);
     }
-    expect(buildDailyConfig({ dailyId: '2026-10-05' }).floorPermit).toBeDefined();
-    const off = withBalance({ floorPermit: { ...BALANCE.floorPermit, inDaily: false } });
-    expect(buildDailyConfig({ dailyId: '2026-10-05', balance: off }).floorPermit).toBeUndefined();
+    expect(buildWeeklyConfig({ weekId: '2026-10-05' }).floorPermit).toBeDefined();
+    const off = withBalance({ floorPermit: { ...BALANCE.floorPermit, inWeekly: false } });
+    expect(buildWeeklyConfig({ weekId: '2026-10-05', balance: off }).floorPermit).toBeUndefined();
   });
 });
 

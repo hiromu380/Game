@@ -20,9 +20,9 @@ import type { BossModifierId } from '../balance';
  * - record:          メタ進行の記録（累計・回数）が atLeast 以上
  * - boardLevel:      工場拡張の段階が atLeast 以上（1: 8×8, 2: 9×9）
  * - allParts:        全パーツを解放した
- * - dailyDays:       デイリーに参加した日数が atLeast 以上
- * - dailyCleared:    デイリーの全シフトをクリアした
- * - dailyTopPercent: デイリーの結果が上位 atMost % 以内
+ * - dailyDays:        週替わりチャレンジに参加した日数が atLeast 以上（1日1回の挑戦を日数で数える）
+ * - weeklyCleared:    週替わりの挑戦で全シフトをクリアした
+ * - weeklyTopPercent: 週替わりの確定した結果（結果発表）が上位 atMost % 以内
  */
 export type AchievementCondition =
   | { kind: 'shiftScore'; atLeast: string }
@@ -36,8 +36,8 @@ export type AchievementCondition =
   | { kind: 'boardLevel'; atLeast: number }
   | { kind: 'allParts' }
   | { kind: 'dailyDays'; atLeast: number }
-  | { kind: 'dailyCleared' }
-  | { kind: 'dailyTopPercent'; atMost: number };
+  | { kind: 'weeklyCleared' }
+  | { kind: 'weeklyTopPercent'; atMost: number };
 
 /** Steam 統計（回数系だけ。実績の進捗バーに使う） */
 export type AchievementStatId = 'STAT_RUNS' | 'STAT_FULL_CLEARS' | 'STAT_DAILY_DAYS';
@@ -120,8 +120,8 @@ export const ACHIEVEMENTS = [
   { id: 'ACH_OVERTIME_3', hidden: false, condition: { kind: 'overtimeCleared', atLeast: 3 } },
   { id: 'ACH_OVERTIME_9', hidden: false, condition: { kind: 'overtimeCleared', atLeast: 9 } },
   { id: 'ACH_DAILY_FIRST', hidden: false, condition: { kind: 'dailyDays', atLeast: 1 } },
-  { id: 'ACH_DAILY_CLEAR', hidden: false, condition: { kind: 'dailyCleared' } },
-  { id: 'ACH_DAILY_TOP10', hidden: false, condition: { kind: 'dailyTopPercent', atMost: 10 } },
+  { id: 'ACH_DAILY_CLEAR', hidden: false, condition: { kind: 'weeklyCleared' } },
+  { id: 'ACH_DAILY_TOP10', hidden: false, condition: { kind: 'weeklyTopPercent', atMost: 10 } },
   {
     id: 'ACH_DAILY_7',
     hidden: false,

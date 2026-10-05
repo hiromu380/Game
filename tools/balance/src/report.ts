@@ -47,7 +47,7 @@ function ratio(score: string, quota: number): number {
   return Number((BigInt(score) * 1000n) / BigInt(Math.max(1, quota))) / 1000;
 }
 
-/** shiftSpecs: シフト表（通常ランは BALANCE.shifts、デイリーは BALANCE.daily.shifts） */
+/** shiftSpecs: シフト表（通常ランは BALANCE.shifts、デイリーは BALANCE.weekly.shifts） */
 export function summarize(
   bot: BotName,
   logs: RunLog[],

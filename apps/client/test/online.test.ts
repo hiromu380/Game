@@ -3,10 +3,10 @@
  */
 import type { DailyInfo } from '@chain-factory/shared';
 import {
-  buildDailyConfig,
+  buildWeeklyConfig,
   commitShift,
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   replayOps,
   type RunOp,
 } from '@chain-factory/sim';
@@ -26,7 +26,7 @@ const DAY = '2026-10-01';
 const info: DailyInfo = {
   dailyId: DAY,
   number: 1,
-  config: buildDailyConfig({ dailyId: DAY }),
+  config: buildWeeklyConfig({ weekId: DAY }),
   seedCommitment: 'x',
   opensAt: 0,
   closesAt: 1,
@@ -49,7 +49,7 @@ describe('デイリーの再開', () => {
   it('確定済みの操作ログとシードから、続けて遊んだ場合と同じ状態を作れる', () => {
     const ops: RunOp[] = [{ op: 'reroll' }];
     // 続けて遊んだ場合
-    const played = replayOps(createRunWithConfig(dailyRunSeed(DAY), info.config), ops);
+    const played = replayOps(createRunWithConfig(weeklyRunSeed(DAY), info.config), ops);
     if (!played.ok) throw new Error('replay failed');
     const committed = commitShift(played.state, { seed: 42 });
     if ('error' in committed) throw new Error(committed.error);

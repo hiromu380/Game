@@ -27,7 +27,7 @@ import { BONUS_FLOORS, FLOOR_PARAMS, FLOOR_PERMIT } from './floors';
 import { META } from './meta';
 import { PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { STAGES } from './stages';
-import { DAILY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
+import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM } from './sim';
 import type { Balance } from './types';
 
@@ -49,7 +49,7 @@ export const BALANCE: Balance = {
   resetBoardEachDay: RESET_BOARD_EACH_DAY,
   dayEvents: DAY_EVENTS,
   overtime: OVERTIME,
-  daily: DAILY,
+  weekly: WEEKLY,
   meta: META,
   boss: BOSS,
 };

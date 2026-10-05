@@ -1,4 +1,4 @@
-import { createDailyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
+import { createWeeklyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import {
   canUndo,
@@ -151,7 +151,7 @@ describe('画面の状態遷移', () => {
 
 describe('操作ログとデイリー本番', () => {
   const daily = () => {
-    const run = createDailyRun('2026-10-01');
+    const run = createWeeklyRun('2026-10-01');
     return createGameState(run, createInitialMeta(), {
       kind: 'daily',
       dailyId: '2026-10-01',
@@ -216,7 +216,7 @@ describe('実績', () => {
   });
 
   it('デイリー本番の確定で参加日数を数え、ランキングの順位で上位の実績を判定する', () => {
-    const run = createDailyRun('2026-10-01');
+    const run = createWeeklyRun('2026-10-01');
     let state = createGameState(run, createInitialMeta(), {
       kind: 'daily',
       dailyId: '2026-10-01',
@@ -232,7 +232,7 @@ describe('実績', () => {
   });
 
   it('練習はデイリーの参加日数に数えない', () => {
-    const run = createDailyRun('2026-10-01');
+    const run = createWeeklyRun('2026-10-01');
     let state = createGameState(
       { ...run, config: { ...run.config, commitSeedMode: 'derived' } },
       createInitialMeta(),
@@ -405,7 +405,7 @@ describe('諦める', () => {
   });
 
   it('デイリー本番は諦められない', () => {
-    const state = createGameState(createDailyRun('2026-10-01'), createInitialMeta(), {
+    const state = createGameState(createWeeklyRun('2026-10-01'), createInitialMeta(), {
       kind: 'daily',
       dailyId: '2026-10-01',
       number: 1,

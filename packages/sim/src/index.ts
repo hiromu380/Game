@@ -55,11 +55,11 @@ export {
 } from './floor/stage';
 export { drawFloorPermit, getCurrentFloor, isCellBlocked } from './run/floor';
 export { addItem, countItems, expireItems, useFloorPermit } from './run/items';
-export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
+export { buildWeeklyConfig, weeklyRunSeed, type WeeklyConfigInput } from './config/weekly';
 
 export * from './run/types';
 export {
-  createDailyRun,
+  createWeeklyRun,
   createRun,
   createRunWithConfig,
   type CreateRunOptions,

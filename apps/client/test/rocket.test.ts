@@ -1,4 +1,4 @@
-import { createDailyRun, createRun, type RunState } from '@chain-factory/sim';
+import { createWeeklyRun, createRun, type RunState } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import { ROCKET_CONFIG } from '../src/config/rocket';
 import { getDestination, getRocketProgress, ROCKET_PARTS } from '../src/state/rocket';
@@ -39,7 +39,7 @@ describe('ロケットの進み具合', () => {
   });
 
   it('デイリー（3シフト）は1シフトで3部品ずつ', () => {
-    const run = createDailyRun('2026-10-01');
+    const run = createWeeklyRun('2026-10-01');
     expect(getRocketProgress(withCleared(run, 1)).parts).toBe(3);
     expect(getRocketProgress(withCleared(run, 3))).toMatchObject({ parts: 9, launched: true });
   });
