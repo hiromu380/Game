@@ -21,14 +21,14 @@ import {
   type RunOp,
   type RunState,
 } from '@chain-factory/sim';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { memoryRateLimiter } from '../src/adapters/rateLimiter';
 import { applyMigrations, openNodeSqlite } from '../src/adapters/nodeSqlite';
 import { WEEKLY_CONFIG } from '../src/config/weekly';
 import { fromHex, sha256Hex } from '../src/domain/crypto';
 import type { DomainContext } from '../src/domain/context';
 import { finalizeWeek } from '../src/domain/weekly/results';
-import { ensureWeek, openWeek } from '../src/domain/weekly/weeks';
+import { ensureWeek } from '../src/domain/weekly/weeks';
 import { createDrizzleRepositories } from '../src/repositories/drizzle';
 import { DAY, DAY_MS, NOON, REGISTER_BODY, testApi, testContext, WEEK, WEEK_END } from './helpers';
 
@@ -655,12 +655,18 @@ describe('床タイル（SIM_VERSION 5）', () => {
 
   it('古い SIM_VERSION で生成された週への提出は拒否される', async () => {
     const { ctx } = testContext();
-    const real = await openWeek(ctx, WEEK);
-    expect(real.simVersion).toBe(SIM_VERSION);
-    await ctx.repos.weeks.save({ ...real, simVersion: '4' });
+    await seedEasyWeek(ctx);
     const api = testApi(ctx);
+    // 古い sim のうちに誰かが本番を確定した週（作り直されずに残る）
+    const other = await api.register();
+    await api.start(other.token);
+    expect((await api.commit(other.token, 0, SIMPLE_OPS)).status).toBe(200);
+    const real = (await ctx.repos.weeks.find(WEEK))!;
+    await ctx.repos.weeks.save({ ...real, simVersion: '4' });
     const { token } = await api.register();
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     await api.start(token);
+    error.mockRestore();
     expect(await api.commit(token, 0, SIMPLE_OPS)).toEqual({
       status: 409,
       json: { error: 'simVersionMismatch' },

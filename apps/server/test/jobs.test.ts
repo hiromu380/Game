@@ -2,7 +2,7 @@
  * 定期ジョブの統合テスト: 先行生成・公開前の自動検証（代替設定への切り替え）・週の切り替え（相場の確定）・
  * 実行順・冪等性・IP ハッシュの削除
  */
-import { buildWeeklyConfig } from '@chain-factory/sim';
+import { buildWeeklyConfig, SIM_VERSION } from '@chain-factory/sim';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WEEKLY_CONFIG } from '../src/config/weekly';
 import type * as BoardCheck from '../src/domain/weekly/boardCheck';
@@ -104,6 +104,70 @@ describe('公開前の自動検証', () => {
     const week = (await ctx.repos.weeks.find(WEEK))!;
     expect(week.verifySamples[0]).toMatchObject({ sample: 0, cleared: false });
     expect(week.verifyState).toBe('verified');
+  });
+});
+
+describe('SIM_VERSION を上げたデプロイ', () => {
+  it('先行生成したまま開いていない週は、新しいシミュレーションで作り直して検証をやり直す', async () => {
+    board.mode = 'fail';
+    const { ctx } = testContext();
+    await prepareWeeks(ctx);
+    const old = (await ctx.repos.weeks.find(NEXT_WEEK))!;
+    await ctx.repos.weeks.save({
+      ...old,
+      simVersion: 'old',
+      candidate: 3,
+      verifyState: 'verified',
+      verifySamples: [{ candidate: 3, sample: 0, started: true, cleared: true }],
+    });
+    board.mode = 'pass';
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await verifyWeeks(ctx, frozen);
+    warn.mockRestore();
+    const rebuilt = (await ctx.repos.weeks.find(NEXT_WEEK))!;
+    expect(rebuilt).toMatchObject({
+      simVersion: SIM_VERSION,
+      candidate: 0,
+      verifyState: 'verified',
+    });
+    expect(rebuilt.verifySamples).toEqual([
+      { candidate: 0, sample: 0, started: true, cleared: true },
+    ]);
+    expect(rebuilt.seedCommitment).toBe(old.seedCommitment);
+  });
+
+  it('開いた週も、まだ誰も本番を確定していなければ作り直す（開き直す）', async () => {
+    const { ctx } = testContext();
+    const opened = await openWeek(ctx, WEEK);
+    await ctx.repos.weeks.save({ ...opened, simVersion: 'old' });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const reopened = await openWeek(ctx, WEEK);
+    warn.mockRestore();
+    expect(reopened.simVersion).toBe(SIM_VERSION);
+    expect(reopened.config).not.toBeNull();
+    expect(reopened.seedCommitment).toBe(opened.seedCommitment);
+  });
+
+  it('誰かが本番を確定した週は作り直さない（その週のうちは条件を変えない）', async () => {
+    const { ctx } = testContext();
+    const opened = await openWeek(ctx, WEEK);
+    const stale = { ...opened, simVersion: 'old' };
+    await ctx.repos.weeks.save(stale);
+    await ctx.repos.bests.put({
+      weekId: WEEK,
+      playerId: 'p',
+      dayId: '2026-10-01',
+      shiftsCleared: 1,
+      score: { digits: 1, head: 1, text: '1' },
+      maxChain: 1,
+      submittedAt: 0,
+      daysPlayed: 1,
+    });
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await verifyWeeks(ctx, frozen);
+    expect(await openWeek(ctx, WEEK)).toEqual(stale);
+    expect(error).toHaveBeenCalled();
+    error.mockRestore();
   });
 });
 

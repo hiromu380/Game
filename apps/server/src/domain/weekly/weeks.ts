@@ -32,12 +32,36 @@ function baseConfigOf(weekId: string, candidate: number, fallback: boolean): Run
   return buildWeeklyConfig({ weekId, candidate, fallback });
 }
 
-/** 指定した週を用意する（すでにあれば何もしない）。作った・既存のレコードを返す */
+/**
+ * 指定した週を用意する（すでにあれば何もしない）。作った・既存のレコードを返す。
+ *
+ * 古い SIM_VERSION で作られた週（挙動を変えたデプロイの前に作った週）は、古いままだと提出がすべて
+ * バージョン違いになるので、新しいシミュレーションで作り直す（検証もやり直し、開くときに相場を入れ直す）。
+ * ただし、すでに誰かが本番を確定した週は条件を変えない（公平性のため。ログに残して運用で対応する。docs/ops/weekly.md）
+ */
 export async function ensureWeek(ctx: DomainContext, weekId: string): Promise<WeekRecord> {
   const existing = await ctx.repos.weeks.find(weekId);
-  if (existing) return existing;
+  if (existing && existing.simVersion === SIM_VERSION) return existing;
+  if (existing?.config && (await ctx.repos.bests.listAll(weekId)).length > 0) {
+    console.error(
+      `weekly week has committed runs on an old sim week=${weekId} sim=${existing.simVersion}`,
+    );
+    return existing;
+  }
+  const fresh = await newWeek(ctx, weekId);
+  if (existing) {
+    console.warn(`weekly board rebuilt for new sim week=${weekId} from=${existing.simVersion}`);
+    await ctx.repos.weeks.save(fresh);
+    return fresh;
+  }
+  await ctx.repos.weeks.createIfAbsent(fresh);
+  // 同時に作られた場合に備え、DB に入っている方を正とする
+  return (await ctx.repos.weeks.find(weekId)) ?? fresh;
+}
+
+async function newWeek(ctx: DomainContext, weekId: string): Promise<WeekRecord> {
   const secret = await deriveWeekSecret(ctx.config.masterSecret, weekId);
-  const record: WeekRecord = {
+  return {
     id: weekId,
     number: weekNumber(weekId, ctx.config.weeklyEpoch),
     candidate: 0,
@@ -51,9 +75,6 @@ export async function ensureWeek(ctx: DomainContext, weekId: string): Promise<We
     simVersion: SIM_VERSION,
     ...weekWindow(weekId, ctx.config.offsetMinutes),
   };
-  await ctx.repos.weeks.createIfAbsent(record);
-  // 同時に作られた場合に備え、DB に入っている方を正とする
-  return (await ctx.repos.weeks.find(weekId)) ?? record;
 }
 
 /** 候補を引き直す（上限に達したら代替設定にする） */
