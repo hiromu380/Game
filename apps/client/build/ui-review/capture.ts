@@ -22,6 +22,7 @@ import {
   useFloorPermit as spendFloorPermit,
   type RunState,
 } from '@chain-factory/sim';
+import { SCENE_IDS } from '../../src/story/playback';
 
 const phase = process.argv[2] === 'after' ? 'after' : process.argv[2] === 'wip' ? 'wip' : 'before';
 /** 撮る画像を絞る（ファイル名の正規表現。例: UI_REVIEW_ONLY='1280x800-ja-trial'） */
@@ -241,7 +242,11 @@ for (const viewport of VIEWPORTS) {
         muted: true,
         tutorialDone: true,
       };
-      const save = JSON.stringify(createSave(scene.run()));
+      // カットシーンは見たことにする（初回の自動再生が画面に重なると、本編の画面を比べられない）
+      const save = JSON.stringify({
+        ...createSave(scene.run()),
+        story: { seen: [...SCENE_IDS] },
+      });
       await page.addInitScript(
         ([s, v]: string[]) => {
           localStorage.setItem('chain-factory:settings', s!);
