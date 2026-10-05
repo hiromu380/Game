@@ -36,7 +36,7 @@ export function loadSave(storage = defaultStorage()): SaveData | null {
 
 /**
  * 保存する。省略した項目は保存済みのものを引き継ぐ
- * （デイリー・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
+ * （週替わり・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
  */
 export function saveGame(
   update: {

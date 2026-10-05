@@ -1,5 +1,5 @@
 /**
- * シフト表（ノルマ・予算・報酬）: 通常ラン・延長戦・デイリー
+ * シフト表（ノルマ・予算・報酬）: 通常ラン・延長戦・週替わり
  */
 import type { Balance } from './types';
 
@@ -31,7 +31,7 @@ export const OVERTIME: Balance['overtime'] = {
 };
 
 export const WEEKLY: Balance['weekly'] = {
-  // 仮の値。デイリーは全パーツが出るので、通常ランの1日目より少し高め
+  // 仮の値。週替わりは全パーツが出るので、通常ランの1日目より少し高め
   shifts: [
     { quota: 5, budget: 14, clearReward: 5, kind: 'normal' },
     { quota: 20, budget: 10, clearReward: 5, kind: 'normal' },

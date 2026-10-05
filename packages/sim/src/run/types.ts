@@ -134,7 +134,7 @@ export type RunError =
   | 'eventNotChosen'
   /** 選べるイベントがない・候補の番号が正しくない */
   | 'noEventToChoose'
-  /** 本番シードを外から渡す設定（デイリー）なのに渡されなかった */
+  /** 本番シードを外から渡す設定（週替わり）なのに渡されなかった */
   | 'seedRequired'
   /** その消耗品を持っていない */
   | 'noItem'

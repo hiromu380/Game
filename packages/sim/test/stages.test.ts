@@ -157,7 +157,7 @@ describe('ランへの組み込み', () => {
     expect(run.config.stages!.days[0]).toEqual(parseTemplate(STAGES.templates.tutorial!).floor);
   });
 
-  it('デイリーは、デイリーの ID から全員同じステージ（2日目相当の帯）', () => {
+  it('週替わりは、週の ID から全員同じステージ（2日目相当の帯）', () => {
     const a = buildWeeklyConfig({ weekId: '2026-10-05' });
     expect(a.stages!.days).toHaveLength(1);
     expect(buildWeeklyConfig({ weekId: '2026-10-05' }).stages).toEqual(a.stages);

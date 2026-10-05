@@ -4,7 +4,7 @@
  * ゲームのルール自体は @chain-factory/sim のラン進行関数に任せ、
  * ここでは「何を選択中か」「演出を再生中か」など UI の状態だけを扱う。
  *
- * 組み立て中の操作は操作ログ（RunOp）としても記録する。デイリーの本番ではこれをサーバーへ送り、
+ * 組み立て中の操作は操作ログ（RunOp）としても記録する。週替わりの本番ではこれをサーバーへ送り、
  * サーバーが同じ関数で再生して検証する（盤面や予算そのものは送らない）。
  */
 import type { OnlineErrorCode } from '../online/api';
@@ -71,9 +71,9 @@ export type GameError = RunError | `online.${OnlineErrorCode}`;
 export interface GameState {
   run: RunState;
   mode: PlayMode;
-  /** 前回の本番以降の操作ログ（デイリーの本番でサーバーへ送る） */
+  /** 前回の本番以降の操作ログ（週替わりの本番でサーバーへ送る） */
   pendingOps: RunOp[];
-  /** デイリーの本番でサーバーの応答を待っている */
+  /** 週替わりの本番でサーバーの応答を待っている */
   awaitingServer: boolean;
   selection: Selection;
   playback: Playback | null;
@@ -93,7 +93,7 @@ export interface GameState {
   meta: MetaProgress;
   /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
   unlocks: Unlock[];
-  /** 実績（解除済み・デイリーの参加日数。ランをまたいで残る） */
+  /** 実績（解除済み・週替わりの参加日数。ランをまたいで残る） */
   achievements: AchievementProgress;
   /**
    * 直前の操作の手応え（効果音用）。seq が変わるたびに1回鳴らす。
@@ -102,7 +102,7 @@ export interface GameState {
   feedback: { kind: FeedbackKind; seq: number } | null;
 }
 
-/** 「元に戻す」で戻す先（操作ログも同じ位置まで戻すので、デイリーの検証とずれない） */
+/** 「元に戻す」で戻す先（操作ログも同じ位置まで戻すので、週替わりの検証とずれない） */
 export interface UndoEntry {
   run: RunState;
   pendingOps: RunOp[];
@@ -130,13 +130,13 @@ export type FeedbackKind =
 
 export type GameAction =
   /**
-   * 新しいラン・デイリー・練習に入る / 通常のランに戻る。
+   * 新しいラン・週替わり・練習に入る / 通常のランに戻る。
    * ランの組み立て（相場・体験版の制限など）は画面側で行う（state/newRun.ts、online/weeklyRun.ts）
    */
   | { type: 'loadRun'; run: RunState; mode: PlayMode }
   /** 全シフトクリア後に延長戦へ進む */
   | { type: 'startOvertime' }
-  /** ランを諦める（通常ラン・練習だけ。デイリー本番はサーバーに記録が残るので諦められない） */
+  /** ランを諦める（通常ラン・練習だけ。週替わりの本番はサーバーに記録が残るので諦められない） */
   | { type: 'giveUp' }
   | { type: 'buy'; offerIndex: number }
   /** 消耗品を使う（ランダム配置権: 盤面のどこかに床が湧く） */
@@ -165,12 +165,12 @@ export type GameAction =
   | { type: 'chooseEvent'; index: number }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
-  /** デイリー: サーバーが検証して返した本番シードで確定する */
+  /** 週替わり: サーバーが検証して返した本番シードで確定する */
   | { type: 'serverCommitted'; seed: number }
   | { type: 'serverCommitFailed'; error: GameError }
   | { type: 'playbackFinished' }
   | { type: 'closePlayback' }
-  /** デイリーのランキングで自分の順位を受け取った（上位○% の実績） */
+  /** 確定した結果発表で自分の順位を受け取った（上位○% の実績） */
   | { type: 'weeklyRanked'; topPercent: number }
   /** 撮影モード: 盤面を差し替える（書き出した JSON の読み込み。ui/CapturePanel.tsx） */
   | { type: 'captureLoadBoard'; board: Board; floor?: FloorLayer }
@@ -229,12 +229,12 @@ function applyRunOp(
   return result.ok ? { ...next, pendingOps: [...state.pendingOps, op] } : next;
 }
 
-/** 本番の結果を再生に渡す（シードは通常・練習なら省略、デイリーはサーバーから） */
+/** 本番の結果を再生に渡す（シードは通常・練習なら省略、週替わりはサーバーから） */
 function beginCommit(state: GameState, seed?: number): GameState {
   const committed = commitShift(state.run, seed === undefined ? {} : { seed });
   if ('error' in committed) return { ...state, awaitingServer: false, error: committed.error };
   // 通常のランは、終わったらその場でメタ進行に反映する（再生中にリロードされても実績が残るように）。
-  // デイリー・練習は全員同じ条件で遊ぶモードなので、メタ進行には反映しない
+  // 週替わり・練習は全員同じ条件で遊ぶモードなので、メタ進行には反映しない
   const recorded =
     state.mode.kind === 'normal'
       ? applyRunToMeta(state.meta, committed.state)
@@ -421,7 +421,7 @@ function reduce(state: GameState, action: GameAction): GameState {
     }
 
     case 'returnAll': {
-      // 1マスずつ「手持ちに戻す」操作として記録する（デイリーのサーバー検証で同じように再生できるように）
+      // 1マスずつ「手持ちに戻す」操作として記録する（週替わりのサーバー検証で同じように再生できるように）
       const { board } = state.run;
       let next: GameState = { ...state, selection: null };
       let returned = 0;
@@ -437,7 +437,7 @@ function reduce(state: GameState, action: GameAction): GameState {
     }
 
     case 'movePart': {
-      // 「手持ちに戻す → 置く」の2つの操作として記録する（デイリーのサーバー検証で同じように再生できるように）
+      // 「手持ちに戻す → 置く」の2つの操作として記録する（週替わりのサーバー検証で同じように再生できるように）
       const { from, to } = action;
       const part = getPart(state.run.board, from.x, from.y);
       if (!part || (from.x === to.x && from.y === to.y)) return state;
@@ -497,7 +497,7 @@ function reduce(state: GameState, action: GameAction): GameState {
     }
 
     case 'startCommit':
-      // デイリー本番は本番シードをサーバーに求める（送信は画面側。応答で serverCommitted が来る）
+      // 週替わりの本番は本番シードをサーバーに求める（送信は画面側。応答で serverCommitted が来る）
       if (state.run.config.commitSeedMode === 'external') {
         return state.run.phase === 'building'
           ? { ...state, awaitingServer: true, error: null }
@@ -548,7 +548,7 @@ function reduce(state: GameState, action: GameAction): GameState {
 /**
  * 保存すべきラン。本番の再生中はすでに結果が確定しているので、
  * リロードでやり直せないよう確定後のランを保存する。
- * デイリー・練習は端末に保存しない（デイリーはサーバーから再開する）ので null
+ * 週替わり・練習は端末に保存しない（週替わりはサーバーから再開する）ので null
  */
 export function getPersistedRun(state: GameState): RunState | null {
   if (state.mode.kind !== 'normal') return null;

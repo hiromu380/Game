@@ -76,7 +76,7 @@ export function commitShift(
   if (state.phase !== 'building') return { error: 'notBuilding' };
   if (isEventPending(state)) return { error: 'eventNotChosen' };
 
-  // デイリーは本番シードをサーバーから受け取る（クライアントでは計算できない）
+  // 週替わりは本番シードをサーバーから受け取る（クライアントでは計算できない）
   let seed = options.seed;
   if (seed === undefined) {
     if (state.config.commitSeedMode === 'external') return { error: 'seedRequired' };

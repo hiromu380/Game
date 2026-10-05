@@ -21,7 +21,7 @@ Steamworks の「統計と実績」→「統計」で3つ作る。
 | ---------------- | --- | ------ | ---- | -------- | ------------------ |
 | STAT_RUNS        | INT | 0      | 0    | はい     | ラン回数           |
 | STAT_FULL_CLEARS | INT | 0      | 0    | はい     | 全シフトクリア回数 |
-| STAT_DAILY_DAYS  | INT | 0      | 0    | はい     | デイリー参加日数   |
+| STAT_DAILY_DAYS  | INT | 0      | 0    | はい     | 週替わり参加日数   |
 
 - 「クライアントから設定できる」（Set By: Client）にする（要確認: 項目名）。ゲームは `SetStatInt` → `StoreStats` で送る
 

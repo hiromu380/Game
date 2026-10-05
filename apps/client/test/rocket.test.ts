@@ -38,7 +38,7 @@ describe('ロケットの進み具合', () => {
     expect(getRocketProgress(failed).parts).toBe(3);
   });
 
-  it('デイリー（3シフト）は1シフトで3部品ずつ', () => {
+  it('週替わり（3シフト）は1シフトで3部品ずつ', () => {
     const run = createWeeklyRun('2026-10-01');
     expect(getRocketProgress(withCleared(run, 1)).parts).toBe(3);
     expect(getRocketProgress(withCleared(run, 3))).toMatchObject({ parts: 9, launched: true });

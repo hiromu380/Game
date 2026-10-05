@@ -215,7 +215,7 @@ describe('ショップの配置権', () => {
     expect(advance(replayed.state, 3).itemFloors ?? null).toBeNull();
   });
 
-  it('初回ガイドのランは1日目のショップに出ない。デイリーは設定で切り替えられる', () => {
+  it('初回ガイドのランは1日目のショップに出ない。週替わりは設定で切り替えられる', () => {
     for (let seed = 1; seed <= 50; seed++) {
       expect(offersPermit(createRun(seed, { tutorial: true }))).toBe(false);
     }

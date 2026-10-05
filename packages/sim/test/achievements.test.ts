@@ -164,7 +164,7 @@ describe('メタ進行の判定', () => {
   });
 });
 
-describe('デイリーの判定', () => {
+describe('週替わりの判定', () => {
   it('参加日数は同じ日を二重に数えない', () => {
     let progress = createInitialAchievements();
     progress = recordWeeklyParticipation(progress, '2026-10-01');

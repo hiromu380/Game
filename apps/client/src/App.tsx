@@ -102,7 +102,7 @@ import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
 import { WorkshopBackdrop } from './ui/WorkshopBackdrop';
 
-/** ゲーム画面の始め方（デイリー・練習はメニューで組み立てたランを渡す） */
+/** ゲーム画面の始め方（週替わり・練習はメニューで組み立てたランを渡す） */
 export interface GameStart {
   run: RunState;
   mode: PlayMode;
@@ -158,7 +158,7 @@ export function App({ start, onTitle }: Props) {
   const [capturePeakFirst, setCapturePeakFirst] = useState(false);
   /** 撮影モード: 共有カードの確認 */
   const [sharePreview, setSharePreview] = useState(false);
-  /** デイリーのメニュー（開いていなければ null） */
+  /** 週替わりのメニュー（開いていなければ null） */
   const [weeklyMenu, setWeeklyMenu] = useState<'menu' | 'ranking' | null>(null);
 
   const { settings, updateSettings } = useSettings();
@@ -198,8 +198,8 @@ export function App({ start, onTitle }: Props) {
     else if (guideStep && tutorialPart(guideStep)) setTab('inventory');
   }
 
-  // 状態が変わるたびに保存する。ランは通常モードのみ（デイリーはサーバーから再開する）。
-  // デイリー・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
+  // 状態が変わるたびに保存する。ランは通常モードのみ（週替わりはサーバーから再開する）。
+  // 週替わり・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
   const persistedRun = getPersistedRun(state);
   useEffect(() => {
     saveGame({

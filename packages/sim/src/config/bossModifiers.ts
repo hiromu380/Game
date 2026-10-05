@@ -54,7 +54,7 @@ export const BOSS_MODIFIERS: Record<BossModifierId, BossModifier> = {
 
 /** そのシフトで使う RuleSet（ボス修正込み） */
 export function getShiftRules(config: RunConfig, shiftIndex: number): RuleSet {
-  // ラン全体の修正（デイリーの特殊ルール）→ そのシフトのボス修正 の順に重ねる
+  // ラン全体の修正（週替わりの特殊ルール）→ そのシフトのボス修正 の順に重ねる
   let rules = config.rules;
   for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
     if (!entry) continue;

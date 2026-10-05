@@ -4,7 +4,7 @@
  * ラン開始時に balance/（＋メタ進行）から組み立てて RunState に保存する。
  * こうしておくと、
  * - balance/ を変更しても進行中のランの挙動は変わらない（セーブの互換性）
- * - フェーズ3の相場（価格）やデイリーの条件を、ここに差し込むだけで反映できる
+ * - フェーズ3の相場（価格）や週替わりの条件を、ここに差し込むだけで反映できる
  */
 import {
   BALANCE,
@@ -89,7 +89,7 @@ export interface RunConfig {
   /** ボス修正ルールの効果量（balance/ の boss の写し） */
   bossParams: Balance['boss'];
   starterKit: Partial<Record<PartId, number>>;
-  /** このランを作ったシミュレーションのバージョン（デイリーの提出で照合する） */
+  /** このランを作ったシミュレーションのバージョン（週替わりの提出で照合する） */
   simVersion: string;
   /**
    * 本番シードの決め方

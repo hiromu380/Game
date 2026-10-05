@@ -23,9 +23,9 @@ import {
 /** セーブに持つ実績の状態（Steam がオフラインでも、あとで送り直せるように解除済みを覚えておく） */
 export interface AchievementProgress {
   unlocked: AchievementId[];
-  /** デイリーに参加した日数（本番を1回以上確定した日） */
+  /** 週替わりに参加した日数（本番を1回以上確定した日） */
   dailyDays: number;
-  /** 最後に数えたデイリー（同じ日を二重に数えないため） */
+  /** 最後に数えた週替わり（同じ日を二重に数えないため） */
   lastDailyId: string | null;
 }
 

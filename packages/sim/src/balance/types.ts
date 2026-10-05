@@ -122,7 +122,7 @@ export interface StageBalance {
   overtimeBand: string[];
   /** 延長戦の日が進むごとに、×2床を×3床に置き換える枚数（延長戦の1日目から数える） */
   overtimeUpgradesPerDay: number;
-  /** デイリー（1日分・3シフト）で抽選するテンプレート */
+  /** 週替わり（1日分・3シフト）で抽選するテンプレート */
   weeklyBand: string[];
   /** 週替わりの盤面が自動検証に通らなかったときの代替の帯（やさしいステージ。特殊ルールなし） */
   weeklyFallbackBand: string[];

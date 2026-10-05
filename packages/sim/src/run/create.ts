@@ -12,7 +12,7 @@ import type { RunState } from './types';
 
 export interface CreateRunOptions {
   balance?: Balance;
-  /** メタ進行による変更（デイリーチャレンジでは渡さない） */
+  /** メタ進行による変更（週替わりチャレンジでは渡さない） */
   meta?: MetaModifiers;
   /** 相場価格（オンライン時に取得したもの。ラン開始時に RunConfig に固定する） */
   prices?: Partial<Record<PartId, number>>;

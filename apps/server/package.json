@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "API サーバー（Hono + Cloudflare Workers + D1）。デイリーチャレンジ・ランキング・相場",
+  "description": "API サーバー（Hono + Cloudflare Workers + D1）。週替わりチャレンジ・ランキング・相場",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

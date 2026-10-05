@@ -65,7 +65,7 @@ function TargetNote({ run, id }: { run: RunState; id: BossModifierId }) {
 export function BossNotice({ run }: { run: RunState }) {
   const { t } = useI18n();
   const boss = findBossToShow(run);
-  // デイリーの特殊ルール（全シフトにかかる）
+  // 週替わりの特殊ルール（全シフトにかかる）
   const special = run.config.globalModifier;
   if (!boss && !special) return null;
 

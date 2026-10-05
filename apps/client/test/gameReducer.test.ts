@@ -361,7 +361,7 @@ describe('元に戻す', () => {
     expect(state.pendingOps).toEqual([]);
     expect(canUndo(state)).toBe(false);
     expect(apply(state, { type: 'undo' })).toBe(state);
-    // 取り消したあとの操作ログを再生すると同じ状態になる（デイリーの検証とずれない）
+    // 取り消したあとの操作ログを再生すると同じ状態になる（週替わりの検証とずれない）
     const mid = apply(cleared, { type: 'undo' }, { type: 'undo' });
     const replayed = replayOps(createRun(1), mid.pendingOps);
     expect(replayed.ok && replayed.state).toEqual(mid.run);

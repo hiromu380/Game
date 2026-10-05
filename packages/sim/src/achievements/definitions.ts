@@ -5,7 +5,7 @@
  * （pnpm --filter @chain-factory/sim achievements:export → docs/ops/steam-achievements.md の手順で登録）。
  * 名前・説明は i18n（apps/client/src/i18n の achievement.<ID>.name / .desc）に置く。
  *
- * デイリー系はサーバーで検証済みの結果（本番の確定・ランキング）を受け取ってから判定する。
+ * 週替わり系はサーバーで検証済みの結果（本番の確定・ランキング）を受け取ってから判定する。
  */
 import type { BossModifierId } from '../balance';
 

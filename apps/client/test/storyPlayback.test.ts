@@ -46,7 +46,7 @@ describe('自動で再生するシーン', () => {
     expect(autoPlayScene({ kind: 'runFailed' }, ctx)).toBe('gameOver');
   });
 
-  it('デイリー・練習では出さない', () => {
+  it('週替わり・練習では出さない', () => {
     expect(autoPlayScene({ kind: 'newRun' }, { ...ctx, mode: 'weekly' })).toBeNull();
     expect(autoPlayScene({ kind: 'runFailed' }, { ...ctx, mode: 'practice' })).toBeNull();
   });

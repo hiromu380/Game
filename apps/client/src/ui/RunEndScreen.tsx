@@ -32,9 +32,9 @@ interface Props {
   onRetry: () => void;
   /** 延長戦へ進む（全シフトクリア後のみ） */
   onOvertime: () => void;
-  /** デイリー・練習: ランキングを開く */
+  /** 週替わり・練習: ランキングを開く */
   onViewRanking: () => void;
-  /** デイリー・練習: 通常モードに戻る */
+  /** 週替わり・練習: 通常モードに戻る */
   onBackToNormal: () => void;
 }
 

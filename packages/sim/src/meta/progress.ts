@@ -2,7 +2,7 @@
  * メタ進行の更新: 終わったランの実績を記録し、条件を満たした解放を行う（純粋関数）
  *
  * 解放条件と解放内容は balance/ の meta に置く。
- * デイリーチャレンジ（フェーズ3）ではメタ進行を適用しないので、ここで作る MetaModifiers を渡さない。
+ * 週替わりチャレンジ（フェーズ3）ではメタ進行を適用しないので、ここで作る MetaModifiers を渡さない。
  */
 import { BALANCE, type Balance, type MetaCondition } from '../balance';
 import type { MetaModifiers } from '../config/runConfig';
