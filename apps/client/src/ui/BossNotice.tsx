@@ -1,5 +1,8 @@
 /**
  * ボスシフトの表示: 夜は「適用中のルール」、同じ日の朝・昼は「夜シフトの予告」を出す
+ *
+ * 常に出ている説明なので短くする（CLAUDE.md「常に出す説明は1行」）: 予告と週替わりの特殊ルールは、
+ * 見出し（送り主・名前）と効果だけ。物語の一言はそのシフトの間だけ出す
  */
 import type { BossModifierId, BossPlanEntry, PartId, RunState } from '@chain-factory/sim';
 import { useI18n, type TranslateFn } from '../i18n';
@@ -72,20 +75,22 @@ export function BossNotice({ run }: { run: RunState }) {
   return (
     <>
       {special && (
-        <div className="boss-notice boss-notice--now">
+        <div className="boss-notice boss-notice--now" title={t(`boss.${special.id}.story`)}>
           <img className="boss-notice__icon" src={BOSS_ICONS[special.id]} alt="" />
           <span className="boss-notice__label">{t('weekly.specialRule')}</span>
           <span className="boss-notice__period">{t('rule.period.allShifts')}</span>
           <strong>
             {t(`boss.${special.id}.sender`)} / {t(`boss.${special.id}.name`)}
           </strong>
-          <span className="boss-notice__story">{t(`boss.${special.id}.story`)}</span>
           <span className="boss-notice__desc">{describeBoss(t, run, special)}</span>
           <TargetNote run={run} id={special.id} />
         </div>
       )}
       {boss && (
-        <div className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}>
+        <div
+          className={`boss-notice ${boss.isNow ? 'boss-notice--now' : ''}`}
+          title={boss.isNow ? undefined : t(`boss.${boss.entry.id}.story`)}
+        >
           <img className="boss-notice__icon" src={BOSS_ICONS[boss.entry.id]} alt="" />
           <span className="boss-notice__label">
             {boss.isNow ? t('boss.now') : t('boss.upcoming')}
@@ -96,7 +101,10 @@ export function BossNotice({ run }: { run: RunState }) {
           <strong>
             {t(`boss.${boss.entry.id}.sender`)} / {t(`boss.${boss.entry.id}.name`)}
           </strong>
-          <span className="boss-notice__story">{t(`boss.${boss.entry.id}.story`)}</span>
+          {/* 物語の一言は、そのシフト（夜）にだけ出す。予告は効果だけを短く（全文はマウスを載せると出る） */}
+          {boss.isNow && (
+            <span className="boss-notice__story">{t(`boss.${boss.entry.id}.story`)}</span>
+          )}
           <span className="boss-notice__desc">{describeBoss(t, run, boss.entry)}</span>
           <TargetNote run={run} id={boss.entry.id} />
         </div>

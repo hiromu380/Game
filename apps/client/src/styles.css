@@ -489,6 +489,15 @@ button:disabled {
     display: none;
   }
 }
+/* 結果の数字は2組ずつ横に並べ、パネルの高さを抑える（盤面の結果が見えるように） */
+.playback-panel .stats {
+  grid-template-columns: repeat(2, auto auto);
+  column-gap: 14px;
+  margin-bottom: 8px;
+}
+.playback-panel {
+  padding: 10px 16px;
+}
 .playback-panel h2 {
   margin: 0 0 4px;
   font-size: 1rem;
@@ -1405,6 +1414,10 @@ a.button.button--primary {
     padding: 4px 8px;
     font-size: 0.8rem;
   }
+  /* 長いボタン名はアイコンだけにする（名前は aria-label で読み上げる） */
+  .app-header__label {
+    display: none;
+  }
   .mode-badge {
     font-size: 0.7rem;
     padding: 2px 8px;
@@ -1517,6 +1530,16 @@ a.button.button--primary {
 }
 .app--compact .controls button {
   padding: 8px 6px;
+  white-space: nowrap;
+}
+/* 再生中は押せない「試運転・本番」を畳み、再生速度だけを1行で出す */
+.app--compact .controls.is-playing .button-row {
+  display: none;
+}
+.app--compact .controls.is-playing .speed {
+  flex: 1;
+  justify-content: center;
+  margin: 0;
 }
 .app--compact .speed {
   flex-shrink: 0;

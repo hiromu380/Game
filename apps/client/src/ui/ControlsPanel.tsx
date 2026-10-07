@@ -42,7 +42,7 @@ export function ControlsPanel({
 }: Props) {
   const { t, formatCompact } = useI18n();
   return (
-    <section className="panel controls">
+    <section className={`panel controls ${playing ? 'is-playing' : ''}`}>
       <div className="button-row">
         <button
           className={`button--secondary ${guide === 'trial' ? 'is-guided' : ''}`}

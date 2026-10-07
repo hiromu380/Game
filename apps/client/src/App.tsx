@@ -512,9 +512,14 @@ export function App({ start, onTitle }: Props) {
             </button>
           </>
         )}
-        <button className="button--ghost" disabled={playing} onClick={() => setWeeklyMenu('menu')}>
+        <button
+          className="button--ghost"
+          disabled={playing}
+          onClick={() => setWeeklyMenu('menu')}
+          aria-label={t('online.weeklyButton')}
+        >
           <UiIcon name="weekly" />
-          {t('online.weeklyButton')}
+          <span className="app-header__label">{t('online.weeklyButton')}</span>
         </button>
         {DEBUG_AVAILABLE && (
           <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
@@ -615,12 +620,6 @@ export function App({ start, onTitle }: Props) {
       <BossNotice run={run} />
     </>
   );
-  const runInfo = (
-    <>
-      {hud}
-      {notices}
-    </>
-  );
 
   // ラン終了（全シフト達成 or ノルマ未達）
   if (!playing && run.phase !== 'building') {
@@ -709,7 +708,8 @@ export function App({ start, onTitle }: Props) {
       )}
       {header}
       <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
-      {!fit && runInfo}
+      {/* 縦長の画面（スマホ）: 盤面の上には計器だけを置き、説明は操作ボタンの下へ（盤面を画面の上の方に出す） */}
+      {!fit && hud}
       <main className="layout">
         <div className="layout__board">
           <PixiBoard
@@ -767,7 +767,7 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
-          {fit && <div className="layout__info">{notices}</div>}
+          <div className="layout__info">{notices}</div>
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
