@@ -69,6 +69,7 @@ import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
+import { commitWarnings } from './state/commitWarnings';
 import { SellZone } from './ui/SellZone';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RocketGoal } from './ui/RocketProgress';
@@ -659,6 +660,7 @@ export function App({ start, onTitle }: Props) {
       )}
       {commitConfirm && !playing && (
         <CommitConfirm
+          warnings={commitWarnings(run, trial, getCurrentShift(run).quota)}
           onConfirm={() => startPlayback('startCommit')}
           onCancel={() => setCommitConfirm(false)}
         />

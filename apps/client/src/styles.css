@@ -1721,6 +1721,32 @@ a.button.button--primary {
   overflow-y: auto;
 }
 /* 本番の確認（ui/CommitConfirm.tsx） */
+.commit-confirm__warnings {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: grid;
+  gap: 6px;
+}
+.commit-confirm__warning {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.commit-confirm__warning > span {
+  color: var(--accent);
+  font-weight: bold;
+}
+.commit-confirm__warning.is-noSwitch,
+.commit-confirm__warning.is-noDock {
+  border-left-color: var(--missed);
+}
 .commit-confirm .button-row {
   margin-top: 12px;
 }
