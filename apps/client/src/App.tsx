@@ -680,7 +680,8 @@ export function App({ start, onTitle }: Props) {
           peakFirst={capturePeakFirst}
           onPeakFirstChange={setCapturePeakFirst}
           onCommit={(seed) => {
-            setLiveScore(null);
+            // 通常の本番と同じく、画面上部の出荷量を 0 から数え上げる
+            setLiveScore('0');
             dispatch({ type: 'captureCommit', seed });
           }}
           onPreviewShare={() => setSharePreview(true)}
