@@ -3,7 +3,7 @@
  * ゲーム状態から描く（装飾だけなのでセーブデータは増やさない）。
  */
 import { activeEvent, getDayAndPeriod, type MetaProgress, type RunState } from '@chain-factory/sim';
-import { BACKDROP_ASSETS, BOLT_BODY_ASSETS, ROCKET_ASSETS } from '../assets/manifest';
+import { BACKDROP_ASSETS, BOLT_BODY_ASSETS, ROCKET_ASSETS, EVENT_ICONS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import { getRocketProgress } from '../state/rocket';
 
@@ -62,6 +62,7 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       </div>
       {event && (
         <div className={`workshop__event-prop workshop__event-prop--${event}`}>
+          <img src={EVENT_ICONS[event]} alt="" width={26} height={26} />
           <span>{t('event.today')}</span>
           <strong>{t(`event.${event}.name`)}</strong>
         </div>

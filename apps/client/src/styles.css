@@ -1857,6 +1857,14 @@ a.button.button--primary {
   padding: 6px 0;
   border-bottom: 1px solid var(--panel-border);
 }
+/* パーツの絵は、盤面のマスのような暗い台に載せて見せる */
+.catalog__item .part-icon {
+  flex: none;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+}
 .catalog__item.is-locked {
   opacity: 0.5;
 }
@@ -2513,6 +2521,12 @@ a.button.button--primary {
   color: var(--text);
   transform: rotate(1deg);
   box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
+}
+.workshop__event-prop img {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  translate: 0 -50%;
 }
 .workshop__event-prop span {
   color: var(--muted);

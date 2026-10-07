@@ -48,7 +48,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
             const rarity = BALANCE.parts[partId].rarity ?? 'common';
             return (
               <li key={partId} className="catalog__item">
-                <PartIcon partId={partId} size={36} />
+                <PartIcon partId={partId} size={52} />
                 <div className="catalog__text">
                   <strong>{t(`part.${partId}.name`)}</strong>{' '}
                   <span className={`catalog__rarity catalog__rarity--${rarity}`}>
@@ -67,7 +67,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
             const unlock = unlockOf(partId);
             return (
               <li key={partId} className="catalog__item is-locked">
-                <PartIcon partId={partId} size={36} />
+                <PartIcon partId={partId} size={52} />
                 <div className="catalog__text">
                   <strong>{t(`part.${partId}.name`)}</strong>{' '}
                   <span className="catalog__rarity">{t('catalog.locked')}</span>
