@@ -66,6 +66,21 @@ function day3(): RunState {
   return run;
 }
 
+/** 2日目の朝（今日の出来事を選ぶところ） */
+function day2Event(): RunState {
+  const original = createRun(18);
+  let run: RunState = {
+    ...original,
+    config: { ...original.config, shifts: original.config.shifts.map((s) => ({ ...s, quota: 0 })) },
+  };
+  while (run.shiftIndex < 3) {
+    const committed = commitShift(run);
+    if ('error' in committed) throw new Error(committed.error);
+    run = committed.state;
+  }
+  return { ...run, config: { ...run.config, shifts: original.config.shifts } };
+}
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -202,6 +217,7 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'day3-floors', run: day3 },
+  { name: 'day2-event', run: day2Event },
 ];
 
 // ---- 撮影 ----

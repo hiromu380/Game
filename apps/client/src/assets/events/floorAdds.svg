@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: floorAdds（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <rect x="14" y="26" width="18" height="18" rx="2" fill="#43a047" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M23 30 V40 M18 35 H28" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="32" y="18" width="18" height="18" rx="2" fill="#43a047" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M41 22 V32 M36 27 H46" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

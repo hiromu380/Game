@@ -2,10 +2,11 @@
  * ボスのアイコン（64×64・警告の標識風）と UI アイコン（24×24・線2px）
  *
  * - ボス: 黄色の標識に赤い縁。中のピクトグラムでルールを表す（夜のシフトの予告・今日の特殊ルールに出す）
+ * - 今日の出来事: 緑の角丸の札（良い知らせ。ボスの丸い警告の標識と形と色で見分ける）に、出来事のピクトグラム
  * - UI: 暗いボタンの上に置くので、線は文字色（UI_COLORS.text）。アクセントに黄・赤を少しだけ使う
  *   24px で意味がわかるよう、線の数を減らす（docs/art-style.md「読みやすさの基準」）
  */
-import type { BossModifierId } from '@chain-factory/sim';
+import type { BossModifierId, DayEventId } from '@chain-factory/sim';
 import {
   BOARD_COLORS as B,
   INK,
@@ -56,6 +57,85 @@ const BOSS: Record<BossModifierId, string[]> = {
     path('M18 28 L32 34 L46 28 M32 34 V50', line(O, 2)),
     path('M18 28 L12 22 M46 28 L52 22', line(O, 3)),
     path('M27 39 h10', line(U.missed, 3.5)),
+  ],
+};
+
+// ---- 今日の出来事 ----
+
+/** 札の土台（緑の角丸の板・白い縁）。ボスの丸い標識と形で見分ける */
+const card = () => [
+  rect(5, 5, 54, 54, { fill: B.floorAdd, stroke: O, 'stroke-width': 3 }, 12),
+  rect(10, 10, 44, 44, { fill: '#e8f5e9', stroke: O, 'stroke-width': 2 }, 8),
+];
+
+/** 硬貨（内側の輪と光。マイナス記号に見えないよう、横線は入れない） */
+const coin = (x: number, y: number, r = 7) => [
+  circle(x, y, r, outlined(M.coin, 2.5)),
+  circle(x, y, r * 0.55, { fill: 'none', stroke: M.cardboardDark, 'stroke-width': 1.5 }),
+  path(
+    `M${x - r * 0.5} ${y - r * 0.2} a${r * 0.5} ${r * 0.5} 0 0 1 ${r * 0.4} ${-r * 0.35}`,
+    line(INK.white, 1.5),
+  ),
+];
+
+const EVENTS: Record<DayEventId, string[]> = {
+  // 差し入れ: 紙袋と、こぼれる硬貨
+  supplies: [
+    path('M19 26 H41 L39 48 H21 Z', outlined(M.cardboard, 3)),
+    path('M25 26 v-4 a5 5 0 0 1 10 0 v4', line(O, 2.5)),
+    ...coin(43, 42, 6),
+  ],
+  // 試供品: リボンのかかった箱
+  sample: [
+    rect(18, 28, 28, 20, outlined(U.primary, 3), 2),
+    rect(16, 23, 32, 7, outlined(U.primary, 2.5), 2),
+    path('M32 23 V48', line(M.coin, 4)),
+    path('M32 23 q-8 -8 -10 -1 q2 3 10 1 q8 2 10 -1 q-2 -7 -10 1', outlined(M.coin, 2)),
+  ],
+  // 特売日: 値札と「%」
+  sale: [
+    path('M16 30 L30 16 H47 V33 L33 47 Z', outlined(U.accent, 3)),
+    circle(41, 22, 2.5, { fill: O }),
+    path('M25 38 L37 26', line(O, 2.5)),
+    circle(26, 29, 2.5, outlined(INK.white, 1.5)),
+    circle(36, 35, 2.5, outlined(INK.white, 1.5)),
+  ],
+  // 在庫整理: 段ボールと、上向きの矢印（高く買い取る）
+  clearance: [
+    path('M14 32 L27 27 L40 32 V46 L27 51 L14 46 Z', outlined(M.cardboard, 3)),
+    path('M14 32 L27 37 L40 32 M27 37 V51', line(O, 2)),
+    path('M46 40 V16 M40 22 l6 -6 l6 6', line(B.floorAdd, 4)),
+  ],
+  // 残業手当: 三日月と硬貨
+  overtimePay: [
+    path('M30 15 a12 12 0 1 0 12 17 a10 10 0 1 1 -12 -17 Z', outlined(M.sun, 3)),
+    ...coin(41, 41, 8),
+  ],
+  // 腕まくり: 下がるノルマの棒と、下向きの矢印
+  rollUpSleeves: [
+    rect(16, 20, 9, 26, outlined(U.missed, 2.5), 2),
+    rect(28, 30, 9, 16, outlined(U.accent, 2.5), 2),
+    path('M45 16 V40 M39 34 l6 6 l6 -6', line(B.floorAdd, 4)),
+  ],
+  // 床の出来事（真ん中）: 盤面の真ん中に ×2 床
+  floorCenter: [
+    rect(16, 16, 32, 32, { fill: INK.steelDark, stroke: O, 'stroke-width': 2.5 }, 3),
+    path('M26.7 16 V48 M37.3 16 V48 M16 26.7 H48 M16 37.3 H48', line(O, 1.2)),
+    rect(27.5, 27.5, 9, 9, { fill: B.floorDouble, stroke: O, 'stroke-width': 1.5 }, 1),
+  ],
+  // 床の修理: スパナ
+  floorRepair: [
+    path(
+      'M20 44 L36 28 a8 8 0 0 1 10 -10 l-5 5 l1 4 l4 1 l5 -5 a8 8 0 0 1 -10 10 L25 49 a3.5 3.5 0 0 1 -5 -5 Z',
+      outlined(INK.steel, 2.5),
+    ),
+  ],
+  // 加算床が湧く: 緑の床と「+」を2枚
+  floorAdds: [
+    rect(14, 26, 18, 18, outlined(B.floorAdd, 2.5), 2),
+    path('M23 30 V40 M18 35 H28', line(INK.white, 2.5)),
+    rect(32, 18, 18, 18, outlined(B.floorAdd, 2.5), 2),
+    path('M41 22 V32 M36 27 H46', line(INK.white, 2.5)),
   ],
 };
 
@@ -159,6 +239,9 @@ export function iconFiles(): Record<string, string> {
   const files: Record<string, string> = {};
   for (const [id, body] of Object.entries(BOSS)) {
     files[`src/assets/boss/${id}.svg`] = svg(`ボス: ${id}`, [...sign(), ...body]);
+  }
+  for (const [id, body] of Object.entries(EVENTS)) {
+    files[`src/assets/events/${id}.svg`] = svg(`今日の出来事: ${id}`, [...card(), ...body]);
   }
   for (const [name, body] of Object.entries(UI)) {
     files[`src/assets/ui/${name}.svg`] = svg(`UI アイコン: ${name}`, body, '0 0 24 24');

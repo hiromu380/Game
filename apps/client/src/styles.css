@@ -2380,11 +2380,21 @@ a.button.button--primary {
 }
 .day-event__choice {
   display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+}
+.day-event__icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+.day-event__text {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: 10px 14px;
-  text-align: left;
 }
 .day-event__choice strong {
   color: var(--accent);
@@ -2869,4 +2879,18 @@ a.button.button--primary {
   color: var(--muted);
   font-size: 0.85rem;
   pointer-events: none;
+}
+
+/* ダイアログの右上の閉じるボタン（どのページからでも閉じられるように） */
+.modal__body {
+  position: relative;
+}
+.modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.1rem;
+  line-height: 1;
 }

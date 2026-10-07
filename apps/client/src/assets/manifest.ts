@@ -5,7 +5,13 @@
  * parts/ 以下のファイルを置き換える（または src の import 先を変える）だけでよい。
  * 現在は仮素材として SVG のピクトグラムを使っている（art/ のスクリプトで生成したものを含む）。
  */
-import { PART_IDS, type AchievementId, type BossModifierId, type PartId } from '@chain-factory/sim';
+import {
+  PART_IDS,
+  type AchievementId,
+  type BossModifierId,
+  type DayEventId,
+  type PartId,
+} from '@chain-factory/sim';
 import logoDarkSrc from './logo/logo-dark-bg.svg';
 import logoLightSrc from './logo/logo-light-bg.svg';
 import boltFailSrc from './mascot/bolt-fail.svg';
@@ -114,6 +120,9 @@ const boardFiles = byName(
 const bossFiles = byName(
   import.meta.glob<string>('./boss/*.svg', { eager: true, import: 'default' }),
 );
+const eventFiles = byName(
+  import.meta.glob<string>('./events/*.svg', { eager: true, import: 'default' }),
+);
 const uiFiles = byName(import.meta.glob<string>('./ui/*.svg', { eager: true, import: 'default' }));
 
 /** 盤面の素材（床3種・床タイル・使用不可マス・枠の角と辺。art/board.ts で生成） */
@@ -134,6 +143,9 @@ export const BOARD_ASSETS = {
 
 /** ボスのアイコン（art/icons.ts で生成） */
 export const BOSS_ICONS = bossFiles as Record<BossModifierId, string>;
+
+/** 今日の出来事のアイコン（art/icons.ts で生成） */
+export const EVENT_ICONS = eventFiles as Record<DayEventId, string>;
 
 /** UI アイコン（24×24。art/icons.ts で生成） */
 export const UI_ICON_NAMES = [

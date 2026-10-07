@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: floorCenter（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <rect x="16" y="16" width="32" height="32" rx="3" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5"/>
+  <path d="M26.7 16 V48 M37.3 16 V48 M16 26.7 H48 M16 37.3 H48" fill="none" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="27.5" y="27.5" width="9" height="9" rx="1" fill="#ffb300" stroke="#1b1f27" stroke-width="1.5"/>
+</svg>

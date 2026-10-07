@@ -71,6 +71,8 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
       addControlHandler((action) => {
         const { options: o, cursor: c } = ref.current;
         if (!o.active) return false;
+        // ダイアログ（ショップの一覧・確認など）が開いていれば、ダイアログの操作（Esc で閉じる等）にまわす
+        if (document.querySelector('.modal')) return false;
 
         if (o.playing) {
           if (action === 'confirm' && o.playbackFinished) {
