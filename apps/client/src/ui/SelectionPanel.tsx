@@ -16,6 +16,11 @@ interface Props {
   selection: Selection;
   /** 何も選んでいないときはパネルごと出さない（狭い画面で場所を空けるため） */
   hideWhenEmpty?: boolean;
+  /**
+   * 1行に詰めて出す（手持ち・ショップをタブで切り替える画面。下の一覧を画面の外へ押し出さないように）。
+   * 効果の説明はマウスを載せると出る
+   */
+  compact?: boolean;
   disabled: boolean;
   onRotate: () => void;
   onReturn: () => void;
@@ -26,6 +31,7 @@ export function SelectionPanel({
   run,
   selection,
   hideWhenEmpty = false,
+  compact = false,
   disabled,
   onRotate,
   onReturn,
@@ -47,6 +53,49 @@ export function SelectionPanel({
   const refund = getRefund(run, part.id);
   const sellable = run.config.economy.prices[part.id] > 0;
 
+  const description = describePart(t, part.id, getCurrentRules(run));
+
+  if (compact) {
+    return (
+      <section className="panel selection--compact" aria-label={t('selection.title')}>
+        <div className="selection__part" title={description}>
+          <PartIcon partId={part.id} size={32} />
+          <span className="selection__name">
+            {t(`part.${part.id}.name`)}（{t(`dir.${part.dir}`)}）
+          </span>
+        </div>
+        <div className="selection__actions">
+          <button
+            className="button--small"
+            disabled={disabled}
+            onClick={onRotate}
+            title={t('selection.rotate')}
+          >
+            <UiIcon name="rotate" size={16} />
+            {t('selection.rotateShort')}
+          </button>
+          <button
+            className="button--small"
+            disabled={disabled}
+            onClick={onReturn}
+            title={t('selection.returnToInventory')}
+          >
+            <UiIcon name="return" size={16} />
+            {t('selection.returnShort')}
+          </button>
+          <button
+            className="button--small button--ghost"
+            disabled={disabled || !sellable}
+            onClick={onSell}
+          >
+            {sellable && <UiIcon name="sell" size={16} />}
+            {sellable ? t('selection.sellShort', { refund }) : t('selection.cannotSell')}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="panel">
       <h2 className="panel__title">{t('selection.title')}</h2>
@@ -56,7 +105,7 @@ export function SelectionPanel({
           <div className="selection__name">
             {t(`part.${part.id}.name`)}（{t(`dir.${part.dir}`)}）
           </div>
-          <div className="panel__hint">{describePart(t, part.id, getCurrentRules(run))}</div>
+          <div className="panel__hint">{description}</div>
         </div>
       </div>
       <div className="button-row">

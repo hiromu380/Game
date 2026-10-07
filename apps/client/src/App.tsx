@@ -56,6 +56,7 @@ import {
   canUndo,
   createGameState,
   gameReducer,
+  isTrialResultOpen,
   getPersistedRun,
   type PlayMode,
 } from './state/gameReducer';
@@ -147,7 +148,6 @@ export function App({ start, onTitle }: Props) {
   /** ショップ・手持ちをタブで切り替えるか（狭い画面・高さの低い画面） */
   const tabbed = compact || short;
   /** 狭い画面で表示中のタブ */
-  const [tab, setTab] = useState<'shop' | 'inventory'>('shop');
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   /** 再生中の出荷量の途中経過 */
   const [liveScore, setLiveScore] = useState<string | null>(null);
@@ -164,8 +164,19 @@ export function App({ start, onTitle }: Props) {
 
   const { settings, updateSettings } = useSettings();
   const { run, selection, playback, error, mode } = state;
+  // タブ表示の一覧: シフトの始めは、手持ちにパーツがあれば手持ち（まず置く）、なければショップ（まず買う）
+  const firstTab = (r: RunState): 'shop' | 'inventory' =>
+    Object.values(r.inventory).some((count) => (count ?? 0) > 0) ? 'inventory' : 'shop';
+  const [tab, setTab] = useState<'shop' | 'inventory'>(() => firstTab(run));
+  const [tabShift, setTabShift] = useState(`${run.seed}:${run.shiftIndex}`);
+  if (tabShift !== `${run.seed}:${run.shiftIndex}`) {
+    setTabShift(`${run.seed}:${run.shiftIndex}`);
+    setTab(firstTab(run));
+  }
   const previousShift = useRef(run.shiftIndex);
-  const playing = playback !== null || state.awaitingServer;
+  // 試運転の結果を見終わったところは「再生中」として扱わない（組み立ての操作をすると結果のパネルが閉じる）
+  const trialResultOpen = isTrialResultOpen(state);
+  const playing = (playback !== null && !trialResultOpen) || state.awaitingServer;
 
   // 初回ガイド（ガイド用のランの1シフト目。進み方は state/tutorial.ts）。ランを始め直したら最初から
   const [tutorial, setTutorial] = useState<TutorialState>(() => startTutorial(run));
@@ -589,6 +600,7 @@ export function App({ start, onTitle }: Props) {
       run={run}
       selection={selection}
       hideWhenEmpty={tabbed}
+      compact={tabbed}
       disabled={playing}
       onRotate={() => dispatch({ type: 'rotate' })}
       onReturn={() => dispatch({ type: 'returnSelected' })}
@@ -599,7 +611,8 @@ export function App({ start, onTitle }: Props) {
   // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
   const trial = trialStatus(state.trials, run);
-  const hud = <Hud run={run} liveScore={liveScore} trial={trial} />;
+  // 結果のパネルを閉じたら、出荷量の途中経過ではなく直近の試運転の結果を出す（操作で閉じた場合も含む）
+  const hud = <Hud run={run} liveScore={playback ? liveScore : null} trial={trial} />;
   const notices = (
     <>
       {tutorialOn ? (
@@ -753,7 +766,8 @@ export function App({ start, onTitle }: Props) {
             compact={compact}
             inputMode={inputMode}
             speed={speed}
-            next={nextStep(run, selection, trial, getCurrentShift(run).quota)}
+            // 初回ガイドが出ている間は、ガイドの指示と食い違わないよう1行の案内を出さない
+            next={tutorialOn ? null : nextStep(run, selection, trial, getCurrentShift(run).quota)}
             canUndo={canUndo(state)}
             onUndo={() => dispatch({ type: 'undo' })}
             onTrial={() => startPlayback('startTrial')}

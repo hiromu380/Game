@@ -283,13 +283,25 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 /** 元に戻せる操作があるか */
+/** 試運転の再生が終わり、結果のパネルを出しているところ（組み立ての操作で閉じられる） */
+export function isTrialResultOpen(state: GameState): boolean {
+  return state.playback?.mode === 'trial' && state.playback.finished && !state.awaitingServer;
+}
+
 export function canUndo(state: GameState): boolean {
-  return state.undo.length > 0 && !state.playback && !state.awaitingServer;
+  return (
+    state.undo.length > 0 && (!state.playback || isTrialResultOpen(state)) && !state.awaitingServer
+  );
 }
 
 function reduce(state: GameState, action: GameAction): GameState {
   // 演出の再生中・サーバーの応答待ちは、再生・応答に関する操作以外を受け付けない
   const busyAllowed = ['playbackFinished', 'closePlayback', 'loadRun', 'weeklyRanked'];
+  // 試運転の結果を見終わった後は、組み立ての操作（盤面を押す・パーツを選ぶ・もう一度試運転など）で
+  // 結果のパネルを閉じて、そのまま操作を続ける（試運転を繰り返すたびに「配置に戻る」を押さなくてよい）
+  if (isTrialResultOpen(state) && !busyAllowed.includes(action.type)) {
+    state = { ...state, playback: null };
+  }
   if (state.playback && !busyAllowed.includes(action.type)) return state;
   if (
     state.awaitingServer &&

@@ -5,6 +5,7 @@ import {
   createGameState,
   gameReducer,
   getPersistedRun,
+  isTrialResultOpen,
   type GameAction,
   type GameState,
 } from '../src/state/gameReducer';
@@ -36,6 +37,36 @@ describe('画面の状態遷移', () => {
     const before = state;
     state = apply(state, { type: 'selectInventory', partId: 'dock' });
     expect(state).toBe(before);
+  });
+
+  it('試運転の結果を見終わった後は、組み立ての操作で結果のパネルを閉じてそのまま続ける（本番の結果は閉じない）', () => {
+    let state = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'startTrial' },
+      { type: 'playbackFinished' },
+    );
+    expect(isTrialResultOpen(state)).toBe(true);
+    state = apply(state, { type: 'selectInventory', partId: 'dock' });
+    expect(state.playback).toBeNull();
+    expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'dock' });
+    // もう一度試運転を押すと、閉じてそのまま次の試運転
+    state = apply(
+      state,
+      { type: 'startTrial' },
+      { type: 'playbackFinished' },
+      { type: 'startTrial' },
+    );
+    expect(state.playback?.mode).toBe('trial');
+    expect(state.run.trialCount).toBe(3);
+    // 本番の結果は、組み立ての操作では閉じない
+    let commit = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'startCommit' },
+      { type: 'playbackFinished' },
+    );
+    expect(isTrialResultOpen(commit)).toBe(false);
+    commit = apply(commit, { type: 'selectInventory', partId: 'dock' });
+    expect(commit.playback?.mode).toBe('commit');
   });
 
   it('本番の再生中は確定後のランを保存対象にし、閉じると反映される', () => {

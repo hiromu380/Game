@@ -2908,3 +2908,27 @@ a.button.button--primary {
   font-size: 1.1rem;
   line-height: 1;
 }
+
+/* 選択中のパーツ（1行）: 手持ち・ショップの一覧を画面の外へ押し出さない */
+.selection--compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+.selection--compact .selection__part {
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.selection--compact .selection__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selection__actions {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
