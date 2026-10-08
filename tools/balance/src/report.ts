@@ -31,6 +31,8 @@ export interface BotSummary {
     expired: number;
     tiles: Record<string, number>;
   };
+  /** 金色パーツ（全ランの合計）: 合体した回数・手持ちの金色パーツを置いた回数 */
+  golden: { merged: number; placed: number };
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
@@ -111,12 +113,19 @@ export function summarize(
       permits.tiles[tile] = (permits.tiles[tile] ?? 0) + (n ?? 0);
   }
 
+  const golden = { merged: 0, placed: 0 };
+  for (const log of logs) {
+    golden.merged += log.golden?.merged ?? 0;
+    golden.placed += log.golden?.placed ?? 0;
+  }
+
   return {
     bot,
     runs: logs.length,
     bosses,
     floor,
     permits,
+    golden,
     clearRate: logs.filter((l) => l.cleared).length / logs.length,
     shifts,
     parts,
@@ -205,6 +214,16 @@ export function toMarkdown(
     const p = s.permits;
     lines.push(
       `| ${s.bot} | ${p.offered} | ${p.offered ? pct(p.bought / p.offered) : '-'} | ${p.bought ? pct(p.used / p.bought) : '-'} | ${p.bought ? pct(p.expired / p.bought) : '-'} | ${p.tiles.double ?? 0} / ${p.tiles.add ?? 0} / ${p.tiles.triple ?? 0} |`,
+    );
+  }
+  lines.push('');
+
+  lines.push('## 金色パーツ（1ランあたり）', '');
+  lines.push('| ボット | 合体 | 手持ちから置いた |', '|---|---|---|');
+  for (const s of summaries) {
+    const g = s.golden;
+    lines.push(
+      `| ${s.bot} | ${(g.merged / s.runs).toFixed(2)} | ${(g.placed / s.runs).toFixed(2)} |`,
     );
   }
   lines.push('');

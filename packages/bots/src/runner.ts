@@ -23,6 +23,7 @@ import {
 import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
 import { evaluate, type EvalMode } from './evaluate';
 import { applyMove, MOVE_SETTINGS } from './moves';
+import { playGolden, type GoldenLog } from './golden';
 import { playPermits, type PermitLog } from './permit';
 
 /** 1シフトの記録 */
@@ -70,6 +71,8 @@ export interface RunLog {
   rerolls: number;
   /** ランダム配置権: 並んだ・買った・使った枚数、使わずに消えた枚数、湧いた床の種類 */
   permits: PermitLog & { expired: number };
+  /** 金色パーツ: 合体した回数・手持ちの金色パーツを置いた回数 */
+  golden: GoldenLog;
   ms: number;
 }
 
@@ -94,6 +97,8 @@ export interface RunnerOptions {
   floorAware?: boolean;
   /** ボットがランダム配置権を買って使うか（既定 true。false は「配置権を使わないボット」との比較用） */
   permits?: boolean;
+  /** ボットが金色パーツを合体・配置するか（既定 true。false は比較用。golden.ts） */
+  golden?: boolean;
   /** 全シフトをクリアしたら延長戦に入り、最大この日数まで続ける（既定 0: 延長戦に入らない） */
   overtimeDays?: number;
 }
@@ -138,6 +143,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     onBoard: {},
     rerolls: 0,
     permits: { offered: 0, bought: 0, used: 0, expired: 0, tiles: {} },
+    golden: { merged: 0, placed: 0 },
     ms: 0,
   };
 
@@ -185,11 +191,16 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
 
     const quota = getCurrentShift(plan.state).quota;
     const expected = evaluate(plan.state, botOptions.samples, botOptions.evalMode).score;
+    // 金色パーツ（組み立て後に、見込みが増えるときだけ置く・合体する。golden.ts）
+    const golden =
+      (options.golden ?? true)
+        ? playGolden(plan.state, botOptions.samples, botOptions.evalMode, log.golden)
+        : plan.state;
     // ランダム配置権（組み立て後に、期待値で買う・使う。結果は先読みしない。permit.ts）
     const built =
       (options.permits ?? true)
-        ? playPermits(plan.state, botOptions.samples, botOptions.evalMode, log.permits)
-        : plan.state;
+        ? playPermits(golden, botOptions.samples, botOptions.evalMode, log.permits)
+        : golden;
     // 今日の最後のシフトで使わずに残った配置権は、日が変わると消える
     if ((built.shiftIndex + 1) % built.config.shiftsPerDay === 0) {
       log.permits.expired += countItems(built, 'floorPermit');

@@ -6,6 +6,7 @@
  */
 export * from './bots';
 export * from './evaluate';
+export * from './golden';
 export * from './moves';
 export * from './permit';
 export * from './runner';

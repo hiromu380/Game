@@ -2,7 +2,8 @@
  * ボットの動作確認（バランスの良し悪しではなく「正しく遊べるか」を見る）
  */
 import { describe, expect, it } from 'vitest';
-import { playRun } from '../src';
+import { createRun, type PartId, type RunState } from '@chain-factory/sim';
+import { playGolden, playRun } from '../src';
 
 const OPTIONS = {
   unlock: 'all' as const,
@@ -68,5 +69,40 @@ describe('ボット', () => {
     });
     expect(log.shifts).toHaveLength(9);
     expect(log.cleared).toBe(true);
+  });
+});
+
+describe('金色パーツ', () => {
+  it('見込みが増えるときだけ合体し、増えないなら盤面を変えない', () => {
+    const base = createRun(1);
+    const empty = base.board.cells.map(() => null) as RunState['board']['cells'];
+    const put = (cells: RunState['board']['cells'], x: number, y: number, id: PartId) => {
+      cells[y * base.board.width + x] = { id, dir: 1 };
+    };
+    // スイッチ → 出荷口が3つ横並び（先頭の出荷口だけが信号を受ける）。合体すれば先頭が ×3
+    const cells = [...empty];
+    put(cells, 0, 0, 'switch');
+    put(cells, 1, 0, 'dock');
+    put(cells, 1, 1, 'dock');
+    put(cells, 1, 2, 'dock');
+    const run: RunState = {
+      ...base,
+      board: { ...base.board, cells },
+      bonusFloor: null,
+      itemFloors: null,
+    };
+    const log = { merged: 0, placed: 0 };
+    const merged = playGolden(run, 1, 'mean', log);
+    expect(log.merged).toBe(1);
+    expect(merged.board.cells.filter((c) => c?.golden)).toHaveLength(1);
+
+    // 合体しても見込みが増えない盤面（出荷口に信号が届かない）は変えない
+    const idle = playGolden(
+      { ...run, board: { ...run.board, cells: cells.map((c) => (c?.id === 'switch' ? null : c)) } },
+      1,
+      'mean',
+      { merged: 0, placed: 0 },
+    );
+    expect(idle.board.cells.some((c) => c?.golden)).toBe(false);
   });
 });

@@ -10,6 +10,7 @@
  *   pnpm balance --mode weekly                 # 週替わりチャレンジと同じ条件（3シフト・全パーツ・特殊ルール）で検証
  *   pnpm balance --floor-aware off             # 床を見ないボット（床を使うボットとの比較用）
  *   pnpm balance --permits off                 # ランダム配置権を使わないボット（比較用）
+ *   pnpm balance --golden off                  # 金色パーツを使わないボット（比較用）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
  */
@@ -47,6 +48,7 @@ function parseArgs(argv: string[]) {
       'normal' | 'weekly',
     floorAware: args.get('floor-aware') !== 'off',
     permits: args.get('permits') !== 'off',
+    golden: args.get('golden') !== 'off',
   };
 }
 
@@ -61,6 +63,7 @@ async function main() {
     mode: opts.mode,
     floorAware: opts.floorAware,
     permits: opts.permits,
+    golden: opts.golden,
   };
   const summaries: BotSummary[] = [];
   const shiftSpecs = opts.mode === 'weekly' ? BALANCE.weekly.shifts : BALANCE.shifts;
@@ -91,6 +94,7 @@ async function main() {
     リロール上限: `${opts.maxRerolls}回/シフト`,
     床: opts.floorAware ? '床を見て置く' : '床を見ない（比較用）',
     ランダム配置権: opts.permits ? '期待値で買って使う' : '使わない（比較用）',
+    金色パーツ: opts.golden ? '見込みが増えるときだけ合体・配置' : '使わない（比較用）',
     パーツの解放:
       opts.unlock === 'all'
         ? '全解放・工場拡張最大（やり込み相当）'
