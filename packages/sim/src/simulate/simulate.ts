@@ -20,7 +20,7 @@
 import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
-import { SCORE_ZERO, scoreAdd, scoreMax, scoreOf, type Score } from '../core/score';
+import { SCORE_ZERO, scoreAdd, scoreMax, scoreMul, scoreOf, type Score } from '../core/score';
 import { getFloorCell, isBlockedCell } from '../floor/layer';
 import { FLOOR_BEHAVIORS } from '../floor/tiles';
 import type { HaltReason, Part, SimEvent, SimInput, SimResult, Signal } from '../types';
@@ -103,10 +103,14 @@ export function simulate(input: SimInput): SimResult {
     tick: number,
     x: number,
     y: number,
-    reaction: Reaction,
+    raw: Reaction,
     out: Signal[],
   ): void => {
     const index = cellIndex(board, x, y);
+    // 金色パーツ: パーツの効果の後で、出荷量と送る信号の値を倍にする（収入は増やさない）
+    const reaction = getPart(board, x, y)?.golden
+      ? goldenReaction(raw, rules.goldenMultiplier ?? 1)
+      : raw;
     if (reaction.ship !== undefined) {
       score = scoreAdd(score, reaction.ship);
       shipCount++;
@@ -282,5 +286,14 @@ export function simulate(input: SimInput): SimResult {
       ticks: tick,
       halted,
     },
+  };
+}
+
+/** 金色パーツの反応: 出荷量と送る信号の値を multiplier 倍する */
+function goldenReaction(reaction: Reaction, multiplier: number): Reaction {
+  return {
+    ...reaction,
+    ship: reaction.ship === undefined ? undefined : scoreMul(reaction.ship, multiplier),
+    emits: reaction.emits?.map((e) => ({ ...e, value: scoreMul(e.value, multiplier) })),
   };
 }

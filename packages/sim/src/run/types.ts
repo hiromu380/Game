@@ -59,6 +59,8 @@ export interface RunState {
   board: Board;
   /** 手持ち（購入済み・未配置のパーツ） */
   inventory: Partial<Record<PartId, number>>;
+  /** 手持ちの金色パーツ（盤面から戻したもの）。導入前のセーブには無い */
+  goldenInventory?: Partial<Record<PartId, number>>;
   shop: ShopOffer[];
   /** このシフトでリロールした回数（リロール価格とショップのシードに使う） */
   rerollCount: number;
@@ -124,6 +126,8 @@ export type RunError =
   | 'alreadySold'
   | 'notEnoughBudget'
   | 'notInInventory'
+  /** 合体できない（同じパーツが3つつながっていない・合体しないパーツ・金色パーツ） */
+  | 'cannotMerge'
   | 'cellOccupied'
   | 'cellEmpty'
   | 'cellBlocked'

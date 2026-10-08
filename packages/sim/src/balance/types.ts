@@ -160,6 +160,16 @@ export interface FloorPermitBalance {
   inWeekly: boolean;
 }
 
+/** 金色パーツ（parts.ts の GOLDEN） */
+export interface GoldenBalance {
+  /** 合体に必要な、縦横につながった同じパーツの数 */
+  mergeCount: number;
+  /** 金色パーツが送る信号の値・出荷量に掛ける倍率（パーツの効果の後） */
+  multiplier: number;
+  /** 合体しないパーツ */
+  excluded: PartId[];
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -193,6 +203,8 @@ export interface Balance {
   floorPermit: FloorPermitBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
+  /** 金色パーツ（同じパーツを盤面で3つつなげると合体する） */
+  golden: GoldenBalance;
 
   /** 経済（ショップ・売却・リロール） */
   economy: {

@@ -70,12 +70,15 @@ export {
   buyOffer,
   getRefund,
   getRerollCost,
+  mergeCells,
+  mergeGolden,
   placePart,
   rerollShop,
   returnPart,
   rotatePart,
   sellPart,
 } from './run/build';
+export { goldenCount } from './run/inventory';
 export {
   abandonRun,
   commitShift,

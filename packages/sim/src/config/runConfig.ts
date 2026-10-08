@@ -84,6 +84,10 @@ export interface RunConfig {
    * 導入前に始めたランには無いので、無ければショップに出ない
    */
   floorPermit?: Balance['floorPermit'] & { fromShift: number };
+  /**
+   * 金色パーツの合体（balance/ の写し）。導入前に始めたラン（セーブ）には無いので、無ければ合体しない
+   */
+  golden?: { mergeCount: number; excluded: PartId[] };
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
   /** ボス修正ルールの効果量（balance/ の boss の写し） */
@@ -224,6 +228,7 @@ export function buildRunConfig({
             tileWeights: balance.floorPermit.tileWeights.map((w) => ({ ...w })),
             fromShift: tutorial ? balance.shiftsPerDay : 0,
           },
+    golden: { mergeCount: balance.golden.mergeCount, excluded: [...balance.golden.excluded] },
     bossPlan: planBosses(balance, board, bossSeed, stages?.days ?? []),
     bossParams: { ...balance.boss, candidates: [...balance.boss.candidates] },
     starterKit: { ...balance.economy.starterKit },

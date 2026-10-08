@@ -6,7 +6,7 @@ import { cellIndex, getPart, isInside, setPart } from '../core/board';
 import { rotateCw } from '../core/direction';
 import type { Dir4, PartId } from '../types';
 import { isCellBlocked } from './floor';
-import { addInventory } from './inventory';
+import { addInventory, goldenCount, returnToHand } from './inventory';
 import { addItem } from './items';
 import { shopSeed } from './seeds';
 import { getCurrentEconomy } from './shift';
@@ -34,27 +34,89 @@ export function buyOffer(state: RunState, offerIndex: number): RunActionResult {
   return ok({ ...paid, inventory: addInventory(state.inventory, offer.partId, 1) });
 }
 
-/** 手持ちのパーツを盤面へ置く */
+/** 手持ちのパーツを盤面へ置く（golden なら手持ちの金色パーツを置く） */
 export function placePart(
   state: RunState,
   partId: PartId,
   x: number,
   y: number,
   dir: Dir4,
+  golden = false,
 ): RunActionResult {
   if (state.phase !== 'building') return fail('notBuilding');
   if (!isInside(state.board, x, y)) return fail('outOfBoard');
-  if ((state.inventory[partId] ?? 0) <= 0) return fail('notInInventory');
+  const have = golden ? goldenCount(state, partId) : (state.inventory[partId] ?? 0);
+  if (have <= 0) return fail('notInInventory');
   if (getPart(state.board, x, y) !== null) return fail('cellOccupied');
   if (isCellBlocked(state, cellIndex(state.board, x, y))) {
     return fail('cellBlocked');
   }
 
+  if (golden) {
+    return ok({
+      ...state,
+      board: setPart(state.board, x, y, { id: partId, dir, golden: true }),
+      goldenInventory: addInventory(state.goldenInventory ?? {}, partId, -1),
+    });
+  }
   return ok({
     ...state,
     board: setPart(state.board, x, y, { id: partId, dir }),
     inventory: addInventory(state.inventory, partId, -1),
   });
+}
+
+/**
+ * (x, y) のパーツで合体するときに使うマス（先頭が (x, y)。金色になるマス）。合体できなければ null。
+ * 同じ種類の普通のパーツが縦横に合体の数だけつながっているときに合体できる。
+ * つながりが合体の数より多いときは、(x, y) から近い順（幅優先・上右下左の順）に選ぶ
+ */
+export function mergeCells(state: RunState, x: number, y: number): [number, number][] | null {
+  const rule = state.config.golden;
+  const part = isInside(state.board, x, y) ? getPart(state.board, x, y) : null;
+  if (!rule || !part || part.golden || rule.excluded.includes(part.id)) return null;
+  const group = connectedSameParts(state, x, y, part.id);
+  return group.length >= rule.mergeCount ? group.slice(0, rule.mergeCount) : null;
+}
+
+/**
+ * 合体: (x, y) のパーツを金色にし、つながった残りのパーツを取り除く（mergeCells）。
+ * 盤面で同じパーツが3つつながると合体できる（自動では合体しない。一列に並べた組み方を崩さないため）
+ */
+export function mergeGolden(state: RunState, x: number, y: number): RunActionResult {
+  if (state.phase !== 'building') return fail('notBuilding');
+  const cells = mergeCells(state, x, y);
+  const part = isInside(state.board, x, y) ? getPart(state.board, x, y) : null;
+  if (!cells || !part) return fail('cannotMerge');
+  let board = state.board;
+  for (const [gx, gy] of cells.slice(1)) board = setPart(board, gx, gy, null);
+  return ok({ ...state, board: setPart(board, x, y, { ...part, golden: true }) });
+}
+
+/** (x, y) から縦横につながった、同じ種類の普通のパーツのマス（幅優先・上右下左の順。先頭は (x, y)） */
+function connectedSameParts(state: RunState, x: number, y: number, id: PartId): [number, number][] {
+  const seen = new Set([cellIndex(state.board, x, y)]);
+  const order: [number, number][] = [[x, y]];
+  for (let i = 0; i < order.length; i++) {
+    const [cx, cy] = order[i]!;
+    for (const [dx, dy] of [
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+    ] as const) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (!isInside(state.board, nx, ny)) continue;
+      const index = cellIndex(state.board, nx, ny);
+      if (seen.has(index)) continue;
+      const neighbor = getPart(state.board, nx, ny);
+      if (neighbor?.id !== id || neighbor.golden) continue;
+      seen.add(index);
+      order.push([nx, ny]);
+    }
+  }
+  return order;
 }
 
 /** 盤面のパーツを時計回りに90度回転する（無料） */
@@ -70,18 +132,17 @@ export function returnPart(state: RunState, x: number, y: number): RunActionResu
   if (state.phase !== 'building') return fail('notBuilding');
   const part = getPart(state.board, x, y);
   if (!part) return fail('cellEmpty');
-  return ok({
-    ...state,
-    board: setPart(state.board, x, y, null),
-    inventory: addInventory(state.inventory, part.id, 1),
-  });
+  return ok(returnToHand({ ...state, board: setPart(state.board, x, y, null) }, part));
 }
 
-/** 売却したときの返金額（価格 × 返金率、切り捨て） */
-export function getRefund(state: RunState, partId: PartId): number {
+/**
+ * 売却したときの返金額（価格 × 返金率、切り捨て）。金色パーツは合体した数の分（普通のパーツ × 合体の数）
+ */
+export function getRefund(state: RunState, partId: PartId, golden = false): number {
   // 在庫整理（今日のイベント）で返金率が変わるので、今のシフトの経済設定を使う
   const economy = getCurrentEconomy(state);
-  return Math.floor((economy.prices[partId] * economy.refundPercent) / 100);
+  const one = Math.floor((economy.prices[partId] * economy.refundPercent) / 100);
+  return golden ? one * (state.config.golden?.mergeCount ?? 1) : one;
 }
 
 /** 盤面のパーツを売却する。価格 0 のパーツ（スイッチ）は売れない */
@@ -93,7 +154,7 @@ export function sellPart(state: RunState, x: number, y: number): RunActionResult
   return ok({
     ...state,
     board: setPart(state.board, x, y, null),
-    budget: state.budget + getRefund(state, part.id),
+    budget: state.budget + getRefund(state, part.id, part.golden === true),
   });
 }
 

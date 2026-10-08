@@ -25,7 +25,7 @@ import { ECONOMY } from './economy';
 import { DAY_EVENTS } from './events';
 import { BONUS_FLOORS, FLOOR_PARAMS, FLOOR_PERMIT } from './floors';
 import { META } from './meta';
-import { PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
+import { GOLDEN, PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { STAGES } from './stages';
 import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM } from './sim';
@@ -43,6 +43,7 @@ export const BALANCE: Balance = {
   bonusFloors: BONUS_FLOORS,
   floorPermit: FLOOR_PERMIT,
   rarityWeights: RARITY_WEIGHTS,
+  golden: GOLDEN,
   economy: ECONOMY,
   shifts: SHIFTS,
   shiftsPerDay: SHIFTS_PER_DAY,
