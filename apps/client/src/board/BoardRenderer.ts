@@ -83,7 +83,9 @@ export interface BoardViewState {
   /** 選択中のマス */
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
-  placing: { partId: PartId; dir: Dir4 } | null;
+  placing: { partId: PartId; dir: Dir4; golden: boolean } | null;
+  /** 合体できるパーツのマス（金色の枠で光らせる。マスの番号） */
+  mergeable: number[];
   /** 今日の夜シフト（ボス）に使用不可になるマス（予告表示用） */
   upcomingBlocked: number[];
   /** どのランのどのシフトか（変わったら前の本番の表示を消す） */
@@ -380,6 +382,10 @@ export class BoardRenderer {
     }
     this.knownItemCells = new Set(itemCells);
 
+    // 金色パーツに合体した: 消えた2マスから金色のマスへ光を集める（同じシフトの中だけ）
+    if (previous?.shiftKey === state.shiftKey && !sizeChanged)
+      this.showMerges(previous.board, state.board);
+
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     // 床タイル（盤面の下層。パーツより下に、控えめに描く）
     for (let cell = 0; cell < state.floor.length; cell++) {
@@ -427,6 +433,23 @@ export class BoardRenderer {
     this.drawOverlay();
   }
 
+  /** 前の盤面から金色になったマスを探し、同じパーツが消えたマスから光を集める */
+  private showMerges(before: Board, after: Board): void {
+    for (let i = 0; i < after.cells.length; i++) {
+      const now = after.cells[i];
+      const was = before.cells[i];
+      if (!now?.golden || !was || was.golden || was.id !== now.id) continue;
+      const from: { x: number; y: number }[] = [];
+      for (let j = 0; j < after.cells.length; j++) {
+        const gone = before.cells[j];
+        if (j !== i && !after.cells[j] && gone?.id === now.id && !gone.golden) {
+          from.push({ x: j % after.width, y: Math.floor(j / after.width) });
+        }
+      }
+      this.effects.merge(i % after.width, Math.floor(i / after.width), from);
+    }
+  }
+
   /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
   private badgeOf(part: Part, x: number, y: number): PartBadge | null {
     if (!this.state) return null;
@@ -454,7 +477,16 @@ export class BoardRenderer {
     this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     if (!this.state) return;
-    const { board, highlight, placing, guideCell } = this.state;
+    const { board, highlight, placing, guideCell, mergeable } = this.state;
+
+    // 合体できるパーツ: 金色の太い枠（色だけでなく、選ぶと合体ボタンが出る）
+    if (!this.timeline) {
+      for (const cell of mergeable) {
+        const x = cell % board.width;
+        const y = Math.floor(cell / board.width);
+        this.overlayLayer.addChild(mergeGlow(x, y));
+      }
+    }
 
     if (guideCell && !this.timeline) {
       this.overlayLayer.addChild(cellFrame(guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5));
@@ -495,7 +527,9 @@ export class BoardRenderer {
 
     if (placing && !part) {
       // 配置プレビュー: 半透明のパーツと緑の枠
-      const ghostPart: Part = { id: placing.partId, dir: placing.dir };
+      const ghostPart: Part = placing.golden
+        ? { id: placing.partId, dir: placing.dir, golden: true }
+        : { id: placing.partId, dir: placing.dir };
       const ghost = createPartView(ghostPart, this.textures, null);
       const { px, py } = cellCenter(hovered.x, hovered.y);
       ghost.position.set(px, py);
@@ -908,6 +942,31 @@ export class BoardRenderer {
 }
 
 /** マスを囲む枠 */
+/**
+ * 合体できるパーツの印: 薄い金のにじみと、四隅のかぎ括弧（金色パーツの縁取りと形で区別する）
+ */
+function mergeGlow(x: number, y: number): Graphics {
+  const { px, py } = cellCenter(x, y);
+  const half = CELL_SIZE / 2 - 4;
+  const arm = CELL_SIZE * 0.22;
+  const g = new Graphics()
+    .roundRect(px - half, py - half, half * 2, half * 2, 8)
+    .fill({ color: BOARD_THEME.golden, alpha: 0.14 });
+  for (const [sx, sy] of [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ] as const) {
+    const cx = px + sx * half;
+    const cy = py + sy * half;
+    g.moveTo(cx - sx * arm, cy)
+      .lineTo(cx, cy)
+      .lineTo(cx, cy - sy * arm);
+  }
+  return g.stroke({ width: 4, color: BOARD_THEME.golden, cap: 'round', join: 'round' });
+}
+
 function cellFrame(x: number, y: number, color: number, width: number): Graphics {
   const { px, py } = cellCenter(x, y);
   const half = CELL_SIZE / 2 - 3;

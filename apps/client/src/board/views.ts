@@ -78,6 +78,18 @@ export function createPartView(
 ): Container {
   const view = new Container();
 
+  // 金色パーツ: 下に金の板と縁取り（色だけでなく右下の星でも区別する）
+  if (part.golden) {
+    const half = PART_DISPLAY_SIZE / 2 + 3;
+    view.addChild(
+      new Graphics()
+        .roundRect(-half - 3, -half - 3, (half + 3) * 2, (half + 3) * 2, 12)
+        .fill({ color: BOARD_THEME.golden, alpha: 0.4 })
+        .roundRect(-half, -half, half * 2, half * 2, 10)
+        .stroke({ width: 3, color: BOARD_THEME.golden }),
+    );
+  }
+
   const sprite = new Sprite(textures[part.id]);
   sprite.anchor.set(0.5);
   sprite.width = PART_DISPLAY_SIZE;
@@ -85,7 +97,10 @@ export function createPartView(
   if (PART_ASSETS[part.id].rotates) sprite.rotation = (part.dir * Math.PI) / 2;
   view.addChild(sprite);
 
+  if (part.golden) sprite.tint = 0xffe9a8;
+
   for (const dir of arrowDirs(part)) view.addChild(createArrow(dir));
+  if (part.golden) view.addChild(createGoldStar());
 
   if (badge) {
     const label = createBadge(`${badge.kind === 'mul' ? '×' : '+'}${badge.value}`);
@@ -94,6 +109,24 @@ export function createPartView(
     view.addChild(label);
   }
   return view;
+}
+
+/** 金色パーツの印（右下の星） */
+function createGoldStar(): Graphics {
+  const r = 11;
+  const points: number[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const radius = i % 2 === 0 ? r : r * 0.45;
+    points.push(Math.cos(a) * radius, Math.sin(a) * radius);
+  }
+  const star = new Graphics()
+    .poly(points)
+    .fill(BOARD_THEME.golden)
+    .stroke({ width: 2, color: BOARD_THEME.arrowStroke });
+  // 右下（左下は効果量バッジ、左上は床の表記、右上はパーツの絵の飾りと重なる）
+  star.position.set(CELL_SIZE * 0.3, CELL_SIZE * 0.3);
+  return star;
 }
 
 // -----------------------------------------------------------------------------

@@ -285,6 +285,58 @@ export class EffectsLayer {
     this.popText(x, y + 0.25, text, 0, durationMs, color);
   }
 
+  /**
+   * 金色パーツに合体した: 消える2つのマスから光の粒が金色のマスへ集まり、金の輪が広がる
+   * （本番の再生とは別。合体ボタンを押したとき）
+   */
+  merge(x: number, y: number, from: { x: number; y: number }[]): void {
+    const { px, py } = cellCenter(x, y);
+    const m = EFFECTS_CONFIG.merge;
+    const minimal = this.settings.strength === 'minimal';
+    const gather = minimal ? 0 : m.gatherMs;
+    if (!minimal) {
+      for (const cell of from) {
+        const start = cellCenter(cell.x, cell.y);
+        for (let i = 0; i < Math.round(m.dotsPerCell * this.power); i++) {
+          const dot = this.particles.acquire('dot', BOARD_THEME.golden);
+          if (!dot) break;
+          const sx = start.px + (Math.random() - 0.5) * CELL_SIZE * 0.6;
+          const sy = start.py + (Math.random() - 0.5) * CELL_SIZE * 0.6;
+          dot.position.set(sx, sy);
+          this.tweens.add({
+            duration: gather,
+            onUpdate: (t) => {
+              const e = easeOutCubic(t);
+              dot.position.set(sx + (px - sx) * e, sy + (py - sy) * e);
+            },
+            onComplete: () => this.particles.release(dot),
+          });
+        }
+      }
+    }
+    const ring = new Graphics()
+      .circle(0, 0, CELL_SIZE / 2)
+      .stroke({ width: 5, color: BOARD_THEME.golden });
+    ring.position.set(px, py);
+    ring.alpha = 0;
+    this.boardLayer.addChild(ring);
+    const total = gather + m.ringMs;
+    let burst = minimal;
+    this.tweens.add({
+      duration: total,
+      onUpdate: (t) => {
+        const local = Math.max(0, (t * total - gather) / m.ringMs);
+        ring.alpha = local > 0 ? 1 - local : 0;
+        ring.scale.set(0.6 + 1.4 * easeOutCubic(local));
+        if (!burst && local > 0) {
+          burst = true;
+          this.sparks(x, y, BOARD_THEME.golden, Math.round(m.sparks * this.power), m.sparksMs);
+        }
+      },
+      onComplete: () => ring.destroy(),
+    });
+  }
+
   /** 合計の単位が変わった（K → M → B）: 画面の上に大きく出す */
   digitUp(total: Score): void {
     if (this.settings.strength === 'minimal') return;

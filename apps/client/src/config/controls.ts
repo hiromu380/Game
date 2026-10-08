@@ -22,6 +22,8 @@ export type ControlAction =
   | 'undo'
   /** 選んでいる盤面のパーツを手持ちに戻す（そのまま置き直せる） */
   | 'returnPart'
+  /** 選んでいる盤面のパーツと、つながった同じパーツを金色パーツに合体する */
+  | 'merge'
   | 'trial'
   | 'commit'
   /** ショップの一覧へ（L） */
@@ -39,6 +41,7 @@ export const KEY_BINDINGS: Record<ControlAction, readonly string[]> = {
   rotate: ['r'],
   undo: ['z'],
   returnPart: ['f'],
+  merge: ['g'],
   trial: ['t'],
   commit: ['p'],
   shop: ['q'],
@@ -55,6 +58,7 @@ export const GAMEPAD_BUTTONS: Record<ControlAction, readonly number[]> = {
   rotate: [2],
   undo: [8],
   returnPart: [7],
+  merge: [6],
   trial: [3],
   commit: [9],
   shop: [4],

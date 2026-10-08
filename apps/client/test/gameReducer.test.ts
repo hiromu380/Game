@@ -448,3 +448,62 @@ describe('諦める', () => {
     expect(apply(state, { type: 'giveUp' })).toBe(state);
   });
 });
+
+describe('金色パーツ', () => {
+  const gearRun = () => {
+    const run = createRun(1);
+    return createGameState(
+      {
+        ...run,
+        board: { ...run.board, cells: run.board.cells.map(() => null) },
+        inventory: { gear: 3 },
+        bonusFloor: null,
+      },
+      createInitialMeta(),
+    );
+  };
+
+  it('3つつなげて選び、合体すると金色になる。手持ちに戻すと金色のまま選択され、置き直せる', () => {
+    let state = apply(
+      gearRun(),
+      { type: 'selectInventory', partId: 'gear' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 1, y: 0 },
+      { type: 'clickCell', x: 2, y: 0 },
+      { type: 'clickCell', x: 1, y: 0 },
+      { type: 'mergeSelected' },
+    );
+    expect(state.feedback?.kind).toBe('merge');
+    expect(state.run.board.cells[1]).toEqual({ id: 'gear', dir: 1, golden: true });
+    expect(state.run.board.cells[0]).toBeNull();
+    expect(state.pendingOps.at(-1)).toEqual({ op: 'merge', x: 1, y: 0 });
+
+    state = apply(state, { type: 'returnSelected' });
+    expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'gear', golden: true });
+    state = apply(state, { type: 'clickCell', x: 4, y: 4 });
+    expect(state.run.board.cells[4 * state.run.board.width + 4]).toMatchObject({ golden: true });
+    expect(state.pendingOps.at(-1)).toEqual({
+      op: 'place',
+      partId: 'gear',
+      x: 4,
+      y: 4,
+      dir: 1,
+      golden: true,
+    });
+    const replayed = replayOps(gearRun().run, state.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(state.run);
+  });
+
+  it('つながっていなければ合体できない（エラー）', () => {
+    const state = apply(
+      gearRun(),
+      { type: 'selectInventory', partId: 'gear' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 2, y: 0 },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'mergeSelected' },
+    );
+    expect(state.error).toBe('cannotMerge');
+    expect(state.run.board.cells[0]).toEqual({ id: 'gear', dir: 1 });
+  });
+});

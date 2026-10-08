@@ -149,6 +149,9 @@ export const BOARD_COLORS = {
   floorBonus: '#4dd0e1',
   /** ランダム配置権で湧いた床の枠・ルーレットの枠（今日だけ） */
   floorItem: '#ffca28',
+  /** 金色パーツの縁・星、合体できるパーツの光る枠 */
+  golden: '#ffd54f',
+  goldenDeep: '#ff8f00',
   selected: '#ffeb3b',
   ghostOk: '#69f0ae',
   arrowFill: '#ffeb3b',

@@ -17,6 +17,7 @@ import {
   commitShift,
   createInitialAchievements,
   getPart,
+  goldenCount,
   runTrial,
   startOvertime,
   rotateCw,
@@ -39,8 +40,11 @@ import { achievementsAfterCommit, achievementsAfterRanking } from './achievement
 import { recordTrial, type TrialRecord } from './trialStatus';
 
 /** 選択状態: 手持ちのパーツ（配置待ち） or 盤面のマス */
+/** 選択中のもの（手持ちのパーツ。golden なら手持ちの金色パーツ / 盤面のマス） */
 export type Selection =
-  { kind: 'inventory'; partId: PartId; dir: Dir4 } | { kind: 'cell'; x: number; y: number } | null;
+  | { kind: 'inventory'; partId: PartId; dir: Dir4; golden?: boolean }
+  | { kind: 'cell'; x: number; y: number }
+  | null;
 
 /** 再生中（または再生終了後に結果表示中）の演出 */
 export type Playback =
@@ -126,7 +130,16 @@ const UNDO_NEUTRAL_ACTIONS: readonly GameAction['type'][] = ['startTrial', 'clos
 
 /** 操作の手応えの種類（サウンドマニフェストのキーと同じ名前。undo だけは returnPart の音を鳴らす） */
 export type FeedbackKind =
-  'place' | 'rotate' | 'buy' | 'sell' | 'reroll' | 'returnPart' | 'useItem' | 'undo' | 'error';
+  | 'place'
+  | 'rotate'
+  | 'buy'
+  | 'sell'
+  | 'reroll'
+  | 'returnPart'
+  | 'useItem'
+  | 'merge'
+  | 'undo'
+  | 'error';
 
 export type GameAction =
   /**
@@ -143,7 +156,7 @@ export type GameAction =
   | { type: 'useItem'; itemId: ItemId }
   /** 撮影モード: 配置権を1枚もらう（使う場面の確認・録画用） */
   | { type: 'captureGivePermit' }
-  | { type: 'selectInventory'; partId: PartId }
+  | { type: 'selectInventory'; partId: PartId; golden?: boolean }
   | { type: 'clickCell'; x: number; y: number }
   /** 長押し（スマホ）・ダブルクリック: そのマスのパーツを手持ちに戻す */
   | { type: 'longPressCell'; x: number; y: number }
@@ -158,6 +171,8 @@ export type GameAction =
   /** 直前の組み替え（配置・回転・移動・手持ちに戻す）を取り消す */
   | { type: 'undo' }
   | { type: 'sellSelected' }
+  /** 選択中のパーツと、つながった同じパーツを金色パーツ1つに合体する */
+  | { type: 'mergeSelected' }
   /** 盤面のパーツを売却する（ショップへドラッグしたとき） */
   | { type: 'sellCell'; x: number; y: number }
   | { type: 'reroll' }
@@ -218,6 +233,20 @@ function applyRunResult(
 }
 
 /** 操作を1つ適用し、成功したら操作ログに記録する */
+/** 手持ちのパーツの選択（金色パーツのときだけ golden を付ける） */
+function inventorySelection(partId: PartId, dir: Dir4, golden: boolean): Selection {
+  return golden
+    ? { kind: 'inventory', partId, dir, golden: true }
+    : { kind: 'inventory', partId, dir };
+}
+
+/** 配置の操作（金色パーツは golden: true を付ける。普通のパーツには付けない） */
+function placeOp(partId: PartId, x: number, y: number, dir: Dir4, golden: boolean): RunOp {
+  return golden
+    ? { op: 'place', partId, x, y, dir, golden: true }
+    : { op: 'place', partId, x, y, dir };
+}
+
 function applyRunOp(
   state: GameState,
   op: RunOp,
@@ -341,7 +370,7 @@ function reduce(state: GameState, action: GameAction): GameState {
     case 'selectInventory':
       return {
         ...state,
-        selection: { kind: 'inventory', partId: action.partId, dir: 1 },
+        selection: inventorySelection(action.partId, 1, action.golden === true),
         error: null,
       };
 
@@ -390,11 +419,13 @@ function reduce(state: GameState, action: GameAction): GameState {
 
       // 手持ちのパーツを選択中で空きマスをクリック → 配置
       if (state.selection?.kind === 'inventory' && part === null) {
-        const { partId, dir } = state.selection;
-        const next = applyRunOp(state, { op: 'place', partId, x, y, dir }, 'place');
+        const { partId, dir, golden } = state.selection;
+        const next = applyRunOp(state, placeOp(partId, x, y, dir, golden === true), 'place');
         if (next.error) return next;
         // まだ同じパーツが手持ちにあれば続けて置けるよう選択を維持する
-        const remaining = next.run.inventory[partId] ?? 0;
+        const remaining = golden
+          ? goldenCount(next.run, partId)
+          : (next.run.inventory[partId] ?? 0);
         return { ...next, selection: remaining > 0 ? state.selection : null };
       }
       // 選択中のパーツをもう一度クリック（タップ）→ 回転（スマホでも回せるように）
@@ -427,7 +458,7 @@ function reduce(state: GameState, action: GameAction): GameState {
       if (sel?.kind !== 'cell') return state;
       const part = getPart(state.run.board, sel.x, sel.y);
       const selection: Selection = part
-        ? { kind: 'inventory', partId: part.id, dir: part.dir }
+        ? inventorySelection(part.id, part.dir, part.golden === true)
         : null;
       return applyRunOp(state, { op: 'return', x: sel.x, y: sel.y }, 'returnPart', selection);
     }
@@ -460,7 +491,7 @@ function reduce(state: GameState, action: GameAction): GameState {
       if (returned.error) return returned;
       const placed = applyRunOp(
         returned,
-        { op: 'place', partId: part.id, x: to.x, y: to.y, dir: part.dir },
+        placeOp(part.id, to.x, to.y, part.dir, part.golden === true),
         'place',
       );
       // 置けなかった（工事中のマスなど）ときは、動かす前に戻す
@@ -476,6 +507,12 @@ function reduce(state: GameState, action: GameAction): GameState {
         selection: { kind: 'cell', x: action.x, y: action.y },
       };
       return reduce(selected, { type: 'returnSelected' });
+    }
+
+    case 'mergeSelected': {
+      const sel = state.selection;
+      if (sel?.kind !== 'cell') return state;
+      return applyRunOp(state, { op: 'merge', x: sel.x, y: sel.y }, 'merge');
     }
 
     case 'sellSelected': {

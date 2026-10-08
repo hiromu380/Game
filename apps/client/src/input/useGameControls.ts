@@ -29,6 +29,7 @@ export interface GameControlOptions {
   onUndo: () => void;
   /** 選んでいる盤面のパーツを手持ちに戻す */
   onReturn: () => void;
+  onMerge: () => void;
   onTrial: () => void;
   onCommit: () => void;
   onClosePlayback: () => void;
@@ -134,6 +135,9 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
             return true;
           case 'returnPart':
             o.onReturn();
+            return true;
+          case 'merge':
+            o.onMerge();
             return true;
           case 'trial':
             o.onTrial();

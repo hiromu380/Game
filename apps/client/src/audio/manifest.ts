@@ -54,6 +54,7 @@ export type SoundKey =
   | 'digitUp'
   | 'floor'
   | 'useItem'
+  | 'merge'
   | 'permitTick'
   | 'permitLand'
   | 'quotaCross'
@@ -263,6 +264,20 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       notes: [
         { freq: 660, at: 0, duration: 0.05 },
         { freq: 990, at: 0.05, duration: 0.09 },
+      ],
+    },
+  },
+  /** 合体: 3つのパーツが1つの金色パーツになった（きらきらと上がる3音と、最後の高い鈴） */
+  merge: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.26,
+      notes: [
+        { freq: 523, at: 0, duration: 0.07 },
+        { freq: 659, at: 0.07, duration: 0.07 },
+        { freq: 784, at: 0.14, duration: 0.07 },
+        { freq: 1568, at: 0.21, duration: 0.3, slideTo: 1760 },
       ],
     },
   },

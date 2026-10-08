@@ -382,6 +382,24 @@ button:disabled {
   user-select: none;
 }
 
+/* 金色パーツ: 金の縁と光 */
+.part-icon--golden {
+  border-radius: 8px;
+  outline: 2px solid var(--golden);
+  box-shadow: 0 0 8px var(--golden);
+}
+
+/* 合体ボタン（金色。合体できるときだけ出る） */
+.button--merge {
+  border-color: var(--golden);
+  background: var(--golden);
+  color: var(--hazard-black);
+  font-weight: bold;
+}
+.button--merge:hover:not(:disabled) {
+  background: var(--golden-deep);
+}
+
 /* ---- 消耗品のアイコン（ランダム配置権。パーツのアイコンと同じ大きさの枠に UI アイコンを置く） ---- */
 .item-icon {
   display: flex;

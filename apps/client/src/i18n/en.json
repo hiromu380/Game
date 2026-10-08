@@ -406,9 +406,9 @@
   "howTo.goal.title": "Goal: send Bolt's rocket to space",
   "howTo.goal.body": "Each day has 3 shifts: morning, noon and night. A run is 9 shifts over 3 days\nMeet a shift's quota (a shipment target) and one rocket part gets built\nClear all 9 shifts to finish the rocket and launch! Miss a quota and the run ends\nAfter the launch, Overtime lets you see how far you can go: the Moon, Mars, and beyond",
   "howTo.build.title": "Building the factory",
-  "howTo.build.body": "Buy parts in the shop, then pick them from your inventory and place them on the floor (you get a budget each shift, and leftovers carry over)\nTap a placed part to rotate it, drag to move it. Drag it to the inventory to return it, or to the sell area to sell it (half price)\nThe switch sends a signal in the direction of its arrow. Each part the signal passes changes its value, and the value that reaches a dock is shipped\nSignals that enter an empty cell or leave the floor disappear\nUndo (Z / Ctrl+Z) takes back your last place, rotate, move or return (buying, selling and rerolling can't be undone)\nKeyboard: arrows move, Enter places, R rotates, Z undoes, F returns to inventory, T trial, P real run\nController: D-pad moves, A places, X rotates, Back undoes, RT returns to inventory, Y trial, Start real run",
+  "howTo.build.body": "Buy parts in the shop, then pick them from your inventory and place them on the floor (you get a budget each shift, and leftovers carry over)\nTap a placed part to rotate it, drag to move it. Drag it to the inventory to return it, or to the sell area to sell it (half price)\nThe switch sends a signal in the direction of its arrow. Each part the signal passes changes its value, and the value that reaches a dock is shipped\nSignals that enter an empty cell or leave the floor disappear\nUndo (Z / Ctrl+Z) takes back your last place, rotate, move or return (buying, selling and rerolling can't be undone)\nKeyboard: arrows move, Enter places, R rotates, Z undoes, F returns to inventory, G merges, T trial, P real run\nController: D-pad moves, A places, X rotates, Back undoes, RT returns to inventory, LT merges, Y trial, Start real run",
   "howTo.chain.title": "Chain tips",
-  "howTo.chain.body": "Multiply: gears and presses make values bigger. Stacked multipliers make them skyrocket\nBranch: splitters and spreaders make more signals to reach more docks\nRetrigger: reflectors and turntables send signals through the same parts again (each part has an activation limit)\nPlacement: coils and solar panels depend on where they sit. Piggy banks add budget for the next shift\nTrial runs are unlimited. Try out a layout before pressing the real switch\nRandom parts like the Junkbot give different results on each trial. The shift is decided by the real switch",
+  "howTo.chain.body": "Multiply: gears and presses make values bigger. Stacked multipliers make them skyrocket\nBranch: splitters and spreaders make more signals to reach more docks\nRetrigger: reflectors and turntables send signals through the same parts again (each part has an activation limit)\nPlacement: coils and solar panels depend on where they sit. Piggy banks add budget for the next shift\nTrial runs are unlimited. Try out a layout before pressing the real switch\nRandom parts like the Junkbot give different results on each trial. The shift is decided by the real switch\nGold parts: 3 of the same part connected side by side start to glow. Select one and press Merge to turn that cell into a gold part (×3 after its effect; switches and resonance coils can't merge)",
   "howTo.night.title": "Night shifts and more",
   "howTo.night.body": "Night shifts have a special rule (low oil, floor repairs and more). You get a preview during the morning and noon shifts\nAfter a run, your records unlock new parts and a bigger factory (see the Collection)\nThe Weekly Challenge is 3 shifts with the same conditions for everyone all week (one ranked run per day). Your best of the week is ranked worldwide",
   "tutorial.gear.reroll": "You shipped {score}. Almost at the quota! But there's no Booster Gear in the shop. Try a Reroll to get new stock",
@@ -690,5 +690,11 @@
   "weekly.offline": "Can't reach the server. Normal mode is still playable",
   "weekly.retry": "Retry",
   "weekly.committing": "Verifying on the server…",
-  "weekly.seedCommitment": "Seed commitment (verifiable after closing): {hash}"
+  "weekly.seedCommitment": "Seed commitment (verifiable after closing): {hash}",
+  "selection.merge": "Merge into gold",
+  "selection.mergeShort": "Merge",
+  "selection.mergeHint": "Merges {count} connected parts of the same kind into one gold part on this cell",
+  "golden.name": "Gold {name}",
+  "golden.note": " (Gold: ×{multiplier} after its effect)",
+  "error.cannotMerge": "Can't merge (connect 3 of the same part side by side)"
 }

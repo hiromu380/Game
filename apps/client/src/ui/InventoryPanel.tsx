@@ -4,6 +4,7 @@
  */
 import {
   countItems,
+  goldenCount,
   PART_IDS,
   type ItemId,
   type PartId,
@@ -26,7 +27,7 @@ interface Props {
   boardHasParts: boolean;
   /** 初回ガイドで選んでほしいパーツ（光らせる） */
   guidePartId?: PartId | null;
-  onSelect: (partId: PartId) => void;
+  onSelect: (partId: PartId, golden: boolean) => void;
   onReturnAll: () => void;
   /** 消耗品の状態（持っている数は run.items から数える） */
   run: RunState;
@@ -52,7 +53,21 @@ export function InventoryPanel({
   onUseItem,
 }: Props) {
   const { t } = useI18n();
-  const items = PART_IDS.filter((id) => (inventory[id] ?? 0) > 0);
+  // 金色パーツは普通のパーツとは別の行にする（先に並べる）
+  const items = [
+    ...PART_IDS.filter((id) => goldenCount(run, id) > 0).map((id) => ({
+      id,
+      golden: true,
+      count: goldenCount(run, id),
+    })),
+    ...PART_IDS.filter((id) => (inventory[id] ?? 0) > 0).map((id) => ({
+      id,
+      golden: false,
+      count: inventory[id] ?? 0,
+    })),
+  ];
+  const isSelected = (id: PartId, golden: boolean) =>
+    selection?.kind === 'inventory' && selection.partId === id && !!selection.golden === golden;
   const selectedId = selection?.kind === 'inventory' ? selection.partId : null;
   const permits = countItems(run, 'floorPermit');
 
@@ -95,19 +110,26 @@ export function InventoryPanel({
         <p className="panel__hint">{t('inventory.empty')}</p>
       ) : (
         <ul className="item-list">
-          {items.map((id) => (
-            <li key={id}>
+          {items.map(({ id, golden, count }) => (
+            <li key={golden ? `${id}:golden` : id}>
               <button
-                className={`item-button ${selectedId === id ? 'item-button--selected' : ''} ${guidePartId === id && selectedId !== id ? 'is-guided' : ''}`}
+                className={`item-button ${isSelected(id, golden) ? 'item-button--selected' : ''} ${guidePartId === id && !golden && selectedId !== id ? 'is-guided' : ''}`}
                 disabled={disabled}
-                onClick={() => onSelect(id)}
+                onClick={() => onSelect(id, golden)}
               >
-                <PartIcon partId={id} />
+                <PartIcon partId={id} golden={golden} />
                 <span className="item-button__text">
-                  <span className="item-button__name">{t(`part.${id}.name`)}</span>
-                  <span className="item-button__desc">{describePart(t, id, rules)}</span>
+                  <span className="item-button__name">
+                    {golden
+                      ? t('golden.name', { name: t(`part.${id}.name`) })
+                      : t(`part.${id}.name`)}
+                  </span>
+                  <span className="item-button__desc">
+                    {describePart(t, id, rules)}
+                    {golden && t('golden.note', { multiplier: rules.goldenMultiplier ?? 1 })}
+                  </span>
                 </span>
-                <span className="item-button__meta item-button__count">×{inventory[id]}</span>
+                <span className="item-button__meta item-button__count">×{count}</span>
               </button>
             </li>
           ))}

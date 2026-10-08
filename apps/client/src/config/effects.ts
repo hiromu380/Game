@@ -39,6 +39,16 @@ export const EFFECTS_CONFIG = {
     maxAlive: 240,
   },
 
+  /** 金色パーツへの合体: 消える2マスから光の粒が集まり（gatherMs）、金の輪が広がる（ringMs） */
+  merge: {
+    gatherMs: 260,
+    ringMs: 500,
+    /** 消えるマス1つあたりの粒・合体後に散る火花の数（演出の強さで増減） */
+    dotsPerCell: 6,
+    sparks: 14,
+    sparksMs: 520,
+  },
+
   /** 連鎖数カウンター: この連鎖数に達したら大きく弾ませて色を変える */
   chainCounter: {
     /** 表示を始める連鎖数 */

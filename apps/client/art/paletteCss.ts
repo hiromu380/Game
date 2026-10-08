@@ -9,6 +9,8 @@ export function paletteCss(): string {
     `  --white: ${INK.white};`,
     `  --hazard-yellow: ${BOARD_COLORS.hazardYellow};`,
     `  --floor-item: ${BOARD_COLORS.floorItem};`,
+    `  --golden: ${BOARD_COLORS.golden};`,
+    `  --golden-deep: ${BOARD_COLORS.goldenDeep};`,
     `  --floor-bonus: ${BOARD_COLORS.floorBonus};`,
     `  --floor-blocked: ${BOARD_COLORS.blocked};`,
     ...Object.entries(VANISH_COLORS).map(([k, v]) => `  --vanish-${k}: ${v};`),

@@ -81,6 +81,30 @@ function day2Event(): RunState {
   return { ...run, config: { ...run.config, shifts: original.config.shifts } };
 }
 
+/**
+ * 金色パーツ: 増幅ギアが3つつながって光っている盤面と、金色の増幅ギア（盤面・手持ち）。
+ * ボーナス床は消して、パーツの見た目だけを比べる
+ */
+function golden(): RunState {
+  const run = createRun(5);
+  const cells = run.board.cells.map(() => null) as RunState['board']['cells'];
+  const put = (x: number, y: number, part: NonNullable<RunState['board']['cells'][number]>) => {
+    cells[y * run.board.width + x] = part;
+  };
+  put(0, 3, { id: 'switch', dir: 1 });
+  put(1, 3, { id: 'gear', dir: 1, golden: true });
+  put(2, 2, { id: 'gear', dir: 1 });
+  put(2, 3, { id: 'gear', dir: 1 });
+  put(3, 3, { id: 'gear', dir: 1 });
+  put(4, 3, { id: 'dock', dir: 1 });
+  return {
+    ...run,
+    board: { ...run.board, cells },
+    bonusFloor: null,
+    goldenInventory: { splitter: 1 },
+  };
+}
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -167,6 +191,23 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'poor', run: poor },
+  { name: 'golden', run: golden },
+  {
+    name: 'golden-select',
+    run: golden,
+    act: async (page) => {
+      await clickCell(page, 2, 3);
+    },
+  },
+  {
+    name: 'golden-merged',
+    run: golden,
+    act: async (page) => {
+      await clickCell(page, 2, 3);
+      await page.locator('.button--merge').first().click();
+      await page.waitForTimeout(350);
+    },
+  },
   {
     name: 'trial-done',
     run: day1,

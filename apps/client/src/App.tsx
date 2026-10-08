@@ -16,6 +16,7 @@ import {
   getRefund,
   getRerollCost,
   isEventPending,
+  mergeCells,
   scoreToString,
   SIM_VERSION,
   type RunState,
@@ -327,7 +328,10 @@ export function App({ start, onTitle }: Props) {
       })(),
       highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
       placing:
-        selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
+        selection?.kind === 'inventory'
+          ? { partId: selection.partId, dir: selection.dir, golden: !!selection.golden }
+          : null,
+      mergeable: run.phase === 'building' ? mergeableCells(run) : [],
       shiftKey: `${run.seed}:${run.shiftIndex}`,
       guideCell: guideStep ? tutorialCell(guideStep) : null,
     }),
@@ -462,6 +466,7 @@ export function App({ start, onTitle }: Props) {
     onRotate: () => dispatch({ type: 'rotate' }),
     onUndo: () => dispatch({ type: 'undo' }),
     onReturn: () => dispatch({ type: 'returnSelected' }),
+    onMerge: () => dispatch({ type: 'mergeSelected' }),
     onTrial: () => startPlayback('startTrial'),
     onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,
@@ -587,7 +592,7 @@ export function App({ start, onTitle }: Props) {
       disabled={playing}
       boardHasParts={run.board.cells.some((cell) => cell !== null)}
       guidePartId={guideStep && guideStep !== 'buyGear' ? tutorialPart(guideStep) : null}
-      onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
+      onSelect={(partId, golden) => dispatch({ type: 'selectInventory', partId, golden })}
       onReturnAll={() => dispatch({ type: 'returnAll' })}
       run={run}
       lastShiftOfDay={getDayAndPeriod(run).period === run.config.shiftsPerDay - 1}
@@ -605,6 +610,7 @@ export function App({ start, onTitle }: Props) {
       onRotate={() => dispatch({ type: 'rotate' })}
       onReturn={() => dispatch({ type: 'returnSelected' })}
       onSell={() => dispatch({ type: 'sellSelected' })}
+      onMerge={() => dispatch({ type: 'mergeSelected' })}
     />
   );
 
@@ -819,4 +825,14 @@ export function App({ start, onTitle }: Props) {
       </main>
     </div>
   );
+}
+
+/** 合体できるパーツのマス（盤面で同じパーツが3つ以上つながっているマス。金色の枠で光らせる） */
+function mergeableCells(run: RunState): number[] {
+  const { width, height } = run.board;
+  const cells: number[] = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) if (mergeCells(run, x, y)) cells.push(y * width + x);
+  }
+  return cells;
 }
