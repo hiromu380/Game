@@ -18,6 +18,7 @@ import {
   type RunState,
   chooseEvent,
   isEventPending,
+  startOvertime,
 } from '@chain-factory/sim';
 import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
 import { evaluate, type EvalMode } from './evaluate';
@@ -93,6 +94,8 @@ export interface RunnerOptions {
   floorAware?: boolean;
   /** ボットがランダム配置権を買って使うか（既定 true。false は「配置権を使わないボット」との比較用） */
   permits?: boolean;
+  /** 全シフトをクリアしたら延長戦に入り、最大この日数まで続ける（既定 0: 延長戦に入らない） */
+  overtimeDays?: number;
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
@@ -148,7 +151,13 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     : options.mode === 'weekly'
       ? createWeeklyRun(`bal-${seed}`, { practice: true })
       : createRun(seed, meta);
-  while (state.phase === 'building') {
+  const overtimeEnd =
+    state.config.shifts.length + (options.overtimeDays ?? 0) * state.config.shiftsPerDay;
+  for (;;) {
+    if (state.phase === 'cleared' && (options.overtimeDays ?? 0) > 0) {
+      state = startOvertime(state) ?? state;
+    }
+    if (state.phase !== 'building' || state.shiftIndex >= overtimeEnd) break;
     // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
     // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
     if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
@@ -216,7 +225,8 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     state = committed.state;
   }
 
-  log.cleared = state.phase === 'cleared';
+  log.cleared =
+    state.phase === 'cleared' || (state.overtime === true && state.phase === 'building');
   log.ms = nowMs() - started;
   return log;
 }
