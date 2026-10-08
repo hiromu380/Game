@@ -2,7 +2,9 @@
  * 再生後の結果表示（試運転 / 本番）
  */
 import {
+  BALANCE,
   getCurrentShift,
+  isUnmeasurable,
   scoreCompare,
   scoreOf,
   scoreToString,
@@ -24,7 +26,7 @@ interface Props {
 }
 
 export function PlaybackPanel({ playback, run, onClose }: Props) {
-  const { t, formatScore, formatCompact } = useI18n();
+  const { t, formatScore, formatCompact, formatMeasured } = useI18n();
   if (!playback.finished) {
     return <div className="playback-banner">{t('playback.playing')}</div>;
   }
@@ -63,13 +65,22 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
       <RocketLine playback={playback} run={run} />
       <dl className="stats">
         <dt>{t('playback.score')}</dt>
-        <dd className="stats__score">{formatScore(score)}</dd>
+        <dd className="stats__score">
+          {formatMeasured(score)}
+          {isUnmeasurable(score) && (
+            <span className="stats__note">
+              {t('unmeasurable.note', {
+                limit: formatScore(`1${'0'.repeat(BALANCE.unmeasurable.digits - 1)}`),
+              })}
+            </span>
+          )}
+        </dd>
         <dt>{t('playback.quota')}</dt>
         <dd>{formatScore(String(quota))}</dd>
         <dt>{t('playback.chain')}</dt>
         <dd>{stats.chainCount}</dd>
         <dt>{t('playback.maxValue')}</dt>
-        <dd>{formatScore(scoreToString(stats.maxValue))}</dd>
+        <dd>{formatMeasured(scoreToString(stats.maxValue))}</dd>
         {playback.result.income > 0 && (
           <>
             <dt>{t('playback.income')}</dt>

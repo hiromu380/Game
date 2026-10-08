@@ -13,6 +13,7 @@ import type { BossModifierId } from '../balance';
  * 解除条件
  * - shiftScore:      1シフトの出荷量が atLeast 以上
  * - shiftZero:       本番の出荷量が 0（隠し実績用）
+ * - unmeasurable:    1シフトの出荷量が「計測不能」（balance/ の桁数以上。隠し実績用）
  * - shiftCleared:    シフトをクリアした（boss を指定したらそのボスのシフト、'any' なら何かのボスのシフト）
  * - chain:           1回の稼働で連鎖数が atLeast 以上
  * - junkbotStreak:   1回の稼働でポンコツロボが count 回続けて最大倍率を出した
@@ -27,6 +28,7 @@ import type { BossModifierId } from '../balance';
 export type AchievementCondition =
   | { kind: 'shiftScore'; atLeast: string }
   | { kind: 'shiftZero' }
+  | { kind: 'unmeasurable' }
   | { kind: 'shiftCleared'; boss?: BossModifierId | 'any' }
   | { kind: 'chain'; atLeast: number }
   | { kind: 'junkbotStreak'; count: number }
@@ -130,6 +132,7 @@ export const ACHIEVEMENTS = [
   },
   { id: 'ACH_JUNKBOT_JACKPOT', hidden: true, condition: { kind: 'junkbotStreak', count: 3 } },
   { id: 'ACH_ZERO', hidden: true, condition: { kind: 'shiftZero' } },
+  { id: 'ACH_UNMEASURABLE', hidden: true, condition: { kind: 'unmeasurable' } },
 ] as const satisfies readonly AchievementDef[];
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id'];

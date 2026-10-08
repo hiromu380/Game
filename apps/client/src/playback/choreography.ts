@@ -9,7 +9,7 @@
  * - 盤面の光は1秒に3回まで。「点滅を減らす」なら光を出さない
  * 設定値は config/effects.ts の choreography。描く側（board/）はこの命令列をそのまま再生する
  */
-import { scoreOf, type FloorTileId, type Score, type SimEvent } from '@chain-factory/sim';
+import { BALANCE, scoreOf, type FloorTileId, type Score, type SimEvent } from '@chain-factory/sim';
 import { EFFECTS_CONFIG, type EffectStrength } from '../config/effects';
 import { groupEventsByTick } from './timeline';
 
@@ -22,6 +22,8 @@ export interface ChoreographyOptions {
   reduceFlashes: boolean;
   /** ノルマ（試運転・本番の両方で、超えた瞬間を見せる。なければ null） */
   quota: number | null;
+  /** 計測不能の桁数（既定は balance/ の値。テストで差し替える） */
+  unmeasurableDigits?: number;
 }
 
 export type Cue =
@@ -37,6 +39,8 @@ export type Cue =
   | { atMs: number; kind: 'digitUp'; digits: number; total: Score }
   /** 合計がノルマを超えた */
   | { atMs: number; kind: 'quotaCross' }
+  /** 合計が「計測不能」の桁数に達した（メーターが振り切れる。以後は桁上がりを出さない） */
+  | { atMs: number; kind: 'unmeasurable' }
   /** 盤面の光（面積は盤面の中、不透明度は alpha まで） */
   | { atMs: number; kind: 'flash'; alpha: number; durationMs: number }
   /** ピーク: 一瞬止めて大きく揺らす */
@@ -123,6 +127,8 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
   let chainSoFar = 0;
   let total = scoreOf(0);
   let quotaCrossed = false;
+  const unmeasurableDigits = options.unmeasurableDigits ?? BALANCE.unmeasurable.digits;
+  let overflowed = false;
   let lastFlashAt = -Infinity;
   let pops = 0;
   let lastPopAt = -Infinity;
@@ -196,8 +202,16 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
       const before = digitsOf(total);
       total = e.total;
       const after = digitsOf(total);
-      // 単位（K・M・B…）が切り替わる桁（4・7・10…桁）を越えた
-      if (Math.floor((after - 1) / 3) > Math.floor((before - 1) / 3) && after >= 4) {
+      if (!overflowed && after >= unmeasurableDigits) {
+        overflowed = true;
+        cues.push({ atMs: at, kind: 'unmeasurable' });
+        flash(at);
+      } else if (
+        // 単位（K・M・B…）が切り替わる桁（4・7・10…桁）を越えた（計測不能の後は出さない）
+        !overflowed &&
+        Math.floor((after - 1) / 3) > Math.floor((before - 1) / 3) &&
+        after >= 4
+      ) {
         cues.push({ atMs: at, kind: 'digitUp', digits: after, total });
         flash(at);
       }

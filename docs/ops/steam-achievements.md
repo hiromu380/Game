@@ -1,6 +1,6 @@
 # 実績・統計の登録（人が行う作業）
 
-実績30個と、回数系の統計3つを Steamworks に登録する。定義はコード（`packages/sim/src/achievements/definitions.ts`）が正で、
+実績31個と、回数系の統計3つを Steamworks に登録する。定義はコード（`packages/sim/src/achievements/definitions.ts`）が正で、
 Steamworks にはその一覧を書き写す。**体験版の App ID には登録しない**（体験版では実績を無効にしている）。
 
 ## 1. 登録する一覧を用意する
@@ -31,7 +31,7 @@ Steamworks の「統計と実績」→「統計」で3つ作る。
 
 - **API 名**は表のとおり（大文字・下線も同じ）。ゲームはこの名前で解除する
 - 名前・説明は日本語と英語の両方を入れる（言語の切り替え欄）
-- 「隠し」がはいの2つ（ACH_JUNKBOT_JACKPOT・ACH_ZERO）は、隠し実績にする
+- 「隠し」がはいの3つ（ACH_JUNKBOT_JACKPOT・ACH_ZERO・ACH_UNMEASURABLE）は、隠し実績にする
 - 進捗の統計がある3つ（ACH_FULL_CLEAR_10・ACH_RUNS_10/50・ACH_DAILY_7）は、「進捗の統計」に表の統計と範囲（0〜上限）を設定する
 - アイコンは解除済みと未解除の2枚を上げる
 - 全部作ったら「公開」する（公開するまでゲームから解除できない。要確認）

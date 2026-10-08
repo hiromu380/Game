@@ -76,6 +76,7 @@ export function PixiBoard(props: Props) {
       formatScore: (value) => labels().formatScore(value),
       formatCompact: (value) => labels().formatCompact(value),
       getQuotaCrossLabel: () => labels().getQuotaCrossLabel(),
+      getUnmeasurableLabel: () => labels().getUnmeasurableLabel(),
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),
       playSound: (key, semitones) => audio.play(key, semitones),

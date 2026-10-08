@@ -7,6 +7,8 @@ import {
   ACHIEVEMENT_IDS,
   achievementStats,
   BALANCE,
+  isUnmeasurable,
+  scoreFromString,
   commitShift,
   createInitialAchievements,
   createInitialMeta,
@@ -70,9 +72,9 @@ const evaluate = (context: AchievementContext, progress = createInitialAchieveme
   evaluateAchievements(progress, context);
 
 describe('実績の定義', () => {
-  it('30個・ID は Steamworks の API 名の形で重複なし', () => {
-    expect(ACHIEVEMENTS).toHaveLength(30);
-    expect(new Set(ACHIEVEMENT_IDS).size).toBe(30);
+  it('31個・ID は Steamworks の API 名の形で重複なし', () => {
+    expect(ACHIEVEMENTS).toHaveLength(31);
+    expect(new Set(ACHIEVEMENT_IDS).size).toBe(31);
     for (const id of ACHIEVEMENT_IDS) expect(id).toMatch(/^ACH_[A-Z0-9_]+$/);
   });
 });
@@ -110,6 +112,16 @@ describe('シフト確定時の判定', () => {
       'ACH_OVERTIME_9',
       'ACH_ZERO',
     ]);
+  });
+
+  it('計測不能の隠し実績: 1シフトの出荷量が balance/ の桁数以上', () => {
+    const digits = BALANCE.unmeasurable.digits;
+    const below = '9'.repeat(digits - 1);
+    const at = `1${'0'.repeat(digits - 1)}`;
+    expect(evaluate(shiftContext({ score: below }))).not.toContain('ACH_UNMEASURABLE');
+    expect(evaluate(shiftContext({ score: at }))).toContain('ACH_UNMEASURABLE');
+    expect(isUnmeasurable(below)).toBe(false);
+    expect(isUnmeasurable(scoreFromString(at))).toBe(true);
   });
 
   it('解除済みの実績は返さない', () => {

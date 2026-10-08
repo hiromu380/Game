@@ -58,6 +58,8 @@ export type SoundKey =
   | 'permitTick'
   | 'permitLand'
   | 'quotaCross'
+  /** 計測不能（メーターが振り切れた）: 警報のように上下する音 */
+  | 'unmeasurable'
   | 'peak'
   | 'stamp'
   | 'quotaMet'
@@ -321,6 +323,20 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 988, at: 0.08, duration: 0.08 },
         { freq: 1175, at: 0.16, duration: 0.08 },
         { freq: 1568, at: 0.24, duration: 0.22 },
+      ],
+    },
+  },
+  unmeasurable: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.2,
+      notes: [
+        { freq: 1397, at: 0, duration: 0.14 },
+        { freq: 932, at: 0.14, duration: 0.14 },
+        { freq: 1397, at: 0.28, duration: 0.14 },
+        { freq: 932, at: 0.42, duration: 0.14 },
+        { freq: 1865, at: 0.6, duration: 0.5 },
       ],
     },
   },

@@ -2,7 +2,7 @@
  * バランス定数（ゲームの数値はすべてこのフォルダに集約する）
  *
  * 種類ごとにファイルを分けている。数値を変えるときは該当するファイルだけを開けばよい:
- * - sim.ts      盤面の広さ・tick 上限などシミュレーション全体の上限
+ * - sim.ts      盤面の広さ・tick 上限などシミュレーション全体の上限・計測不能の桁数
  * - parts.ts    パーツの価格・発動回数・レア度・効果量（倍率など）・ショップの出現重み
  * - floors.ts   床タイルの効果量（×2床・加算床・×3床）とシフト開始時のボーナス床・ランダム配置権
  * - stages.ts   日ごとのステージ（床の配置のテンプレートと、日ごとの抽選の帯）
@@ -28,7 +28,7 @@ import { META } from './meta';
 import { GOLDEN, PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { STAGES } from './stages';
 import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
-import { BOARD, SIM } from './sim';
+import { BOARD, SIM, UNMEASURABLE } from './sim';
 import type { Balance } from './types';
 
 export type * from './types';
@@ -36,6 +36,7 @@ export type * from './types';
 export const BALANCE: Balance = {
   board: BOARD,
   sim: SIM,
+  unmeasurable: UNMEASURABLE,
   parts: PARTS,
   partParams: PART_PARAMS,
   floorParams: FLOOR_PARAMS,

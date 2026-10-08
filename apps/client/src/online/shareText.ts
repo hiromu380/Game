@@ -84,9 +84,11 @@ export function buildShareText(t: TranslateFn, input: ShareInput): string {
 /** 通常ランのシェア文 */
 export function buildRunShareText(
   t: TranslateFn,
-  input: { result: string; score: string; shift: number },
+  input: { result: string; score: string; shift: number; unmeasurable?: boolean },
 ): string {
-  return t('share.runText', input);
+  const { unmeasurable, ...params } = input;
+  // 計測不能のシフトがあったら、数字の代わりにそれを見出しにする（数字を出さないので気になる）
+  return t(unmeasurable ? 'share.runTextUnmeasurable' : 'share.runText', params);
 }
 
 /** X の投稿画面の URL（本文と、別枠で付ける URL） */

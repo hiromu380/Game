@@ -189,6 +189,12 @@ export interface Balance {
     maxLiveSignals: number;
   };
 
+  /**
+   * 「計測不能」: 1シフトの出荷量がこの桁数以上になったら、画面では数字の代わりに「計測不能」と出す
+   * （演出・隠し実績・シェア文も。表示だけで、内部の値・ランキングの並びは正確な値のまま）
+   */
+  unmeasurable: { digits: number };
+
   /** パーツごとの価格・発動回数・レア度 */
   parts: Record<PartId, PartBalance>;
   /** パーツ固有の効果量 */

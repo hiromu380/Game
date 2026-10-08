@@ -38,6 +38,7 @@
 | ACH_DAILY_7 | 皆勤賞 | 週替わりチャレンジに合計7日参加する | Perfect Attendance | Take part in Weekly Challenges on 7 days |  | STAT_DAILY_DAYS（0〜7） |
 | ACH_JUNKBOT_JACKPOT | ポンコツの本気 | ポンコツロボが1回の稼働で3回続けて ×3 を出す | Junkbot Jackpot | Have Junkbots roll ×3 three times in a row in one run of the factory | はい |  |
 | ACH_ZERO | 何も起きない | スイッチを押して、出荷量 0 で終わる | Nothing Happened | Press the switch and ship nothing at all | はい |  |
+| ACH_UNMEASURABLE | 計測不能 | 1シフトの出荷量でメーターを振り切る | Unmeasurable | Max out the shipping meter in a single shift | はい |  |
 
 ## 統計（回数系のみ）
 

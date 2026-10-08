@@ -11,6 +11,7 @@ import { BALANCE, type Balance, type PartParams } from '../balance';
 import { SCORE_ZERO, scoreCompare, scoreFromString, scoreMul, type Score } from '../core/score';
 import type { MetaProgress } from '../meta/types';
 import { getCurrentRules } from '../run/shift';
+import { isUnmeasurable } from '../run/unmeasurable';
 import type { CommitResult, RunState, ShiftRecord } from '../run/types';
 import type { SimEvent, SimResult } from '../types';
 import {
@@ -124,6 +125,8 @@ function isMet(
   switch (condition.kind) {
     case 'shiftScore':
       return !!shift && atLeast(scoreFromString(shift.record.score), condition.atLeast);
+    case 'unmeasurable':
+      return !!shift && isUnmeasurable(shift.record.score);
     case 'shiftZero':
       return !!shift && scoreCompare(scoreFromString(shift.record.score), SCORE_ZERO) === 0;
     case 'shiftCleared':

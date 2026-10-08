@@ -40,7 +40,7 @@ interface Props {
 
 export function RunEndScreen(props: Props) {
   const { run, meta, unlocks, mode, onRetry, onOvertime } = props;
-  const { t, formatScore } = useI18n();
+  const { t, formatScore, formatMeasured } = useI18n();
   const canOvertime = run.phase === 'cleared' && !run.overtime && run.config.overtimeAllowed;
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
@@ -63,7 +63,7 @@ export function RunEndScreen(props: Props) {
         </h1>
         <dl className="stats stats--large">
           <dt>{t('runEnd.finalScore')}</dt>
-          <dd className="stats__score">{formatScore(total)}</dd>
+          <dd className="stats__score">{formatMeasured(total)}</dd>
           <dt>{t('runEnd.bestChain')}</dt>
           <dd>{getBestChain(run)}</dd>
           <dt>{t('runEnd.shiftsCleared')}</dt>
@@ -76,7 +76,7 @@ export function RunEndScreen(props: Props) {
             <li key={r.shiftIndex} className={r.cleared ? 'is-met' : 'is-missed'}>
               {t('runEnd.shiftRow', {
                 index: r.shiftIndex + 1,
-                score: formatScore(r.score),
+                score: formatMeasured(r.score),
                 quota: formatScore(String(r.quota)),
               })}
             </li>

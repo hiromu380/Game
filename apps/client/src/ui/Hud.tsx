@@ -20,7 +20,7 @@ interface Props {
 }
 
 export function Hud({ run, liveScore: target, trial }: Props) {
-  const { t, formatScore, formatCompact } = useI18n();
+  const { t, formatScore, formatMeasuredCompact } = useI18n();
   // 出荷のたびに、前の値から勢いよく増えてピタッと止まる
   const liveScore = useCountUp(target);
   const quota = getCurrentShift(run).quota;
@@ -64,7 +64,7 @@ export function Hud({ run, liveScore: target, trial }: Props) {
       >
         <span className="hud__label">{t(live !== null ? 'hud.score' : 'hud.trial')}</span>
         <span className="hud__value hud__value--score">
-          {shown === null ? t('hud.trialNone') : formatCompact(shown.toString())}
+          {shown === null ? t('hud.trialNone') : formatMeasuredCompact(shown.toString())}
           {shown !== null && (
             <small className="hud__trial-percent">
               {met
@@ -84,8 +84,8 @@ export function Hud({ run, liveScore: target, trial }: Props) {
                 ? trial.count > 1
                   ? t('hud.trialRange', {
                       count: trial.count,
-                      min: formatCompact(trial.min.toString()),
-                      max: formatCompact(trial.max.toString()),
+                      min: formatMeasuredCompact(trial.min.toString()),
+                      max: formatMeasuredCompact(trial.max.toString()),
                     })
                   : t('hud.trialRandom')
                 : null}

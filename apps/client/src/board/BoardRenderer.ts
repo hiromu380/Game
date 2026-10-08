@@ -114,6 +114,8 @@ export interface BoardLabels {
   formatCompact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯の文言 */
   getQuotaCrossLabel: () => string;
+  /** 計測不能の帯の見出しと小見出し */
+  getUnmeasurableLabel: () => { title: string; sub: string };
   /** 床タイルの短い表記（マスの左上・演出。例: ×2・+3） */
   getFloorShort: (tile: FloorTileId, params: FloorParams) => string;
   /** 床の説明（ホバー時。ボーナス床・出来事の床は期間も） */
@@ -222,6 +224,7 @@ export class BoardRenderer {
         score: options.formatScore,
         compact: options.formatCompact,
         quotaCross: options.getQuotaCrossLabel,
+        unmeasurable: options.getUnmeasurableLabel,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
       () => ({ width: this.app.screen.width, height: this.app.screen.height }),
@@ -790,6 +793,10 @@ export class BoardRenderer {
       case 'quotaCross':
         this.options.playSound('quotaCross', 0);
         this.effects.quotaCross();
+        break;
+      case 'unmeasurable':
+        this.options.playSound('unmeasurable', 0);
+        this.effects.unmeasurable();
         break;
       case 'flash':
         this.effects.flash(cue.alpha, cue.durationMs / rate);

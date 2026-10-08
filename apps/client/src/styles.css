@@ -562,6 +562,13 @@ button:disabled {
 .stats__score {
   color: var(--met);
 }
+/* 計測不能のときの補足（出荷量の下に小さく） */
+.stats__note {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: var(--muted);
+}
 .stats--large {
   font-size: 1.2rem;
 }

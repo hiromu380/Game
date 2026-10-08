@@ -696,5 +696,11 @@
   "selection.mergeHint": "つながった同じパーツ {count} つを、このマスの金色パーツ1つにまとめます",
   "golden.name": "金色の{name}",
   "golden.note": "（金色: 効果の後で値を ×{multiplier}）",
-  "error.cannotMerge": "合体できません（同じパーツを縦横に3つつなげてください）"
+  "error.cannotMerge": "合体できません（同じパーツを縦横に3つつなげてください）",
+  "unmeasurable.label": "計測不能",
+  "unmeasurable.overload": "出荷メーターが振り切れました",
+  "unmeasurable.note": "{limit} を超えて、メーターでは測れません",
+  "share.runTextUnmeasurable": "#ChainFactory 出荷量が計測不能になった\nボルトのロケット: {result}・シフト {shift} まで到達",
+  "achievement.ACH_UNMEASURABLE.name": "計測不能",
+  "achievement.ACH_UNMEASURABLE.desc": "1シフトの出荷量でメーターを振り切る"
 }

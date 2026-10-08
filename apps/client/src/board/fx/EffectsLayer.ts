@@ -47,13 +47,21 @@ export interface EffectLabels {
   compact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯（例: ノルマ突破！） */
   quotaCross: () => string;
+  /** 計測不能の帯の見出しと小見出し */
+  unmeasurable: () => { title: string; sub: string };
 }
 
 /** 値の桁数（演出の段階を決める） */
 export const digitsOf = (value: Score): number => value.toString().length;
 
 /** 見出しの優先度（大きいほど優先。同じなら新しい方に置き換える） */
-const HEADLINE_PRIORITY = { digitUp: 1, quotaCross: 2, cutIn: 3, stamp: 4 } as const;
+const HEADLINE_PRIORITY = {
+  digitUp: 1,
+  quotaCross: 2,
+  cutIn: 3,
+  unmeasurable: 4,
+  stamp: 5,
+} as const;
 type HeadlineKind = keyof typeof HEADLINE_PRIORITY;
 
 /** 盤面の数字ポップを短い表記にする桁数（これ以上は 1.2M のように縮めて、マスからはみ出さないようにする） */
@@ -387,6 +395,68 @@ export class EffectsLayer {
         band.alpha = t < 0.15 ? t / 0.15 : t < 0.75 ? 1 : 1 - (t - 0.75) / 0.25;
         text.scale.set(
           t < 0.15 ? 0.6 + (t / 0.15) * 0.5 : 1.1 - 0.1 * Math.min(1, (t - 0.15) / 0.2),
+        );
+      },
+      onComplete: () => this.endHeadline(band),
+    });
+  }
+
+  /**
+   * 計測不能: 盤面の真ん中に警告の帯（上下に黄黒の縞）が出て、「計測不能」の文字が震える。
+   * 点滅はさせない（震えは位置だけ）。演出の強さが「弱」なら震え・揺れなしで帯だけ出す
+   */
+  unmeasurable(): void {
+    const cfg = EFFECTS_CONFIG.unmeasurable;
+    const minimal = this.settings.strength === 'minimal';
+    const { width, height } = this.getScreenSize();
+    const h = cfg.bandHeight;
+    const stripe = 10;
+    const band = new Container();
+    const back = new Graphics().rect(0, 0, width, h).fill({ color: 0x000000, alpha: 0.82 });
+    // 上下の黄黒の縞（斜めの帯を並べる）
+    for (const y of [0, h - stripe]) {
+      back.rect(0, y, width, stripe).fill(BOARD_THEME.hazardYellow);
+      for (let x = -stripe; x < width + stripe; x += stripe * 2) {
+        back
+          .poly([x, y + stripe, x + stripe, y, x + stripe * 2, y, x + stripe, y + stripe])
+          .fill(BOARD_THEME.hazardBlack);
+      }
+    }
+    const { title, sub } = this.labels.unmeasurable();
+    const titleText = new Text({
+      text: title,
+      style: {
+        fill: 0xffffff,
+        fontSize: Math.min(56, Math.floor((width * 0.8) / Math.max(4, title.length))),
+        fontWeight: '900',
+        stroke: { color: BOARD_THEME.blocked, width: 8 },
+      },
+    });
+    titleText.anchor.set(0.5);
+    titleText.position.set(width / 2, h / 2 - 8);
+    const subText = new Text({
+      text: sub,
+      style: { fill: BOARD_THEME.hazardYellow, fontSize: 16, fontWeight: '900' },
+    });
+    subText.anchor.set(0.5);
+    subText.position.set(width / 2, h - stripe - 16);
+    band.addChild(back, titleText, subText);
+    band.position.set(0, height / 2 - h / 2);
+    if (!this.showHeadline('unmeasurable', band)) return;
+    if (!minimal) this.addShake(cfg.shake);
+
+    const jitter = minimal ? 0 : cfg.jitterPx * this.power;
+    this.tweens.add({
+      duration: cfg.durationMs,
+      onUpdate: (t) => {
+        if (band.destroyed) return;
+        band.alpha = t < 0.08 ? t / 0.08 : t < 0.85 ? 1 : 1 - (t - 0.85) / 0.15;
+        titleText.scale.set(t < 0.1 ? 1.8 - 0.8 * easeOutCubic(t / 0.1) : 1);
+        // 針が振り切れたメーターのように、文字が細かく震える（序盤ほど大きく）
+        const amount = jitter * (1 - t);
+        titleText.position.set(
+          width / 2 + (Math.random() - 0.5) * 2 * amount,
+          h / 2 - 8 + (Math.random() - 0.5) * 2 * amount,
         );
       },
       onComplete: () => this.endHeadline(band),

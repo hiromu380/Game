@@ -122,6 +122,15 @@ describe('連鎖の演出の流れ', () => {
     expect(kinds(none.cues)).not.toContain('quotaCross');
   });
 
+  it('合計が計測不能の桁数に達したら、桁上がりの代わりに「計測不能」を1回だけ出す', () => {
+    // 合計 12,345（5桁）を、4桁で計測不能になる設定で
+    const c = buildChoreography(hugeEvents(5), { ...strong, quota: null, unmeasurableDigits: 4 });
+    expect(kinds(c.cues).filter((k) => k === 'unmeasurable')).toHaveLength(1);
+    expect(kinds(c.cues)).not.toContain('digitUp');
+    // 既定（balance/ の桁数）では出ない
+    expect(kinds(buildChoreography(hugeEvents(5), strong).cues)).not.toContain('unmeasurable');
+  });
+
   it('規模が大きいほど長いが、どんなに長い連鎖でも上限内に収まる', () => {
     const total = (events: SimEvent[]) => buildChoreography(events, strong).totalMs;
     expect(total(small.events)).toBeLessThan(total(medium.events));

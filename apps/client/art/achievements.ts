@@ -70,6 +70,18 @@ const box = (x: number, y: number, s: number) =>
     path(`M${x + s / 2} ${y} V${y + s * 0.35}`, line(M.cardboardDark, 2)),
   );
 
+/** 振り切れたメーター（計測不能）: 半円の目盛り、赤い域、上限を越えて曲がった針 */
+const brokenMeter = () =>
+  group(
+    {},
+    path('M10 40 A22 22 0 0 1 54 40 Z', outlined(INK.white, 3)),
+    path('M44 22 A22 22 0 0 1 54 40 L32 40 Z', { fill: U.missed }),
+    path('M10 40 A22 22 0 0 1 54 40', line(INK.outline, 3)),
+    path('M32 40 L56 30 L60 22', line(INK.outline, 4)),
+    circle(32, 40, 4, { fill: INK.outline }),
+    path('M52 10 L56 16 M60 12 L58 18 M48 16 L54 19', line(U.missed, 2.5)),
+  );
+
 const moon = () => path('M38 10 a14 14 0 1 0 12 22 a11 11 0 1 1 -12 -22 Z', outlined(M.sun, 3));
 
 const DEFS: Record<AchievementId, { group: Group; body: string[] }> = {
@@ -136,6 +148,7 @@ const DEFS: Record<AchievementId, { group: Group; body: string[] }> = {
     body: [art(partBody('junkbot'), 0.5), label('×3')],
   },
   ACH_ZERO: { group: 'secret', body: [art(boltBody('surprised'), 0.5, 1), label('0')] },
+  ACH_UNMEASURABLE: { group: 'secret', body: [brokenMeter()] },
 };
 
 function medal(ring: string, body: string[]): string[] {

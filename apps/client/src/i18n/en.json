@@ -696,5 +696,11 @@
   "selection.mergeHint": "Merges {count} connected parts of the same kind into one gold part on this cell",
   "golden.name": "Gold {name}",
   "golden.note": " (Gold: ×{multiplier} after its effect)",
-  "error.cannotMerge": "Can't merge (connect 3 of the same part side by side)"
+  "error.cannotMerge": "Can't merge (connect 3 of the same part side by side)",
+  "unmeasurable.label": "UNMEASURABLE",
+  "unmeasurable.overload": "The shipping meter has maxed out",
+  "unmeasurable.note": "Over {limit}. The meter can't read it",
+  "share.runTextUnmeasurable": "#ChainFactory Shipments went UNMEASURABLE\nBolt's rocket: {result} · reached shift {shift}",
+  "achievement.ACH_UNMEASURABLE.name": "Unmeasurable",
+  "achievement.ACH_UNMEASURABLE.desc": "Max out the shipping meter in a single shift"
 }

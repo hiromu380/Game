@@ -15,6 +15,16 @@ export const EFFECTS_CONFIG = {
     durationMs: 1300,
   },
 
+  /** 計測不能（合計が balance/ の桁数に達した）: 警告の帯と、震える「計測不能」の文字 */
+  unmeasurable: {
+    durationMs: 1900,
+    bandHeight: 120,
+    /** 文字の震えの幅（px。演出の強さで増減。「弱」では震えない） */
+    jitterPx: 5,
+    /** 揺れ（px） */
+    shake: 26,
+  },
+
   /** 画面の揺れ（px） */
   shake: {
     /** この桁数以上の出荷から揺らす */

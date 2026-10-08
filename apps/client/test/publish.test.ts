@@ -75,6 +75,17 @@ describe('シェア文', () => {
     );
   });
 
+  it('計測不能のシフトがあったら、数字を出さずに「計測不能」を見出しにする', () => {
+    const text = buildRunShareText(t, {
+      result: '打ち上げ成功！',
+      score: '計測不能',
+      shift: 21,
+      unmeasurable: true,
+    });
+    expect(text).toContain('計測不能');
+    expect(text).toContain('シフト 21 まで到達');
+  });
+
   it('X の投稿画面の URL は本文と URL をエンコードする', () => {
     expect(xIntentUrl('a b#c')).toBe('https://x.com/intent/post?text=a%20b%23c');
     expect(xIntentUrl('a', 'https://e.com/?x=1')).toBe(

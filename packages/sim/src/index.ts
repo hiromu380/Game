@@ -79,6 +79,7 @@ export {
   sellPart,
 } from './run/build';
 export { goldenCount } from './run/inventory';
+export { isUnmeasurable } from './run/unmeasurable';
 export {
   abandonRun,
   commitShift,

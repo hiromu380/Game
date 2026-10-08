@@ -136,7 +136,7 @@ const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
 const DEBUG_AVAILABLE = !CAPTURE && isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
-  const { t, formatScore, formatCompact } = useI18n();
+  const { t, formatCompact, formatMeasured } = useI18n();
   const [state, dispatch] = useReducer(gameReducer, start, (initialStart) => {
     const initial = createInitialState();
     return initialStart
@@ -347,6 +347,10 @@ export function App({ start, onTitle }: Props) {
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
       getQuotaCrossLabel: () => t('playback.quotaCross'),
+      getUnmeasurableLabel: () => ({
+        title: t('unmeasurable.label'),
+        sub: t('unmeasurable.overload'),
+      }),
       getFloorShort: (tile, params) => t(`floor.${tile}.short`, floorAmounts(params)),
       getFloorDescription: (cell, params) =>
         t('floor.tooltip', {
@@ -357,10 +361,11 @@ export function App({ start, onTitle }: Props) {
               ? t(`floor.period.${cell.source}`)
               : '',
         }),
-      formatScore,
+      // 盤面の合計（ドン・カットイン）は、計測不能の桁数以上なら「計測不能」
+      formatScore: formatMeasured,
       formatCompact,
     }),
-    [t, formatScore, formatCompact],
+    [t, formatMeasured, formatCompact],
   );
   const effectSettings = useMemo(
     () => ({
