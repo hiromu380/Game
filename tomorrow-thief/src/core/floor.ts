@@ -93,7 +93,6 @@ export function generateFloor(seed: number, bankedTotal: number): Floor {
     const pillars: Fixture[] = [
       { kind: 'pillar', x: ROOM_W - 1, y: ROOM_H - 1 },
       { kind: 'pillar', x: 3, y: ROOM_H - 1 },
-      { kind: 'pillar', x: ROOM_W - 1, y: 2 },
     ];
     rooms[id]!.fixtures.push(
       ...pillars.filter((f) => !rooms[id]!.doors.some((d) => Math.abs(d.x - f.x) + Math.abs(d.y - f.y) <= 1)),

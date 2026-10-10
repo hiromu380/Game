@@ -172,6 +172,8 @@ export interface RunState {
   time: number;
   /** 導入（壊れた台の777）を終えたか */
   introDone: boolean;
+  /** 捕まえた相手（捕まったときだけ） */
+  caughtBy: 'nox' | 'guards' | null;
   /** この挑戦で確定した利益の合計（表示用） */
   profit: number;
   events: RunEvent[];

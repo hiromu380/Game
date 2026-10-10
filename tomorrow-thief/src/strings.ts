@@ -48,6 +48,7 @@ export const TEXT = {
     limitBoosted: (n: number) => `上限 ${n}（追い賭け手袋）`,
     broken: '壊れた台',
     dead: '故障中',
+    deadHint: '壊れた台は止まった。ほかの台の未来を覗こう',
     predicted: '予知済み',
     unknown: '次の結果: 未知',
     next: '次の結果',
@@ -84,7 +85,7 @@ export const TEXT = {
 
   exit: {
     title: '搬出ロビー',
-    take: (n: number) => `持ち帰る（${n} チップ）`,
+    take: (n: string) => `持ち帰る（${n} チップ）`,
     hint: '持ち帰れば成功。続けるなら、扉から客席へ戻る',
   },
 
@@ -144,11 +145,11 @@ export const TEXT = {
   result: {
     escaped: '持ち帰った',
     caught: '捕まった',
-    banked: (n: number) => `持ち帰り ${n} チップ`,
-    lost: (n: number) => `失ったチップ ${n}`,
-    safeKept: (n: number) => `安全保管で残った ${n} チップ`,
-    total: (n: number) => `これまでに持ち帰った合計 ${n}`,
-    goal: (n: number) => `カジノの所有権まで あと ${n}`,
+    chipsUnit: 'チップ',
+    lost: (n: string) => `失ったチップ ${n}`,
+    safeKept: (n: string) => `安全保管で残った ${n} チップ`,
+    total: (n: string) => `これまでに持ち帰った合計 ${n}`,
+    goal: (n: string) => `カジノの所有権まで あと ${n}`,
     unlocked: (name: string) => `時計工房に新しい道具が並ぶ: ${name}`,
     again: 'もう一度挑む',
   },

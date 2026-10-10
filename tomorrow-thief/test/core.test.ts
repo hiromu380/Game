@@ -203,6 +203,7 @@ describe('ポーズ・逃走・捕獲', () => {
     s.nox = { active: true, room: s.room, pos: { ...s.player.pos }, travel: 0, entering: 0, slow: 0, facing: { x: 0, y: 1 } };
     update(s, 0.05);
     expect(s.phase).toBe('caught');
+    expect(s.caughtBy).toBe('nox');
     expect(bankedAmount(s)).toBe(safe);
   });
 

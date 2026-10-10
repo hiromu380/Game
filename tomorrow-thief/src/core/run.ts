@@ -64,6 +64,7 @@ export function createRun(seed: number, options: RunOptions = {}): RunState {
     phase: 'playing',
     time: 0,
     introDone: false,
+    caughtBy: null,
     profit: 0,
     events: [],
   };
@@ -204,7 +205,8 @@ export function confirmSpin(state: RunState): boolean {
   if (state.phase !== 'playing' || !spin || spin.phase !== 'result') return false;
   const m = machineById(state, spin.machineId);
   m.index++;
-  if (m.broken === 'fixed') {
+  const intro = m.broken === 'fixed';
+  if (intro) {
     m.broken = 'dead';
     state.introDone = true;
   }
@@ -212,8 +214,9 @@ export function confirmSpin(state: RunState): boolean {
   state.profit += spin.payout.profit;
   state.safe += spin.payout.safe;
   const outcome = spin.result.outcome;
-  if (outcome === 'jackpot') addTrace(state, BALANCE.trace.perJackpot);
-  else if (outcome === 'big') addTrace(state, BALANCE.trace.perBigWin);
+  // 導入の壊れた台の当たりは痕跡にしない（支配人の気配は、能力を試した後から）
+  if (!intro && outcome === 'jackpot') addTrace(state, BALANCE.trace.perJackpot);
+  else if (!intro && outcome === 'big') addTrace(state, BALANCE.trace.perBigWin);
   emit(state, { type: 'confirm', machineId: m.id, outcome, payout: spin.payout });
   if (spin.payout.total - spin.payout.safe <= 0) {
     state.spin = null;
@@ -559,6 +562,7 @@ function hurt(state: RunState, g: Guard) {
 
 function caught(state: RunState, by: 'nox' | 'guards') {
   state.phase = 'caught';
+  state.caughtBy = by;
   state.spin = null;
   state.rewindPoint = null;
   emit(state, { type: 'caught', by });

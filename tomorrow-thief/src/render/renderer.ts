@@ -66,10 +66,12 @@ export class Renderer {
         break;
       }
       case 'confirm': {
-        const m = state.machines.find((x) => x.id === e.machineId)!;
-        if (e.payout.total > 0) this.particles.text(this.machineTop(m), `+${e.payout.total}`, C.gold, 30);
-        if (e.payout.safe > 0) this.particles.text({ x: this.machineTop(m).x, y: this.machineTop(m).y + 34 }, `${TEXT.safe} ${e.payout.safe}`, C.teal, 20);
-        if (e.payout.bonus > 0) this.particles.text({ x: this.machineTop(m).x + 60, y: this.machineTop(m).y + 10 }, `+${e.payout.bonus}`, 'rgba(255,216,106,0.7)', 22);
+        // リールの表示（台の上）よりさらに上に出す
+        const top = this.machineTop(m0(state, e.machineId));
+        const at = { x: top.x, y: top.y - 110 };
+        if (e.payout.total > 0) this.particles.text(at, `+${e.payout.total}`, C.gold, 34);
+        if (e.payout.safe > 0) this.particles.text({ x: at.x, y: at.y + 34 }, `${TEXT.safe} ${e.payout.safe}`, C.teal, 20);
+        if (e.payout.bonus > 0) this.particles.text({ x: at.x + 90, y: at.y + 12 }, `+${e.payout.bonus}`, 'rgba(255,216,106,0.75)', 22);
         break;
       }
       case 'rewindStart':
@@ -477,6 +479,8 @@ export class Renderer {
     }
   }
 }
+
+const m0 = (state: RunState, id: string) => state.machines.find((x) => x.id === id)!;
 
 function xy(v: Vec): [number, number] {
   return [v.x, v.y];
