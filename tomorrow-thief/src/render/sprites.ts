@@ -7,6 +7,7 @@ import type { SymbolId } from '../core/slot';
 import type { Vec } from '../core/types';
 import { TILE_H, TILE_W, toScreen } from './iso';
 import { PALETTE as C } from './palette';
+import { FONT_BODY, FONT_TITLE } from '../fonts';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -276,7 +277,7 @@ export function drawGuard(ctx: Ctx, x: number, y: number, o: FigureOpts & { aler
   }
   if (!t && o.alert) {
     ctx.fillStyle = C.red;
-    ctx.font = 'bold 22px sans-serif';
+    ctx.font = `700 22px ${FONT_BODY}`;
     ctx.textAlign = 'center';
     ctx.scale(o.facing.x < -0.05 ? -1 : 1, 1);
     ctx.fillText('!', 0, -92);
@@ -320,7 +321,7 @@ export function drawBouncer(ctx: Ctx, x: number, y: number, o: FigureOpts & { al
   }
   if (!t && o.alert) {
     ctx.fillStyle = C.red;
-    ctx.font = 'bold 24px sans-serif';
+    ctx.font = `700 24px ${FONT_BODY}`;
     ctx.textAlign = 'center';
     ctx.scale(o.facing.x < -0.05 ? -1 : 1, 1);
     ctx.fillText('!', 0, -102);
@@ -346,7 +347,7 @@ export function drawSymbol(ctx: Ctx, sym: SymbolId, cx: number, cy: number, size
   ctx.scale(s, s);
   switch (sym) {
     case 'seven':
-      ctx.font = 'bold 38px Georgia, serif';
+      ctx.font = `700 38px ${FONT_TITLE}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.lineWidth = 4;
@@ -361,7 +362,7 @@ export function drawSymbol(ctx: Ctx, sym: SymbolId, cx: number, cy: number, size
         ctx.fillRect(-15, yy - 3, 30, 6);
       }
       ctx.fillStyle = C.navy;
-      ctx.font = 'bold 9px sans-serif';
+      ctx.font = `700 9px ${FONT_BODY}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('BAR', 0, 0.5);

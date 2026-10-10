@@ -24,6 +24,7 @@ import {
   drawRio,
   MACHINE_TOP,
 } from './sprites';
+import { FONT_TITLE } from '../fonts';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -396,7 +397,7 @@ export class Renderer {
   private tag(x: number, y: number, text: string, color: string) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.font = '700 24px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
+    ctx.font = `700 24px ${FONT_TITLE}`;
     ctx.textAlign = 'center';
     ctx.lineWidth = 6;
     ctx.strokeStyle = C.navyDeep;

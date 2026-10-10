@@ -86,7 +86,11 @@ npm run dev        # http://localhost:5173 をブラウザ（Chrome / Edge 推�
 
 ## 使用素材
 
-外部の画像・音声素材は使っていません。
+外部の画像・音声素材は使っていません（フォントのみ同梱）。
+
+- フォント: 漢字を日本の字形で表示するため、日本語フォントを同梱（`src/assets/fonts/`・SIL Open Font License 1.1・`OFL.txt`）
+  - 見出し・作品名: しっぽり明朝（Shippori Mincho）／本文・金額: 禅角ゴシック New（Zen Kaku Gothic New）
+  - ゲームで使う文字だけに絞っている。文言を変えたら `PYFTSUBSET=<pyftsubset のパス> node scripts/fonts.mjs` で作り直す（`pip install fonttools brotli`。収録漏れはテストで分かる）
 
 - 絵: すべて Canvas 2D / SVG でコードから描画（`src/render/sprites.ts`・`src/render/room.ts`・`src/ui/icons.ts`）
 - 音: Web Audio API で合成（`src/audio/audio.ts`）

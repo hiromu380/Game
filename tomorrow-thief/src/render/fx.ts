@@ -4,6 +4,7 @@
  * 巻き戻しのあいだは、飛んでいる金貨が逆向きに戻る（reverse）
  */
 import { PALETTE as C } from './palette';
+import { FONT_BODY } from '../fonts';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -171,7 +172,7 @@ export class Particles {
           break;
         case 'text':
           ctx.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1;
-          ctx.font = `700 ${p.size}px "Segoe UI", "Hiragino Sans", sans-serif`;
+          ctx.font = `700 ${p.size}px ${FONT_BODY}`;
           ctx.textAlign = 'center';
           ctx.lineWidth = 5;
           ctx.strokeStyle = C.navyDeep;

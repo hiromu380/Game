@@ -7,6 +7,7 @@ import type { Door, Room } from '../core/types';
 import { TEXT } from '../strings';
 import { SCREEN_H, SCREEN_W, TILE_H, TILE_W, WALL_H, toScreen } from './iso';
 import { PALETTE as C } from './palette';
+import { FONT_TITLE } from '../fonts';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -225,7 +226,7 @@ function drawDoorFrame(ctx: Ctx, room: Room, door: Door, rooms: Record<string, R
 
 function drawLabel(ctx: Ctx, x: number, y: number, text: string) {
   ctx.save();
-  ctx.font = '600 15px "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif';
+  ctx.font = `700 15px ${FONT_TITLE}`;
   const w = ctx.measureText(text).width + 16;
   ctx.fillStyle = 'rgba(11,15,26,0.85)';
   ctx.fillRect(x - w / 2, y - 12, w, 22);

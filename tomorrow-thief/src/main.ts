@@ -27,6 +27,7 @@ import { screenDirToRoom } from './render/iso';
 import { Renderer } from './render/renderer';
 import { clearRoomCache } from './render/room';
 import { loadSave, loadSettings, storeSave, storeSettings, type SaveData, type Settings } from './save';
+import { loadFonts } from './fonts';
 import { TEXT } from './strings';
 import {
   controlsScreen,
@@ -499,7 +500,11 @@ if (import.meta.env.DEV) {
 // タイトルの背景: 入口の客席に主人公を立たせる
 state.player.pos = { x: 5.5, y: 3.4 };
 state.player.facing = { x: 0, y: -1 };
-renderMenu();
-requestAnimationFrame(frame);
+// 同梱フォントを読んでから描き始める（部屋の背景は文字ごと使い回すため）
+void loadFonts().then(() => {
+  clearRoomCache();
+  renderMenu();
+  requestAnimationFrame(frame);
+});
 
 export type { BetChoice };

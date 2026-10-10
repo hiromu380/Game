@@ -10,8 +10,9 @@
   --ivory: #efe6d6;
   --muted: #a99f8e;
   --panel: rgba(11, 15, 26, 0.9);
-  --font-body: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
-  --font-title: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', Georgia, serif;
+  /* 同梱の日本語フォント（src/fonts.ts で読み込む）。漢字を日本の字形で表示する */
+  --font-body: 'TT Gothic', 'Yu Gothic UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+  --font-title: 'TT Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
 }
 
 * {
@@ -174,7 +175,7 @@ kbd {
 }
 .hud-money .chips {
   font-size: 46px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--gold);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
@@ -589,7 +590,7 @@ kbd {
 }
 .result-big {
   font-size: 64px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--gold);
   text-align: center;
   font-variant-numeric: tabular-nums;
