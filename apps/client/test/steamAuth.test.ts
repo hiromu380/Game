@@ -56,11 +56,11 @@ describe('Steam での本人確認（デスクトップ版）', () => {
     const calls = stubFetch((path) =>
       path === '/auth/steam'
         ? { status: 200, body: { playerId: 'p1', token: 'p1.s1', displayName: 'P' } }
-        : { status: 200, body: { session: { shiftIndex: 0 } } },
+        : { status: 200, body: { attempt: { shiftIndex: 0 } } },
     );
     const { api } = await load(steamBridge());
-    await api.start('2026-10-01');
-    expect(calls.map((c) => c.path)).toEqual(['/auth/steam', '/daily/2026-10-01/start']);
+    await api.start('2026-09-28');
+    expect(calls.map((c) => c.path)).toEqual(['/auth/steam', '/weekly/2026-09-28/attempts']);
     expect(JSON.parse(calls[0]!.init.body as string)).toEqual({ appId: 480, ticket: 'ab0' });
     expect((calls[1]!.init.headers as Record<string, string>).Authorization).toBe('Bearer p1.s1');
     expect(JSON.parse(storage.getItem(IDENTITY_KEY)!)).toMatchObject({ token: 'p1.s1' });

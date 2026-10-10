@@ -2,7 +2,9 @@
  * 再生後の結果表示（試運転 / 本番）
  */
 import {
+  BALANCE,
   getCurrentShift,
+  isUnmeasurable,
   scoreCompare,
   scoreOf,
   scoreToString,
@@ -10,6 +12,7 @@ import {
   type SimResult,
   type VanishReason,
 } from '@chain-factory/sim';
+import { BOLT_BODY_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
@@ -23,7 +26,7 @@ interface Props {
 }
 
 export function PlaybackPanel({ playback, run, onClose }: Props) {
-  const { t, formatScore } = useI18n();
+  const { t, formatScore, formatCompact, formatMeasured } = useI18n();
   if (!playback.finished) {
     return <div className="playback-banner">{t('playback.playing')}</div>;
   }
@@ -42,20 +45,42 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
 
   return (
     <div className="playback-panel">
+      {/* ボルトの反応（全身）: 達成でガッツポーズ、未達でしょんぼり */}
+      <img
+        className="playback-panel__bolt"
+        src={met ? BOLT_BODY_ASSETS.guts : BOLT_BODY_ASSETS.sad}
+        alt=""
+      />
       <h2>{playback.mode === 'trial' ? t('playback.trialTitle') : t('playback.commitTitle')}</h2>
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
         {met ? t('playback.quotaMet') : t('playback.quotaMissed')}
       </div>
+      {!met && (
+        <p className="playback-panel__short">
+          {t('playback.shortBy', {
+            amount: formatCompact((BigInt(quota) - BigInt(scoreToString(score))).toString()),
+          })}
+        </p>
+      )}
       <RocketLine playback={playback} run={run} />
       <dl className="stats">
         <dt>{t('playback.score')}</dt>
-        <dd className="stats__score">{formatScore(score)}</dd>
+        <dd className="stats__score">
+          {formatMeasured(score)}
+          {isUnmeasurable(score) && (
+            <span className="stats__note">
+              {t('unmeasurable.note', {
+                limit: formatScore(`1${'0'.repeat(BALANCE.unmeasurable.digits - 1)}`),
+              })}
+            </span>
+          )}
+        </dd>
         <dt>{t('playback.quota')}</dt>
         <dd>{formatScore(String(quota))}</dd>
         <dt>{t('playback.chain')}</dt>
         <dd>{stats.chainCount}</dd>
         <dt>{t('playback.maxValue')}</dt>
-        <dd>{formatScore(scoreToString(stats.maxValue))}</dd>
+        <dd>{formatMeasured(scoreToString(stats.maxValue))}</dd>
         {playback.result.income > 0 && (
           <>
             <dt>{t('playback.income')}</dt>

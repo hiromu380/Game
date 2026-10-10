@@ -7,21 +7,28 @@ Steam のストアページ（Steamworks の「コンテンツに関するアン
 
 「AI 生成」= 開発中に AI（コーディング支援の AI アシスタント）が作ったもの。**ゲームの実行中に AI で生成するものはない**。
 
-| 区分              | ファイル                                                        | 作り方                                                           | 状態                |
-| ----------------- | --------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------- |
-| マスコット        | `apps/client/src/assets/mascot/bolt-*.svg`（4種）               | AI が描画コード（`apps/client/art/mascot.ts`）を書き、SVG を生成 | AI 生成             |
-| アプリアイコン    | `apps/client/public/icon.svg`・`icon-180.png`・`icon-512.png`   | 同上（ボルトの待機の顔。PNG は SVG から変換）                    | AI 生成             |
-| パーツ            | `apps/client/src/assets/parts/*.svg`（20種）                    | AI が描画コード（`art/parts.ts`）を書き、SVG を生成              | AI 生成             |
-| 盤面              | `apps/client/src/assets/board/*.svg`（床・枠・背景など7種）     | AI が描画コード（`art/board.ts`）                                | AI 生成             |
-| ボス・UI アイコン | `apps/client/src/assets/boss/*.svg`・`ui/*.svg`                 | AI が描画コード（`art/icons.ts`）                                | AI 生成             |
-| ロゴ              | `apps/client/src/assets/logo/*.svg`                             | AI が描画コード（`art/logo.ts`・文字も線で描いた独自の字形）     | AI 生成             |
-| 実績アイコン      | `apps/client/src/assets/achievements/*.svg`（30個）と PNG       | AI が描画コード（`art/achievements.ts`）                         | AI 生成             |
-| ロケット          | `apps/client/src/assets/rocket/*.svg`（組み上がりの10段階と炎） | AI が描画コード（`art/rocket.ts`）                               | AI 生成             |
-| タイトルの背景    | `apps/client/src/assets/title/*.svg`（工場のシルエット・歯車）  | AI が描画コード（`art/title.ts`）                                | AI 生成             |
-| OGP 画像          | `apps/client/public/ogp.png`                                    | ロゴ・ボルトを HTML に並べて撮影（`build/ogp/`）                 | AI 生成             |
-| 効果音            | `apps/client/src/audio/`（Web Audio API で合成）                | AI が合成レシピ（コード）を書いた。録音・外部素材なし            | AI 生成             |
-| 文言              | `apps/client/src/i18n/ja.json`・`en.json`                       | AI が下書きし、開発者が確認・修正                                | AI 生成（人が確認） |
-| プログラム        | リポジトリのソースコード                                        | AI のコーディング支援を使って開発し、開発者が確認                | AI 支援             |
+| 区分                                                                   | ファイル                                                                        | 作り方                                                                                             | 状態                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------- |
+| マスコット                                                             | `apps/client/src/assets/mascot/bolt-*.svg`（4種）                               | AI が描画コード（`apps/client/art/mascot.ts`）を書き、SVG を生成                                   | AI 生成             |
+| アプリアイコン                                                         | `apps/client/public/icon.svg`・`icon-180.png`・`icon-512.png`                   | 同上（ボルトの待機の顔。PNG は SVG から変換）                                                      | AI 生成             |
+| ボルトの全身（設定画・切り絵の部品・表情・ポーズ）                     | `apps/client/src/assets/characters/bolt/`・`docs/characters/`                   | AI が描画コード（`apps/client/art/characters/`）を書き、SVG と部品の関節データ（`rig.json`）を生成 | AI 生成             |
+| 工場長（天井クレーン）・ロケットの設定画                               | `apps/client/src/assets/characters/chief/`・`apps/client/src/assets/rocket/`    | AI が描画コード（`apps/client/art/characters/chief.ts`・`art/rocket.ts`）を書き、SVG を生成        | AI 生成             |
+| ナット（仮名・見知らぬロボ）の設定画                                   | `apps/client/src/assets/characters/nut/`・`docs/characters/`                    | AI が描画コード（`apps/client/art/characters/nut.ts`）を書き、SVG と部品の関節データを生成         | AI 生成             |
+| ナットのロケット                                                       | `apps/client/src/assets/rocket/nut-rocket*.svg`                                 | AI が描画コード（`apps/client/art/characters/nutRocket.ts`）を書き、SVG を生成                     | AI 生成             |
+| カットシーン（ストーリー演出）の背景・小物・絵コンテ・動き             | `apps/client/src/assets/story/`・`apps/client/src/story/scenes/`・`docs/story/` | AI が描画コード（`apps/client/art/story/`）と動きの表（シーンの定義）を書き、SVG を生成            | AI 生成             |
+| ゲーム画面の上部の帯（窓の外の景色・組み立て台・警告灯）               | `apps/client/src/assets/backdrop/`                                              | AI が描画コード（`apps/client/art/backdrop.ts`）を書き、SVG を生成                                 | AI 生成             |
+| キービジュアル・Steam のカプセル画像（ストアページの素材。開示の対象） | `apps/client/build/store/svg/`（書き出しは `apps/desktop/release/store/`）      | AI が描画コード（`apps/client/art/keyvisual/`）を書き、ゲーム内の素材を組み合わせて SVG を生成     | AI 生成             |
+| パーツ                                                                 | `apps/client/src/assets/parts/*.svg`（20種）                                    | AI が描画コード（`art/parts.ts`）を書き、SVG を生成                                                | AI 生成             |
+| 盤面                                                                   | `apps/client/src/assets/board/*.svg`（床・床タイル・枠・背景など10種）          | AI が描画コード（`art/board.ts`）                                                                  | AI 生成             |
+| ボス・今日の出来事・UI アイコン                                        | `apps/client/src/assets/boss/*.svg`・`events/*.svg`・`ui/*.svg`                 | AI が描画コード（`art/icons.ts`）                                                                  | AI 生成             |
+| ロゴ                                                                   | `apps/client/src/assets/logo/*.svg`                                             | AI が描画コード（`art/logo.ts`・文字も線で描いた独自の字形）                                       | AI 生成             |
+| 実績アイコン                                                           | `apps/client/src/assets/achievements/*.svg`（31個）と PNG                       | AI が描画コード（`art/achievements.ts`）                                                           | AI 生成             |
+| ロケット                                                               | `apps/client/src/assets/rocket/*.svg`（組み上がりの10段階と炎）                 | AI が描画コード（`art/rocket.ts`）                                                                 | AI 生成             |
+| タイトルの背景                                                         | `apps/client/src/assets/title/*.svg`（工場のシルエット・歯車）                  | AI が描画コード（`art/title.ts`）                                                                  | AI 生成             |
+| OGP 画像                                                               | `apps/client/public/ogp.png`                                                    | ロゴ・ボルトを HTML に並べて撮影（`build/ogp/`）                                                   | AI 生成             |
+| 効果音                                                                 | `apps/client/src/audio/`（Web Audio API で合成）                                | AI が合成レシピ（コード）を書いた。録音・外部素材なし                                              | AI 生成             |
+| 文言                                                                   | `apps/client/src/i18n/ja.json`・`en.json`                                       | AI が下書きし、開発者が確認・修正                                                                  | AI 生成（人が確認） |
+| プログラム                                                             | リポジトリのソースコード                                                        | AI のコーディング支援を使って開発し、開発者が確認                                                  | AI 支援             |
 
 - 画像生成 AI（テキストから画像を作るモデル）は使っていない。上記の絵はすべて、AI が書いた SVG の描画コード（図形の座標と色）から作った
 - フォントは M PLUS Rounded 1c（SIL Open Font License。人の制作物）

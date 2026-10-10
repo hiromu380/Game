@@ -2,7 +2,7 @@
  * タイトル画面（最初に表示する軽い画面。ゲーム本体は裏で読み込む）
  *
  * - 通常ラン: 保存済みのランがあれば「続きから」
- * - デイリー: メニューを開く（デイリーのランはここからゲーム画面へ渡す）
+ * - 週替わり: メニューを開く（週替わりのランはここからゲーム画面へ渡す）
  * - 遊び方・コレクション（実績・パーツ図鑑・解放の目標）
  * - 設定
  * ゲーム本体の読み込みが終わる前に押された場合は、進捗を見せながら待つ。
@@ -21,10 +21,17 @@ interface Props {
   hasSavedRun: boolean;
   meta: MetaProgress | null;
   onPlay: () => void;
-  onDaily: () => void;
+  /** 今週のチャレンジ */
+  onWeekly: () => void;
+  /** 結果発表（先週のランキング） */
+  onResults: () => void;
+  /** まだ見ていない結果発表がある（バッジを出す） */
+  unreadResults: boolean;
   onCollection: () => void;
   onHowTo: () => void;
   onSettings: () => void;
+  /** 思い出（見たカットシーン）。見たシーンがなければ undefined（ボタンを出さない） */
+  onMemories?: () => void;
 }
 
 export function TitleScreen({
@@ -33,10 +40,13 @@ export function TitleScreen({
   hasSavedRun,
   meta,
   onPlay,
-  onDaily,
+  onWeekly,
+  onResults,
+  unreadResults,
   onCollection,
   onHowTo,
   onSettings,
+  onMemories,
 }: Props) {
   const { t } = useI18n();
   const percent = Math.round(progress * 100);
@@ -63,13 +73,22 @@ export function TitleScreen({
         <button className="button--primary" disabled={waiting} onClick={onPlay}>
           {hasSavedRun ? t('title.continue') : t('title.play')}
         </button>
-        <button onClick={onDaily}>{t('title.daily')}</button>
+        <button onClick={onWeekly}>{t('title.weekly')}</button>
+        <button className="button--ghost title__results" onClick={onResults}>
+          {t('title.results')}
+          {unreadResults && <span className="badge">{t('title.resultsNew')}</span>}
+        </button>
         <button className="button--ghost" onClick={onHowTo}>
           {t('title.howTo')}
         </button>
         <button className="button--ghost" onClick={onCollection}>
           {t('title.collection')}
         </button>
+        {onMemories && (
+          <button className="button--ghost" onClick={onMemories}>
+            {t('story.memories')}
+          </button>
+        )}
         <button className="button--ghost" onClick={onSettings}>
           {t('settings.open')}
         </button>

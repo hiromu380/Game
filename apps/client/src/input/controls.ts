@@ -74,7 +74,14 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 function onKeyDown(e: KeyboardEvent) {
-  if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
+  if (isTyping(e.target)) return;
+  // Ctrl+Z・⌘Z は「元に戻す」（ほかの修飾キーつきの入力はブラウザに任せる）
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+    setMode('keys');
+    if (dispatchControl('undo')) e.preventDefault();
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
   const action = actionOfKey(e.key);
   if (!action) return;
   if (e.repeat && !REPEATABLE.includes(action)) return;

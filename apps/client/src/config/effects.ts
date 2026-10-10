@@ -15,6 +15,16 @@ export const EFFECTS_CONFIG = {
     durationMs: 1300,
   },
 
+  /** 計測不能（合計が balance/ の桁数に達した）: 警告の帯と、震える「計測不能」の文字 */
+  unmeasurable: {
+    durationMs: 1900,
+    bandHeight: 120,
+    /** 文字の震えの幅（px。演出の強さで増減。「弱」では震えない） */
+    jitterPx: 5,
+    /** 揺れ（px） */
+    shake: 26,
+  },
+
   /** 画面の揺れ（px） */
   shake: {
     /** この桁数以上の出荷から揺らす */
@@ -37,6 +47,16 @@ export const EFFECTS_CONFIG = {
     max: 40,
     /** 同時に出せるパーティクルの上限（使い回し。board/fx/particlePool.ts） */
     maxAlive: 240,
+  },
+
+  /** 金色パーツへの合体: 消える2マスから光の粒が集まり（gatherMs）、金の輪が広がる（ringMs） */
+  merge: {
+    gatherMs: 260,
+    ringMs: 500,
+    /** 消えるマス1つあたりの粒・合体後に散る火花の数（演出の強さで増減） */
+    dotsPerCell: 6,
+    sparks: 14,
+    sparksMs: 520,
   },
 
   /** 連鎖数カウンター: この連鎖数に達したら大きく弾ませて色を変える */
@@ -87,6 +107,18 @@ export const EFFECTS_CONFIG = {
     /** 連鎖の音: 1連鎖ごとに半音上がる（上限あり）。stepsPerTimbre 段ごとに音色を変える */
     notes: { maxSemitones: 24, stepsPerTimbre: 8, timbres: 3 },
   },
+  /**
+   * ランダム配置権のルーレット: 枠が跳ぶ回数（演出の強さごと。1 なら跳ばずに止まる）と、1回の間隔・最後の減速
+   * （強で合計およそ 0.9 秒）
+   */
+  permitRoulette: {
+    hops: { full: 10, reduced: 6, minimal: 1 },
+    baseHopMs: 55,
+    slowdownMs: 140,
+  },
 } as const;
 
 export type EffectStrength = keyof typeof EFFECTS_CONFIG.strength;
+
+/** 操作の手応えの短い表示（購入 −3円 など）を出しておく時間（ミリ秒） */
+export const FEEDBACK_NOTE_MS = 1600;

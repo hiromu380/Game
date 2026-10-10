@@ -1,0 +1,7 @@
+<svg width="88" height="40" xmlns="http://www.w3.org/2000/svg" viewBox="-44 -24 88 40">
+  <!-- ボルトの部品: prop / blueprint（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-26" y="-20" width="52" height="34" rx="2" fill="#b3e5fc" stroke="#33691e" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M0 -15 Q8 -6 7 6 H-7 Q-8 -6 0 -15 Z" fill="none" stroke="#546e7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-7 2 L-12 9 M7 2 L12 9 M-18 -14 H-10 M-18 -10 H-12" fill="none" stroke="#546e7a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-26 10 h52" fill="none" stroke="#33691e" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

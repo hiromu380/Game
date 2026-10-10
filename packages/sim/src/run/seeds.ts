@@ -14,6 +14,7 @@ const LABEL_OVERTIME = 5;
 const LABEL_DAY_EVENT = 6;
 const LABEL_STAGE = 7;
 const LABEL_BONUS_FLOOR = 8;
+const LABEL_FLOOR_PERMIT = 9;
 
 /** 本番（スイッチを押したとき）のシード。プレイヤーには表示しない */
 export function commitSeed(runSeed: number, shiftIndex: number): number {
@@ -56,4 +57,9 @@ export function stageSeed(runSeed: number, day: number): number {
 /** シフト開始時のボーナス床のシード */
 export function bonusFloorSeed(runSeed: number, shiftIndex: number): number {
   return deriveSeed(runSeed, LABEL_BONUS_FLOOR, shiftIndex);
+}
+
+/** ランダム配置権の抽選のシード（その日の何枚目か: nth は 0 始まり） */
+export function floorPermitSeed(runSeed: number, day: number, nth: number): number {
+  return deriveSeed(runSeed, LABEL_FLOOR_PERMIT, day, nth);
 }

@@ -13,9 +13,10 @@ import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
 import { drawBonusFloor, getCurrentFloor } from './floor';
-import { addInventory } from './inventory';
+import { returnToHand } from './inventory';
+import { expireItems } from './items';
 import { commitSeed, overtimeSeed, shopSeed, stageSeed, trialSeed } from './seeds';
-import { generateShop } from './shop';
+import { generateShop, permitForShift } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
 /** 現在のシフトの設定（ノルマ・予算・報酬・種類。今日のイベント込み） */
@@ -75,7 +76,7 @@ export function commitShift(
   if (state.phase !== 'building') return { error: 'notBuilding' };
   if (isEventPending(state)) return { error: 'eventNotChosen' };
 
-  // デイリーは本番シードをサーバーから受け取る（クライアントでは計算できない）
+  // 週替わりは本番シードをサーバーから受け取る（クライアントでは計算できない）
   let seed = options.seed;
   if (seed === undefined) {
     if (state.config.commitSeedMode === 'external') return { error: 'seedRequired' };
@@ -163,8 +164,15 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
   // ショップは今日のイベント（特売日など）を反映した価格で並べる
   next = {
     ...next,
-    shop: generateShop(shopSeed(state.seed, shiftIndex, 0), getCurrentEconomy(next)),
+    shop: generateShop(
+      shopSeed(state.seed, shiftIndex, 0),
+      getCurrentEconomy(next),
+      permitForShift(state.config, shiftIndex),
+    ),
   };
+
+  // 日が変わったら、使っていない配置権と、配置権で湧いた床を消す
+  next = expireItems(next, shiftIndex);
 
   if (state.config.resetBoardEachDay && dayStart) {
     next = returnAllParts(next);
@@ -178,11 +186,7 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     const y = Math.floor(cell / next.board.width);
     const part = getPart(next.board, x, y);
     if (!part) continue;
-    next = {
-      ...next,
-      board: setPart(next.board, x, y, null),
-      inventory: addInventory(next.inventory, part.id, 1),
-    };
+    next = returnToHand({ ...next, board: setPart(next.board, x, y, null) }, part);
   }
   // シフト開始時のボーナス床（パーツを片付けた後の盤面で、空きマスに湧く）
   return { ...next, bonusFloor: drawBonusFloor(next, shiftIndex) };
@@ -195,15 +199,14 @@ export function isDayStart(state: RunState, shiftIndex: number): boolean {
 
 /** 盤面のパーツをすべて手持ちへ戻す */
 function returnAllParts(state: RunState): RunState {
-  let inventory = state.inventory;
-  for (const part of state.board.cells) {
-    if (part) inventory = addInventory(inventory, part.id, 1);
-  }
-  return {
+  let next: RunState = {
     ...state,
     board: { ...state.board, cells: state.board.cells.map(() => null) },
-    inventory,
   };
+  for (const part of state.board.cells) {
+    if (part) next = returnToHand(next, part);
+  }
+  return next;
 }
 
 /**

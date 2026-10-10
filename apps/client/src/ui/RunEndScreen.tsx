@@ -17,7 +17,7 @@ import { EDITION_CONFIG } from '../config/edition';
 import { AchievementList } from './AchievementList';
 import { MetaPanel } from './MetaPanel';
 import { RocketScene } from './RocketScene';
-import { DailyShare } from './share/DailyShare';
+import { WeeklyShare } from './share/WeeklyShare';
 import { RunShare } from './share/RunShare';
 import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
@@ -32,97 +32,102 @@ interface Props {
   onRetry: () => void;
   /** 延長戦へ進む（全シフトクリア後のみ） */
   onOvertime: () => void;
-  /** デイリー・練習: ランキングを開く */
+  /** 週替わり・練習: ランキングを開く */
   onViewRanking: () => void;
-  /** デイリー・練習: 通常モードに戻る */
+  /** 週替わり・練習: 通常モードに戻る */
   onBackToNormal: () => void;
 }
 
 export function RunEndScreen(props: Props) {
   const { run, meta, unlocks, mode, onRetry, onOvertime } = props;
-  const { t, formatScore } = useI18n();
+  const { t, formatScore, formatMeasured } = useI18n();
   const canOvertime = run.phase === 'cleared' && !run.overtime && run.config.overtimeAllowed;
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
 
   return (
     <div className="run-end">
-      <RocketScene run={run} />
-      <h1>
-        {mode.kind === 'daily'
-          ? t('runEnd.dailyTitle', { number: mode.number })
-          : mode.kind === 'practice'
-            ? t('runEnd.practiceTitle', { number: mode.number })
-            : run.overtime
-              ? t('runEnd.overtimeTitle', { shift: run.history.length })
-              : run.phase === 'cleared'
-                ? t('runEnd.clearedTitle')
-                : t('runEnd.failedTitle')}
-      </h1>
-      <dl className="stats stats--large">
-        <dt>{t('runEnd.finalScore')}</dt>
-        <dd className="stats__score">{formatScore(total)}</dd>
-        <dt>{t('runEnd.bestChain')}</dt>
-        <dd>{getBestChain(run)}</dd>
-        <dt>{t('runEnd.shiftsCleared')}</dt>
-        <dd>
-          {clearedCount} / {run.history.length}
-        </dd>
-      </dl>
-      <ul className="run-end__history">
-        {run.history.map((r) => (
-          <li key={r.shiftIndex} className={r.cleared ? 'is-met' : 'is-missed'}>
-            {t('runEnd.shiftRow', {
-              index: r.shiftIndex + 1,
-              score: formatScore(r.score),
-              quota: formatScore(String(r.quota)),
-            })}
-          </li>
-        ))}
-      </ul>
-      {mode.kind === 'normal' ? (
-        <div className="button-row run-end__actions">
-          {canOvertime && (
-            <button className="button--primary" onClick={onOvertime}>
-              {t('runEnd.overtime')}
+      {/* 広い画面では2列: 左に結果（ロケット・スコア・次の操作）、右に共有・解放の目標・実績 */}
+      <div className="run-end__main">
+        <RocketScene run={run} />
+        <h1>
+          {mode.kind === 'weekly'
+            ? t('runEnd.weeklyTitle', { number: mode.number })
+            : mode.kind === 'practice'
+              ? t('runEnd.practiceTitle', { number: mode.number })
+              : run.overtime
+                ? t('runEnd.overtimeTitle', { shift: run.history.length })
+                : run.phase === 'cleared'
+                  ? t('runEnd.clearedTitle')
+                  : t('runEnd.failedTitle')}
+        </h1>
+        <dl className="stats stats--large">
+          <dt>{t('runEnd.finalScore')}</dt>
+          <dd className="stats__score">{formatMeasured(total)}</dd>
+          <dt>{t('runEnd.bestChain')}</dt>
+          <dd>{getBestChain(run)}</dd>
+          <dt>{t('runEnd.shiftsCleared')}</dt>
+          <dd>
+            {clearedCount} / {run.history.length}
+          </dd>
+        </dl>
+        <ul className="run-end__history">
+          {run.history.map((r) => (
+            <li key={r.shiftIndex} className={r.cleared ? 'is-met' : 'is-missed'}>
+              {t('runEnd.shiftRow', {
+                index: r.shiftIndex + 1,
+                score: formatMeasured(r.score),
+                quota: formatScore(String(r.quota)),
+              })}
+            </li>
+          ))}
+        </ul>
+        {mode.kind === 'normal' ? (
+          <div className="button-row run-end__actions">
+            {canOvertime && (
+              <button className="button--primary" onClick={onOvertime}>
+                {t('runEnd.overtime')}
+              </button>
+            )}
+            <button className={canOvertime ? '' : 'button--primary'} onClick={onRetry}>
+              {t('runEnd.retry')}
             </button>
-          )}
-          <button className={canOvertime ? '' : 'button--primary'} onClick={onRetry}>
-            {t('runEnd.retry')}
-          </button>
-        </div>
-      ) : (
-        <div className="button-row run-end__actions">
-          <button className="button--primary" onClick={props.onViewRanking}>
-            <UiIcon name="ranking" />
-            {t('runEnd.viewRanking')}
-          </button>
-          {mode.kind === 'practice' && (
-            <button onClick={onRetry}>{t('runEnd.practiceAgain')}</button>
-          )}
-          <button onClick={props.onBackToNormal}>{t('mode.backToNormal')}</button>
-        </div>
-      )}
-      {canOvertime && (
-        <p className="panel__hint">
-          {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
-        </p>
-      )}
-      {(mode.kind === 'daily' || mode.kind === 'normal') && (
-        <section className="run-end__share">
-          <h2>{t('shareCard.title')}</h2>
-          {mode.kind === 'daily' ? (
-            <DailyShare run={run} dailyId={mode.dailyId} number={mode.number} />
-          ) : (
-            <RunShare run={run} />
-          )}
-        </section>
-      )}
-      {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
-        <MetaPanel meta={meta} unlocks={unlocks} />
-      )}
-      {EDITION_CONFIG.achievements && <AchievementList progress={props.achievements} />}
-      {mode.kind === 'normal' && <StoreLink />}
+          </div>
+        ) : (
+          <div className="button-row run-end__actions">
+            <button className="button--primary" onClick={props.onViewRanking}>
+              <UiIcon name="ranking" />
+              {t('runEnd.viewRanking')}
+            </button>
+            {mode.kind === 'practice' && (
+              <button onClick={onRetry}>{t('runEnd.practiceAgain')}</button>
+            )}
+            <button onClick={props.onBackToNormal}>{t('mode.backToNormal')}</button>
+          </div>
+        )}
+        {canOvertime && (
+          <p className="panel__hint">
+            {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
+          </p>
+        )}
+      </div>
+      <div className="run-end__side">
+        {(mode.kind === 'weekly' || mode.kind === 'normal') && (
+          <section className="run-end__share">
+            <h2>{t('shareCard.title')}</h2>
+            {mode.kind === 'weekly' ? (
+              <WeeklyShare run={run} weekId={mode.weekId} number={mode.number} />
+            ) : (
+              <RunShare run={run} />
+            )}
+          </section>
+        )}
+        {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
+          <MetaPanel meta={meta} unlocks={unlocks} />
+        )}
+        {EDITION_CONFIG.achievements && <AchievementList progress={props.achievements} />}
+        {mode.kind === 'normal' && <StoreLink />}
+      </div>
     </div>
   );
 }

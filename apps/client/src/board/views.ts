@@ -78,6 +78,18 @@ export function createPartView(
 ): Container {
   const view = new Container();
 
+  // 金色パーツ: 下に金の板と縁取り（色だけでなく右下の星でも区別する）
+  if (part.golden) {
+    const half = PART_DISPLAY_SIZE / 2 + 3;
+    view.addChild(
+      new Graphics()
+        .roundRect(-half - 3, -half - 3, (half + 3) * 2, (half + 3) * 2, 12)
+        .fill({ color: BOARD_THEME.golden, alpha: 0.4 })
+        .roundRect(-half, -half, half * 2, half * 2, 10)
+        .stroke({ width: 3, color: BOARD_THEME.golden }),
+    );
+  }
+
   const sprite = new Sprite(textures[part.id]);
   sprite.anchor.set(0.5);
   sprite.width = PART_DISPLAY_SIZE;
@@ -85,7 +97,10 @@ export function createPartView(
   if (PART_ASSETS[part.id].rotates) sprite.rotation = (part.dir * Math.PI) / 2;
   view.addChild(sprite);
 
+  if (part.golden) sprite.tint = 0xffe9a8;
+
   for (const dir of arrowDirs(part)) view.addChild(createArrow(dir));
+  if (part.golden) view.addChild(createGoldStar());
 
   if (badge) {
     const label = createBadge(`${badge.kind === 'mul' ? '×' : '+'}${badge.value}`);
@@ -94,6 +109,24 @@ export function createPartView(
     view.addChild(label);
   }
   return view;
+}
+
+/** 金色パーツの印（右下の星） */
+function createGoldStar(): Graphics {
+  const r = 11;
+  const points: number[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const radius = i % 2 === 0 ? r : r * 0.45;
+    points.push(Math.cos(a) * radius, Math.sin(a) * radius);
+  }
+  const star = new Graphics()
+    .poly(points)
+    .fill(BOARD_THEME.golden)
+    .stroke({ width: 2, color: BOARD_THEME.arrowStroke });
+  // 右下（左下は効果量バッジ、左上は床の表記、右上はパーツの絵の飾りと重なる）
+  star.position.set(CELL_SIZE * 0.3, CELL_SIZE * 0.3);
+  return star;
 }
 
 // -----------------------------------------------------------------------------
@@ -203,7 +236,7 @@ export function createFloor(width: number, height: number, textures: BoardTextur
 
 /**
  * 使用不可マス（補修工事中）の表示
- * @param upcoming true なら「夜シフトで使えなくなる」予告（点線の枠だけ）
+ * @param upcoming true なら「夜シフトで使えなくなる」予告（赤の斜線と点線の枠）
  */
 export function createBlockedCell(
   x: number,
@@ -221,13 +254,26 @@ export function createBlockedCell(
     sprite.alpha = 0.92;
     return sprite;
   }
-  // 夜シフトの予告: 黄色の点線の枠
-  return dashedFrame(left, top, 5).stroke({ width: 3, color: BOARD_THEME.hazardYellow });
+  // 夜シフトの予告: 赤の斜線と赤い点線の枠（金色の点線＝ランダム配置権の床と見分けられるようにする）
+  const view = new Container();
+  const hatch = new Graphics();
+  const inner = CELL_SIZE - 12;
+  for (let d = 12; d < inner * 2; d += 12) {
+    const x0 = Math.max(0, d - inner);
+    const y0 = Math.min(d, inner);
+    const x1 = Math.min(d, inner);
+    const y1 = Math.max(0, d - inner);
+    hatch.moveTo(left + 6 + x0, top + 6 + y0).lineTo(left + 6 + x1, top + 6 + y1);
+  }
+  hatch.stroke({ width: 3, color: BOARD_THEME.blocked, alpha: 0.45 });
+  view.addChild(hatch);
+  view.addChild(dashedFrame(left, top, 5).stroke({ width: 3, color: BOARD_THEME.blocked }));
+  return view;
 }
 
 /**
  * 床タイル（×2床・加算床・×3床）: 色つきの鉄板と、左上の数字（×2・+3。パーツを置いても見える位置）。
- * ボーナス床・今日の出来事の床（期間限定）は、水色の点線の枠で見分けられるようにする。
+ * ボーナス床・今日の出来事の床（期間限定）は水色、ランダム配置権の床（今日だけ）は金色の点線の枠で見分けられるようにする。
  * 使用不可は createBlockedCell で描く
  */
 export function createFloorTile(
@@ -259,6 +305,10 @@ export function createFloorTile(
   view.addChild(text);
   if (cell.source === 'bonus' || cell.source === 'event') {
     view.addChild(dashedFrame(left, top, 3).stroke({ width: 3, color: BOARD_THEME.floorBonus }));
+  }
+  if (cell.source === 'item') {
+    // ランダム配置権の床（今日だけ）: 金色の点線の枠
+    view.addChild(dashedFrame(left, top, 3).stroke({ width: 3, color: BOARD_THEME.floorItem }));
   }
   return view;
 }

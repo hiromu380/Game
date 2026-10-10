@@ -46,3 +46,14 @@ export const PART_PARAMS: Balance['partParams'] = {
 };
 
 export const RARITY_WEIGHTS: Balance['rarityWeights'] = { common: 10, uncommon: 5, rare: 2 };
+
+/**
+ * 金色パーツ: 同じパーツを mergeCount 個、盤面で縦横につなげて置くと、合体できる（選んだマスが1つの金色パーツになる）。
+ * 金色パーツは、パーツの効果の後で、送る信号の値と出荷量を multiplier 倍する（収入は増えない）。
+ * excluded は合体しないパーツ（スイッチ = 1つしか持たない。共鳴コイル = 隣に並べるほど強いパーツで、合体とぶつかる）
+ */
+export const GOLDEN: Balance['golden'] = {
+  mergeCount: 3,
+  multiplier: 3,
+  excluded: ['switch', 'coil'],
+};

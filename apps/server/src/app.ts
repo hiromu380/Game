@@ -14,17 +14,12 @@ import type { HumanVerifier } from './adapters/humanCheck';
 import type { RateLimiter } from './adapters/rateLimiter';
 import { SERVER_LIMITS } from './config/server';
 import { DomainError, type DomainContext } from './domain/context';
-import {
-  commitDaily,
-  getSession,
-  getToday,
-  revealDaily,
-  startDaily,
-} from './domain/daily/dailyService';
+import { getLatestMarket } from './domain/market/market';
 import { signInWithExternal, type ExternalAuthProvider } from './domain/players/externalAuth';
 import { authenticate, registerPlayer, updateName } from './domain/players/players';
-import { getLatestMarket } from './domain/market/market';
-import { getRanking } from './domain/ranking/ranking';
+import { commitAttempt, getAttempt, getCurrentWeek, startAttempt } from './domain/weekly/attempts';
+import { getProvisional } from './domain/weekly/provisional';
+import { getLatest, getReplay, getResults } from './domain/weekly/results';
 
 export interface AppDeps {
   ctx: DomainContext;
@@ -35,6 +30,8 @@ export interface AppDeps {
   humanVerifier: HumanVerifier;
   /** Steam 版の本人確認（Web API チケットの検証） */
   steamAuth: ExternalAuthProvider;
+  /** 開発用の時計（DEV_CLOCK=1 のときだけ。本番では undefined） */
+  devClock?: { advance(ms: number): number };
 }
 
 type AppEnv = { Variables: { deps: AppDeps } };
@@ -50,7 +47,10 @@ const STATUS: Record<ApiErrorCode, ContentfulStatusCode> = {
   notFound: 404,
   alreadyPlayed: 409,
   simVersionMismatch: 409,
-  dailyClosed: 410,
+  challengeClosed: 410,
+  notPublished: 404,
+  tallying: 425,
+  clientOutdated: 410,
   rateLimited: 429,
 };
 
@@ -168,25 +168,52 @@ export function createApp(options: {
     return c.json({ displayName: await updateName(ctxOf(c), player, displayName) });
   });
 
-  // ---- デイリー ----
-  app.get('/daily/today', async (c) => c.json(await getToday(ctxOf(c))));
-  app.post('/daily/:id/start', async (c) =>
-    c.json({ session: await startDaily(ctxOf(c), await playerOf(c), c.req.param('id')) }),
-  );
-  app.get('/daily/:id/session', async (c) =>
-    c.json(await getSession(ctxOf(c), await playerOf(c), c.req.param('id'))),
-  );
-  app.post('/daily/:id/commit', async (c) => {
-    const player = await playerOf(c);
-    return c.json(await commitDaily(ctxOf(c), player, c.req.param('id'), await readJson(c)));
-  });
-  app.get('/daily/:id/reveal', async (c) => c.json(await revealDaily(ctxOf(c), c.req.param('id'))));
+  /** ログインしていれば自分、していなければ null（ランキング・今週の情報は誰でも見られる） */
+  const optionalPlayer = async (c: Context<AppEnv>) =>
+    c.req.header('Authorization') ? await playerOf(c).catch(() => null) : null;
 
-  // ---- ランキング（ログインしていなくても見られる。していれば自分の順位も返す） ----
-  app.get('/daily/:id/ranking', async (c) => {
-    const auth = c.req.header('Authorization');
-    const me = auth ? await playerOf(c).catch(() => null) : null;
-    return c.json(await getRanking(ctxOf(c), c.req.param('id'), me));
+  // ---- 週替わりチャレンジ ----
+  app.get('/weekly/current', async (c) =>
+    c.json(await getCurrentWeek(ctxOf(c), await optionalPlayer(c))),
+  );
+  app.post('/weekly/:week/attempts', async (c) =>
+    c.json({ attempt: await startAttempt(ctxOf(c), await playerOf(c), c.req.param('week')) }),
+  );
+  app.get('/weekly/:week/attempts/:day', async (c) =>
+    c.json(await getAttempt(ctxOf(c), await playerOf(c), c.req.param('week'), c.req.param('day'))),
+  );
+  app.post('/weekly/:week/attempts/:day/commit', async (c) => {
+    const player = await playerOf(c);
+    const { week, day } = c.req.param();
+    return c.json(await commitAttempt(ctxOf(c), player, week, day, await readJson(c)));
+  });
+  // 当週の暫定ランキング（順位・表示名・出荷量だけ。他人の配置・操作ログは返さない）
+  app.get('/weekly/:week/provisional', async (c) =>
+    c.json(await getProvisional(ctxOf(c), c.req.param('week'), await optionalPlayer(c))),
+  );
+  // 結果発表（締め切り後・確定済みの週だけ。秘密値もここで公開する）
+  app.get('/weekly/:week/results', async (c) =>
+    c.json(await getResults(ctxOf(c), c.req.param('week'), await optionalPlayer(c))),
+  );
+  app.get('/weekly/:week/results/:rank/replay', async (c) =>
+    c.json(await getReplay(ctxOf(c), c.req.param('week'), Number(c.req.param('rank')))),
+  );
+  app.get('/weekly/latest', async (c) => c.json(await getLatest(ctxOf(c))));
+
+  // 旧 API（デイリー）: アプリの更新を促す
+  app.all('/daily/*', (c) => fail(c, 'clientOutdated'));
+
+  // ---- 開発用の時計（DEV_CLOCK=1 かつ localhost のときだけ。週の切り替え・結果発表の確認用） ----
+  app.post('/dev/clock', async (c) => {
+    const clock = c.get('deps').devClock;
+    const host = new URL(c.req.url).hostname;
+    if (!clock || (host !== 'localhost' && host !== '127.0.0.1')) return fail(c, 'notFound');
+    const body: unknown = await readJson(c);
+    const advanceMs = isRecord(body) ? body.advanceMs : undefined;
+    if (typeof advanceMs !== 'number' || !Number.isFinite(advanceMs)) {
+      throw new DomainError('badRequest');
+    }
+    return c.json({ now: clock.advance(advanceMs) });
   });
 
   // ---- 相場（通常ランの開始時の価格・ショップの前日比の表示に使う） ----

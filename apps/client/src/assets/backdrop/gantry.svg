@@ -1,0 +1,21 @@
+<svg width="96" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64">
+  <!-- ロケットの組み立て台（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="4" y="8" width="10" height="56" fill="#3a404a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M5 16 L13 26 L5 36 L13 46 L5 56" fill="none" stroke="#31363f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="82" y="8" width="10" height="56" fill="#3a404a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M83 16 L91 26 L83 36 L91 46 L83 56" fill="none" stroke="#31363f" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="0" y="2" width="96" height="10" fill="#2b2b2b" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="2,11 8,11 14,3 8,3" fill="#ffc107"/>
+  <polygon points="14,11 20,11 26,3 20,3" fill="#ffc107"/>
+  <polygon points="26,11 32,11 38,3 32,3" fill="#ffc107"/>
+  <polygon points="38,11 44,11 50,3 44,3" fill="#ffc107"/>
+  <polygon points="50,11 56,11 62,3 56,3" fill="#ffc107"/>
+  <polygon points="62,11 68,11 74,3 68,3" fill="#ffc107"/>
+  <polygon points="74,11 80,11 86,3 80,3" fill="#ffc107"/>
+  <polygon points="86,11 92,11 98,3 92,3" fill="#ffc107"/>
+  <rect x="0" y="2" width="96" height="10" fill="none" stroke="#1b1f27" stroke-width="2.5"/>
+  <circle cx="66" cy="15" r="4" fill="#90a4ae" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M66 19 V30" fill="none" stroke="#ffc107" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M63 30 q3 6 6 0" fill="none" stroke="#cfd8dc" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="0" y="60" width="96" height="4" fill="#31363f"/>
+</svg>

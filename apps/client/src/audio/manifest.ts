@@ -53,7 +53,13 @@ export type SoundKey =
   | 'chain2'
   | 'digitUp'
   | 'floor'
+  | 'useItem'
+  | 'merge'
+  | 'permitTick'
+  | 'permitLand'
   | 'quotaCross'
+  /** 計測不能（メーターが振り切れた）: 警報のように上下する音 */
+  | 'unmeasurable'
   | 'peak'
   | 'stamp'
   | 'quotaMet'
@@ -61,7 +67,24 @@ export type SoundKey =
   | 'runCleared'
   | 'unlock'
   | 'shiftStart'
-  | 'bossAlert';
+  | 'bossAlert'
+  // ---- カットシーン（ストーリー演出）: 台詞の代わりの「声」と、場面の音 ----
+  | 'boltBeep'
+  | 'boltQuestion'
+  | 'boltSad'
+  | 'boltHappy'
+  | 'chiefBuzz'
+  | 'chiefSoft'
+  | 'clank'
+  | 'craneWinch'
+  | 'footstep'
+  | 'twinkle'
+  | 'paper'
+  | 'collapse'
+  | 'countdown'
+  | 'launch'
+  | 'landing'
+  | 'strangerBeep';
 
 export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   // ---- 組み立て操作 ----
@@ -246,6 +269,49 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       ],
     },
   },
+  /** 合体: 3つのパーツが1つの金色パーツになった（きらきらと上がる3音と、最後の高い鈴） */
+  merge: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.26,
+      notes: [
+        { freq: 523, at: 0, duration: 0.07 },
+        { freq: 659, at: 0.07, duration: 0.07 },
+        { freq: 784, at: 0.14, duration: 0.07 },
+        { freq: 1568, at: 0.21, duration: 0.3, slideTo: 1760 },
+      ],
+    },
+  },
+  /** 消耗品を使った（ランダム配置権: ルーレットが回り始める） */
+  useItem: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 392, at: 0, duration: 0.05 },
+        { freq: 523, at: 0.05, duration: 0.05 },
+      ],
+    },
+  },
+  /** ルーレットの枠が1マス跳んだ（短いクリック。跳ぶたびに少しずつ高くする） */
+  permitTick: {
+    kind: 'synth',
+    recipe: { wave: 'square', volume: 0.1, notes: [{ freq: 880, at: 0, duration: 0.03 }] },
+  },
+  /** ルーレットが止まり、床が湧いた */
+  permitLand: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.24,
+      notes: [
+        { freq: 784, at: 0, duration: 0.07 },
+        { freq: 1175, at: 0.07, duration: 0.16 },
+      ],
+    },
+  },
   /** ノルマを超えた瞬間 */
   quotaCross: {
     kind: 'synth',
@@ -257,6 +323,20 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 988, at: 0.08, duration: 0.08 },
         { freq: 1175, at: 0.16, duration: 0.08 },
         { freq: 1568, at: 0.24, duration: 0.22 },
+      ],
+    },
+  },
+  unmeasurable: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.2,
+      notes: [
+        { freq: 1397, at: 0, duration: 0.14 },
+        { freq: 932, at: 0.14, duration: 0.14 },
+        { freq: 1397, at: 0.28, duration: 0.14 },
+        { freq: 932, at: 0.42, duration: 0.14 },
+        { freq: 1865, at: 0.6, duration: 0.5 },
       ],
     },
   },
@@ -332,6 +412,159 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 880, at: 0, duration: 0.08 },
         { freq: 1109, at: 0.08, duration: 0.08 },
         { freq: 1319, at: 0.16, duration: 0.25 },
+      ],
+    },
+  },
+  // ---- カットシーン ----
+  /** ボルトの声「ピポ」（上がる2音） */
+  boltBeep: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.18,
+      notes: [
+        { freq: 880, at: 0, duration: 0.08 },
+        { freq: 1320, at: 0.1, duration: 0.1 },
+      ],
+    },
+  },
+  /** ボルトの「ピ？」（語尾が上がる） */
+  boltQuestion: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.16,
+      notes: [{ freq: 700, at: 0, duration: 0.22, slideTo: 1200 }],
+    },
+  },
+  /** ボルトのしょんぼり（下がる） */
+  boltSad: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.25,
+      notes: [{ freq: 660, at: 0, duration: 0.5, slideTo: 330 }],
+    },
+  },
+  /** ボルトの喜び（上がる3音） */
+  boltHappy: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.16,
+      notes: [
+        { freq: 784, at: 0, duration: 0.08 },
+        { freq: 988, at: 0.09, duration: 0.08 },
+        { freq: 1319, at: 0.18, duration: 0.14 },
+      ],
+    },
+  },
+  /** 工場長の声（低いブザー） */
+  chiefBuzz: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.12,
+      notes: [
+        { freq: 110, at: 0, duration: 0.18 },
+        { freq: 98, at: 0.22, duration: 0.24 },
+      ],
+    },
+  },
+  /** 工場長のやさしい声（エンディング） */
+  chiefSoft: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.22,
+      notes: [{ freq: 196, at: 0, duration: 0.5, slideTo: 262 }],
+    },
+  },
+  /** 金属の音（部品の取り付け） */
+  clank: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 1800, at: 0, duration: 0.04 },
+        { freq: 620, at: 0.02, duration: 0.12, slideTo: 520 },
+      ],
+    },
+  },
+  /** クレーンの巻き上げ */
+  craneWinch: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.07,
+      notes: [{ freq: 70, at: 0, duration: 0.9, slideTo: 120 }],
+    },
+  },
+  /** 金属の足音 */
+  footstep: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.12, notes: [{ freq: 400, at: 0, duration: 0.05 }] },
+  },
+  /** 流れ星・きらめき */
+  twinkle: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.2,
+      notes: [
+        { freq: 2093, at: 0, duration: 0.12 },
+        { freq: 2637, at: 0.08, duration: 0.2 },
+      ],
+    },
+  },
+  /** 紙を広げる */
+  paper: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.08, notes: [{ freq: 800, at: 0, duration: 0.25 }] },
+  },
+  /** 崩れる（下がる音階） */
+  collapse: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 523, at: 0, duration: 0.1 },
+        { freq: 392, at: 0.12, duration: 0.1 },
+        { freq: 262, at: 0.24, duration: 0.1 },
+        { freq: 196, at: 0.36, duration: 0.3 },
+      ],
+    },
+  },
+  /** カウントダウンの秒読み */
+  countdown: {
+    kind: 'synth',
+    recipe: { wave: 'square', volume: 0.15, notes: [{ freq: 1047, at: 0, duration: 0.12 }] },
+  },
+  /** 打ち上げ（だんだん高く） */
+  launch: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.22, notes: [{ freq: 200, at: 0, duration: 2.4 }] },
+  },
+  /** 着地 */
+  landing: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.3,
+      notes: [{ freq: 120, at: 0, duration: 0.3, slideTo: 60 }],
+    },
+  },
+  /** 見知らぬロボの声（ボルトと違う声色: 柔らかいサイン波で、下がってから上がる） */
+  strangerBeep: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.25,
+      notes: [
+        { freq: 1175, at: 0, duration: 0.12, slideTo: 880 },
+        { freq: 880, at: 0.18, duration: 0.18, slideTo: 1397 },
       ],
     },
   },

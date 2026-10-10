@@ -4,13 +4,14 @@
  * 判定の材料（AchievementContext）は、呼び出す場面ごとに分かれている:
  * - shift: 本番のシフトを確定した直後（出荷量・連鎖・ボス・延長戦・イベントログ）
  * - meta:  ランが終わってメタ進行を更新した後（累計・回数・工場拡張・解放パーツ）。起動時にも判定して取りこぼしを拾う
- * - daily: デイリーの本番がサーバーで確定した後・ランキングを受け取った後（サーバーで検証済みの結果だけ）
+ * - weekly: 週替わりの本番がサーバーで確定した後・確定した結果発表を受け取った後（サーバーで検証済みの結果だけ）
  * 材料がない条件は判定しない（false）。
  */
 import { BALANCE, type Balance, type PartParams } from '../balance';
 import { SCORE_ZERO, scoreCompare, scoreFromString, scoreMul, type Score } from '../core/score';
 import type { MetaProgress } from '../meta/types';
 import { getCurrentRules } from '../run/shift';
+import { isUnmeasurable } from '../run/unmeasurable';
 import type { CommitResult, RunState, ShiftRecord } from '../run/types';
 import type { SimEvent, SimResult } from '../types';
 import {
@@ -23,9 +24,9 @@ import {
 /** セーブに持つ実績の状態（Steam がオフラインでも、あとで送り直せるように解除済みを覚えておく） */
 export interface AchievementProgress {
   unlocked: AchievementId[];
-  /** デイリーに参加した日数（本番を1回以上確定した日） */
+  /** 週替わりに参加した日数（本番を1回以上確定した日） */
   dailyDays: number;
-  /** 最後に数えたデイリー（同じ日を二重に数えないため） */
+  /** 最後に数えた週替わり（同じ日を二重に数えないため） */
   lastDailyId: string | null;
 }
 
@@ -43,10 +44,10 @@ export interface AchievementContext {
     overtimeCleared: number;
   };
   meta?: MetaProgress;
-  daily?: {
-    /** このデイリーで全シフトをクリアした */
+  weekly?: {
+    /** この挑戦で全シフトをクリアした */
     cleared?: boolean;
-    /** ランキングの上位何 % か */
+    /** 確定した結果発表の上位何 % か（当週の暫定順位では解除しない） */
     topPercent?: number;
   };
 }
@@ -66,15 +67,16 @@ export function shiftContextOf(
 }
 
 /**
- * デイリーの本番を確定したことを記録する（その日の最初の確定でだけ日数を足す）
- * ランキング対象（その日の最初の挑戦）のときだけ呼ぶ
+ * 週替わりの本番を確定したことを記録する（その日の最初の確定でだけ日数を足す）
+ * ランキング対象（その日の挑戦）のときだけ呼ぶ。dayId は挑戦した日（'YYYY-MM-DD'）。
+ * セーブの項目名（dailyDays・lastDailyId）は「参加した日数・最後に参加した日」の意味のまま使う
  */
-export function recordDailyParticipation(
+export function recordWeeklyParticipation(
   progress: AchievementProgress,
-  dailyId: string,
+  dayId: string,
 ): AchievementProgress {
-  if (progress.lastDailyId === dailyId) return progress;
-  return { ...progress, dailyDays: progress.dailyDays + 1, lastDailyId: dailyId };
+  if (progress.lastDailyId === dayId) return progress;
+  return { ...progress, dailyDays: progress.dailyDays + 1, lastDailyId: dayId };
 }
 
 /** まだ解除していない実績のうち、条件を満たしたもの（定義順） */
@@ -117,12 +119,14 @@ const atLeast = (value: Score, threshold: string) =>
 function isMet(
   condition: AchievementCondition,
   progress: AchievementProgress,
-  { shift, meta, daily }: AchievementContext,
+  { shift, meta, weekly }: AchievementContext,
   balance: Balance,
 ): boolean {
   switch (condition.kind) {
     case 'shiftScore':
       return !!shift && atLeast(scoreFromString(shift.record.score), condition.atLeast);
+    case 'unmeasurable':
+      return !!shift && isUnmeasurable(shift.record.score);
     case 'shiftZero':
       return !!shift && scoreCompare(scoreFromString(shift.record.score), SCORE_ZERO) === 0;
     case 'shiftCleared':
@@ -147,10 +151,10 @@ function isMet(
       return !!meta && balance.meta.partUnlocks.every((u) => meta.unlockedParts.includes(u.partId));
     case 'dailyDays':
       return progress.dailyDays >= condition.atLeast;
-    case 'dailyCleared':
-      return daily?.cleared === true;
-    case 'dailyTopPercent':
-      return daily?.topPercent !== undefined && daily.topPercent <= condition.atMost;
+    case 'weeklyCleared':
+      return weekly?.cleared === true;
+    case 'weeklyTopPercent':
+      return weekly?.topPercent !== undefined && weekly.topPercent <= condition.atMost;
   }
 }
 

@@ -122,8 +122,10 @@ export interface StageBalance {
   overtimeBand: string[];
   /** 延長戦の日が進むごとに、×2床を×3床に置き換える枚数（延長戦の1日目から数える） */
   overtimeUpgradesPerDay: number;
-  /** デイリー（1日分・3シフト）で抽選するテンプレート */
-  dailyBand: string[];
+  /** 週替わり（1日分・3シフト）で抽選するテンプレート */
+  weeklyBand: string[];
+  /** 週替わりの盤面が自動検証に通らなかったときの代替の帯（やさしいステージ。特殊ルールなし） */
+  weeklyFallbackBand: string[];
   /** 初回ガイドの1日目に使うテンプレート（抽選しない・回転しない） */
   tutorialTemplate: string;
   /** 使用不可を除いたマスが、盤面のこの割合（%）以上あること（テンプレートの検証） */
@@ -138,6 +140,34 @@ export interface BonusFloorBalance {
   countWeights: number[];
   /** 湧く床の種類の重み */
   tileWeights: { tile: FloorTileId; weight: number }[];
+}
+
+/** 消耗品の種類（手持ちのパーツとは別に持つ。今はランダム配置権だけ） */
+export type ItemId = 'floorPermit';
+
+/**
+ * ランダム配置権: 使うと、盤面のどこかに床が1枚湧く。日が変わると、使っていない配置権も湧いた床も消える
+ */
+export interface FloorPermitBalance {
+  price: number;
+  /** ショップを引くたびに、品揃えの1枠が配置権になる確率（%）。1回の品揃えで最大1枠 */
+  offerChancePercent: number;
+  /** 同時に持てる枚数 */
+  maxHeld: number;
+  /** 湧く床の種類の重み。fromDay（0 始まり）より前の日には出さない */
+  tileWeights: { tile: FloorTileId; weight: number; fromDay?: number }[];
+  /** 週替わりチャレンジでも出すか */
+  inWeekly: boolean;
+}
+
+/** 金色パーツ（parts.ts の GOLDEN） */
+export interface GoldenBalance {
+  /** 合体に必要な、縦横につながった同じパーツの数 */
+  mergeCount: number;
+  /** 金色パーツが送る信号の値・出荷量に掛ける倍率（パーツの効果の後） */
+  multiplier: number;
+  /** 合体しないパーツ */
+  excluded: PartId[];
 }
 
 export interface Balance {
@@ -159,6 +189,12 @@ export interface Balance {
     maxLiveSignals: number;
   };
 
+  /**
+   * 「計測不能」: 1シフトの出荷量がこの桁数以上になったら、画面では数字の代わりに「計測不能」と出す
+   * （演出・隠し実績・シェア文も。表示だけで、内部の値・ランキングの並びは正確な値のまま）
+   */
+  unmeasurable: { digits: number };
+
   /** パーツごとの価格・発動回数・レア度 */
   parts: Record<PartId, PartBalance>;
   /** パーツ固有の効果量 */
@@ -169,8 +205,12 @@ export interface Balance {
   stages: StageBalance;
   /** シフト開始時のボーナス床 */
   bonusFloors: BonusFloorBalance;
+  /** ランダム配置権 */
+  floorPermit: FloorPermitBalance;
   /** レア度ごとのショップ出現重み（既定値） */
   rarityWeights: Record<Rarity, number>;
+  /** 金色パーツ（同じパーツを盤面で3つつなげると合体する） */
+  golden: GoldenBalance;
 
   /** 経済（ショップ・売却・リロール） */
   economy: {
@@ -223,11 +263,11 @@ export interface Balance {
     clearReward: number;
   };
 
-  /** デイリーチャレンジ（1日＝3シフトの短縮版。全員同じ条件） */
-  daily: {
+  /** 週替わりチャレンジ（1回の挑戦＝3シフトの短縮版。全員同じ条件で1週間） */
+  weekly: {
     /** シフト表（朝・昼・夜。夜はボス） */
     shifts: ShiftSpec[];
-    /** 「今日の特殊ルール」の候補（ボス修正ルールの仕組みを流用し、3シフト全体にかける） */
+    /** 「今週の特殊ルール」の候補（ボス修正ルールの仕組みを流用し、3シフト全体にかける） */
     specialRules: BossModifierId[];
   };
 

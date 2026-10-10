@@ -45,7 +45,7 @@ export function deriveSeed(seed: number, ...labels: number[]): number {
 
 /**
  * 文字列から32bitのシードを作る（FNV-1a）。
- * デイリーの ID（例: '2026-09-28'）から、全員共通のランシードを作るのに使う
+ * 週替わりの ID（例: '2026-09-28'）から、全員共通のランシードを作るのに使う
  */
 export function hashString(text: string): number {
   let h = 0x811c9dc5;

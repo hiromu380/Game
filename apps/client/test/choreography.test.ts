@@ -104,11 +104,31 @@ describe('連鎖の演出の流れ', () => {
     expect(weak.some((c) => c.kind === 'floor')).toBe(false);
   });
 
+  it('信号が1つも出ない（スイッチがない）本番でも、例外にならずに「ドン」だけで終わる', () => {
+    const empty = run({ width: 3, height: 1, cells: [null, null, null] });
+    expect(empty.events).toEqual([]);
+    const c = buildChoreography(empty.events, strong);
+    expect(c.ticks).toEqual([]);
+    expect(kinds(c.cues)).toEqual(['windup', 'stamp']);
+    // 信号は出るが出荷しない盤面も同じ（ピークなし）
+    const noShip = buildChoreography(run(row(['switch', 'gear'])).events, strong);
+    expect(noShip.cues.some((q) => q.kind === 'peak')).toBe(false);
+  });
+
   it('合計の単位が変わる瞬間（1,000 以上）と、ノルマを超えた瞬間を出す', () => {
     const c = buildChoreography(hugeEvents(5), { ...strong, quota: 10 });
     expect(kinds(c.cues)).toEqual(expect.arrayContaining(['digitUp', 'quotaCross']));
     const none = buildChoreography(small.events, { ...strong, quota: 100 });
     expect(kinds(none.cues)).not.toContain('quotaCross');
+  });
+
+  it('合計が計測不能の桁数に達したら、桁上がりの代わりに「計測不能」を1回だけ出す', () => {
+    // 合計 12,345（5桁）を、4桁で計測不能になる設定で
+    const c = buildChoreography(hugeEvents(5), { ...strong, quota: null, unmeasurableDigits: 4 });
+    expect(kinds(c.cues).filter((k) => k === 'unmeasurable')).toHaveLength(1);
+    expect(kinds(c.cues)).not.toContain('digitUp');
+    // 既定（balance/ の桁数）では出ない
+    expect(kinds(buildChoreography(hugeEvents(5), strong).cues)).not.toContain('unmeasurable');
   });
 
   it('規模が大きいほど長いが、どんなに長い連鎖でも上限内に収まる', () => {

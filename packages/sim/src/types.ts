@@ -44,6 +44,8 @@ export type Dir8 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface Part {
   id: PartId;
   dir: Dir4;
+  /** 金色パーツ（同じパーツが合体したもの。効果の後で値を goldenMultiplier 倍する）。普通のパーツには無い */
+  golden?: true;
 }
 
 /** 盤面。cells は行優先（index = y * width + x）、空マスは null */
@@ -78,6 +80,8 @@ export interface RuleSet {
   dockDivisor: number;
   /** 経済系パーツが1回のシミュレーションで生める予算の上限 */
   maxIncomePerSim: number;
+  /** 金色パーツが送る信号の値・出荷量に掛ける倍率（金色パーツを導入する前のランには無い = 1） */
+  goldenMultiplier?: number;
   /** 同時に存在できる信号の数の上限（超えたら打ち切る。メモリと計算時間を守るため） */
   maxLiveSignals: number;
 }

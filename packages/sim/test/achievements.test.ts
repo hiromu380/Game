@@ -7,6 +7,8 @@ import {
   ACHIEVEMENT_IDS,
   achievementStats,
   BALANCE,
+  isUnmeasurable,
+  scoreFromString,
   commitShift,
   createInitialAchievements,
   createInitialMeta,
@@ -15,7 +17,7 @@ import {
   evaluateAchievements,
   getCurrentRules,
   junkbotMaxStreak,
-  recordDailyParticipation,
+  recordWeeklyParticipation,
   scoreOf,
   shiftContextOf,
   simulate,
@@ -70,9 +72,9 @@ const evaluate = (context: AchievementContext, progress = createInitialAchieveme
   evaluateAchievements(progress, context);
 
 describe('実績の定義', () => {
-  it('30個・ID は Steamworks の API 名の形で重複なし', () => {
-    expect(ACHIEVEMENTS).toHaveLength(30);
-    expect(new Set(ACHIEVEMENT_IDS).size).toBe(30);
+  it('31個・ID は Steamworks の API 名の形で重複なし', () => {
+    expect(ACHIEVEMENTS).toHaveLength(31);
+    expect(new Set(ACHIEVEMENT_IDS).size).toBe(31);
     for (const id of ACHIEVEMENT_IDS) expect(id).toMatch(/^ACH_[A-Z0-9_]+$/);
   });
 });
@@ -110,6 +112,16 @@ describe('シフト確定時の判定', () => {
       'ACH_OVERTIME_9',
       'ACH_ZERO',
     ]);
+  });
+
+  it('計測不能の隠し実績: 1シフトの出荷量が balance/ の桁数以上', () => {
+    const digits = BALANCE.unmeasurable.digits;
+    const below = '9'.repeat(digits - 1);
+    const at = `1${'0'.repeat(digits - 1)}`;
+    expect(evaluate(shiftContext({ score: below }))).not.toContain('ACH_UNMEASURABLE');
+    expect(evaluate(shiftContext({ score: at }))).toContain('ACH_UNMEASURABLE');
+    expect(isUnmeasurable(below)).toBe(false);
+    expect(isUnmeasurable(scoreFromString(at))).toBe(true);
   });
 
   it('解除済みの実績は返さない', () => {
@@ -164,24 +176,24 @@ describe('メタ進行の判定', () => {
   });
 });
 
-describe('デイリーの判定', () => {
+describe('週替わりの判定', () => {
   it('参加日数は同じ日を二重に数えない', () => {
     let progress = createInitialAchievements();
-    progress = recordDailyParticipation(progress, '2026-10-01');
-    progress = recordDailyParticipation(progress, '2026-10-01');
+    progress = recordWeeklyParticipation(progress, '2026-10-01');
+    progress = recordWeeklyParticipation(progress, '2026-10-01');
     expect(progress.dailyDays).toBe(1);
     expect(evaluate({}, progress)).toEqual(['ACH_DAILY_FIRST']);
-    for (let d = 2; d <= 7; d++) progress = recordDailyParticipation(progress, `2026-10-0${d}`);
+    for (let d = 2; d <= 7; d++) progress = recordWeeklyParticipation(progress, `2026-10-0${d}`);
     expect(progress.dailyDays).toBe(7);
     expect(evaluate({}, progress)).toContain('ACH_DAILY_7');
   });
 
   it('全シフトクリア・上位 10%', () => {
-    expect(evaluate({ daily: { cleared: true, topPercent: 10 } })).toEqual([
+    expect(evaluate({ weekly: { cleared: true, topPercent: 10 } })).toEqual([
       'ACH_DAILY_CLEAR',
       'ACH_DAILY_TOP10',
     ]);
-    expect(evaluate({ daily: { cleared: false, topPercent: 10.5 } })).toEqual([]);
+    expect(evaluate({ weekly: { cleared: false, topPercent: 10.5 } })).toEqual([]);
   });
 });
 

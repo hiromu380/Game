@@ -42,6 +42,11 @@ button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* キーボード・コントローラーで選んでいる場所をはっきり見せる（マウスのクリックでは出ない） */
+:focus-visible {
+  outline: 3px solid var(--selected);
+  outline-offset: 2px;
+}
 .button--primary {
   background: var(--primary);
   border-color: var(--primary-shadow);
@@ -204,6 +209,42 @@ button:disabled {
 .hud__quota.is-met .hud__quota-bar > span {
   background: var(--met);
 }
+/* 試運転の結果（再生中は出荷量の途中経過）とノルマに対するゲージ。配置を変えた後の古い結果は薄く、点線のゲージ */
+.hud__trial {
+  min-width: 9.5rem;
+}
+.hud__trial .hud__quota-bar {
+  height: 6px;
+  margin-top: 4px;
+}
+.hud__trial.is-met .hud__quota-bar > span {
+  background: var(--met);
+}
+.hud__trial-percent {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.hud__trial-note {
+  margin-top: 3px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.hud__trial.is-stale .hud__value,
+.hud__trial.is-stale .hud__quota-bar {
+  opacity: 0.45;
+}
+.hud__trial.is-stale .hud__quota-bar {
+  outline: 1px dashed var(--muted);
+}
+.hud__trial.is-stale .hud__trial-note {
+  color: var(--accent);
+  font-weight: 700;
+}
+.hud__trial:not(.is-met) .hud__value--score {
+  color: var(--text);
+}
 /* ロケットの進み具合（ui/RocketProgress.tsx） */
 .hud__rocket {
   flex-direction: row;
@@ -288,10 +329,50 @@ button:disabled {
 .item-button__desc {
   font-size: 0.75rem;
   color: var(--muted);
+  /* 説明は2行まで。ポインターを重ねる・キーボードで選ぶと全文を出す（全文はパーツ一覧にもある） */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.item-button:hover .item-button__desc,
+.item-button:focus-visible .item-button__desc {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 .item-button__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* 価格・個数は大きく（買えるか・何個あるかを一目で） */
+.item-button__price,
+.item-button__count {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--text);
+}
+.item-button:disabled .item-button__price {
+  color: var(--muted);
+}
+/* 購入後の残り予算（ポインターを重ねる・キーボードで選んだときだけ） */
+.item-button__after {
+  display: none;
+  font-size: 0.7rem;
+}
+.item-button:hover .item-button__after,
+.item-button:focus-visible .item-button__after {
+  display: block;
+}
+/* 予算が足りないときの不足額 */
+.shop__short {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--missed);
 }
 
 /* ---- パーツアイコン（仮素材: 色分けした図形 + 頭文字） ---- */
@@ -299,6 +380,61 @@ button:disabled {
   display: block;
   flex-shrink: 0;
   user-select: none;
+}
+
+/* 金色パーツ: 金の縁と光 */
+.part-icon--golden {
+  border-radius: 8px;
+  outline: 2px solid var(--golden);
+  box-shadow: 0 0 8px var(--golden);
+}
+
+/* 合体ボタン（金色。合体できるときだけ出る） */
+.button--merge {
+  border-color: var(--golden);
+  background: var(--golden);
+  color: var(--hazard-black);
+  font-weight: bold;
+}
+.button--merge:hover:not(:disabled) {
+  background: var(--golden-deep);
+}
+
+/* ---- 消耗品のアイコン（ランダム配置権。パーツのアイコンと同じ大きさの枠に UI アイコンを置く） ---- */
+.item-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* ---- 手持ちの消耗品（ランダム配置権）: 今日だけ有効。夜は警告の色 ---- */
+.item-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 2px dashed var(--floor-item);
+  border-radius: 8px;
+}
+
+.item-row__expires {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--floor-item);
+}
+
+.item-row--expiring {
+  border-style: solid;
+  border-color: var(--missed);
+}
+
+.item-row--expiring .item-row__expires {
+  color: var(--missed);
+  font-weight: 700;
 }
 
 /* ---- 選択中のパーツ ---- */
@@ -330,6 +466,7 @@ button:disabled {
 .speed__button {
   padding: 4px 10px;
   font-size: 0.85rem;
+  min-height: 32px;
 }
 .speed__button--active {
   border-color: var(--selected);
@@ -357,6 +494,28 @@ button:disabled {
   padding: 14px 18px;
   text-align: center;
 }
+/* ボルトの反応（左下に全身）。狭い画面では出さない */
+.playback-panel__bolt {
+  position: absolute;
+  left: 18px;
+  bottom: 12px;
+  height: 120px;
+  width: auto;
+}
+@media (max-width: 600px) {
+  .playback-panel__bolt {
+    display: none;
+  }
+}
+/* 結果の数字は2組ずつ横に並べ、パネルの高さを抑える（盤面の結果が見えるように） */
+.playback-panel .stats {
+  grid-template-columns: repeat(2, auto auto);
+  column-gap: 14px;
+  margin-bottom: 8px;
+}
+.playback-panel {
+  padding: 10px 16px;
+}
 .playback-panel h2 {
   margin: 0 0 4px;
   font-size: 1rem;
@@ -370,6 +529,11 @@ button:disabled {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 8px;
+}
+.playback-panel__short {
+  margin: -4px 0 8px;
+  font-weight: bold;
+  color: var(--missed);
 }
 .is-met {
   color: var(--met);
@@ -398,6 +562,13 @@ button:disabled {
 .stats__score {
   color: var(--met);
 }
+/* 計測不能のときの補足（出荷量の下に小さく） */
+.stats__note {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: var(--muted);
+}
 .stats--large {
   font-size: 1.2rem;
 }
@@ -413,24 +584,120 @@ button:disabled {
   font-size: 0.85rem;
   pointer-events: none;
 }
+/* 操作の手応え（購入 −3円 など）: 盤面の下の中央に短く出す */
+.toast--note {
+  top: auto;
+  right: auto;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  font-weight: bold;
+  white-space: nowrap;
+  animation: toast-note 1.6s ease-out both;
+}
+@keyframes toast-note {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  12%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast--note {
+    animation: none;
+  }
+}
 
 /* ---- ラン終了画面 ---- */
 .run-end {
-  max-width: 480px;
-  margin: 40px auto;
+  margin: 16px 0 24px;
   text-align: center;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 24px;
 }
-.run-end h1 {
-  margin-top: 0;
+.run-end__main,
+.run-end__side {
+  min-width: 0;
 }
+.run-end h1 {
+  margin: 12px 0 8px;
+}
+/* シフトごとの結果: 達成は緑の枠、未達は赤い枠の小さな札を並べる（色だけでなく記号でも） */
 .run-end__history {
   list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
   padding: 0;
   margin: 0 0 20px;
+}
+.run-end__history li {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.run-end__history li.is-met::before {
+  content: '✓ ';
+}
+.run-end__history li.is-missed::before {
+  content: '✗ ';
+}
+/* 広い画面: 画面の幅いっぱいに2列（左は結果、右は共有・解放の目標・実績） */
+@media (min-width: 900px) {
+  .run-end {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .run-end__main {
+    position: sticky;
+    top: 16px;
+  }
+  .run-end .rocket-scene__sky {
+    height: 220px;
+  }
+  .run-end__side > :first-child {
+    margin-top: 0;
+  }
+}
+.app--wide {
+  max-width: 1600px;
+}
+/* とても広い画面: 3列（結果 ｜ 共有 ｜ 解放の目標・実績） */
+@media (min-width: 1400px) {
+  .run-end {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+  .run-end__side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: start;
+  }
+  .run-end__side > * {
+    grid-column: 2;
+    margin-top: 0;
+  }
+  .run-end__side > .run-end__share {
+    grid-column: 1;
+    grid-row: 1 / span 6;
+    margin-top: 0;
+  }
 }
 
 /* ---- パネル見出し行（見出し + 小さなボタン） ---- */
@@ -451,6 +718,8 @@ button:disabled {
 .button--small {
   padding: 4px 10px;
   font-size: 0.8rem;
+  /* 指で押せる大きさ（小さいボタンでも高さ 32px） */
+  min-height: 32px;
 }
 
 /* ---- 売却（取り消せない操作）は目立たせず、確認時だけ赤くする ---- */
@@ -492,6 +761,20 @@ button:disabled {
 }
 .boss-notice--now .boss-notice__label {
   color: var(--missed);
+}
+/* ルールの期間（このシフトだけ・今夜だけ・今日だけ・全シフト） */
+.boss-notice__period {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: var(--muted);
+}
+/* 対象のパーツが手元にないとき（今は関係ない） */
+.boss-notice__target {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--met);
 }
 .boss-notice__desc {
   font-size: 0.85rem;
@@ -710,7 +993,7 @@ button:disabled {
   min-width: 140px;
 }
 
-/* ---- デイリーチャレンジ・ランキング ---- */
+/* ---- 週替わりチャレンジ・ランキング・結果発表 ---- */
 .mode-badge {
   align-self: center;
   line-height: 1.4;
@@ -722,21 +1005,21 @@ button:disabled {
   border-radius: 999px;
   white-space: nowrap;
 }
-.daily {
+.weekly {
   max-height: calc(100vh - 32px);
   overflow-y: auto;
 }
-.daily .boss-notice {
+.weekly .boss-notice {
   margin: 12px 0;
 }
-.daily__actions {
+.weekly__actions {
   flex-wrap: wrap;
   margin: 12px 0 4px;
 }
-.daily__error {
+.weekly__error {
   color: var(--missed);
 }
-.daily__name input {
+.weekly__name input {
   flex: 1;
   min-width: 0;
   font: inherit;
@@ -746,7 +1029,7 @@ button:disabled {
   background: var(--bg);
   color: var(--text);
 }
-.daily__commitment {
+.weekly__commitment {
   font-size: 0.7rem;
   color: var(--muted);
   word-break: break-all;
@@ -799,6 +1082,144 @@ button:disabled {
   align-self: center;
   font-weight: bold;
   color: var(--accent);
+}
+
+/* 挑戦した日（7マス）。状態は色だけでなく記号・文字でも示す */
+.weekly__days {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 4px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.weekly__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.weekly__day.is-today {
+  border: 2px solid var(--accent);
+}
+.weekly__day--cleared {
+  border-color: var(--met);
+  color: var(--text);
+}
+.weekly__day--cleared .weekly__mark {
+  color: var(--met);
+}
+.weekly__day--played,
+.weekly__day--playing {
+  color: var(--text);
+}
+.weekly__day--missed {
+  border-style: dashed;
+}
+.weekly__mark {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.weekly__best {
+  font-weight: bold;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.ranking__badge {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+}
+.ranking__badge--final {
+  border-style: solid;
+  border-color: var(--met);
+  color: var(--met);
+}
+.ranking__you {
+  margin-left: 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--accent);
+}
+.results__weeks select {
+  font: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+  color: var(--text);
+}
+.results__me {
+  text-align: center;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+}
+.results__rank {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--accent);
+}
+.results__percent {
+  margin: 0 0 8px;
+  font-weight: bold;
+}
+/* 結果発表として開いたときだけ、順位を順に見せる */
+.results__me--reveal > * {
+  animation: results-reveal 0.5s ease-out both;
+}
+.results__me--reveal > :nth-child(2) {
+  animation-delay: 0.35s;
+}
+.results__me--reveal > :nth-child(3) {
+  animation-delay: 0.7s;
+}
+@keyframes results-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .results__me--reveal > * {
+    animation: none;
+  }
+}
+.results__share {
+  margin-top: 12px;
+}
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  background: var(--accent);
+  color: var(--hazard-black);
 }
 
 /* ---- ヘッダー: アイコン＋タイトルはタイトル画面へ戻るボタン ---- */
@@ -1018,6 +1439,10 @@ a.button.button--primary {
     padding: 4px 8px;
     font-size: 0.8rem;
   }
+  /* 長いボタン名はアイコンだけにする（名前は aria-label で読み上げる） */
+  .app-header__label {
+    display: none;
+  }
   .mode-badge {
     font-size: 0.7rem;
     padding: 2px 8px;
@@ -1112,9 +1537,17 @@ a.button.button--primary {
 }
 .app--compact .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   padding: 6px;
+}
+/* 狭い画面: 案内はボタンの下の1行に回す */
+.app--compact .controls__next {
+  order: 1;
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
 }
 .app--compact .controls .button-row {
   flex: 1;
@@ -1122,6 +1555,16 @@ a.button.button--primary {
 }
 .app--compact .controls button {
   padding: 8px 6px;
+  white-space: nowrap;
+}
+/* 再生中は押せない「試運転・本番」を畳み、再生速度だけを1行で出す */
+.app--compact .controls.is-playing .button-row {
+  display: none;
+}
+.app--compact .controls.is-playing .speed {
+  flex: 1;
+  justify-content: center;
+  margin: 0;
 }
 .app--compact .speed {
   flex-shrink: 0;
@@ -1142,7 +1585,7 @@ a.button.button--primary {
     width: min(100%, calc(100dvh - 330px));
   }
 }
-.daily__actions > button {
+.weekly__actions > button {
   flex: 1 1 30%;
   white-space: nowrap;
 }
@@ -1177,7 +1620,8 @@ a.button.button--primary {
 .app--fit .layout__board {
   /* cqh は子要素から見た .layout の高さ（.layout 自身の指定では使えない） */
   /* 高さいっぱい。ただし右の列（最小 280px + すき間）の分は横幅に残す */
-  width: min(100cqh, 100cqw - 290px, var(--board-max, 640px));
+  /* 下に床の凡例の1行（26px）を残す */
+  width: min(100cqh - 26px, 100cqw - 290px, var(--board-max, 640px));
 }
 .app--fit .layout__side {
   min-height: 0;
@@ -1193,7 +1637,19 @@ a.button.button--primary {
 .app--fit .layout__side > * {
   grid-column: 1 / -1;
 }
-/* 右の列の先頭: シフトの情報・目的の案内・夜シフトの予告（盤面の上から移したもの） */
+/* 右の列の先頭: 目標の計器（右の列をスクロールしても上に残す）。その下に本番ボタン、目的の案内・夜シフトの予告 */
+.app--fit .layout__goal {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--bg);
+  padding-bottom: 2px;
+}
+.app--fit .layout__goal .hud {
+  margin: 0;
+  padding: 6px 10px;
+  gap: 4px 14px;
+}
 .app--fit .layout__info .hud {
   margin: 0 0 6px;
   padding: 6px 10px;
@@ -1313,6 +1769,32 @@ a.button.button--primary {
   overflow-y: auto;
 }
 /* 本番の確認（ui/CommitConfirm.tsx） */
+.commit-confirm__warnings {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 4px;
+  display: grid;
+  gap: 6px;
+}
+.commit-confirm__warning {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.commit-confirm__warning > span {
+  color: var(--accent);
+  font-weight: bold;
+}
+.commit-confirm__warning.is-noSwitch,
+.commit-confirm__warning.is-noDock {
+  border-left-color: var(--missed);
+}
 .commit-confirm .button-row {
   margin-top: 12px;
 }
@@ -1400,6 +1882,14 @@ a.button.button--primary {
   padding: 6px 0;
   border-bottom: 1px solid var(--panel-border);
 }
+/* パーツの絵は、盤面のマスのような暗い台に載せて見せる */
+.catalog__item .part-icon {
+  flex: none;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+}
 .catalog__item.is-locked {
   opacity: 0.5;
 }
@@ -1449,24 +1939,22 @@ a.button.button--primary {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-}
-.rocket-scene.is-launched .rocket-scene__sky {
+  border: 1px solid var(--panel-border);
   border-radius: 10px;
-  /* 星空: 小さな点を2種類の間隔で敷き詰める */
-  background:
-    radial-gradient(circle, var(--white) 1px, transparent 1.5px) 0 0 / 37px 29px,
-    radial-gradient(circle, var(--muted) 1px, transparent 1.5px) 11px 13px / 23px 31px,
-    var(--bg);
+  /* 発射台の絵（art/backdrop.ts。夜空・投光器・台）。台は中央の下 */
+  background: #141b33 center bottom / cover no-repeat;
 }
 .rocket-scene__rocket {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 8px;
+  /* 発射台の上面（絵の下から 22px）に立てる */
+  padding-bottom: 14px;
 }
+/* 発射後: 炎の分だけ台から浮かせる */
 .rocket-scene.is-launched .rocket-scene__rocket {
-  padding-bottom: 32px;
+  padding-bottom: 40px;
 }
 .rocket-scene__flame {
   position: absolute;
@@ -1837,7 +2325,8 @@ a.button.button--primary {
 .title-backdrop__bolt {
   position: absolute;
   right: 5%;
-  bottom: 70px;
+  /* 全身の足もと（viewBox の下の余白）をベルトの上に合わせる */
+  bottom: 52px;
   z-index: 1;
   animation: title-bob 1.6s ease-in-out infinite;
 }
@@ -1924,11 +2413,21 @@ a.button.button--primary {
 }
 .day-event__choice {
   display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  text-align: left;
+}
+.day-event__icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+.day-event__text {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: 10px 14px;
-  text-align: left;
 }
 .day-event__choice strong {
   color: var(--accent);
@@ -1957,11 +2456,12 @@ a.button.button--primary {
   color: var(--met);
 }
 
-/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ---- */
+/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ----
+   盤面を主役にするため、細い帯（64px）にする。左から: 時刻 → シフトの達成（✓）→ 今日の出来事 → ボルト → ロケット */
 .workshop {
   position: relative;
-  height: 150px;
-  margin: 8px 0 12px;
+  height: 64px;
+  margin: 6px 0 8px;
   overflow: hidden;
   pointer-events: none;
   border: 1px solid var(--panel-border);
@@ -1973,104 +2473,69 @@ a.button.button--primary {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #728a96;
-  transition: background 0.6s;
-}
-.workshop--period-1 .workshop__window {
-  background: #44677c;
-}
-.workshop--period-2 .workshop__window {
   background: #16182c;
+}
+/* 窓の外の景色（art/backdrop.ts: 朝・昼・夜）。帯の幅に合わせて切り抜き、下を揃える */
+.workshop__sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% bottom;
 }
 .workshop__sky-label {
   position: absolute;
-  top: 12px;
+  top: 50%;
   left: 14px;
+  transform: translateY(-50%);
   padding: 3px 7px;
   border: 1px solid currentColor;
-  color: rgba(255, 255, 255, 0.72);
+  border-radius: 3px;
+  background: rgba(20, 23, 29, 0.55);
+  color: rgba(255, 255, 255, 0.85);
   font: 700 0.62rem/1 monospace;
   letter-spacing: 0.08em;
 }
-.workshop__stars {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: radial-gradient(circle, white 1px, transparent 1.5px) 0 0 / 47px 41px;
-  transition: opacity 0.6s;
-}
-.workshop--period-2 .workshop__stars {
-  opacity: 0.55;
-}
-.workshop__factory {
-  position: absolute;
-  right: -20px;
-  bottom: -35px;
-  width: 340px;
-  opacity: 0.38;
-  filter: brightness(0.45);
-}
+/* ロケットの組み立て台（art/backdrop.ts の絵）と、中に置くロケット */
 .workshop__gantry {
   position: absolute;
-  right: 18%;
-  bottom: 12px;
-  width: 116px;
-  height: 132px;
-  border: 5px solid rgba(20, 23, 29, 0.82);
-  border-top: 0;
+  right: 12%;
+  bottom: 0;
+  width: 84px;
+  height: 56px;
 }
-.workshop__gantry-top {
+.workshop__gantry-frame {
   position: absolute;
-  top: 0;
-  left: -15px;
-  width: 136px;
-  border-top: 8px solid rgba(20, 23, 29, 0.82);
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 .workshop__rocket {
   position: absolute;
-  left: 22px;
-  bottom: 3px;
-  width: 64px;
-  height: 70px;
+  left: 23px;
+  bottom: 4px;
+  width: 38px;
+  height: 44px;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.3));
-}
-.workshop__cable {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 65px;
-  background: var(--hazard-yellow);
-}
-.workshop__cable--a {
-  left: 12px;
-}
-.workshop__cable--b {
-  right: 12px;
-  height: 105px;
 }
 .workshop__plaques {
   position: absolute;
-  top: 12px;
+  top: 50%;
   right: 14px;
+  transform: translateY(-50%);
   display: flex;
   gap: 4px;
 }
-.workshop__plaques span {
-  display: grid;
-  place-items: center;
+.workshop__plaques img {
   width: 22px;
-  height: 27px;
-  border: 2px solid rgba(255, 193, 7, 0.72);
-  border-radius: 2px;
-  background: rgba(20, 24, 32, 0.7);
-  color: var(--hazard-yellow);
-  font-size: 0.68rem;
+  height: 28px;
 }
 .workshop__event-prop {
   position: absolute;
-  left: 18%;
-  bottom: 12px;
+  left: 34%;
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
   flex-direction: column;
   min-width: 108px;
@@ -2081,6 +2546,12 @@ a.button.button--primary {
   color: var(--text);
   transform: rotate(1deg);
   box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
+}
+.workshop__event-prop img {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  translate: 0 -50%;
 }
 .workshop__event-prop span {
   color: var(--muted);
@@ -2104,31 +2575,28 @@ a.button.button--primary {
 .workshop__beacon {
   position: absolute;
   left: 50%;
-  top: 8px;
-  width: 18px;
-  height: 13px;
-  border: 3px solid rgba(20, 23, 29, 0.82);
-  border-bottom: 0;
-  border-radius: 12px 12px 2px 2px;
-  background: var(--missed);
-  opacity: 0.25;
+  top: 6px;
+  width: 24px;
+  height: 20px;
+  opacity: 0.35;
 }
 .workshop.is-alert .workshop__beacon {
   opacity: 1;
   animation: workshop-alert 0.8s steps(1) infinite;
-  box-shadow: 0 0 18px var(--missed);
+  filter: drop-shadow(0 0 6px var(--missed));
 }
 @keyframes workshop-alert {
   50% {
-    opacity: 0.3;
-    box-shadow: none;
+    opacity: 0.35;
+    filter: none;
   }
 }
 .workshop__status {
+  /* 工場名は目標の計器の管理プレートにもあるので、細い帯では出さない */
+  display: none;
   position: absolute;
   left: 18px;
   bottom: 15px;
-  display: flex;
   flex-direction: column;
   padding: 6px 9px;
   border-left: 4px solid var(--hazard-yellow);
@@ -2140,27 +2608,29 @@ a.button.button--primary {
 }
 .workshop__bolt {
   position: absolute;
-  left: 48%;
-  bottom: 5px;
-  width: 58px;
-  transform: rotate(-4deg);
+  left: 56%;
+  bottom: 0;
+  /* 全身（設定画の viewBox 140×162）。帯の高さに収める */
+  height: calc(100% - 4px);
+  width: auto;
   transition: transform 0.2s;
 }
 .workshop__bolt.is-watching {
-  transform: rotate(4deg) translateY(-8px);
+  transform: translateY(-2px);
+}
+/* シフトを達成した印（✓）: 時刻の右に並べる（以前は時刻の表示に重なっていた） */
+.workshop__marks {
+  position: absolute;
+  top: 50%;
+  left: 130px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
 }
 .workshop__approval {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
   width: 22px;
   height: 22px;
-  margin: 7px 3px;
-  border: 2px solid var(--met);
-  border-radius: 50%;
-  color: var(--met);
-  font-weight: 800;
-  transform: rotate(-8deg);
+  margin: 0 1px;
 }
 .workshop__soot {
   position: absolute;
@@ -2210,12 +2680,15 @@ a.button.button--primary {
 
 @media (max-width: 600px) {
   .workshop {
-    height: 104px;
+    height: 48px;
   }
   .workshop__gantry {
     right: 8%;
     transform: scale(0.78);
     transform-origin: bottom;
+  }
+  .workshop__marks {
+    left: 112px;
   }
   .workshop__bolt,
   .workshop__status,
@@ -2296,4 +2769,191 @@ a.button.button--primary {
   width: min(720px, 100%);
   max-height: 90dvh;
   overflow-y: auto;
+}
+
+/* ---- ゲームのメニュー（ui/GameMenu.tsx）: 操作方法・諦める ---- */
+.game-menu {
+  position: relative;
+}
+.game-menu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 11rem;
+  padding: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.game-menu__list button {
+  justify-content: flex-start;
+  width: 100%;
+}
+.game-menu__danger {
+  color: var(--missed);
+}
+
+/* 横長の画面: 目標の計器を1段に収める（ロケットの進み具合は上の細い帯の ✓ とロケットの絵で見せる） */
+.app--fit .layout__goal .hud__rocket {
+  display: none;
+}
+.app--fit .layout__goal .hud__trial {
+  min-width: 8rem;
+  flex: 1;
+}
+
+/* 狭い画面: ヘッダーのボタンは絵だけにし、目標の計器は「シフト・予算・ノルマ」の1段と「試運転」の1段にする */
+@media (max-width: 600px) {
+  .app-header__actions .button--ghost {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+  .app-header__name {
+    display: none;
+  }
+  .hud {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 6px 12px;
+  }
+  .hud__trial {
+    grid-column: 1 / -1;
+  }
+  .hud__rocket {
+    display: none;
+  }
+}
+
+/* 床の凡例（盤面の下。盤面にある床の種類だけ） */
+.floor-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+.floor-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.floor-legend__swatch {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 2px;
+}
+.floor-legend__swatch--limited {
+  border: 2px dashed var(--floor-bonus);
+}
+.floor-legend__swatch--item {
+  border: 2px dashed var(--floor-item);
+}
+.floor-legend__swatch--upcoming {
+  border: 2px dashed var(--floor-blocked);
+  background: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--floor-blocked) 50%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+/* 次にすること（操作欄の1行の案内。state/nextStep.ts） */
+.controls__next {
+  margin: 8px 0 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+.controls__next--ready {
+  color: var(--met);
+}
+.controls__next--short {
+  color: var(--accent);
+}
+/* 横長の画面では凡例を1行にする（はみ出す分は横にスクロール） */
+.app--fit .floor-legend {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+/* 狭い画面（指で操作）: 押せるものは高さ 44px 以上（CLAUDE.md「UI の原則」） */
+.app--compact button,
+.app--compact .tabs__tab {
+  min-height: 44px;
+}
+
+/* ---- カットシーン（story/CutscenePlayer.tsx）: 画面全体に重ねる ---- */
+.cutscene {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0b0d12;
+  touch-action: none;
+  user-select: none;
+}
+.cutscene__stage {
+  position: absolute;
+  inset: 0;
+}
+.cutscene__canvas {
+  display: block;
+}
+/* スキップの案内（右下・控えめ）: 長押しの進み具合の輪 */
+.cutscene__skip {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+/* ダイアログの右上の閉じるボタン（どのページからでも閉じられるように） */
+.modal__body {
+  position: relative;
+}
+.modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* 選択中のパーツ（1行）: 手持ち・ショップの一覧を画面の外へ押し出さない */
+.selection--compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+.selection--compact .selection__part {
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.selection--compact .selection__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selection__actions {
+  display: flex;
+  gap: 4px;
+  flex: none;
 }

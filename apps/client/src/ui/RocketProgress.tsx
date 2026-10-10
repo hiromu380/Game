@@ -50,7 +50,9 @@ export function RocketGoal({ run }: { run: RunState }) {
       <img className="boss-notice__icon" src={ROCKET_ASSETS.stages[ROCKET_PARTS]} alt="" />
       <span className="boss-notice__label">{t('rocket.goalLabel')}</span>
       <span className="boss-notice__desc">
-        {t(run.config.shifts.length > run.config.shiftsPerDay ? 'rocket.goal' : 'rocket.goalDaily')}
+        {t(
+          run.config.shifts.length > run.config.shiftsPerDay ? 'rocket.goal' : 'rocket.goalWeekly',
+        )}
       </span>
     </div>
   );

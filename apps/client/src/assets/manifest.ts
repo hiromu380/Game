@@ -5,13 +5,23 @@
  * parts/ 以下のファイルを置き換える（または src の import 先を変える）だけでよい。
  * 現在は仮素材として SVG のピクトグラムを使っている（art/ のスクリプトで生成したものを含む）。
  */
-import { PART_IDS, type AchievementId, type BossModifierId, type PartId } from '@chain-factory/sim';
+import {
+  PART_IDS,
+  type AchievementId,
+  type BossModifierId,
+  type DayEventId,
+  type PartId,
+} from '@chain-factory/sim';
 import logoDarkSrc from './logo/logo-dark-bg.svg';
 import logoLightSrc from './logo/logo-light-bg.svg';
 import boltFailSrc from './mascot/bolt-fail.svg';
 import boltHappySrc from './mascot/bolt-happy.svg';
 import boltIdleSrc from './mascot/bolt-idle.svg';
 import boltSurprisedSrc from './mascot/bolt-surprised.svg';
+import boltGutsSrc from './characters/bolt/poses/guts.svg';
+import boltSadSrc from './characters/bolt/poses/sad.svg';
+import boltStandSrc from './characters/bolt/poses/stand.svg';
+import boltWaveSrc from './characters/bolt/poses/wave.svg';
 import { PART_FAMILY } from './partFamily';
 import { BOARD_COLORS, FAMILY_COLORS, hex, SIGNAL_TIERS } from './palette';
 import barrelSrc from './parts/barrel.svg';
@@ -110,6 +120,9 @@ const boardFiles = byName(
 const bossFiles = byName(
   import.meta.glob<string>('./boss/*.svg', { eager: true, import: 'default' }),
 );
+const eventFiles = byName(
+  import.meta.glob<string>('./events/*.svg', { eager: true, import: 'default' }),
+);
 const uiFiles = byName(import.meta.glob<string>('./ui/*.svg', { eager: true, import: 'default' }));
 
 /** 盤面の素材（床3種・床タイル・使用不可マス・枠の角と辺。art/board.ts で生成） */
@@ -131,6 +144,9 @@ export const BOARD_ASSETS = {
 /** ボスのアイコン（art/icons.ts で生成） */
 export const BOSS_ICONS = bossFiles as Record<BossModifierId, string>;
 
+/** 今日の出来事のアイコン（art/icons.ts で生成） */
+export const EVENT_ICONS = eventFiles as Record<DayEventId, string>;
+
 /** UI アイコン（24×24。art/icons.ts で生成） */
 export const UI_ICON_NAMES = [
   'reroll',
@@ -145,9 +161,11 @@ export const UI_ICON_NAMES = [
   'ranking',
   'share',
   'debug',
-  'daily',
+  'weekly',
   'back',
   'expand',
+  'permit',
+  'undo',
 ] as const;
 export type UiIconName = (typeof UI_ICON_NAMES)[number];
 export const UI_ICONS = uiFiles as Record<UiIconName, string>;
@@ -174,7 +192,51 @@ export const ROCKET_ASSETS = {
     .sort((a, b) => Number(a.slice(7)) - Number(b.slice(7)))
     .map((name) => rocketFiles[name]!),
   flame: rocketFiles['flame']!,
+  /** 発射の煙（カットシーンの打ち上げ用） */
+  smoke: rocketFiles['smoke']!,
+  /** ナットのロケット（ボルトのものより性能が良さそうな機体。カットシーン・写真用） */
+  nut: rocketFiles['nut-rocket']!,
+  nutLaunch: rocketFiles['nut-rocket-flame']!,
 };
+
+/**
+ * キャラクターの全身（切り絵アニメの部品・ポーズ。art/characters/ で生成）
+ *
+ * 部品は数が多く、使う場面（上部の背景・カットシーン）も限られるので、必要なときに読み込む（URL を返す関数）。
+ * 部品のつながり・関節・ポーズは rig.json（docs/characters/preview.html で一覧）
+ */
+const characterFiles = import.meta.glob<string>('./characters/*/**/*.svg', {
+  query: '?url',
+  import: 'default',
+});
+
+/**
+ * ボルトの全身（よく使うポーズだけ最初から読み込む。上部の背景・タイトル画面の情景）。
+ * 顔だけのアイコン（MASCOT_ASSETS）は、吹き出し・ガイド・共有カードなどで使い続ける
+ */
+export const BOLT_BODY_ASSETS = {
+  stand: boltStandSrc,
+  guts: boltGutsSrc,
+  wave: boltWaveSrc,
+  sad: boltSadSrc,
+} as const;
+
+/** 全身で描くキャラクター（ボルト・工場長・ナット） */
+export type CharacterId = 'bolt' | 'chief' | 'nut';
+
+/** キャラクターの素材の URL を読み込む（path は rig.json の files の値・'poses/jump.svg' など） */
+export function loadCharacterAsset(character: CharacterId, path: string): Promise<string> {
+  const load = characterFiles[`./characters/${character}/${path}`];
+  return load ? load() : Promise.reject(new Error(`unknown ${character} asset: ${path}`));
+}
+
+/** キャラクターの素材のパスの一覧（テストで参照切れを確かめる） */
+export function characterAssetPaths(character: CharacterId): string[] {
+  const prefix = `./characters/${character}/`;
+  return Object.keys(characterFiles)
+    .filter((k) => k.startsWith(prefix))
+    .map((k) => k.slice(prefix.length));
+}
 
 const titleFiles = byName(
   import.meta.glob<string>('./title/*.svg', { eager: true, import: 'default' }),
@@ -184,6 +246,22 @@ const titleFiles = byName(
 export const TITLE_ASSETS = {
   factory: titleFiles['factory']!,
   gear: titleFiles['gear']!,
+};
+
+const backdropFiles = byName(
+  import.meta.glob<string>('./backdrop/*.svg', { eager: true, import: 'default' }),
+);
+
+/** ゲーム画面の上部の帯とラン終了画面の背景（art/backdrop.ts で生成）: 窓の外の景色（朝・昼・夜）・組み立て台・警告灯・発射台 */
+export const BACKDROP_ASSETS = {
+  sky: [backdropFiles['sky-0']!, backdropFiles['sky-1']!, backdropFiles['sky-2']!],
+  gantry: backdropFiles['gantry']!,
+  beacon: backdropFiles['beacon']!,
+  /** ラン終了画面の発射台（夜空・投光器・台） */
+  launchpad: backdropFiles['launchpad']!,
+  /** シフト達成の印（緑のスタンプ）と、全シフトクリアの記念プレート（真鍮の札に星） */
+  approval: backdropFiles['approval']!,
+  plaque: backdropFiles['plaque']!,
 };
 
 /** 盤面・演出の色（PixiJS 用の数値。定義は palette.ts） */

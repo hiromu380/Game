@@ -31,12 +31,16 @@
     { "name": "RATE_LIMIT_WRITE", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } },
   ],
 
-  // 1時間ごと。切り替え時刻（日本時間0時 = UTC 15:00）の直後に当日分が作られ、失敗しても次の回で再試行される
+  // 1時間ごと。週の盤面の先行生成・公開前の検証（少しずつ）・週の切り替え（相場の確定）・前週の結果の確定を行う。
+  // どれも冪等なので、失敗しても次の回で続きから再試行される
   "triggers": { "crons": ["0 * * * *"] },
 
   "vars": {
-    "DAILY_OFFSET_MINUTES": "540",
-    "DAILY_EPOCH": "2026-09-01",
+    // 日・週の切り替え時刻（UTC からのずれ・分。540 = 日本時間0時）と、週の始まりの曜日（1 = 月曜）
+    "CHALLENGE_OFFSET_MINUTES": "540",
+    "WEEK_START_DAY": "1",
+    // 週替わり #1 の週（公開する週の月曜の日付にする: docs/ops/deploy.md）
+    "WEEKLY_EPOCH": "2026-09-28",
     // デスクトップ版（Electron）のページのオリジン（Electron 44 で確認済み）。Web 版は同一オリジンなので影響しない
     "CORS_ORIGINS": "app://chain-factory",
     // Steam 認証で受け付ける App ID（製品版,体験版）。App ID の取得後に設定する（docs/ops/steam-setup.md）

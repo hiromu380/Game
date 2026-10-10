@@ -1,10 +1,12 @@
 /**
- * 盤面で選択中のパーツの操作（回転・手持ちに戻す・売却）
+ * 盤面で選択中のパーツの操作（回転・手持ちに戻す・売却・合体）
+ *
+ * 同じパーツが3つつながっていると「合体」ボタンが出る（選んだマスが金色パーツになる）。
  *
  * 売却は確認なしですぐ行う（「手持ちに戻す」とはボタンの並びと色で区別する）。
  * 盤面のパーツを売却エリア（ui/SellZone.tsx）へドラッグしても売却できる（App.tsx）。
  */
-import { getCurrentRules, getPart, getRefund, type RunState } from '@chain-factory/sim';
+import { getCurrentRules, getPart, getRefund, mergeCells, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import type { Selection } from '../state/gameReducer';
 import { describePart } from './partText';
@@ -16,20 +18,28 @@ interface Props {
   selection: Selection;
   /** 何も選んでいないときはパネルごと出さない（狭い画面で場所を空けるため） */
   hideWhenEmpty?: boolean;
+  /**
+   * 1行に詰めて出す（手持ち・ショップをタブで切り替える画面。下の一覧を画面の外へ押し出さないように）。
+   * 効果の説明はマウスを載せると出る
+   */
+  compact?: boolean;
   disabled: boolean;
   onRotate: () => void;
   onReturn: () => void;
   onSell: () => void;
+  onMerge: () => void;
 }
 
 export function SelectionPanel({
   run,
   selection,
   hideWhenEmpty = false,
+  compact = false,
   disabled,
   onRotate,
   onReturn,
   onSell,
+  onMerge,
 }: Props) {
   const { t } = useI18n();
   const part = selection?.kind === 'cell' ? getPart(run.board, selection.x, selection.y) : null;
@@ -44,21 +54,92 @@ export function SelectionPanel({
     );
   }
 
-  const refund = getRefund(run, part.id);
+  const golden = !!part.golden;
+  const refund = getRefund(run, part.id, golden);
   const sellable = run.config.economy.prices[part.id] > 0;
+  const mergeable =
+    selection?.kind === 'cell' && mergeCells(run, selection.x, selection.y) !== null;
+
+  const rules = getCurrentRules(run);
+  const description =
+    describePart(t, part.id, rules) +
+    (golden ? t('golden.note', { multiplier: rules.goldenMultiplier ?? 1 }) : '');
+  const name = golden
+    ? t('golden.name', { name: t(`part.${part.id}.name`) })
+    : t(`part.${part.id}.name`);
+  const mergeHint = t('selection.mergeHint', { count: run.config.golden?.mergeCount ?? 0 });
+
+  if (compact) {
+    return (
+      <section className="panel selection--compact" aria-label={t('selection.title')}>
+        <div className="selection__part" title={description}>
+          <PartIcon partId={part.id} size={32} golden={golden} />
+          <span className="selection__name">
+            {name}（{t(`dir.${part.dir}`)}）
+          </span>
+        </div>
+        <div className="selection__actions">
+          {mergeable && (
+            <button
+              className="button--small button--merge"
+              disabled={disabled}
+              onClick={onMerge}
+              title={mergeHint}
+            >
+              {t('selection.mergeShort')}
+            </button>
+          )}
+          <button
+            className="button--small"
+            disabled={disabled}
+            onClick={onRotate}
+            title={t('selection.rotate')}
+          >
+            <UiIcon name="rotate" size={16} />
+            {t('selection.rotateShort')}
+          </button>
+          <button
+            className="button--small"
+            disabled={disabled}
+            onClick={onReturn}
+            title={t('selection.returnToInventory')}
+          >
+            <UiIcon name="return" size={16} />
+            {t('selection.returnShort')}
+          </button>
+          <button
+            className="button--small button--ghost"
+            disabled={disabled || !sellable}
+            onClick={onSell}
+          >
+            {sellable && <UiIcon name="sell" size={16} />}
+            {sellable ? t('selection.sellShort', { refund }) : t('selection.cannotSell')}
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="panel">
       <h2 className="panel__title">{t('selection.title')}</h2>
       <div className="selection__part">
-        <PartIcon partId={part.id} />
+        <PartIcon partId={part.id} golden={golden} />
         <div>
           <div className="selection__name">
-            {t(`part.${part.id}.name`)}（{t(`dir.${part.dir}`)}）
+            {name}（{t(`dir.${part.dir}`)}）
           </div>
-          <div className="panel__hint">{describePart(t, part.id, getCurrentRules(run))}</div>
+          <div className="panel__hint">{description}</div>
         </div>
       </div>
+      {mergeable && (
+        <div className="button-row">
+          <button className="button--merge" disabled={disabled} onClick={onMerge}>
+            {t('selection.merge')}
+          </button>
+          <span className="panel__hint">{mergeHint}</span>
+        </div>
+      )}
       <div className="button-row">
         <button disabled={disabled} onClick={onRotate}>
           <UiIcon name="rotate" />

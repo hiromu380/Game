@@ -146,7 +146,7 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
           const unlock = BALANCE.meta.partUnlocks.find((u) => u.partId === partId);
           return (
             <li key={partId} className={`catalog__item ${locked ? 'is-locked' : ''}`}>
-              <PartIcon partId={partId} size={36} />
+              <PartIcon partId={partId} size={52} />
               <div className="catalog__text">
                 <strong>{t(`part.${partId}.name`)}</strong>{' '}
                 <span className={`catalog__rarity catalog__rarity--${rarity ?? 'common'}`}>

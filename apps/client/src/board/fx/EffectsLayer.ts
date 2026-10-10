@@ -6,6 +6,9 @@
  * どの演出をどれくらい強く出すかの閾値は config/effects.ts に集約し、ユーザー設定（演出の強さ・揺れ・
  * 点滅を減らす）で弱められるようにしている。ここはあくまで見た目の処理で、ゲームの計算はしない。
  * パーティクルは使い回す（particlePool.ts）。
+ *
+ * 大きな文字の演出（桁上がり・ノルマ突破・カットイン・合計の「ドン」）は「見出し」として1つずつしか出さない。
+ * 新しい見出しは、出ている見出しより優先度が高ければ置き換え、低ければ出さない（文字が重なって読めなくなるのを防ぐ）。
  */
 import type { FloorTileId, PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
@@ -44,10 +47,28 @@ export interface EffectLabels {
   compact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯（例: ノルマ突破！） */
   quotaCross: () => string;
+  /** 計測不能の帯の見出しと小見出し */
+  unmeasurable: () => { title: string; sub: string };
 }
 
 /** 値の桁数（演出の段階を決める） */
 export const digitsOf = (value: Score): number => value.toString().length;
+
+/** 見出しの優先度（大きいほど優先。同じなら新しい方に置き換える） */
+const HEADLINE_PRIORITY = {
+  digitUp: 1,
+  quotaCross: 2,
+  cutIn: 3,
+  unmeasurable: 4,
+  stamp: 5,
+} as const;
+type HeadlineKind = keyof typeof HEADLINE_PRIORITY;
+
+/** 盤面の数字ポップを短い表記にする桁数（これ以上は 1.2M のように縮めて、マスからはみ出さないようにする） */
+const COMPACT_POP_DIGITS = 4;
+
+/** 上の見出し（桁上がり・ノルマ突破）の縦位置（連鎖数の札と「稼働中」の表示の下） */
+const HEADLINE_Y = 78;
 
 export class EffectsLayer {
   /** 盤面と一緒に揺れる演出（パーツの上に重ねる） */
@@ -63,7 +84,11 @@ export class EffectsLayer {
   /** この再生でカットインを出した最大の桁数（同じ規模で何度も出さないため） */
   private cutInShownDigits = 0;
   private chainCount = 0;
-  private readonly counter: Text;
+  private readonly counter = new Container();
+  private readonly counterBack = new Graphics();
+  private readonly counterText: Text;
+  /** いま出ている見出し（なければ null） */
+  private headline: { kind: HeadlineKind; node: Container } | null = null;
 
   constructor(
     private readonly tweens: TweenManager,
@@ -72,17 +97,19 @@ export class EffectsLayer {
     private readonly getPartView: (x: number, y: number) => Container | undefined,
     private readonly getScreenSize: () => { width: number; height: number },
   ) {
-    this.counter = new Text({
+    // 連鎖数は盤面の左上に、暗い札に載せて出す（下のパーツと重なっても読めるように）
+    this.counterText = new Text({
       text: '',
       style: {
         fill: 0xffffff,
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: '900',
-        stroke: { color: 0x000000, width: 6 },
+        stroke: { color: 0x000000, width: 4 },
       },
     });
-    this.counter.anchor.set(0, 0);
-    this.counter.position.set(24, 22);
+    this.counterText.anchor.set(0.5);
+    this.counter.addChild(this.counterBack, this.counterText);
+    this.counter.position.set(16, 14);
     this.counter.visible = false;
     this.screenLayer.addChild(this.counter);
   }
@@ -101,6 +128,7 @@ export class EffectsLayer {
     this.cutInShownDigits = 0;
     this.chainCount = 0;
     this.thin = false;
+    this.headline = null;
     this.counter.visible = false;
     this.particles.releaseAll();
     this.boardLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
@@ -170,15 +198,17 @@ export class EffectsLayer {
   /** 出荷した */
   onShip(x: number, y: number, value: Score, durationMs: number): void {
     const digits = digitsOf(value);
-    const tier = Math.min(digits - 1, 5);
-    this.popText(
-      x,
-      y,
-      `+${this.labels.score(value)}`,
-      tier,
-      durationMs * 2.5,
-      BOARD_THEME.shipText,
-    );
+    const tier = Math.min(digits - 1, 3);
+    const cutIn =
+      digits >= EFFECTS_CONFIG.cutIn.minShipDigits &&
+      digits > this.cutInShownDigits &&
+      this.settings.strength !== 'minimal';
+    // カットインに同じ数字を大きく出すときは、盤面の数字は出さない（同じ数字を2か所に出さない）
+    if (!cutIn) {
+      const text =
+        digits > COMPACT_POP_DIGITS ? this.labels.compact(value) : this.labels.score(value);
+      this.popText(x, y, `+${text}`, tier, durationMs * 2.5, BOARD_THEME.shipText);
+    }
 
     const p = EFFECTS_CONFIG.particles;
     const count = Math.min(p.max, p.shipBase + digits * p.shipPerDigit);
@@ -186,7 +216,7 @@ export class EffectsLayer {
 
     const s = EFFECTS_CONFIG.shake;
     if (digits >= s.minShipDigits) this.addShake((digits - s.minShipDigits + 1) * s.perDigit);
-    if (digits >= EFFECTS_CONFIG.cutIn.minShipDigits && digits > this.cutInShownDigits) {
+    if (cutIn) {
       this.cutInShownDigits = digits;
       this.cutIn(value);
     }
@@ -263,31 +293,84 @@ export class EffectsLayer {
     this.popText(x, y + 0.25, text, 0, durationMs, color);
   }
 
+  /**
+   * 金色パーツに合体した: 消える2つのマスから光の粒が金色のマスへ集まり、金の輪が広がる
+   * （本番の再生とは別。合体ボタンを押したとき）
+   */
+  merge(x: number, y: number, from: { x: number; y: number }[]): void {
+    const { px, py } = cellCenter(x, y);
+    const m = EFFECTS_CONFIG.merge;
+    const minimal = this.settings.strength === 'minimal';
+    const gather = minimal ? 0 : m.gatherMs;
+    if (!minimal) {
+      for (const cell of from) {
+        const start = cellCenter(cell.x, cell.y);
+        for (let i = 0; i < Math.round(m.dotsPerCell * this.power); i++) {
+          const dot = this.particles.acquire('dot', BOARD_THEME.golden);
+          if (!dot) break;
+          const sx = start.px + (Math.random() - 0.5) * CELL_SIZE * 0.6;
+          const sy = start.py + (Math.random() - 0.5) * CELL_SIZE * 0.6;
+          dot.position.set(sx, sy);
+          this.tweens.add({
+            duration: gather,
+            onUpdate: (t) => {
+              const e = easeOutCubic(t);
+              dot.position.set(sx + (px - sx) * e, sy + (py - sy) * e);
+            },
+            onComplete: () => this.particles.release(dot),
+          });
+        }
+      }
+    }
+    const ring = new Graphics()
+      .circle(0, 0, CELL_SIZE / 2)
+      .stroke({ width: 5, color: BOARD_THEME.golden });
+    ring.position.set(px, py);
+    ring.alpha = 0;
+    this.boardLayer.addChild(ring);
+    const total = gather + m.ringMs;
+    let burst = minimal;
+    this.tweens.add({
+      duration: total,
+      onUpdate: (t) => {
+        const local = Math.max(0, (t * total - gather) / m.ringMs);
+        ring.alpha = local > 0 ? 1 - local : 0;
+        ring.scale.set(0.6 + 1.4 * easeOutCubic(local));
+        if (!burst && local > 0) {
+          burst = true;
+          this.sparks(x, y, BOARD_THEME.golden, Math.round(m.sparks * this.power), m.sparksMs);
+        }
+      },
+      onComplete: () => ring.destroy(),
+    });
+  }
+
   /** 合計の単位が変わった（K → M → B）: 画面の上に大きく出す */
   digitUp(total: Score): void {
     if (this.settings.strength === 'minimal') return;
+    this.addShake(EFFECTS_CONFIG.shake.perDigit * 3);
     const { width } = this.getScreenSize();
     const label = new Text({
       text: this.labels.compact(total),
       style: {
         fill: BOARD_THEME.shipText,
-        fontSize: 54,
+        fontSize: 46,
         fontWeight: '900',
         stroke: { color: 0x000000, width: 8 },
       },
     });
     label.anchor.set(0.5);
-    label.position.set(width / 2, 90);
-    this.screenLayer.addChild(label);
+    label.position.set(width / 2, HEADLINE_Y);
+    if (!this.showHeadline('digitUp', label)) return;
     this.tweens.add({
       duration: 900,
       onUpdate: (t) => {
+        if (label.destroyed) return;
         label.scale.set(t < 0.2 ? 0.4 + (t / 0.2) * 1.0 : 1.4 - 0.4 * Math.min(1, (t - 0.2) / 0.3));
         label.alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
       },
-      onComplete: () => label.destroy(),
+      onComplete: () => this.endHeadline(label),
     });
-    this.addShake(EFFECTS_CONFIG.shake.perDigit * 3);
   }
 
   /** ノルマを超えた瞬間: 画面の上を帯が走る */
@@ -303,17 +386,80 @@ export class EffectsLayer {
     text.anchor.set(0.5);
     text.position.set(width / 2, h / 2);
     band.addChild(text);
-    band.position.set(0, 140);
-    this.screenLayer.addChild(band);
+    band.position.set(0, HEADLINE_Y - h / 2);
+    if (!this.showHeadline('quotaCross', band)) return;
     this.tweens.add({
       duration: 1100,
       onUpdate: (t) => {
+        if (band.destroyed) return;
         band.alpha = t < 0.15 ? t / 0.15 : t < 0.75 ? 1 : 1 - (t - 0.75) / 0.25;
         text.scale.set(
           t < 0.15 ? 0.6 + (t / 0.15) * 0.5 : 1.1 - 0.1 * Math.min(1, (t - 0.15) / 0.2),
         );
       },
-      onComplete: () => band.destroy({ children: true }),
+      onComplete: () => this.endHeadline(band),
+    });
+  }
+
+  /**
+   * 計測不能: 盤面の真ん中に警告の帯（上下に黄黒の縞）が出て、「計測不能」の文字が震える。
+   * 点滅はさせない（震えは位置だけ）。演出の強さが「弱」なら震え・揺れなしで帯だけ出す
+   */
+  unmeasurable(): void {
+    const cfg = EFFECTS_CONFIG.unmeasurable;
+    const minimal = this.settings.strength === 'minimal';
+    const { width, height } = this.getScreenSize();
+    const h = cfg.bandHeight;
+    const stripe = 10;
+    const band = new Container();
+    const back = new Graphics().rect(0, 0, width, h).fill({ color: 0x000000, alpha: 0.82 });
+    // 上下の黄黒の縞（斜めの帯を並べる）
+    for (const y of [0, h - stripe]) {
+      back.rect(0, y, width, stripe).fill(BOARD_THEME.hazardYellow);
+      for (let x = -stripe; x < width + stripe; x += stripe * 2) {
+        back
+          .poly([x, y + stripe, x + stripe, y, x + stripe * 2, y, x + stripe, y + stripe])
+          .fill(BOARD_THEME.hazardBlack);
+      }
+    }
+    const { title, sub } = this.labels.unmeasurable();
+    const titleText = new Text({
+      text: title,
+      style: {
+        fill: 0xffffff,
+        fontSize: Math.min(56, Math.floor((width * 0.8) / Math.max(4, title.length))),
+        fontWeight: '900',
+        stroke: { color: BOARD_THEME.blocked, width: 8 },
+      },
+    });
+    titleText.anchor.set(0.5);
+    titleText.position.set(width / 2, h / 2 - 8);
+    const subText = new Text({
+      text: sub,
+      style: { fill: BOARD_THEME.hazardYellow, fontSize: 16, fontWeight: '900' },
+    });
+    subText.anchor.set(0.5);
+    subText.position.set(width / 2, h - stripe - 16);
+    band.addChild(back, titleText, subText);
+    band.position.set(0, height / 2 - h / 2);
+    if (!this.showHeadline('unmeasurable', band)) return;
+    if (!minimal) this.addShake(cfg.shake);
+
+    const jitter = minimal ? 0 : cfg.jitterPx * this.power;
+    this.tweens.add({
+      duration: cfg.durationMs,
+      onUpdate: (t) => {
+        if (band.destroyed) return;
+        band.alpha = t < 0.08 ? t / 0.08 : t < 0.85 ? 1 : 1 - (t - 0.85) / 0.15;
+        titleText.scale.set(t < 0.1 ? 1.8 - 0.8 * easeOutCubic(t / 0.1) : 1);
+        // 針が振り切れたメーターのように、文字が細かく震える（序盤ほど大きく）
+        const amount = jitter * (1 - t);
+        titleText.position.set(
+          width / 2 + (Math.random() - 0.5) * 2 * amount,
+          h / 2 - 8 + (Math.random() - 0.5) * 2 * amount,
+        );
+      },
+      onComplete: () => this.endHeadline(band),
     });
   }
 
@@ -340,6 +486,11 @@ export class EffectsLayer {
 
   /** 最後の合計の「ドン」: 盤面の真ん中に弾ませて出す */
   stamp(total: Score, durationMs: number): void {
+    // 何も出荷しなかったときは「0」を大きく出さない（結果のパネルで伝える）
+    if (total <= 0n) {
+      this.clearHeadline();
+      return;
+    }
     const { width, height } = this.getScreenSize();
     const label = new Text({
       text: this.labels.score(total),
@@ -355,17 +506,18 @@ export class EffectsLayer {
     });
     label.anchor.set(0.5);
     label.position.set(width / 2, height / 2);
-    this.screenLayer.addChild(label);
+    this.showHeadline('stamp', label);
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
+        if (label.destroyed) return;
         // 大きく落ちてきて、弾んで止まる
         const s =
           t < 0.25 ? 2.2 - 1.3 * easeOutCubic(t / 0.25) : 0.9 + 0.1 * Math.min(1, (t - 0.25) / 0.2);
         label.scale.set(s);
         label.alpha = t < 0.8 ? 1 : 1 - (t - 0.8) / 0.2;
       },
-      onComplete: () => label.destroy(),
+      onComplete: () => this.endHeadline(label),
     });
     this.addShake(EFFECTS_CONFIG.shake.perDigit * 4);
   }
@@ -373,6 +525,37 @@ export class EffectsLayer {
   // ---------------------------------------------------------------------------
   // 個々の演出
   // ---------------------------------------------------------------------------
+
+  /**
+   * 見出しを出す（出ている見出しより優先度が低ければ出さずに false）。
+   * 置き換えた見出しはすぐ消す（そのトゥイーンは destroyed を見て何もしない）
+   */
+  private showHeadline(kind: HeadlineKind, node: Container): boolean {
+    const current = this.headline;
+    if (current && !current.node.destroyed) {
+      if (HEADLINE_PRIORITY[current.kind] > HEADLINE_PRIORITY[kind]) {
+        node.destroy({ children: true });
+        return false;
+      }
+      current.node.destroy({ children: true });
+    }
+    this.headline = { kind, node };
+    this.screenLayer.addChild(node);
+    return true;
+  }
+
+  /** 見出しの表示が終わった（置き換えられて消えていれば何もしない） */
+  private endHeadline(node: Container): void {
+    if (this.headline?.node === node) this.headline = null;
+    if (!node.destroyed) node.destroy({ children: true });
+  }
+
+  private clearHeadline(): void {
+    if (this.headline && !this.headline.node.destroyed) {
+      this.headline.node.destroy({ children: true });
+    }
+    this.headline = null;
+  }
 
   private addShake(amount: number): void {
     if (!this.settings.shake) return;
@@ -385,9 +568,19 @@ export class EffectsLayer {
     const c = EFFECTS_CONFIG.chainCounter;
     if (this.chainCount < c.showFrom || this.settings.strength === 'minimal') return;
     this.counter.visible = true;
-    this.counter.text = this.labels.chain(this.chainCount);
+    this.counterText.text = this.labels.chain(this.chainCount);
     const level = c.milestones.filter((m) => this.chainCount >= m).length;
-    this.counter.style.fill = c.colors[Math.min(level, c.colors.length - 1)]!;
+    const color = c.colors[Math.min(level, c.colors.length - 1)]!;
+    this.counterText.style.fill = color;
+    // 札の大きさを文字に合わせる（左上を基準に置く）
+    const w = this.counterText.width + 20;
+    const h = this.counterText.height + 8;
+    this.counterText.position.set(w / 2, h / 2);
+    this.counterBack
+      .clear()
+      .roundRect(0, 0, w, h, h / 2)
+      .fill({ color: 0x000000, alpha: 0.72 })
+      .stroke({ width: 2, color, alpha: 0.9 });
 
     const isMilestone = (c.milestones as readonly number[]).includes(this.chainCount);
     const peak = isMilestone ? 1.6 : 1.15;
@@ -511,18 +704,24 @@ export class EffectsLayer {
       text,
       style: {
         fill: color,
-        fontSize: 20 + tier * 5,
+        fontSize: 20 + tier * 4,
         fontWeight: '900',
         stroke: { color: BOARD_THEME.background, width: 5 },
       },
     });
     label.anchor.set(0.5);
-    label.position.set(px, py - 10);
+    // 盤面の端で見切れないよう、文字の幅の分だけ内側に寄せる（浮かび上がる分も見込む）
+    const { width, height } = this.getScreenSize();
+    const halfW = (label.width * 1.2) / 2 + 4;
+    const halfH = (label.height * 1.2) / 2 + 4;
+    const cx = Math.min(width - halfW, Math.max(halfW, px));
+    const startY = Math.min(height - halfH, Math.max(halfH + 40, py - 10));
+    label.position.set(cx, startY);
     this.boardLayer.addChild(label);
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
-        label.y = py - 10 - 40 * easeOutCubic(t);
+        label.y = startY - 40 * easeOutCubic(t);
         label.scale.set(t < 0.15 ? 0.5 + (t / 0.15) * 0.7 : 1.2 - Math.min(0.2, (t - 0.15) * 0.5));
         label.alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
       },
@@ -588,19 +787,20 @@ export class EffectsLayer {
     amount.position.set(110, 40);
     band.addChild(mascot, title, amount);
     band.position.set(-width, height / 2 - bandHeight / 2);
-    this.screenLayer.addChild(band);
+    if (!this.showHeadline('cutIn', band)) return;
 
     const duration = EFFECTS_CONFIG.cutIn.durationMs;
     this.tweens.add({
       duration,
       onUpdate: (t) => {
         // 素早く入って、真ん中で少し止まり、素早く抜ける
+        if (band.destroyed) return;
         const x =
           t < 0.2 ? -width * (1 - easeOutCubic(t / 0.2)) : t < 0.8 ? 0 : width * ((t - 0.8) / 0.2);
         band.x = x;
         mascot.rotation = Math.sin(t * Math.PI * 6) * 0.15;
       },
-      onComplete: () => band.destroy({ children: true }),
+      onComplete: () => this.endHeadline(band),
     });
   }
 }

@@ -8,6 +8,7 @@ export {
   type BossModifierId,
   type DayEventId,
   type FloorParams,
+  type ItemId,
   type MetaCondition,
   type PartBalance,
   type PartParams,
@@ -52,12 +53,13 @@ export {
   transformFloor,
   validateStage,
 } from './floor/stage';
-export { getCurrentFloor, isCellBlocked } from './run/floor';
-export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
+export { drawFloorPermit, getCurrentFloor, isCellBlocked } from './run/floor';
+export { addItem, countItems, expireItems, useFloorPermit } from './run/items';
+export { buildWeeklyConfig, weeklyRunSeed, type WeeklyConfigInput } from './config/weekly';
 
 export * from './run/types';
 export {
-  createDailyRun,
+  createWeeklyRun,
   createRun,
   createRunWithConfig,
   type CreateRunOptions,
@@ -68,12 +70,16 @@ export {
   buyOffer,
   getRefund,
   getRerollCost,
+  mergeCells,
+  mergeGolden,
   placePart,
   rerollShop,
   returnPart,
   rotatePart,
   sellPart,
 } from './run/build';
+export { goldenCount } from './run/inventory';
+export { isUnmeasurable } from './run/unmeasurable';
 export {
   abandonRun,
   commitShift,

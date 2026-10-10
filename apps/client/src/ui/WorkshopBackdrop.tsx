@@ -3,7 +3,7 @@
  * ゲーム状態から描く（装飾だけなのでセーブデータは増やさない）。
  */
 import { activeEvent, getDayAndPeriod, type MetaProgress, type RunState } from '@chain-factory/sim';
-import { MASCOT_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../assets/manifest';
+import { BACKDROP_ASSETS, BOLT_BODY_ASSETS, ROCKET_ASSETS, EVENT_ICONS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import { getRocketProgress } from '../state/rocket';
 
@@ -30,17 +30,18 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       aria-hidden="true"
     >
       <div className="workshop__window">
+        <img
+          className="workshop__sky"
+          src={BACKDROP_ASSETS.sky[period] ?? BACKDROP_ASSETS.sky[0]}
+          alt=""
+        />
         <span className="workshop__sky-label">
           {t(`atmosphere.period.${period}` as 'atmosphere.period.0')}
         </span>
-        <span className="workshop__stars" />
-        <img className="workshop__factory" src={TITLE_ASSETS.factory} alt="" />
       </div>
       <div className="workshop__gantry">
-        <span className="workshop__gantry-top" />
+        <img className="workshop__gantry-frame" src={BACKDROP_ASSETS.gantry} alt="" />
         <img className="workshop__rocket" src={ROCKET_ASSETS.stages[parts]} alt="" />
-        <span className="workshop__cable workshop__cable--a" />
-        <span className="workshop__cable workshop__cable--b" />
       </div>
       <div className="workshop__status">
         <span>{t('world.factoryId')}</span>
@@ -48,9 +49,7 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       </div>
       <div className="workshop__marks">
         {Array.from({ length: completed }, (_, index) => (
-          <span key={index} className="workshop__approval">
-            ✓
-          </span>
+          <img key={index} className="workshop__approval" src={BACKDROP_ASSETS.approval} alt="" />
         ))}
         {Array.from({ length: soot }, (_, index) => (
           <span key={`soot-${index}`} className={`workshop__soot workshop__soot--${index + 1}`} />
@@ -58,19 +57,21 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       </div>
       <div className="workshop__plaques">
         {Array.from({ length: plaques }, (_, index) => (
-          <span key={index}>★</span>
+          <img key={index} src={BACKDROP_ASSETS.plaque} alt="" />
         ))}
       </div>
       {event && (
         <div className={`workshop__event-prop workshop__event-prop--${event}`}>
+          <img src={EVENT_ICONS[event]} alt="" width={26} height={26} />
           <span>{t('event.today')}</span>
           <strong>{t(`event.${event}.name`)}</strong>
         </div>
       )}
-      <span className="workshop__beacon" />
+      <img className="workshop__beacon" src={BACKDROP_ASSETS.beacon} alt="" />
+      {/* ボルト（全身）: ふだんは立って待ち、演出の再生中はガッツポーズで見守る */}
       <img
         className={`workshop__bolt ${playing ? 'is-watching' : ''}`}
-        src={playing ? MASCOT_ASSETS.surprised : MASCOT_ASSETS.idle}
+        src={playing ? BOLT_BODY_ASSETS.guts : BOLT_BODY_ASSETS.stand}
         alt=""
       />
     </div>

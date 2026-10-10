@@ -75,6 +75,17 @@ describe('シェア文', () => {
     );
   });
 
+  it('計測不能のシフトがあったら、数字を出さずに「計測不能」を見出しにする', () => {
+    const text = buildRunShareText(t, {
+      result: '打ち上げ成功！',
+      score: '計測不能',
+      shift: 21,
+      unmeasurable: true,
+    });
+    expect(text).toContain('計測不能');
+    expect(text).toContain('シフト 21 まで到達');
+  });
+
   it('X の投稿画面の URL は本文と URL をエンコードする', () => {
     expect(xIntentUrl('a b#c')).toBe('https://x.com/intent/post?text=a%20b%23c');
     expect(xIntentUrl('a', 'https://e.com/?x=1')).toBe(
@@ -83,19 +94,19 @@ describe('シェア文', () => {
   });
 });
 
-describe('相場の前日比', () => {
+describe('相場の前週比', () => {
   const market: MarketResponse = {
-    date: '2026-10-02',
+    weekId: '2026-09-28',
     prices: { gear: 3, coil: 1, dock: 3 } as never,
     previous: { gear: 2, coil: 2, dock: 3 } as never,
   };
 
-  it('値上がり・値下がりしたパーツだけ（ランの価格が今日の相場のとき）', () => {
+  it('値上がり・値下がりしたパーツだけ（ランの価格が今週の相場のとき）', () => {
     const runPrices = { gear: 3, coil: 1, dock: 3 } as never;
     expect(priceTrends(market, runPrices)).toEqual({ gear: 'up', coil: 'down' });
   });
 
-  it('前日の相場がない・ランが別の価格で始まっていれば出さない', () => {
+  it('前週の相場がない・ランが別の価格で始まっていれば出さない', () => {
     expect(priceTrends({ ...market, previous: null }, { gear: 3 } as never)).toEqual({});
     expect(priceTrends(market, { gear: 2, coil: 2 } as never)).toEqual({});
   });
