@@ -20,11 +20,14 @@ export function toScreen(x: number, y: number, z = 0): Vec {
   };
 }
 
-/** 画面上の向き（WASD）→ 部屋の座標の向き */
+/**
+ * キーの向き（WASD）→ 部屋の座標の向き。
+ * W は画面の上（部屋の奥の角）、D は画面の右。斜め（W+D など）は部屋の壁に沿った向きになる
+ * （W+D で奥右の壁沿い、W+A で奥左の壁沿いにまっすぐ進む）
+ */
 export function screenDirToRoom(dx: number, dy: number): Vec {
-  // 画面: sx = (x - y)·W/2, sy = (x + y)·H/2, H = W/2 → 向きだけなら x - y = dx, x + y = 2dy
-  const x = (dx + 2 * dy) / 2;
-  const y = (2 * dy - dx) / 2;
+  const x = dx + dy;
+  const y = dy - dx;
   const len = Math.hypot(x, y);
   return len > 0 ? { x: x / len, y: y / len } : { x: 0, y: 0 };
 }

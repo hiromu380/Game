@@ -399,20 +399,47 @@ function updatePlayer(state: RunState, dt: number, input: FrameInput) {
   const next = { x: p.pos.x + velocity.x * dt, y: p.pos.y + velocity.y * dt };
   if (tryDoor(state, next)) return;
   moveWithCollision(state, p.pos, velocity, dt, cfg.radius);
+  if (p.dodge <= 0) slideTowardDoor(state, velocity, dt);
 }
 
-/** 扉のマスから部屋の外へ出ようとしたら、隣の部屋へ移る */
+/** 壁に向かって押しているとき、近くの扉があればその方へ滑らせる（扉に入りやすくする） */
+function slideTowardDoor(state: RunState, velocity: Vec, dt: number) {
+  const room = state.rooms[state.room]!;
+  const p = state.player;
+  const near = BALANCE.player.radius + 0.06;
+  const speed = Math.hypot(velocity.x, velocity.y);
+  for (const d of room.doors) {
+    const vertical = d.side === 'n' || d.side === 's';
+    const against =
+      (d.side === 'n' && velocity.y < 0 && p.pos.y <= near) ||
+      (d.side === 's' && velocity.y > 0 && p.pos.y >= room.height - near) ||
+      (d.side === 'w' && velocity.x < 0 && p.pos.x <= near) ||
+      (d.side === 'e' && velocity.x > 0 && p.pos.x >= room.width - near);
+    if (!against) continue;
+    const offset = vertical ? d.x + 0.5 - p.pos.x : d.y + 0.5 - p.pos.y;
+    if (Math.abs(offset) > 1.6 || Math.abs(offset) < 0.02) continue;
+    const step = Math.sign(offset) * Math.min(Math.abs(offset), speed * dt);
+    moveWithCollision(state, p.pos, vertical ? { x: step, y: 0 } : { x: 0, y: step }, 1, BALANCE.player.radius);
+    return;
+  }
+}
+
+/** 扉の前で壁に向かって押し込んだら、隣の部屋へ移る */
 function tryDoor(state: RunState, next: Vec): boolean {
   const room = state.rooms[state.room]!;
-  const tx = Math.floor(state.player.pos.x);
-  const ty = Math.floor(state.player.pos.y);
+  const pos = state.player.pos;
+  // 体の半径の分だけ壁の手前で止まるので、その手前で判定する
+  const edge = BALANCE.player.radius + 0.12;
+  // 扉の幅より少し広く受け付ける（斜めに歩いて扉のマスから少しずれても出られる）
+  const reach = 0.85;
   const door = room.doors.find((d) => {
-    if (d.x !== tx || d.y !== ty) return false;
+    const along = d.side === 'n' || d.side === 's' ? pos.x - (d.x + 0.5) : pos.y - (d.y + 0.5);
+    if (Math.abs(along) > reach) return false;
     return (
-      (d.side === 'n' && next.y < 0.15) ||
-      (d.side === 's' && next.y > room.height - 0.15) ||
-      (d.side === 'w' && next.x < 0.15) ||
-      (d.side === 'e' && next.x > room.width - 0.15)
+      (d.side === 'n' && next.y < edge) ||
+      (d.side === 's' && next.y > room.height - edge) ||
+      (d.side === 'w' && next.x < edge) ||
+      (d.side === 'e' && next.x > room.width - edge)
     );
   });
   if (!door) return false;

@@ -237,6 +237,42 @@ describe('ポーズ・逃走・捕獲', () => {
   });
 });
 
+describe('部屋の移動', () => {
+  it('扉に向かって歩き続けると（毎フレーム 1/60 秒）、すべての扉から隣の部屋へ出られる', () => {
+    const base = createRun(21);
+    const dirs = { n: { x: 0, y: -1 }, s: { x: 0, y: 1 }, w: { x: -1, y: 0 }, e: { x: 1, y: 0 } };
+    for (const room of Object.values(base.rooms)) {
+      for (const door of room.doors) {
+        const s = createRun(21);
+        s.room = room.id;
+        s.guards = [];
+        // 扉の2マス手前から歩く
+        s.player.pos = {
+          x: door.x + 0.5 - dirs[door.side].x * 2,
+          y: door.y + 0.5 - dirs[door.side].y * 2,
+        };
+        for (let i = 0; i < 120 && s.room === room.id; i++) {
+          update(s, 1 / 60, { move: dirs[door.side], dodge: false, shockwave: false });
+        }
+        expect(`${room.id}→${s.room}`).toBe(`${room.id}→${door.to}`);
+      }
+    }
+  });
+});
+
+describe('扉の近くの壁', () => {
+  it('扉の少し横で壁を押すと、扉の方へ滑って入れる（W だけで斜めに歩いても）', () => {
+    const s = createRun(21);
+    s.guards = [];
+    const door = s.rooms.entrance!.doors.find((d) => d.side === 'n')!;
+    s.player.pos = { x: door.x + 1.6, y: 1.6 };
+    for (let i = 0; i < 180 && s.room === 'entrance'; i++) {
+      update(s, 1 / 60, { move: { x: -Math.SQRT1_2, y: -Math.SQRT1_2 }, dodge: false, shockwave: false });
+    }
+    expect(s.room).toBe(door.to);
+  });
+});
+
 describe('道具', () => {
   it('追い賭け手袋: 予知済みの抽選だけ上限が上がる', () => {
     const s = createRun(12);
