@@ -71,7 +71,7 @@
   "error.cellEmpty": "That cell is empty",
   "error.outOfBoard": "Outside the floor",
   "part.switch.name": "Switch",
-  "part.switch.desc": "Fires a value-1 signal in its facing direction at start",
+  "part.switch.desc": "Fires a value-{switchSignalValue} signal in its facing direction at start",
   "part.conveyor.name": "Conveyor",
   "part.conveyor.desc": "Sends signals in its facing direction",
   "part.splitter.name": "Splitter",

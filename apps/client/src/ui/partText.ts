@@ -12,6 +12,7 @@ export function describePart(t: TranslateFn, partId: PartId, rules: RuleSet): st
   return t(`part.${partId}.desc`, {
     ...p,
     maxIncomePerSim: rules.maxIncomePerSim,
+    switchSignalValue: rules.switchSignalValue,
     // ポンコツロボの倍率は「整数 ÷ 整数」で持っているので、表示用に小数へ直す
     junkbotMin: p.junkbotMinSteps / p.junkbotStepDivisor,
     junkbotMax: p.junkbotMaxSteps / p.junkbotStepDivisor,

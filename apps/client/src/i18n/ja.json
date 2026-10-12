@@ -71,7 +71,7 @@
   "error.cellEmpty": "そのマスにはパーツがありません",
   "error.outOfBoard": "盤面の外です",
   "part.switch.name": "スイッチ",
-  "part.switch.desc": "開始時に向いている方向へ値1の信号を発射",
+  "part.switch.desc": "開始時に向いている方向へ値{switchSignalValue}の信号を発射",
   "part.conveyor.name": "ベルトコンベア",
   "part.conveyor.desc": "受けた信号を自身の向きへ送る",
   "part.splitter.name": "分岐器",
