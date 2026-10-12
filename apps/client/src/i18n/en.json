@@ -766,5 +766,6 @@
   "runEnd.relics": "Relics this run",
   "collection.tab.relics": "Relics",
   "collection.relicsHint": "Treasures you can pick after clearing a night shift ({found} / {total} found)",
-  "collection.relicLockedHint": "Not found yet"
+  "collection.relicLockedHint": "Not found yet",
+  "capture.giveRelic": "Pick a relic"
 }

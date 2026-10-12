@@ -719,6 +719,7 @@ export function App({ start, onTitle }: Props) {
           }}
           onPreviewShare={() => setSharePreview(true)}
           onGivePermit={() => dispatch({ type: 'captureGivePermit' })}
+          onGiveRelic={() => dispatch({ type: 'captureGiveRelic' })}
           scenes={AVAILABLE_SCENES}
           onPlayScene={setCutscene}
         />

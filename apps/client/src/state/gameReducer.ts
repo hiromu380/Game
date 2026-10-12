@@ -11,6 +11,8 @@ import type { OnlineErrorCode } from '../online/api';
 import {
   abandonRun,
   addItem,
+  drawRelicChoice,
+  isRelicPending,
   BALANCE,
   applyOp,
   applyRunToMeta,
@@ -157,6 +159,7 @@ export type GameAction =
   | { type: 'useItem'; itemId: ItemId }
   /** 撮影モード: 配置権を1枚もらう（使う場面の確認・録画用） */
   | { type: 'captureGivePermit' }
+  | { type: 'captureGiveRelic' }
   | { type: 'selectInventory'; partId: PartId; golden?: boolean }
   | { type: 'clickCell'; x: number; y: number }
   /** 長押し（スマホ）・ダブルクリック: そのマスのパーツを手持ちに戻す */
@@ -585,6 +588,15 @@ function reduce(state: GameState, action: GameAction): GameState {
       if (state.run.phase !== 'building') return state;
       const given = addItem(state.run, 'floorPermit');
       return given.ok ? { ...state, run: given.state, error: null } : state;
+    }
+
+    case 'captureGiveRelic': {
+      // 撮影・確認用: レリックの選択を出す（持っている数で抽選の日をずらし、押すたびに候補が変わるようにする）
+      if (state.run.phase !== 'building' || isRelicPending(state.run)) return state;
+      const day = 100 + (state.run.relics?.length ?? 0);
+      const choices = drawRelicChoice(state.run, day);
+      if (choices.length === 0) return state;
+      return { ...state, run: { ...state.run, relicChoice: { day, choices } }, error: null };
     }
 
     case 'captureCommit':

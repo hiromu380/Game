@@ -44,6 +44,7 @@ interface Props {
   onPreviewShare: () => void;
   /** ランダム配置権を1枚もらう（使う場面の確認・録画用） */
   onGivePermit: () => void;
+  onGiveRelic: () => void;
   /** 用意してあるカットシーン（録画用に、見たかどうかに関係なく再生する） */
   scenes: readonly SceneId[];
   onPlayScene: (scene: SceneId) => void;
@@ -183,6 +184,7 @@ export function CapturePanel(props: Props) {
       </div>
       <button onClick={props.onPreviewShare}>{t('capture.shareCard')}</button>
       <button onClick={props.onGivePermit}>{t('capture.givePermit')}</button>
+      <button onClick={props.onGiveRelic}>{t('capture.giveRelic')}</button>
       {props.scenes.length > 0 && (
         <div className="button-row">
           {props.scenes.map((scene) => (
