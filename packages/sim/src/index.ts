@@ -31,6 +31,7 @@ export * from './floor/layer';
 export { FLOOR_BEHAVIORS } from './floor/tiles';
 export { getPressMultiplier } from './simulate/parts/press';
 export { getPartBadge, type PartBadge } from './simulate/badges';
+export { teleportTarget } from './simulate/parts/teleporter';
 export { computeActivationLimits } from './simulate/limits';
 
 export { createRuleSet, DEFAULT_RULES } from './config/rules';

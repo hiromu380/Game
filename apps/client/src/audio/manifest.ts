@@ -54,6 +54,9 @@ export type SoundKey =
   | 'digitUp'
   | 'floor'
   | 'useItem'
+  | 'teleport'
+  | 'charge'
+  | 'relicPick'
   | 'merge'
   | 'permitTick'
   | 'permitLand'
@@ -280,6 +283,40 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 659, at: 0.07, duration: 0.07 },
         { freq: 784, at: 0.14, duration: 0.07 },
         { freq: 1568, at: 0.21, duration: 0.3, slideTo: 1760 },
+      ],
+    },
+  },
+  /** 転送装置が信号を飛ばした（上がって下がる短い掃引） */
+  teleport: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.12,
+      notes: [
+        { freq: 660, at: 0, duration: 0.06, slideTo: 1320 },
+        { freq: 1320, at: 0.06, duration: 0.08, slideTo: 880 },
+      ],
+    },
+  },
+  /** 蓄電器が値を溜めた（低く唸る短い音） */
+  charge: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.12,
+      notes: [{ freq: 220, at: 0, duration: 0.12, slideTo: 330 }],
+    },
+  },
+  /** レリックを選んだ（きらっと上がる3音） */
+  relicPick: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.16,
+      notes: [
+        { freq: 784, at: 0, duration: 0.08 },
+        { freq: 988, at: 0.08, duration: 0.08 },
+        { freq: 1319, at: 0.16, duration: 0.28, slideTo: 1568 },
       ],
     },
   },

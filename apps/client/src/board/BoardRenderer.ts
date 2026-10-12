@@ -10,6 +10,7 @@
 import {
   getPart,
   getPartBadge,
+  teleportTarget,
   type Board,
   type Dir4,
   type Part,
@@ -35,7 +36,7 @@ import { FONT_STACK } from '../config/fonts';
 
 // 盤面の文字も画面と同じ同梱フォントで描く（指定しないと端末任せになり、中国語用の字形になることがある）
 TextStyle.defaultTextStyle.fontFamily = FONT_STACK;
-import { BOARD_THEME } from '../assets/manifest';
+import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import type { PlaybackSpeed } from '../playback/timeline';
 import {
   buildChoreography,
@@ -453,6 +454,30 @@ export class BoardRenderer {
     }
   }
 
+  /**
+   * 置き場所で効果が決まるパーツの「関係するマス」を示す
+   * - 磁石: 同じ行・列にある出荷口（倍率に数えるもの）
+   * - 転送装置: 飛ばす先の転送装置（点線でつなぐ）
+   */
+  private drawRelated(part: Part, board: Board, x: number, y: number): void {
+    const color = PART_ASSETS[part.id].color;
+    if (part.id === 'magnet') {
+      board.cells.forEach((other, index) => {
+        const ox = index % board.width;
+        const oy = Math.floor(index / board.width);
+        if (other?.id === 'dock' && (ox === x || oy === y)) {
+          this.overlayLayer.addChild(cellFrame(ox, oy, color, 3));
+        }
+      });
+    }
+    if (part.id === 'teleporter') {
+      const target = teleportTarget(board, x, y);
+      if (!target) return;
+      const [tx, ty] = target;
+      this.overlayLayer.addChild(dashedLine(x, y, tx, ty, color), cellFrame(tx, ty, color, 3));
+    }
+  }
+
   /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
   private badgeOf(part: Part, x: number, y: number): PartBadge | null {
     if (!this.state) return null;
@@ -533,15 +558,24 @@ export class BoardRenderer {
       const ghostPart: Part = placing.golden
         ? { id: placing.partId, dir: placing.dir, golden: true }
         : { id: placing.partId, dir: placing.dir };
-      const ghost = createPartView(ghostPart, this.textures, null);
+      // 置いたときの盤面で効果量バッジと関係するマスを出す（置く前に「ここなら ×4」とわかるように）
+      const cells = [...board.cells];
+      cells[hovered.y * board.width + hovered.x] = ghostPart;
+      const placed: Board = { ...board, cells };
+      const badge = this.state.rules
+        ? getPartBadge(ghostPart, placed, hovered.x, hovered.y, this.state.rules)
+        : null;
+      const ghost = createPartView(ghostPart, this.textures, badge);
       const { px, py } = cellCenter(hovered.x, hovered.y);
       ghost.position.set(px, py);
       ghost.alpha = 0.55;
+      this.drawRelated(ghostPart, placed, hovered.x, hovered.y);
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
       this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, placing.partId));
       return;
     }
     if (part) {
+      this.drawRelated(part, board, hovered.x, hovered.y);
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
       this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, part.id));
       return;
@@ -925,6 +959,31 @@ export class BoardRenderer {
             },
           });
           break;
+        case 'store':
+          // 蓄電器: 溜めた値を札で見せる（放出したら札を外す）
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => {
+              this.status.onStore(
+                event.x,
+                event.y,
+                event.value === null ? null : this.options.formatCompact(event.value),
+              );
+              if (event.value !== null) sound('charge');
+            },
+          });
+          break;
+        case 'teleport':
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => {
+              if (!instant) this.effects.onTeleport(event.x, event.y, event.toX, event.toY, fxMs);
+              sound('teleport');
+            },
+          });
+          break;
         case 'halt':
           // 打ち切りの表示は再生後の「途切れた理由」でまとめて行う
           break;
@@ -972,6 +1031,24 @@ function mergeGlow(x: number, y: number): Graphics {
       .lineTo(cx, cy - sy * arm);
   }
   return g.stroke({ width: 4, color: BOARD_THEME.golden, cap: 'round', join: 'round' });
+}
+
+/** 2つのマスの中心を結ぶ点線（転送装置の行き先など） */
+function dashedLine(x1: number, y1: number, x2: number, y2: number, color: number): Graphics {
+  const a = cellCenter(x1, y1);
+  const b = cellCenter(x2, y2);
+  const length = Math.hypot(b.px - a.px, b.py - a.py);
+  const steps = Math.max(1, Math.floor(length / 12));
+  const g = new Graphics();
+  for (let i = 0; i < steps; i += 2) {
+    const t0 = i / steps;
+    const t1 = Math.min(1, (i + 1) / steps);
+    g.moveTo(a.px + (b.px - a.px) * t0, a.py + (b.py - a.py) * t0).lineTo(
+      a.px + (b.px - a.px) * t1,
+      a.py + (b.py - a.py) * t1,
+    );
+  }
+  return g.stroke({ width: 3, color, alpha: 0.9, cap: 'round' });
 }
 
 function cellFrame(x: number, y: number, color: number, width: number): Graphics {

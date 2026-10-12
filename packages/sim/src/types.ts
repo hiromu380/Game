@@ -126,6 +126,10 @@ export type SimEvent =
   | { tick: number; type: 'vanish'; signalId: number; x: number; y: number; reason: VanishReason }
   /** 合流するパーツ（合流炉）が、同じ tick の2本目以降の信号を取り込んだ */
   | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
+  /** 溜めるパーツ（蓄電器）が値を溜めた（value）／放出して空になった（null） */
+  | { tick: number; type: 'store'; x: number; y: number; value: Score | null }
+  /** 転送装置が信号を (x,y) から (toX,toY) へ飛ばした（この直後に行き先から emit される） */
+  | { tick: number; type: 'teleport'; x: number; y: number; toX: number; toY: number }
   /** 経済系パーツが予算を生んだ。total はその時点の累計 */
   | { tick: number; type: 'income'; x: number; y: number; amount: number; total: number }
   /** 信号が (x,y) のパーツを発動させる直前に、床の効果を受けた（before → after） */

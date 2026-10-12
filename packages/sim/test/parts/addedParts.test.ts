@@ -61,6 +61,8 @@ describe('蓄電器', () => {
     const { scoreText, events } = run(['S> X> Z> D>']);
     expect(scoreText).toBe(String(2 * P.capacitorMultiplier));
     expect(only(events, 'activate').filter((e) => e.partId === 'capacitor')).toHaveLength(2);
+    // 演出用: 溜めた（値 1）→ 放出して空になった（null）
+    expect(only(events, 'store').map((e) => e.value)).toEqual([1n, null]);
   });
 
   it('1本しか来なければ何も送らない', () => {
@@ -75,10 +77,16 @@ describe('転送装置', () => {
     expect(scoreText).toBe('1');
     // 行き先の転送装置は発動しない
     expect(only(events, 'activate').filter((e) => e.partId === 'teleporter')).toHaveLength(1);
+    // 演出用: 入口から行き先への転送を記録する
+    expect(only(events, 'teleport')).toEqual([
+      expect.objectContaining({ x: 1, y: 0, toX: 1, toY: 2 }),
+    ]);
   });
 
   it('ほかに転送装置がなければ、そのまま通り抜ける', () => {
-    expect(run(['S> T> D>']).scoreText).toBe('1');
+    const { scoreText, events } = run(['S> T> D>']);
+    expect(scoreText).toBe('1');
+    expect(only(events, 'teleport')).toHaveLength(0);
   });
 });
 

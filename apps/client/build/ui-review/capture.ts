@@ -119,6 +119,28 @@ function golden(): RunState {
   };
 }
 
+/** 新パーツの見え方: 転送装置の行き先・磁石の出荷口・置く前の倍率（手持ちに磁石を1つ） */
+function newParts(): RunState {
+  const run = createRun(5);
+  const cells = run.board.cells.map(() => null) as RunState['board']['cells'];
+  const put = (x: number, y: number, part: NonNullable<RunState['board']['cells'][number]>) => {
+    cells[y * run.board.width + x] = part;
+  };
+  put(0, 1, { id: 'switch', dir: 1 });
+  put(1, 1, { id: 'capacitor', dir: 1 });
+  put(2, 1, { id: 'teleporter', dir: 0 });
+  put(5, 5, { id: 'teleporter', dir: 0 });
+  put(6, 5, { id: 'dock', dir: 0 });
+  put(3, 6, { id: 'dock', dir: 0 });
+  put(0, 0, { id: 'cornerBench', dir: 1 });
+  return {
+    ...run,
+    board: { ...run.board, cells },
+    bonusFloor: null,
+    inventory: { magnet: 1 },
+  };
+}
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -269,6 +291,18 @@ const SCENES: Scene[] = [
       await page.locator('.controls .button--primary').first().click();
       await page.locator('.commit-confirm .button--primary').click();
       await page.waitForTimeout(6000);
+    },
+  },
+  // 転送装置にマウスを乗せる: 行き先までの点線と枠
+  { name: 'teleporter-hover', run: newParts, act: (page) => clickCell(page, 2, 1, true) },
+  // 磁石を置こうとする: 同じ行・列の出荷口に枠、置いたときの倍率のバッジ
+  {
+    name: 'magnet-preview',
+    run: newParts,
+    act: async (page) => {
+      await openInventory(page);
+      await page.locator('[data-panel="inventory"] .item-button').first().click();
+      await clickCell(page, 3, 5, true);
     },
   },
   { name: 'day3-floors', run: day3 },

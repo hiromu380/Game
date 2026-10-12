@@ -227,6 +227,39 @@ export class EffectsLayer {
     this.popText(x, y, this.labels.income(amount), 0, durationMs * 2.5, BOARD_THEME.incomeText);
   }
 
+  /**
+   * 転送装置が信号を飛ばした: 入口と出口を光の線で結び、両端に輪を出す
+   * （点滅ではなく、1回だけ伸びて消える線。光は盤面の中だけ）
+   */
+  onTeleport(x: number, y: number, toX: number, toY: number, durationMs: number): void {
+    const from = cellCenter(x, y);
+    const to = cellCenter(toX, toY);
+    const color = PART_ASSETS.teleporter.color;
+    const beam = new Graphics();
+    this.boardLayer.addChild(beam);
+    this.tweens.add({
+      duration: durationMs * 1.6,
+      onUpdate: (t) => {
+        // 前半で入口から出口へ伸び、後半で薄れる
+        const grow = Math.min(1, t / 0.4);
+        const fade = t < 0.4 ? 1 : 1 - (t - 0.4) / 0.6;
+        const ex = from.px + (to.px - from.px) * grow;
+        const ey = from.py + (to.py - from.py) * grow;
+        beam
+          .clear()
+          .moveTo(from.px, from.py)
+          .lineTo(ex, ey)
+          .stroke({ width: 10, color, alpha: 0.25 * fade, cap: 'round' })
+          .moveTo(from.px, from.py)
+          .lineTo(ex, ey)
+          .stroke({ width: 3, color: 0xffffff, alpha: 0.8 * fade, cap: 'round' });
+      },
+      onComplete: () => beam.destroy(),
+    });
+    this.ring(x, y, color, durationMs);
+    this.ring(toX, toY, color, durationMs * 1.4);
+  }
+
   /** 発動回数がリセットされた */
   onReset(x: number, y: number, durationMs: number): void {
     this.ripple(x, y, durationMs);
@@ -731,10 +764,13 @@ export class EffectsLayer {
 
   /** 発動回数リセットの波紋 */
   private ripple(x: number, y: number, durationMs: number): void {
+    this.ring(x, y, BOARD_THEME.reset, durationMs);
+  }
+
+  /** マスの中心から広がって消える輪 */
+  private ring(x: number, y: number, color: number, durationMs: number): void {
     const { px, py } = cellCenter(x, y);
-    const ring = new Graphics()
-      .circle(0, 0, CELL_SIZE / 2)
-      .stroke({ width: 4, color: BOARD_THEME.reset });
+    const ring = new Graphics().circle(0, 0, CELL_SIZE / 2).stroke({ width: 4, color });
     ring.position.set(px, py);
     this.boardLayer.addChild(ring);
     this.tweens.add({

@@ -129,10 +129,14 @@ export function simulate(input: SimInput): SimResult {
       events.push({ tick, type: 'reset', x: rx, y: ry });
     }
     if (reaction.nextState !== undefined) partState[index] = reaction.nextState;
-    if (reaction.store !== undefined) partStored[index] = reaction.store ?? SCORE_ZERO;
+    if (reaction.store !== undefined) {
+      partStored[index] = reaction.store ?? SCORE_ZERO;
+      events.push({ tick, type: 'store', x, y, value: reaction.store });
+    }
     for (const emission of reaction.emits ?? []) {
       // 転送装置: 行き先のマスから発射する
       const [ex, ey] = emission.from ?? [x, y];
+      if (ex !== x || ey !== y) events.push({ tick, type: 'teleport', x, y, toX: ex, toY: ey });
       const delay = emission.delay ?? 0;
       if (delay > 0) pending.push({ tick: tick + delay, x: ex, y: ey, emission });
       else out.push(emit(tick, ex, ey, emission));
