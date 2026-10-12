@@ -27,6 +27,10 @@ interface Props {
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
+  /** 再生後に「途切れた場所と理由」を出す（省略時は出す。見本の盤面では出さない） */
+  showBreaks?: boolean;
+  /** 効果音を鳴らさない（タイトル画面の見本など、遊んでいない盤面） */
+  muted?: boolean;
   /** 描画を止める（カットシーンで盤面が隠れている間） */
   paused?: boolean;
   /** キーボード・コントローラーのカーソル（マウス・タッチで操作中は null） */
@@ -79,7 +83,10 @@ export function PixiBoard(props: Props) {
       getUnmeasurableLabel: () => labels().getUnmeasurableLabel(),
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),
-      playSound: (key, semitones) => audio.play(key, semitones),
+      showBreaks: () => callbacksRef.current.showBreaks ?? true,
+      playSound: (key, semitones) => {
+        if (!callbacksRef.current.muted) audio.play(key, semitones);
+      },
     }).then((r) => {
       if (disposed) {
         r.destroy();

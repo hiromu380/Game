@@ -124,6 +124,8 @@ export interface BoardLabels {
 }
 
 export interface BoardRendererOptions extends BoardLabels {
+  /** 再生後に「途切れた場所と理由」を出すか（見本の盤面では出さない。省略時は出す） */
+  showBreaks?: () => boolean;
   onCellClick: (x: number, y: number) => void;
   /** 長押し（スマホで「手持ちに戻す」に使う） */
   onCellLongPress: (x: number, y: number) => void;
@@ -787,7 +789,7 @@ export class BoardRenderer {
     const callbacks = this.callbacks;
     this.timeline = null;
     this.callbacks = null;
-    if (this.lastResult && this.state) {
+    if (this.lastResult && this.state && (this.options.showBreaks?.() ?? true)) {
       this.status.showBreaks(summarizeBreaks(this.lastResult.events, this.state.board));
     }
     this.drawOverlay();

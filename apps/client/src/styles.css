@@ -1295,6 +1295,34 @@ button:disabled {
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
+.title__showcase {
+  margin: 0;
+  width: min(250px, 64vw);
+  pointer-events: none;
+}
+.title__showcase figcaption {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: var(--golden);
+}
+.showcase canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+/* 広い画面では、見本の盤面を左の余白に大きく置く（ボタンの列は中央のまま） */
+@media (min-width: 1000px) {
+  .title__showcase {
+    position: absolute;
+    left: max(16px, 3vw);
+    top: 50%;
+    transform: translateY(-55%);
+    width: min(26vw, 400px);
+  }
+}
 .title__actions {
   display: flex;
   flex-direction: column;

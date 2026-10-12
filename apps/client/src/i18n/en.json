@@ -767,5 +767,6 @@
   "collection.tab.relics": "Relics",
   "collection.relicsHint": "Treasures you can pick after clearing a night shift ({found} / {total} found)",
   "collection.relicLockedHint": "Not found yet",
-  "capture.giveRelic": "Pick a relic"
+  "capture.giveRelic": "Pick a relic",
+  "title.showcaseCaption": "One switch. One massive chain."
 }

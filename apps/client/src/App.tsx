@@ -9,7 +9,6 @@ import {
   getCurrentEconomy,
   drawFloorPermit,
   getCurrentFloor,
-  type FloorParams,
   getCurrentRules,
   getCurrentShift,
   getDayAndPeriod,
@@ -35,7 +34,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
+import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
 import { LAYOUT } from './config/layout';
@@ -78,6 +77,7 @@ import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RelicDialog, RelicStrip } from './ui/RelicDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
+import { useBoardLabels } from './board/useBoardLabels';
 import {
   advanceTutorial,
   gearAvailability,
@@ -120,13 +120,6 @@ interface Props {
   onTitle: () => void;
 }
 
-/** 床の効果量（文言に埋め込む） */
-const floorAmounts = (params: FloorParams) => ({
-  double: params.doubleMultiplier,
-  add: params.addAmount,
-  triple: params.tripleMultiplier,
-});
-
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
@@ -138,7 +131,7 @@ const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
 const DEBUG_AVAILABLE = !CAPTURE && isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
-  const { t, formatCompact, formatMeasured } = useI18n();
+  const { t } = useI18n();
   const [state, dispatch] = useReducer(gameReducer, start, (initialStart) => {
     const initial = createInitialState();
     return initialStart
@@ -341,34 +334,7 @@ export function App({ start, onTitle }: Props) {
   );
 
   // 盤面に出す文言（言語が変わったら作り直す）
-  const boardLabels = useMemo<BoardLabels>(
-    () => ({
-      getPartName: (partId) => t(`part.${partId}.name`),
-      formatIncome: (amount) => t('playback.incomePop', { amount }),
-      getBreakLabel: (reason) => t(`break.short.${reason}`),
-      formatChain: (count) => t('playback.chainCounter', { count }),
-      getCutInTitle: () => t('playback.cutIn'),
-      getQuotaCrossLabel: () => t('playback.quotaCross'),
-      getUnmeasurableLabel: () => ({
-        title: t('unmeasurable.label'),
-        sub: t('unmeasurable.overload'),
-      }),
-      getFloorShort: (tile, params) => t(`floor.${tile}.short`, floorAmounts(params)),
-      getFloorDescription: (cell, params) =>
-        t('floor.tooltip', {
-          name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
-          desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
-          period:
-            cell.source === 'bonus' || cell.source === 'event' || cell.source === 'item'
-              ? t(`floor.period.${cell.source}`)
-              : '',
-        }),
-      // 盤面の合計（ドン・カットイン）は、計測不能の桁数以上なら「計測不能」
-      formatScore: formatMeasured,
-      formatCompact,
-    }),
-    [t, formatMeasured, formatCompact],
-  );
+  const boardLabels = useBoardLabels();
   const effectSettings = useMemo(
     () => ({
       strength: settings.effects,

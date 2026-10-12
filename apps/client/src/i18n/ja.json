@@ -767,5 +767,6 @@
   "collection.tab.relics": "レリック",
   "collection.relicsHint": "夜シフトをクリアすると選べる秘宝です（{found} / {total} 種類を発見）",
   "collection.relicLockedHint": "まだ手に入れたことがありません",
-  "capture.giveRelic": "レリックを選ぶ"
+  "capture.giveRelic": "レリックを選ぶ",
+  "title.showcaseCaption": "スイッチ1回で、この大連鎖。"
 }

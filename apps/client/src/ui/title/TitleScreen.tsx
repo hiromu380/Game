@@ -11,6 +11,10 @@ import { EDITION } from '../../config/edition';
 import { useI18n } from '../../i18n';
 import { LOGO_ASSETS } from '../../assets/manifest';
 import { TitleBackdrop } from './TitleBackdrop';
+import { lazy, Suspense } from 'react';
+
+/** 見本の連鎖（盤面の描画はゲーム本体と同じなので、本体の読み込みが終わってから出す） */
+const TitleShowcase = lazy(() => import('../../showcase/TitleShowcase'));
 import type { MetaProgress } from '@chain-factory/sim';
 
 interface Props {
@@ -57,6 +61,14 @@ export function TitleScreen({
       <h1 className="title__name">{t('app.title')}</h1>
       {EDITION === 'demo' && <span className="mode-badge">{t('title.demoBadge')}</span>}
       <p className="title__tagline">{t('title.tagline')}</p>
+      {progress >= 1 && (
+        <figure className="title__showcase">
+          <Suspense fallback={null}>
+            <TitleShowcase />
+          </Suspense>
+          <figcaption>{t('title.showcaseCaption')}</figcaption>
+        </figure>
+      )}
       {meta && meta.records.runsPlayed > 0 && (
         <div className="title__factory-record">
           <span>{t('world.factoryId')}</span>
