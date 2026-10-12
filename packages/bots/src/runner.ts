@@ -103,6 +103,8 @@ export interface RunnerOptions {
   permits?: boolean;
   /** ボットが金色パーツを合体・配置するか（既定 true。false は比較用。golden.ts） */
   golden?: boolean;
+  /** レリックの選び方（既定 best: 候補を試して見込みが最良のもの。first は先頭の候補＝ほぼランダム。比較用） */
+  relics?: 'best' | 'first';
   /** 全シフトをクリアしたら延長戦に入り、最大この日数まで続ける（既定 0: 延長戦に入らない） */
   overtimeDays?: number;
 }
@@ -193,7 +195,13 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
     // レリック（夜のシフトをクリアした次のシフト）: 候補ごとにそのシフトの見込みを比べて選ぶ
     if (isRelicPending(state)) {
-      state = chooseBestRelic(state, bot, botOptions);
+      if (options.relics === 'first') {
+        const picked = applyOp(state, { op: 'pickRelic', index: 0 });
+        if (!picked.ok) throw new Error('レリックを選べない');
+        state = picked.state;
+      } else {
+        state = chooseBestRelic(state, bot, botOptions);
+      }
       log.relics.push(state.relics!.at(-1)!);
     }
     for (const offer of state.shop) if (offer.partId) add(log.offered, offer.partId);

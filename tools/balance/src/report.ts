@@ -33,6 +33,8 @@ export interface BotSummary {
   };
   /** 金色パーツ（全ランの合計）: 合体した回数・手持ちの金色パーツを置いた回数 */
   golden: { merged: number; placed: number };
+  /** 選ばれたレリック（id → 回数）と、レリックを持った夜明け後のシフトの数 */
+  relics: Record<string, number>;
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
@@ -119,6 +121,9 @@ export function summarize(
     golden.placed += log.golden?.placed ?? 0;
   }
 
+  const relics: Record<string, number> = {};
+  for (const log of logs) for (const id of log.relics ?? []) relics[id] = (relics[id] ?? 0) + 1;
+
   return {
     bot,
     runs: logs.length,
@@ -126,6 +131,7 @@ export function summarize(
     floor,
     permits,
     golden,
+    relics,
     clearRate: logs.filter((l) => l.cleared).length / logs.length,
     shifts,
     parts,
@@ -225,6 +231,17 @@ export function toMarkdown(
     lines.push(
       `| ${s.bot} | ${(g.merged / s.runs).toFixed(2)} | ${(g.placed / s.runs).toFixed(2)} |`,
     );
+  }
+  lines.push('');
+
+  lines.push('## レリック（選ばれた回数）', '');
+  lines.push('| ボット | 選ばれた回数（多い順） |', '|---|---|');
+  for (const s of summaries) {
+    const picked = Object.entries(s.relics)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, n]) => `${id} ${n}`)
+      .join('・');
+    lines.push(`| ${s.bot} | ${picked || '-'} |`);
   }
   lines.push('');
 
