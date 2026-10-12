@@ -3117,6 +3117,22 @@ a.button.button--primary {
     transform: translate(-50%, 0);
   }
 }
+.cutscene__speaker {
+  position: absolute;
+  top: -14px;
+  left: 18px;
+  padding: 2px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--hazard-black);
+}
+.cutscene__text--bolt .cutscene__speaker {
+  background: #8bc34a;
+}
+.cutscene__text--chief .cutscene__speaker {
+  background: var(--hazard-yellow);
+}
 .cutscene__turn {
   position: absolute;
   inset: 0;

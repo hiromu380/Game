@@ -188,7 +188,12 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
       {/* ページの切り替え: 一瞬暗くしてからめくる（ページが変わるたびに作り直してアニメーションさせる） */}
       <div key={`turn-${page}`} className="cutscene__turn" aria-hidden="true" />
       {pages[page] && (
-        <p key={`text-${page}`} className="cutscene__text" aria-live="polite">
+        <p
+          key={`text-${page}`}
+          className={`cutscene__text cutscene__text--${pages[page].speaker}`}
+          aria-live="polite"
+        >
+          <span className="cutscene__speaker">{t(`story.name.${pages[page].speaker}`)}</span>
           {t(pages[page].text as never)}
         </p>
       )}

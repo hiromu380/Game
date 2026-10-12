@@ -1,7 +1,8 @@
 /**
  * 紙芝居のページ（純粋関数）
  *
- * 1ページ = シーンのある時刻の止め絵（at 秒）＋ 1〜2行の文（i18n のキー）。ページは自動でめくる。
+ * 1ページ = シーンのある時刻の止め絵（at 秒）＋ 話し手のセリフ（1〜2行。i18n のキー）。地の文（説明）は入れない。
+ * ページは自動でめくる。
  * 表示秒数は文の長さから決める（config/cutscene.ts の pages）。合計は上限時間（maxDurationSec）までに収める。
  * 絵はキーフレームの表（scenes/*.ts）をそのまま使い、その時刻の状態を描く
  */
@@ -11,41 +12,45 @@ import type { SceneId } from './playback';
 export interface StoryPage {
   /** 止め絵にするシーンの時刻（秒） */
   at: number;
-  /** 文（i18n のキー） */
+  /** 話し手（名前を添える） */
+  speaker: Speaker;
+  /** セリフ（i18n のキー） */
   text: string;
 }
 
+export type Speaker = 'bolt' | 'chief';
+
 export const STORY_PAGES: Record<SceneId, StoryPage[]> = {
   opening: [
-    { at: 2, text: 'story.page.opening.1' },
-    { at: 21, text: 'story.page.opening.2' },
-    { at: 31, text: 'story.page.opening.3' },
-    { at: 39, text: 'story.page.opening.4' },
-    { at: 45, text: 'story.page.opening.5' },
-    { at: 51, text: 'story.page.opening.6' },
+    { speaker: 'chief', at: 2, text: 'story.page.opening.1' },
+    { speaker: 'bolt', at: 21, text: 'story.page.opening.2' },
+    { speaker: 'bolt', at: 31, text: 'story.page.opening.3' },
+    { speaker: 'chief', at: 39, text: 'story.page.opening.4' },
+    { speaker: 'bolt', at: 45, text: 'story.page.opening.5' },
+    { speaker: 'bolt', at: 51, text: 'story.page.opening.6' },
   ],
   interlude1: [
-    { at: 1.5, text: 'story.page.interlude1.1' },
-    { at: 6, text: 'story.page.interlude1.2' },
+    { speaker: 'chief', at: 1.5, text: 'story.page.interlude1.1' },
+    { speaker: 'bolt', at: 6, text: 'story.page.interlude1.2' },
   ],
   interlude2: [
-    { at: 3, text: 'story.page.interlude2.1' },
-    { at: 7.5, text: 'story.page.interlude2.2' },
+    { speaker: 'bolt', at: 3, text: 'story.page.interlude2.1' },
+    { speaker: 'bolt', at: 7.5, text: 'story.page.interlude2.2' },
   ],
   gameOver: [
-    { at: 1.5, text: 'story.page.gameOver.1' },
-    { at: 3.5, text: 'story.page.gameOver.2' },
+    { speaker: 'chief', at: 1.5, text: 'story.page.gameOver.1' },
+    { speaker: 'bolt', at: 3.5, text: 'story.page.gameOver.2' },
   ],
   ending: [
-    { at: 4, text: 'story.page.ending.1' },
-    { at: 12, text: 'story.page.ending.2' },
-    { at: 21, text: 'story.page.ending.3' },
-    { at: 27, text: 'story.page.ending.4' },
-    { at: 37, text: 'story.page.ending.5' },
-    { at: 47, text: 'story.page.ending.6' },
-    { at: 56, text: 'story.page.ending.7' },
+    { speaker: 'bolt', at: 4, text: 'story.page.ending.1' },
+    { speaker: 'chief', at: 12, text: 'story.page.ending.2' },
+    { speaker: 'bolt', at: 21, text: 'story.page.ending.3' },
+    { speaker: 'bolt', at: 27, text: 'story.page.ending.4' },
+    { speaker: 'bolt', at: 37, text: 'story.page.ending.5' },
+    { speaker: 'bolt', at: 47, text: 'story.page.ending.6' },
+    { speaker: 'chief', at: 56, text: 'story.page.ending.7' },
   ],
-  demoTeaser: [{ at: 2, text: 'story.demoTeaser' }],
+  demoTeaser: [{ speaker: 'bolt', at: 2, text: 'story.page.demoTeaser.1' }],
 };
 
 export type Lang = keyof typeof CUTSCENE_CONFIG.pages.perChar;
