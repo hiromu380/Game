@@ -178,6 +178,7 @@ export type GameAction =
   | { type: 'reroll' }
   /** 今日のイベント（2日目以降の朝）を候補から選ぶ */
   | { type: 'chooseEvent'; index: number }
+  | { type: 'pickRelic'; index: number }
   | { type: 'startTrial' }
   | { type: 'startCommit' }
   /** 週替わり: サーバーが検証して返した本番シードで確定する */
@@ -528,6 +529,9 @@ function reduce(state: GameState, action: GameAction): GameState {
 
     case 'chooseEvent':
       return applyRunOp(state, { op: 'chooseEvent', index: action.index }, 'buy', null);
+
+    case 'pickRelic':
+      return applyRunOp(state, { op: 'pickRelic', index: action.index }, 'buy', null);
 
     case 'reroll':
       return applyRunOp(state, { op: 'reroll' }, 'reroll');

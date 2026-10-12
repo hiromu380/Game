@@ -16,6 +16,7 @@ import {
   getRefund,
   getRerollCost,
   isEventPending,
+  isRelicPending,
   mergeCells,
   scoreToString,
   SIM_VERSION,
@@ -74,6 +75,7 @@ import { CommitConfirm } from './ui/CommitConfirm';
 import { commitWarnings } from './state/commitWarnings';
 import { SellZone } from './ui/SellZone';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
+import { RelicDialog, RelicStrip } from './ui/RelicDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
 import {
@@ -459,6 +461,7 @@ export function App({ start, onTitle }: Props) {
     active:
       !settingsOpen &&
       !isEventPending(run) &&
+      !isRelicPending(run) &&
       !commitConfirm &&
       weeklyMenu === null &&
       (playing || run.phase === 'building'),
@@ -642,6 +645,7 @@ export function App({ start, onTitle }: Props) {
       )}
       <DayEventNotice run={run} />
       <BossNotice run={run} />
+      <RelicStrip run={run} />
     </>
   );
 
@@ -678,7 +682,11 @@ export function App({ start, onTitle }: Props) {
       {dragging && <DragGhost partId={dragging} />}
       {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
       {/* 2日目以降の朝: 今日の出来事を選ぶまでは組み立てられない */}
-      {isEventPending(run) && !playing && run.phase === 'building' && (
+      {/* レリックの選択を先に（夜明けの朝は、レリック → 今日の出来事の順に選ぶ） */}
+      {isRelicPending(run) && !playing && run.phase === 'building' && (
+        <RelicDialog run={run} onPick={(index) => dispatch({ type: 'pickRelic', index })} />
+      )}
+      {!isRelicPending(run) && isEventPending(run) && !playing && run.phase === 'building' && (
         <DayEventDialog run={run} onChoose={(index) => dispatch({ type: 'chooseEvent', index })} />
       )}
       {commitConfirm && !playing && (

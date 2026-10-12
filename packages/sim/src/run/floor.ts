@@ -12,6 +12,7 @@ import { isBlockedCell, setFloorCell } from '../floor/layer';
 import type { FloorLayer, FloorTileId } from '../floor/types';
 import { bonusFloorSeed, dayEventSeed, floorPermitSeed } from './seeds';
 import type { BonusFloorState, RunState } from './types';
+import { relicBonusFloorAdd } from './relics';
 
 const dayOf = (state: RunState, shiftIndex: number) =>
   Math.floor(shiftIndex / state.config.shiftsPerDay);
@@ -75,10 +76,10 @@ export function drawBonusFloor(state: RunState, shiftIndex: number): BonusFloorS
   if (!params || shiftIndex < params.fromShift) return null;
   const rng = createPrng(bonusFloorSeed(state.seed, shiftIndex));
   const count =
-    pickWeighted(
+    (pickWeighted(
       rng,
       params.countWeights.map((weight, n) => ({ value: n, weight })),
-    ) ?? 0;
+    ) ?? 0) + relicBonusFloorAdd(state);
   const floor = getCurrentFloor({ ...state, bonusFloor: null }, shiftIndex);
   const avoid = occupiedToday(state, shiftIndex);
   const cells: BonusFloorState['cells'] = [];

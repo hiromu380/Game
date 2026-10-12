@@ -2456,6 +2456,44 @@ a.button.button--primary {
   color: var(--met);
 }
 
+/* ---- レリック（ui/RelicDialog.tsx）: 紫の六角形の宝石（今日の出来事の緑・ボスの赤と見分ける） ---- */
+.relic-dialog .panel__title {
+  color: #b39ddb;
+}
+.relic-dialog__choice {
+  border-color: #7e57c2;
+}
+.relic-strip {
+  padding: 4px 8px;
+  border: 1px solid #7e57c2;
+  border-radius: 10px;
+  background: rgba(126, 87, 194, 0.12);
+}
+.relic-strip__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  cursor: pointer;
+}
+.relic-strip__label {
+  margin-right: 4px;
+  font-size: 0.75rem;
+  color: #b39ddb;
+}
+.relic-strip__summary img {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.relic-strip__list {
+  margin: 4px 0 2px;
+  padding-left: 1.2em;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
 /* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ----
    盤面を主役にするため、細い帯（64px）にする。左から: 時刻 → シフトの達成（✓）→ 今日の出来事 → ボルト → ロケット */
 .workshop {

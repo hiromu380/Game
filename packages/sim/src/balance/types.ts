@@ -71,6 +71,58 @@ export interface PartParams {
  * - overtimePay: 残業手当（ノルマ達成の報酬が増える）
  * - rollUpSleeves: 腕まくり（朝シフトのノルマが下がる）
  */
+/** レリック（夜のシフトをクリアすると3つの候補から1つ選ぶ。ランの終わりまで効く） */
+export const RELIC_IDS = [
+  'spareSwitch',
+  'gearGloves',
+  'rewoundCoil',
+  'doubleCheck',
+  'chainPulse',
+  'goldLeaf',
+  'junkbotHunch',
+  'polishedFloor',
+  'spareOil',
+  'afterglow',
+  'piggyHabit',
+  'coupon',
+  'connoisseur',
+  'nightPay',
+  'floorCraftsman',
+] as const;
+export type RelicId = (typeof RELIC_IDS)[number];
+
+/** レリックの効果量 */
+export interface RelicParams {
+  /** 予備のスイッチ: スイッチの信号の初期値に足す */
+  spareSwitchAdd: number;
+  /** ギア職人の手袋: 増幅ギアの倍率に足す */
+  gearAdd: number;
+  /** 巻き直したコイル: 共鳴コイルの「隣接1つあたり」に足す */
+  coilAdd: number;
+  /** 二重チェック: 検品台の倍率に足す */
+  inspectorAdd: number;
+  /** 連鎖の鼓動: 連鎖メーターの割る数から引く（最低1） */
+  chainMeterStepDelta: number;
+  /** 金箔: 金色パーツの倍率に足す */
+  goldenAdd: number;
+  /** 磨いた床: ×2床の倍率 */
+  polishedDoubleMultiplier: number;
+  /** 予備の油: 全パーツの発動回数上限に足す（上限なし・0 のパーツは除く） */
+  spareOilAdd: number;
+  /** 余熱: 爆発ドラム缶の発動回数上限に足す */
+  afterglowAdd: number;
+  /** 貯金癖: 貯金箱の収入に足す */
+  piggyAdd: number;
+  /** 割引クーポン: パーツの価格から引く（最低1） */
+  couponDiscount: number;
+  /** 目利き: ショップの枠に足す */
+  connoisseurOffers: number;
+  /** 夜勤手当: 夜のシフトのクリア報酬に足す */
+  nightPayReward: number;
+  /** 床職人: シフト開始時のボーナス床の枚数に足す */
+  floorCraftsmanAdd: number;
+}
+
 export type DayEventId =
   | 'supplies'
   | 'sample'
@@ -293,6 +345,9 @@ export interface Balance {
     /** 工場拡張（1段階ごとに盤面の縦横 +1）の条件 */
     boardExpansions: MetaCondition[];
   };
+
+  /** レリック（choices: 候補の数・weights: 出やすさ） */
+  relics: { choices: number; weights: Record<RelicId, number>; params: RelicParams };
 
   /** ボス修正ルールの効果量 */
   boss: {

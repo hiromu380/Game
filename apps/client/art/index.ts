@@ -21,6 +21,7 @@ import { iconFiles } from './icons';
 import { logoFiles } from './logo';
 import { mascotFiles } from './mascot';
 import { partFiles } from './parts';
+import { relicFiles } from './relics';
 import { paletteCss } from './paletteCss';
 import { previewHtml } from './preview';
 import { rocketFiles } from './rocket';
@@ -31,6 +32,7 @@ export function buildArt(): Record<string, string> {
     'src/styles/palette.css': paletteCss(),
     ...mascotFiles(),
     ...partFiles(),
+    ...relicFiles(),
     ...boardFiles(),
     ...iconFiles(),
     ...logoFiles(),

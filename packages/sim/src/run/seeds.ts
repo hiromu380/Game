@@ -15,6 +15,7 @@ const LABEL_DAY_EVENT = 6;
 const LABEL_STAGE = 7;
 const LABEL_BONUS_FLOOR = 8;
 const LABEL_FLOOR_PERMIT = 9;
+const LABEL_RELIC = 10;
 
 /** 本番（スイッチを押したとき）のシード。プレイヤーには表示しない */
 export function commitSeed(runSeed: number, shiftIndex: number): number {
@@ -62,4 +63,9 @@ export function bonusFloorSeed(runSeed: number, shiftIndex: number): number {
 /** ランダム配置権の抽選のシード（その日の何枚目か: nth は 0 始まり） */
 export function floorPermitSeed(runSeed: number, day: number, nth: number): number {
   return deriveSeed(runSeed, LABEL_FLOOR_PERMIT, day, nth);
+}
+
+/** レリックの候補の抽選のシード（day は夜のシフトをクリアした日。0 始まり） */
+export function relicSeed(runSeed: number, day: number): number {
+  return deriveSeed(runSeed, LABEL_RELIC, day);
 }

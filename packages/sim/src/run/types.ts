@@ -4,7 +4,7 @@
  * RunState はそのまま JSON 化して保存できる形にしている（Score は文字列で保持）。
  */
 import type { FloorTileId } from '../floor/types';
-import type { BossModifierId, DayEventId, ItemId } from '../balance';
+import type { BossModifierId, DayEventId, ItemId, RelicId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
 
@@ -71,6 +71,10 @@ export interface RunState {
   overtime: boolean;
   /** メタ進行に記録済みのシフト数（延長戦で同じシフトを二重に記録しないため） */
   metaRecordedShifts: number;
+  /** 持っているレリック（選んだ順。導入前のセーブには無い） */
+  relics?: RelicId[];
+  /** レリックの候補（夜のシフトをクリアした次のシフトの開始時に出る。選ぶまでほかの操作はできない） */
+  relicChoice?: { day: number; choices: RelicId[] } | null;
   /** 今日のイベント（2日目以降の朝に選ぶ。導入前のセーブには無い） */
   dayEvent?: DayEventState | null;
   /** このシフトのボーナス床（シフト開始時に湧く。そのシフトのみ有効。導入前のセーブには無い） */
@@ -136,6 +140,10 @@ export type RunError =
   | 'rerollDisabled'
   /** 今日のイベントをまだ選んでいない */
   | 'eventNotChosen'
+  /** レリックをまだ選んでいない */
+  | 'relicNotChosen'
+  /** 選べるレリックがない・候補の番号が正しくない */
+  | 'noRelicToPick'
   /** 選べるイベントがない・候補の番号が正しくない */
   | 'noEventToChoose'
   /** 本番シードを外から渡す設定（週替わり）なのに渡されなかった */

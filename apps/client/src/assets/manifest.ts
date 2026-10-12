@@ -10,6 +10,7 @@ import {
   type AchievementId,
   type BossModifierId,
   type DayEventId,
+  type RelicId,
   type PartId,
 } from '@chain-factory/sim';
 import logoDarkSrc from './logo/logo-dark-bg.svg';
@@ -147,6 +148,9 @@ const bossFiles = byName(
 const eventFiles = byName(
   import.meta.glob<string>('./events/*.svg', { eager: true, import: 'default' }),
 );
+const relicFiles = byName(
+  import.meta.glob<string>('./relics/*.svg', { eager: true, import: 'default' }),
+);
 const uiFiles = byName(import.meta.glob<string>('./ui/*.svg', { eager: true, import: 'default' }));
 
 /** 盤面の素材（床3種・床タイル・使用不可マス・枠の角と辺。art/board.ts で生成） */
@@ -167,6 +171,9 @@ export const BOARD_ASSETS = {
 
 /** ボスのアイコン（art/icons.ts で生成） */
 export const BOSS_ICONS = bossFiles as Record<BossModifierId, string>;
+
+/** レリックのアイコン（art/relics.ts で生成） */
+export const RELIC_ICONS = relicFiles as Record<RelicId, string>;
 
 /** 今日の出来事のアイコン（art/icons.ts で生成） */
 export const EVENT_ICONS = eventFiles as Record<DayEventId, string>;

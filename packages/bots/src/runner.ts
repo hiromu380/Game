@@ -16,8 +16,10 @@ import {
   PART_IDS,
   type PartId,
   type RunState,
+  applyOp,
   chooseEvent,
   isEventPending,
+  isRelicPending,
   startOvertime,
 } from '@chain-factory/sim';
 import { BOTS, type Bot, type BotName, type BotOptions } from './bots';
@@ -73,6 +75,8 @@ export interface RunLog {
   permits: PermitLog & { expired: number };
   /** 金色パーツ: 合体した回数・手持ちの金色パーツを置いた回数 */
   golden: GoldenLog;
+  /** 選んだレリック（選んだ順） */
+  relics: string[];
   ms: number;
 }
 
@@ -127,6 +131,25 @@ function chooseBestEvent(state: RunState, bot: Bot, options: BotOptions): RunSta
   return best.state;
 }
 
+/** レリックの候補を1つずつ試し、そのシフトの見込みがいちばん良いものを選んだ状態を返す */
+function chooseBestRelic(state: RunState, bot: Bot, options: BotOptions): RunState {
+  let best: { state: RunState; ratio: number; budget: number } | null = null;
+  const count = state.relicChoice?.choices.length ?? 0;
+  for (let i = 0; i < count; i++) {
+    const picked = applyOp(state, { op: 'pickRelic', index: i });
+    if (!picked.ok) continue;
+    const plan = bot.playShift(picked.state, options);
+    const quota = getCurrentShift(plan.state).quota;
+    const score = evaluate(plan.state, options.samples, options.evalMode).score;
+    const ratio = Number((score * 1000n) / BigInt(Math.max(1, quota))) / 1000;
+    if (!best || ratio > best.ratio || (ratio === best.ratio && plan.state.budget > best.budget)) {
+      best = { state: picked.state, ratio, budget: plan.state.budget };
+    }
+  }
+  if (!best) throw new Error('レリックを選べない');
+  return best.state;
+}
+
 export function playRun(seed: number, botName: BotName, options: RunnerOptions): RunLog {
   const started = nowMs();
   MOVE_SETTINGS.floorAware = options.floorAware ?? true;
@@ -144,6 +167,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     rerolls: 0,
     permits: { offered: 0, bought: 0, used: 0, expired: 0, tiles: {} },
     golden: { merged: 0, placed: 0 },
+    relics: [],
     ms: 0,
   };
 
@@ -167,6 +191,11 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     // 今日の出来事（2日目以降の朝）: 候補ごとにその朝の手を考えてみて、ノルマに対する出荷量の見込みが
     // いちばん良いものを選ぶ（同じなら予算が多く残るもの）。朝のノルマ・価格・予算に効く出来事を正しく比べるため
     if (isEventPending(state)) state = chooseBestEvent(state, bot, botOptions);
+    // レリック（夜のシフトをクリアした次のシフト）: 候補ごとにそのシフトの見込みを比べて選ぶ
+    if (isRelicPending(state)) {
+      state = chooseBestRelic(state, bot, botOptions);
+      log.relics.push(state.relics!.at(-1)!);
+    }
     for (const offer of state.shop) if (offer.partId) add(log.offered, offer.partId);
 
     const plan = bot.playShift(state, botOptions);

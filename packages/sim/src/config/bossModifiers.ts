@@ -9,6 +9,8 @@ import { emptyFloor, setFloorCell } from '../floor/layer';
 import type { FloorLayer } from '../floor/types';
 import type { RuleSet } from '../types';
 import type { BossPlanEntry, EconomyConfig, RunConfig } from './runConfig';
+import type { RelicId } from '../balance';
+import { applyRelicEconomy, applyRelicRules } from '../run/relics';
 
 type BossParams = Balance['boss'];
 
@@ -53,9 +55,15 @@ export const BOSS_MODIFIERS: Record<BossModifierId, BossModifier> = {
 };
 
 /** そのシフトで使う RuleSet（ボス修正込み） */
-export function getShiftRules(config: RunConfig, shiftIndex: number): RuleSet {
-  // ラン全体の修正（週替わりの特殊ルール）→ そのシフトのボス修正 の順に重ねる
-  let rules = config.rules;
+export function getShiftRules(
+  config: RunConfig,
+  shiftIndex: number,
+  relics: readonly RelicId[] = [],
+): RuleSet {
+  // レリック → ラン全体の修正（週替わりの特殊ルール）→ そのシフトのボス修正 の順に重ねる
+  let rules = config.relics
+    ? applyRelicRules(config.rules, relics, config.relics.params)
+    : config.rules;
   for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
     if (!entry) continue;
     rules = BOSS_MODIFIERS[entry.id].applyRules?.(rules, entry, config.bossParams) ?? rules;
@@ -64,8 +72,14 @@ export function getShiftRules(config: RunConfig, shiftIndex: number): RuleSet {
 }
 
 /** そのシフトで使う経済設定（ボス修正込み） */
-export function getShiftEconomy(config: RunConfig, shiftIndex: number): EconomyConfig {
-  let economy = config.economy;
+export function getShiftEconomy(
+  config: RunConfig,
+  shiftIndex: number,
+  relics: readonly RelicId[] = [],
+): EconomyConfig {
+  let economy = config.relics
+    ? applyRelicEconomy(config.economy, relics, config.relics.params)
+    : config.economy;
   for (const entry of [config.globalModifier ?? null, config.bossPlan[shiftIndex] ?? null]) {
     if (!entry) continue;
     economy = BOSS_MODIFIERS[entry.id].applyEconomy?.(economy, config.bossParams) ?? economy;

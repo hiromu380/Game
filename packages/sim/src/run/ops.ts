@@ -1,5 +1,5 @@
 /**
- * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却・合体・今日のイベントの選択・消耗品の使用）を
+ * 操作ログ: 組み立て中の操作（購入・リロール・配置・回転・手持ちに戻す・売却・合体・今日のイベントの選択・レリックの選択・消耗品の使用）を
  * 1手ずつ記録したもの
  *
  * 週替わりでは、クライアントはこの操作ログだけをサーバーへ送る。サーバーは同じラン進行関数で
@@ -19,6 +19,8 @@ import {
   sellPart,
 } from './build';
 import { chooseEvent, isEventPending } from './events';
+import { isRelicPending, pickRelic } from './relics';
+import { regenerateShop } from './shift';
 import { useFloorPermit } from './items';
 import type { RunActionResult, RunError, RunState } from './types';
 
@@ -34,13 +36,17 @@ export type RunOp =
   | { op: 'merge'; x: number; y: number }
   /** 今日のイベントを候補から選ぶ（2日目以降の朝。選ぶまでほかの操作はできない） */
   | { op: 'chooseEvent'; index: number }
+  /** レリックを候補から選ぶ（夜のシフトをクリアした次のシフト。選ぶまでほかの操作はできない） */
+  | { op: 'pickRelic'; index: number }
   /** 消耗品を使う（ランダム配置権: 床が湧く位置と種類は sim が決めるので、位置は送らない） */
   | { op: 'useItem'; itemId: ItemId };
 
 /** 操作を1つ適用する */
 export function applyOp(state: RunState, op: RunOp): RunActionResult {
   if (op.op === 'chooseEvent') return chooseEvent(state, op.index);
+  if (op.op === 'pickRelic') return pickRelic(state, op.index, regenerateShop);
   if (isEventPending(state)) return { ok: false, error: 'eventNotChosen' };
+  if (isRelicPending(state)) return { ok: false, error: 'relicNotChosen' };
   switch (op.op) {
     case 'buy':
       return buyOffer(state, op.offerIndex);
@@ -96,6 +102,7 @@ export function isRunOp(value: unknown): value is RunOp {
     case 'buy':
       return isInt(v.offerIndex);
     case 'chooseEvent':
+    case 'pickRelic':
       return isInt(v.index);
     case 'reroll':
       return true;

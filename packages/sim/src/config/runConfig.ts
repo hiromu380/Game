@@ -80,6 +80,11 @@ export interface RunConfig {
    */
   bonusFloors?: Balance['bonusFloors'] & { fromShift: number };
   /**
+   * レリック（balance/ の写し）。夜のシフトをクリアすると候補から1つ選ぶ。
+   * 導入前に始めたラン（セーブ）には無いので、無ければ候補は出ない
+   */
+  relics?: Balance['relics'];
+  /**
    * ランダム配置権（balance/ の写し）。fromShift より前のシフトのショップには出ない（初回ガイドの1日目）。
    * 導入前に始めたランには無いので、無ければショップに出ない
    */
@@ -209,6 +214,11 @@ export function buildRunConfig({
     },
     baseShiftCount: balance.shifts.length,
     overtime: { ...balance.overtime },
+    relics: {
+      choices: balance.relics.choices,
+      weights: { ...balance.relics.weights },
+      params: { ...balance.relics.params },
+    },
     stages,
     // ランシードがない（床を使わない）組み立てでは、ボーナス床も湧かせない
     bonusFloors:

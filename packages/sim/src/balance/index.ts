@@ -10,6 +10,7 @@
  * - shifts.ts   シフト表（ノルマ・予算・報酬）・延長戦・週替わり
  * - meta.ts     メタ進行（パーツの解放条件・工場拡張）
  * - events.ts   日ごとのイベント（2日目以降の朝に選ぶ）の候補と効果量
+ * - relics.ts   レリック（夜のシフトをクリアすると選ぶ、ランの終わりまで効く効果）
  * - boss.ts     ボスシフトの修正ルールの効果量
  * - types.ts    上の値の型（各項目の意味はここのコメントを参照）
  *
@@ -26,12 +27,14 @@ import { DAY_EVENTS } from './events';
 import { BONUS_FLOORS, FLOOR_PARAMS, FLOOR_PERMIT } from './floors';
 import { META } from './meta';
 import { GOLDEN, PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
+import { RELICS } from './relics';
 import { STAGES } from './stages';
 import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM, UNMEASURABLE } from './sim';
 import type { Balance } from './types';
 
 export type * from './types';
+export { RELIC_IDS } from './types';
 
 export const BALANCE: Balance = {
   board: BOARD,
@@ -53,5 +56,6 @@ export const BALANCE: Balance = {
   overtime: OVERTIME,
   weekly: WEEKLY,
   meta: META,
+  relics: RELICS,
   boss: BOSS,
 };

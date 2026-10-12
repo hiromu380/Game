@@ -13,7 +13,10 @@ export {
   type PartBalance,
   type PartParams,
   type Rarity,
+  type RelicId,
+  type RelicParams,
   type ShiftSpec,
+  RELIC_IDS,
 } from './balance';
 
 export { SIM_VERSION } from './version';
@@ -79,6 +82,14 @@ export {
   sellPart,
 } from './run/build';
 export { goldenCount } from './run/inventory';
+export {
+  applyRelicEconomy,
+  applyRelicRules,
+  drawRelicChoice,
+  hasRelic,
+  isRelicPending,
+} from './run/relics';
+export { regenerateShop } from './run/shift';
 export { isUnmeasurable } from './run/unmeasurable';
 export {
   abandonRun,

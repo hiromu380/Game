@@ -15,10 +15,12 @@ import { fileURLToPath } from 'node:url';
 import { createSave } from '@chain-factory/shared';
 import {
   addItem,
+  applyOp,
   chooseEvent,
   commitShift,
   createRun,
   isEventPending,
+  isRelicPending,
   useFloorPermit as spendFloorPermit,
   type RunState,
 } from '@chain-factory/sim';
@@ -34,6 +36,13 @@ mkdirSync(outDir, { recursive: true });
 
 // ---- 状態（ラン）を作る ----
 
+/** レリックの選択が待っていれば、先頭の候補を選ぶ */
+function pickFirstRelic(run: RunState): RunState {
+  if (!isRelicPending(run)) return run;
+  const picked = applyOp(run, { op: 'pickRelic', index: 0 });
+  return picked.ok ? picked.state : run;
+}
+
 /** 1日目の朝（床は ×2 のみ・ボーナス床あり） */
 const day1 = (): RunState => createRun(5);
 
@@ -45,6 +54,7 @@ function day3(): RunState {
     config: { ...original.config, shifts: original.config.shifts.map((s) => ({ ...s, quota: 0 })) },
   };
   while (run.shiftIndex < 6) {
+    run = pickFirstRelic(run);
     if (isEventPending(run)) {
       const chosen = chooseEvent(run, 0);
       if (chosen.ok) run = chosen.state;
@@ -53,6 +63,7 @@ function day3(): RunState {
     if ('error' in committed) throw new Error(committed.error);
     run = committed.state;
   }
+  run = pickFirstRelic(run);
   if (isEventPending(run)) {
     const chosen = chooseEvent(run, 0);
     if (chosen.ok) run = chosen.state;
@@ -66,8 +77,8 @@ function day3(): RunState {
   return run;
 }
 
-/** 2日目の朝（今日の出来事を選ぶところ） */
-function day2Event(): RunState {
+/** 2日目の朝（夜明けのレリックを選ぶところ） */
+function day2Relic(): RunState {
   const original = createRun(18);
   let run: RunState = {
     ...original,
@@ -80,6 +91,9 @@ function day2Event(): RunState {
   }
   return { ...run, config: { ...run.config, shifts: original.config.shifts } };
 }
+
+/** 2日目の朝（レリックを選んだあと、今日の出来事を選ぶところ） */
+const day2Event = (): RunState => pickFirstRelic(day2Relic());
 
 /**
  * 金色パーツ: 増幅ギアが3つつながって光っている盤面と、金色の増幅ギア（盤面・手持ち）。
@@ -258,6 +272,7 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'day3-floors', run: day3 },
+  { name: 'day2-relic', run: day2Relic },
   { name: 'day2-event', run: day2Event },
 ];
 
