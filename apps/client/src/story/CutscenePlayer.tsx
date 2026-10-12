@@ -1,5 +1,5 @@
 /**
- * カットシーンの再生画面（画面全体に重ねる）
+ * カットシーンの再生画面（画面全体に重ねる）。紙芝居: 止め絵と1〜2行の文を自動でめくる（story/pages.ts）
  *
  * - スキップ: クリック・タップ・キー・コントローラーのボタンを長押し（誤操作の防止）。押している間は進み具合の輪を出す
  * - 設定: 演出の強さ・揺れ・点滅を減らす（timeline.ts）、音量（効果音は AudioEngine の設定に従う）
@@ -14,7 +14,8 @@ import { useSettings } from '../settings/SettingsContext';
 import { CutsceneRenderer } from './CutsceneRenderer';
 import type { SceneId } from './playback';
 import { SCENE_LOADERS } from './scenes';
-import { sampleScene, soundsBetween } from './timeline';
+import { pageAt, pageSchedule, STORY_PAGES } from './pages';
+import { sampleScene } from './timeline';
 
 interface Props {
   scene: SceneId;
@@ -23,8 +24,10 @@ interface Props {
 }
 
 export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { settings } = useSettings();
+  const pages = STORY_PAGES[sceneId] ?? [];
+  const [page, setPage] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
   const [hold, setHold] = useState(0);
   const doneRef = useRef(onDone);
@@ -67,10 +70,14 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
           return;
         }
         renderer = created;
-        // 経過時間は実時間で測る（描画が重くてコマが落ちても、話の進み方と音がずれないように）
+        // 経過時間は実時間で測る（描画が重くてコマが落ちても、めくる間隔がずれないように）
+        const schedule = pageSchedule(
+          pages.map((p) => t(p.text as never)),
+          lang,
+        );
         const startedAt = performance.now();
-        let time = 0;
-        // 撮影モード（開発専用）: 指定の時刻で止めて描く（docs/ui-review の撮影・コマの確認用）
+        let shown = -1;
+        // 撮影モード（開発専用）: 指定の経過時間で止めて描く（docs/ui-review の撮影・コマの確認用）
         let frozenAt: number | null = null;
         if (import.meta.env.VITE_CAPTURE === '1') {
           (window as { cutsceneSeek?: (t: number) => void }).cutsceneSeek = (t) => {
@@ -78,19 +85,36 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
             frozenAt = t;
           };
         }
-        created.render(sampleScene(scene, 0, options.current));
+        const { zoom } = CUTSCENE_CONFIG.pages;
+        const still = options.current.strength === 'minimal';
+        const draw = (elapsed: number) => {
+          const state = pageAt(schedule, elapsed);
+          const current = pages[state.index];
+          if (!current) return state;
+          if (state.index !== shown) {
+            shown = state.index;
+            setPage(state.index);
+            if (state.index > 0) audio.play('paper' as SoundKey);
+          }
+          // 止め絵: 揺れ・光は出さず、ページの間だけゆっくり寄る
+          const frame = sampleScene(scene, current.at, options.current);
+          const push = still ? 1 : 1 + zoom * state.progress;
+          created.render({
+            ...frame,
+            camera: { ...frame.camera, zoom: frame.camera.zoom * push },
+            shake: { x: 0, y: 0 },
+            flash: null,
+          });
+          return state;
+        };
+        draw(0);
         created.onTick(() => {
           if (finished.current) return;
           if (frozenAt !== null) {
-            created.render(sampleScene(scene, frozenAt, options.current));
+            draw(frozenAt);
             return;
           }
-          const next = (performance.now() - startedAt) / 1000;
-          for (const key of soundsBetween(scene, time, next)) audio.play(key as SoundKey);
-          time = next;
-          const frame = sampleScene(scene, time, options.current);
-          created.render(frame);
-          if (frame.done) finish(false);
+          if (draw((performance.now() - startedAt) / 1000).done) finish(false);
         });
       } catch {
         // 読み込みに失敗したら、カットシーンを飛ばしてゲームを続ける
@@ -161,6 +185,18 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
   return (
     <div className="cutscene" role="dialog" aria-label={t(`story.scene.${sceneId}`)}>
       <div className="cutscene__stage" ref={parentRef} />
+      {/* ページの切り替え: 一瞬暗くしてからめくる（ページが変わるたびに作り直してアニメーションさせる） */}
+      <div key={`turn-${page}`} className="cutscene__turn" aria-hidden="true" />
+      {pages[page] && (
+        <p key={`text-${page}`} className="cutscene__text" aria-live="polite">
+          {t(pages[page].text as never)}
+        </p>
+      )}
+      <ol className="cutscene__pages" aria-hidden="true">
+        {pages.map((p, i) => (
+          <li key={p.text} className={i === page ? 'is-current' : i < page ? 'is-read' : ''} />
+        ))}
+      </ol>
       <div className="cutscene__skip" aria-hidden="true">
         <svg viewBox="0 0 36 36" width="28" height="28">
           <circle

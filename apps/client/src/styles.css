@@ -3086,6 +3086,94 @@ a.button.button--primary {
   font-size: 0.85rem;
   pointer-events: none;
 }
+/* 紙芝居: ページの文（下の帯）・ページの切り替え（一瞬暗く）・何ページ目か */
+.cutscene__text {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  transform: translateX(-50%);
+  width: min(880px, calc(100% - 32px));
+  margin: 0;
+  padding: 14px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(11, 13, 18, 0.82);
+  color: var(--white);
+  font-size: clamp(1rem, 2.4vw, 1.45rem);
+  font-weight: bold;
+  line-height: 1.6;
+  text-align: center;
+  pointer-events: none;
+  animation: cutscene-text-in 0.6s ease-out both;
+}
+@keyframes cutscene-text-in {
+  0%,
+  40% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.cutscene__turn {
+  position: absolute;
+  inset: 0;
+  background: #0b0d12;
+  pointer-events: none;
+  animation: cutscene-turn 0.45s ease-out forwards;
+}
+@keyframes cutscene-turn {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.cutscene__pages {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.cutscene__pages li {
+  width: 9px;
+  height: 9px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+.cutscene__pages li.is-read {
+  background: rgba(255, 255, 255, 0.5);
+}
+.cutscene__pages li.is-current {
+  border-color: var(--golden);
+  background: var(--golden);
+}
+/* 縦長の画面: 絵（16:9 で上下中央）のすぐ下に文、すぐ上にページの印を置く */
+@media (orientation: portrait) {
+  .cutscene__text {
+    bottom: auto;
+    top: calc(50% + 28.125vw + 16px);
+  }
+  .cutscene__pages {
+    bottom: auto;
+    top: calc(50% - 28.125vw - 28px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cutscene__text,
+  .cutscene__turn {
+    animation-duration: 0.01s;
+  }
+}
 
 /* ダイアログの右上の閉じるボタン（どのページからでも閉じられるように） */
 .modal__body {

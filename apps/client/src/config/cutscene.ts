@@ -1,5 +1,5 @@
 /**
- * カットシーン（セリフなしのストーリー演出）の設定（調整はこのファイルだけで行う）
+ * カットシーン（紙芝居: 止め絵と1〜2行の文を自動でめくる）の設定（調整はこのファイルだけで行う）
  */
 export const CUTSCENE_CONFIG = {
   /** シーンの座標系（16:9）。画面の大きさに合わせて拡大縮小する */
@@ -27,4 +27,16 @@ export const CUTSCENE_CONFIG = {
   maxResolution: 1.5,
   /** 素材の読み込みを待つ上限（ミリ秒）。過ぎたらシーンを飛ばしてゲームを続ける */
   loadTimeoutMs: 5000,
+  /**
+   * 紙芝居（story/pages.ts）: 1ページの表示秒数 = base + 文字数 × perChar（言語ごと）を min〜max に収める。
+   * ページの間は turnMs かけて暗くして切り替える。止め絵はページの間に zoom だけゆっくり寄る（弱では寄らない）
+   */
+  pages: {
+    base: 1.8,
+    perChar: { ja: 0.1, en: 0.045 },
+    min: 3,
+    max: 6.5,
+    turnMs: 450,
+    zoom: 0.04,
+  },
 } as const;
