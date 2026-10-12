@@ -61,7 +61,7 @@
   "runEnd.bestChain": "Best chain",
   "runEnd.shiftsCleared": "Shifts cleared",
   "runEnd.shiftRow": "Shift {index}: {score} / quota {quota}",
-  "runEnd.retry": "Play again",
+  "runEnd.retry": "Try again",
   "error.notBuilding": "You can't do that right now",
   "error.offerNotFound": "Item not found",
   "error.alreadySold": "Already sold",
@@ -774,5 +774,11 @@
   "showcase.playing": "Here it goes!",
   "showcase.done": "{score} shipped! All from one switch. Collect parts and grow your factory!",
   "showcase.close": "Back to my factory",
-  "tutorial.showcase": "Show me!"
+  "tutorial.showcase": "Show me!",
+  "nearMiss.gap": "{gap} short of the quota ({percent}% reached)",
+  "nearMiss.hint.noShip": "Bolt: The signal never reached a dock. Try a test run first to check the flow",
+  "nearMiss.hint.unspent": "Bolt: You had {budget} left. Spend it in the shop to push further",
+  "nearMiss.hint.boss": "Bolt: Night shifts have special rules. Check the warning in the morning and prepare",
+  "nearMiss.hint.multiply": "Bolt: Line up Booster Gears and Presses—multipliers stack fast",
+  "nearMiss.hint.close": "Bolt: So close! Put multipliers or a dock on a ×2 floor to get there"
 }

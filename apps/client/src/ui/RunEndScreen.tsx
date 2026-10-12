@@ -23,6 +23,7 @@ import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
 import { RELIC_ICONS } from '../assets/manifest';
 import { describeRelic } from './RelicDialog';
+import { getNearMiss } from '../state/nearMiss';
 
 interface Props {
   run: RunState;
@@ -46,6 +47,21 @@ export function RunEndScreen(props: Props) {
   const canOvertime = run.phase === 'cleared' && !run.overtime && run.config.overtimeAllowed;
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
+  // 通常ランで失敗したら「あと○○」とひとことヒントを見出しのすぐ下に出し、もう一度のボタンもそこへ上げる
+  const nearMiss = mode.kind === 'normal' ? getNearMiss(run) : null;
+
+  const actions = (
+    <div className="button-row run-end__actions">
+      {canOvertime && (
+        <button className="button--primary" onClick={onOvertime}>
+          {t('runEnd.overtime')}
+        </button>
+      )}
+      <button className={canOvertime ? '' : 'button--primary'} onClick={onRetry}>
+        {t('runEnd.retry')}
+      </button>
+    </div>
+  );
 
   return (
     <div className="run-end">
@@ -63,6 +79,23 @@ export function RunEndScreen(props: Props) {
                   ? t('runEnd.clearedTitle')
                   : t('runEnd.failedTitle')}
         </h1>
+        {nearMiss && (
+          <section className="near-miss" aria-live="polite">
+            <p className="near-miss__gap">
+              {t('nearMiss.gap', {
+                gap: formatScore(String(nearMiss.gap)),
+                percent: nearMiss.percent,
+              })}
+            </p>
+            <div className="near-miss__meter" aria-hidden>
+              <span style={{ width: `${nearMiss.percent}%` }} />
+            </div>
+            <p className="near-miss__hint">
+              {t(`nearMiss.hint.${nearMiss.hint}`, { budget: nearMiss.budgetLeft })}
+            </p>
+            {actions}
+          </section>
+        )}
         <dl className="stats stats--large">
           <dt>{t('runEnd.finalScore')}</dt>
           <dd className="stats__score">{formatMeasured(total)}</dd>
@@ -98,16 +131,7 @@ export function RunEndScreen(props: Props) {
           </div>
         )}
         {mode.kind === 'normal' ? (
-          <div className="button-row run-end__actions">
-            {canOvertime && (
-              <button className="button--primary" onClick={onOvertime}>
-                {t('runEnd.overtime')}
-              </button>
-            )}
-            <button className={canOvertime ? '' : 'button--primary'} onClick={onRetry}>
-              {t('runEnd.retry')}
-            </button>
-          </div>
+          !nearMiss && actions
         ) : (
           <div className="button-row run-end__actions">
             <button className="button--primary" onClick={props.onViewRanking}>

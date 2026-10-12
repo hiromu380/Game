@@ -2546,6 +2546,32 @@ a.button.button--primary {
   font-weight: bold;
   color: #b39ddb;
 }
+.near-miss {
+  margin: 4px 0 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--hazard-yellow);
+  border-radius: 12px;
+  background: rgba(255, 193, 7, 0.08);
+}
+.near-miss__gap {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: bold;
+}
+.near-miss__meter {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.near-miss__meter span {
+  display: block;
+  height: 100%;
+  background: var(--hazard-yellow);
+}
+.near-miss__hint {
+  margin: 8px 0 10px;
+}
 .run-end__relics h2 {
   margin: 8px 0 4px;
   font-size: 0.9rem;

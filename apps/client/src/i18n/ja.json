@@ -61,7 +61,7 @@
   "runEnd.bestChain": "最大連鎖数",
   "runEnd.shiftsCleared": "達成シフト",
   "runEnd.shiftRow": "シフト {index}: {score} / ノルマ {quota}",
-  "runEnd.retry": "もう一度",
+  "runEnd.retry": "もう一度挑戦",
   "error.notBuilding": "今は操作できません",
   "error.offerNotFound": "商品が見つかりません",
   "error.alreadySold": "売約済みです",
@@ -774,5 +774,11 @@
   "showcase.playing": "いけーっ！",
   "showcase.done": "出荷量 {score}！ スイッチ1回で、ここまで行けるんだ。パーツを集めて、工場を育てていこう！",
   "showcase.close": "自分の工場へ戻る",
-  "tutorial.showcase": "見せて！"
+  "tutorial.showcase": "見せて！",
+  "nearMiss.gap": "ノルマまで、あと {gap}（{percent}% 達成）",
+  "nearMiss.hint.noShip": "ボルト: 信号が出荷口まで届いていなかったみたい。本番の前に試運転で流れを確かめよう",
+  "nearMiss.hint.unspent": "ボルト: 予算が {budget}円 残っていたよ。ショップで使い切れば、もっと伸ばせたかも",
+  "nearMiss.hint.boss": "ボルト: 夜シフトは特殊ルールつき。朝のうちに予告を見て、備えておこう",
+  "nearMiss.hint.multiply": "ボルト: 増幅ギアやプレス機を重ねて並べると、値が掛け算でぐんと伸びるよ",
+  "nearMiss.hint.close": "ボルト: あと少し！ ×2床の上に倍率パーツや出荷口を置くと届くかも"
 }

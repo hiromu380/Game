@@ -293,6 +293,18 @@ const SCENES: Scene[] = [
       await page.waitForTimeout(6000);
     },
   },
+  // ノルマ未達でラン終了: 「あと○○」とヒント、もう一度のボタン
+  {
+    name: 'run-failed',
+    run: day1,
+    act: async (page) => {
+      await page.locator('.controls .button--primary').first().click();
+      await page.locator('.commit-confirm .button--primary').click();
+      await page.locator('.playback-panel .button--primary').waitFor({ timeout: 20000 });
+      await page.locator('.playback-panel .button--primary').click();
+      await page.waitForTimeout(800);
+    },
+  },
   // 転送装置にマウスを乗せる: 行き先までの点線と枠
   { name: 'teleporter-hover', run: newParts, act: (page) => clickCell(page, 2, 1, true) },
   // 磁石を置こうとする: 同じ行・列の出荷口に枠、置いたときの倍率のバッジ
