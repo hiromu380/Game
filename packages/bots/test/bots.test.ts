@@ -15,7 +15,9 @@ const OPTIONS = {
 
 describe('ボット', () => {
   it('ランダム配置権は、並べば期待値で買って使うことがあり、使わないボットとも比べられる', () => {
-    const logs = [1, 2, 3, 4, 5, 6].map((seed) => playRun(seed, 'greedy', OPTIONS));
+    // お金を厳しくした調整（2026-10-12）で、シード 1〜6 では配置権を買う余裕がなくなったので 1〜12 に広げた
+    const seeds = Array.from({ length: 12 }, (_, i) => i + 1);
+    const logs = seeds.map((seed) => playRun(seed, 'greedy', OPTIONS));
     const permits = logs.reduce(
       (n, l) => ({ offered: n.offered + l.permits.offered, used: n.used + l.permits.used }),
       { offered: 0, used: 0 },

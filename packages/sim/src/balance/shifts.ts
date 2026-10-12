@@ -10,13 +10,13 @@ export const SHIFTS: Balance['shifts'] = [
   { quota: 10, budget: 10, clearReward: 5, kind: 'normal' },
   { quota: 25, budget: 10, clearReward: 6, kind: 'boss' },
   // 2日目
-  { quota: 80, budget: 12, clearReward: 5, kind: 'normal' },
-  { quota: 250, budget: 12, clearReward: 5, kind: 'normal' },
-  { quota: 600, budget: 12, clearReward: 6, kind: 'boss' },
+  { quota: 80, budget: 10, clearReward: 5, kind: 'normal' },
+  { quota: 250, budget: 10, clearReward: 5, kind: 'normal' },
+  { quota: 600, budget: 10, clearReward: 6, kind: 'boss' },
   // 3日目
-  { quota: 2000, budget: 14, clearReward: 5, kind: 'normal' },
-  { quota: 4000, budget: 14, clearReward: 5, kind: 'normal' },
-  { quota: 8000, budget: 14, clearReward: 0, kind: 'boss' },
+  { quota: 2000, budget: 10, clearReward: 5, kind: 'normal' },
+  { quota: 4000, budget: 10, clearReward: 5, kind: 'normal' },
+  { quota: 8000, budget: 10, clearReward: 0, kind: 'boss' },
 ];
 
 export const SHIFTS_PER_DAY: Balance['shiftsPerDay'] = 3;
@@ -26,7 +26,7 @@ export const RESET_BOARD_EACH_DAY: Balance['resetBoardEachDay'] = true;
 
 export const OVERTIME: Balance['overtime'] = {
   quotaGrowthPercent: 250,
-  budget: 14,
+  budget: 10,
   clearReward: 5,
 };
 

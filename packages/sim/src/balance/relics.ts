@@ -37,7 +37,7 @@ export const RELICS: Balance['relics'] = {
     piggyAdd: 1,
     couponDiscount: 1,
     connoisseurOffers: 1,
-    nightPayReward: 5,
+    nightPayReward: 3,
     floorCraftsmanAdd: 1,
   },
 };
