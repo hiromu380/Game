@@ -383,7 +383,6 @@
   "settings.tutorialAgain": "もう一度見る",
   "settings.tutorialPending": "次に新しいランを始めたときにガイドを表示します（ガイドのランは最初のパーツ・7×7 で始まります）",
   "tutorial.next": "次へ",
-  "tutorial.finish": "はじめる",
   "tutorial.skip": "ガイドを閉じる",
   "tutorial.step.intro": "やあ、工場長！ ボルトだよ。この夜間工場を立て直して、ぼくのロケットを3日で完成させよう。まずは操作盤の使い方を教えるね",
   "tutorial.step.placeSwitch": "手持ちの「スイッチ」を選んで、盤面の光っているマスに置いてね。スイッチは矢印の向きに信号を出すよ",
@@ -395,7 +394,7 @@
   "tutorial.step.placeSecondGear": "空いたところに、買った増幅ギアを置こう。ギア2つで4倍、さらに×2床で8倍だ！",
   "tutorial.step.trialAgain": "もう一度「試運転」で確かめよう",
   "tutorial.step.commit": "ノルマに届いた！「スイッチを押す（本番）」で出荷量を確定しよう。本番はやり直せないから、試運転で確かめてから押すのがコツだよ",
-  "tutorial.step.finish": "やったね、ロケットの部品が1つできた！ あとは自由に工場を作ってみて。パーツの効果はショップの「一覧」や、タイトルの「コレクション」で見られるよ",
+  "tutorial.step.finish": "やったね、ロケットの部品が1つできた！ 最後に、ぼくの「本気の工場」を見せてあげる",
   "tutorial.hint.notReached": "信号が出荷口まで届かなかったみたい。スイッチ・ギア・出荷口が右向きで一直線に並んでいるか確かめてね（置いたパーツはタップで回転できるよ）",
   "tutorial.hint.short": "まだノルマに届かないみたい。並び方を確かめて、もう一度試運転してね",
   "title.howTo": "遊び方",
@@ -768,5 +767,12 @@
   "collection.relicsHint": "夜シフトをクリアすると選べる秘宝です（{found} / {total} 種類を発見）",
   "collection.relicLockedHint": "まだ手に入れたことがありません",
   "capture.giveRelic": "レリックを選ぶ",
-  "title.showcaseCaption": "スイッチ1回で、この大連鎖。"
+  "title.showcaseCaption": "スイッチ1回で、この大連鎖。",
+  "showcase.title": "ボルトの本気の工場",
+  "showcase.ready": "これが、ぼくが夢見る工場だよ。スイッチを押してみて！",
+  "showcase.press": "スイッチを押す",
+  "showcase.playing": "いけーっ！",
+  "showcase.done": "出荷量 {score}！ スイッチ1回で、ここまで行けるんだ。パーツを集めて、工場を育てていこう！",
+  "showcase.close": "自分の工場へ戻る",
+  "tutorial.showcase": "見せて！"
 }

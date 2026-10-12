@@ -43,7 +43,7 @@ export function TutorialGuide({ tutorial, run, lastTrialScore, onNext, onSkip }:
       <div className="tutorial__actions">
         {withButton && (
           <button className="button--primary button--small" onClick={onNext}>
-            {t(step === 'intro' ? 'tutorial.next' : 'tutorial.finish')}
+            {t(step === 'intro' ? 'tutorial.next' : 'tutorial.showcase')}
           </button>
         )}
         {step !== 'finish' && (

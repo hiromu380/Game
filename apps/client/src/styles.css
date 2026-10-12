@@ -1323,6 +1323,23 @@ button:disabled {
     width: min(26vw, 400px);
   }
 }
+.showcase-dialog {
+  width: min(460px, 94vw);
+}
+.showcase-dialog__bolt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.showcase-dialog__bolt p {
+  margin: 0;
+  min-height: 2.8em;
+}
+.showcase-dialog__board {
+  margin: 8px auto;
+  width: min(400px, 84vw);
+}
 .title__actions {
   display: flex;
   flex-direction: column;

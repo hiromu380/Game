@@ -78,6 +78,9 @@ import { RelicDialog, RelicStrip } from './ui/RelicDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
 import { useBoardLabels } from './board/useBoardLabels';
+
+/** チュートリアルの締めの大連鎖（初回だけ使うので遅延読み込み） */
+const ShowcaseDialog = lazy(() => import('./showcase/ShowcaseDialog'));
 import {
   advanceTutorial,
   gearAvailability,
@@ -198,6 +201,7 @@ export function App({ start, onTitle }: Props) {
     updateSettings({ tutorialDone: true });
   };
   const guideStep = tutorialOn ? tutorial.step : null;
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
   // タブ表示では、ガイドの手順が変わったら、その手順で使う一覧（ショップ・手持ち）を開く
   const [tabGuideStep, setTabGuideStep] = useState(guideStep);
   if (guideStep !== tabGuideStep) {
@@ -428,6 +432,7 @@ export function App({ start, onTitle }: Props) {
       !settingsOpen &&
       !isEventPending(run) &&
       !isRelicPending(run) &&
+      !showcaseOpen &&
       !commitConfirm &&
       weeklyMenu === null &&
       (playing || run.phase === 'building'),
@@ -601,7 +606,8 @@ export function App({ start, onTitle }: Props) {
           run={run}
           lastTrialScore={lastTrialScore}
           onNext={() => {
-            if (tutorial.step === 'finish') endTutorial();
+            // 締めは、ボルトの本気の工場で大連鎖を体験してもらってから終える
+            if (tutorial.step === 'finish') setShowcaseOpen(true);
             else setTutorial(advanceTutorial(tutorial, run));
           }}
           onSkip={endTutorial}
@@ -648,6 +654,16 @@ export function App({ start, onTitle }: Props) {
       {dragging && <DragGhost partId={dragging} />}
       {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
       {/* 2日目以降の朝: 今日の出来事を選ぶまでは組み立てられない */}
+      {showcaseOpen && (
+        <Suspense fallback={null}>
+          <ShowcaseDialog
+            onClose={() => {
+              setShowcaseOpen(false);
+              endTutorial();
+            }}
+          />
+        </Suspense>
+      )}
       {/* レリックの選択を先に（夜明けの朝は、レリック → 今日の出来事の順に選ぶ） */}
       {isRelicPending(run) && !playing && run.phase === 'building' && (
         <RelicDialog run={run} onPick={(index) => dispatch({ type: 'pickRelic', index })} />

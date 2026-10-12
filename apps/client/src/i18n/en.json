@@ -383,7 +383,6 @@
   "settings.tutorialAgain": "Show again",
   "settings.tutorialPending": "The guide will appear when you start your next new run (the guide run starts with the starter parts on a 7×7 floor)",
   "tutorial.next": "Next",
-  "tutorial.finish": "Let's go",
   "tutorial.skip": "Close guide",
   "tutorial.step.intro": "Welcome, new foreman! I'm Bolt. Let's save Night Factory No. 3 and finish my rocket in three days. First, I'll show you the old control console",
   "tutorial.step.placeSwitch": "Pick the Switch from your inventory and place it on the glowing cell. The switch sends a signal in the direction of its arrow",
@@ -395,7 +394,7 @@
   "tutorial.step.placeSecondGear": "Place the gear you bought in the gap. Two gears make ×4, and the ×2 floor makes it ×8!",
   "tutorial.step.trialAgain": "Run another trial to check",
   "tutorial.step.commit": "You hit the quota! Press the switch (real run) to lock in your shipments. The real run can't be undone, so check with a trial first",
-  "tutorial.step.finish": "Nice, one rocket part is done! Now build your factory however you like. You can check what each part does in the shop's List or in the Collection on the title screen",
+  "tutorial.step.finish": "You did it, the first rocket part is done! One last thing: let me show you my dream factory",
   "tutorial.hint.notReached": "The signal didn't reach the dock. Check that the switch, gear and dock face right in a straight line (tap a placed part to rotate it)",
   "tutorial.hint.short": "Not at the quota yet. Check the layout and run another trial",
   "title.howTo": "How to play",
@@ -768,5 +767,12 @@
   "collection.relicsHint": "Treasures you can pick after clearing a night shift ({found} / {total} found)",
   "collection.relicLockedHint": "Not found yet",
   "capture.giveRelic": "Pick a relic",
-  "title.showcaseCaption": "One switch. One massive chain."
+  "title.showcaseCaption": "One switch. One massive chain.",
+  "showcase.title": "Bolt's Dream Factory",
+  "showcase.ready": "This is the factory I dream of. Go ahead, press the switch!",
+  "showcase.press": "Press the switch",
+  "showcase.playing": "Here it goes!",
+  "showcase.done": "{score} shipped! All from one switch. Collect parts and grow your factory!",
+  "showcase.close": "Back to my factory",
+  "tutorial.showcase": "Show me!"
 }
