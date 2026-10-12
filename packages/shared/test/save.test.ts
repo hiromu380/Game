@@ -16,6 +16,7 @@ import {
   convertV3toV4,
   convertV4toV5,
   convertV5toV6,
+  convertV6toV7,
   createSave,
   migrateSave,
   SAVE_VERSION,
@@ -45,10 +46,10 @@ const V1_SAVE: SaveDataV1 = {
 };
 
 describe('セーブデータ', () => {
-  it('最新バージョン（v6）で保存し、JSON を往復しても同じ内容になる', () => {
+  it('最新バージョン（v7）で保存し、JSON を往復しても同じ内容になる', () => {
     const save = createSave(createRun(42));
     expect(save.version).toBe(SAVE_VERSION);
-    expect(SAVE_VERSION).toBe(6);
+    expect(SAVE_VERSION).toBe(7);
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
 
@@ -242,7 +243,7 @@ describe('v5 → v6（ストーリー演出）', () => {
   it('見たシーンの記録を足し、すでに遊んでいる人はオープニングを見た扱いにする（ランはそのまま）', () => {
     const v5 = v5Save();
     const migrated = migrateSave(v5)!;
-    expect(migrated.version).toBe(6);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(migrated.story).toEqual({ seen: ['opening'] });
     expect(migrated.run).toEqual(v5.run);
     expect(convertV5toV6(v5).story.seen).toEqual(['opening']);
@@ -255,5 +256,42 @@ describe('v5 → v6（ストーリー演出）', () => {
     const broken = { ...save, story: { seen: ['opening', 3, null] } };
     expect(migrateSave(broken)!.story.seen).toEqual(['opening']);
     expect(migrateSave({ ...save, story: undefined })!.story.seen).toEqual([]);
+  });
+});
+
+describe('v6 → v7（レリック）', () => {
+  function v6Save(relics?: string[]) {
+    const save = JSON.parse(JSON.stringify(createSave(createRun(3))));
+    delete save.meta.relicsFound;
+    if (relics) save.run.relics = relics;
+    save.version = 6;
+    return save;
+  }
+
+  it('レリックの図鑑を足す（空）。ランとほかのメタ進行はそのまま', () => {
+    const v6 = v6Save();
+    const migrated = migrateSave(v6)!;
+    expect(migrated.version).toBe(7);
+    expect(migrated.meta.relicsFound).toEqual([]);
+    expect(migrated.meta.unlockedParts).toEqual(v6.meta.unlockedParts);
+    expect(migrated.run).toEqual(v6.run);
+  });
+
+  it('進行中のランで手に入れているレリックは、見つけた扱いにする', () => {
+    expect(convertV6toV7(v6Save(['coupon', 'gearGloves'])).meta.relicsFound).toEqual([
+      'coupon',
+      'gearGloves',
+    ]);
+  });
+
+  it('図鑑は JSON を往復しても残り、知らない ID・重複・壊れた値は捨てる', () => {
+    const meta = { ...createInitialMeta(), relicsFound: ['coupon' as const] };
+    const save = createSave(null, meta);
+    expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+    const broken = { ...save, meta: { ...meta, relicsFound: ['coupon', 'coupon', 'nope', 3] } };
+    expect(migrateSave(broken)!.meta.relicsFound).toEqual(['coupon']);
+    expect(migrateSave({ ...save, meta: { ...meta, relicsFound: 'x' } })!.meta.relicsFound).toEqual(
+      [],
+    );
   });
 });

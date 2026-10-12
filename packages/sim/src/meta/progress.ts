@@ -115,8 +115,12 @@ export function applyRunToMeta(
     unlocks.push({ kind: 'board', level: boardLevel });
   }
 
+  // このランで手に入れたレリックを図鑑に足す（新しいものだけ、手に入れた順）
+  const relicsFound = [...(meta.relicsFound ?? [])];
+  for (const id of run.relics ?? []) if (!relicsFound.includes(id)) relicsFound.push(id);
+
   return {
-    meta: { unlockedParts, boardLevel, records },
+    meta: { unlockedParts, boardLevel, records, relicsFound },
     unlocks,
     run: { ...run, metaRecordedShifts: run.history.length },
   };

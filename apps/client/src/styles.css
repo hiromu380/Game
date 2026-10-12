@@ -2487,6 +2487,64 @@ a.button.button--primary {
   width: 30px;
   height: 30px;
 }
+.catalog__relic-icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+}
+.catalog__relic-icon--unknown {
+  display: grid;
+  place-items: center;
+  border: 2px dashed #7e57c2;
+  border-radius: 12px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #b39ddb;
+}
+.run-end__relics h2 {
+  margin: 8px 0 4px;
+  font-size: 0.9rem;
+  color: #b39ddb;
+}
+.run-end__relics ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.run-end__relics li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+.run-end__relics img {
+  width: 28px;
+  height: 28px;
+}
+.relic-strip__newest {
+  animation: relic-pop 0.5s ease-out;
+}
+@keyframes relic-pop {
+  0% {
+    transform: scale(0.3) rotate(-20deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .relic-strip__newest {
+    animation: none;
+  }
+}
 .relic-strip__list {
   margin: 4px 0 2px;
   padding-left: 1.2em;

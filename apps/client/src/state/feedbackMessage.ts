@@ -7,7 +7,7 @@
 import type { FeedbackKind } from './gameReducer';
 
 export interface FeedbackMessage {
-  kind: 'buy' | 'sell' | 'reroll' | 'useItem' | 'undo';
+  kind: 'buy' | 'sell' | 'reroll' | 'useItem' | 'relicPick' | 'undo';
   /** 予算の増減の大きさ（円。増減がない操作は 0） */
   amount: number;
 }
@@ -21,6 +21,7 @@ export function feedbackMessage(kind: FeedbackKind, budgetDelta: number): Feedba
     case 'sell':
       return { kind, amount: Math.max(0, budgetDelta) };
     case 'useItem':
+    case 'relicPick':
     case 'undo':
       return { kind, amount: 0 };
     default:

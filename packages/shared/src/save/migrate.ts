@@ -17,6 +17,8 @@ import {
   type MetaProgress,
   type RunState,
   type ShopOffer,
+  RELIC_IDS,
+  type RelicId,
 } from '@chain-factory/sim';
 import type { RunStateV1, SaveDataV1 } from './v1';
 import type { SaveDataV2 } from './v2';
@@ -24,12 +26,13 @@ import type { SaveDataV3 } from './v3';
 import type { SaveDataV4 } from './v4';
 import type { SaveDataV5 } from './v5';
 import type { SaveDataV6, StoryProgress } from './v6';
+import type { SaveDataV7 } from './v7';
 
 /** 現在のセーブデータのバージョン */
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 /** 最新バージョンのセーブデータ */
-export type SaveData = SaveDataV6;
+export type SaveData = SaveDataV7;
 
 export function createSave(
   run: RunState | null,
@@ -50,17 +53,21 @@ export function migrateSave(raw: unknown): SaveData | null {
     case 1:
       return migrateSave(convertV1toV2(raw as SaveDataV1));
     case 2:
-      return convertV5toV6(
-        convertV4toV5(convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2)))),
+      return convertV6toV7(
+        convertV5toV6(convertV4toV5(convertV3toV4(convertV2toV3(normalizeV2(raw as SaveDataV2))))),
       );
     case 3:
-      return convertV5toV6(convertV4toV5(convertV3toV4(normalizeV3(raw as SaveDataV3))));
+      return convertV6toV7(
+        convertV5toV6(convertV4toV5(convertV3toV4(normalizeV3(raw as SaveDataV3)))),
+      );
     case 4:
-      return convertV5toV6(convertV4toV5(normalizeV3(raw as SaveDataV4)));
+      return convertV6toV7(convertV5toV6(convertV4toV5(normalizeV3(raw as SaveDataV4))));
     case 5:
-      return convertV5toV6(normalizeV5(raw as SaveDataV5));
+      return convertV6toV7(convertV5toV6(normalizeV5(raw as SaveDataV5)));
     case 6:
-      return normalizeV6(raw as SaveDataV6);
+      return convertV6toV7(normalizeV6(raw as SaveDataV6));
+    case 7:
+      return normalizeV7(raw as SaveDataV7);
     default:
       return null;
   }
@@ -130,6 +137,30 @@ function normalizeV6(save: SaveDataV6): SaveDataV6 {
     ? save.story.seen.filter((id): id is string => typeof id === 'string')
     : [];
   return { ...normalizeV3(save), story: { seen } };
+}
+
+/** v7 の読み込み: v6 と同じ補い方に、レリックの図鑑（知らない ID・重複を落とす）を補う */
+function normalizeV7(save: SaveDataV7): SaveDataV7 {
+  const base = normalizeV6(save as unknown as SaveDataV6) as unknown as SaveDataV7;
+  return { ...base, meta: { ...base.meta, relicsFound: validRelics(save.meta?.relicsFound) } };
+}
+
+function validRelics(raw: unknown): RelicId[] {
+  if (!Array.isArray(raw)) return [];
+  const ids = raw.filter((id): id is RelicId => (RELIC_IDS as readonly unknown[]).includes(id));
+  return [...new Set(ids)];
+}
+
+/**
+ * v6 → v7（レリック）: レリックの図鑑を足す。
+ * 進行中のランで手に入れているレリックがあれば、それを見つけた扱いにする
+ */
+export function convertV6toV7(save: SaveDataV6): SaveDataV7 {
+  return {
+    ...save,
+    version: 7,
+    meta: { ...save.meta, relicsFound: validRelics(save.run?.relics) },
+  };
 }
 
 /**

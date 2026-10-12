@@ -149,6 +149,7 @@ describe('メタ進行の判定', () => {
     const meta = createInitialMeta();
     expect(evaluate({ meta })).toEqual([]);
     const grown = {
+      ...meta,
       unlockedParts: [...meta.unlockedParts, ...BALANCE.meta.partUnlocks.map((u) => u.partId)],
       boardLevel: 2,
       records: {

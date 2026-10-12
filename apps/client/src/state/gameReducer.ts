@@ -138,6 +138,7 @@ export type FeedbackKind =
   | 'returnPart'
   | 'useItem'
   | 'merge'
+  | 'relicPick'
   | 'undo'
   | 'error';
 
@@ -531,7 +532,7 @@ function reduce(state: GameState, action: GameAction): GameState {
       return applyRunOp(state, { op: 'chooseEvent', index: action.index }, 'buy', null);
 
     case 'pickRelic':
-      return applyRunOp(state, { op: 'pickRelic', index: action.index }, 'buy', null);
+      return applyRunOp(state, { op: 'pickRelic', index: action.index }, 'relicPick', null);
 
     case 'reroll':
       return applyRunOp(state, { op: 'reroll' }, 'reroll');

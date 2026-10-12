@@ -10,11 +10,14 @@ import {
   createInitialMeta,
   DEFAULT_RULES,
   PART_IDS,
+  RELIC_IDS,
   type PartId,
+  type RelicId,
 } from '@chain-factory/sim';
 import { useMemo, useState } from 'react';
 import { EDITION_CONFIG } from '../../config/edition';
-import { MASCOT_ASSETS } from '../../assets/manifest';
+import { MASCOT_ASSETS, RELIC_ICONS } from '../../assets/manifest';
+import { describeRelicWith } from '../RelicDialog';
 import { useI18n } from '../../i18n';
 import { achievementsOnLoad } from '../../state/achievements';
 import { loadSave } from '../../state/saveStore';
@@ -23,7 +26,7 @@ import { describeCondition, MetaPanel } from '../MetaPanel';
 import { describePart } from '../partText';
 import { PartIcon } from '../PartIcon';
 
-type Tab = 'parts' | 'logs' | 'goals' | 'achievements';
+type Tab = 'parts' | 'relics' | 'logs' | 'goals' | 'achievements';
 
 const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
 
@@ -40,6 +43,7 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
 
   const tabs: Tab[] = [
     'parts',
+    'relics',
     'logs',
     ...(EDITION_CONFIG.metaProgression ? (['goals'] as const) : []),
     ...(EDITION_CONFIG.achievements ? (['achievements'] as const) : []),
@@ -67,6 +71,7 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
         )}
         <div className="collection__content">
           {tab === 'parts' && <PartList unlockedParts={meta.unlockedParts} />}
+          {tab === 'relics' && <RelicList found={meta.relicsFound ?? []} />}
           {tab === 'logs' && <FactoryLog meta={meta} />}
           {tab === 'goals' && <MetaPanel meta={meta} unlocks={[]} />}
           {tab === 'achievements' && <AchievementList progress={achievements} open />}
@@ -118,6 +123,43 @@ function FactoryLog({ meta }: { meta: ReturnType<typeof createInitialMeta> }) {
         ))}
       </div>
     </section>
+  );
+}
+
+/** レリック図鑑: 手に入れたことのあるレリックは名前と効果、まだのものは「？？？」 */
+function RelicList({ found }: { found: RelicId[] }) {
+  const { t } = useI18n();
+  const seen = new Set(found);
+  return (
+    <>
+      <p className="panel__hint">
+        {t('collection.relicsHint', { found: seen.size, total: RELIC_IDS.length })}
+      </p>
+      <ul className="catalog__list">
+        {RELIC_IDS.map((id) => {
+          const known = seen.has(id);
+          return (
+            <li key={id} className={`catalog__item ${known ? '' : 'is-locked'}`}>
+              {known ? (
+                <img className="catalog__relic-icon" src={RELIC_ICONS[id]} alt="" />
+              ) : (
+                <span className="catalog__relic-icon catalog__relic-icon--unknown" aria-hidden>
+                  ?
+                </span>
+              )}
+              <div className="catalog__text">
+                <strong>{known ? t(`relic.${id}.name`) : t('collection.logLocked')}</strong>
+                <div className="catalog__desc">
+                  {known
+                    ? describeRelicWith(t, BALANCE.relics.params, id)
+                    : t('collection.relicLockedHint')}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 

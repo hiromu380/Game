@@ -21,6 +21,8 @@ import { WeeklyShare } from './share/WeeklyShare';
 import { RunShare } from './share/RunShare';
 import { StoreLink } from './StoreLink';
 import { UiIcon } from './UiIcon';
+import { RELIC_ICONS } from '../assets/manifest';
+import { describeRelic } from './RelicDialog';
 
 interface Props {
   run: RunState;
@@ -82,6 +84,19 @@ export function RunEndScreen(props: Props) {
             </li>
           ))}
         </ul>
+        {(run.relics ?? []).length > 0 && (
+          <div className="run-end__relics">
+            <h2>{t('runEnd.relics')}</h2>
+            <ul>
+              {(run.relics ?? []).map((id) => (
+                <li key={id} title={describeRelic(t, run, id)}>
+                  <img src={RELIC_ICONS[id]} alt="" />
+                  <span>{t(`relic.${id}.name`)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {mode.kind === 'normal' ? (
           <div className="button-row run-end__actions">
             {canOvertime && (

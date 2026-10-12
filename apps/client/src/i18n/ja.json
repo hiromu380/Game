@@ -761,5 +761,10 @@
   "relic.nightPay.name": "夜勤手当",
   "relic.nightPay.desc": "夜シフトのクリア報酬 +{nightPayReward}",
   "relic.floorCraftsman.name": "床職人",
-  "relic.floorCraftsman.desc": "シフト開始時のボーナス床 +{floorCraftsmanAdd}枚"
+  "relic.floorCraftsman.desc": "シフト開始時のボーナス床 +{floorCraftsmanAdd}枚",
+  "toast.relicPick": "レリックを手に入れた",
+  "runEnd.relics": "このランのレリック",
+  "collection.tab.relics": "レリック",
+  "collection.relicsHint": "夜シフトをクリアすると選べる秘宝です（{found} / {total} 種類を発見）",
+  "collection.relicLockedHint": "まだ手に入れたことがありません"
 }

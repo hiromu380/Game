@@ -2,15 +2,19 @@
  * レリック: 夜のシフトをクリアした次のシフトに、3つの候補から1つ選ぶダイアログと、持っているレリックの列
  * 効果量は RunConfig の relics から埋め込む（balance/relics.ts を変えれば文言も追従する）
  */
-import type { RelicId, RunState } from '@chain-factory/sim';
+import type { RelicId, RelicParams, RunState } from '@chain-factory/sim';
 import { RELIC_ICONS } from '../assets/manifest';
 import { useI18n, type TranslateFn } from '../i18n';
 
-/** レリックの説明文 */
+/** レリックの説明文（ランが持つ効果量で） */
 export function describeRelic(t: TranslateFn, run: RunState, id: RelicId): string {
   const p = run.config.relics?.params;
-  if (!p) return '';
-  return t(`relic.${id}.desc`, { ...p });
+  return p ? describeRelicWith(t, p, id) : '';
+}
+
+/** レリックの説明文（効果量を指定。コレクションでは balance/ の基準値） */
+export function describeRelicWith(t: TranslateFn, params: RelicParams, id: RelicId): string {
+  return t(`relic.${id}.desc`, { ...params });
 }
 
 interface Props {
@@ -57,8 +61,14 @@ export function RelicStrip({ run }: { run: RunState }) {
     <details className="relic-strip">
       <summary className="relic-strip__summary">
         <span className="relic-strip__label">{t('relic.owned')}</span>
-        {relics.map((id) => (
-          <img key={id} src={RELIC_ICONS[id]} alt={t(`relic.${id}.name`)} />
+        {relics.map((id, index) => (
+          <img
+            key={id}
+            src={RELIC_ICONS[id]}
+            alt={t(`relic.${id}.name`)}
+            // 手に入れたばかりのレリック（いちばん後ろ）は、ぽんと出てくる
+            className={index === relics.length - 1 ? 'relic-strip__newest' : undefined}
+          />
         ))}
       </summary>
       <ul className="relic-strip__list">

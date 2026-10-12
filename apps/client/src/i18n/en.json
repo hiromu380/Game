@@ -761,5 +761,10 @@
   "relic.nightPay.name": "Night Pay",
   "relic.nightPay.desc": "Night shift clear reward +{nightPayReward}",
   "relic.floorCraftsman.name": "Floor Craftsman",
-  "relic.floorCraftsman.desc": "+{floorCraftsmanAdd} bonus floor tile(s) at shift start"
+  "relic.floorCraftsman.desc": "+{floorCraftsmanAdd} bonus floor tile(s) at shift start",
+  "toast.relicPick": "Got a relic",
+  "runEnd.relics": "Relics this run",
+  "collection.tab.relics": "Relics",
+  "collection.relicsHint": "Treasures you can pick after clearing a night shift ({found} / {total} found)",
+  "collection.relicLockedHint": "Not found yet"
 }
