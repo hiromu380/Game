@@ -27,6 +27,16 @@ export const PARTS: Balance['parts'] = {
   solar: { price: 2, maxActivations: 1, rarity: 'common' },
   inspector: { price: 4, maxActivations: 1, rarity: 'uncommon' },
   piggyBank: { price: 3, maxActivations: 3, rarity: 'uncommon' },
+  // パーツ追加（SIM_VERSION 9。数値は仮: docs/balance-log.md）
+  bend: { price: 1, maxActivations: 3, rarity: 'common' },
+  crossSplitter: { price: 4, maxActivations: 1, rarity: 'uncommon' },
+  magnet: { price: 4, maxActivations: 1, rarity: 'uncommon' },
+  cornerBench: { price: 2, maxActivations: 1, rarity: 'common' },
+  // 1回目は溜めるだけ、2回目で送るので発動回数は2
+  capacitor: { price: 6, maxActivations: 2, rarity: 'rare' },
+  teleporter: { price: 5, maxActivations: 2, rarity: 'rare' },
+  booster: { price: 2, maxActivations: 1, rarity: 'common' },
+  cashier: { price: 4, maxActivations: 2, rarity: 'rare' },
 };
 
 export const PART_PARAMS: Balance['partParams'] = {
@@ -43,6 +53,13 @@ export const PART_PARAMS: Balance['partParams'] = {
   junkbotMinSteps: 1,
   junkbotMaxSteps: 6,
   junkbotStepDivisor: 2,
+  crossSplitterDivisor: 2,
+  magnetPerDock: 1,
+  cornerBenchEdge: 2,
+  cornerBenchCorner: 4,
+  capacitorMultiplier: 2,
+  boosterAdd: 5,
+  cashierPerDigit: 1,
 };
 
 export const RARITY_WEIGHTS: Balance['rarityWeights'] = { common: 10, uncommon: 5, rare: 2 };

@@ -29,6 +29,9 @@ function arrowDirs(part: Part): Dir4[] {
     case 'dock':
     case 'reflector':
     case 'oiler':
+    case 'bend': // 以下3つは向きを使わない（入ってきた向きで決まる・信号を消す）
+    case 'teleporter':
+    case 'cashier':
       return [];
     default:
       return [part.dir];

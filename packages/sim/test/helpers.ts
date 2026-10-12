@@ -5,6 +5,7 @@
  *   パーツ記号: S=スイッチ C=コンベア Y=分岐器 G=ギア P=プレス B=ドラム缶 J=ポンコツ R=再起動 D=出荷口
  *             M=合流炉 K=連鎖メーター E=散布機 X=コピー機 F=反射板 U=回転台 O=潤滑油タンク
  *             L=共鳴コイル A=ソーラーパネル I=検品台 $=貯金箱
+ *             W=曲がりレール H=十字分岐器 N=磁石 Q=隅の作業台 Z=蓄電器 T=転送装置 !=ブースター %=換金機
  *   向き: ^=上 >=右 v=下 <=左
  * 例:
  *   board(['S> G> D>'])  // スイッチ → ギア → 出荷口
@@ -41,6 +42,14 @@ const PART_CODES: Record<string, PartId> = {
   A: 'solar',
   I: 'inspector',
   $: 'piggyBank',
+  W: 'bend',
+  H: 'crossSplitter',
+  N: 'magnet',
+  Q: 'cornerBench',
+  Z: 'capacitor',
+  T: 'teleporter',
+  '!': 'booster',
+  '%': 'cashier',
 };
 const DIR_CODES: Record<string, Dir4> = { '^': 0, '>': 1, v: 2, '<': 3 };
 

@@ -47,6 +47,19 @@ export interface PartParams {
   junkbotMinSteps: number;
   junkbotMaxSteps: number;
   junkbotStepDivisor: number;
+  /** 十字分岐器: 4方向へ送る値 = 受けた値 ÷ crossSplitterDivisor（切り捨て） */
+  crossSplitterDivisor: number;
+  /** 磁石: 倍率 = 1 + 同じ行・列の出荷口の数 × magnetPerDock */
+  magnetPerDock: number;
+  /** 隅の作業台: 盤面の端・角に置いたときの倍率 */
+  cornerBenchEdge: number;
+  cornerBenchCorner: number;
+  /** 蓄電器: 2回目に送る値 =（溜めた値 + 今の値）× capacitorMultiplier */
+  capacitorMultiplier: number;
+  /** ブースター: 値に足す量 */
+  boosterAdd: number;
+  /** 換金機: 予算 = 値の桁数 × cashierPerDigit */
+  cashierPerDigit: number;
 }
 
 /**

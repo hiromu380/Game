@@ -28,6 +28,15 @@ export const PART_IDS = [
   'solar',
   'inspector',
   'piggyBank',
+  // パーツ追加（SIM_VERSION 9）
+  'bend',
+  'crossSplitter',
+  'magnet',
+  'cornerBench',
+  'capacitor',
+  'teleporter',
+  'booster',
+  'cashier',
 ] as const;
 export type PartId = (typeof PART_IDS)[number];
 

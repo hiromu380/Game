@@ -41,7 +41,16 @@ const hasFloorEffect = (floor: FloorLayer, index: number) =>
   (FLOOR_WEIGHT[floor[index]?.tile ?? ''] ?? 0) > 0;
 
 /** 向きが挙動に関係しないパーツ（候補を1方向に絞る） */
-const DIRECTIONLESS = new Set<PartId>(['barrel', 'junkbot', 'dock', 'reflector', 'oiler']);
+const DIRECTIONLESS = new Set<PartId>([
+  'barrel',
+  'junkbot',
+  'dock',
+  'reflector',
+  'oiler',
+  'bend',
+  'teleporter',
+  'cashier',
+]);
 const DIRS: Dir4[] = [0, 1, 2, 3];
 const DELTAS: [number, number][] = [
   [0, -1],

@@ -45,6 +45,15 @@ import reflectorSrc from './parts/reflector.svg';
 import solarSrc from './parts/solar.svg';
 import spreaderSrc from './parts/spreader.svg';
 import turntableSrc from './parts/turntable.svg';
+// パーツ追加（SIM_VERSION 9）
+import bendSrc from './parts/bend.svg';
+import boosterSrc from './parts/booster.svg';
+import capacitorSrc from './parts/capacitor.svg';
+import cashierSrc from './parts/cashier.svg';
+import cornerBenchSrc from './parts/cornerBench.svg';
+import crossSplitterSrc from './parts/crossSplitter.svg';
+import magnetSrc from './parts/magnet.svg';
+import teleporterSrc from './parts/teleporter.svg';
 
 export interface PartAsset {
   /** 画像ファイルの URL */
@@ -80,10 +89,25 @@ const PART_SOURCES: Record<PartId, string> = {
   solar: solarSrc,
   inspector: inspectorSrc,
   piggyBank: piggyBankSrc,
+  bend: bendSrc,
+  crossSplitter: crossSplitterSrc,
+  magnet: magnetSrc,
+  cornerBench: cornerBenchSrc,
+  capacitor: capacitorSrc,
+  teleporter: teleporterSrc,
+  booster: boosterSrc,
+  cashier: cashierSrc,
 };
 
 /** 画像が上向きに描かれていて、向きに合わせて回転表示するパーツ */
-const ROTATING_PARTS: readonly PartId[] = ['conveyor', 'splitter', 'spreader'];
+const ROTATING_PARTS: readonly PartId[] = [
+  'conveyor',
+  'splitter',
+  'spreader',
+  'crossSplitter',
+  'capacitor',
+  'booster',
+];
 
 /** パーツの見た目（テーマ色は系統色: docs/art-style.md） */
 export const PART_ASSETS: Record<PartId, PartAsset> = Object.fromEntries(

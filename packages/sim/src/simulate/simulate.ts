@@ -54,6 +54,7 @@ export function simulate(input: SimInput): SimResult {
   const limits = computeActivationLimits(board, rules);
   const used = new Array<number>(board.cells.length).fill(0);
   const partState = new Array<number>(board.cells.length).fill(0);
+  const partStored = new Array<Score>(board.cells.length).fill(SCORE_ZERO);
   const activatedCells = new Set<number>();
 
   let signals: Signal[] = [];
@@ -128,10 +129,13 @@ export function simulate(input: SimInput): SimResult {
       events.push({ tick, type: 'reset', x: rx, y: ry });
     }
     if (reaction.nextState !== undefined) partState[index] = reaction.nextState;
+    if (reaction.store !== undefined) partStored[index] = reaction.store ?? SCORE_ZERO;
     for (const emission of reaction.emits ?? []) {
+      // 転送装置: 行き先のマスから発射する
+      const [ex, ey] = emission.from ?? [x, y];
       const delay = emission.delay ?? 0;
-      if (delay > 0) pending.push({ tick: tick + delay, x, y, emission });
-      else out.push(emit(tick, x, y, emission));
+      if (delay > 0) pending.push({ tick: tick + delay, x: ex, y: ey, emission });
+      else out.push(emit(tick, ex, ey, emission));
     }
   };
 
@@ -233,6 +237,7 @@ export function simulate(input: SimInput): SimResult {
         rng,
         chainCount,
         state: partState[index] ?? 0,
+        stored: partStored[index] ?? SCORE_ZERO,
       });
       markActivated(index);
       chainCount++;
@@ -258,6 +263,7 @@ export function simulate(input: SimInput): SimResult {
         rng,
         chainCount,
         state: partState[buffer.index] ?? 0,
+        stored: partStored[buffer.index] ?? SCORE_ZERO,
       });
       applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals);
     }
