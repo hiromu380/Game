@@ -5,6 +5,7 @@
  * 画面幅が狭いとき（スマホ縦画面）は、盤面の下にショップ・手持ちをタブで切り替えて出す。
  */
 import {
+  BALANCE,
   createRunWithConfig,
   getCurrentEconomy,
   drawFloorPermit,
@@ -37,6 +38,7 @@ import {
 import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
+import { relicRarity } from './ui/RarityTag';
 import { LAYOUT } from './config/layout';
 import { EDITION } from './config/edition';
 import {
@@ -308,6 +310,24 @@ export function App({ start, onTitle }: Props) {
     previousShift.current = run.shiftIndex;
     audio.play(bossActive ? 'bossAlert' : 'shiftStart');
   }, [run.shiftIndex, bossActive]);
+
+  // ショップ・レリックの候補にレジェンドが出たら鳴らす（品揃え・候補が変わったときに1回）
+  const legendaryKey = [
+    ...run.shop.flatMap((o, i) =>
+      o.partId && !o.sold && BALANCE.parts[o.partId].rarity === 'legendary'
+        ? [`s${i}${o.partId}`]
+        : [],
+    ),
+    ...(run.relicChoice?.choices ?? []).flatMap((id) =>
+      relicRarity(run, id) === 'legendary' ? [`r${id}`] : [],
+    ),
+  ].join(',');
+  const shopSeq = `${run.shiftIndex}:${run.rerollCount ?? 0}:${run.relicChoice?.day ?? ''}`;
+  useEffect(() => {
+    if (legendaryKey) audio.play('legendary');
+    // 品揃え・候補が出し直されたときだけ見る（買って sold になっても鳴らし直さない）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopSeq]);
 
   // 新しい解放があれば結果画面で鳴らす
   const showingUnlocks = !playing && run.phase !== 'building' && state.unlocks.length > 0;

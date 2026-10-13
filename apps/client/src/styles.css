@@ -1958,11 +1958,39 @@ a.button.button--primary {
   border-radius: 6px;
   background: var(--secondary);
 }
-.catalog__rarity--uncommon {
-  color: var(--met);
+.rarity-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  color: var(--muted);
+  white-space: nowrap;
+  vertical-align: middle;
 }
-.catalog__rarity--rare {
-  color: var(--accent);
+.rarity-tag--uncommon {
+  color: var(--rarity-uncommon);
+}
+.rarity-tag--rare {
+  color: var(--rarity-rare);
+}
+.rarity-tag--legendary {
+  color: var(--bg);
+  background: var(--rarity-legendary);
+  border-color: var(--rarity-legendary);
+}
+/* 札の枠（コモンは既定の枠のまま。レジェンドは枠に光を足す） */
+.rarity-frame.rarity-frame--uncommon {
+  border-color: var(--rarity-uncommon);
+}
+.rarity-frame.rarity-frame--rare {
+  border-color: var(--rarity-rare);
+}
+.rarity-frame.rarity-frame--legendary {
+  border-color: var(--rarity-legendary);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--rarity-legendary) 55%, transparent);
 }
 .catalog__meta {
   text-align: right;

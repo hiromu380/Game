@@ -12,10 +12,10 @@ export const PARTS: Balance['parts'] = {
   press: { price: 5, maxActivations: 1, rarity: 'uncommon' },
   splitter: { price: 2, maxActivations: 1, rarity: 'common' },
   barrel: { price: 5, maxActivations: 1, rarity: 'uncommon' },
-  rebooter: { price: 3, maxActivations: 1, rarity: 'rare' },
+  rebooter: { price: 5, maxActivations: 1, rarity: 'legendary' },
   // フェーズ2で追加
   merger: { price: 2, maxActivations: 2, rarity: 'uncommon' },
-  chainMeter: { price: 7, maxActivations: 1, rarity: 'rare' },
+  chainMeter: { price: 8, maxActivations: 2, rarity: 'legendary' },
   spreader: { price: 2, maxActivations: 1, rarity: 'common' },
   copier: { price: 4, maxActivations: 1, rarity: 'uncommon' },
   reflector: { price: 1, maxActivations: 2, rarity: 'common' },
@@ -62,7 +62,12 @@ export const PART_PARAMS: Balance['partParams'] = {
   cashierPerDigit: 1,
 };
 
-export const RARITY_WEIGHTS: Balance['rarityWeights'] = { common: 10, uncommon: 5, rare: 2 };
+export const RARITY_WEIGHTS: Balance['rarityWeights'] = {
+  common: 20,
+  uncommon: 10,
+  rare: 4,
+  legendary: 1,
+};
 
 /**
  * 金色パーツ: 同じパーツを mergeCount 個、盤面で縦横につなげて置くと、合体できる（選んだマスが1つの金色パーツになる）。

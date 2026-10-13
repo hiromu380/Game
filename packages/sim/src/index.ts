@@ -17,6 +17,7 @@ export {
   type RelicParams,
   type AscensionEffect,
   type ShiftSpec,
+  RARITIES,
   RELIC_IDS,
 } from './balance';
 
@@ -88,6 +89,7 @@ export {
   applyRelicEconomy,
   applyRelicRules,
   drawRelicChoice,
+  relicWeights,
   hasRelic,
   isRelicPending,
 } from './run/relics';

@@ -35,8 +35,9 @@ describe('ボット', () => {
   });
 
   it('貪欲ボットは最初のシフトをクリアでき、同じシードなら同じ結果になる', () => {
-    const a = playRun(42, 'greedy', OPTIONS);
-    const b = playRun(42, 'greedy', OPTIONS);
+    // SIM_VERSION 11（レア度4段）でシード 42 → 43 に変更（ショップの重みが変わり、品揃えが変わったため）
+    const a = playRun(43, 'greedy', OPTIONS);
+    const b = playRun(43, 'greedy', OPTIONS);
     expect(a.shifts[0]?.cleared).toBe(true);
     expect(b.shifts).toEqual(a.shifts);
   });
@@ -56,14 +57,15 @@ describe('ボット', () => {
     expect(search.shiftsCleared).toBeGreaterThanOrEqual(greedy.shiftsCleared);
   });
 
-  it('現在のバランスで、貪欲ボットがシード4の9シフトを最後までクリアできる（通しプレイの回帰確認）', () => {
+  it('現在のバランスで、貪欲ボットがシード10の9シフトを最後までクリアできる（通しプレイの回帰確認）', () => {
     // バランス調整でこのテストが落ちたら、クリアできるシードを選び直すか、難しくなりすぎていないか確認する
     // フェーズ3c（SIM_VERSION 2）でシード1 → 3 に変更（ポンコツロボ・回転台の調整で購入の判断や連鎖の結果が変わったため）
     // SIM_VERSION 3（日ごとの片付け）でシード3 → 6 に変更（難易度の調整は後で行う）
     // SIM_VERSION 5（床タイル・日ごとのステージ・ボーナス床）でシード6 → 24 に変更（床で購入や配置の判断が変わり、
     // ボットが床を見てスイッチを置くようにしたため）
     // SIM_VERSION 9（パーツ8種の追加）でシード24 → 4 に変更（全解放のショップに新パーツが並び、品揃えが変わったため）
-    const log = playRun(4, 'greedy', {
+    // SIM_VERSION 11（レア度4段）でシード4 → 10 に変更（ショップの重みが変わり、品揃えが変わったため）
+    const log = playRun(10, 'greedy', {
       unlock: 'all',
       samples: 3,
       evalMode: 'mean',

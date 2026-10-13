@@ -4,8 +4,25 @@
 import type { FloorTileId } from '../floor/types';
 import type { PartId } from '../types';
 
-/** レア度。ショップの出現重みの既定値を決める */
-export type Rarity = 'common' | 'uncommon' | 'rare';
+/** レア度。ショップの出現重み・レリックの候補の重みを決める（低い順） */
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'legendary';
+
+/** レア度（低い順。表示の並び順にも使う） */
+export const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
+
+/**
+ * レリックのバランス値
+ *
+ * 候補の出やすさはレア度で決め、夜が進むほど上位が出やすい（weightsByNight[i] は i 日目の夜。足りない日は最後の値）。
+ * weights はレア度を導入する前のラン（RunConfig に写した値）だけが持つ、レリックごとの出やすさ
+ */
+export interface RelicBalance {
+  choices: number;
+  rarity?: Record<RelicId, Rarity>;
+  weightsByNight?: Record<Rarity, number>[];
+  weights?: Record<RelicId, number>;
+  params: RelicParams;
+}
 
 /** パーツ1種ごとのバランス値 */
 export interface PartBalance {
@@ -371,8 +388,8 @@ export interface Balance {
     boardExpansions: MetaCondition[];
   };
 
-  /** レリック（choices: 候補の数・weights: 出やすさ） */
-  relics: { choices: number; weights: Record<RelicId, number>; params: RelicParams };
+  /** レリック（choices: 候補の数・rarity: レア度・weightsByNight: 何日目の夜か → レア度ごとの出やすさ） */
+  relics: RelicBalance;
   /** 残業レベル（段階式の高難度）。levels[i] は Lv(i+1) で増える条件。Lv L は 1〜L の条件をすべて重ねる */
   ascension: { levels: AscensionEffect[] };
 

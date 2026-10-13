@@ -27,6 +27,10 @@ export const UI_COLORS = {
   /** ノルマ未達・悪い結果 */
   missed: '#ff5252',
   selected: '#ffeb3b',
+  /** レア度（コモンは本文の色。アンコモン → レア → レジェンドの順に目立たせる） */
+  'rarity-uncommon': '#4fc3f7',
+  'rarity-rare': '#ce93d8',
+  'rarity-legendary': '#ffb74d',
 } as const;
 
 /** 素材の線（アウトライン）と、共通の白・黒 */

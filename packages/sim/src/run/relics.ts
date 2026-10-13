@@ -19,9 +19,7 @@ export function drawRelicChoice(state: RunState, day: number): RelicId[] {
   const config = state.config.relics;
   if (!config) return [];
   const owned = new Set(state.relics ?? []);
-  const pool = (Object.keys(config.weights) as RelicId[])
-    .filter((id) => !owned.has(id) && config.weights[id] > 0)
-    .map((id) => ({ id, weight: config.weights[id] }));
+  const pool = relicWeights(config, day).filter((p) => !owned.has(p.id) && p.weight > 0);
   const rng = createPrng(relicSeed(state.seed, day));
   const choices: RelicId[] = [];
   while (choices.length < config.choices && pool.length > 0) {
@@ -32,6 +30,21 @@ export function drawRelicChoice(state: RunState, day: number): RelicId[] {
     pool.splice(index, 1);
   }
   return choices;
+}
+
+/** day 日目の夜の、レリックごとの出やすさ（レア度を導入する前のランはレリックごとの重み） */
+export function relicWeights(
+  config: NonNullable<RunState['config']['relics']>,
+  day: number,
+): { id: RelicId; weight: number }[] {
+  const table = config.weightsByNight;
+  if (config.rarity && table && table.length > 0) {
+    const weights = table[Math.min(day, table.length - 1)]!;
+    const rarity = config.rarity;
+    return (Object.keys(rarity) as RelicId[]).map((id) => ({ id, weight: weights[rarity[id]] }));
+  }
+  const legacy = config.weights ?? ({} as Record<RelicId, number>);
+  return (Object.keys(legacy) as RelicId[]).map((id) => ({ id, weight: legacy[id] }));
 }
 
 /** レリックの候補が出ていて、まだ選んでいないか */

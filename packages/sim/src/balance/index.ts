@@ -35,7 +35,7 @@ import { BOARD, SIM, UNMEASURABLE } from './sim';
 import type { Balance } from './types';
 
 export type * from './types';
-export { RELIC_IDS } from './types';
+export { RARITIES, RELIC_IDS } from './types';
 export type { AscensionEffect } from './types';
 
 export const BALANCE: Balance = {

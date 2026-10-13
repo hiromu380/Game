@@ -5,6 +5,7 @@
 import type { RelicId, RelicParams, RunState } from '@chain-factory/sim';
 import { RELIC_ICONS } from '../assets/manifest';
 import { useI18n, type TranslateFn } from '../i18n';
+import { RarityTag, relicRarity } from './RarityTag';
 
 /** レリックの説明文（ランが持つ効果量で） */
 export function describeRelic(t: TranslateFn, run: RunState, id: RelicId): string {
@@ -35,13 +36,15 @@ export function RelicDialog({ run, onPick }: Props) {
           {choice.choices.map((id, index) => (
             <button
               key={id}
-              className="day-event__choice relic-dialog__choice"
+              className={`day-event__choice relic-dialog__choice rarity-frame rarity-frame--${relicRarity(run, id)}`}
               onClick={() => onPick(index)}
               autoFocus={index === 0}
             >
               <img className="day-event__icon" src={RELIC_ICONS[id]} alt="" />
               <span className="day-event__text">
-                <strong>{t(`relic.${id}.name`)}</strong>
+                <strong>
+                  {t(`relic.${id}.name`)} <RarityTag rarity={relicRarity(run, id)} />
+                </strong>
                 <span>{describeRelic(t, run, id)}</span>
               </span>
             </button>

@@ -5,6 +5,7 @@
  * タイトル画面を軽く保つため、Root から遅延読み込みする。
  */
 import {
+  RARITIES,
   BALANCE,
   createInitialAchievements,
   createInitialMeta,
@@ -25,10 +26,9 @@ import { AchievementList } from '../AchievementList';
 import { describeCondition, MetaPanel } from '../MetaPanel';
 import { describePart } from '../partText';
 import { PartIcon } from '../PartIcon';
+import { RarityTag, relicRarity } from '../RarityTag';
 
 type Tab = 'parts' | 'relics' | 'logs' | 'goals' | 'achievements';
-
-const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
 
 export default function CollectionScreen({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
@@ -148,7 +148,8 @@ function RelicList({ found }: { found: RelicId[] }) {
                 </span>
               )}
               <div className="catalog__text">
-                <strong>{known ? t(`relic.${id}.name`) : t('collection.logLocked')}</strong>
+                <strong>{known ? t(`relic.${id}.name`) : t('collection.logLocked')}</strong>{' '}
+                <RarityTag rarity={relicRarity(null, id)} />
                 <div className="catalog__desc">
                   {known
                     ? describeRelicWith(t, BALANCE.relics.params, id)
@@ -175,7 +176,9 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
     const ra = BALANCE.parts[a].rarity;
     const rb = BALANCE.parts[b].rarity;
     if (ra === null || rb === null) return ra === null ? -1 : 1;
-    return RARITY_ORDER[ra] - RARITY_ORDER[rb] || BALANCE.parts[a].price - BALANCE.parts[b].price;
+    return (
+      RARITIES.indexOf(ra) - RARITIES.indexOf(rb) || BALANCE.parts[a].price - BALANCE.parts[b].price
+    );
   });
 
   return (
@@ -191,9 +194,11 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
               <PartIcon partId={partId} size={52} />
               <div className="catalog__text">
                 <strong>{t(`part.${partId}.name`)}</strong>{' '}
-                <span className={`catalog__rarity catalog__rarity--${rarity ?? 'common'}`}>
-                  {rarity ? t(`rarity.${rarity}`) : t('collection.starter')}
-                </span>
+                {rarity ? (
+                  <RarityTag rarity={rarity} />
+                ) : (
+                  <span className="catalog__rarity">{t('collection.starter')}</span>
+                )}
                 {locked && <span className="catalog__rarity">{t('catalog.locked')}</span>}
                 <div className="catalog__desc">{describePart(t, partId, DEFAULT_RULES)}</div>
                 {!locked && <div className="catalog__flavor">{t(`part.${partId}.flavor`)}</div>}

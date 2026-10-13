@@ -1,13 +1,20 @@
 /**
  * ショップ: その シフトに並んだ商品を購入する
  */
-import type { EconomyConfig, PartId, RuleSet, ShopOffer } from '@chain-factory/sim';
+import {
+  BALANCE,
+  type EconomyConfig,
+  type PartId,
+  type RuleSet,
+  type ShopOffer,
+} from '@chain-factory/sim';
 import { useState } from 'react';
 import type { PriceTrend } from '../online/market';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
 import { PartCatalog } from './PartCatalog';
 import { PartIcon } from './PartIcon';
+import { RarityTag } from './RarityTag';
 import { UiIcon } from './UiIcon';
 
 interface Props {
@@ -65,7 +72,11 @@ export function ShopPanel(props: Props) {
           return (
             <li key={index}>
               <button
-                className={`item-button ${index === guidedIndex ? 'is-guided' : ''}`}
+                className={`item-button ${index === guidedIndex ? 'is-guided' : ''} ${
+                  offer.partId
+                    ? `rarity-frame rarity-frame--${BALANCE.parts[offer.partId].rarity ?? 'common'}`
+                    : ''
+                }`}
                 disabled={disabled || offer.sold || !affordable}
                 onClick={() => onBuy(index)}
               >
@@ -83,7 +94,10 @@ export function ShopPanel(props: Props) {
                   <>
                     <PartIcon partId={offer.partId} />
                     <span className="item-button__text">
-                      <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
+                      <span className="item-button__name">
+                        {t(`part.${offer.partId}.name`)}{' '}
+                        <RarityTag rarity={BALANCE.parts[offer.partId].rarity ?? 'common'} />
+                      </span>
                       <span className="item-button__desc">
                         {describePart(t, offer.partId, rules)}
                       </span>

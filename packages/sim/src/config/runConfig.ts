@@ -218,7 +218,11 @@ export function buildRunConfig({
     overtime: { ...balance.overtime },
     relics: {
       choices: balance.relics.choices,
-      weights: { ...balance.relics.weights },
+      ...(balance.relics.rarity ? { rarity: { ...balance.relics.rarity } } : {}),
+      ...(balance.relics.weightsByNight
+        ? { weightsByNight: balance.relics.weightsByNight.map((w) => ({ ...w })) }
+        : {}),
+      ...(balance.relics.weights ? { weights: { ...balance.relics.weights } } : {}),
       params: { ...balance.relics.params },
     },
     stages,

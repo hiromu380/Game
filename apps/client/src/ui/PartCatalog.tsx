@@ -4,6 +4,7 @@
  * まだ解放していないパーツは、解放の条件と一緒に薄く表示する（体験版では「製品版で使える」）。
  */
 import {
+  RARITIES,
   BALANCE,
   PART_IDS,
   type EconomyConfig,
@@ -16,6 +17,7 @@ import { useI18n } from '../i18n';
 import { describeCondition } from './MetaPanel';
 import { describePart } from './partText';
 import { PartIcon } from './PartIcon';
+import { RarityTag } from './RarityTag';
 
 interface Props {
   economy: EconomyConfig;
@@ -23,14 +25,12 @@ interface Props {
   onClose: () => void;
 }
 
-const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
-
 export function PartCatalog({ economy, rules, onClose }: Props) {
   const { t, formatScore } = useI18n();
   const available = [...economy.shopPool].sort(
     (a, b) =>
-      RARITY_ORDER[BALANCE.parts[a.partId].rarity ?? 'common'] -
-        RARITY_ORDER[BALANCE.parts[b.partId].rarity ?? 'common'] ||
+      RARITIES.indexOf(BALANCE.parts[a.partId].rarity ?? 'common') -
+        RARITIES.indexOf(BALANCE.parts[b.partId].rarity ?? 'common') ||
       economy.prices[a.partId] - economy.prices[b.partId],
   );
   const inPool = new Set<PartId>(available.map((p) => p.partId));
@@ -50,10 +50,7 @@ export function PartCatalog({ economy, rules, onClose }: Props) {
               <li key={partId} className="catalog__item">
                 <PartIcon partId={partId} size={52} />
                 <div className="catalog__text">
-                  <strong>{t(`part.${partId}.name`)}</strong>{' '}
-                  <span className={`catalog__rarity catalog__rarity--${rarity}`}>
-                    {t(`rarity.${rarity}`)}
-                  </span>
+                  <strong>{t(`part.${partId}.name`)}</strong> <RarityTag rarity={rarity} />
                   <div className="catalog__desc">{describePart(t, partId, rules)}</div>
                   <div className="catalog__flavor">{t(`part.${partId}.flavor`)}</div>
                 </div>

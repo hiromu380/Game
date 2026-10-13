@@ -142,6 +142,18 @@ function newParts(): RunState {
   };
 }
 
+/** ショップにレア度の違うパーツが並んだ（コモン〜レジェンドの札と枠） */
+const rarityShop = (): RunState => ({
+  ...createRun(5),
+  budget: 20,
+  shop: [
+    { partId: 'gear', price: 4, sold: false },
+    { partId: 'press', price: 5, sold: false },
+    { partId: 'capacitor', price: 5, sold: false },
+    { partId: 'chainMeter', price: 8, sold: false },
+  ],
+});
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -230,6 +242,15 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'poor', run: poor },
+  {
+    name: 'shop-rarity',
+    run: rarityShop,
+    act: async (page) => {
+      const tab = page.locator('.tabs__tab').nth(1);
+      if (await tab.isVisible()) await tab.click();
+      await page.locator('[data-panel="shop"] .item-button').last().scrollIntoViewIfNeeded();
+    },
+  },
   { name: 'golden', run: golden },
   {
     name: 'golden-select',

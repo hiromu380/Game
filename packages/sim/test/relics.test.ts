@@ -17,6 +17,7 @@ import {
   isRelicPending,
   placePart,
   RELIC_IDS,
+  relicWeights,
   replayOps,
   simulate,
   type RelicId,
@@ -96,6 +97,42 @@ describe('レリックの候補', () => {
     const left = drawRelicChoice(owned, 0);
     expect(left.every((id) => !owned.relics!.includes(id))).toBe(true);
     expect(left).toHaveLength(2);
+  });
+
+  it('出やすさはレア度と夜で決まる: 1日目の夜にレジェンドは出ず、夜が進むほど上位が出やすい', () => {
+    const run = runToFirstNight(5);
+    const relics = run.config.relics!;
+    const share = (day: number, rarity: string) => {
+      const w = relicWeights(relics, day);
+      const total = w.reduce((n, p) => n + p.weight, 0);
+      return (
+        w.filter((p) => relics.rarity![p.id] === rarity).reduce((n, p) => n + p.weight, 0) / total
+      );
+    };
+    expect(share(0, 'legendary')).toBe(0);
+    expect(share(1, 'legendary')).toBeGreaterThan(0);
+    expect(share(5, 'rare')).toBeGreaterThan(share(0, 'rare'));
+    expect(share(5, 'common')).toBeLessThan(share(0, 'common'));
+    // 延長戦の夜（表より先の日）は最後の値を使う
+    expect(relicWeights(relics, 9)).toEqual(relicWeights(relics, 2));
+    for (let seed = 1; seed <= 30; seed++) {
+      const r = runToFirstNight(seed);
+      expect(drawRelicChoice(r, 0).every((id) => relics.rarity![id] !== 'legendary')).toBe(true);
+    }
+  });
+
+  it('レア度を導入する前のラン（RunConfig にレリックごとの重みだけがある）は、その重みで出す', () => {
+    const run = runToFirstNight(5);
+    const only = RELIC_IDS[0]!;
+    const weights = Object.fromEntries(RELIC_IDS.map((id) => [id, id === only ? 1 : 0])) as Record<
+      RelicId,
+      number
+    >;
+    const legacy: RunState = {
+      ...run,
+      config: { ...run.config, relics: { choices: 3, weights, params: run.config.relics!.params } },
+    };
+    expect(drawRelicChoice(legacy, 0)).toEqual([only]);
   });
 
   it('操作ログで選択を再生できる（サーバーの検証）', () => {

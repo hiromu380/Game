@@ -60,6 +60,8 @@ export type SoundKey =
   | 'teleport'
   | 'charge'
   | 'relicPick'
+  /** ショップ・レリックの候補にレジェンドが出た */
+  | 'legendary'
   | 'merge'
   | 'permitTick'
   | 'permitLand'
@@ -320,6 +322,20 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 784, at: 0, duration: 0.08 },
         { freq: 988, at: 0.08, duration: 0.08 },
         { freq: 1319, at: 0.16, duration: 0.28, slideTo: 1568 },
+      ],
+    },
+  },
+  /** レジェンドが出た（低い音から駆け上がって、高い音を長く伸ばす） */
+  legendary: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.16,
+      notes: [
+        { freq: 523, at: 0, duration: 0.07 },
+        { freq: 659, at: 0.07, duration: 0.07 },
+        { freq: 784, at: 0.14, duration: 0.07 },
+        { freq: 1047, at: 0.21, duration: 0.5, slideTo: 1175 },
       ],
     },
   },
