@@ -15,6 +15,9 @@ describe('見本の工場', () => {
     expect(r.stats.shipCount).toBeGreaterThanOrEqual(3);
     expect(r.stats.chainCount).toBeGreaterThanOrEqual(20);
     expect(r.stats.halted).toBeNull();
+    // 一直線ではない見せ場: 合流炉で掛け合わせ、同時出荷ボーナスが乗る
+    expect(r.events.some((e) => e.type === 'absorb')).toBe(true);
+    expect(r.events.some((e) => e.type === 'ship' && e.sync > 1)).toBe(true);
   });
 
   it('チュートリアルの見本は、カットインが出る大出荷になる', () => {
