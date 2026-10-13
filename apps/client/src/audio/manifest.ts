@@ -5,6 +5,9 @@
  * （src にファイルパス）へ書き換えるだけでよい。
  * 現在は仮SEとして、Web Audio API で合成する「レシピ」を使っている（外部素材は使わない）。
  */
+import type { BgmKey } from './bgm';
+
+export type { BgmKey } from './bgm';
 
 /** 合成する音の1つの音符 */
 export interface SynthNote {
@@ -607,11 +610,11 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   },
 };
 
-/** BGM のキー（仕組みのみ。曲はまだ入れていない） */
-export type BgmKey = 'building' | 'result';
-
-/** BGM の定義。曲を入れるときは { kind: 'file', src, volume } を設定する */
+/**
+ * BGM を音声ファイルに差し替えるときの定義（null のあいだは audio/bgm.ts のレシピから合成して鳴らす）
+ */
 export const BGM_ASSETS: Record<BgmKey, SoundAsset | null> = {
   building: null,
+  night: null,
   result: null,
 };

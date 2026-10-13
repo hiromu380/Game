@@ -287,15 +287,16 @@ export function App({ start, onTitle }: Props) {
     audio.play(next === 'failed' ? 'runFailed' : next === 'cleared' ? 'runCleared' : 'quotaMet');
   }, [playback]);
 
-  // BGM（曲はまだないので、今は何も流れない。曲を入れれば組み立て中・結果画面で切り替わる）
-  const bgm = run.phase === 'building' ? 'building' : 'result';
-  useEffect(() => {
-    audio.playBgm(bgm);
-  }, [bgm]);
-
   // 操作卓の奥で鳴る工場音。朝・昼・夜と、夜のトラブル発生中で音色を変える。
   const { period: ambiencePeriod } = getDayAndPeriod(run);
   const bossActive = findBossToShow(run)?.isNow ?? false;
+
+  // BGM（audio/bgm.ts で合成）: 組み立て中・夜シフト（ボス）・結果画面で切り替える。ゲーム画面を離れたら止める
+  const bgm = run.phase !== 'building' ? 'result' : bossActive ? 'night' : 'building';
+  useEffect(() => {
+    audio.playBgm(bgm);
+  }, [bgm]);
+  useEffect(() => () => audio.playBgm(null), []);
   useEffect(() => {
     audio.playAmbience(ambiencePeriod, bossActive);
     return () => audio.playAmbience(null, false);
