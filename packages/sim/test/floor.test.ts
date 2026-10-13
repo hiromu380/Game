@@ -63,12 +63,12 @@ describe('床タイルの効果', () => {
     expect(result.events.some((e) => e.type === 'vanish' && e.reason === 'exhausted')).toBe(true);
   });
 
-  it('合流炉は、取り込んだ値の合計に1回だけ床を適用する', () => {
-    // 分岐器で上下2本に分け、同じ長さの経路で同じ tick に合流炉へ入れる: (1 + 1) × 2 = 4
-    const rows = ['.. C> Cv ..', 'S> Y> M> D>', '.. C> C^ ..'];
-    expect(run(rows).scoreText).toBe('2');
+  it('合流炉は、掛け合わせた値に1回だけ床を適用する', () => {
+    // 分岐器で上下2本に分け、同じ長さの経路で同じ tick に合流炉へ入れる: (2 × 2) × 2 = 8
+    const rows = ['.. G> Cv ..', 'S> Y> M> D>', '.. G> C^ ..'];
+    expect(run(rows).scoreText).toBe('4');
     const result = runWithFloor(rows, ['. . . .', '. . 2 .', '. . . .']);
-    expect(result.scoreText).toBe('4');
+    expect(result.scoreText).toBe('8');
     expect(result.events.filter((e) => e.type === 'floor')).toHaveLength(1);
     expect(result.events.some((e) => e.type === 'absorb')).toBe(true);
   });

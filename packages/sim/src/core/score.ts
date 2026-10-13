@@ -30,6 +30,11 @@ export function scoreMul(a: Score, factor: number): Score {
   return (a * BigInt(factor)) as Score;
 }
 
+/** スコア × スコア（合流炉の掛け算） */
+export function scoreMulScore(a: Score, b: Score): Score {
+  return (a * b) as Score;
+}
+
 /** スコア ÷ 整数（切り捨て） */
 export function scoreDiv(a: Score, divisor: number): Score {
   return (a / BigInt(divisor)) as Score;

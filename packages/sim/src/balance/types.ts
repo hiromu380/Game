@@ -270,6 +270,13 @@ export interface Balance {
      * tick 上限より先に信号が爆発的に増えるため、これで打ち切って停止を保証する
      */
     maxLiveSignals: number;
+    /** 合流炉が同じ tick の信号をどうまとめるか（product: 掛け算 / sum: 足し算） */
+    mergeMode: 'product' | 'sum';
+    /**
+     * 同時出荷ボーナス: 同じ tick に出荷した出荷口の数を、その tick の出荷量に掛ける。
+     * この値で倍率を抑える（1 ならボーナスなし）
+     */
+    syncShipMax: number;
   };
 
   /**

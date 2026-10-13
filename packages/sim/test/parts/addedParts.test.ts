@@ -28,7 +28,8 @@ describe('十字分岐器', () => {
   it('前・左・右・後ろの4方向へ、値を割って送る（切り捨て）', () => {
     // 値 4（ギア2つ）→ 十字分岐器（右向き）→ 前・上・下の出荷口へ 2 ずつ。後ろはギアへ戻る（発動済みで消える）
     const { scoreText } = run(['.. .. .. D^ ..', 'S> G> G> H> D>', '.. .. .. Dv ..']);
-    expect(scoreText).toBe(String((4 / P.crossSplitterDivisor) * 3));
+    // 3口の同時出荷で ×3
+    expect(scoreText).toBe(String((4 / P.crossSplitterDivisor) * 3 * 3));
   });
 
   it('値 1 は 0 になる（切り捨て）', () => {

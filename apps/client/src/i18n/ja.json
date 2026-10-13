@@ -87,7 +87,7 @@
   "part.rebooter.name": "再起動装置",
   "part.rebooter.desc": "1回だけ、隣のパーツの発動回数を戻す",
   "part.dock.name": "出荷口",
-  "part.dock.desc": "届いた値を出荷する",
+  "part.dock.desc": "届いた値を出荷する。同時に出荷した口の数だけ倍",
   "error.cellBlocked": "そこは工事中",
   "error.cannotSell": "これは売れない",
   "error.rerollDisabled": "今はリロールできない",
@@ -114,7 +114,7 @@
   "boss.partShortage.name": "部品不足",
   "boss.partShortage.desc": "ショップの品数 {delta}、リロール不可",
   "part.merger.name": "合流炉",
-  "part.merger.desc": "同じ tick に来た信号を1本に合算",
+  "part.merger.desc": "同じ tick に来た信号の値を掛け合わせて1本に",
   "part.chainMeter.name": "連鎖メーター",
   "part.chainMeter.desc": "値 ×（連鎖数÷{chainMeterStep}＋1）",
   "part.spreader.name": "散布機",
@@ -485,7 +485,7 @@
   "part.junkbot.flavor": "ボルトは「同期だ」と言う。本人は何も言わない。",
   "part.rebooter.flavor": "直すわけではない。もう一度だけ、動かす。",
   "part.dock.flavor": "すべての連鎖の行き着く先。",
-  "part.merger.flavor": "バラバラの仕事を、ひとつの数字にする。",
+  "part.merger.flavor": "足すな。掛けろ。",
   "part.chainMeter.flavor": "連鎖が続くほど、針が振れる。",
   "part.spreader.flavor": "前と左右へ。後ろは振り返らない。",
   "part.copier.flavor": "コピーのほうが評価が高い日もある。",
@@ -826,5 +826,6 @@
   "meta.newAscension": "残業Lv{level} を選べるようになった",
   "breakdown.title": "最大の出荷の内訳",
   "breakdown.more": "…{count}段",
+  "breakdown.sync": "同時出荷 ×{count}",
   "breakdown.floor": "床"
 }

@@ -53,6 +53,7 @@ function hugeEvents(ticks: number): SimEvent[] {
     value: scoreOf(12345),
     total: scoreOf(12345),
     signalId: ticks - 1,
+    sync: 1,
   });
   return events;
 }
@@ -167,7 +168,16 @@ describe('連鎖の演出の流れ', () => {
     // 毎 tick 桁が上がる出荷（光を出したい瞬間が続く）
     for (let k = 0; k < 20; k++) {
       const v = scoreOf(10 ** (3 + k));
-      events.push({ tick: k, type: 'ship', x: 0, y: 0, value: v, total: v, signalId: null });
+      events.push({
+        tick: k,
+        type: 'ship',
+        x: 0,
+        y: 0,
+        value: v,
+        total: v,
+        signalId: null,
+        sync: 1,
+      });
     }
     const times = flashTimes(buildChoreography(events, { ...strong, quota: 5000 }).cues);
     expect(times.length).toBeGreaterThan(0);

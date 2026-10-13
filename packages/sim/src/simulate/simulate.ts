@@ -21,6 +21,7 @@ import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
 import { SCORE_ZERO, scoreAdd, scoreMax, scoreMul, scoreOf, type Score } from '../core/score';
+import { combineMerged } from './parts/merger';
 import { getFloorCell, isBlockedCell } from '../floor/layer';
 import { FLOOR_BEHAVIORS } from '../floor/tiles';
 import type { HaltReason, Part, SimEvent, SimInput, SimResult, Signal } from '../types';
@@ -70,6 +71,8 @@ export function simulate(input: SimInput): SimResult {
   let chainCount = 0;
   let shipCount = 0;
   let floorApplied = 0;
+  /** この tick の出荷（tick の終わりに同時出荷ボーナスを掛けて確定する） */
+  let tickShips: { x: number; y: number; value: Score; cause: number | null }[] = [];
 
   const isBlocked = (index: number): boolean => isBlockedCell(floor, index);
 
@@ -126,19 +129,8 @@ export function simulate(input: SimInput): SimResult {
     const reaction = getPart(board, x, y)?.golden
       ? goldenReaction(raw, rules.goldenMultiplier ?? 1)
       : raw;
-    if (reaction.ship !== undefined) {
-      score = scoreAdd(score, reaction.ship);
-      shipCount++;
-      events.push({
-        tick,
-        type: 'ship',
-        x,
-        y,
-        value: reaction.ship,
-        total: score,
-        signalId: cause,
-      });
-    }
+    // 出荷は tick の終わりにまとめて確定する（同時出荷ボーナスのため）
+    if (reaction.ship !== undefined) tickShips.push({ x, y, value: reaction.ship, cause });
     if (reaction.income !== undefined) {
       const amount = Math.min(reaction.income, rules.maxIncomePerSim - income);
       if (amount > 0) {
@@ -273,11 +265,11 @@ export function simulate(input: SimInput): SimResult {
 
     // tick の終わり: 合流するパーツをマス番号の昇順に処理する
     for (const buffer of [...buffers.values()].sort((a, b) => a.index - b.index)) {
-      // 床の効果は、取り込んだ値の合計に1回だけ適用する（効果のある床なら、合計した1本として渡す）
+      // 床の効果は、取り込んだ値をまとめたものに1回だけ適用する（効果のある床なら、まとめた1本として渡す）
       const floorCell = getFloorCell(floor, buffer.index);
       const values =
         floorCell && FLOOR_BEHAVIORS[floorCell.tile].apply
-          ? [applyFloor(tick, buffer.x, buffer.y, buffer.values.reduce(scoreAdd, SCORE_ZERO))]
+          ? [applyFloor(tick, buffer.x, buffer.y, combineMerged(buffer.values, rules))]
           : buffer.values;
       const reaction = PART_BEHAVIORS[buffer.part.id].collect!({
         part: buffer.part,
@@ -292,6 +284,28 @@ export function simulate(input: SimInput): SimResult {
         stored: partStored[buffer.index] ?? SCORE_ZERO,
       });
       applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals, buffer.firstSignal);
+    }
+
+    // 出荷の確定: 同じ tick に出荷した出荷口の数（上限つき）を、その tick の出荷すべてに掛ける
+    if (tickShips.length > 0) {
+      const docks = new Set(tickShips.map((t) => cellIndex(board, t.x, t.y))).size;
+      const sync = Math.max(1, Math.min(docks, rules.syncShipMax ?? 1));
+      for (const t of tickShips) {
+        const value = scoreMul(t.value, sync);
+        score = scoreAdd(score, value);
+        shipCount++;
+        events.push({
+          tick,
+          type: 'ship',
+          x: t.x,
+          y: t.y,
+          value,
+          total: score,
+          signalId: t.cause,
+          sync,
+        });
+      }
+      tickShips = [];
     }
 
     // 遅れて発射する予定の信号のうち、この tick の分を発射する（登録順）

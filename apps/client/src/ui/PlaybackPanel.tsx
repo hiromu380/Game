@@ -129,7 +129,7 @@ const BREAKDOWN_MAX_CHIPS = 7;
 function ShipBreakdownLine({ result }: { result: SimResult }) {
   const { t, formatCompact } = useI18n();
   const breakdown = biggestShipBreakdown(result.events);
-  if (!breakdown || breakdown.steps.length === 0) return null;
+  if (!breakdown || (breakdown.steps.length === 0 && breakdown.sync === 1)) return null;
   const chips: { key: string; label: string; kind: 'part' | 'floor' }[] = [];
   breakdown.steps.forEach((step, i) => {
     if (step.floor) {
@@ -145,6 +145,12 @@ function ShipBreakdownLine({ result }: { result: SimResult }) {
         kind: 'part',
       });
   });
+  if (breakdown.sync > 1)
+    chips.push({
+      key: 'sync',
+      label: t('breakdown.sync', { count: breakdown.sync }),
+      kind: 'floor',
+    });
   const shown =
     chips.length > BREAKDOWN_MAX_CHIPS
       ? [

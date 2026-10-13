@@ -93,6 +93,10 @@ export interface RuleSet {
   goldenMultiplier?: number;
   /** 同時に存在できる信号の数の上限（超えたら打ち切る。メモリと計算時間を守るため） */
   maxLiveSignals: number;
+  /** 合流炉のまとめ方（導入前のランには無い = sum） */
+  mergeMode?: 'product' | 'sum';
+  /** 同時出荷ボーナスの倍率の上限（導入前のランには無い = 1 でボーナスなし） */
+  syncShipMax?: number;
 }
 
 /** simulate の入力 */
@@ -138,6 +142,8 @@ export type SimEvent =
       total: Score;
       /** 出荷口を発動させた信号（計算の内訳をたどる用） */
       signalId: number | null;
+      /** 同時出荷ボーナスの倍率（同じ tick に出荷した出荷口の数。value はこれを掛けた後）。1 なら無し */
+      sync: number;
     }
   /** (x,y) のパーツの発動回数がリセットされた */
   | { tick: number; type: 'reset'; x: number; y: number }

@@ -163,8 +163,9 @@ describe('金色パーツの効果', () => {
 
   it('分岐器: 両方の枝の値が ×3', () => {
     const rows = ['.. D^ ..', 'S> Y> ..', '.. Dv ..'];
-    expect(score(board(rows))).toBe('2');
-    expect(score(goldenAt(rows, 1, 1))).toBe(String(2 * M));
+    // 2口の同時出荷で ×2
+    expect(score(board(rows))).toBe('4');
+    expect(score(goldenAt(rows, 1, 1))).toBe(String(4 * M));
   });
 
   it('貯金箱: 信号の値は ×3、収入は増えない', () => {

@@ -10,6 +10,8 @@ export const SIM: Balance['sim'] = {
   switchSignalValue: 1,
   maxIncomePerSim: 3,
   maxLiveSignals: 1000,
+  mergeMode: 'product',
+  syncShipMax: 9,
 };
 
 /**

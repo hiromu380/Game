@@ -22,6 +22,8 @@ export interface ShipBreakdown {
   start: Score;
   /** 値が変わった段（値が変わらない通過は省く） */
   steps: BreakdownStep[];
+  /** 同時出荷ボーナスの倍率（1 なら無し。steps の出荷口の値はこれを掛ける前） */
+  sync: number;
   /** 出荷した値 */
   shipped: Score;
 }
@@ -85,22 +87,24 @@ export function biggestShipBreakdown(events: readonly SimEvent[]): ShipBreakdown
       after: child.value,
     });
   }
-  // 出荷口（床・金色・検査の効果を含めた出荷の値）
+  // 出荷口（床・金色・検査の効果を含めた出荷の値。同時出荷ボーナスは別に示す）
   const last = chain[chain.length - 1]!;
   const dock = activations.get(last.signalId);
+  const sync = biggest.sync;
+  const dockValue = ((biggest.value as bigint) / BigInt(sync)) as Score;
   if (dock) {
     const afterFloor = dock.floor ? dock.floor.after : last.value;
-    if (biggest.value !== last.value || dock.floor) {
+    if (dockValue !== last.value || dock.floor) {
       steps.push({
         partId: dock.act.partId,
         floor: dock.floor ? dock.floor.tile : null,
         before: last.value,
         afterFloor,
-        after: biggest.value,
+        after: dockValue,
       });
     }
   }
-  return { start: root.value, steps, shipped: biggest.value };
+  return { start: root.value, steps, sync, shipped: biggest.value };
 }
 
 /** 値の変わり方の短い表し方（×3・+5・÷2）。割り切れない掛け算は「→」 */

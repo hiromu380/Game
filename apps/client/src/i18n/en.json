@@ -87,7 +87,7 @@
   "part.rebooter.name": "Rebooter",
   "part.rebooter.desc": "Once: resets adjacent parts' activations",
   "part.dock.name": "Shipping Dock",
-  "part.dock.desc": "Adds the signal value to your shipment",
+  "part.dock.desc": "Ships the signal value. Docks shipping at once multiply by their count",
   "error.cellBlocked": "Under repair",
   "error.cannotSell": "Can't sell this",
   "error.rerollDisabled": "No rerolls right now",
@@ -114,7 +114,7 @@
   "boss.partShortage.name": "Part Shortage",
   "boss.partShortage.desc": "Shop items {delta}, no rerolls",
   "part.merger.name": "Merger",
-  "part.merger.desc": "Sums all signals entering in the same tick into one",
+  "part.merger.desc": "Multiplies all signals entering in the same tick into one",
   "part.chainMeter.name": "Chain Meter",
   "part.chainMeter.desc": "Multiplies by (chain so far ÷ {chainMeterStep} + 1)",
   "part.spreader.name": "Spreader",
@@ -485,7 +485,7 @@
   "part.junkbot.flavor": "Bolt calls it a coworker. It says nothing.",
   "part.rebooter.flavor": "It doesn't fix anything. It just runs it one more time.",
   "part.dock.flavor": "Where every chain ends up.",
-  "part.merger.flavor": "Turns scattered work into one number.",
+  "part.merger.flavor": "Don't add. Multiply.",
   "part.chainMeter.flavor": "The longer the chain, the harder the needle swings.",
   "part.spreader.flavor": "Forward, left, right. Never looks back.",
   "part.copier.flavor": "Some days the copy gets the better review.",
@@ -826,5 +826,6 @@
   "meta.newAscension": "OT Lv{level} unlocked",
   "breakdown.title": "Biggest shipment, step by step",
   "breakdown.more": "…{count} more",
+  "breakdown.sync": "Sync ×{count}",
   "breakdown.floor": "Floor"
 }

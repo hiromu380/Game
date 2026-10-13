@@ -34,6 +34,26 @@ describe('出荷の計算の内訳', () => {
     expect(b.shipped).toBe(4n);
   });
 
+  it('同時出荷ボーナスは出荷口の段に混ぜず、sync に分ける', () => {
+    // 右向きの分岐器が上下の出荷口へ。2口同時なので ×2
+    const board: Board = {
+      width: 2,
+      height: 3,
+      cells: [
+        null,
+        { id: 'dock', dir: 1 },
+        { id: 'switch', dir: 1 },
+        { id: 'splitter', dir: 1 },
+        null,
+        { id: 'dock', dir: 1 },
+      ],
+    };
+    const b = biggestShipBreakdown(simulate({ board, seed: 1, rules: DEFAULT_RULES }).events)!;
+    expect(b.steps).toEqual([]);
+    expect(b.sync).toBe(2);
+    expect(b.shipped).toBe(2n);
+  });
+
   it('出荷がなければ null。変わり方の表し方', () => {
     expect(biggestShipBreakdown(line(['switch', 'gear']).events)).toBeNull();
     expect(describeChange(2n as never, 6n as never)).toBe('×3');
