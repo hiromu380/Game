@@ -11,7 +11,8 @@ export const SIM: Balance['sim'] = {
   maxIncomePerSim: 3,
   maxLiveSignals: 1000,
   mergeMode: 'product',
-  syncShipMax: 9,
+  // 同時出荷の倍率の上限。ドラム缶の周りに出荷口を並べるだけで ×7 になるのを抑える（docs/balance-log.md）
+  syncShipMax: 4,
 };
 
 /**

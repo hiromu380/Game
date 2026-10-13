@@ -119,7 +119,8 @@ describe('爆発ドラム缶', () => {
     const { scoreText, events } = run(['D> D> D>', 'D> B^ D>', 'D> S^ D>']);
     // S は B の真下。B から出る8方向のうち、下（S）以外の7方向が出荷口
     expect(only(events, 'emit').filter((e) => e.tick === 1)).toHaveLength(8);
-    expect(scoreText).toBe('49'); // 7口の同時出荷で ×7
+    // 7口の同時出荷。倍率は上限 syncShipMax で抑える
+    expect(scoreText).toBe(String(7 * Math.min(7, DEFAULT_RULES.syncShipMax!)));
   });
 
   it('発動は1回のみ', () => {
