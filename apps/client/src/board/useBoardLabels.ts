@@ -23,6 +23,7 @@ export function useBoardLabels(): BoardLabels {
       formatChain: (count) => t('playback.chainCounter', { count }),
       getCutInTitle: () => t('playback.cutIn'),
       getQuotaCrossLabel: () => t('playback.quotaCross'),
+      formatSync: (count) => t('playback.syncPop', { count }),
       getUnmeasurableLabel: () => ({
         title: t('unmeasurable.label'),
         sub: t('unmeasurable.overload'),

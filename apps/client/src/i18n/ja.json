@@ -544,6 +544,7 @@
   "capture.peakFirst": "ピークの直前から再生（録画用）",
   "share.runText": "#ChainFactory ボルトのロケット: {result}\n出荷量 {score}・シフト {shift} まで到達",
   "playback.quotaCross": "ノルマ突破",
+  "playback.syncPop": "同時×{count}",
   "floor.tooltip": "{name}: {desc}{period}",
   "floor.double.short": "×{double}",
   "floor.double.name": "×{double}床",

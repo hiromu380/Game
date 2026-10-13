@@ -35,6 +35,8 @@ export type Cue =
   | { atMs: number; kind: 'multiplier'; x: number; y: number; text: string }
   /** 床の効果を受けた（マスが光り、床の種類の色で「×2」「+3」が浮かぶ。倍率ポップと同じ上限で間引く） */
   | { atMs: number; kind: 'floor'; x: number; y: number; tile: FloorTileId; text: string }
+  /** 同時出荷ボーナス: 同じ tick に出荷した出荷口（count 口・倍率も count） */
+  | { atMs: number; kind: 'sync'; count: number; docks: [number, number][] }
   /** 合計の桁が上がった（K → M → B の切り替わり）。digits は新しい桁数 */
   | { atMs: number; kind: 'digitUp'; digits: number; total: Score }
   /** 合計がノルマを超えた */
@@ -196,6 +198,15 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
       });
     } else {
       chainSoFar += activated;
+    }
+    // 同時出荷ボーナス: ポップの上限・間隔に関係なく出す（狙って作る形なので見落とさせない）
+    const synced = tickEvents.filter(
+      (e): e is Extract<SimEvent, { type: 'ship' }> => e.type === 'ship' && e.sync > 1,
+    );
+    if (synced.length > 0 && options.strength !== 'minimal') {
+      const docks = new Map<string, [number, number]>();
+      for (const e of synced) docks.set(`${e.x},${e.y}`, [e.x, e.y]);
+      cues.push({ atMs: at, kind: 'sync', count: synced[0]!.sync, docks: [...docks.values()] });
     }
     for (const e of tickEvents) {
       if (e.type !== 'ship') continue;

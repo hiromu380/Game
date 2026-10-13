@@ -95,6 +95,35 @@ describe('連鎖の演出の流れ', () => {
     expect(new Set(notes).size).toBe(notes.length);
   });
 
+  it('同時出荷ボーナスは、出荷した出荷口ごとに1回だけ出す（弱では出さない）', () => {
+    // 右向きの分岐器が上下の出荷口へ（2口同時）
+    const board: Board = {
+      width: 2,
+      height: 3,
+      cells: [
+        null,
+        { id: 'dock', dir: 1 },
+        { id: 'switch', dir: 1 },
+        { id: 'splitter', dir: 1 },
+        null,
+        { id: 'dock', dir: 1 },
+      ],
+    };
+    const events = run(board).events;
+    const syncs = buildChoreography(events, strong).cues.filter((q) => q.kind === 'sync');
+    expect(syncs).toHaveLength(1);
+    expect(syncs[0]).toMatchObject({
+      count: 2,
+      docks: [
+        [1, 0],
+        [1, 2],
+      ],
+    });
+    const weak = buildChoreography(events, { ...strong, strength: 'minimal' });
+    expect(weak.cues.some((q) => q.kind === 'sync')).toBe(false);
+    expect(buildChoreography(small.events, strong).cues.some((q) => q.kind === 'sync')).toBe(false);
+  });
+
   it('床の効果を受けた瞬間に床の種類つきで数字を出し、パーツの倍率は床の後の値と比べる', () => {
     // スイッチ → ×2床のギア → 出荷口: 床の「×2」とギアの「×2」が別々に出る（まとめて ×4 にはしない）
     const floored = simulate({

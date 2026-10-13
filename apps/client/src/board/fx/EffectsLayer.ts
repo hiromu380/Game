@@ -47,6 +47,8 @@ export interface EffectLabels {
   compact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯（例: ノルマ突破！） */
   quotaCross: () => string;
+  /** 同時出荷ボーナスのポップ（例: 同時×3） */
+  sync: (count: number) => string;
   /** 計測不能の帯の見出しと小見出し */
   unmeasurable: () => { title: string; sub: string };
 }
@@ -299,6 +301,11 @@ export class EffectsLayer {
   }
 
   /** 倍率が乗った瞬間（×2・+8）: パーツの少し上に黄色い数字を浮かべる */
+  /** 同時出荷ボーナスのポップの文言 */
+  syncText(count: number): string {
+    return this.labels.sync(count);
+  }
+
   multiplier(x: number, y: number, text: string, durationMs: number): void {
     this.popText(x, y - 0.35, text, 1, durationMs, BOARD_THEME.hazardYellow);
   }

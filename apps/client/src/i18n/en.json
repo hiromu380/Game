@@ -544,6 +544,7 @@
   "capture.peakFirst": "Start just before the peak (for recording)",
   "share.runText": "#ChainFactory Bolt's rocket: {result}\nShipped {score} · Reached shift {shift}",
   "playback.quotaCross": "Quota cleared",
+  "playback.syncPop": "Sync ×{count}",
   "floor.tooltip": "{name}: {desc}{period}",
   "floor.double.short": "×{double}",
   "floor.double.name": "×{double} Floor",

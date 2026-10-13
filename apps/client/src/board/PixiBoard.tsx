@@ -80,6 +80,7 @@ export function PixiBoard(props: Props) {
       formatScore: (value) => labels().formatScore(value),
       formatCompact: (value) => labels().formatCompact(value),
       getQuotaCrossLabel: () => labels().getQuotaCrossLabel(),
+      formatSync: (count) => labels().formatSync(count),
       getUnmeasurableLabel: () => labels().getUnmeasurableLabel(),
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),

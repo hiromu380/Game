@@ -115,6 +115,8 @@ export interface BoardLabels {
   formatCompact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯の文言 */
   getQuotaCrossLabel: () => string;
+  /** 同時出荷ボーナスのポップ（例: 同時×3） */
+  formatSync: (count: number) => string;
   /** 計測不能の帯の見出しと小見出し */
   getUnmeasurableLabel: () => { title: string; sub: string };
   /** 床タイルの短い表記（マスの左上・演出。例: ×2・+3） */
@@ -227,6 +229,7 @@ export class BoardRenderer {
         score: options.formatScore,
         compact: options.formatCompact,
         quotaCross: options.getQuotaCrossLabel,
+        sync: options.formatSync,
         unmeasurable: options.getUnmeasurableLabel,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
@@ -816,6 +819,10 @@ export class BoardRenderer {
         break;
       case 'multiplier':
         this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
+        break;
+      case 'sync':
+        for (const [x, y] of cue.docks)
+          this.effects.multiplier(x, y, this.effects.syncText(cue.count), 900 / rate);
         break;
       case 'floor':
         // 床の効果: 倍率が大きい床ほど音程が高い
