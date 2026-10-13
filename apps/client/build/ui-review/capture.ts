@@ -321,6 +321,8 @@ const SCENES: Scene[] = [
       await page.waitForTimeout(800);
     },
   },
+  // 試運転の結果に、いちばん大きい出荷の計算の内訳（金色ギア → ギア → ギア → 出荷口）
+  { name: 'breakdown', run: golden, act: (page) => trial(page) },
   // 転送装置にマウスを乗せる: 行き先までの点線と枠
   { name: 'teleporter-hover', run: newParts, act: (page) => clickCell(page, 2, 1, true) },
   // 磁石を置こうとする: 同じ行・列の出荷口に枠、置いたときの倍率のバッジ

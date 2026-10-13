@@ -823,5 +823,8 @@
   "ascension.effect.bonusFloor": "ボーナス床 {value}枚",
   "ascension.effect.relicChoices": "レリックの候補 {value}",
   "ascension.effect.eventChoices": "今日の出来事の候補 {value}",
-  "meta.newAscension": "残業Lv{level} を選べるようになった"
+  "meta.newAscension": "残業Lv{level} を選べるようになった",
+  "breakdown.title": "最大の出荷の内訳",
+  "breakdown.more": "…{count}段",
+  "breakdown.floor": "床"
 }

@@ -30,11 +30,20 @@ const medium = run(row(['switch', 'gear', 'gear', 'gear', 'gear', 'gear', 'gear'
 /** 特大: tick 上限まで続く人工的なイベント列（1 tick に1回ずつ発動し、最後に出荷） */
 function hugeEvents(ticks: number): SimEvent[] {
   const events: SimEvent[] = [
-    { tick: 0, type: 'emit', signalId: 0, x: 0, y: 0, dir: 2, value: 1n as never },
+    { tick: 0, type: 'emit', signalId: 0, x: 0, y: 0, dir: 2, value: 1n as never, parent: null },
   ];
   for (let k = 1; k < ticks; k++) {
     events.push({ tick: k, type: 'activate', signalId: k - 1, x: 0, y: 0, partId: 'conveyor' });
-    events.push({ tick: k, type: 'emit', signalId: k, x: 0, y: 0, dir: 2, value: 1n as never });
+    events.push({
+      tick: k,
+      type: 'emit',
+      signalId: k,
+      x: 0,
+      y: 0,
+      dir: 2,
+      value: 1n as never,
+      parent: k - 1,
+    });
   }
   events.push({
     tick: ticks,
@@ -43,6 +52,7 @@ function hugeEvents(ticks: number): SimEvent[] {
     y: 0,
     value: scoreOf(12345),
     total: scoreOf(12345),
+    signalId: ticks - 1,
   });
   return events;
 }
@@ -157,7 +167,7 @@ describe('連鎖の演出の流れ', () => {
     // 毎 tick 桁が上がる出荷（光を出したい瞬間が続く）
     for (let k = 0; k < 20; k++) {
       const v = scoreOf(10 ** (3 + k));
-      events.push({ tick: k, type: 'ship', x: 0, y: 0, value: v, total: v });
+      events.push({ tick: k, type: 'ship', x: 0, y: 0, value: v, total: v, signalId: null });
     }
     const times = flashTimes(buildChoreography(events, { ...strong, quota: 5000 }).cues);
     expect(times.length).toBeGreaterThan(0);

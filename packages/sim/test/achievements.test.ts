@@ -215,6 +215,7 @@ describe('ポンコツロボの連続最大倍率', () => {
     y: 0,
     dir: 2,
     value: scoreOf(value),
+    parent: null,
   });
   const start: SimEvent = {
     tick: 0,
@@ -224,6 +225,7 @@ describe('ポンコツロボの連続最大倍率', () => {
     y: 0,
     dir: 2,
     value: scoreOf(2),
+    parent: null,
   };
 
   it('×3 が3回続けば 3、途中で途切れたら数え直す', () => {

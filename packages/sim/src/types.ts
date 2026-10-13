@@ -113,13 +113,32 @@ export type VanishReason = 'outOfBoard' | 'emptyCell' | 'exhausted' | 'inert' | 
  */
 export type SimEvent =
   /** 信号が (x,y) から dir 方向へ発射された（次の tick で隣へ移動する） */
-  | { tick: number; type: 'emit'; signalId: number; x: number; y: number; dir: Dir8; value: Score }
+  | {
+      tick: number;
+      type: 'emit';
+      signalId: number;
+      x: number;
+      y: number;
+      dir: Dir8;
+      value: Score;
+      /** この信号を生んだ（パーツを発動させた）信号。スイッチの最初の信号は null（計算の内訳をたどる用） */
+      parent: number | null;
+    }
   /** 信号が (x,y) へ移動した */
   | { tick: number; type: 'move'; signalId: number; x: number; y: number }
   /** (x,y) のパーツが信号を受けて発動した（受けた信号はここで消費される） */
   | { tick: number; type: 'activate'; signalId: number; x: number; y: number; partId: PartId }
   /** 出荷口が value を出荷した。total はその時点の累計 */
-  | { tick: number; type: 'ship'; x: number; y: number; value: Score; total: Score }
+  | {
+      tick: number;
+      type: 'ship';
+      x: number;
+      y: number;
+      value: Score;
+      total: Score;
+      /** 出荷口を発動させた信号（計算の内訳をたどる用） */
+      signalId: number | null;
+    }
   /** (x,y) のパーツの発動回数がリセットされた */
   | { tick: number; type: 'reset'; x: number; y: number }
   /** 信号が消滅した */

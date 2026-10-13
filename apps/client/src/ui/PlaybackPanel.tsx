@@ -16,6 +16,7 @@ import { BOLT_BODY_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
+import { biggestShipBreakdown, describeChange } from '../playback/breakdown';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
 import { destinationName } from './RocketProgress';
 
@@ -88,6 +89,7 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
           </>
         )}
       </dl>
+      <ShipBreakdownLine result={playback.result} />
       <BreakList result={playback.result} run={run} />
       <button className="button--primary" onClick={onClose}>
         {closeLabel}
@@ -116,6 +118,60 @@ function RocketLine({ playback, run }: { playback: Playback; run: RunState }) {
   return (
     <div className="playback-panel__rocket">
       {t('rocket.partBuilt', { parts: after.parts, total: ROCKET_PARTS })}
+    </div>
+  );
+}
+
+/** 計算の内訳に並べる段の数の上限（多いときは真ん中を「…」でまとめる） */
+const BREAKDOWN_MAX_CHIPS = 7;
+
+/** いちばん大きい出荷の計算の内訳: 1 → ギア ×2 → ×2床 → … = 出荷量 */
+function ShipBreakdownLine({ result }: { result: SimResult }) {
+  const { t, formatCompact } = useI18n();
+  const breakdown = biggestShipBreakdown(result.events);
+  if (!breakdown || breakdown.steps.length === 0) return null;
+  const chips: { key: string; label: string; kind: 'part' | 'floor' }[] = [];
+  breakdown.steps.forEach((step, i) => {
+    if (step.floor) {
+      const change = describeChange(step.before, step.afterFloor);
+      if (change)
+        chips.push({ key: `f${i}`, label: `${t('breakdown.floor')} ${change}`, kind: 'floor' });
+    }
+    const change = describeChange(step.afterFloor, step.after);
+    if (change)
+      chips.push({
+        key: `p${i}`,
+        label: `${t(`part.${step.partId}.name`)} ${change}`,
+        kind: 'part',
+      });
+  });
+  const shown =
+    chips.length > BREAKDOWN_MAX_CHIPS
+      ? [
+          ...chips.slice(0, 2),
+          {
+            key: 'more',
+            label: t('breakdown.more', { count: chips.length - 5 }),
+            kind: 'part' as const,
+          },
+          ...chips.slice(-3),
+        ]
+      : chips;
+  return (
+    <div className="breakdown">
+      <div className="breakdown__title">{t('breakdown.title')}</div>
+      <ol className="breakdown__chain">
+        <li className="breakdown__start">{formatCompact(breakdown.start)}</li>
+        {shown.map((chip) => (
+          <li key={chip.key} className={`breakdown__chip breakdown__chip--${chip.kind}`}>
+            <span className="breakdown__arrow" aria-hidden>
+              →
+            </span>
+            <span className="breakdown__label">{chip.label}</span>
+          </li>
+        ))}
+        <li className="breakdown__total">= {formatCompact(breakdown.shipped)}</li>
+      </ol>
     </div>
   );
 }

@@ -2591,6 +2591,55 @@ a.button.button--primary {
   font-size: 0.85rem;
   text-align: left;
 }
+.breakdown {
+  margin: 6px 0 8px;
+  text-align: left;
+}
+.breakdown__title {
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.breakdown__chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.breakdown__chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.breakdown__arrow {
+  color: var(--muted);
+}
+.breakdown__start,
+.breakdown__label {
+  padding: 1px 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.breakdown__chip--floor .breakdown__label {
+  border-style: dashed;
+  border-color: var(--golden);
+}
+/* 広い画面: 左下のボルトの絵と重ならないように、内訳を右へ寄せる */
+@media (min-width: 900px) {
+  .playback-panel .breakdown {
+    margin-left: 96px;
+  }
+}
+.breakdown__total {
+  font-weight: bold;
+  color: var(--golden);
+}
 .near-miss {
   margin: 4px 0 12px;
   padding: 12px 14px;

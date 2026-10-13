@@ -823,5 +823,8 @@
   "ascension.effect.bonusFloor": "Bonus floors {value}",
   "ascension.effect.relicChoices": "Relic choices {value}",
   "ascension.effect.eventChoices": "Event choices {value}",
-  "meta.newAscension": "OT Lv{level} unlocked"
+  "meta.newAscension": "OT Lv{level} unlocked",
+  "breakdown.title": "Biggest shipment, step by step",
+  "breakdown.more": "…{count} more",
+  "breakdown.floor": "Floor"
 }

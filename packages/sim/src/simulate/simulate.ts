@@ -34,6 +34,8 @@ interface PendingEmission {
   x: number;
   y: number;
   emission: Emission;
+  /** 発射のもとになった信号 */
+  parent: number | null;
 }
 
 /** 合流するパーツが、この tick に受けた信号 */
@@ -43,6 +45,8 @@ interface CollectBuffer {
   y: number;
   part: Part;
   values: Score[];
+  /** 最初に入った信号（合流した信号の代表。計算の内訳をたどる用） */
+  firstSignal: number;
 }
 
 export function simulate(input: SimInput): SimResult {
@@ -92,10 +96,19 @@ export function simulate(input: SimInput): SimResult {
   };
 
   /** 信号を1つ生成し、emit イベントを記録する */
-  const emit = (tick: number, x: number, y: number, e: Emission): Signal => {
+  const emit = (tick: number, x: number, y: number, e: Emission, parent: number | null): Signal => {
     const signal: Signal = { id: nextSignalId++, x, y, dir: e.dir, value: e.value };
     maxValue = scoreMax(maxValue, e.value);
-    events.push({ tick, type: 'emit', signalId: signal.id, x, y, dir: e.dir, value: e.value });
+    events.push({
+      tick,
+      type: 'emit',
+      signalId: signal.id,
+      x,
+      y,
+      dir: e.dir,
+      value: e.value,
+      parent,
+    });
     return signal;
   };
 
@@ -106,6 +119,7 @@ export function simulate(input: SimInput): SimResult {
     y: number,
     raw: Reaction,
     out: Signal[],
+    cause: number | null,
   ): void => {
     const index = cellIndex(board, x, y);
     // 金色パーツ: パーツの効果の後で、出荷量と送る信号の値を倍にする（収入は増やさない）
@@ -115,7 +129,15 @@ export function simulate(input: SimInput): SimResult {
     if (reaction.ship !== undefined) {
       score = scoreAdd(score, reaction.ship);
       shipCount++;
-      events.push({ tick, type: 'ship', x, y, value: reaction.ship, total: score });
+      events.push({
+        tick,
+        type: 'ship',
+        x,
+        y,
+        value: reaction.ship,
+        total: score,
+        signalId: cause,
+      });
     }
     if (reaction.income !== undefined) {
       const amount = Math.min(reaction.income, rules.maxIncomePerSim - income);
@@ -138,8 +160,8 @@ export function simulate(input: SimInput): SimResult {
       const [ex, ey] = emission.from ?? [x, y];
       if (ex !== x || ey !== y) events.push({ tick, type: 'teleport', x, y, toX: ex, toY: ey });
       const delay = emission.delay ?? 0;
-      if (delay > 0) pending.push({ tick: tick + delay, x: ex, y: ey, emission });
-      else out.push(emit(tick, ex, ey, emission));
+      if (delay > 0) pending.push({ tick: tick + delay, x: ex, y: ey, emission, parent: cause });
+      else out.push(emit(tick, ex, ey, emission, cause));
     }
   };
 
@@ -152,7 +174,7 @@ export function simulate(input: SimInput): SimResult {
       if (isBlocked(index) || !canActivate(index)) continue;
       markActivated(index);
       signals.push(
-        emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }),
+        emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }, null),
       );
     }
   }
@@ -215,7 +237,7 @@ export function simulate(input: SimInput): SimResult {
         markActivated(index);
         chainCount++;
         events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
-        buffers.set(index, { index, x, y, part, values: [signal.value] });
+        buffers.set(index, { index, x, y, part, values: [signal.value], firstSignal: signal.id });
         continue;
       }
 
@@ -246,7 +268,7 @@ export function simulate(input: SimInput): SimResult {
       markActivated(index);
       chainCount++;
       events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
-      applyReaction(tick, x, y, reaction, nextSignals);
+      applyReaction(tick, x, y, reaction, nextSignals, signal.id);
     }
 
     // tick の終わり: 合流するパーツをマス番号の昇順に処理する
@@ -269,13 +291,13 @@ export function simulate(input: SimInput): SimResult {
         state: partState[buffer.index] ?? 0,
         stored: partStored[buffer.index] ?? SCORE_ZERO,
       });
-      applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals);
+      applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals, buffer.firstSignal);
     }
 
     // 遅れて発射する予定の信号のうち、この tick の分を発射する（登録順）
     const due = pending.filter((p) => p.tick === tick);
     pending = pending.filter((p) => p.tick !== tick);
-    for (const p of due) nextSignals.push(emit(tick, p.x, p.y, p.emission));
+    for (const p of due) nextSignals.push(emit(tick, p.x, p.y, p.emission, p.parent));
 
     signals = nextSignals;
   }
