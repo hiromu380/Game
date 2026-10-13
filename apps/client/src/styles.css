@@ -2546,6 +2546,51 @@ a.button.button--primary {
   font-weight: bold;
   color: #b39ddb;
 }
+.hud__ascension {
+  margin-top: 2px;
+  padding: 0 6px;
+  border: 1px solid var(--hazard-yellow);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--hazard-yellow);
+}
+.ascension {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--hazard-yellow);
+  border-radius: 10px;
+}
+.ascension h2 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+.ascension__picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.ascension__picker button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.ascension__level {
+  min-width: 7em;
+  font-size: 1.15rem;
+  text-align: center;
+}
+.ascension__name {
+  margin: 6px 0 2px;
+  font-weight: bold;
+  color: var(--hazard-yellow);
+}
+.ascension__effects {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.85rem;
+  text-align: left;
+}
 .near-miss {
   margin: 4px 0 12px;
   padding: 12px 14px;

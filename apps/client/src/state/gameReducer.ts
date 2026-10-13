@@ -150,6 +150,8 @@ export type GameAction =
    * ランの組み立て（相場・体験版の制限など）は画面側で行う（state/newRun.ts、online/weeklyRun.ts）
    */
   | { type: 'loadRun'; run: RunState; mode: PlayMode }
+  /** 次のランの残業レベルを選ぶ（解放済みのレベルまで） */
+  | { type: 'selectAscension'; level: number }
   /** 全シフトクリア後に延長戦へ進む */
   | { type: 'startOvertime' }
   /** ランを諦める（通常ラン・練習だけ。週替わりの本番はサーバーに記録が残るので諦められない） */
@@ -347,6 +349,13 @@ function reduce(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'loadRun':
       return createGameState(action.run, state.meta, action.mode, state.achievements);
+
+    case 'selectAscension': {
+      const current = state.meta.ascension ?? { unlocked: 0, selected: 0 };
+      const level = Math.max(0, Math.min(action.level, current.unlocked));
+      if (level === current.selected) return state;
+      return { ...state, meta: { ...state.meta, ascension: { ...current, selected: level } } };
+    }
 
     case 'weeklyRanked':
       return {

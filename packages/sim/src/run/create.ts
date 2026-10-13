@@ -2,6 +2,7 @@
  * ランの開始
  */
 import { BALANCE, type Balance } from '../balance';
+import { applyAscension } from '../config/ascension';
 import { buildWeeklyConfig, weeklyRunSeed } from '../config/weekly';
 import { buildRunConfig, type MetaModifiers, type RunConfig } from '../config/runConfig';
 import { createEmptyBoard } from '../core/board';
@@ -18,6 +19,8 @@ export interface CreateRunOptions {
   prices?: Partial<Record<PartId, number>>;
   /** 初回ガイドのラン（1日目のステージを固定のテンプレートにする） */
   tutorial?: boolean;
+  /** 残業レベル（0 は通常。相場価格の後に重ねる） */
+  ascension?: number;
 }
 
 /** 新しい通常ランを始める */
@@ -36,7 +39,8 @@ export function createRun(seed: number, options: CreateRunOptions = {}): RunStat
         economy: { ...config.economy, prices: { ...config.economy.prices, ...options.prices } },
       }
     : config;
-  return createRunWithConfig(runSeed, withPrices);
+  const balance = options.balance ?? BALANCE;
+  return createRunWithConfig(runSeed, applyAscension(withPrices, options.ascension ?? 0, balance));
 }
 
 /**

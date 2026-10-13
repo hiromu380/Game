@@ -15,6 +15,7 @@ export {
   type Rarity,
   type RelicId,
   type RelicParams,
+  type AscensionEffect,
   type ShiftSpec,
   RELIC_IDS,
 } from './balance';
@@ -120,3 +121,4 @@ export {
 } from './meta/progress';
 
 export * from './achievements';
+export { applyAscension, ascensionEffects, maxAscension } from './config/ascension';

@@ -93,6 +93,8 @@ export interface RunConfig {
    * 金色パーツの合体（balance/ の写し）。導入前に始めたラン（セーブ）には無いので、無ければ合体しない
    */
   golden?: { mergeCount: number; excluded: PartId[] };
+  /** 残業レベル（段階式の高難度。config/ascension.ts で重ねた段数。無ければ 0） */
+  ascension?: number;
   /** シフトごとのボス修正（通常シフトは null） */
   bossPlan: (BossPlanEntry | null)[];
   /** ボス修正ルールの効果量（balance/ の boss の写し） */

@@ -47,6 +47,11 @@ export function Hud({ run, liveScore: target, trial }: Props) {
             ? t('hud.overtime', { current: run.shiftIndex + 1 })
             : t('hud.shiftProgress', { current: run.shiftIndex + 1, total: getShiftCount(run) })}
         </span>
+        {(run.config.ascension ?? 0) > 0 && (
+          <span className="hud__ascension">
+            {t('ascension.label', { level: run.config.ascension ?? 0 })}
+          </span>
+        )}
       </div>
       <div className="hud__item">
         <span className="hud__label">{t('hud.budget')}</span>

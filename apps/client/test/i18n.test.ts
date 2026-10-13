@@ -1,4 +1,4 @@
-import { BALANCE, PART_IDS, RELIC_IDS } from '@chain-factory/sim';
+import { BALANCE, maxAscension, PART_IDS, RELIC_IDS } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import en from '../src/i18n/en.json';
 import ja from '../src/i18n/ja.json';
@@ -31,6 +31,12 @@ describe('i18n ファイル', () => {
         const text = translate(lang, `relic.${id}.desc`, { ...BALANCE.relics.params });
         expect(text).not.toMatch(/\{\w+\}/);
       }
+    }
+  });
+
+  it('残業レベルの全段に名前がある', () => {
+    for (let level = 1; level <= maxAscension(BALANCE); level++) {
+      expect(ja).toHaveProperty([`ascension.name.${level}`]);
     }
   });
 });

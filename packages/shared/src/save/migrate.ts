@@ -10,6 +10,7 @@ import {
   createInitialAchievements,
   createInitialMeta,
   isAchievementId,
+  maxAscension,
   seeds,
   SIM_VERSION,
   type AchievementProgress,
@@ -142,7 +143,23 @@ function normalizeV6(save: SaveDataV6): SaveDataV6 {
 /** v7 の読み込み: v6 と同じ補い方に、レリックの図鑑（知らない ID・重複を落とす）を補う */
 function normalizeV7(save: SaveDataV7): SaveDataV7 {
   const base = normalizeV6(save as unknown as SaveDataV6) as unknown as SaveDataV7;
-  return { ...base, meta: { ...base.meta, relicsFound: validRelics(save.meta?.relicsFound) } };
+  return {
+    ...base,
+    meta: {
+      ...base.meta,
+      relicsFound: validRelics(save.meta?.relicsFound),
+      ascension: validAscension(save.meta?.ascension),
+    },
+  };
+}
+
+/** 残業レベル: 0〜上限の整数に収める。選んだレベルは解放済みのレベルを超えない */
+function validAscension(raw: unknown): { unlocked: number; selected: number } {
+  const value = (v: unknown) =>
+    Number.isInteger(v) ? Math.min(Math.max(v as number, 0), maxAscension(BALANCE)) : 0;
+  const a = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>;
+  const unlocked = value(a.unlocked);
+  return { unlocked, selected: Math.min(value(a.selected), unlocked) };
 }
 
 function validRelics(raw: unknown): RelicId[] {
@@ -152,14 +169,18 @@ function validRelics(raw: unknown): RelicId[] {
 }
 
 /**
- * v6 → v7（レリック）: レリックの図鑑を足す。
+ * v6 → v7（レリック・残業レベル）: レリックの図鑑と残業レベル（未解放）を足す。
  * 進行中のランで手に入れているレリックがあれば、それを見つけた扱いにする
  */
 export function convertV6toV7(save: SaveDataV6): SaveDataV7 {
   return {
     ...save,
     version: 7,
-    meta: { ...save.meta, relicsFound: validRelics(save.run?.relics) },
+    meta: {
+      ...save.meta,
+      relicsFound: validRelics(save.run?.relics),
+      ascension: { unlocked: 0, selected: 0 },
+    },
   };
 }
 

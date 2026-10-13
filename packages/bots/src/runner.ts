@@ -103,6 +103,8 @@ export interface RunnerOptions {
   permits?: boolean;
   /** ボットが金色パーツを合体・配置するか（既定 true。false は比較用。golden.ts） */
   golden?: boolean;
+  /** 残業レベル（通常ランのみ。既定 0） */
+  ascension?: number;
   /** レリックの選び方（既定 best: 候補を試して見込みが最良のもの。first は先頭の候補＝ほぼランダム。比較用） */
   relics?: 'best' | 'first';
   /** 全シフトをクリアしたら延長戦に入り、最大この日数まで続ける（既定 0: 延長戦に入らない） */
@@ -182,7 +184,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     ? options.start
     : options.mode === 'weekly'
       ? createWeeklyRun(`bal-${seed}`, { practice: true })
-      : createRun(seed, meta);
+      : createRun(seed, { ...meta, ascension: options.ascension ?? 0 });
   const overtimeEnd =
     state.config.shifts.length + (options.overtimeDays ?? 0) * state.config.shiftsPerDay;
   for (;;) {

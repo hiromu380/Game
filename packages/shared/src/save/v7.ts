@@ -1,6 +1,7 @@
 /**
- * セーブデータ v7（レリック）の形式
+ * セーブデータ v7（レリック・残業レベル）の形式
  * - メタ進行に、これまでに手に入れたレリックの一覧（meta.relicsFound）が増えた。コレクションの「レリック」で見る
+ * - メタ進行に、残業レベル（meta.ascension: 解放済み・次に選ぶレベル）が増えた
  * - v6 からの変換: 進行中のランで手に入れているレリックがあれば、それを図鑑に入れる
  */
 import type { AchievementProgress, MetaProgress, RunState } from '@chain-factory/sim';

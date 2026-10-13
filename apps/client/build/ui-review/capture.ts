@@ -18,6 +18,7 @@ import {
   applyOp,
   chooseEvent,
   commitShift,
+  createInitialMeta,
   createRun,
   isEventPending,
   isRelicPending,
@@ -193,6 +194,8 @@ interface Browser {
 interface Scene {
   name: string;
   run: () => RunState;
+  /** メタ進行（省略時は初期値） */
+  meta?: () => ReturnType<typeof createInitialMeta>;
   act?: (page: Page) => Promise<void>;
 }
 
@@ -305,6 +308,19 @@ const SCENES: Scene[] = [
       await page.waitForTimeout(800);
     },
   },
+  // 残業レベルを解放した人のラン失敗: 次のランのレベルを選ぶ
+  {
+    name: 'run-failed-ascension',
+    run: day1,
+    meta: () => ({ ...createInitialMeta(), ascension: { unlocked: 4, selected: 3 } }),
+    act: async (page) => {
+      await page.locator('.controls .button--primary').first().click();
+      await page.locator('.commit-confirm .button--primary').click();
+      await page.locator('.playback-panel .button--primary').waitFor({ timeout: 20000 });
+      await page.locator('.playback-panel .button--primary').click();
+      await page.waitForTimeout(800);
+    },
+  },
   // 転送装置にマウスを乗せる: 行き先までの点線と枠
   { name: 'teleporter-hover', run: newParts, act: (page) => clickCell(page, 2, 1, true) },
   // 磁石を置こうとする: 同じ行・列の出荷口に枠、置いたときの倍率のバッジ
@@ -362,7 +378,7 @@ for (const viewport of VIEWPORTS) {
       };
       // カットシーンは見たことにする（初回の自動再生が画面に重なると、本編の画面を比べられない）
       const save = JSON.stringify({
-        ...createSave(scene.run()),
+        ...createSave(scene.run(), scene.meta?.()),
         story: { seen: [...SCENE_IDS] },
       });
       await page.addInitScript(

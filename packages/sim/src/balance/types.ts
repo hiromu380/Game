@@ -235,6 +235,24 @@ export interface GoldenBalance {
   excluded: PartId[];
 }
 
+/** 残業レベル1段で増える条件（指定したものだけ。数値は足し算・quotaPercent は掛け算で重ねる） */
+export interface AscensionEffect {
+  /** ノルマを何%にするか（通常ランの全シフト。切り上げ） */
+  quotaPercent?: number;
+  /** 毎シフトの予算に足す（マイナスで減る。最低 0。延長戦の予算も） */
+  budgetDelta?: number;
+  /** リロールの値上がり幅に足す */
+  rerollStepDelta?: number;
+  /** シフト開始時のボーナス床の枚数に足す（マイナスで減る。最低 0 枚） */
+  bonusFloorDelta?: number;
+  /** パーツの価格に足す（価格 0 のパーツは除く） */
+  priceDelta?: number;
+  /** レリックの候補の数に足す（最低 1） */
+  relicChoicesDelta?: number;
+  /** 今日の出来事の候補の数に足す（最低 1） */
+  eventChoicesDelta?: number;
+}
+
 export interface Balance {
   /** 工場フロアの広さ（メタ進行の工場拡張はここに加算する） */
   board: { width: number; height: number };
@@ -348,6 +366,8 @@ export interface Balance {
 
   /** レリック（choices: 候補の数・weights: 出やすさ） */
   relics: { choices: number; weights: Record<RelicId, number>; params: RelicParams };
+  /** 残業レベル（段階式の高難度）。levels[i] は Lv(i+1) で増える条件。Lv L は 1〜L の条件をすべて重ねる */
+  ascension: { levels: AscensionEffect[] };
 
   /** ボス修正ルールの効果量 */
   boss: {

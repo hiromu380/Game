@@ -637,6 +637,7 @@ export function App({ start, onTitle }: Props) {
           onViewRanking={() => setWeeklyMenu('ranking')}
           onBackToNormal={backToNormal}
           onRetry={newRun}
+          onSelectAscension={(level) => dispatch({ type: 'selectAscension', level })}
           onOvertime={() => {
             setLiveScore(null);
             dispatch({ type: 'startOvertime' });

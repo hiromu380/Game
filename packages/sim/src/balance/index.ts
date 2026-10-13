@@ -28,6 +28,7 @@ import { BONUS_FLOORS, FLOOR_PARAMS, FLOOR_PERMIT } from './floors';
 import { META } from './meta';
 import { GOLDEN, PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { RELICS } from './relics';
+import { ASCENSION } from './ascension';
 import { STAGES } from './stages';
 import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM, UNMEASURABLE } from './sim';
@@ -35,6 +36,7 @@ import type { Balance } from './types';
 
 export type * from './types';
 export { RELIC_IDS } from './types';
+export type { AscensionEffect } from './types';
 
 export const BALANCE: Balance = {
   board: BOARD,
@@ -57,5 +59,6 @@ export const BALANCE: Balance = {
   weekly: WEEKLY,
   meta: META,
   relics: RELICS,
+  ascension: ASCENSION,
   boss: BOSS,
 };

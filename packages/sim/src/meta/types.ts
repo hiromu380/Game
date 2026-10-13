@@ -27,6 +27,8 @@ export interface MetaProgress {
   records: MetaRecords;
   /** これまでに手に入れたレリック（コレクションの図鑑用。手に入れた順） */
   relicsFound: RelicId[];
+  /** 残業レベル: unlocked まで選べる（0 は通常だけ）。selected は次のランで使うレベル */
+  ascension: { unlocked: number; selected: number };
 }
 
 /** 初めて遊ぶときのメタ進行 */
@@ -43,5 +45,6 @@ export function createInitialMeta(balance: Balance = BALANCE): MetaProgress {
       clears: 0,
     },
     relicsFound: [],
+    ascension: { unlocked: 0, selected: 0 },
   };
 }

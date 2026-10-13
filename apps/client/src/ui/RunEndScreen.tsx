@@ -24,6 +24,7 @@ import { UiIcon } from './UiIcon';
 import { RELIC_ICONS } from '../assets/manifest';
 import { describeRelic } from './RelicDialog';
 import { getNearMiss } from '../state/nearMiss';
+import { AscensionPicker } from './AscensionPicker';
 
 interface Props {
   run: RunState;
@@ -39,6 +40,8 @@ interface Props {
   onViewRanking: () => void;
   /** 週替わり・練習: 通常モードに戻る */
   onBackToNormal: () => void;
+  /** 次のランの残業レベルを選ぶ（通常ランのみ） */
+  onSelectAscension: (level: number) => void;
 }
 
 export function RunEndScreen(props: Props) {
@@ -50,6 +53,14 @@ export function RunEndScreen(props: Props) {
   // 通常ランで失敗したら「あと○○」とひとことヒントを見出しのすぐ下に出し、もう一度のボタンもそこへ上げる
   const nearMiss = mode.kind === 'normal' ? getNearMiss(run) : null;
 
+  const ascension = meta.ascension ?? { unlocked: 0, selected: 0 };
+  const picker = mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
+    <AscensionPicker
+      unlocked={ascension.unlocked}
+      selected={ascension.selected}
+      onSelect={props.onSelectAscension}
+    />
+  );
   const actions = (
     <div className="button-row run-end__actions">
       {canOvertime && (
@@ -93,6 +104,7 @@ export function RunEndScreen(props: Props) {
             <p className="near-miss__hint">
               {t(`nearMiss.hint.${nearMiss.hint}`, { budget: nearMiss.budgetLeft })}
             </p>
+            {picker}
             {actions}
           </section>
         )}
@@ -131,7 +143,12 @@ export function RunEndScreen(props: Props) {
           </div>
         )}
         {mode.kind === 'normal' ? (
-          !nearMiss && actions
+          !nearMiss && (
+            <>
+              {picker}
+              {actions}
+            </>
+          )
         ) : (
           <div className="button-row run-end__actions">
             <button className="button--primary" onClick={props.onViewRanking}>

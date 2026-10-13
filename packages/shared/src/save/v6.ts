@@ -14,8 +14,8 @@ export interface SaveDataV6 {
   version: 6;
   /** 進行中のラン（なければ null） */
   run: RunState | null;
-  /** v7 でレリックの図鑑（relicsFound）が増えた。v6 には無い */
-  meta: Omit<MetaProgress, 'relicsFound'>;
+  /** v7 でレリックの図鑑（relicsFound）と残業レベル（ascension）が増えた。v6 には無い */
+  meta: Omit<MetaProgress, 'relicsFound' | 'ascension'>;
   achievements: AchievementProgress;
   story: StoryProgress;
 }

@@ -11,6 +11,7 @@
  *   pnpm balance --floor-aware off             # 床を見ないボット（床を使うボットとの比較用）
  *   pnpm balance --permits off                 # ランダム配置権を使わないボット（比較用）
  *   pnpm balance --golden off                  # 金色パーツを使わないボット（比較用）
+ *   pnpm balance --ascension 5                 # 残業レベル5で検証（通常ランのみ）
  *   pnpm balance --relics first                # レリックを先頭の候補で選ぶ（見込みで選ぶボットとの比較用）
  *
  * 出力: tools/balance/reports/latest.md と、日時つきの .md / .json
@@ -51,6 +52,7 @@ function parseArgs(argv: string[]) {
     permits: args.get('permits') !== 'off',
     golden: args.get('golden') !== 'off',
     relics: (args.get('relics') === 'first' ? 'first' : 'best') as 'best' | 'first',
+    ascension: Number(args.get('ascension') ?? 0),
   };
 }
 
@@ -67,6 +69,7 @@ async function main() {
     permits: opts.permits,
     golden: opts.golden,
     relics: opts.relics,
+    ascension: opts.ascension,
   };
   const summaries: BotSummary[] = [];
   const shiftSpecs = opts.mode === 'weekly' ? BALANCE.weekly.shifts : BALANCE.shifts;
@@ -98,6 +101,7 @@ async function main() {
     床: opts.floorAware ? '床を見て置く' : '床を見ない（比較用）',
     ランダム配置権: opts.permits ? '期待値で買って使う' : '使わない（比較用）',
     金色パーツ: opts.golden ? '見込みが増えるときだけ合体・配置' : '使わない（比較用）',
+    残業レベル: opts.ascension,
     レリック: opts.relics === 'first' ? '先頭の候補（比較用）' : '候補を試して見込みが最良のもの',
     パーツの解放:
       opts.unlock === 'all'

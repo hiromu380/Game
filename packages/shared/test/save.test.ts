@@ -263,6 +263,7 @@ describe('v6 → v7（レリック）', () => {
   function v6Save(relics?: string[]) {
     const save = JSON.parse(JSON.stringify(createSave(createRun(3))));
     delete save.meta.relicsFound;
+    delete save.meta.ascension;
     if (relics) save.run.relics = relics;
     save.version = 6;
     return save;
@@ -273,6 +274,7 @@ describe('v6 → v7（レリック）', () => {
     const migrated = migrateSave(v6)!;
     expect(migrated.version).toBe(7);
     expect(migrated.meta.relicsFound).toEqual([]);
+    expect(migrated.meta.ascension).toEqual({ unlocked: 0, selected: 0 });
     expect(migrated.meta.unlockedParts).toEqual(v6.meta.unlockedParts);
     expect(migrated.run).toEqual(v6.run);
   });
@@ -293,5 +295,15 @@ describe('v6 → v7（レリック）', () => {
     expect(migrateSave({ ...save, meta: { ...meta, relicsFound: 'x' } })!.meta.relicsFound).toEqual(
       [],
     );
+  });
+
+  it('残業レベルは 0〜上限の整数に収め、選んだレベルは解放済みを超えない', () => {
+    const base = createSave(null);
+    const load = (ascension: unknown) =>
+      migrateSave({ ...base, meta: { ...base.meta, ascension } })!.meta.ascension;
+    expect(load({ unlocked: 3, selected: 2 })).toEqual({ unlocked: 3, selected: 2 });
+    expect(load({ unlocked: 3, selected: 9 })).toEqual({ unlocked: 3, selected: 3 });
+    expect(load({ unlocked: 999, selected: -1 })).toEqual({ unlocked: 10, selected: 0 });
+    expect(load('x')).toEqual({ unlocked: 0, selected: 0 });
   });
 });
