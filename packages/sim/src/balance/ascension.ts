@@ -7,7 +7,7 @@ import type { Balance } from './types';
 export const ASCENSION: Balance['ascension'] = {
   levels: [
     // Lv1 本社の目標修正
-    { quotaPercent: 125 },
+    { quotaPercent: 150 },
     // Lv2 経費削減
     { budgetDelta: -1 },
     // Lv3 リロールの手数料
@@ -15,7 +15,7 @@ export const ASCENSION: Balance['ascension'] = {
     // Lv4 床の手入れ打ち切り
     { bonusFloorDelta: -1 },
     // Lv5 目標の再修正
-    { quotaPercent: 125 },
+    { quotaPercent: 200 },
     // Lv6 仕入れ値の高騰
     { priceDelta: 1 },
     // Lv7 秘宝の在庫切れ
@@ -25,6 +25,6 @@ export const ASCENSION: Balance['ascension'] = {
     // Lv9 さらに経費削減
     { budgetDelta: -1 },
     // Lv10 本社の無茶ぶり
-    { quotaPercent: 150 },
+    { quotaPercent: 300 },
   ],
 };

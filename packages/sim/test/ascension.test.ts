@@ -26,10 +26,8 @@ describe('残業レベル', () => {
     const base = createRun(3).config;
     const lv10 = createRun(3, { ascension: 10 }).config;
     expect(lv10.ascension).toBe(10);
-    // 125% × 125% × 150% = 234.375%
-    expect(lv10.shifts.map((s) => s.quota)).toEqual(
-      base.shifts.map((s) => Math.ceil((s.quota * 234375) / 100000)),
-    );
+    // 150% × 200% × 300% = 900%
+    expect(lv10.shifts.map((s) => s.quota)).toEqual(base.shifts.map((s) => s.quota * 9));
     expect(lv10.shifts.map((s) => s.budget)).toEqual(
       base.shifts.map((s) => Math.max(0, s.budget - 2)),
     );
