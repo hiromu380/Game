@@ -7,6 +7,7 @@ import type { FloorTileId } from '../floor/types';
 import type { BossModifierId, DayEventId, ItemId, RelicId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
+import type { Score } from '../core/score';
 
 /** ショップの商品1つ: パーツか、消耗品（ランダム配置権）。消耗品かどうかは itemId で見分ける */
 export type ShopOffer = PartOffer | ItemOffer;
@@ -83,6 +84,18 @@ export interface RunState {
   items?: HeldItem[];
   /** ランダム配置権で湧いた床（その日のあいだ有効。導入前のセーブには無い） */
   itemFloors?: ItemFloorState | null;
+  /** このシフトで押した回の記録（1シフトに何回も押せるとき。まだ押していなければ null） */
+  press?: PressState | null;
+}
+
+/** 1シフトに何回も押すときの、このシフトの途中経過 */
+export interface PressState {
+  /** 押した回数 */
+  count: number;
+  /** ここまでの出荷量の合計（scoreToString した文字列） */
+  shipped: string;
+  /** 前の回に発動したマス（次の回は過熱して通り抜けるだけ） */
+  hot: number[];
 }
 
 /** 手持ちの消耗品1つ。expiresDay の日が終わると消える */
@@ -158,6 +171,12 @@ export type RunError =
 /** シフトを確定した結果 */
 export interface ShiftOutcome {
   cleared: boolean;
+  /** まだこのシフトで押せる（ノルマ未達だが、残りの回がある）。1シフト1回のランでは常に false */
+  continues?: boolean;
+  /** この回までの出荷量の合計（1シフト1回なら本番の出荷量と同じ） */
+  shipped?: Score;
+  /** 押さずに残った回数の報酬（ノルマに届いたときだけ） */
+  spareReward?: number;
   quota: number;
   income: number;
   stats: SimStats;

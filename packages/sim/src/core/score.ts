@@ -25,6 +25,11 @@ export function scoreAdd(a: Score, b: Score): Score {
   return (a + b) as Score;
 }
 
+/** スコア − スコア */
+export function scoreSub(a: Score, b: Score): Score {
+  return (a - b) as Score;
+}
+
 /** スコア × 整数倍率 */
 export function scoreMul(a: Score, factor: number): Score {
   return (a * BigInt(factor)) as Score;

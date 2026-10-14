@@ -5,6 +5,7 @@
  * （「同じシード・同じ配置なら同じスコア」の確認や、不具合の再現に使う）。
  */
 import {
+  BALANCE,
   createInitialAchievements,
   createInitialMeta,
   createRun,
@@ -27,6 +28,9 @@ function seedFromUrl(): number | null {
   if (value === null || !/^\d+$/.test(value)) return null;
   return Number(value) >>> 0;
 }
+
+/** 試作で1シフトに押せる回数 */
+const EXPERIMENT_PRESSES = 3;
 
 /** 新しいランのシード。シミュレーション外なので Math.random を使ってよい */
 export function createNewSeed(): number {
@@ -63,11 +67,22 @@ export function startNormalRun(
   const progress = EDITION_CONFIG.metaProgression ? meta : createInitialMeta();
   // 残業レベル: 製品版だけ。初回ガイドのランでは使わない
   const ascension = options.tutorial ? 0 : (progress.ascension?.selected ?? 0);
+  // 試作（設定でオンのとき）: 1シフトに3回押す・工場を翌日に持ち越す。初回ガイドのランでは使わない
+  const experiment = loadSettings().experimentPresses && !options.tutorial;
   const run = createRun(seed, {
     meta: metaToModifiers(progress),
     prices,
     tutorial: options.tutorial,
     ascension,
+    ...(experiment
+      ? {
+          balance: {
+            ...BALANCE,
+            presses: { ...BALANCE.presses, perShift: EXPERIMENT_PRESSES },
+            resetBoardEachDay: false,
+          },
+        }
+      : {}),
   });
   if (EDITION_CONFIG.overtime) return run;
   return { ...run, config: { ...run.config, overtimeAllowed: false } };

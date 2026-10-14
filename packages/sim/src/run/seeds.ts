@@ -18,8 +18,11 @@ const LABEL_FLOOR_PERMIT = 9;
 const LABEL_RELIC = 10;
 
 /** 本番（スイッチを押したとき）のシード。プレイヤーには表示しない */
-export function commitSeed(runSeed: number, shiftIndex: number): number {
-  return deriveSeed(runSeed, LABEL_COMMIT, shiftIndex);
+export function commitSeed(runSeed: number, shiftIndex: number, press = 0): number {
+  // 1回目は従来と同じシード（1シフト1回のランの結果を変えない）
+  return press === 0
+    ? deriveSeed(runSeed, LABEL_COMMIT, shiftIndex)
+    : deriveSeed(runSeed, LABEL_COMMIT, shiftIndex, press);
 }
 
 /** ショップの品揃えのシード（リロールするたびに変わる） */

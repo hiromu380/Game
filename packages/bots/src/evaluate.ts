@@ -58,6 +58,7 @@ export function evaluate(state: RunState, samples: number, mode: EvalMode = 'mea
       floor,
       seed: seeds.trialSeed(state.seed, state.shiftIndex, EVAL_TRIAL_BASE + k),
       rules,
+      hot: state.press?.hot ?? [],
     });
     score += result.score;
     maxValue += result.stats.maxValue;

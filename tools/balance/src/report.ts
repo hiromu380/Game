@@ -38,6 +38,13 @@ export interface BotSummary {
   /** クリアできなかったシード（どのシフトで脱落したか） */
   failed: { seed: number; failedShift: number }[];
   avgMs: number;
+  /**
+   * 全シフトの「出荷量 ÷ ノルマ」の分布（RATIO_BINS の区間ごとの割合）。
+   * 0 か桁違いかに偏る（二極化）か、ノルマの近くに集まる（ギリギリの勝負）かを見る
+   */
+  ratioBins: number[];
+  /** 1シフトあたりの押した回数の平均（1シフト1回のランでは 1） */
+  avgPresses: number;
 }
 
 function percentile(values: number[], p: number): number {
@@ -47,6 +54,26 @@ function percentile(values: number[], p: number): number {
 }
 
 /** スコア ÷ ノルマ（大きな値でも比較できるよう桁数で丸める） */
+/** 出荷量 ÷ ノルマの区間（下限。最後の区間は上限なし） */
+export const RATIO_BINS = [0, 0.000001, 0.5, 1, 2, 10] as const;
+const RATIO_BIN_LABELS = ['0', '0〜0.5', '0.5〜1（惜しい）', '1〜2（ギリギリ）', '2〜10', '10以上'];
+
+function binRatios(ratios: number[]): number[] {
+  const counts = RATIO_BINS.map(() => 0);
+  for (const r of ratios) {
+    let bin = 0;
+    RATIO_BINS.forEach((low, i) => {
+      if (r >= low) bin = i;
+    });
+    counts[bin]!++;
+  }
+  return counts.map((c) => c / Math.max(1, ratios.length));
+}
+
+function average(values: number[]): number {
+  return values.reduce((n, v) => n + v, 0) / Math.max(1, values.length);
+}
+
 function ratio(score: string, quota: number): number {
   return Number((BigInt(score) * 1000n) / BigInt(Math.max(1, quota))) / 1000;
 }
@@ -139,6 +166,8 @@ export function summarize(
       .filter((l) => !l.cleared)
       .map((l) => ({ seed: l.seed, failedShift: l.shifts.length - 1 })),
     avgMs: logs.reduce((n, l) => n + l.ms, 0) / logs.length,
+    ratioBins: binRatios(logs.flatMap((l) => l.shifts.map((s) => ratio(s.score, s.quota)))),
+    avgPresses: average(logs.flatMap((l) => l.shifts.map((s) => s.presses ?? 1))),
   };
 }
 
@@ -163,6 +192,16 @@ export function toMarkdown(
   lines.push('| ボット | ラン数 | クリア率 | 平均時間/ラン |', '|---|---|---|---|');
   for (const s of summaries) {
     lines.push(`| ${s.bot} | ${s.runs} | ${pct(s.clearRate)} | ${(s.avgMs / 1000).toFixed(2)}s |`);
+  }
+  lines.push('');
+
+  lines.push('## 出荷量 ÷ ノルマの分布（全シフト。二極化しているか・ギリギリの勝負があるか）', '');
+  lines.push(
+    `| ボット | ${RATIO_BIN_LABELS.join(' | ')} | 押した回数/シフト |`,
+    `|---|${RATIO_BIN_LABELS.map(() => '---').join('|')}|---|`,
+  );
+  for (const s of summaries) {
+    lines.push(`| ${s.bot} | ${s.ratioBins.map(pct).join(' | ')} | ${s.avgPresses.toFixed(2)} |`);
   }
   lines.push('');
 

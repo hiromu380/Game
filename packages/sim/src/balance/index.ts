@@ -30,7 +30,7 @@ import { GOLDEN, PART_PARAMS, PARTS, RARITY_WEIGHTS } from './parts';
 import { RELICS } from './relics';
 import { ASCENSION } from './ascension';
 import { STAGES } from './stages';
-import { WEEKLY, OVERTIME, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
+import { WEEKLY, OVERTIME, PRESSES, RESET_BOARD_EACH_DAY, SHIFTS, SHIFTS_PER_DAY } from './shifts';
 import { BOARD, SIM, UNMEASURABLE } from './sim';
 import type { Balance } from './types';
 
@@ -54,6 +54,7 @@ export const BALANCE: Balance = {
   shifts: SHIFTS,
   shiftsPerDay: SHIFTS_PER_DAY,
   resetBoardEachDay: RESET_BOARD_EACH_DAY,
+  presses: PRESSES,
   dayEvents: DAY_EVENTS,
   overtime: OVERTIME,
   weekly: WEEKLY,

@@ -24,6 +24,13 @@ export const SHIFTS_PER_DAY: Balance['shiftsPerDay'] = 3;
 /** 2日目以降の朝に盤面を片付ける（その日にできたロケットの部品を運び出す）。パーツは手持ちに戻る */
 export const RESET_BOARD_EACH_DAY: Balance['resetBoardEachDay'] = true;
 
+/** 1シフトに押せる回数（試作: 1 なら従来どおり。3回押し＋過熱を試すときは 3 にする） */
+export const PRESSES: Balance['presses'] = {
+  perShift: 1,
+  spareReward: 2,
+  overheatExempt: ['switch', 'dock', 'conveyor', 'bend'],
+};
+
 export const OVERTIME: Balance['overtime'] = {
   quotaGrowthPercent: 250,
   budget: 10,

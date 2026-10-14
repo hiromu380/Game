@@ -24,6 +24,19 @@ export interface RelicBalance {
   params: RelicParams;
 }
 
+/**
+ * 1シフトに何回スイッチを押せるか（試作。perShift が 1 なら従来どおり1回で確定）
+ *
+ * 2回以上のときは、押した回の出荷量の合計でノルマを目指す。ノルマに届いたらそのシフトは終わり、
+ * 押さずに残った回数 × spareReward を報酬に足す。ある回に発動したマスは次の回だけ過熱する（通り抜けるだけ）
+ */
+export interface PressBalance {
+  perShift: number;
+  spareReward: number;
+  /** 過熱しないパーツ（通り道・出荷口） */
+  overheatExempt: PartId[];
+}
+
 /** パーツ1種ごとのバランス値 */
 export interface PartBalance {
   /** ショップでの固定価格（フェーズ3で相場制に置き換え予定） */
@@ -337,6 +350,8 @@ export interface Balance {
   shiftsPerDay: number;
   /** 2日目以降の朝（1日の最初のシフト）に、盤面のパーツをすべて手持ちに戻すか（毎日組み直す） */
   resetBoardEachDay: boolean;
+  /** 1シフトにスイッチを押せる回数と、過熱・押さずに残った回数の報酬（試作） */
+  presses: PressBalance;
 
   /** 日ごとのイベント（2日目以降の朝に選ぶ） */
   dayEvents: {

@@ -74,6 +74,7 @@ export function simulate(input: SimInput): SimResult {
   /** この tick の出荷（tick の終わりに同時出荷ボーナスを掛けて確定する） */
   let tickShips: { x: number; y: number; value: Score; cause: number | null }[] = [];
 
+  const hot = new Set(input.hot ?? []);
   const isBlocked = (index: number): boolean => isBlockedCell(floor, index);
 
   /** 発動の直前に、そのマスの床の効果を値に適用する（効果がなければそのまま） */
@@ -209,6 +210,13 @@ export function simulate(input: SimInput): SimResult {
       const part = getPart(board, x, y);
       if (part === null) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'emptyCell' });
+        continue;
+      }
+
+      // 過熱したマス: 発動せず、同じ信号がそのまま次のマスへ進む
+      if (hot.has(index)) {
+        events.push({ tick, type: 'overheat', signalId: signal.id, x, y });
+        nextSignals.push({ ...signal, x, y });
         continue;
       }
 

@@ -286,6 +286,11 @@ export function App({ start, onTitle }: Props) {
   useEffect(() => {
     if (playback?.mode !== 'commit' || !playback.finished) return;
     const next = playback.nextRun.phase;
+    // 試作（1シフトに何回も押す）: まだ押せるときは、達成の音ではなく次の回の合図
+    if (playback.outcome.continues) {
+      audio.play('shiftStart');
+      return;
+    }
     audio.play(next === 'failed' ? 'runFailed' : next === 'cleared' ? 'runCleared' : 'quotaMet');
   }, [playback]);
 
@@ -352,7 +357,8 @@ export function App({ start, onTitle }: Props) {
           ? { partId: selection.partId, dir: selection.dir, golden: !!selection.golden }
           : null,
       mergeable: run.phase === 'building' ? mergeableCells(run) : [],
-      shiftKey: `${run.seed}:${run.shiftIndex}`,
+      hot: run.phase === 'building' ? (run.press?.hot ?? []) : [],
+      shiftKey: `${run.seed}:${run.shiftIndex}:${run.press?.count ?? 0}`,
       guideCell: guideStep ? tutorialCell(guideStep) : null,
     }),
     [run, selection, guideStep],
