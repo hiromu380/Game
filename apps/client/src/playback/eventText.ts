@@ -17,8 +17,6 @@ export function eventToText(e: SimEvent): string {
       return `reset(${e.x},${e.y})`;
     case 'vanish':
       return `vanish#${e.signalId}:${e.reason}`;
-    case 'overheat':
-      return `overheat#${e.signalId}(${e.x},${e.y})`;
     case 'absorb':
       return `absorb#${e.signalId}(${e.x},${e.y})`;
     case 'store':

@@ -8,15 +8,7 @@ import { isBlockedCell } from '../floor/layer';
 import { generateStage } from '../floor/stage';
 import { createPrng } from '../core/prng';
 import { getPart, setPart } from '../core/board';
-import {
-  SCORE_ZERO,
-  scoreAdd,
-  scoreCompare,
-  scoreFromString,
-  scoreOf,
-  scoreSub,
-  scoreToString,
-} from '../core/score';
+import { scoreCompare, scoreOf, scoreToString } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
@@ -94,7 +86,6 @@ export function runTrial(state: RunState): { state: RunState; result: SimResult 
     floor: getCurrentFloor(state),
     seed: trialSeed(state.seed, state.shiftIndex, state.trialCount),
     rules: getCurrentRules(state),
-    hot: state.press?.hot ?? [],
   });
   return { state: { ...state, trialCount: state.trialCount + 1 }, result };
 }
@@ -112,11 +103,10 @@ export function commitShift(
   if (isRelicPending(state)) return { error: 'relicNotChosen' };
 
   // 週替わりは本番シードをサーバーから受け取る（クライアントでは計算できない）
-  const pressIndex = state.press?.count ?? 0;
   let seed = options.seed;
   if (seed === undefined) {
     if (state.config.commitSeedMode === 'external') return { error: 'seedRequired' };
-    seed = commitSeed(state.seed, state.shiftIndex, pressIndex);
+    seed = commitSeed(state.seed, state.shiftIndex);
   }
 
   const result = simulate({
@@ -124,48 +114,11 @@ export function commitShift(
     floor: getCurrentFloor(state),
     seed,
     rules: getCurrentRules(state),
-    hot: state.press?.hot ?? [],
   });
   const spec = getCurrentShift(state);
-  // 1シフトに何回も押せるときは、押した回の合計でノルマを目指す
-  const perShift = Math.max(1, state.config.presses?.perShift ?? 1);
-  const shipped = scoreAdd(
-    state.press ? scoreFromString(state.press.shipped) : SCORE_ZERO,
-    result.score,
-  );
-  const cleared = scoreCompare(shipped, scoreOf(spec.quota)) >= 0;
-  const pressesLeft = perShift - (pressIndex + 1);
-
-  // ノルマ未達で、まだ押せる: 同じシフトのまま次の回へ（収入はその場で予算に入る）
-  if (!cleared && pressesLeft > 0) {
-    const exempt = new Set(state.config.presses?.overheatExempt ?? []);
-    const hot = hotCells(state, result).filter((cell) => {
-      const part = state.board.cells[cell];
-      return part ? !exempt.has(part.id) : false;
-    });
-    return {
-      state: {
-        ...state,
-        budget: state.budget + result.income,
-        press: { count: pressIndex + 1, shipped: scoreToString(shipped), hot },
-      },
-      result,
-      outcome: {
-        cleared: false,
-        continues: true,
-        shipped,
-        quota: spec.quota,
-        income: result.income,
-        stats: result.stats,
-      },
-    };
-  }
-
-  const spareReward = cleared ? pressesLeft * (state.config.presses?.spareReward ?? 0) : 0;
+  const cleared = scoreCompare(result.score, scoreOf(spec.quota)) >= 0;
   const outcome: ShiftOutcome = {
     cleared,
-    shipped,
-    spareReward,
     quota: spec.quota,
     income: result.income,
     stats: result.stats,
@@ -175,7 +128,7 @@ export function commitShift(
     ...state.history,
     {
       shiftIndex: state.shiftIndex,
-      score: scoreToString(shipped),
+      score: scoreToString(result.score),
       quota: spec.quota,
       cleared,
       chainCount: result.stats.chainCount,
@@ -187,7 +140,7 @@ export function commitShift(
   if (!cleared) return { state: { ...state, phase: 'failed', history }, result, outcome };
 
   const nextIndex = state.shiftIndex + 1;
-  const carried = state.budget + spec.clearReward + result.income + spareReward;
+  const carried = state.budget + spec.clearReward + result.income;
   if (nextIndex >= getShiftCount(state)) {
     // 延長戦中は次のシフトを作って続ける。本編なら全シフトクリアで終了
     if (state.overtime) {
@@ -229,7 +182,6 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     budget: carriedBudget + spec.budget,
     rerollCount: 0,
     trialCount: 0,
-    press: null,
     // 新しい日の朝は今日のイベントを抽選する（選ぶまでは効果なし）。同じ日のうちは前のシフトのまま
     dayEvent: dayStart
       ? drawDayEvent(state, Math.floor(shiftIndex / state.config.shiftsPerDay))
@@ -266,29 +218,6 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
   }
   // シフト開始時のボーナス床（パーツを片付けた後の盤面で、空きマスに湧く）
   return { ...next, bonusFloor: drawBonusFloor(next, shiftIndex) };
-}
-
-/**
- * 1シフトに押せる回数の途中経過（画面の表示用）
- * perShift: 押せる回数（1 なら従来どおり）・used: 押した回数・shipped: ここまでの合計・
- * remaining: ノルマまであと（0 未満にはしない）・hot: 過熱しているマス
- */
-export function getPressInfo(state: RunState) {
-  const perShift = Math.max(1, state.config.presses?.perShift ?? 1);
-  const used = state.press?.count ?? 0;
-  const shipped = state.press ? scoreFromString(state.press.shipped) : SCORE_ZERO;
-  const quota = scoreOf(getCurrentShift(state).quota);
-  const remaining = scoreCompare(shipped, quota) >= 0 ? SCORE_ZERO : scoreSub(quota, shipped);
-  return { perShift, used, shipped, remaining, hot: state.press?.hot ?? [] };
-}
-
-/** 本番で発動したマス（次の回に過熱する） */
-function hotCells(state: RunState, result: SimResult): number[] {
-  const cells = new Set<number>();
-  for (const e of result.events) {
-    if (e.type === 'activate') cells.add(e.y * state.board.width + e.x);
-  }
-  return [...cells].sort((a, b) => a - b);
 }
 
 /** 2日目以降の1日の最初のシフトか（ラン開始時の朝は含めない） */

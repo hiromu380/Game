@@ -8,13 +8,13 @@ import type { EffectStrength } from '../config/effects';
 import type { Lang } from '../i18n';
 import { appStorage } from '../storage';
 
-export const SETTINGS_VERSION = 4;
+export const SETTINGS_VERSION = 3;
 export const SETTINGS_STORAGE_KEY = 'chain-factory:settings';
 /** 設定を導入する前に言語だけを保存していたキー（読み込み時に引き継ぐ） */
 const LEGACY_LANG_KEY = 'chain-factory:lang';
 
 export interface UserSettings {
-  version: 4;
+  version: 3;
   lang: Lang;
   /** 演出の強さ */
   effects: EffectStrength;
@@ -29,12 +29,10 @@ export interface UserSettings {
   muted: boolean;
   /** 初回ガイドを終えた（または閉じた）か。false なら次の新しいランでガイドを出す */
   tutorialDone: boolean;
-  /** 試作: 1シフトに3回押す・工場を持ち越す（次の新しい通常ランから） */
-  experimentPresses: boolean;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  version: 4,
+  version: 3,
   lang: 'ja',
   effects: 'full',
   shake: true,
@@ -44,7 +42,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
   bgmVolume: 60,
   muted: false,
   tutorialDone: false,
-  experimentPresses: false,
 };
 
 type SimpleStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -58,13 +55,12 @@ function defaultStorage(): SimpleStorage | null {
  * 読み込んだ値を最新形式にする（足りない項目は既定値で補う）
  * - v1 → v2: 初回ガイド（tutorialDone）を追加。v1 のころから遊んでいた人にもガイドを1回出す
  * - v2 → v3: 点滅を減らす（reduceFlashes）を追加。既定はオフ（演出の強さ・揺れの設定はそのまま）
- * - v3 → v4: 試作の切り替え（experimentPresses）を追加。既定はオフ
  */
 export function migrateSettings(raw: unknown): UserSettings {
   if (typeof raw !== 'object' || raw === null) return DEFAULT_SETTINGS;
   const value = raw as Record<string, unknown>;
-  if (![1, 2, 3, 4].includes(value.version as number)) return DEFAULT_SETTINGS;
-  return { ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 4 };
+  if (value.version !== 1 && value.version !== 2 && value.version !== 3) return DEFAULT_SETTINGS;
+  return { ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 3 };
 }
 
 export function loadSettings(storage = defaultStorage()): UserSettings {

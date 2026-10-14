@@ -106,11 +106,6 @@ export interface SimInput {
   floor?: FloorLayer;
   seed: number;
   rules: RuleSet;
-  /**
-   * 過熱しているマス（1シフトに何回も押すとき、前の回に発動したマス）。
-   * 過熱したマスのパーツは発動せず、入った信号は向きも値も変えずに通り抜ける。省略時はなし
-   */
-  hot?: readonly number[];
 }
 
 /** 信号が消えた理由 */
@@ -156,8 +151,6 @@ export type SimEvent =
   | { tick: number; type: 'vanish'; signalId: number; x: number; y: number; reason: VanishReason }
   /** 合流するパーツ（合流炉）が、同じ tick の2本目以降の信号を取り込んだ */
   | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
-  /** 過熱したマスのパーツを、信号が発動させずに通り抜けた（同じ信号がそのまま進む） */
-  | { tick: number; type: 'overheat'; signalId: number; x: number; y: number }
   /** 溜めるパーツ（蓄電器）が値を溜めた（value）／放出して空になった（null） */
   | { tick: number; type: 'store'; x: number; y: number; value: Score | null }
   /** 転送装置が信号を (x,y) から (toX,toY) へ飛ばした（この直後に行き先から emit される） */

@@ -14,7 +14,6 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createSave } from '@chain-factory/shared';
 import {
-  BALANCE,
   addItem,
   applyOp,
   chooseEvent,
@@ -23,7 +22,6 @@ import {
   createRun,
   isEventPending,
   isRelicPending,
-  placePart,
   useFloorPermit as spendFloorPermit,
   type RunState,
 } from '@chain-factory/sim';
@@ -156,34 +154,6 @@ const rarityShop = (): RunState => ({
   ],
 });
 
-/** 試作（1シフト3回押し）: 1回押した後。ギアのマスが過熱し、ノルマの残りと残り回数が出る */
-function secondPress(): RunState {
-  let run = createRun(5, {
-    balance: {
-      ...BALANCE,
-      presses: { ...BALANCE.presses, perShift: 3 },
-      resetBoardEachDay: false,
-    },
-  });
-  run = { ...run, inventory: { switch: 1, gear: 2, dock: 1 }, bonusFloor: null };
-  for (const [id, x] of [
-    ['switch', 1],
-    ['gear', 2],
-    ['gear', 3],
-    ['dock', 4],
-  ] as const) {
-    const placed = placePart(run, id, x, 2, 1);
-    if (placed.ok) run = placed.state;
-  }
-  run = {
-    ...run,
-    config: { ...run.config, shifts: run.config.shifts.map((s) => ({ ...s, quota: 10 })) },
-  };
-  const committed = commitShift(run);
-  if ('error' in committed) throw new Error(committed.error);
-  return committed.state;
-}
-
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -211,8 +181,6 @@ interface Locator {
   click(): Promise<void>;
   first(): Locator;
   last(): Locator;
-  nth(index: number): Locator;
-  scrollIntoViewIfNeeded(): Promise<void>;
   isVisible(): Promise<boolean>;
   waitFor(options?: { timeout?: number }): Promise<void>;
   boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;
@@ -274,7 +242,6 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'poor', run: poor },
-  { name: 'second-press', run: secondPress },
   {
     name: 'shop-rarity',
     run: rarityShop,

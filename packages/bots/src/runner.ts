@@ -54,8 +54,6 @@ export interface ShiftLog {
   partsOnFloor: number;
   /** 本番で床の効果を受けた回数 */
   floorApplied: number;
-  /** このシフトで押した回数（1シフト1回のランでは 1） */
-  presses: number;
 }
 
 /** 1ランの記録 */
@@ -111,10 +109,6 @@ export interface RunnerOptions {
   relics?: 'best' | 'first';
   /** 全シフトをクリアしたら延長戦に入り、最大この日数まで続ける（既定 0: 延長戦に入らない） */
   overtimeDays?: number;
-  /** 試作の比較用: 1シフトに押せる回数（既定は balance/ のまま） */
-  presses?: number;
-  /** 試作の比較用: 工場を翌日に持ち越す（毎朝の片付けをしない） */
-  carryBoard?: boolean;
 }
 
 function add(record: Partial<Record<PartId, number>>, id: PartId, n = 1) {
@@ -190,24 +184,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
     ? options.start
     : options.mode === 'weekly'
       ? createWeeklyRun(`bal-${seed}`, { practice: true })
-      : createRun(seed, {
-          ...meta,
-          ascension: options.ascension ?? 0,
-          ...(options.presses !== undefined || options.carryBoard
-            ? {
-                balance: {
-                  ...BALANCE,
-                  presses: {
-                    ...BALANCE.presses,
-                    perShift: options.presses ?? BALANCE.presses.perShift,
-                  },
-                  resetBoardEachDay: options.carryBoard ? false : BALANCE.resetBoardEachDay,
-                },
-              }
-            : {}),
-        });
-  /** このシフトで押した回数（1シフトに何回も押せるとき） */
-  let pressCount = 0;
+      : createRun(seed, { ...meta, ascension: options.ascension ?? 0 });
   const overtimeEnd =
     state.config.shifts.length + (options.overtimeDays ?? 0) * state.config.shiftsPerDay;
   for (;;) {
@@ -275,12 +252,6 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       options.commitSeed ? { seed: options.commitSeed(plan.state.shiftIndex) } : undefined,
     );
     if ('error' in committed) throw new Error(committed.error);
-    // 1シフトに何回も押せるとき: ノルマ未達で回が残っていれば、同じシフトの次の回へ（組み直して押す）
-    pressCount++;
-    if (committed.outcome.continues) {
-      state = committed.state;
-      continue;
-    }
     const record = committed.state.history.at(-1)!;
     const dayEvent = plan.state.dayEvent ?? null;
     log.shifts.push({
@@ -299,9 +270,7 @@ export function playRun(seed: number, botName: BotName, options: RunnerOptions):
       floorCells: effectCells.length,
       partsOnFloor: effectCells.filter((i) => plan.state.board.cells[i]).length,
       floorApplied: committed.result.stats.floorApplied,
-      presses: pressCount,
     });
-    pressCount = 0;
     if (record.cleared) log.shiftsCleared++;
     state = committed.state;
   }

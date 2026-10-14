@@ -102,7 +102,6 @@ export {
   getCurrentRules,
   getCurrentShift,
   getDayAndPeriod,
-  getPressInfo,
   getShiftCount,
   isDayStart,
   runTrial,

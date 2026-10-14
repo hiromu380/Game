@@ -53,9 +53,6 @@ function parseArgs(argv: string[]) {
     golden: args.get('golden') !== 'off',
     relics: (args.get('relics') === 'first' ? 'first' : 'best') as 'best' | 'first',
     ascension: Number(args.get('ascension') ?? 0),
-    // 試作の比較用: 1シフトに押せる回数・工場の持ち越し
-    presses: args.has('presses') ? Number(args.get('presses')) : undefined,
-    carryBoard: args.get('carry') === 'on',
   };
 }
 
@@ -73,8 +70,6 @@ async function main() {
     golden: opts.golden,
     relics: opts.relics,
     ascension: opts.ascension,
-    ...(opts.presses !== undefined ? { presses: opts.presses } : {}),
-    carryBoard: opts.carryBoard,
   };
   const summaries: BotSummary[] = [];
   const shiftSpecs = opts.mode === 'weekly' ? BALANCE.weekly.shifts : BALANCE.shifts;

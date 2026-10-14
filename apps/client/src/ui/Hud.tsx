@@ -5,13 +5,7 @@
  * 未試運転・試運転済み・配置を変えた後（古い結果は薄く）を区別し、ランダムなパーツがあれば「毎回変わる」と添える。
  * 再生中は、同じ場所に出荷量の途中経過を出す
  */
-import {
-  getCurrentShift,
-  getDayAndPeriod,
-  getPressInfo,
-  getShiftCount,
-  type RunState,
-} from '@chain-factory/sim';
+import { getCurrentShift, getDayAndPeriod, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
 import { quotaRatio, type TrialStatus } from '../state/trialStatus';
 import { RocketProgress } from './RocketProgress';
@@ -29,10 +23,7 @@ export function Hud({ run, liveScore: target, trial }: Props) {
   const { t, formatScore, formatMeasuredCompact } = useI18n();
   // 出荷のたびに、前の値から勢いよく増えてピタッと止まる
   const liveScore = useCountUp(target);
-  // 1シフトに何回も押すとき（試作）は、ノルマまでの残りを目標にする
-  const press = getPressInfo(run);
-  const multi = press.perShift > 1;
-  const quota = multi ? Number(press.remaining) : getCurrentShift(run).quota;
+  const quota = getCurrentShift(run).quota;
   const live = liveScore === null ? null : BigInt(liveScore);
   // ゲージに出す値: 再生中は出荷量の途中経過、それ以外は直近の試運転の結果
   const shown = live ?? (trial.kind === 'none' ? null : trial.last);
@@ -68,13 +59,8 @@ export function Hud({ run, liveScore: target, trial }: Props) {
       </div>
       {/* ノルマはいちばん大事な数字なので、枠つきで大きく出す。再生中は出荷量の進み具合をバーで見せる */}
       <div className={`hud__item hud__quota ${met && !stale ? 'is-met' : ''}`}>
-        <span className="hud__label">{t(multi ? 'hud.quotaLeft' : 'hud.quota')}</span>
+        <span className="hud__label">{t('hud.quota')}</span>
         <span className="hud__quota-value">{formatScore(String(quota))}</span>
-        {multi && (
-          <span className="hud__presses">
-            {t('hud.pressesLeft', { left: press.perShift - press.used, total: press.perShift })}
-          </span>
-        )}
       </div>
       {/* 試運転の結果（再生中は出荷量の途中経過）と、ノルマに対するゲージ */}
       <div

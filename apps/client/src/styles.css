@@ -177,12 +177,6 @@ button:disabled {
   color: var(--accent);
   font-weight: bold;
 }
-.hud__presses {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text);
-  white-space: nowrap;
-}
 .hud__quota-value {
   font-size: 1.6rem;
   font-weight: 800;

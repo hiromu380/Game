@@ -87,8 +87,6 @@ export interface BoardViewState {
   placing: { partId: PartId; dir: Dir4; golden: boolean } | null;
   /** 合体できるパーツのマス（金色の枠で光らせる。マスの番号） */
   mergeable: number[];
-  /** 過熱しているマス（1シフトに何回も押すとき。前の回に発動して、この回は素通り） */
-  hot: number[];
   /** 今日の夜シフト（ボス）に使用不可になるマス（予告表示用） */
   upcomingBlocked: number[];
   /** どのランのどのシフトか（変わったら前の本番の表示を消す） */
@@ -512,12 +510,7 @@ export class BoardRenderer {
     this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     if (!this.state) return;
-    const { board, highlight, placing, guideCell, mergeable, hot } = this.state;
-
-    // 過熱したマス: 赤い網と、立ちのぼる熱の線（色だけでなく形でも示す）
-    for (const cell of hot) {
-      this.overlayLayer.addChild(heatMark(cell % board.width, Math.floor(cell / board.width)));
-    }
+    const { board, highlight, placing, guideCell, mergeable } = this.state;
 
     // 合体できるパーツ: 金色の太い枠（色だけでなく、選ぶと合体ボタンが出る）
     if (!this.timeline) {
@@ -1027,24 +1020,6 @@ export class BoardRenderer {
 /**
  * 合体できるパーツの印: 薄い金のにじみと、四隅のかぎ括弧（金色パーツの縁取りと形で区別する）
  */
-function heatMark(x: number, y: number): Graphics {
-  const { px, py } = cellCenter(x, y);
-  const half = CELL_SIZE / 2 - 3;
-  const g = new Graphics()
-    .roundRect(px - half, py - half, half * 2, half * 2, 8)
-    .fill({ color: BOARD_THEME.hot, alpha: 0.22 })
-    .stroke({ width: 3, color: BOARD_THEME.hot, alpha: 0.9 });
-  // 右上に3本の波線（陽炎）
-  for (let i = 0; i < 3; i++) {
-    const sx = px + half * 0.25 + i * 7;
-    const sy = py - half + 6;
-    g.moveTo(sx, sy + 14)
-      .quadraticCurveTo(sx - 4, sy + 10, sx, sy + 7)
-      .quadraticCurveTo(sx + 4, sy + 4, sx, sy);
-  }
-  return g.stroke({ width: 2.5, color: BOARD_THEME.hot, cap: 'round' });
-}
-
 function mergeGlow(x: number, y: number): Graphics {
   const { px, py } = cellCenter(x, y);
   const half = CELL_SIZE / 2 - 4;

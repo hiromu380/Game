@@ -46,7 +46,6 @@ export function ShowcasePlayer({ def, start, loop = false, muted = false, onFini
       highlight: null,
       placing: null,
       mergeable: [],
-      hot: [],
       upcomingBlocked: [],
       shiftKey: 'showcase',
       guideCell: null,

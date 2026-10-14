@@ -103,16 +103,6 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </div>
         {!settings.tutorialDone && <p className="panel__hint">{t('settings.tutorialPending')}</p>}
 
-        <label className="settings__row">
-          <span>{t('settings.experimentPresses')}</span>
-          <input
-            type="checkbox"
-            checked={settings.experimentPresses}
-            onChange={(e) => updateSettings({ experimentPresses: e.target.checked })}
-          />
-        </label>
-        <p className="panel__hint">{t('settings.experimentPressesHint')}</p>
-
         <div className="button-row">
           <button className="button--primary" onClick={onClose} data-close>
             {t('settings.close')}

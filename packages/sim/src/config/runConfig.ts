@@ -60,8 +60,6 @@ export interface RunConfig {
    * これを導入する前に始めたラン（セーブ）には無いので、無ければ戻さない
    */
   resetBoardEachDay?: boolean;
-  /** 1シフトに押せる回数（balance/ の写し。導入前のランには無い = 1回） */
-  presses?: Balance['presses'];
   /**
    * 日ごとのイベント（balance/ の写しと、試供品で出るパーツの一覧）。
    * 導入前に始めたラン（セーブ）には無いので、無ければイベントは起きない
@@ -204,7 +202,6 @@ export function buildRunConfig({
     shifts: balance.shifts.map((s) => ({ ...s })),
     shiftsPerDay: balance.shiftsPerDay,
     resetBoardEachDay: balance.resetBoardEachDay,
-    presses: { ...balance.presses, overheatExempt: [...balance.presses.overheatExempt] },
     dayEvents: {
       ...balance.dayEvents,
       candidates: [...balance.dayEvents.candidates],

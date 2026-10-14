@@ -4,7 +4,6 @@
 import {
   BALANCE,
   getCurrentShift,
-  getPressInfo,
   isUnmeasurable,
   scoreCompare,
   scoreOf,
@@ -35,25 +34,15 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
 
   const { score, stats } = playback.result;
   const quota = getCurrentShift(run).quota;
-  // 本番は押した回の合計で判定する（1シフト1回なら本番の出荷量と同じ）
-  const outcome = playback.mode === 'commit' ? playback.outcome : null;
-  const shipped = outcome?.shipped ?? score;
-  const met = scoreCompare(shipped, scoreOf(quota)) >= 0;
-  /** まだこのシフトで押せる（試作: 1シフトに何回も押す） */
-  const pressesLeft =
-    playback.mode === 'commit' && outcome?.continues
-      ? getPressInfo(playback.nextRun).perShift - getPressInfo(playback.nextRun).used
-      : 0;
+  const met = scoreCompare(score, scoreOf(quota)) >= 0;
 
   // 本番で次に進むときのボタン文言
   const closeLabel =
     playback.mode === 'trial'
       ? t('playback.close')
-      : pressesLeft > 0
-        ? t('playback.nextPress')
-        : playback.nextRun.phase === 'building'
-          ? t('playback.nextShift')
-          : t('playback.toResult');
+      : playback.nextRun.phase === 'building'
+        ? t('playback.nextShift')
+        : t('playback.toResult');
 
   return (
     <div className="playback-panel">
@@ -65,22 +54,13 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
       />
       <h2>{playback.mode === 'trial' ? t('playback.trialTitle') : t('playback.commitTitle')}</h2>
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
-        {met
-          ? t('playback.quotaMet')
-          : pressesLeft > 0
-            ? t('playback.pressAgain', { left: pressesLeft })
-            : t('playback.quotaMissed')}
+        {met ? t('playback.quotaMet') : t('playback.quotaMissed')}
       </div>
       {!met && (
         <p className="playback-panel__short">
           {t('playback.shortBy', {
-            amount: formatCompact((BigInt(quota) - BigInt(scoreToString(shipped))).toString()),
+            amount: formatCompact((BigInt(quota) - BigInt(scoreToString(score))).toString()),
           })}
-        </p>
-      )}
-      {(outcome?.spareReward ?? 0) > 0 && (
-        <p className="playback-panel__short">
-          {t('playback.spareReward', { amount: outcome!.spareReward! })}
         </p>
       )}
       <RocketLine playback={playback} run={run} />
@@ -96,12 +76,6 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
             </span>
           )}
         </dd>
-        {shipped !== score && (
-          <>
-            <dt>{t('playback.shippedTotal')}</dt>
-            <dd>{formatMeasured(shipped)}</dd>
-          </>
-        )}
         <dt>{t('playback.quota')}</dt>
         <dd>{formatScore(String(quota))}</dd>
         <dt>{t('playback.chain')}</dt>

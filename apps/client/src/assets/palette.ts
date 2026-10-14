@@ -133,8 +133,6 @@ export const TITLE_COLORS = {
 
 /** 盤面（床・枠・マス）とボス */
 export const BOARD_COLORS = {
-  /** 過熱したマス（1シフトに何回も押す試作: 前の回に発動して、次の回は素通り） */
-  hot: '#ff7043',
   background: '#23272e',
   floorA: '#4a4f57',
   floorB: '#454a52',
