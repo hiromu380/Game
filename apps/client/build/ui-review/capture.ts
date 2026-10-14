@@ -181,6 +181,8 @@ interface Locator {
   click(): Promise<void>;
   first(): Locator;
   last(): Locator;
+  nth(index: number): Locator;
+  scrollIntoViewIfNeeded(): Promise<void>;
   isVisible(): Promise<boolean>;
   waitFor(options?: { timeout?: number }): Promise<void>;
   boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null>;
