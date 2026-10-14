@@ -1,7 +1,7 @@
 /**
  * 人間確認（Turnstile）のウィジェット。通ったら匿名登録して onRegistered を呼ぶ
  *
- * デイリーに初めて参加するときだけ表示する（ランキングの閲覧・練習には不要）。
+ * 週替わりに初めて参加するときだけ表示する（ランキングの閲覧・練習には不要）。
  */
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../i18n';
@@ -73,9 +73,9 @@ export function HumanCheck({ onRegistered }: Props) {
       {TURNSTILE_SITE_KEY ? (
         <div ref={containerRef} />
       ) : (
-        <p className="panel__hint daily__error">{t('online.notConfigured')}</p>
+        <p className="panel__hint weekly__error">{t('online.notConfigured')}</p>
       )}
-      {message && <p className="panel__hint daily__error">{message}</p>}
+      {message && <p className="panel__hint weekly__error">{message}</p>}
     </div>
   );
 }

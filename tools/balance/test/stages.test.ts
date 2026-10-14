@@ -7,7 +7,7 @@
  */
 import { BALANCE, commitShift, createPrng, createRun, type Balance } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { BOTS } from '../src/bots';
+import { BOTS } from '@chain-factory/bots';
 
 const QUOTA = BALANCE.shifts[0]!.quota;
 

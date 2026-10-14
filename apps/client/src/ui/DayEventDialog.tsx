@@ -3,6 +3,7 @@
  * 効果量は RunConfig の dayEvents から埋め込む（balance/events.ts を変えれば文言も追従する）
  */
 import { activeEvent, type DayEventId, type RunState } from '@chain-factory/sim';
+import { EVENT_ICONS } from '../assets/manifest';
 import { useI18n, type TranslateFn } from '../i18n';
 
 /** イベントの説明文 */
@@ -41,10 +42,13 @@ export function DayEventDialog({ run, onChoose }: Props) {
               onClick={() => onChoose(index)}
               autoFocus={index === 0}
             >
-              <span className="day-event__sender">{t(`event.${id}.sender`)}</span>
-              <strong>{t(`event.${id}.name`)}</strong>
-              <span className="day-event__story">{t(`event.${id}.story`)}</span>
-              <span>{describeEvent(t, run, id)}</span>
+              <img className="day-event__icon" src={EVENT_ICONS[id]} alt="" />
+              <span className="day-event__text">
+                <span className="day-event__sender">{t(`event.${id}.sender`)}</span>
+                <strong>{t(`event.${id}.name`)}</strong>
+                <span className="day-event__story">{t(`event.${id}.story`)}</span>
+                <span>{describeEvent(t, run, id)}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -60,12 +64,13 @@ export function DayEventNotice({ run }: { run: RunState }) {
   if (!id) return null;
   const sample = run.dayEvent?.samplePart;
   return (
-    <div className="boss-notice day-event-notice">
+    <div className="boss-notice day-event-notice" title={t(`event.${id}.story`)}>
+      <img className="boss-notice__icon" src={EVENT_ICONS[id]} alt="" />
       <span className="boss-notice__label">{t('event.today')}</span>
+      <span className="boss-notice__period">{t('rule.period.today')}</span>
       <strong>
         {t(`event.${id}.sender`)} / {t(`event.${id}.name`)}
       </strong>
-      <span className="boss-notice__story">{t(`event.${id}.story`)}</span>
       <span className="boss-notice__desc">
         {id === 'sample' && sample
           ? t('event.sampleGot', { part: t(`part.${sample}.name`) })

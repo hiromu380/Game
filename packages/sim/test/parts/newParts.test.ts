@@ -18,12 +18,18 @@ const only = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
 const P = BALANCE.partParams;
 
 describe('合流炉（倍率系）', () => {
-  it('同じ tick に入った信号を合算して1本にする', () => {
-    // 分岐器で上下に分けた 1 と 1 が、同じ長さの経路で合流炉(2,1)に同時に入る → 2 を出荷
-    const { scoreText, events } = run(['.. C> Cv ..', 'S> Y> M> D>', '.. C> C^ ..']);
-    expect(scoreText).toBe('2');
+  it('同じ tick に入った信号の値を掛け合わせて1本にする', () => {
+    // 分岐器で上下に分けた信号が、同じ長さの経路で合流炉(2,1)に同時に入る。上はギア2つで 4、下はギア1つで 2
+    // → 4 × 2 = 8（足し算なら 6）
+    const { scoreText, events } = run(['.. G> Gv ..', 'S> Y> M> D>', '.. G> C^ ..']);
+    expect(scoreText).toBe('8');
     expect(only(events, 'absorb')).toHaveLength(1);
     expect(only(events, 'activate').filter((e) => e.partId === 'merger')).toHaveLength(1);
+  });
+
+  it('導入前のラン（mergeMode が sum）は足し算のまま', () => {
+    const rules = { ...DEFAULT_RULES, mergeMode: 'sum' as const };
+    expect(run(['.. G> Gv ..', 'S> Y> M> D>', '.. G> C^ ..'], 1, rules).scoreText).toBe('6');
   });
 
   it('別々の tick に入った信号は別々に送る（発動回数は tick ごとに1回）', () => {
@@ -56,7 +62,7 @@ describe('連鎖メーター（倍率系）', () => {
 describe('散布機（分岐系）', () => {
   it('前・左・右の3方向へ同じ値で送る', () => {
     const { scoreText } = run(['.. D> ..', 'S> E> D>', '.. D> ..']);
-    expect(scoreText).toBe('3');
+    expect(scoreText).toBe('9'); // 1 × 3口 × 同時出荷 ×3
   });
 });
 

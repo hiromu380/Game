@@ -4,7 +4,7 @@
   --panel: #262a31;
   --panel-border: #3a3f48;
   --text: #eef0f3;
-  --muted: #a3aab5;
+  --muted: #aab1bc;
   --accent: #ffc107;
   --hazard-black: #2b2b2b;
   --primary: #e53935;
@@ -14,8 +14,16 @@
   --met: #69f0ae;
   --missed: #ff5252;
   --selected: #ffeb3b;
+  --rarity-uncommon: #4fc3f7;
+  --rarity-rare: #ce93d8;
+  --rarity-legendary: #ffb74d;
   --white: #ffffff;
   --hazard-yellow: #ffc107;
+  --floor-item: #ffca28;
+  --golden: #ffd54f;
+  --golden-deep: #ff8f00;
+  --floor-bonus: #4dd0e1;
+  --floor-blocked: #c62828;
   --vanish-outOfBoard: #90a4ae;
   --vanish-emptyCell: #ffb74d;
   --vanish-exhausted: #ef5350;

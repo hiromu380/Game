@@ -1,0 +1,54 @@
+# UI の確認（after）
+
+撮影: 2026-10-07T23:10:53.828Z・http://localhost:5173/
+
+| 画面サイズ | 言語 | 状態 | 横スクロール | ヘッダーのはみ出し | 画像 |
+|---|---|---|---|---|---|
+| 1920x1080 | ja | idle | なし | なし | [1920x1080-ja-idle.jpg](1920x1080-ja-idle.jpg) |
+| 1920x1080 | ja | selected | なし | なし | [1920x1080-ja-selected.jpg](1920x1080-ja-selected.jpg) |
+| 1920x1080 | ja | poor | なし | なし | [1920x1080-ja-poor.jpg](1920x1080-ja-poor.jpg) |
+| 1920x1080 | ja | trial-done | なし | なし | [1920x1080-ja-trial-done.jpg](1920x1080-ja-trial-done.jpg) |
+| 1920x1080 | ja | trial-then-changed | なし | なし | [1920x1080-ja-trial-then-changed.jpg](1920x1080-ja-trial-then-changed.jpg) |
+| 1920x1080 | ja | playing | なし | なし | [1920x1080-ja-playing.jpg](1920x1080-ja-playing.jpg) |
+| 1920x1080 | ja | commit-failed | なし | なし | [1920x1080-ja-commit-failed.jpg](1920x1080-ja-commit-failed.jpg) |
+| 1920x1080 | ja | day3-floors | なし | なし | [1920x1080-ja-day3-floors.jpg](1920x1080-ja-day3-floors.jpg) |
+| 1920x1080 | ja | day2-event | なし | なし | [1920x1080-ja-day2-event.jpg](1920x1080-ja-day2-event.jpg) |
+| 1920x1080 | en | idle | なし | なし | [1920x1080-en-idle.jpg](1920x1080-en-idle.jpg) |
+| 1920x1080 | en | day3-floors | なし | なし | [1920x1080-en-day3-floors.jpg](1920x1080-en-day3-floors.jpg) |
+| 1366x768 | ja | idle | なし | なし | [1366x768-ja-idle.jpg](1366x768-ja-idle.jpg) |
+| 1366x768 | ja | selected | なし | なし | [1366x768-ja-selected.jpg](1366x768-ja-selected.jpg) |
+| 1366x768 | ja | poor | なし | なし | [1366x768-ja-poor.jpg](1366x768-ja-poor.jpg) |
+| 1366x768 | ja | trial-done | なし | なし | [1366x768-ja-trial-done.jpg](1366x768-ja-trial-done.jpg) |
+| 1366x768 | ja | trial-then-changed | なし | なし | [1366x768-ja-trial-then-changed.jpg](1366x768-ja-trial-then-changed.jpg) |
+| 1366x768 | ja | playing | なし | なし | [1366x768-ja-playing.jpg](1366x768-ja-playing.jpg) |
+| 1366x768 | ja | commit-failed | なし | なし | [1366x768-ja-commit-failed.jpg](1366x768-ja-commit-failed.jpg) |
+| 1366x768 | ja | day3-floors | なし | なし | [1366x768-ja-day3-floors.jpg](1366x768-ja-day3-floors.jpg) |
+| 1366x768 | ja | day2-event | なし | なし | [1366x768-ja-day2-event.jpg](1366x768-ja-day2-event.jpg) |
+| 1366x768 | en | idle | なし | なし | [1366x768-en-idle.jpg](1366x768-en-idle.jpg) |
+| 1366x768 | en | day3-floors | なし | なし | [1366x768-en-day3-floors.jpg](1366x768-en-day3-floors.jpg) |
+| 1280x800 | ja | idle | なし | なし | [1280x800-ja-idle.jpg](1280x800-ja-idle.jpg) |
+| 1280x800 | ja | selected | なし | なし | [1280x800-ja-selected.jpg](1280x800-ja-selected.jpg) |
+| 1280x800 | ja | poor | なし | なし | [1280x800-ja-poor.jpg](1280x800-ja-poor.jpg) |
+| 1280x800 | ja | trial-done | なし | なし | [1280x800-ja-trial-done.jpg](1280x800-ja-trial-done.jpg) |
+| 1280x800 | ja | trial-then-changed | なし | なし | [1280x800-ja-trial-then-changed.jpg](1280x800-ja-trial-then-changed.jpg) |
+| 1280x800 | ja | playing | なし | なし | [1280x800-ja-playing.jpg](1280x800-ja-playing.jpg) |
+| 1280x800 | ja | commit-failed | なし | なし | [1280x800-ja-commit-failed.jpg](1280x800-ja-commit-failed.jpg) |
+| 1280x800 | ja | day3-floors | なし | なし | [1280x800-ja-day3-floors.jpg](1280x800-ja-day3-floors.jpg) |
+| 1280x800 | ja | day2-event | なし | なし | [1280x800-ja-day2-event.jpg](1280x800-ja-day2-event.jpg) |
+| 1280x800 | en | idle | なし | なし | [1280x800-en-idle.jpg](1280x800-en-idle.jpg) |
+| 1280x800 | en | day3-floors | なし | なし | [1280x800-en-day3-floors.jpg](1280x800-en-day3-floors.jpg) |
+| 390x844 | ja | idle | なし | なし | [390x844-ja-idle.jpg](390x844-ja-idle.jpg) |
+| 390x844 | ja | selected | なし | なし | [390x844-ja-selected.jpg](390x844-ja-selected.jpg) |
+| 390x844 | ja | poor | なし | なし | [390x844-ja-poor.jpg](390x844-ja-poor.jpg) |
+| 390x844 | ja | trial-done | なし | なし | [390x844-ja-trial-done.jpg](390x844-ja-trial-done.jpg) |
+| 390x844 | ja | trial-then-changed | なし | なし | [390x844-ja-trial-then-changed.jpg](390x844-ja-trial-then-changed.jpg) |
+| 390x844 | ja | playing | なし | なし | [390x844-ja-playing.jpg](390x844-ja-playing.jpg) |
+| 390x844 | ja | commit-failed | なし | なし | [390x844-ja-commit-failed.jpg](390x844-ja-commit-failed.jpg) |
+| 390x844 | ja | day3-floors | なし | なし | [390x844-ja-day3-floors.jpg](390x844-ja-day3-floors.jpg) |
+| 390x844 | ja | day2-event | なし | なし | [390x844-ja-day2-event.jpg](390x844-ja-day2-event.jpg) |
+| 390x844 | en | idle | なし | なし | [390x844-en-idle.jpg](390x844-en-idle.jpg) |
+| 390x844 | en | day3-floors | なし | なし | [390x844-en-day3-floors.jpg](390x844-en-day3-floors.jpg) |
+| 1280x800-zoom200 | ja | idle | なし | なし | [1280x800-zoom200-ja-idle.jpg](1280x800-zoom200-ja-idle.jpg) |
+| 1280x800-zoom200 | ja | day3-floors | なし | なし | [1280x800-zoom200-ja-day3-floors.jpg](1280x800-zoom200-ja-day3-floors.jpg) |
+| 1280x800-zoom200 | en | idle | なし | なし | [1280x800-zoom200-en-idle.jpg](1280x800-zoom200-en-idle.jpg) |
+| 1280x800-zoom200 | en | day3-floors | なし | なし | [1280x800-zoom200-en-day3-floors.jpg](1280x800-zoom200-en-day3-floors.jpg) |

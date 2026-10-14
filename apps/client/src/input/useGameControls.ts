@@ -1,7 +1,7 @@
 /**
  * ゲーム画面のキーボード・コントローラー操作（盤面のカーソルと、ショップ・手持ちの一覧）
  *
- * - 盤面: 方向でカーソルを動かす。決定 = 置く・選ぶ（マウスのクリックと同じ）、X = 回転、B = 選択解除、
+ * - 盤面: 方向でカーソルを動かす。決定 = 置く・選ぶ（マウスのクリックと同じ）、X = 回転、Back = 元に戻す、RT = 手持ちに戻す、B = 選択解除、
  *   Y = 試運転、Start = 本番
  * - L / R: ショップ・手持ちの一覧へ移る（タブ表示ならタブも切り替える）。一覧の中は上下で選び、決定で押す。
  *   手持ちのパーツを選んだら盤面へ戻る（そのまま置けるように）。B で盤面へ戻る
@@ -26,6 +26,10 @@ export interface GameControlOptions {
   onPlace: (x: number, y: number) => void;
   onDeselect: () => void;
   onRotate: () => void;
+  onUndo: () => void;
+  /** 選んでいる盤面のパーツを手持ちに戻す */
+  onReturn: () => void;
+  onMerge: () => void;
   onTrial: () => void;
   onCommit: () => void;
   onClosePlayback: () => void;
@@ -68,6 +72,8 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
       addControlHandler((action) => {
         const { options: o, cursor: c } = ref.current;
         if (!o.active) return false;
+        // ダイアログ（ショップの一覧・確認など）が開いていれば、ダイアログの操作（Esc で閉じる等）にまわす
+        if (document.querySelector('.modal')) return false;
 
         if (o.playing) {
           if (action === 'confirm' && o.playbackFinished) {
@@ -123,6 +129,15 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
             return true;
           case 'rotate':
             o.onRotate();
+            return true;
+          case 'undo':
+            o.onUndo();
+            return true;
+          case 'returnPart':
+            o.onReturn();
+            return true;
+          case 'merge':
+            o.onMerge();
             return true;
           case 'trial':
             o.onTrial();

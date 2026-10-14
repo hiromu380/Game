@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- ストア用の画像の確認ページ（apps/client/art/keyvisual/preview.ts で生成。手で編集しない） -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ストア用の画像の確認</title>
+    <style>
+      body { margin: 0; padding: 16px; background: #1a1c20; color: #eef0f3; font-family: system-ui, sans-serif; }
+      h2 { color: #ffc107; font-size: 1.05rem; margin: 28px 0 6px; }
+      p { color: #aab1bc; margin: 0 0 8px; }
+      .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+      figure { margin: 0; }
+      figcaption { font-size: 0.8rem; color: #aab1bc; }
+      .light { background: #f2f2f2; padding: 10px; border-radius: 6px; }
+      .light figcaption, .light .note { color: #333; }
+      .mono img { filter: grayscale(1) blur(1.5px); }
+      .strip { display: flex; gap: 6px; align-items: center; padding: 8px; background: #1b2838; border-radius: 6px; overflow: hidden; }
+      .strip.light { background: #f2f2f2; }
+      .note { font-size: 0.8rem; color: #aab1bc; }
+      .checker { background: repeating-conic-gradient(#999 0 25%, #bbb 0 50%) 0 0 / 16px 16px; }
+      .hero { position: relative; display: inline-block; }
+      .hero .safe { position: absolute; border: 2px dashed #69f0ae; box-sizing: border-box; }
+    </style>
+  </head>
+  <body>
+    <h1>ストア用の画像の確認</h1>
+    <p>規定は apps/client/build/store/capsules.json（2026-09 時点・要確認）。書き出し: <code>node apps/client/build/store/generate.mjs</code></p>
+
+    <h2>Steam で表示される大きさ</h2>
+    <div class="row"><figure><img src="../apps/client/build/store/svg/header.svg" width="460" alt="" /><figcaption>Header Capsule（920×430 → 表示 460px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/small.svg" width="120" alt="" /><figcaption>Small Capsule（462×174 → 表示 120px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/main.svg" width="616" alt="" /><figcaption>Main Capsule（1232×706 → 表示 616px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/vertical.svg" width="374" alt="" /><figcaption>Vertical Capsule（748×896 → 表示 374px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/library.svg" width="200" alt="" /><figcaption>Library Capsule（600×900 → 表示 200px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/hero.svg" width="960" alt="" /><figcaption>Library Hero（3840×1240 → 表示 960px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/background.svg" width="480" alt="" /><figcaption>ページ背景（要確認）（1920×1080 → 表示 480px 幅）</figcaption></figure><figure><img src="../apps/client/build/store/svg/libraryLogo.svg" width="320" alt="" class="checker"/><figcaption>Library Logo（サイズ要確認）（1280×720 → 表示 320px 幅）</figcaption></figure></div>
+
+    <h2>Small Capsule を小さく（120×45 まで）</h2>
+    <div class="row"><figure><img src="../apps/client/build/store/svg/small.svg" width="120" alt="" /><figcaption>Small 120px</figcaption></figure><figure><img src="../apps/client/build/store/svg/small.svg" width="184" alt="" /><figcaption>Small 184px</figcaption></figure><figure><img src="../apps/client/build/store/svg/small.svg" width="231" alt="" /><figcaption>Small 231px</figcaption></figure></div>
+
+    <h2>明るい背景</h2>
+    <div class="row light"><img src="../apps/client/build/store/svg/header.svg" width="460" alt="" /><img src="../apps/client/build/store/svg/small.svg" width="231" alt="" /><img src="../apps/client/build/store/svg/vertical.svg" width="187" alt="" /><img src="../apps/client/build/store/svg/library.svg" width="150" alt="" /></div>
+
+    <h2>白黒＋ぼかし（シルエットで判別できるか）</h2>
+    <div class="row mono"><img src="../apps/client/build/store/svg/header.svg" width="460" alt="" /><img src="../apps/client/build/store/svg/small.svg" width="231" alt="" /><img src="../apps/client/build/store/svg/main.svg" width="308" alt="" /><img src="../apps/client/build/store/svg/vertical.svg" width="187" alt="" /></div>
+
+    <h2>混雑した一覧での目立ち方（周りはダミーの図形）</h2>
+    <div class="strip"><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#3d5a80"/><circle cx="161" cy="54" r="37.8" fill="#293241"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#98c1d9"/><circle cx="161" cy="54" r="37.8" fill="#6d597a"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><img src="../apps/client/build/store/svg/header.svg" width="230" alt="" /><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#293241"/><circle cx="161" cy="54" r="37.8" fill="#e5989b"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#6d597a"/><circle cx="161" cy="54" r="37.8" fill="#355070"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg> <span class="note">暗い一覧</span></div>
+    <div class="strip light" style="margin-top:8px"><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#3d5a80"/><circle cx="161" cy="54" r="37.8" fill="#293241"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#98c1d9"/><circle cx="161" cy="54" r="37.8" fill="#6d597a"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><img src="../apps/client/build/store/svg/header.svg" width="230" alt="" /><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#293241"/><circle cx="161" cy="54" r="37.8" fill="#e5989b"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg><svg width="230" height="108" viewBox="0 0 230 108"><rect width="230" height="108" fill="#6d597a"/><circle cx="161" cy="54" r="37.8" fill="#355070"/><rect x="18.400000000000002" y="32.4" width="92" height="17.28" fill="#fff" opacity="0.8"/></svg> <span class="note">明るい一覧</span></div>
+    <div class="strip" style="margin-top:8px"><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#ee6c4d"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#b56576"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#293241"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#e5989b"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#6d597a"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#355070"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg><img src="../apps/client/build/store/svg/small.svg" width="120" alt="" /><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#e5989b"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#98c1d9"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#355070"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#ee6c4d"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg><svg width="120" height="45" viewBox="0 0 120 45"><rect width="120" height="45" fill="#3d5a80"/><circle cx="84" cy="22.5" r="15.749999999999998" fill="#293241"/><rect x="9.6" y="13.5" width="48" height="7.2" fill="#fff" opacity="0.8"/></svg> <span class="note">Small 120px の一覧</span></div>
+
+    <h2>Library Hero と重要な要素の範囲（中央 860×380、緑の点線）</h2>
+    <div class="hero"><img src="../apps/client/build/store/svg/hero.svg" width="960" alt="" /><span class="safe" style="left:372.5px;top:107.5px;width:215px;height:95px"></span></div>
+    <p>表示 460×215（Header の目安）</p>
+  </body>
+</html>

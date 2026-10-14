@@ -27,6 +27,12 @@ interface Props {
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
+  /** 再生後に「途切れた場所と理由」を出す（省略時は出す。見本の盤面では出さない） */
+  showBreaks?: boolean;
+  /** 効果音を鳴らさない（タイトル画面の見本など、遊んでいない盤面） */
+  muted?: boolean;
+  /** 描画を止める（カットシーンで盤面が隠れている間） */
+  paused?: boolean;
   /** キーボード・コントローラーのカーソル（マウス・タッチで操作中は null） */
   cursor?: { x: number; y: number } | null;
   onCellClick: (x: number, y: number) => void;
@@ -74,9 +80,14 @@ export function PixiBoard(props: Props) {
       formatScore: (value) => labels().formatScore(value),
       formatCompact: (value) => labels().formatCompact(value),
       getQuotaCrossLabel: () => labels().getQuotaCrossLabel(),
+      formatSync: (count) => labels().formatSync(count),
+      getUnmeasurableLabel: () => labels().getUnmeasurableLabel(),
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),
-      playSound: (key, semitones) => audio.play(key, semitones),
+      showBreaks: () => callbacksRef.current.showBreaks ?? true,
+      playSound: (key, semitones) => {
+        if (!callbacksRef.current.muted) audio.play(key, semitones);
+      },
     }).then((r) => {
       if (disposed) {
         r.destroy();
@@ -103,6 +114,12 @@ export function PixiBoard(props: Props) {
   useEffect(() => {
     renderer?.setCursor(cursor);
   }, [renderer, cursor]);
+
+  // 描画の停止・再開
+  const { paused = false } = props;
+  useEffect(() => {
+    renderer?.setPaused(paused);
+  }, [renderer, paused]);
 
   // 演出の設定の反映
   useEffect(() => {

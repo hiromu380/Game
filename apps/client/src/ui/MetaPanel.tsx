@@ -52,6 +52,11 @@ export function MetaPanel({ meta, unlocks }: Props) {
                   <PartIcon partId={u.partId} size={32} />
                   {t('meta.newPart', { name: t(`part.${u.partId}.name`) })}
                 </li>
+              ) : u.kind === 'ascension' ? (
+                <li key={`ascension-${u.level}`}>
+                  <UiIcon name="expand" size={32} />
+                  {t('meta.newAscension', { level: u.level })}
+                </li>
               ) : (
                 <li key={`board-${u.level}`}>
                   <UiIcon name="expand" size={32} />

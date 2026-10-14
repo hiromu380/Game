@@ -1,9 +1,11 @@
-import { createDailyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
+import { createWeeklyRun, createInitialMeta, createRun, replayOps } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
 import {
+  canUndo,
   createGameState,
   gameReducer,
   getPersistedRun,
+  isTrialResultOpen,
   type GameAction,
   type GameState,
 } from '../src/state/gameReducer';
@@ -35,6 +37,36 @@ describe('画面の状態遷移', () => {
     const before = state;
     state = apply(state, { type: 'selectInventory', partId: 'dock' });
     expect(state).toBe(before);
+  });
+
+  it('試運転の結果を見終わった後は、組み立ての操作で結果のパネルを閉じてそのまま続ける（本番の結果は閉じない）', () => {
+    let state = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'startTrial' },
+      { type: 'playbackFinished' },
+    );
+    expect(isTrialResultOpen(state)).toBe(true);
+    state = apply(state, { type: 'selectInventory', partId: 'dock' });
+    expect(state.playback).toBeNull();
+    expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'dock' });
+    // もう一度試運転を押すと、閉じてそのまま次の試運転
+    state = apply(
+      state,
+      { type: 'startTrial' },
+      { type: 'playbackFinished' },
+      { type: 'startTrial' },
+    );
+    expect(state.playback?.mode).toBe('trial');
+    expect(state.run.trialCount).toBe(3);
+    // 本番の結果は、組み立ての操作では閉じない
+    let commit = apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'startCommit' },
+      { type: 'playbackFinished' },
+    );
+    expect(isTrialResultOpen(commit)).toBe(false);
+    commit = apply(commit, { type: 'selectInventory', partId: 'dock' });
+    expect(commit.playback?.mode).toBe('commit');
   });
 
   it('本番の再生中は確定後のランを保存対象にし、閉じると反映される', () => {
@@ -148,12 +180,14 @@ describe('画面の状態遷移', () => {
   });
 });
 
-describe('操作ログとデイリー本番', () => {
-  const daily = () => {
-    const run = createDailyRun('2026-10-01');
+describe('操作ログと週替わりの本番', () => {
+  // リロールを止める特殊ルール（部品不足）に当たらない週
+  const weekly = () => {
+    const run = createWeeklyRun('2026-10-12');
     return createGameState(run, createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
   };
@@ -176,9 +210,9 @@ describe('操作ログとデイリー本番', () => {
     expect(replayed.ok && replayed.state).toEqual(state.run);
   });
 
-  it('デイリーは本番でサーバーの応答を待ち、返ってきたシードで確定する', () => {
+  it('週替わりは本番でサーバーの応答を待ち、返ってきたシードで確定する', () => {
     let state = apply(
-      daily(),
+      weekly(),
       { type: 'selectInventory', partId: 'switch' },
       { type: 'clickCell', x: 1, y: 3 },
       { type: 'startCommit' },
@@ -192,13 +226,13 @@ describe('操作ログとデイリー本番', () => {
     expect(state.awaitingServer).toBe(false);
     expect(state.playback?.mode).toBe('commit');
     expect(state.pendingOps).toEqual([]);
-    // デイリーは端末に保存しない・メタ進行に反映しない
+    // 週替わりは端末に保存しない・メタ進行に反映しない
     expect(getPersistedRun(state)).toBeNull();
     expect(state.meta).toEqual(createInitialMeta());
   });
 
   it('サーバーが拒否したら操作ログを残したまま組み立てに戻る', () => {
-    let state = apply(daily(), { type: 'reroll' }, { type: 'startCommit' });
+    let state = apply(weekly(), { type: 'reroll' }, { type: 'startCommit' });
     state = apply(state, { type: 'serverCommitFailed', error: 'online.network' });
     expect(state).toMatchObject({ awaitingServer: false, error: 'online.network', playback: null });
     expect(state.pendingOps).toEqual([{ op: 'reroll' }]);
@@ -214,28 +248,29 @@ describe('実績', () => {
     expect(state.achievements.unlocked).toEqual(['ACH_ZERO']);
   });
 
-  it('デイリー本番の確定で参加日数を数え、ランキングの順位で上位の実績を判定する', () => {
-    const run = createDailyRun('2026-10-01');
+  it('週替わりの本番の確定で参加日数を数え、確定した結果発表の順位で上位の実績を判定する', () => {
+    const run = createWeeklyRun('2026-10-12');
     let state = createGameState(run, createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
     state = apply(state, { type: 'startCommit' }, { type: 'serverCommitted', seed: 1 });
     expect(state.achievements.dailyDays).toBe(1);
     expect(state.achievements.unlocked).toContain('ACH_DAILY_FIRST');
-    state = apply(state, { type: 'dailyRanked', topPercent: 50 });
+    state = apply(state, { type: 'weeklyRanked', topPercent: 50 });
     expect(state.achievements.unlocked).not.toContain('ACH_DAILY_TOP10');
-    state = apply(state, { type: 'dailyRanked', topPercent: 3 });
+    state = apply(state, { type: 'weeklyRanked', topPercent: 3 });
     expect(state.achievements.unlocked).toContain('ACH_DAILY_TOP10');
   });
 
-  it('練習はデイリーの参加日数に数えない', () => {
-    const run = createDailyRun('2026-10-01');
+  it('練習は週替わりの参加日数に数えない', () => {
+    const run = createWeeklyRun('2026-10-12');
     let state = createGameState(
       { ...run, config: { ...run.config, commitSeedMode: 'derived' } },
       createInitialMeta(),
-      { kind: 'practice', dailyId: '2026-10-01', number: 1 },
+      { kind: 'practice', weekId: '2026-09-28', number: 1 },
     );
     state = apply(state, { type: 'startCommit' });
     expect(state.achievements.dailyDays).toBe(0);
@@ -328,6 +363,68 @@ describe('全部戻す', () => {
   });
 });
 
+describe('元に戻す', () => {
+  const placed = () =>
+    apply(
+      createGameState(createRun(1), createInitialMeta()),
+      { type: 'selectInventory', partId: 'switch' },
+      { type: 'clickCell', x: 1, y: 1 },
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 3, y: 1 },
+    );
+
+  it('配置・回転・移動・全部戻すを1つずつ取り消し、操作ログも同じ位置まで戻す', () => {
+    const start = createGameState(createRun(1), createInitialMeta());
+    expect(canUndo(start)).toBe(false);
+    const two = placed();
+    const rotated = apply(two, { type: 'clickCell', x: 1, y: 1 }, { type: 'rotate' });
+    const moved = apply(rotated, { type: 'movePart', from: { x: 3, y: 1 }, to: { x: 4, y: 2 } });
+    const cleared = apply(moved, { type: 'returnAll' });
+    expect(cleared.undo).toHaveLength(5);
+
+    let state = apply(cleared, { type: 'undo' });
+    expect(state.run).toEqual(moved.run);
+    expect(state.pendingOps).toEqual(moved.pendingOps);
+    state = apply(state, { type: 'undo' });
+    expect(state.run).toEqual(rotated.run);
+    state = apply(state, { type: 'undo' }, { type: 'undo' }, { type: 'undo' });
+    expect(state.run).toEqual(start.run);
+    expect(state.pendingOps).toEqual([]);
+    expect(canUndo(state)).toBe(false);
+    expect(apply(state, { type: 'undo' })).toBe(state);
+    // 取り消したあとの操作ログを再生すると同じ状態になる（週替わりの検証とずれない）
+    const mid = apply(cleared, { type: 'undo' }, { type: 'undo' });
+    const replayed = replayOps(createRun(1), mid.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(mid.run);
+  });
+
+  it('購入・売却・リロールのあとは戻せない（買い物のやり直しはできない）', () => {
+    for (const action of [
+      { type: 'buy', offerIndex: 0 },
+      { type: 'reroll' },
+      { type: 'sellCell', x: 3, y: 1 },
+    ] satisfies GameAction[]) {
+      const state = apply(placed(), action);
+      expect(state.run).not.toEqual(placed().run);
+      expect(canUndo(state)).toBe(false);
+    }
+  });
+
+  it('試運転では履歴を消さず、試運転の回数は戻さない', () => {
+    let state = apply(placed(), { type: 'startTrial' }, { type: 'closePlayback' });
+    expect(state.undo).toHaveLength(2);
+    const trials = state.run.trialCount;
+    state = apply(state, { type: 'undo' });
+    expect(state.run.trialCount).toBe(trials);
+    expect(state.run.board.cells.filter(Boolean)).toHaveLength(1);
+  });
+
+  it('本番のあとは履歴を消す', () => {
+    const state = apply(placed(), { type: 'startCommit' }, { type: 'closePlayback' });
+    expect(state.undo).toEqual([]);
+  });
+});
+
 describe('諦める', () => {
   it('通常ランは脱落で終わり、確定したシフトの分をメタ進行に記録する', () => {
     let state = apply(createGameState(createRun(1), createInitialMeta()), { type: 'startCommit' });
@@ -341,12 +438,72 @@ describe('諦める', () => {
     expect(state.meta.records.runsPlayed).toBe(before);
   });
 
-  it('デイリー本番は諦められない', () => {
-    const state = createGameState(createDailyRun('2026-10-01'), createInitialMeta(), {
-      kind: 'daily',
-      dailyId: '2026-10-01',
+  it('週替わりの本番は諦められない', () => {
+    const state = createGameState(createWeeklyRun('2026-10-12'), createInitialMeta(), {
+      kind: 'weekly',
+      weekId: '2026-09-28',
+      dayId: '2026-10-01',
       number: 1,
     });
     expect(apply(state, { type: 'giveUp' })).toBe(state);
+  });
+});
+
+describe('金色パーツ', () => {
+  const gearRun = () => {
+    const run = createRun(1);
+    return createGameState(
+      {
+        ...run,
+        board: { ...run.board, cells: run.board.cells.map(() => null) },
+        inventory: { gear: 3 },
+        bonusFloor: null,
+      },
+      createInitialMeta(),
+    );
+  };
+
+  it('3つつなげて選び、合体すると金色になる。手持ちに戻すと金色のまま選択され、置き直せる', () => {
+    let state = apply(
+      gearRun(),
+      { type: 'selectInventory', partId: 'gear' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 1, y: 0 },
+      { type: 'clickCell', x: 2, y: 0 },
+      { type: 'clickCell', x: 1, y: 0 },
+      { type: 'mergeSelected' },
+    );
+    expect(state.feedback?.kind).toBe('merge');
+    expect(state.run.board.cells[1]).toEqual({ id: 'gear', dir: 1, golden: true });
+    expect(state.run.board.cells[0]).toBeNull();
+    expect(state.pendingOps.at(-1)).toEqual({ op: 'merge', x: 1, y: 0 });
+
+    state = apply(state, { type: 'returnSelected' });
+    expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'gear', golden: true });
+    state = apply(state, { type: 'clickCell', x: 4, y: 4 });
+    expect(state.run.board.cells[4 * state.run.board.width + 4]).toMatchObject({ golden: true });
+    expect(state.pendingOps.at(-1)).toEqual({
+      op: 'place',
+      partId: 'gear',
+      x: 4,
+      y: 4,
+      dir: 1,
+      golden: true,
+    });
+    const replayed = replayOps(gearRun().run, state.pendingOps);
+    expect(replayed.ok && replayed.state).toEqual(state.run);
+  });
+
+  it('つながっていなければ合体できない（エラー）', () => {
+    const state = apply(
+      gearRun(),
+      { type: 'selectInventory', partId: 'gear' },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'clickCell', x: 2, y: 0 },
+      { type: 'clickCell', x: 0, y: 0 },
+      { type: 'mergeSelected' },
+    );
+    expect(state.error).toBe('cannotMerge');
+    expect(state.run.board.cells[0]).toEqual({ id: 'gear', dir: 1 });
   });
 });

@@ -1,0 +1,89 @@
+{
+  "$comment": "Steam のストア・ライブラリ用の画像の規定（2026年9月時点の情報。要確認: 提出前に Steamworks の「グラフィックアセット」の最新の指定を人が確かめる。変わったらここだけ直す）",
+  "checkedAt": "2026-09",
+  "maxBytes": 2097152,
+  "capsules": [
+    {
+      "id": "header",
+      "label": "Header Capsule",
+      "file": "header_capsule.png",
+      "width": 920,
+      "height": 430,
+      "format": "png",
+      "logo": true,
+      "previewWidth": 460
+    },
+    {
+      "id": "small",
+      "label": "Small Capsule",
+      "file": "small_capsule.png",
+      "width": 462,
+      "height": 174,
+      "format": "png",
+      "logo": true,
+      "previewWidth": 120
+    },
+    {
+      "id": "main",
+      "label": "Main Capsule",
+      "file": "main_capsule.png",
+      "width": 1232,
+      "height": 706,
+      "format": "png",
+      "logo": true,
+      "previewWidth": 616
+    },
+    {
+      "id": "vertical",
+      "label": "Vertical Capsule",
+      "file": "vertical_capsule.png",
+      "width": 748,
+      "height": 896,
+      "format": "png",
+      "logo": true,
+      "previewWidth": 374
+    },
+    {
+      "id": "library",
+      "label": "Library Capsule",
+      "file": "library_capsule.png",
+      "width": 600,
+      "height": 900,
+      "format": "png",
+      "logo": true,
+      "previewWidth": 200
+    },
+    {
+      "id": "hero",
+      "label": "Library Hero",
+      "file": "library_hero.jpg",
+      "width": 3840,
+      "height": 1240,
+      "format": "jpg",
+      "logo": false,
+      "safeArea": [860, 380],
+      "previewWidth": 960
+    },
+    {
+      "id": "background",
+      "label": "ページ背景（要確認）",
+      "file": "page_background.jpg",
+      "width": 1920,
+      "height": 1080,
+      "format": "jpg",
+      "logo": false,
+      "previewWidth": 480
+    },
+    {
+      "id": "libraryLogo",
+      "label": "Library Logo（サイズ要確認）",
+      "file": "library_logo.png",
+      "width": 1280,
+      "height": 720,
+      "format": "png",
+      "logo": true,
+      "transparent": true,
+      "previewWidth": 320
+    }
+  ]
+}

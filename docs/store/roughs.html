@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>キービジュアル 3案</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: #1a1c20;
+        color: #eef0f3;
+        font-family: system-ui, sans-serif;
+      }
+      h2 {
+        color: #ffc107;
+        font-size: 1.05rem;
+        margin: 24px 0 4px;
+      }
+      p {
+        color: #aab1bc;
+        margin: 0 0 8px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+      }
+      figcaption {
+        font-size: 0.85rem;
+        margin-top: 2px;
+      }
+      .gray img {
+        filter: grayscale(1) blur(2px);
+      }
+      .light {
+        background: #f4f4f4;
+        color: #222;
+        padding: 8px;
+        border-radius: 6px;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      th,
+      td {
+        border: 1px solid #3a3f48;
+        padding: 6px 8px;
+        font-size: 0.9rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #262a31;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>キービジュアル 構図3案（段階1のラフ・Header Capsule 920×430）</h1>
+    <p>
+      素材はゲーム内のもの（ボルトの全身・パーツ・床・ハザードの枠・工場街・ロケット・ロゴ）。光・火花・数字の発光だけ半透明とぼかし（キービジュアルの例外）
+    </p>
+    <h2>原寸（920×430）</h2>
+    <div class="row" style="flex-direction: column">
+      <figure class="">
+        <img src="roughs/A.svg" width="920" alt="" />
+        <figcaption>A 押した瞬間</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/B.svg" width="920" alt="" />
+        <figcaption>B 工場の全景</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/C.svg" width="920" alt="" />
+        <figcaption>C ボルトのアップ</figcaption>
+      </figure>
+    </div>
+    <h2>Steam での表示の大きさ（約 460×215）</h2>
+    <div class="row">
+      <figure class="">
+        <img src="roughs/A.svg" width="460" alt="" />
+        <figcaption>A 押した瞬間</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/B.svg" width="460" alt="" />
+        <figcaption>B 工場の全景</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/C.svg" width="460" alt="" />
+        <figcaption>C ボルトのアップ</figcaption>
+      </figure>
+    </div>
+    <h2>明るい背景で</h2>
+    <div class="row light">
+      <figure class="">
+        <img src="roughs/A.svg" width="300" alt="" />
+        <figcaption>A 押した瞬間</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/B.svg" width="300" alt="" />
+        <figcaption>B 工場の全景</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/C.svg" width="300" alt="" />
+        <figcaption>C ボルトのアップ</figcaption>
+      </figure>
+    </div>
+    <h2>縮小（230×108）と、白黒＋ぼかし（シルエットで判別できるか）</h2>
+    <div class="row">
+      <figure class="">
+        <img src="roughs/A.svg" width="230" alt="" />
+        <figcaption>A 押した瞬間</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/B.svg" width="230" alt="" />
+        <figcaption>B 工場の全景</figcaption>
+      </figure>
+      <figure class="">
+        <img src="roughs/C.svg" width="230" alt="" />
+        <figcaption>C ボルトのアップ</figcaption>
+      </figure>
+    </div>
+    <div class="row" style="margin-top: 8px">
+      <figure class="gray">
+        <img src="roughs/A.svg" width="230" alt="" />
+        <figcaption>A 押した瞬間</figcaption>
+      </figure>
+      <figure class="gray">
+        <img src="roughs/B.svg" width="230" alt="" />
+        <figcaption>B 工場の全景</figcaption>
+      </figure>
+      <figure class="gray">
+        <img src="roughs/C.svg" width="230" alt="" />
+        <figcaption>C ボルトのアップ</figcaption>
+      </figure>
+    </div>
+    <h2>比較</h2>
+    <table>
+      <tr>
+        <th>観点</th>
+        <th>A 押した瞬間</th>
+        <th>B 工場の全景</th>
+        <th>C ボルトのアップ</th>
+      </tr>
+      <tr>
+        <td>一目で伝わること（押すだけで数字が跳ねる）</td>
+        <td>◎ 盤面・光の連鎖・大きな数字・驚くボルトが全部入り、因果（盤面 → 数字）が読める</td>
+        <td>○ 打ち上げと光は派手だが、「盤面にパーツを置くゲーム」だとわからない</td>
+        <td>○ 数字とボルトは強いが、盤面が切れていて連鎖の因果が弱い</td>
+      </tr>
+      <tr>
+        <td>縮小時の判別</td>
+        <td>○ 要素が多く、小さいと盤面がごちゃつく</td>
+        <td>◎ 横長の光の筋とロケットのシルエットがはっきり</td>
+        <td>◎ 大きなボルトと数字だけで読める</td>
+      </tr>
+      <tr>
+        <td>ゲーム内の絵との統一感</td>
+        <td>◎ ゲーム画面そのものに近い</td>
+        <td>○ タイトル画面に近い</td>
+        <td>◎</td>
+      </tr>
+      <tr>
+        <td>ロゴの置きやすさ</td>
+        <td>○ 左上に置けるが、ボルトと競う</td>
+        <td>◎ 空が広く、ロゴの余白が大きい</td>
+        <td>○ 左上が狭い（ボルトの頭と近い）</td>
+      </tr>
+    </table>
+    <p>
+      おすすめ:
+      <strong>A「押した瞬間」</strong>（「置いて押すと数字が跳ねる」の因果が1枚で伝わるのは A
+      だけ）。
+      仕上げでは、光の筋を太く少なくして縮小時のごちゃつきを抑え、ボルトとロゴの重なりを離します。
+      Small Capsule など小さい枠は、C の「ボルト＋大きな数字」の組み方を専用構図として使います。
+    </p>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 /**
- * 遊び方（タイトル画面から開く）: 目的 → 置き方と操作 → 連鎖のコツ → 夜シフト・延長戦・デイリー
+ * 遊び方（タイトル画面から開く）: 目的 → 置き方と操作 → 連鎖のコツ → 夜シフト・延長戦・週替わり
  * 文言は i18n の howTo.*。ページを足すときは PAGES に足し、i18n に title / body を足す
  */
 import { useState } from 'react';
@@ -21,6 +21,15 @@ export default function HowToPlay({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="modal__body panel how-to" onClick={(e) => e.stopPropagation()}>
+        {/* どのページからでも閉じられるように（Esc・コントローラーの B もこのボタンを押す） */}
+        <button
+          className="button--small button--ghost modal__close"
+          onClick={onClose}
+          aria-label={t('howTo.close')}
+          data-close
+        >
+          ✕
+        </button>
         <h2 className="panel__title">{t('howTo.title')}</h2>
         <div className="how-to__page">
           <img className="how-to__image" src={page.image} alt="" width={72} height={72} />
@@ -47,7 +56,7 @@ export default function HowToPlay({ onClose }: { onClose: () => void }) {
             {t('howTo.prev')}
           </button>
           {last ? (
-            <button className="button--primary" onClick={onClose} data-close>
+            <button className="button--primary" onClick={onClose} autoFocus>
               {t('howTo.close')}
             </button>
           ) : (

@@ -10,6 +10,7 @@
 import {
   getPart,
   getPartBadge,
+  teleportTarget,
   type Board,
   type Dir4,
   type Part,
@@ -35,7 +36,7 @@ import { FONT_STACK } from '../config/fonts';
 
 // 盤面の文字も画面と同じ同梱フォントで描く（指定しないと端末任せになり、中国語用の字形になることがある）
 TextStyle.defaultTextStyle.fontFamily = FONT_STACK;
-import { BOARD_THEME } from '../assets/manifest';
+import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import type { PlaybackSpeed } from '../playback/timeline';
 import {
   buildChoreography,
@@ -83,7 +84,9 @@ export interface BoardViewState {
   /** 選択中のマス */
   highlight: { x: number; y: number } | null;
   /** 配置しようとしている手持ちパーツ（マウスを乗せたマスにプレビューを出す） */
-  placing: { partId: PartId; dir: Dir4 } | null;
+  placing: { partId: PartId; dir: Dir4; golden: boolean } | null;
+  /** 合体できるパーツのマス（金色の枠で光らせる。マスの番号） */
+  mergeable: number[];
   /** 今日の夜シフト（ボス）に使用不可になるマス（予告表示用） */
   upcomingBlocked: number[];
   /** どのランのどのシフトか（変わったら前の本番の表示を消す） */
@@ -112,6 +115,10 @@ export interface BoardLabels {
   formatCompact: (value: Score) => string;
   /** ノルマを超えた瞬間の帯の文言 */
   getQuotaCrossLabel: () => string;
+  /** 同時出荷ボーナスのポップ（例: 同時×3） */
+  formatSync: (count: number) => string;
+  /** 計測不能の帯の見出しと小見出し */
+  getUnmeasurableLabel: () => { title: string; sub: string };
   /** 床タイルの短い表記（マスの左上・演出。例: ×2・+3） */
   getFloorShort: (tile: FloorTileId, params: FloorParams) => string;
   /** 床の説明（ホバー時。ボーナス床・出来事の床は期間も） */
@@ -119,6 +126,8 @@ export interface BoardLabels {
 }
 
 export interface BoardRendererOptions extends BoardLabels {
+  /** 再生後に「途切れた場所と理由」を出すか（見本の盤面では出さない。省略時は出す） */
+  showBreaks?: () => boolean;
   onCellClick: (x: number, y: number) => void;
   /** 長押し（スマホで「手持ちに戻す」に使う） */
   onCellLongPress: (x: number, y: number) => void;
@@ -160,6 +169,12 @@ export class BoardRenderer {
   private readonly blockLayer = new Container();
   private readonly partLayer = new Container();
   private readonly overlayLayer = new Container();
+  /** ランダム配置権のルーレット（盤面を描き直しても消えないよう、別の層に描く） */
+  private readonly revealLayer = new Container();
+  /** 今わかっている配置権の床のマス（増えたら、増えたマスをルーレットで見せる） */
+  private knownItemCells = new Set<number>();
+  /** ルーレットの演出中のマス（終わるまで床を描かない） */
+  private readonly revealing = new Set<number>();
   /** 残り発動回数と、途切れた理由の表示 */
   private readonly status: StatusOverlay;
   private readonly signalLayer = new Container();
@@ -214,6 +229,8 @@ export class BoardRenderer {
         score: options.formatScore,
         compact: options.formatCompact,
         quotaCross: options.getQuotaCrossLabel,
+        sync: options.formatSync,
+        unmeasurable: options.getUnmeasurableLabel,
       },
       (x, y) => (this.state ? this.partViews.get(y * this.state.board.width + x) : undefined),
       () => ({ width: this.app.screen.width, height: this.app.screen.height }),
@@ -227,6 +244,7 @@ export class BoardRenderer {
       this.overlayLayer,
       this.signalLayer,
       this.effects.boardLayer,
+      this.revealLayer,
       this.status.breakLayer,
       this.tooltipLayer,
     );
@@ -328,6 +346,12 @@ export class BoardRenderer {
     this.app.destroy(true, { children: true });
   }
 
+  /** 描画を止める・再開する（カットシーンの間は盤面を描かず、カットシーンの描画に余力を回す） */
+  setPaused(paused: boolean): void {
+    if (paused) this.app.ticker.stop();
+    else this.app.ticker.start();
+  }
+
   private toCell(px: number, py: number) {
     if (!this.state) return null;
     return pixelToCell(px, py, this.state.board.width, this.state.board.height);
@@ -339,6 +363,7 @@ export class BoardRenderer {
 
   /** 盤面・選択状態を描き直す */
   setState(state: BoardViewState): void {
+    const previous = this.state;
     const sizeChanged =
       this.state?.board.width !== state.board.width ||
       this.state?.board.height !== state.board.height;
@@ -358,11 +383,23 @@ export class BoardRenderer {
       );
     }
 
+    // ランダム配置権で新しく湧いた床は、ルーレットで位置を見せてから描く
+    // （シフトが変わった・ランを読み込んだときは、すでにある床なので演出しない）
+    const itemCells = state.floor.flatMap((c, i) => (c?.source === 'item' ? [i] : []));
+    if (previous?.shiftKey === state.shiftKey) {
+      for (const cell of itemCells) if (!this.knownItemCells.has(cell)) this.revealPermit(cell);
+    }
+    this.knownItemCells = new Set(itemCells);
+
+    // 金色パーツに合体した: 消えた2マスから金色のマスへ光を集める（同じシフトの中だけ）
+    if (previous?.shiftKey === state.shiftKey && !sizeChanged)
+      this.showMerges(previous.board, state.board);
+
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     // 床タイル（盤面の下層。パーツより下に、控えめに描く）
     for (let cell = 0; cell < state.floor.length; cell++) {
       const floorCell = state.floor[cell];
-      if (!floorCell) continue;
+      if (!floorCell || this.revealing.has(cell)) continue;
       const x = cell % state.board.width;
       const y = Math.floor(cell / state.board.width);
       this.blockLayer.addChild(
@@ -405,6 +442,47 @@ export class BoardRenderer {
     this.drawOverlay();
   }
 
+  /** 前の盤面から金色になったマスを探し、同じパーツが消えたマスから光を集める */
+  private showMerges(before: Board, after: Board): void {
+    for (let i = 0; i < after.cells.length; i++) {
+      const now = after.cells[i];
+      const was = before.cells[i];
+      if (!now?.golden || !was || was.golden || was.id !== now.id) continue;
+      const from: { x: number; y: number }[] = [];
+      for (let j = 0; j < after.cells.length; j++) {
+        const gone = before.cells[j];
+        if (j !== i && !after.cells[j] && gone?.id === now.id && !gone.golden) {
+          from.push({ x: j % after.width, y: Math.floor(j / after.width) });
+        }
+      }
+      this.effects.merge(i % after.width, Math.floor(i / after.width), from);
+    }
+  }
+
+  /**
+   * 置き場所で効果が決まるパーツの「関係するマス」を示す
+   * - 磁石: 同じ行・列にある出荷口（倍率に数えるもの）
+   * - 転送装置: 飛ばす先の転送装置（点線でつなぐ）
+   */
+  private drawRelated(part: Part, board: Board, x: number, y: number): void {
+    const color = PART_ASSETS[part.id].color;
+    if (part.id === 'magnet') {
+      board.cells.forEach((other, index) => {
+        const ox = index % board.width;
+        const oy = Math.floor(index / board.width);
+        if (other?.id === 'dock' && (ox === x || oy === y)) {
+          this.overlayLayer.addChild(cellFrame(ox, oy, color, 3));
+        }
+      });
+    }
+    if (part.id === 'teleporter') {
+      const target = teleportTarget(board, x, y);
+      if (!target) return;
+      const [tx, ty] = target;
+      this.overlayLayer.addChild(dashedLine(x, y, tx, ty, color), cellFrame(tx, ty, color, 3));
+    }
+  }
+
   /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
   private badgeOf(part: Part, x: number, y: number): PartBadge | null {
     if (!this.state) return null;
@@ -432,7 +510,16 @@ export class BoardRenderer {
     this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     if (!this.state) return;
-    const { board, highlight, placing, guideCell } = this.state;
+    const { board, highlight, placing, guideCell, mergeable } = this.state;
+
+    // 合体できるパーツ: 金色の太い枠（色だけでなく、選ぶと合体ボタンが出る）
+    if (!this.timeline) {
+      for (const cell of mergeable) {
+        const x = cell % board.width;
+        const y = Math.floor(cell / board.width);
+        this.overlayLayer.addChild(mergeGlow(x, y));
+      }
+    }
 
     if (guideCell && !this.timeline) {
       this.overlayLayer.addChild(cellFrame(guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5));
@@ -473,16 +560,27 @@ export class BoardRenderer {
 
     if (placing && !part) {
       // 配置プレビュー: 半透明のパーツと緑の枠
-      const ghostPart: Part = { id: placing.partId, dir: placing.dir };
-      const ghost = createPartView(ghostPart, this.textures, null);
+      const ghostPart: Part = placing.golden
+        ? { id: placing.partId, dir: placing.dir, golden: true }
+        : { id: placing.partId, dir: placing.dir };
+      // 置いたときの盤面で効果量バッジと関係するマスを出す（置く前に「ここなら ×4」とわかるように）
+      const cells = [...board.cells];
+      cells[hovered.y * board.width + hovered.x] = ghostPart;
+      const placed: Board = { ...board, cells };
+      const badge = this.state.rules
+        ? getPartBadge(ghostPart, placed, hovered.x, hovered.y, this.state.rules)
+        : null;
+      const ghost = createPartView(ghostPart, this.textures, badge);
       const { px, py } = cellCenter(hovered.x, hovered.y);
       ghost.position.set(px, py);
       ghost.alpha = 0.55;
+      this.drawRelated(ghostPart, placed, hovered.x, hovered.y);
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
       this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, placing.partId));
       return;
     }
     if (part) {
+      this.drawRelated(part, board, hovered.x, hovered.y);
       this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
       this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, part.id));
       return;
@@ -490,6 +588,67 @@ export class BoardRenderer {
     // 空きマスの床: 効果の説明
     const text = this.withFloor(hovered, null);
     if (text) this.showTooltip(hovered.x, hovered.y, text);
+  }
+
+  /**
+   * ランダム配置権のルーレット: 枠が盤面のマスを跳び回り、だんだん遅くなって、床が湧くマスで止まる。
+   * 位置は sim で決まっていて、演出は見せ方だけ（跳ぶ先は演出用の乱数。sim の乱数とは別）。
+   * 演出の強さが「弱」なら跳ばずに止まる
+   */
+  private revealPermit(index: number): void {
+    const state = this.state;
+    if (!state) return;
+    const { width, height } = state.board;
+    const config = EFFECTS_CONFIG.permitRoulette;
+    const hops = config.hops[this.effectSettings.strength];
+    this.revealing.add(index);
+    let seed = (index * 2654435761) >>> 0;
+    const nextCell = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed % (width * height);
+    };
+    let at = 0;
+    for (let i = 0; i < hops; i++) {
+      const cell = i === hops - 1 ? index : nextCell();
+      // だんだん遅くなる（最後の数回は間隔が広がる）
+      at += config.baseHopMs + Math.round(config.slowdownMs * (i / Math.max(1, hops - 1)) ** 2);
+      this.tweens.add({
+        delay: at,
+        duration: config.baseHopMs,
+        onStart: () => {
+          this.revealLayer.removeChildren().forEach((c) => c.destroy());
+          this.revealLayer.addChild(
+            cellFrame(cell % width, Math.floor(cell / width), BOARD_THEME.floorItem, 4),
+          );
+          this.options.playSound('permitTick', Math.min(12, i));
+        },
+      });
+    }
+    this.tweens.add({
+      delay: at + config.baseHopMs,
+      duration: 0,
+      onComplete: () => this.landPermit(index),
+    });
+  }
+
+  /** ルーレットが止まった: 床を描き、床の色で光らせて数字を出す */
+  private landPermit(index: number): void {
+    this.revealing.delete(index);
+    this.revealLayer.removeChildren().forEach((c) => c.destroy());
+    const state = this.state;
+    const cell = state?.floor[index];
+    if (!state || !cell) return;
+    this.setState(state);
+    const x = index % state.board.width;
+    const y = Math.floor(index / state.board.width);
+    this.options.playSound('permitLand', 0);
+    this.effects.floor(
+      x,
+      y,
+      cell.tile,
+      this.options.getFloorShort(cell.tile, state.rules.floorParams),
+      700,
+    );
   }
 
   /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */
@@ -633,7 +792,7 @@ export class BoardRenderer {
     const callbacks = this.callbacks;
     this.timeline = null;
     this.callbacks = null;
-    if (this.lastResult && this.state) {
+    if (this.lastResult && this.state && (this.options.showBreaks?.() ?? true)) {
       this.status.showBreaks(summarizeBreaks(this.lastResult.events, this.state.board));
     }
     this.drawOverlay();
@@ -661,6 +820,10 @@ export class BoardRenderer {
       case 'multiplier':
         this.effects.multiplier(cue.x, cue.y, cue.text, 700 / rate);
         break;
+      case 'sync':
+        for (const [x, y] of cue.docks)
+          this.effects.multiplier(x, y, this.effects.syncText(cue.count), 900 / rate);
+        break;
       case 'floor':
         // 床の効果: 倍率が大きい床ほど音程が高い
         this.options.playSound('floor', FLOOR_SEMITONES[cue.tile]);
@@ -673,6 +836,10 @@ export class BoardRenderer {
       case 'quotaCross':
         this.options.playSound('quotaCross', 0);
         this.effects.quotaCross();
+        break;
+      case 'unmeasurable':
+        this.options.playSound('unmeasurable', 0);
+        this.effects.unmeasurable();
         break;
       case 'flash':
         this.effects.flash(cue.alpha, cue.durationMs / rate);
@@ -801,6 +968,31 @@ export class BoardRenderer {
             },
           });
           break;
+        case 'store':
+          // 蓄電器: 溜めた値を札で見せる（放出したら札を外す）
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => {
+              this.status.onStore(
+                event.x,
+                event.y,
+                event.value === null ? null : this.options.formatCompact(event.value),
+              );
+              if (event.value !== null) sound('charge');
+            },
+          });
+          break;
+        case 'teleport':
+          this.tweens.add({
+            delay: moveMs,
+            duration: 0,
+            onComplete: () => {
+              if (!instant) this.effects.onTeleport(event.x, event.y, event.toX, event.toY, fxMs);
+              sound('teleport');
+            },
+          });
+          break;
         case 'halt':
           // 打ち切りの表示は再生後の「途切れた理由」でまとめて行う
           break;
@@ -825,6 +1017,49 @@ export class BoardRenderer {
 }
 
 /** マスを囲む枠 */
+/**
+ * 合体できるパーツの印: 薄い金のにじみと、四隅のかぎ括弧（金色パーツの縁取りと形で区別する）
+ */
+function mergeGlow(x: number, y: number): Graphics {
+  const { px, py } = cellCenter(x, y);
+  const half = CELL_SIZE / 2 - 4;
+  const arm = CELL_SIZE * 0.22;
+  const g = new Graphics()
+    .roundRect(px - half, py - half, half * 2, half * 2, 8)
+    .fill({ color: BOARD_THEME.golden, alpha: 0.14 });
+  for (const [sx, sy] of [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ] as const) {
+    const cx = px + sx * half;
+    const cy = py + sy * half;
+    g.moveTo(cx - sx * arm, cy)
+      .lineTo(cx, cy)
+      .lineTo(cx, cy - sy * arm);
+  }
+  return g.stroke({ width: 4, color: BOARD_THEME.golden, cap: 'round', join: 'round' });
+}
+
+/** 2つのマスの中心を結ぶ点線（転送装置の行き先など） */
+function dashedLine(x1: number, y1: number, x2: number, y2: number, color: number): Graphics {
+  const a = cellCenter(x1, y1);
+  const b = cellCenter(x2, y2);
+  const length = Math.hypot(b.px - a.px, b.py - a.py);
+  const steps = Math.max(1, Math.floor(length / 12));
+  const g = new Graphics();
+  for (let i = 0; i < steps; i += 2) {
+    const t0 = i / steps;
+    const t1 = Math.min(1, (i + 1) / steps);
+    g.moveTo(a.px + (b.px - a.px) * t0, a.py + (b.py - a.py) * t0).lineTo(
+      a.px + (b.px - a.px) * t1,
+      a.py + (b.py - a.py) * t1,
+    );
+  }
+  return g.stroke({ width: 3, color, alpha: 0.9, cap: 'round' });
+}
+
 function cellFrame(x: number, y: number, color: number, width: number): Graphics {
   const { px, py } = cellCenter(x, y);
   const half = CELL_SIZE / 2 - 3;

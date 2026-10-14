@@ -1,7 +1,14 @@
 import { SAVE_VERSION } from '@chain-factory/shared';
 import { createRun } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { loadRun, SAVE_STORAGE_KEY, saveGame, type SimpleStorage } from '../src/state/saveStore';
+import {
+  loadRun,
+  loadSeenScenes,
+  markSceneSeen,
+  SAVE_STORAGE_KEY,
+  saveGame,
+  type SimpleStorage,
+} from '../src/state/saveStore';
 
 /** テスト用のメモリ上の Storage */
 function memoryStorage(): SimpleStorage & { data: Map<string, string> } {
@@ -35,5 +42,22 @@ describe('セーブ/ロード', () => {
     const storage = memoryStorage();
     saveGame({ run: { ...createRun(99), phase: 'failed' } }, storage);
     expect(loadRun(storage)).toBeNull();
+  });
+});
+
+describe('見たカットシーンの記録', () => {
+  it('見たシーンを足し、ほかの保存（ラン）を消さない。同じシーンは二重に記録しない', () => {
+    const storage = memoryStorage();
+    expect(loadSeenScenes(storage)).toEqual([]);
+    const run = createRun(5);
+    saveGame({ run }, storage);
+    markSceneSeen('opening', storage);
+    markSceneSeen('opening', storage);
+    markSceneSeen('interlude1', storage);
+    expect(loadSeenScenes(storage)).toEqual(['opening', 'interlude1']);
+    expect(loadRun(storage)).toEqual(run);
+    // ランを保存し直しても、見たシーンは残る
+    saveGame({ run: null }, storage);
+    expect(loadSeenScenes(storage)).toEqual(['opening', 'interlude1']);
   });
 });

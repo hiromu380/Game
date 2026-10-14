@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: magnet（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M18 12 V34 a14 14 0 0 0 28 0 V12" fill="none" stroke="#1b1f27" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18 12 V34 a14 14 0 0 0 28 0 V12" fill="none" stroke="#43a047" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="11" y="8" width="14" height="10" rx="2" fill="#cfd8dc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="39" y="8" width="14" height="10" rx="2" fill="#cfd8dc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 28 h5 M53 28 h5 M6 38 h4 M54 38 h4" fill="none" stroke="#a5d6a7" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

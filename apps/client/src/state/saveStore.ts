@@ -2,7 +2,7 @@
  * 進行中のランとメタ進行を localStorage に保存・読み込みする
  * 形式とバージョン管理は @chain-factory/shared の save/ を参照
  */
-import { createSave, migrateSave, type SaveData } from '@chain-factory/shared';
+import { createSave, migrateSave, type SaveData, type StoryProgress } from '@chain-factory/shared';
 import {
   createInitialAchievements,
   createInitialMeta,
@@ -36,20 +36,28 @@ export function loadSave(storage = defaultStorage()): SaveData | null {
 
 /**
  * 保存する。省略した項目は保存済みのものを引き継ぐ
- * （デイリー・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
+ * （週替わり・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
  */
 export function saveGame(
-  update: { run?: RunState | null; meta?: MetaProgress; achievements?: AchievementProgress },
+  update: {
+    run?: RunState | null;
+    meta?: MetaProgress;
+    achievements?: AchievementProgress;
+    story?: StoryProgress;
+  },
   storage = defaultStorage(),
 ): void {
   if (!storage) return;
   try {
     const saved =
-      update.run === undefined || !update.meta || !update.achievements ? loadSave(storage) : null;
+      update.run === undefined || !update.meta || !update.achievements || !update.story
+        ? loadSave(storage)
+        : null;
     const data = createSave(
       update.run !== undefined ? update.run : (saved?.run ?? null),
       update.meta ?? saved?.meta ?? createInitialMeta(),
       update.achievements ?? saved?.achievements ?? createInitialAchievements(),
+      update.story ?? saved?.story ?? { seen: [] },
     );
     storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(data));
   } catch {
@@ -64,4 +72,16 @@ export function saveGame(
 export function loadRun(storage = defaultStorage()): RunState | null {
   const run = loadSave(storage)?.run ?? null;
   return run && run.phase !== 'failed' ? run : null;
+}
+
+/** 見たカットシーン（セーブがなければ何も見ていない） */
+export function loadSeenScenes(storage = defaultStorage()): string[] {
+  return loadSave(storage)?.story.seen ?? [];
+}
+
+/** カットシーンを見た記録を残す（すでに見ていれば何もしない） */
+export function markSceneSeen(id: string, storage = defaultStorage()): void {
+  const seen = loadSeenScenes(storage);
+  if (seen.includes(id)) return;
+  saveGame({ story: { seen: [...seen, id] } }, storage);
 }

@@ -1,0 +1,32 @@
+<svg width="720" height="460" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 460">
+  <!-- カットシーンの絵: blueprint-close（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="8" y="8" width="704" height="444" rx="10" fill="#2f6fb0" stroke="#1b1f27" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M85 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M140 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M195 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M250 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M305 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M360 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M415 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M470 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M525 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M580 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M635 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M690 20 V440" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 30 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 85 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 140 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 195 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 250 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 305 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 360 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <path d="M20 415 H700" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.18"/>
+  <g transform="translate(250 30) scale(4)"><path d="M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><path d="M32 5 V-1" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><circle cx="32" cy="-3.5" r="3" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><rect x="20" y="32" width="24" height="48" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><circle cx="32" cy="53" r="8.5" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><path d="M20 66 H44 M20 76 H44" fill="none" stroke="#ffffff" stroke-width="0.6" opacity="0.7"/><path d="M22 56 L8 74 V86 L22 80 Z M42 56 L56 74 V86 L42 80 Z" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/><path d="M24 80 H40 L44 90 H20 Z" fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/></g>
+  <path d="M200 46 V390 M190 46 H210 M190 390 H210" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+  <path d="M250 420 H490 M250 410 V430 M490 410 V430" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+  <path d="M400 240 L560 170 H640" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+  <circle cx="600" cy="120" r="34" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+  <path d="M584 120 h32 M600 104 v32" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+  <polygon points="640,330 652,358 682,358 658,376 667,404 640,388 613,404 622,376 598,358 628,358" fill="#ffca28" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

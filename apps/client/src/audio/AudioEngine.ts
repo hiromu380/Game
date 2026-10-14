@@ -2,12 +2,19 @@
  * 音を鳴らす仕組み（Web Audio API）
  *
  * - 効果音: サウンドマニフェストのレシピから合成するか、ファイルを再生する
- * - BGM: 仕組みのみ（BGM_ASSETS に曲が設定されていれば、ループ再生する）
+ * - BGM: audio/bgm.ts のレシピから合成し、少し先まで予約しながらループする（BGM_ASSETS にファイルがあればそちら）
  * - 音量: マスター × 効果音 / BGM の2段。ミュートあり
  *
  * ブラウザは「ユーザーが操作するまで音を出せない」ため、AudioContext は最初に鳴らすときに作る。
  */
-import { BGM_ASSETS, SOUND_ASSETS, type BgmKey, type SoundKey, type SynthRecipe } from './manifest';
+import { barSeconds, BGM_RECIPES, bgmBarNotes, type BgmKey, type BgmNote } from './bgm';
+import { BGM_ASSETS, SOUND_ASSETS, type SoundKey, type SynthRecipe } from './manifest';
+
+/** BGM を何秒先まで予約するか・予約を見直す間隔（ミリ秒） */
+const BGM_LOOKAHEAD_SEC = 1.2;
+const BGM_TICK_MS = 250;
+/** 曲の切り替えでフェードする秒数 */
+const BGM_FADE_SEC = 1.2;
 
 export interface VolumeSettings {
   masterVolume: number;
@@ -28,6 +35,12 @@ export class AudioEngine {
   private lastPlayed = new Map<SoundKey, number>();
   private fileBuffers = new Map<string, Promise<AudioBuffer>>();
   private bgmSource: AudioBufferSourceNode | null = null;
+  private bgmKey: BgmKey | null = null;
+  /** 合成 BGM の再生状態（曲ごとの出口・次に予約する小節） */
+  private bgmPlayer: {
+    out: GainNode;
+    timer: ReturnType<typeof setInterval>;
+  } | null = null;
   private ambienceOscillators: OscillatorNode[] = [];
   private ambienceGains: GainNode[] = [];
   private ambienceKey: string | null = null;
@@ -81,16 +94,103 @@ export class AudioEngine {
     else void this.playFile(ctx, this.seBus, asset.src, asset.volume, rate, false);
   }
 
-  /** BGM を流す（曲が設定されていなければ何もしない） */
+  /** BGM を流す（同じ曲なら何もしない。null で止める）。前の曲はフェードアウトする */
   playBgm(key: BgmKey | null): void {
+    if (key === this.bgmKey) return;
+    this.bgmKey = key;
     this.bgmSource?.stop();
     this.bgmSource = null;
-    const asset = key ? BGM_ASSETS[key] : null;
-    const ctx = asset ? this.ensureContext() : null;
-    if (!asset || !ctx || !this.bgmBus || asset.kind !== 'file') return;
-    void this.playFile(ctx, this.bgmBus, asset.src, asset.volume, 1, true).then((source) => {
-      this.bgmSource = source;
-    });
+    this.stopSynthBgm();
+    if (!key) return;
+    const ctx = this.ensureContext();
+    if (!ctx || !this.bgmBus) return;
+    const asset = BGM_ASSETS[key];
+    if (asset?.kind === 'file') {
+      void this.playFile(ctx, this.bgmBus, asset.src, asset.volume, 1, true).then((source) => {
+        this.bgmSource = source;
+      });
+      return;
+    }
+    this.startSynthBgm(ctx, key);
+  }
+
+  private startSynthBgm(ctx: AudioContext, key: BgmKey): void {
+    const recipe = BGM_RECIPES[key];
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0, ctx.currentTime);
+    out.gain.linearRampToValueAtTime(1, ctx.currentTime + BGM_FADE_SEC);
+    out.connect(this.bgmBus!);
+    let bar = 0;
+    let barTime = ctx.currentTime + 0.1;
+    const schedule = () => {
+      // AudioContext が止まっている間（まだ操作がない）は時刻が進まないので、先の分だけ予約して待つ
+      while (barTime < ctx.currentTime + BGM_LOOKAHEAD_SEC) {
+        for (const note of bgmBarNotes(recipe, bar)) this.scheduleBgmNote(ctx, out, note, barTime);
+        bar++;
+        barTime += barSeconds(recipe);
+      }
+    };
+    schedule();
+    this.bgmPlayer = { out, timer: setInterval(schedule, BGM_TICK_MS) };
+  }
+
+  private stopSynthBgm(): void {
+    const player = this.bgmPlayer;
+    if (!player || !this.ctx) return;
+    clearInterval(player.timer);
+    const now = this.ctx.currentTime;
+    player.out.gain.cancelScheduledValues(now);
+    player.out.gain.setValueAtTime(player.out.gain.value, now);
+    player.out.gain.linearRampToValueAtTime(0, now + BGM_FADE_SEC);
+    setTimeout(() => player.out.disconnect(), (BGM_FADE_SEC + 2) * 1000);
+    this.bgmPlayer = null;
+  }
+
+  /** BGM の1音を予約する（打楽器はノイズにフィルターをかけて作る） */
+  private scheduleBgmNote(ctx: AudioContext, out: AudioNode, note: BgmNote, barTime: number): void {
+    const t0 = barTime + note.at;
+    const t1 = t0 + note.duration;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, t0);
+    // 和音は柔らかく立ち上げ、打楽器は鋭く
+    const attack = note.duration > 0.6 ? Math.min(0.4, note.duration / 4) : 0.004;
+    gain.gain.linearRampToValueAtTime(note.volume, t0 + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t1);
+    let tail: AudioNode = gain;
+    if (note.lowpass) {
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = note.lowpass;
+      gain.connect(filter);
+      tail = filter;
+    }
+    tail.connect(out);
+
+    if (note.wave === 'noise') {
+      const source = ctx.createBufferSource();
+      source.buffer = this.noiseBuffer(ctx, note.duration);
+      const filter = ctx.createBiquadFilter();
+      // 高い音はハイハット、低い音は金属を叩く音
+      filter.type = note.freq > 2000 ? 'highpass' : 'bandpass';
+      filter.frequency.value = note.freq;
+      if (filter.type === 'bandpass') filter.Q.value = 8;
+      source.connect(filter).connect(gain);
+      source.start(t0);
+      source.stop(t1);
+      return;
+    }
+    const osc = ctx.createOscillator();
+    osc.type = note.wave;
+    // キック: 高めから一気に下げて、低い鼓動にする
+    if (note.freq === 55 && note.wave === 'sine') {
+      osc.frequency.setValueAtTime(140, t0);
+      osc.frequency.exponentialRampToValueAtTime(45, t0 + 0.12);
+    } else {
+      osc.frequency.setValueAtTime(note.freq, t0);
+    }
+    osc.connect(gain);
+    osc.start(t0);
+    osc.stop(t1 + 0.05);
   }
 
   /**

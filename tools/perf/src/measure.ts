@@ -13,11 +13,11 @@
  * 実行: pnpm --filter @chain-factory/perf perf
  */
 import {
-  buildDailyConfig,
+  buildWeeklyConfig,
   commitShift,
   createPrng,
   createRunWithConfig,
-  dailyRunSeed,
+  weeklyRunSeed,
   PART_IDS,
   replayOps,
   setPart,
@@ -85,7 +85,7 @@ function searchHeavyBoard(base: Board, rules: RuleSet, parts: PartId[]) {
 }
 
 function measureSimulate() {
-  const run = createRunWithConfig(dailyRunSeed(DAILY_ID), buildDailyConfig({ dailyId: DAILY_ID }));
+  const run = createRunWithConfig(weeklyRunSeed(DAILY_ID), buildWeeklyConfig({ weekId: DAILY_ID }));
   // 特殊ルール（短縮営業など）は計算量を減らす方向なので、修正なしの基本ルールで測る
   const rules = run.config.rules;
   const allParts: PartId[] = PART_IDS.filter((id) => id !== 'switch');
@@ -133,7 +133,7 @@ function longOps(state: RunState): RunOp[] {
 }
 
 function measureVerify() {
-  const config = buildDailyConfig({ dailyId: DAILY_ID });
+  const config = buildWeeklyConfig({ weekId: DAILY_ID });
   // ノルマは無視して最終シフトまで進めたいので、計測用にノルマを0にする（計算量は変わらない）
   const easy = {
     ...config,
@@ -141,7 +141,7 @@ function measureVerify() {
     globalModifier: null,
     bossPlan: config.bossPlan.map(() => null),
   };
-  const start = createRunWithConfig(dailyRunSeed(DAILY_ID), easy);
+  const start = createRunWithConfig(weeklyRunSeed(DAILY_ID), easy);
   const shiftOps = [longOps(start), [] as RunOp[], [] as RunOp[]];
 
   const verifyLastShift = () => {
