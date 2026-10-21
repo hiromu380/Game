@@ -34,6 +34,11 @@ export interface EffectSettings {
   reduceFlashes: boolean;
 }
 
+/** 数字のポップが浮かび上がる量（px） */
+const POP_RISE = 40;
+/** 数字のポップが上がってよい上限（盤面の上端から。連鎖数の札の高さぶん空ける） */
+const POP_TOP_MARGIN = 52;
+
 export interface EffectLabels {
   /** 連鎖数カウンターの文言（例: 12 連鎖） */
   chain: (count: number) => string;
@@ -755,13 +760,16 @@ export class EffectsLayer {
     const halfW = (label.width * 1.2) / 2 + 4;
     const halfH = (label.height * 1.2) / 2 + 4;
     const cx = Math.min(width - halfW, Math.max(halfW, px));
-    const startY = Math.min(height - halfH, Math.max(halfH + 40, py - 10));
+    // 上の端の行でも、浮かび上がった先が連鎖数の札（左上）や枠に重ならないよう、上がる量を抑える
+    const minTop = halfH + POP_TOP_MARGIN;
+    const startY = Math.min(height - halfH, Math.max(minTop, py - 10));
+    const rise = Math.max(0, Math.min(POP_RISE, startY - minTop));
     label.position.set(cx, startY);
     this.boardLayer.addChild(label);
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
-        label.y = startY - 40 * easeOutCubic(t);
+        label.y = startY - rise * easeOutCubic(t);
         label.scale.set(t < 0.15 ? 0.5 + (t / 0.15) * 0.7 : 1.2 - Math.min(0.2, (t - 0.15) * 0.5));
         label.alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
       },

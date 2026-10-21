@@ -1457,6 +1457,17 @@ a.button.button--primary {
   border-radius: 8px 8px 0 0;
   background: transparent;
 }
+/* コレクションのタブは数が多いので、狭い画面では折り返さず横にスクロールする（「レリッ/ク」のような途中の改行を防ぐ） */
+.collection .tabs {
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.collection .tabs__tab {
+  flex: 1 0 auto;
+  white-space: nowrap;
+  padding: 6px 12px;
+}
 .tabs__tab.is-active {
   background: var(--panel);
   border-bottom-color: var(--panel);
