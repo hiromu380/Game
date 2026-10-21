@@ -2868,6 +2868,23 @@ a.button.button--primary {
   flex: 1;
 }
 
+/* 狭い画面: 夜シフトの予告は短く（差出人と期間の札を省き、1〜2行に収める。盤面の下の場所を空ける） */
+@media (max-width: 600px) {
+  .boss-notice:not(.boss-notice--now) {
+    padding: 6px 10px;
+    gap: 2px 8px;
+    margin-bottom: 6px;
+  }
+  .boss-notice:not(.boss-notice--now) .boss-notice__period,
+  .boss-notice:not(.boss-notice--now) .boss-notice__sender {
+    display: none;
+  }
+  .boss-notice:not(.boss-notice--now) .boss-notice__icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
 /* 狭い画面: ヘッダーのボタンは絵だけにし、目標の計器は「シフト・予算・ノルマ」の1段と「試運転」の1段にする */
 @media (max-width: 600px) {
   .app-header__actions .button--ghost {

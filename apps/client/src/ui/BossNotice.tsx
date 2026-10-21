@@ -99,7 +99,8 @@ export function BossNotice({ run }: { run: RunState }) {
             {t(boss.isNow ? 'rule.period.thisShift' : 'rule.period.tonight')}
           </span>
           <strong>
-            {t(`boss.${boss.entry.id}.sender`)} / {t(`boss.${boss.entry.id}.name`)}
+            <span className="boss-notice__sender">{t(`boss.${boss.entry.id}.sender`)} / </span>
+            {t(`boss.${boss.entry.id}.name`)}
           </strong>
           {/* 物語の一言は、そのシフト（夜）にだけ出す。予告は効果だけを短く（全文はマウスを載せると出る） */}
           {boss.isNow && (
