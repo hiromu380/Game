@@ -94,13 +94,14 @@ export type SoundKey =
   | 'landing'
   | 'strangerBeep';
 
+// 音量の目安: 何度も鳴る操作音（配置・回転・売買・リロール）は、ノルマ達成などのご褒美の音より小さくする
 export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   // ---- 組み立て操作 ----
   place: {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.25,
+      volume: 0.18,
       notes: [
         { freq: 330, at: 0, duration: 0.06 },
         { freq: 494, at: 0.05, duration: 0.07 },
@@ -111,7 +112,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 600, at: 0, duration: 0.05, slideTo: 900 }],
     },
   },
@@ -119,7 +120,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.22,
+      volume: 0.16,
       notes: [
         { freq: 988, at: 0, duration: 0.06 },
         { freq: 1319, at: 0.06, duration: 0.12 },
@@ -130,7 +131,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.22,
+      volume: 0.16,
       notes: [
         { freq: 1319, at: 0, duration: 0.06 },
         { freq: 880, at: 0.06, duration: 0.1 },
@@ -141,7 +142,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 400, at: 0, duration: 0.15, slideTo: 1200 }],
     },
   },
@@ -149,7 +150,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 700, at: 0, duration: 0.08, slideTo: 350 }],
     },
   },
