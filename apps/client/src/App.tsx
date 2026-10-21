@@ -636,7 +636,7 @@ export function App({ start, onTitle }: Props) {
         />
       ) : null}
       <DayEventNotice run={run} />
-      <BossNotice run={run} />
+      <BossNotice run={run} hideUpcoming={tutorialOn} />
       <RelicStrip run={run} />
     </>
   );

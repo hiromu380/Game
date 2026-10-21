@@ -65,9 +65,17 @@ function TargetNote({ run, id }: { run: RunState; id: BossModifierId }) {
   );
 }
 
-export function BossNotice({ run }: { run: RunState }) {
+export function BossNotice({
+  run,
+  hideUpcoming = false,
+}: {
+  run: RunState;
+  hideUpcoming?: boolean;
+}) {
   const { t } = useI18n();
-  const boss = findBossToShow(run);
+  const found = findBossToShow(run);
+  // 初回ガイドの最中は、先の夜の予告を出さない（最初の画面の情報を絞る。夜そのものの札は出す）
+  const boss = hideUpcoming && found && !found.isNow ? null : found;
   // 週替わりの特殊ルール（全シフトにかかる）
   const special = run.config.globalModifier;
   if (!boss && !special) return null;
