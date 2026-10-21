@@ -417,7 +417,15 @@ for (const viewport of VIEWPORTS) {
   for (const lang of ['ja', 'en'] as const) {
     for (const scene of SCENES) {
       // 英語と 200% 拡大は、主な状態だけ撮る（枚数を抑える）
-      const main = scene.name === 'idle' || scene.name === 'day3-floors';
+      // 英語・拡大表示でも撮る場面（文字があふれやすい画面）
+      const main = [
+        'idle',
+        'day3-floors',
+        'breakdown',
+        'shop-rarity',
+        'day2-relic',
+        'run-cleared',
+      ].includes(scene.name);
       if ((lang === 'en' || viewport.scale) && !main) continue;
       if (only && !only.test(`${viewport.name}-${lang}-${scene.name}`)) continue;
       const page = await browser.newPage({

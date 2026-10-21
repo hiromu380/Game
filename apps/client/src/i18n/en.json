@@ -7,7 +7,7 @@
   "hud.trialNone": "Not yet",
   "hud.trialHint": "Test run before the real thing",
   "hud.trialPercent": "{percent}% of quota",
-  "hud.trialMet": "Quota reached",
+  "hud.trialMet": "Quota met",
   "hud.trialStale": "Layout changed. Test again",
   "hud.trialRandom": "Randomness in play. The real run may differ",
   "hud.trialRange": "Random: {min}–{max} over {count} runs",
