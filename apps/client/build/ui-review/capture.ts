@@ -336,7 +336,7 @@ const SCENES: Scene[] = [
     run: day1,
     act: async (page) => {
       await page.locator('.controls .button--primary').first().click();
-      await page.locator('.commit-confirm .button--primary').click();
+      await page.locator('.commit-confirm .button-row button').last().click();
       await page.waitForTimeout(6000);
     },
   },
@@ -346,7 +346,7 @@ const SCENES: Scene[] = [
     run: day1,
     act: async (page) => {
       await page.locator('.controls .button--primary').first().click();
-      await page.locator('.commit-confirm .button--primary').click();
+      await page.locator('.commit-confirm .button-row button').last().click();
       await page.locator('.playback-panel .button--primary').waitFor({ timeout: 20000 });
       await page.locator('.playback-panel .button--primary').click();
       await page.waitForTimeout(800);
@@ -359,7 +359,7 @@ const SCENES: Scene[] = [
     meta: () => ({ ...createInitialMeta(), ascension: { unlocked: 4, selected: 3 } }),
     act: async (page) => {
       await page.locator('.controls .button--primary').first().click();
-      await page.locator('.commit-confirm .button--primary').click();
+      await page.locator('.commit-confirm .button-row button').last().click();
       await page.locator('.playback-panel .button--primary').waitFor({ timeout: 20000 });
       await page.locator('.playback-panel .button--primary').click();
       await page.waitForTimeout(800);

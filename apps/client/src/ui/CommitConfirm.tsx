@@ -35,10 +35,20 @@ export function CommitConfirm({ warnings, onConfirm, onCancel }: Props) {
           </ul>
         )}
         <div className="button-row">
-          <button className="button--ghost" onClick={onCancel} data-close autoFocus={missing}>
+          {/* 出荷量 0 が決まっている（スイッチ・出荷口がない）ときは「まだ」を目立たせ、押す方を控えめにする */}
+          <button
+            className={missing ? 'button--primary' : 'button--ghost'}
+            onClick={onCancel}
+            data-close
+            autoFocus={missing}
+          >
             {t('commitConfirm.cancel')}
           </button>
-          <button className="button--primary" onClick={onConfirm} autoFocus={!missing}>
+          <button
+            className={missing ? 'button--ghost' : 'button--primary'}
+            onClick={onConfirm}
+            autoFocus={!missing}
+          >
             <UiIcon name="commit-switch" size={22} />
             {t('commitConfirm.ok')}
           </button>
