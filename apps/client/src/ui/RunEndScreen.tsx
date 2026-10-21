@@ -109,6 +109,18 @@ export function RunEndScreen(props: Props) {
           </section>
         )}
         <RocketScene run={run} />
+        {/* 次の一手（延長戦・もう一度）は、記録より先に出す（スクロールせずに押せるように） */}
+        {mode.kind === 'normal' && !nearMiss && (
+          <>
+            {picker}
+            {actions}
+          </>
+        )}
+        {canOvertime && (
+          <p className="panel__hint">
+            {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
+          </p>
+        )}
         <dl className="stats stats--large">
           <dt>{t('runEnd.finalScore')}</dt>
           <dd className="stats__score">{formatMeasured(total)}</dd>
@@ -143,14 +155,7 @@ export function RunEndScreen(props: Props) {
             </ul>
           </div>
         )}
-        {mode.kind === 'normal' ? (
-          !nearMiss && (
-            <>
-              {picker}
-              {actions}
-            </>
-          )
-        ) : (
+        {mode.kind !== 'normal' && (
           <div className="button-row run-end__actions">
             <button className="button--primary" onClick={props.onViewRanking}>
               <UiIcon name="ranking" />
@@ -161,11 +166,6 @@ export function RunEndScreen(props: Props) {
             )}
             <button onClick={props.onBackToNormal}>{t('mode.backToNormal')}</button>
           </div>
-        )}
-        {canOvertime && (
-          <p className="panel__hint">
-            {t('runEnd.overtimeHint', { growth: run.config.overtime.quotaGrowthPercent / 100 })}
-          </p>
         )}
       </div>
       <div className="run-end__side">

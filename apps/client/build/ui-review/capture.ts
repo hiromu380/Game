@@ -154,6 +154,26 @@ const rarityShop = (): RunState => ({
   ],
 });
 
+/** 全シフトをクリアしたラン（ロケット発射・延長戦の案内・共有カード） */
+function cleared(): RunState {
+  const original = createRun(18);
+  let run: RunState = {
+    ...original,
+    config: { ...original.config, shifts: original.config.shifts.map((s) => ({ ...s, quota: 0 })) },
+  };
+  while (run.phase === 'building') {
+    run = pickFirstRelic(run);
+    if (isEventPending(run)) {
+      const chosen = chooseEvent(run, 0);
+      if (chosen.ok) run = chosen.state;
+    }
+    const committed = commitShift(run);
+    if ('error' in committed) throw new Error(committed.error);
+    run = committed.state;
+  }
+  return run;
+}
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -244,6 +264,7 @@ const SCENES: Scene[] = [
     },
   },
   { name: 'poor', run: poor },
+  { name: 'run-cleared', run: cleared },
   {
     name: 'shop-rarity',
     run: rarityShop,

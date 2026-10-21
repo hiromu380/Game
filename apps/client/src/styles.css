@@ -657,6 +657,21 @@ button:disabled {
 .run-end__history li.is-missed::before {
   content: '✗ ';
 }
+/* 狭い画面: シフトの記録は2列にして詰める（9シフト以上で縦に長くならないように） */
+@media (max-width: 600px) {
+  .run-end__history {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .run-end__history li {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}
 /* 広い画面: 画面の幅いっぱいに2列（左は結果、右は共有・解放の目標・実績） */
 @media (min-width: 900px) {
   .run-end {
