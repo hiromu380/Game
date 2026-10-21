@@ -3024,6 +3024,17 @@ a.button.button--primary {
 .app:not(.app--compact) .controls:not(.is-playing) > .panel__hint {
   grid-area: hint;
 }
+.controls__commit-short {
+  display: none;
+}
+@media (max-width: 1150px) {
+  .app--fit .controls__commit-full {
+    display: none;
+  }
+  .app--fit .controls__commit-short {
+    display: inline;
+  }
+}
 .controls__next {
   margin: 8px 0 4px;
   font-size: 0.85rem;

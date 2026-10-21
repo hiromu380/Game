@@ -58,7 +58,15 @@ export function ControlsPanel({
           onClick={onCommit}
         >
           <UiIcon name="commit-switch" size={22} />
-          {compact ? t('controls.commitShort') : t('controls.commit')}
+          {compact ? (
+            t('controls.commitShort')
+          ) : (
+            <>
+              {/* 右の列が狭いとき（タブレット横など）は短い表記に切り替える（2行に折れないように） */}
+              <span className="controls__commit-full">{t('controls.commit')}</span>
+              <span className="controls__commit-short">{t('controls.commitShort')}</span>
+            </>
+          )}
         </button>
       </div>
       {!playing && next && (
