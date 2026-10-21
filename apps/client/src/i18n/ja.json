@@ -563,6 +563,7 @@
   "floor.period.event": "（今日の出来事: 今日かぎり）",
   "legend.title": "床の凡例",
   "legend.tile.double": "×{double}床",
+  "legend.tile.doublePolished": "磨いた床 ×{double}",
   "legend.tile.add": "加算床 +{add}",
   "legend.tile.triple": "×{triple}床",
   "legend.tile.blocked": "使用不可",

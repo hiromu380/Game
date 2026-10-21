@@ -563,6 +563,7 @@
   "floor.period.event": "(today's event: today only)",
   "legend.title": "Floor legend",
   "legend.tile.double": "×{double} floor",
+  "legend.tile.doublePolished": "Polished ×{double}",
   "legend.tile.add": "Add +{add}",
   "legend.tile.triple": "×{triple} floor",
   "legend.tile.blocked": "Unusable",
