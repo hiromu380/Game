@@ -782,6 +782,7 @@
   "nearMiss.hint.unspent": "Bolt: {budget} left unspent. Unspent budget just gets cut next quarter",
   "nearMiss.hint.boss": "Bolt: Nights run on HQ's rules. Read the warning in the morning",
   "nearMiss.hint.multiply": "Bolt: Addition won't beat HQ. Stack gears and presses",
+  "nearMiss.hint.sync": "Bolt: Just one dock. Ship to several at the same moment and it multiplies by how many",
   "nearMiss.hint.close": "Bolt: Close. Put a multiplier or the dock on a ×2 floor",
   "story.page.opening.1": "Your hands stopped, Bolt",
   "story.page.opening.2": "...How far is it to that star, I wonder",

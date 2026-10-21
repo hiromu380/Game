@@ -37,6 +37,12 @@ describe('惜しかった度合いとヒント', () => {
     expect(getNearMiss(failed({ score: '10', boss: 'lowOil' }, 4))?.hint).toBe('boss');
     expect(getNearMiss(failed({ score: '50' }))?.hint).toBe('close');
     expect(getNearMiss(failed({ score: '10' }))?.hint).toBe('multiply');
+    // 出荷口が1つだけの盤面: 同時出荷を勧める
+    const oneDock = failed({ score: '10' });
+    const cells = oneDock.board.cells.map((c, i) =>
+      i === 0 ? { id: 'dock' as const, dir: 1 as const } : c,
+    );
+    expect(getNearMiss({ ...oneDock, board: { ...oneDock.board, cells } })?.hint).toBe('sync');
   });
 
   it('巨大なノルマでも数字のまま計算する。失敗していないランは null', () => {

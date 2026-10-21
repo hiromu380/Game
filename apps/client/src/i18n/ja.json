@@ -782,6 +782,7 @@
   "nearMiss.hint.unspent": "ボルト: {budget}円、余ってました。使わない予算は、来期削られるだけです",
   "nearMiss.hint.boss": "ボルト: 夜は本社のルールつき。朝のうちに予告を見ておかないと",
   "nearMiss.hint.multiply": "ボルト: 足し算じゃ本社に勝てません。ギアとプレス機を重ねましょう",
+  "nearMiss.hint.sync": "ボルト: 出荷口が1つだけでした。同時に届けば、口の数だけ倍になります",
   "nearMiss.hint.close": "ボルト: 惜しい。×2床に、倍率か出荷口を",
   "story.page.opening.1": "手が止まってるぞ、ボルト",
   "story.page.opening.2": "……あの星まで、何キロあるんだろうな",
