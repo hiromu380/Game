@@ -3098,15 +3098,22 @@ a.button.button--primary {
   border-color: var(--golden);
   background: var(--golden);
 }
-/* 縦長の画面: 絵（16:9 で上下中央）のすぐ下に文、すぐ上にページの印を置く */
+/* 縦長の画面: 絵（16:9）のすぐ下に文、すぐ上にページの印を置く。
+   絵と文をひとかたまりとして画面の中央に来るよう、全体を --cutscene-lift だけ上げる */
 @media (orientation: portrait) {
+  .cutscene {
+    --cutscene-lift: 44px;
+  }
+  .cutscene__stage {
+    transform: translateY(calc(-1 * var(--cutscene-lift)));
+  }
   .cutscene__text {
     bottom: auto;
-    top: calc(50% + 28.125vw + 16px);
+    top: calc(50% + 28.125vw + 16px - var(--cutscene-lift));
   }
   .cutscene__pages {
     bottom: auto;
-    top: calc(50% - 28.125vw - 28px);
+    top: calc(50% - 28.125vw - 28px - var(--cutscene-lift));
   }
 }
 @media (prefers-reduced-motion: reduce) {
