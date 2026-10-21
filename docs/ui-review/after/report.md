@@ -1,12 +1,13 @@
 # UI の確認（after）
 
-撮影: 2026-10-21T10:19:40.544Z・http://localhost:5173/
+撮影: 2026-10-21T12:17:03.595Z・http://localhost:5173/
 
 | 画面サイズ | 言語 | 状態 | 横スクロール | ヘッダーのはみ出し | 画像 |
 |---|---|---|---|---|---|
 | 1280x800 | ja | idle | なし | なし | [1280x800-ja-idle.jpg](1280x800-ja-idle.jpg) |
 | 1280x800 | ja | selected | なし | なし | [1280x800-ja-selected.jpg](1280x800-ja-selected.jpg) |
 | 1280x800 | ja | poor | なし | なし | [1280x800-ja-poor.jpg](1280x800-ja-poor.jpg) |
+| 1280x800 | ja | run-cleared | なし | なし | [1280x800-ja-run-cleared.jpg](1280x800-ja-run-cleared.jpg) |
 | 1280x800 | ja | shop-rarity | なし | なし | [1280x800-ja-shop-rarity.jpg](1280x800-ja-shop-rarity.jpg) |
 | 1280x800 | ja | golden | なし | なし | [1280x800-ja-golden.jpg](1280x800-ja-golden.jpg) |
 | 1280x800 | ja | golden-select | なし | なし | [1280x800-ja-golden-select.jpg](1280x800-ja-golden-select.jpg) |
@@ -26,6 +27,7 @@
 | 390x844 | ja | idle | なし | なし | [390x844-ja-idle.jpg](390x844-ja-idle.jpg) |
 | 390x844 | ja | selected | なし | なし | [390x844-ja-selected.jpg](390x844-ja-selected.jpg) |
 | 390x844 | ja | poor | なし | なし | [390x844-ja-poor.jpg](390x844-ja-poor.jpg) |
+| 390x844 | ja | run-cleared | なし | なし | [390x844-ja-run-cleared.jpg](390x844-ja-run-cleared.jpg) |
 | 390x844 | ja | shop-rarity | なし | なし | [390x844-ja-shop-rarity.jpg](390x844-ja-shop-rarity.jpg) |
 | 390x844 | ja | golden | なし | なし | [390x844-ja-golden.jpg](390x844-ja-golden.jpg) |
 | 390x844 | ja | golden-select | なし | なし | [390x844-ja-golden-select.jpg](390x844-ja-golden-select.jpg) |
