@@ -72,6 +72,7 @@ import { useInputMode } from './input/useInputMode';
 import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
+import { RocketGoal } from './ui/RocketProgress';
 import { CommitConfirm } from './ui/CommitConfirm';
 import { commitWarnings } from './state/commitWarnings';
 import { SellZone } from './ui/SellZone';
@@ -634,7 +635,10 @@ export function App({ start, onTitle }: Props) {
           }}
           onSkip={endTutorial}
         />
-      ) : null}
+      ) : (
+        // ランの最初・2日目以降の朝（盤面を片付けた）・延長戦（次の行き先）にだけ出る
+        <RocketGoal run={run} />
+      )}
       <DayEventNotice run={run} />
       <BossNotice run={run} hideUpcoming={tutorialOn} />
       <RelicStrip run={run} />
