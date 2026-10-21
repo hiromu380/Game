@@ -1457,6 +1457,10 @@ a.button.button--primary {
   border-radius: 8px 8px 0 0;
   background: transparent;
 }
+/* ダイアログの中でボタンの行が続くときは、間を空ける（押し間違えないように） */
+.modal__body .button-row + .button-row {
+  margin-top: 8px;
+}
 /* コレクションのタブは数が多いので、狭い画面では折り返さず横にスクロールする（「レリッ/ク」のような途中の改行を防ぐ） */
 .collection .tabs {
   flex-shrink: 0;

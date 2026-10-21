@@ -138,6 +138,7 @@ export function WeeklyMenu({ initialView = 'menu', onEnter, onClose, onRanked }:
     if (!loaded) {
       return (
         <>
+          <h2 className="panel__title">{t('online.weeklyButton')}</h2>
           <p className="panel__hint">{error ? t('weekly.offline') : t('weekly.loading')}</p>
           {error && (
             <div className="button-row">
