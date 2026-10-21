@@ -1493,8 +1493,8 @@ a.button.button--primary {
   font-weight: bold;
 }
 
-/* 中くらいの幅（タブレット縦・200% 表示など）: ヘッダーが2段にならないよう、タイトル文字と長いボタン名を省く */
-@media (max-width: 760px) {
+/* 中くらいの幅（タブレット縦 768〜820px・200% 表示など）: ヘッダーが2段にならないよう、タイトル文字と長いボタン名を省く */
+@media (max-width: 860px) {
   .app-header__name,
   .app-header__label {
     display: none;
