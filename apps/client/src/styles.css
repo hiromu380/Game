@@ -1493,6 +1493,17 @@ a.button.button--primary {
   font-weight: bold;
 }
 
+/* 中くらいの幅（タブレット縦・200% 表示など）: ヘッダーが2段にならないよう、タイトル文字と長いボタン名を省く */
+@media (max-width: 760px) {
+  .app-header__name,
+  .app-header__label {
+    display: none;
+  }
+  .app-header__actions {
+    flex-wrap: nowrap;
+  }
+}
+
 /* =============================================================================
    狭い画面（スマホ縦画面）: 盤面全体をスクロールなしで操作できるように詰める
    ブレークポイントは src/config/layout.ts の compactMaxWidthPx と合わせる
