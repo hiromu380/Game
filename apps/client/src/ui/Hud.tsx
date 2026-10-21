@@ -51,7 +51,9 @@ export function Hud({ run, liveScore: target, trial }: Props) {
       </div>
       <div className="hud__item">
         <span className="hud__label">{t('hud.budget')}</span>
-        <span className="hud__value">{t('shop.price', { price: run.budget })}</span>
+        <span className="hud__value">
+          {t('shop.price', { price: formatScore(String(run.budget)) })}
+        </span>
       </div>
       {/* ノルマはいちばん大事な数字なので、枠つきで大きく出す。再生中は出荷量の進み具合をバーで見せる */}
       <div className={`hud__item hud__quota ${met && !stale ? 'is-met' : ''}`}>

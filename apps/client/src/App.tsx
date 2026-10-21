@@ -795,7 +795,14 @@ export function App({ start, onTitle }: Props) {
             canUndo={canUndo(state)}
             onUndo={() => dispatch({ type: 'undo' })}
             onTrial={() => startPlayback('startTrial')}
-            onCommit={() => setCommitConfirm(true)}
+            onCommit={() =>
+              // 注意することがない（置き忘れなし・試運転が新しく、どの回もノルマに届いた）なら確認を挟まない。
+              // ランキングに残る週替わりの挑戦は、念のため毎回確認する
+              mode.kind !== 'weekly' &&
+              commitWarnings(run, trial, getCurrentShift(run).quota).length === 0
+                ? startPlayback('startCommit')
+                : setCommitConfirm(true)
+            }
             onSpeedChange={setSpeed}
             guide={
               guideStep === 'trial' || guideStep === 'trialAgain'

@@ -174,6 +174,19 @@ function cleared(): RunState {
   return run;
 }
 
+/** 延長戦の終盤のような巨大なノルマ・予算（計器の数字があふれないか） */
+const hugeNumbers = (): RunState => {
+  const run = createRun(5);
+  return {
+    ...run,
+    budget: 12345,
+    config: {
+      ...run.config,
+      shifts: run.config.shifts.map((s) => ({ ...s, quota: 98_765_432_109_876 })),
+    },
+  };
+};
+
 /** 予算が足りない（ショップのパーツを買えない） */
 const poor = (): RunState => ({ ...createRun(5), budget: 0 });
 
@@ -265,6 +278,7 @@ const SCENES: Scene[] = [
   },
   { name: 'poor', run: poor },
   { name: 'run-cleared', run: cleared },
+  { name: 'huge-numbers', run: hugeNumbers },
   {
     name: 'shop-rarity',
     run: rarityShop,

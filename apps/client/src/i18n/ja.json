@@ -7,7 +7,7 @@
   "hud.trialNone": "まだ",
   "hud.trialHint": "本番の前に、試運転",
   "hud.trialPercent": "ノルマの {percent}%",
-  "hud.trialMet": "ノルマ到達",
+  "hud.trialMet": "ノルマ達成",
   "hud.trialStale": "配置が変わった。試運転し直し",
   "hud.trialRandom": "ランダムあり。本番は別物かも",
   "hud.trialRange": "ランダムあり: {count}回で {min}〜{max}",
