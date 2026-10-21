@@ -2959,6 +2959,30 @@ a.button.button--primary {
 }
 
 /* 次にすること（操作欄の1行の案内。state/nextStep.ts） */
+/* 広い画面: 「次の一手」の案内と「元に戻す」を1行に並べる（元に戻すだけの行を作らない） */
+.app:not(.app--compact) .controls:not(.is-playing) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'buttons buttons'
+    'next undo'
+    'hint hint';
+  align-items: center;
+  column-gap: 8px;
+}
+.app:not(.app--compact) .controls:not(.is-playing) > .button-row {
+  grid-area: buttons;
+}
+.app:not(.app--compact) .controls:not(.is-playing) > .controls__next {
+  grid-area: next;
+}
+.app:not(.app--compact) .controls:not(.is-playing) > .speed {
+  grid-area: undo;
+  margin: 6px 0 0;
+}
+.app:not(.app--compact) .controls:not(.is-playing) > .panel__hint {
+  grid-area: hint;
+}
 .controls__next {
   margin: 8px 0 4px;
   font-size: 0.85rem;
