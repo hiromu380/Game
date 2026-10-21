@@ -109,7 +109,6 @@ import { GameMenu } from './ui/GameMenu';
 import { WeeklyMenu } from './ui/online/WeeklyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
-import { WorkshopBackdrop } from './ui/WorkshopBackdrop';
 
 /** ゲーム画面の始め方（週替わり・練習はメニューで組み立てたランを渡す） */
 export interface GameStart {
@@ -648,7 +647,6 @@ export function App({ start, onTitle }: Props) {
       // ラン終了画面は情報が多いので、広い画面では横幅の上限を広げる
       <div className="app app--wide">
         {header}
-        <WorkshopBackdrop run={run} meta={state.meta} playing={false} alert={bossActive} />
         <RunEndScreen
           run={run}
           meta={state.meta}

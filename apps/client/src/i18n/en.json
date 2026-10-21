@@ -158,6 +158,7 @@
   "meta.newTitle": "Newly installed",
   "meta.newPart": "New stock: {name}",
   "meta.newBoard": "Factory expanded: {size}×{size}",
+  "meta.allGoals": "All goals ({count})",
   "meta.goalsTitle": "Unlock goals",
   "meta.boardGoal": "Factory {size}×{size}",
   "meta.condition.bestChain": "Chain {value}+ in one run",

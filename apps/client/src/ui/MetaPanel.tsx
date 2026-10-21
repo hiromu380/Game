@@ -19,6 +19,17 @@ interface Props {
   meta: MetaProgress;
   /** 直前のランで新しく解放されたもの */
   unlocks: Unlock[];
+  /** 目標を、届きそうなものからこの数だけ出し、残りは畳む（省略時はすべて並べる） */
+  limit?: number;
+}
+
+interface Goal {
+  key: string;
+  icon: React.ReactNode;
+  label: string;
+  condition: string;
+  progress: number;
+  done: boolean;
 }
 
 /** 解放条件の文言（パーツ一覧でも使う） */
@@ -37,8 +48,38 @@ export function describeCondition(
 /** 盤面の一辺の長さ（工場拡張の段階から） */
 const boardSizeAt = (level: number) => BALANCE.board.width + level;
 
-export function MetaPanel({ meta, unlocks }: Props) {
+export function MetaPanel({ meta, unlocks, limit }: Props) {
   const { t, formatScore } = useI18n();
+  const goals: Goal[] = [
+    ...BALANCE.meta.partUnlocks.map(({ partId, condition }) => {
+      const done = meta.unlockedParts.includes(partId);
+      return {
+        key: partId,
+        icon: <PartIcon partId={partId} size={28} />,
+        label: t(`part.${partId}.name`),
+        condition: describeCondition(t, formatScore, condition),
+        progress: done ? 1 : conditionProgress(meta.records, condition),
+        done,
+      };
+    }),
+    ...BALANCE.meta.boardExpansions.map((condition, i) => {
+      const done = meta.boardLevel > i || isConditionMet(meta.records, condition);
+      return {
+        key: `board-${i}`,
+        icon: <UiIcon name="expand" size={28} />,
+        label: t('meta.boardGoal', { size: boardSizeAt(i + 1) }),
+        condition: describeCondition(t, formatScore, condition),
+        progress: done ? 1 : conditionProgress(meta.records, condition),
+        done,
+      };
+    }),
+  ];
+  // まだの目標を、届きそうな順に（達成度の高い順）
+  const open = goals.filter((g) => !g.done).sort((a, b) => b.progress - a.progress);
+  const nearest = open.slice(0, limit ?? open.length);
+  const shown = new Set(nearest.map((g) => g.key));
+  const rest = goals.filter((g) => !shown.has(g.key));
+  const renderGoal = ({ key, ...g }: Goal) => <GoalRow key={key} {...g} />;
 
   return (
     <section className="meta">
@@ -69,34 +110,20 @@ export function MetaPanel({ meta, unlocks }: Props) {
       )}
 
       <h2 className="meta__title">{t('meta.goalsTitle')}</h2>
-      <ul className="meta__goals">
-        {BALANCE.meta.partUnlocks.map(({ partId, condition }) => {
-          const done = meta.unlockedParts.includes(partId);
-          return (
-            <GoalRow
-              key={partId}
-              icon={<PartIcon partId={partId} size={28} />}
-              label={t(`part.${partId}.name`)}
-              condition={describeCondition(t, formatScore, condition)}
-              progress={done ? 1 : conditionProgress(meta.records, condition)}
-              done={done}
-            />
-          );
-        })}
-        {BALANCE.meta.boardExpansions.map((condition, i) => {
-          const done = meta.boardLevel > i || isConditionMet(meta.records, condition);
-          return (
-            <GoalRow
-              key={`board-${i}`}
-              icon={<UiIcon name="expand" size={28} />}
-              label={t('meta.boardGoal', { size: boardSizeAt(i + 1) })}
-              condition={describeCondition(t, formatScore, condition)}
-              progress={done ? 1 : conditionProgress(meta.records, condition)}
-              done={done}
-            />
-          );
-        })}
-      </ul>
+      {limit === undefined ? (
+        <ul className="meta__goals">{goals.map(renderGoal)}</ul>
+      ) : (
+        <>
+          {/* もうすぐ届く目標だけを先に出し、残りは畳む（ラン終了画面で圧迫しないように） */}
+          <ul className="meta__goals">{nearest.map(renderGoal)}</ul>
+          {rest.length > 0 && (
+            <details className="meta__more">
+              <summary>{t('meta.allGoals', { count: goals.length })}</summary>
+              <ul className="meta__goals">{rest.map(renderGoal)}</ul>
+            </details>
+          )}
+        </>
+      )}
     </section>
   );
 }

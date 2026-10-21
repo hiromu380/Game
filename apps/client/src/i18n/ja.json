@@ -158,6 +158,7 @@
   "meta.newTitle": "新規導入",
   "meta.newPart": "新入荷: {name}",
   "meta.newBoard": "工場拡張: {size}×{size}",
+  "meta.allGoals": "すべての目標（{count}）",
   "meta.goalsTitle": "解放の目標",
   "meta.boardGoal": "工場拡張 {size}×{size}",
   "meta.condition.bestChain": "1回の稼働で連鎖 {value} 以上",

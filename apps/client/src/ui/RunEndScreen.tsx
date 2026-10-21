@@ -78,7 +78,7 @@ export function RunEndScreen(props: Props) {
     <div className="run-end">
       {/* 広い画面では2列: 左に結果（ロケット・スコア・次の操作）、右に共有・解放の目標・実績 */}
       <div className="run-end__main">
-        <RocketScene run={run} />
+        {/* 結果と次の一手を先に（スクロールせずに「もう一度」まで届くように）、ロケットはその後 */}
         <h1>
           {mode.kind === 'weekly'
             ? t('runEnd.weeklyTitle', { number: mode.number })
@@ -108,6 +108,7 @@ export function RunEndScreen(props: Props) {
             {actions}
           </section>
         )}
+        <RocketScene run={run} />
         <dl className="stats stats--large">
           <dt>{t('runEnd.finalScore')}</dt>
           <dd className="stats__score">{formatMeasured(total)}</dd>
@@ -180,7 +181,7 @@ export function RunEndScreen(props: Props) {
           </section>
         )}
         {mode.kind === 'normal' && EDITION_CONFIG.metaProgression && (
-          <MetaPanel meta={meta} unlocks={unlocks} />
+          <MetaPanel meta={meta} unlocks={unlocks} limit={3} />
         )}
         {EDITION_CONFIG.achievements && <AchievementList progress={props.achievements} />}
         {mode.kind === 'normal' && <StoreLink />}

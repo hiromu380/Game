@@ -881,6 +881,16 @@ button:disabled {
   background: rgba(255, 193, 7, 0.08);
 }
 .meta__new ul,
+.meta__more {
+  margin-top: 6px;
+}
+.meta__more summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85rem;
+  /* 狭い画面でも押しやすい高さ（44px）を確保する */
+  padding: 12px 0;
+}
 .meta__goals {
   list-style: none;
   margin: 0;
@@ -2746,236 +2756,11 @@ a.button.button--primary {
   line-height: 1.5;
 }
 
-/* ---- 夜間工場の遠景（ui/WorkshopBackdrop.tsx） ----
-   盤面を主役にするため、細い帯（64px）にする。左から: 時刻 → シフトの達成（✓）→ 今日の出来事 → ボルト → ロケット */
-.workshop {
-  position: relative;
-  height: 64px;
-  margin: 6px 0 8px;
-  overflow: hidden;
-  pointer-events: none;
-  border: 1px solid var(--panel-border);
-  border-radius: 12px;
-  background: #202630;
-  box-shadow: inset 0 -12px rgba(0, 0, 0, 0.18);
-}
-.workshop__window {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  background: #16182c;
-}
-/* 窓の外の景色（art/backdrop.ts: 朝・昼・夜）。帯の幅に合わせて切り抜き、下を揃える */
-.workshop__sky {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 30% bottom;
-}
-.workshop__sky-label {
-  position: absolute;
-  top: 50%;
-  left: 14px;
-  transform: translateY(-50%);
-  padding: 3px 7px;
-  border: 1px solid currentColor;
-  border-radius: 3px;
-  background: rgba(20, 23, 29, 0.55);
-  color: rgba(255, 255, 255, 0.85);
-  font: 700 0.62rem/1 monospace;
-  letter-spacing: 0.08em;
-}
-/* ロケットの組み立て台（art/backdrop.ts の絵）と、中に置くロケット */
-.workshop__gantry {
-  position: absolute;
-  right: 12%;
-  bottom: 0;
-  width: 84px;
-  height: 56px;
-}
-.workshop__gantry-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.workshop__rocket {
-  position: absolute;
-  left: 23px;
-  bottom: 4px;
-  width: 38px;
-  height: 44px;
-  object-fit: contain;
-}
-.workshop__plaques {
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 4px;
-}
-.workshop__plaques img {
-  width: 22px;
-  height: 28px;
-}
-.workshop__event-prop {
-  position: absolute;
-  left: 34%;
-  top: 50%;
-  translate: 0 -50%;
-  display: flex;
-  flex-direction: column;
-  min-width: 108px;
-  padding: 7px 10px;
-  border: 2px solid var(--panel-border);
-  border-radius: 4px;
-  background: var(--panel);
-  color: var(--text);
-  transform: rotate(1deg);
-  box-shadow: 4px 4px rgba(0, 0, 0, 0.2);
-}
-.workshop__event-prop img {
-  position: absolute;
-  left: -14px;
-  top: 50%;
-  translate: 0 -50%;
-}
-.workshop__event-prop span {
-  color: var(--muted);
-  font-size: 0.58rem;
-  letter-spacing: 0.08em;
-}
-.workshop__event-prop strong {
-  color: var(--met);
-  font-size: 0.75rem;
-}
-.workshop__event-prop--sale,
-.workshop__event-prop--clearance {
-  border-color: var(--hazard-yellow);
-}
-.workshop__event-prop--sample,
-.workshop__event-prop--supplies {
-  box-shadow:
-    4px 4px rgba(0, 0, 0, 0.2),
-    -5px -4px 0 rgba(255, 193, 7, 0.18);
-}
-.workshop__beacon {
-  position: absolute;
-  left: 50%;
-  top: 6px;
-  width: 24px;
-  height: 20px;
-  opacity: 0.35;
-}
-.workshop.is-alert .workshop__beacon {
-  opacity: 1;
-  animation: workshop-alert 0.8s steps(1) infinite;
-  filter: drop-shadow(0 0 6px var(--missed));
-}
-@keyframes workshop-alert {
-  50% {
-    opacity: 0.35;
-    filter: none;
-  }
-}
-.workshop__status {
-  /* 工場名は目標の計器の管理プレートにもあるので、細い帯では出さない */
-  display: none;
-  position: absolute;
-  left: 18px;
-  bottom: 15px;
-  flex-direction: column;
-  padding: 6px 9px;
-  border-left: 4px solid var(--hazard-yellow);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.68rem;
-}
-.workshop__status strong {
-  color: var(--hazard-yellow);
-}
-.workshop__bolt {
-  position: absolute;
-  left: 56%;
-  bottom: 0;
-  /* 全身（設定画の viewBox 140×162）。帯の高さに収める */
-  height: calc(100% - 4px);
-  width: auto;
-  transition: transform 0.2s;
-}
-.workshop__bolt.is-watching {
-  transform: translateY(-2px);
-}
-/* シフトを達成した印（✓）: 時刻の右に並べる（以前は時刻の表示に重なっていた） */
-.workshop__marks {
-  position: absolute;
-  top: 50%;
-  left: 130px;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-}
-.workshop__approval {
-  width: 22px;
-  height: 22px;
-  margin: 0 1px;
-}
-.workshop__soot {
-  position: absolute;
-  width: 42px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(8, 8, 10, 0.18);
-  filter: blur(5px);
-}
-.workshop__soot--1 {
-  left: 28%;
-  top: 25%;
-}
-.workshop__soot--2 {
-  left: 61%;
-  top: 44%;
-}
-.workshop__soot--3 {
-  left: 16%;
-  top: 65%;
-}
-.workshop__soot--4 {
-  left: 78%;
-  top: 18%;
-}
-
 /* HUD は古い工場の操作卓 */
 .control-console {
   position: relative;
   border-width: 2px;
   box-shadow: inset 0 -4px rgba(0, 0, 0, 0.12);
-}
-
-@media (max-width: 600px) {
-  .workshop {
-    height: 48px;
-  }
-  .workshop__gantry {
-    right: 8%;
-    transform: scale(0.78);
-    transform-origin: bottom;
-  }
-  .workshop__marks {
-    left: 112px;
-  }
-  .workshop__bolt,
-  .workshop__status,
-  .workshop__event-prop {
-    display: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .workshop.is-alert .workshop__beacon {
-    animation: none;
-  }
 }
 
 /* ---- 売却エリア（ui/SellZone.tsx） ---- */
