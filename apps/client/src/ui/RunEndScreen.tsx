@@ -168,7 +168,8 @@ export function RunEndScreen(props: Props) {
         )}
       </div>
       <div className="run-end__side">
-        {(mode.kind === 'weekly' || mode.kind === 'normal') && (
+        {/* 共有は見せたくなる結果のときだけ（通常ランで1シフトも達成していなければ出さない。週替わりは常に） */}
+        {(mode.kind === 'weekly' || (mode.kind === 'normal' && clearedCount > 0)) && (
           <section className="run-end__share">
             <h2>{t('shareCard.title')}</h2>
             {mode.kind === 'weekly' ? (

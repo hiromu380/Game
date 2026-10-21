@@ -77,7 +77,6 @@ import { commitWarnings } from './state/commitWarnings';
 import { SellZone } from './ui/SellZone';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RelicDialog, RelicStrip } from './ui/RelicDialog';
-import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
 import { useBoardLabels } from './board/useBoardLabels';
 
@@ -619,6 +618,9 @@ export function App({ start, onTitle }: Props) {
   const trial = trialStatus(state.trials, run);
   // 結果のパネルを閉じたら、出荷量の途中経過ではなく直近の試運転の結果を出す（操作で閉じた場合も含む）
   const hud = <Hud run={run} liveScore={playback ? liveScore : null} trial={trial} />;
+  const playbackPanel = playback && (
+    <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />
+  );
   const notices = (
     <>
       {tutorialOn ? (
@@ -633,9 +635,7 @@ export function App({ start, onTitle }: Props) {
           }}
           onSkip={endTutorial}
         />
-      ) : (
-        <RocketGoal run={run} />
-      )}
+      ) : null}
       <DayEventNotice run={run} />
       <BossNotice run={run} />
       <RelicStrip run={run} />
@@ -744,7 +744,6 @@ export function App({ start, onTitle }: Props) {
         </div>
       )}
       {header}
-      <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
       {/* 縦長の画面（スマホ）: 盤面の上には計器だけを置き、説明は操作ボタンの下へ（盤面を画面の上の方に出す） */}
       {!fit && hud}
       <main className="layout">
@@ -773,7 +772,8 @@ export function App({ start, onTitle }: Props) {
               params={boardView.rules.floorParams}
             />
           )}
-          {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
+          {/* 再生中の帯は盤面の上。結果は、縦長の画面では盤面の下に出す（走りきった盤面を隠さない） */}
+          {playback && (!playback.finished || !fit) && playbackPanel}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
           {note && !error && (
             <div key={note.seq} className="toast toast--note" role="status">
@@ -785,6 +785,8 @@ export function App({ start, onTitle }: Props) {
         <aside className="layout__side">
           {/* 目標の計器は右の列の上に固定し（スクロールしても見える）、本番ボタンをそのすぐ下に置く */}
           {fit && <div className="layout__goal">{hud}</div>}
+          {/* 横長の画面: 結果は右の列（計器のすぐ下）に出す（盤面を隠さない） */}
+          {fit && playback?.finished && playbackPanel}
           <ControlsPanel
             playing={playing}
             compact={compact}
