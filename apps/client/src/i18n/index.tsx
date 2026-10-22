@@ -5,7 +5,7 @@
  * キーは「画面.要素」の形で意味がわかる名前にする。
  * 文中の {name} は t() の params で置き換える。
  */
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { isUnmeasurable, type Score } from '@chain-factory/sim';
 import { useSettings } from '../settings/SettingsContext';
 import { formatCompactNumber, formatScoreNumber } from './numberFormat';
@@ -57,6 +57,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const { settings, updateSettings } = useSettings();
   const lang = settings.lang;
   const setLang = useCallback((next: Lang) => updateSettings({ lang: next }), [updateSettings]);
+
+  // 読み上げ・改行位置（日本語は文節で折り返す。styles.css の :lang(ja)）を言語に合わせる
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const value = useMemo<I18nContextValue>(
     () => ({

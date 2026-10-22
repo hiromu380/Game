@@ -23,6 +23,11 @@ body {
   background-size: 32px 32px;
 }
 
+/* 日本語は文節の切れ目で折り返す（「廃／棄」のような語の途中の改行を避ける。対応していないブラウザでは通常の改行） */
+:lang(ja) {
+  word-break: auto-phrase;
+}
+
 /* ボタンの文字の前に添える UI アイコン（ui/UiIcon.tsx） */
 .ui-icon {
   vertical-align: middle;
