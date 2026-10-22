@@ -130,6 +130,20 @@ function pollGamepads(now: number) {
   requestAnimationFrame(pollGamepads);
 }
 
+// ---- マウス・タッチで当たったフォーカス ----
+
+/** マウス・タッチで押した直後にフォーカスが移った要素（キーボード・コントローラーでたどった要素と区別する） */
+let pointerFocused: Element | null = null;
+let pointerAt = -Infinity;
+
+/**
+ * el のフォーカスがマウス・タッチで押して付いたものか。
+ * マウスで押したボタンにはフォーカスが残るので、続けて矢印キーを押したときは盤面の操作として扱う（useGameControls.ts）
+ */
+export function focusedByPointer(el: Element | null): boolean {
+  return el !== null && el === pointerFocused;
+}
+
 let installed = false;
 
 /** 入力の受け付けを始める（main.tsx から1回だけ呼ぶ） */
@@ -137,7 +151,17 @@ export function installControls(): void {
   if (installed || typeof window === 'undefined') return;
   installed = true;
   window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('pointerdown', () => setMode('pointer'), { capture: true });
+  window.addEventListener(
+    'pointerdown',
+    () => {
+      setMode('pointer');
+      pointerAt = performance.now();
+    },
+    { capture: true },
+  );
+  window.addEventListener('focusin', (e) => {
+    pointerFocused = performance.now() - pointerAt < 200 ? (e.target as Element) : null;
+  });
   window.addEventListener('mousemove', () => setMode('pointer'), { passive: true });
   if ('getGamepads' in navigator) requestAnimationFrame(pollGamepads);
 }

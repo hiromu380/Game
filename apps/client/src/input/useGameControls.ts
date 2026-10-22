@@ -5,12 +5,14 @@
  *   Y = 試運転、Start = 本番
  * - L / R: ショップ・手持ちの一覧へ移る（タブ表示ならタブも切り替える）。一覧の中は上下で選び、決定で押す。
  *   手持ちのパーツを選んだら盤面へ戻る（そのまま置けるように）。B で盤面へ戻る
+ * - 盤面の端からさらに外へ動かすと、その方向の画面のボタン（目標・設定・メニュー・案内の「次へ」など）へ移る。
+ *   ボタンの間は方向で移り、決定で押す。盤面の方向へ戻るか B で盤面へ戻る（コントローラーには Tab がないため）
  * - 再生中: 決定で結果を閉じる（再生が終わっていれば）
  * active が false（ダイアログが開いている・ラン終了画面）のときは何もしない（メニューの操作に任せる）
  */
 import { useEffect, useRef, useState } from 'react';
 import type { ControlAction } from '../config/controls';
-import { addControlHandler } from './controls';
+import { addControlHandler, focusedByPointer } from './controls';
 import { focusables, nearestInDirection } from './menuNavigation';
 
 type Panel = 'shop' | 'inventory';
@@ -49,6 +51,22 @@ function panelOf(el: Element | null): Panel | null {
   return panel === 'shop' || panel === 'inventory' ? panel : null;
 }
 
+/** 盤面のマス（x, y）の画面上の位置。盤面の外のボタンへ移るときの起点 */
+function cellRect(x: number, y: number, width: number, height: number): DOMRect | null {
+  const board = document.querySelector('.board-container');
+  if (!board) return null;
+  const r = board.getBoundingClientRect();
+  const w = r.width / width;
+  const h = r.height / height;
+  return new DOMRect(r.left + x * w, r.top + y * h, w, h);
+}
+
+function candidates(except: Element | null) {
+  return focusables(document)
+    .filter((el) => el !== except)
+    .map((el) => ({ el, rect: el.getBoundingClientRect() }));
+}
+
 /** 一覧の最初のボタンにフォーカスする（タブの切り替えで描き直されるのを待つ） */
 function focusPanel(panel: Panel) {
   requestAnimationFrame(() => {
@@ -84,8 +102,34 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
           return action !== 'cancel';
         }
 
-        const active = document.activeElement;
+        // マウスで押して残ったフォーカスは無視する（続けて矢印を押したら盤面のカーソルが動くように）
+        const active = focusedByPointer(document.activeElement) ? null : document.activeElement;
         const panel = panelOf(active);
+
+        // 盤面の外のボタン（一覧以外）にいるとき
+        if (!panel && active instanceof HTMLElement && focusables(document).includes(active)) {
+          const dir = MOVES[action];
+          if (dir) {
+            // 盤面もひとつの行き先として比べ、盤面がいちばん近ければ盤面へ戻る
+            const board = document.querySelector<HTMLElement>('.board-container');
+            const options = candidates(active);
+            if (board) options.push({ el: board, rect: board.getBoundingClientRect() });
+            const next = nearestInDirection(active.getBoundingClientRect(), options, dir);
+            if (next === board) active.blur();
+            else next?.focus();
+            return true;
+          }
+          if (action === 'confirm') {
+            active.click();
+            return true;
+          }
+          if (action === 'cancel') {
+            active.blur();
+            return true;
+          }
+          // 回転・試運転・本番などは、盤面の操作としてそのまま続ける
+        }
+
         if (panel && active instanceof HTMLElement) {
           const dir = MOVES[action];
           if (dir) {
@@ -114,6 +158,15 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
 
         const move = MOVES[action];
         if (move) {
+          const nx = c.x + move[0];
+          const ny = c.y + move[1];
+          // 盤面の端からさらに外へ: その方向の画面のボタンへ移る（なければ端で止まる）
+          if (nx < 0 || ny < 0 || nx >= o.width || ny >= o.height) {
+            const from = cellRect(c.x, c.y, o.width, o.height);
+            const next = from && nearestInDirection(from, candidates(null), move);
+            next?.focus();
+            return true;
+          }
           setCursor({
             x: Math.min(o.width - 1, Math.max(0, c.x + move[0])),
             y: Math.min(o.height - 1, Math.max(0, c.y + move[1])),
