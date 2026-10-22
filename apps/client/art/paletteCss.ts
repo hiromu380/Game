@@ -7,6 +7,7 @@ export function paletteCss(): string {
   const vars = [
     ...Object.entries(UI_COLORS).map(([k, v]) => `  --${k}: ${v};`),
     `  --white: ${INK.white};`,
+    `  --outline: ${INK.outline};`,
     `  --hazard-yellow: ${BOARD_COLORS.hazardYellow};`,
     `  --floor-item: ${BOARD_COLORS.floorItem};`,
     `  --golden: ${BOARD_COLORS.golden};`,

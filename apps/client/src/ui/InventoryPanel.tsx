@@ -72,9 +72,17 @@ export function InventoryPanel({
   const permits = countItems(run, 'floorPermit');
 
   return (
-    <section className="panel" data-panel="inventory">
+    // 中身が多いと縦にスクロールする。中のボタンが押せないときもキーボードでスクロールできるように、欄そのものにフォーカスを当てられる
+    <section
+      className="panel"
+      data-panel="inventory"
+      tabIndex={0}
+      aria-labelledby="inventory-title"
+    >
       <div className="panel__header">
-        <h2 className="panel__title">{t('inventory.title')}</h2>
+        <h2 id="inventory-title" className="panel__title">
+          {t('inventory.title')}
+        </h2>
         <button
           className="button--small button--ghost"
           disabled={disabled || !boardHasParts}

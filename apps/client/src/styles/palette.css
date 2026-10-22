@@ -10,14 +10,17 @@
   --primary: #e53935;
   --primary-hover: #f44336;
   --primary-shadow: #8e1414;
+  --button-primary: #d32f2f;
+  --button-primary-hover: #da3a36;
   --secondary: #3a404a;
   --met: #69f0ae;
   --missed: #ff5252;
   --selected: #ffeb3b;
   --rarity-uncommon: #4fc3f7;
-  --rarity-rare: #ce93d8;
+  --rarity-rare: #d4a0dc;
   --rarity-legendary: #ffb74d;
   --white: #ffffff;
+  --outline: #1b1f27;
   --hazard-yellow: #ffc107;
   --floor-item: #ffca28;
   --golden: #ffd54f;
@@ -28,7 +31,7 @@
   --vanish-emptyCell: #ffb74d;
   --vanish-exhausted: #ef5350;
   --vanish-blocked: #c62828;
-  --vanish-inert: #9575cd;
+  --vanish-inert: #9c7fd2;
   --title-sky-top: #141b33;
   --title-sky-bottom: #3d2a55;
   --title-glow: #ff8a50;

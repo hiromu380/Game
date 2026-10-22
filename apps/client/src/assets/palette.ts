@@ -21,6 +21,9 @@ export const UI_COLORS = {
   primary: '#e53935',
   'primary-hover': '#f44336',
   'primary-shadow': '#8e1414',
+  /** 赤いボタンの地（白い文字とのコントラスト 4.5:1 以上。primary は素材の赤） */
+  'button-primary': '#d32f2f',
+  'button-primary-hover': '#da3a36',
   secondary: '#3a404a',
   /** ノルマ達成・良い結果 */
   met: '#69f0ae',
@@ -29,7 +32,7 @@ export const UI_COLORS = {
   selected: '#ffeb3b',
   /** レア度（コモンは本文の色。アンコモン → レア → レジェンドの順に目立たせる） */
   'rarity-uncommon': '#4fc3f7',
-  'rarity-rare': '#ce93d8',
+  'rarity-rare': '#d4a0dc',
   'rarity-legendary': '#ffb74d',
 } as const;
 
@@ -189,7 +192,7 @@ export const VANISH_COLORS = {
   emptyCell: '#ffb74d',
   exhausted: '#ef5350',
   blocked: '#c62828',
-  inert: '#9575cd',
+  inert: '#9c7fd2',
 } as const;
 
 /** 連鎖演出の光（ピーク・ノルマ超え・桁上がりだけ。範囲と明るさの上限は docs/art-style.md） */

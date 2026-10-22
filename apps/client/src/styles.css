@@ -53,7 +53,8 @@ button:disabled {
   outline-offset: 2px;
 }
 .button--primary {
-  background: var(--primary);
+  background: var(--button-primary);
+  color: var(--white);
   border-color: var(--primary-shadow);
   font-weight: bold;
   /* 押しボタン風の立体感 */
@@ -66,7 +67,7 @@ button:disabled {
   box-shadow: 0 1px 0 var(--primary-shadow);
 }
 .button--primary:hover:not(:disabled) {
-  background: var(--primary-hover);
+  background: var(--button-primary-hover);
 }
 .button--ghost {
   background: transparent;
@@ -835,7 +836,8 @@ button:disabled {
   margin-right: 6px;
   padding: 0 6px;
   border-radius: 8px;
-  color: var(--white);
+  /* 地の色が明るいので濃い文字（コントラスト 4.5:1 以上。暗い赤の「使用不可」だけ白） */
+  color: var(--outline);
   font-weight: bold;
   text-align: center;
 }
@@ -851,6 +853,7 @@ button:disabled {
 }
 .break-chip--blocked {
   background: var(--vanish-blocked);
+  color: var(--white);
 }
 .break-chip--inert {
   background: var(--vanish-inert);
@@ -1453,7 +1456,8 @@ a.button {
   padding: 8px 12px;
 }
 a.button.button--primary {
-  background: var(--primary);
+  background: var(--button-primary);
+  color: var(--white);
   border-color: var(--primary-shadow);
 }
 .store-link {
