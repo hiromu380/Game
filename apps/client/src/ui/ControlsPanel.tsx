@@ -72,7 +72,9 @@ export function ControlsPanel({
       {!playing && next && (
         <p className={`controls__next controls__next--${next.kind}`}>
           {next.kind === 'short'
-            ? t('next.short', { amount: formatCompact(next.amount.toString()) })
+            ? t(next.oneDock ? 'next.shortOneDock' : 'next.short', {
+                amount: formatCompact(next.amount.toString()),
+              })
             : t(`next.${next.kind}`)}
         </p>
       )}

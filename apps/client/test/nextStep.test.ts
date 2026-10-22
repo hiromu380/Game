@@ -46,7 +46,11 @@ describe('次にすること', () => {
 
   it('試運転の結果で、不足・運しだい・準備OK を分ける', () => {
     const run = built();
-    expect(nextStep(run, null, fresh(1n, 1n), 3)).toEqual({ kind: 'short', amount: 2n });
+    expect(nextStep(run, null, fresh(1n, 1n), 3)).toEqual({
+      kind: 'short',
+      amount: 2n,
+      oneDock: true,
+    });
     expect(nextStep(run, null, fresh(1n, 5n), 3)).toEqual({ kind: 'risky' });
     expect(nextStep(run, null, fresh(3n, 3n), 3)).toEqual({ kind: 'ready' });
     expect(nextStep(run, null, fresh(3n, 3n, 'stale'), 3)).toEqual({

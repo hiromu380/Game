@@ -19,8 +19,8 @@ export type NextStep =
   | { kind: 'cellSelected' }
   /** まだ試運転していない・試運転のあとに組み替えた */
   | { kind: 'trial' }
-  /** 試運転でノルマに届かなかった */
-  | { kind: 'short'; amount: bigint }
+  /** 試運転でノルマに届かなかった（oneDock: 出荷口が1つだけ。同時出荷を勧める） */
+  | { kind: 'short'; amount: bigint; oneDock: boolean }
   /** ランダムなパーツがあり、試運転では届かないこともあった */
   | { kind: 'risky' }
   /** 試運転でノルマに届いた */
@@ -41,7 +41,10 @@ export function nextStep(
   if (!onBoard('dock') && inHand('dock')) return { kind: 'placeDock' };
   if (trial.kind !== 'fresh') return { kind: 'trial' };
   const goal = BigInt(quota);
-  if (trial.max < goal) return { kind: 'short', amount: goal - trial.max };
+  if (trial.max < goal) {
+    const docks = run.board.cells.filter((c) => c?.id === 'dock').length;
+    return { kind: 'short', amount: goal - trial.max, oneDock: docks === 1 };
+  }
   if (trial.min < goal) return { kind: 'risky' };
   return { kind: 'ready' };
 }

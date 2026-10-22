@@ -576,6 +576,7 @@
   "next.cellSelected": "Tap again to rotate, drag to move",
   "next.trial": "Built it? Test run",
   "next.short": "Test run is {amount} short. Add or rearrange",
+  "next.shortOneDock": "{amount} short in the test run. More docks shipping at once multiply it",
   "next.risky": "Randomness in play. The real run is luck",
   "next.ready": "It reaches. Press the switch",
   "toast.buy": "Bought −${amount}",

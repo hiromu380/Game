@@ -576,6 +576,7 @@
   "next.cellSelected": "もう一度で回転、ドラッグで移動",
   "next.trial": "組めたら試運転",
   "next.short": "試運転で、あと {amount}。足すか、組み替えるか",
+  "next.shortOneDock": "試運転で、あと {amount}。出荷口を増やして同時に届けるのも手",
   "next.risky": "ランダムあり。本番は運しだい",
   "next.ready": "届いた。スイッチを押せ",
   "toast.buy": "購入 −{amount}円",
