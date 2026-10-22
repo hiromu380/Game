@@ -987,6 +987,10 @@ button:disabled {
   z-index: 10;
   padding: 16px;
 }
+/* 開いたときにダイアログそのものへフォーカスを移す（input/modalFocus.ts）。枠は出さない */
+.modal:focus {
+  outline: none;
+}
 .modal__body {
   width: min(420px, 100%);
 }
