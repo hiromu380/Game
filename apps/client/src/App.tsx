@@ -450,6 +450,7 @@ export function App({ start, onTitle }: Props) {
   const gameCursor = useGameControls({
     active:
       !settingsOpen &&
+      cutscene === null &&
       !isEventPending(run) &&
       !isRelicPending(run) &&
       !showcaseOpen &&
@@ -626,6 +627,7 @@ export function App({ start, onTitle }: Props) {
       {tutorialOn ? (
         <TutorialGuide
           tutorial={tutorial}
+          ready={cutscene === null}
           run={run}
           lastTrialScore={lastTrialScore}
           onNext={() => {
