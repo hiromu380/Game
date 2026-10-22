@@ -33,7 +33,7 @@ export const CUTSCENE_CONFIG = {
    */
   pages: {
     base: 1.8,
-    perChar: { ja: 0.1, en: 0.045 },
+    perChar: { ja: 0.12, en: 0.045 },
     min: 3,
     max: 6.5,
     turnMs: 450,
