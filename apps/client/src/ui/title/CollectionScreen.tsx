@@ -69,7 +69,13 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         )}
-        <div className="collection__content">
+        {/* 縦にスクロールする。中に押せるものがないタブでも、キーボードでスクロールできるようにフォーカスを当てられる */}
+        <div
+          className="collection__content"
+          role="tabpanel"
+          tabIndex={0}
+          aria-label={t(`collection.tab.${tab}`)}
+        >
           {tab === 'parts' && <PartList unlockedParts={meta.unlockedParts} />}
           {tab === 'relics' && <RelicList found={meta.relicsFound ?? []} />}
           {tab === 'logs' && <FactoryLog meta={meta} />}

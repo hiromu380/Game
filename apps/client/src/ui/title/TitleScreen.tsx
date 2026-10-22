@@ -114,9 +114,12 @@ export function TitleScreen({
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={percent}
+          aria-labelledby="title-loading-label"
         >
           <div className="title__loading-bar" style={{ width: `${percent}%` }} />
-          <span className="title__loading-label">{t('title.loading', { percent })}</span>
+          <span id="title-loading-label" className="title__loading-label">
+            {t('title.loading', { percent })}
+          </span>
         </div>
       )}
     </main>
