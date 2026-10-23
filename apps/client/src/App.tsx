@@ -779,6 +779,8 @@ export function App({ start, onTitle }: Props) {
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
             onCellSecondaryClick={onCellSecondaryClick}
+            canWheelRotate={() => !playing && state.selection !== null}
+            onWheelRotate={() => dispatch({ type: 'rotate' })}
             onCellDragStart={onCellDragStart}
             onCellDragEnd={onCellDragEnd}
             onShip={onShip}

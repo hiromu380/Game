@@ -133,6 +133,10 @@ export interface BoardRendererOptions extends BoardLabels {
   onCellLongPress: (x: number, y: number) => void;
   /** 右クリック（取り消し: 持っているパーツを手放す・置いたパーツを手持ちに戻す） */
   onCellSecondaryClick: (x: number, y: number) => void;
+  /** マウスホイールで回せるか（パーツを選んでいる）。省略時はホイールを使わない */
+  canWheelRotate?: () => boolean;
+  /** マウスホイールで、選んでいるパーツを回す */
+  onWheelRotate?: () => void;
   /** 置いたパーツのドラッグを始めた（画面側で指についてくる絵と、手持ちの落とし先を出す） */
   onCellDragStart: (from: { x: number; y: number }, partId: PartId) => void;
   /**
@@ -304,6 +308,25 @@ export class BoardRenderer {
     });
     // スマホの長押し・右クリックで出るメニューを出さない
     app.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    // マウスホイールで、選んでいるパーツを回す（何も選んでいなければページのスクロールのまま）。
+    // タッチパッドの細かい量はためてから、続けて回すときは間隔をあけて回す
+    let wheelSum = 0;
+    let wheelAt = -Infinity;
+    app.canvas.addEventListener(
+      'wheel',
+      (e) => {
+        if (this.timeline || !options.canWheelRotate?.()) return;
+        e.preventDefault();
+        wheelSum += Math.abs(e.deltaY);
+        const now = performance.now();
+        if (wheelSum < INPUT_CONFIG.wheelStep || now - wheelAt < INPUT_CONFIG.wheelIntervalMs)
+          return;
+        wheelSum = 0;
+        wheelAt = now;
+        options.onWheelRotate?.();
+      },
+      { passive: false },
+    );
     // ドラッグは盤面の外まで追いかける（手持ちの一覧へ落とすため）
     app.stage.on('globalpointermove', (e) => {
       const drag = this.drag;

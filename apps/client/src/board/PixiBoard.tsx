@@ -38,6 +38,9 @@ interface Props {
   onCellClick: (x: number, y: number) => void;
   onCellLongPress: (x: number, y: number) => void;
   onCellSecondaryClick: (x: number, y: number) => void;
+  /** マウスホイールで回せるか・回す（省略時はホイールを使わない） */
+  canWheelRotate?: () => boolean;
+  onWheelRotate?: () => void;
   onCellDragStart: BoardRendererOptions['onCellDragStart'];
   onCellDragEnd: BoardRendererOptions['onCellDragEnd'];
   onShip: (total: Score) => void;
@@ -71,6 +74,8 @@ export function PixiBoard(props: Props) {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
       onCellLongPress: (x, y) => callbacksRef.current.onCellLongPress(x, y),
       onCellSecondaryClick: (x, y) => callbacksRef.current.onCellSecondaryClick(x, y),
+      canWheelRotate: () => callbacksRef.current.canWheelRotate?.() ?? false,
+      onWheelRotate: () => callbacksRef.current.onWheelRotate?.(),
       onCellDragStart: (from, partId) => callbacksRef.current.onCellDragStart(from, partId),
       onCellDragEnd: (from, target, client) =>
         callbacksRef.current.onCellDragEnd(from, target, client),
