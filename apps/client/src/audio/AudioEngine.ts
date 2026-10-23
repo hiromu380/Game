@@ -6,6 +6,7 @@
  * - 音量: マスター × 効果音 / BGM の2段。ミュートあり
  *
  * ブラウザは「ユーザーが操作するまで音を出せない」ため、AudioContext は最初に鳴らすときに作る。
+ * 画面が隠れている間は止める（watchLifecycle）。
  */
 import { barSeconds, BGM_RECIPES, bgmBarNotes, type BgmKey, type BgmNote } from './bgm';
 import { BGM_ASSETS, SOUND_ASSETS, type SoundKey, type SynthRecipe } from './manifest';
@@ -58,7 +59,27 @@ export class AudioEngine {
     this.bgmBus.connect(this.master);
     this.master.connect(this.ctx.destination);
     this.applyVolumes();
+    this.watchLifecycle(this.ctx);
     return this.ctx;
+  }
+
+  /**
+   * - 操作のたびに、止まっていれば鳴らせる状態に戻す（効果音の鳴らない操作でも BGM が始まるように。
+   *   iOS で着信などに割り込まれて止まったときも、次の操作で戻る）
+   * - 画面が隠れている間（別のアプリ・タブ・最小化）は止め、戻ったら再開する
+   */
+  private watchLifecycle(ctx: AudioContext): void {
+    if (typeof document === 'undefined') return;
+    const wake = () => {
+      if (!document.hidden && ctx.state !== 'running') void ctx.resume();
+    };
+    for (const type of ['pointerdown', 'keydown', 'touchend']) {
+      window.addEventListener(type, wake, { capture: true, passive: true });
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) void ctx.suspend();
+      else void ctx.resume();
+    });
   }
 
   setVolumes(volumes: VolumeSettings): void {
