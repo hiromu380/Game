@@ -12,7 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import type { ControlAction } from '../config/controls';
-import { addControlHandler, focusedByPointer } from './controls';
+import { addControlHandler, focusedByPointer, getInputMode } from './controls';
 import { focusables, nearestInDirection } from './menuNavigation';
 
 type Panel = 'shop' | 'inventory';
@@ -27,6 +27,9 @@ export interface GameControlOptions {
   playbackFinished: boolean;
   onPlace: (x: number, y: number) => void;
   onDeselect: () => void;
+  /** 何か選んでいるか（何も選んでいないときの Esc はメニューを開く） */
+  hasSelection: boolean;
+  onOpenMenu: () => void;
   onRotate: () => void;
   onUndo: () => void;
   /** 選んでいる盤面のパーツを手持ちに戻す */
@@ -178,7 +181,10 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
             o.onPlace(c.x, c.y);
             return true;
           case 'cancel':
-            o.onDeselect();
+            // キーボードの Esc は、何も選んでいなければメニューを開く（PC のゲームの慣れた操作）。
+            // コントローラーの B は「戻る」なので、選択の解除だけにする
+            if (!o.hasSelection && getInputMode() === 'keys') o.onOpenMenu();
+            else o.onDeselect();
             return true;
           case 'rotate':
             o.onRotate();

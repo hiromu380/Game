@@ -420,6 +420,8 @@ export function App({ start, onTitle }: Props) {
   };
   /** 本番の確認ダイアログ（押し間違い防止） */
   const [commitConfirm, setCommitConfirm] = useState(false);
+  /** 増やすとゲームのメニューを開く（盤面で何も選んでいないときの Esc） */
+  const [menuSignal, setMenuSignal] = useState(0);
   // カットシーン（初回だけ自動で再生。story/playback.ts）。終わったら見た記録を残す
   const storyContext = () => ({
     mode: mode.kind,
@@ -467,6 +469,8 @@ export function App({ start, onTitle }: Props) {
     playbackFinished: playback?.finished ?? false,
     onPlace: onCellClick,
     onDeselect: () => dispatch({ type: 'deselect' }),
+    hasSelection: state.selection !== null,
+    onOpenMenu: () => setMenuSignal((n) => n + 1),
     onRotate: () => dispatch({ type: 'rotate' }),
     onUndo: () => dispatch({ type: 'undo' }),
     onReturn: () => dispatch({ type: 'returnSelected' }),
@@ -554,6 +558,7 @@ export function App({ start, onTitle }: Props) {
         {/* 操作方法・諦める（押し間違えないよう、よく使うボタンから離してメニューの中に入れる） */}
         <GameMenu
           disabled={playing}
+          openSignal={menuSignal}
           canGiveUp={mode.kind !== 'weekly' && run.phase === 'building'}
           onGiveUp={() => dispatch({ type: 'giveUp' })}
         />
