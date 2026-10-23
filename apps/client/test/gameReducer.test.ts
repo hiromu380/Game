@@ -178,6 +178,24 @@ describe('画面の状態遷移', () => {
     expect(state.selection).toMatchObject({ kind: 'inventory', partId: 'dock' });
     expect(state.feedback?.kind).toBe('returnPart');
   });
+
+  it('右クリック: 持っているパーツは手放し、置いたパーツは手持ちに戻す（どちらも何も持たない状態になる）', () => {
+    let state = createGameState(createRun(1), createInitialMeta());
+    state = apply(state, { type: 'selectInventory', partId: 'dock' });
+    state = apply(state, { type: 'secondaryClickCell', x: 2, y: 2 });
+    expect(state.selection).toBeNull();
+    expect(state.run.board.cells[2 * 7 + 2]).toBeNull();
+    state = apply(
+      state,
+      { type: 'selectInventory', partId: 'dock' },
+      { type: 'clickCell', x: 2, y: 2 },
+      { type: 'deselect' },
+      { type: 'secondaryClickCell', x: 2, y: 2 },
+    );
+    expect(state.run.board.cells[2 * 7 + 2]).toBeNull();
+    expect(state.selection).toBeNull();
+    expect(state.feedback?.kind).toBe('returnPart');
+  });
 });
 
 describe('操作ログと週替わりの本番', () => {

@@ -166,6 +166,8 @@ export type GameAction =
   | { type: 'clickCell'; x: number; y: number }
   /** 長押し（スマホ）・ダブルクリック: そのマスのパーツを手持ちに戻す */
   | { type: 'longPressCell'; x: number; y: number }
+  /** 右クリック（取り消し）: 手持ちのパーツを持っていれば手放す。置いたパーツの上なら手持ちに戻す */
+  | { type: 'secondaryClickCell'; x: number; y: number }
   /** ドラッグ: 置いたパーツを空きマスへ動かす（向きはそのまま） */
   | { type: 'movePart'; from: { x: number; y: number }; to: { x: number; y: number } }
   | { type: 'rotate' }
@@ -521,6 +523,17 @@ function reduce(state: GameState, action: GameAction): GameState {
         selection: { kind: 'cell', x: action.x, y: action.y },
       };
       return reduce(selected, { type: 'returnSelected' });
+    }
+
+    case 'secondaryClickCell': {
+      if (state.selection?.kind !== 'inventory' && getPart(state.run.board, action.x, action.y)) {
+        // 長押しと同じく手持ちに戻すが、そのまま持たずに手放す（右クリックは「取り消し」なので）
+        return {
+          ...reduce(state, { type: 'longPressCell', x: action.x, y: action.y }),
+          selection: null,
+        };
+      }
+      return reduce(state, { type: 'deselect' });
     }
 
     case 'mergeSelected': {

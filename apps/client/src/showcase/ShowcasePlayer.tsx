@@ -92,6 +92,7 @@ export function ShowcasePlayer({ def, start, loop = false, muted = false, onFini
         showBreaks={false}
         onCellClick={noop}
         onCellLongPress={noop}
+        onCellSecondaryClick={noop}
         onCellDragStart={noop}
         onCellDragEnd={noop}
         onShip={noop}

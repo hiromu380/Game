@@ -379,6 +379,10 @@ export function App({ start, onTitle }: Props) {
     (x: number, y: number) => dispatch({ type: 'longPressCell', x, y }),
     [],
   );
+  const onCellSecondaryClick = useCallback(
+    (x: number, y: number) => dispatch({ type: 'secondaryClickCell', x, y }),
+    [],
+  );
 
   // 置いたパーツのドラッグ: 盤面の空きマスへ落とすと移動、手持ちの一覧（またはタブ）へ落とすと手持ちに戻す、
   // 売却エリアへ落とすと売却
@@ -769,6 +773,7 @@ export function App({ start, onTitle }: Props) {
             paused={cutscene !== null}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
+            onCellSecondaryClick={onCellSecondaryClick}
             onCellDragStart={onCellDragStart}
             onCellDragEnd={onCellDragEnd}
             onShip={onShip}

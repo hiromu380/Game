@@ -131,6 +131,8 @@ export interface BoardRendererOptions extends BoardLabels {
   onCellClick: (x: number, y: number) => void;
   /** 長押し（スマホで「手持ちに戻す」に使う） */
   onCellLongPress: (x: number, y: number) => void;
+  /** 右クリック（取り消し: 持っているパーツを手放す・置いたパーツを手持ちに戻す） */
+  onCellSecondaryClick: (x: number, y: number) => void;
   /** 置いたパーツのドラッグを始めた（画面側で指についてくる絵と、手持ちの落とし先を出す） */
   onCellDragStart: (from: { x: number; y: number }, partId: PartId) => void;
   /**
@@ -266,6 +268,12 @@ export class BoardRenderer {
       cancelPress();
       const cell = this.toCell(e.global.x, e.global.y);
       if (!cell) return;
+      // 右クリックは取り消しだけ（置く・選ぶ・ドラッグ・長押しにはしない）
+      if (e.button === 2) {
+        longPressed = true;
+        if (!this.timeline) options.onCellSecondaryClick(cell.x, cell.y);
+        return;
+      }
       // 置いたパーツの上で押したら、ドラッグの候補にする（再生中は動かせない）
       if (!this.timeline && this.state && getPart(this.state.board, cell.x, cell.y)) {
         this.drag = { from: cell, startX: e.global.x, startY: e.global.y, pointer: null };
@@ -290,11 +298,11 @@ export class BoardRenderer {
     app.stage.on('pointerup', endDrag);
     app.stage.on('pointerupoutside', endDrag);
     app.stage.on('pointertap', (e) => {
-      if (longPressed) return;
+      if (longPressed || e.button !== 0) return;
       const cell = this.toCell(e.global.x, e.global.y);
       if (cell) options.onCellClick(cell.x, cell.y);
     });
-    // スマホの長押しで出るメニューを出さない
+    // スマホの長押し・右クリックで出るメニューを出さない
     app.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     // ドラッグは盤面の外まで追いかける（手持ちの一覧へ落とすため）
     app.stage.on('globalpointermove', (e) => {
