@@ -1,0 +1,5 @@
+<svg width="240" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64">
+  <!-- カットシーンの絵: nameplate（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="4" y="4" width="232" height="56" rx="12" fill="#1b1f27" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="14" width="8" height="36" rx="3" fill="#ffca28"/>
+</svg>

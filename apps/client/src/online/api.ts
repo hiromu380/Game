@@ -12,15 +12,18 @@ import type {
   ApiErrorCode,
   CommitRequest,
   CommitResponse,
-  DailyInfo,
-  DailySessionView,
   MarketResponse,
-  RankingResponse,
+  ProvisionalRankingResponse,
   RegisterPlayerRequest,
   RegisterPlayerResponse,
-  StartDailyResponse,
+  ReplayResponse,
+  StartAttemptResponse,
   SteamAuthRequest,
   UpdateNameResponse,
+  WeeklyAttemptView,
+  WeeklyInfo,
+  WeeklyLatestResponse,
+  WeeklyResultsResponse,
 } from '@chain-factory/shared';
 import { getPlatform } from '../platform';
 import { loadIdentity, saveIdentity, type OnlineIdentity } from './identity';
@@ -115,24 +118,29 @@ async function withAuth<T>(call: (identity: OnlineIdentity) => Promise<T>): Prom
   }
 }
 
+/** ログインしていればトークンを付ける（なくても読める API 用） */
+const optionalToken = () => ({ token: loadIdentity()?.token });
+
 export const api = {
-  getToday: () => request<DailyInfo>('GET', '/daily/today'),
+  /** 今週の情報（ログインしていれば自分の状況つき） */
+  getCurrentWeek: () => request<WeeklyInfo>('GET', '/weekly/current', optionalToken()),
 
   getMarket: () => request<MarketResponse>('GET', '/market/latest'),
 
-  start: async (dailyId: string) =>
+  /** 今日の挑戦を始める（1日1回） */
+  start: async (weekId: string) =>
     (
       await withAuth(({ token }) =>
-        request<StartDailyResponse>('POST', `/daily/${dailyId}/start`, { token }),
+        request<StartAttemptResponse>('POST', `/weekly/${weekId}/attempts`, { token }),
       )
-    ).session,
+    ).attempt,
 
-  /** 自分の進行状況。まだ始めていなければ null */
-  getSession: async (dailyId: string): Promise<DailySessionView | null> => {
+  /** その日の自分の挑戦。まだ始めていなければ null */
+  getAttempt: async (weekId: string, dayId: string): Promise<WeeklyAttemptView | null> => {
     if (!loadIdentity()) return null;
     try {
       return await withAuth(({ token }) =>
-        request<DailySessionView>('GET', `/daily/${dailyId}/session`, { token }),
+        request<WeeklyAttemptView>('GET', `/weekly/${weekId}/attempts/${dayId}`, { token }),
       );
     } catch (e) {
       if (e instanceof OnlineError && e.code === 'notFound') return null;
@@ -140,15 +148,27 @@ export const api = {
     }
   },
 
-  commit: async (dailyId: string, body: CommitRequest) =>
+  commit: async (weekId: string, dayId: string, body: CommitRequest) =>
     withAuth(({ token }) =>
-      request<CommitResponse>('POST', `/daily/${dailyId}/commit`, { body, token }),
+      request<CommitResponse>('POST', `/weekly/${weekId}/attempts/${dayId}/commit`, {
+        body,
+        token,
+      }),
     ),
 
-  getRanking: (dailyId: string) =>
-    request<RankingResponse>('GET', `/daily/${dailyId}/ranking`, {
-      token: loadIdentity()?.token,
-    }),
+  /** 当週の暫定ランキング */
+  getProvisional: (weekId: string) =>
+    request<ProvisionalRankingResponse>('GET', `/weekly/${weekId}/provisional`, optionalToken()),
+
+  /** 確定した結果発表（締め切り後の週） */
+  getResults: (weekId: string) =>
+    request<WeeklyResultsResponse>('GET', `/weekly/${weekId}/results`, optionalToken()),
+
+  getReplay: (weekId: string, rank: number) =>
+    request<ReplayResponse>('GET', `/weekly/${weekId}/results/${rank}/replay`),
+
+  /** 結果が確定した週の一覧（新しい順） */
+  getLatest: () => request<WeeklyLatestResponse>('GET', '/weekly/latest'),
 
   updateName: async (displayName: string) => {
     const res = await withAuth(({ token }) =>

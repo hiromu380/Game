@@ -2,7 +2,7 @@
  * 進行中のランとメタ進行を localStorage に保存・読み込みする
  * 形式とバージョン管理は @chain-factory/shared の save/ を参照
  */
-import { createSave, migrateSave, type SaveData } from '@chain-factory/shared';
+import { createSave, migrateSave, type SaveData, type StoryProgress } from '@chain-factory/shared';
 import {
   createInitialAchievements,
   createInitialMeta,
@@ -13,6 +13,11 @@ import {
 import { appStorage } from '../storage';
 
 export const SAVE_STORAGE_KEY = 'chain-factory:save';
+/**
+ * 読めなかったセーブの控え。新しい版で書かれた（別のタブ・クラウド同期）・壊れたセーブを、
+ * 上書きする前に1回だけここへ残す（後から版を戻したときに手で戻せるように。自動では読まない）
+ */
+export const UNREADABLE_SAVE_KEY = 'chain-factory:save:unreadable';
 
 /** テストで差し替えられるよう、必要な機能だけの Storage 型 */
 export type SimpleStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
@@ -27,7 +32,14 @@ export function loadSave(storage = defaultStorage()): SaveData | null {
   if (!storage) return null;
   try {
     const text = storage.getItem(SAVE_STORAGE_KEY);
-    if (!text) return null;
+    return text ? parseSave(text) : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseSave(text: string): SaveData | null {
+  try {
     return migrateSave(JSON.parse(text));
   } catch {
     return null;
@@ -36,20 +48,30 @@ export function loadSave(storage = defaultStorage()): SaveData | null {
 
 /**
  * 保存する。省略した項目は保存済みのものを引き継ぐ
- * （デイリー・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
+ * （週替わり・練習中は進行中の通常ランを保存し直さず、メタ進行・実績だけを更新するため）
  */
 export function saveGame(
-  update: { run?: RunState | null; meta?: MetaProgress; achievements?: AchievementProgress },
+  update: {
+    run?: RunState | null;
+    meta?: MetaProgress;
+    achievements?: AchievementProgress;
+    story?: StoryProgress;
+  },
   storage = defaultStorage(),
 ): void {
   if (!storage) return;
   try {
-    const saved =
-      update.run === undefined || !update.meta || !update.achievements ? loadSave(storage) : null;
+    const previous = storage.getItem(SAVE_STORAGE_KEY);
+    const saved = previous ? parseSave(previous) : null;
+    // 読めないセーブを上書きで失わないよう、控えを残す（最初の1回だけ。控えは上書きしない）
+    if (previous && !saved && !storage.getItem(UNREADABLE_SAVE_KEY)) {
+      storage.setItem(UNREADABLE_SAVE_KEY, previous);
+    }
     const data = createSave(
       update.run !== undefined ? update.run : (saved?.run ?? null),
       update.meta ?? saved?.meta ?? createInitialMeta(),
       update.achievements ?? saved?.achievements ?? createInitialAchievements(),
+      update.story ?? saved?.story ?? { seen: [] },
     );
     storage.setItem(SAVE_STORAGE_KEY, JSON.stringify(data));
   } catch {
@@ -64,4 +86,16 @@ export function saveGame(
 export function loadRun(storage = defaultStorage()): RunState | null {
   const run = loadSave(storage)?.run ?? null;
   return run && run.phase !== 'failed' ? run : null;
+}
+
+/** 見たカットシーン（セーブがなければ何も見ていない） */
+export function loadSeenScenes(storage = defaultStorage()): string[] {
+  return loadSave(storage)?.story.seen ?? [];
+}
+
+/** カットシーンを見た記録を残す（すでに見ていれば何もしない） */
+export function markSceneSeen(id: string, storage = defaultStorage()): void {
+  const seen = loadSeenScenes(storage);
+  if (seen.includes(id)) return;
+  saveGame({ story: { seen: [...seen, id] } }, storage);
 }

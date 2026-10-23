@@ -32,12 +32,13 @@
 | ACH_ALL_PARTS | 全部そろった | すべてのパーツを解放する | Full Catalog | Unlock every part |  |  |
 | ACH_OVERTIME_3 | 残業開始 | 延長戦で3シフト生き残る | Overtime Begins | Survive 3 shifts of overtime |  |  |
 | ACH_OVERTIME_9 | 終わらない残業 | 延長戦で9シフト生き残る | Endless Overtime | Survive 9 shifts of overtime |  |  |
-| ACH_DAILY_FIRST | 今日の工場 | デイリーチャレンジに参加する | Today's Factory | Take part in a Daily Challenge |  |  |
-| ACH_DAILY_CLEAR | 本日の最優秀 | デイリーチャレンジの3シフトをすべてクリアする | Employee of the Day | Clear all 3 shifts of a Daily Challenge |  |  |
-| ACH_DAILY_TOP10 | 上位 10% | デイリーチャレンジで上位10%に入る | Top 10% | Finish in the top 10% of a Daily Challenge |  |  |
-| ACH_DAILY_7 | 皆勤賞 | デイリーチャレンジに合計7日参加する | Perfect Attendance | Take part in Daily Challenges on 7 days |  | STAT_DAILY_DAYS（0〜7） |
+| ACH_DAILY_FIRST | 今週の工場 | 週替わりチャレンジに参加する | This Week's Factory | Take part in a Weekly Challenge |  |  |
+| ACH_DAILY_CLEAR | 今週の最優秀 | 週替わりチャレンジの3シフトをすべてクリアする | Employee of the Week | Clear all 3 shifts in a Weekly Challenge run |  |  |
+| ACH_DAILY_TOP10 | 上位 10% | 週替わりチャレンジの結果発表で上位10%に入る | Top 10% | Finish in the top 10% of a Weekly Challenge (final results) |  |  |
+| ACH_DAILY_7 | 皆勤賞 | 週替わりチャレンジに合計7日参加する | Perfect Attendance | Take part in Weekly Challenges on 7 days |  | STAT_DAILY_DAYS（0〜7） |
 | ACH_JUNKBOT_JACKPOT | ポンコツの本気 | ポンコツロボが1回の稼働で3回続けて ×3 を出す | Junkbot Jackpot | Have Junkbots roll ×3 three times in a row in one run of the factory | はい |  |
 | ACH_ZERO | 何も起きない | スイッチを押して、出荷量 0 で終わる | Nothing Happened | Press the switch and ship nothing at all | はい |  |
+| ACH_UNMEASURABLE | 計測不能 | 1シフトの出荷量でメーターを振り切る | Unmeasurable | Max out the shipping meter in a single shift | はい |  |
 
 ## 統計（回数系のみ）
 
@@ -45,4 +46,4 @@
 | --- | --- | --- | --- | --- | --- |
 | STAT_RUNS | INT | 0 | 0 | はい | 遊んだランの回数 |
 | STAT_FULL_CLEARS | INT | 0 | 0 | はい | 全シフトをクリアした回数 |
-| STAT_DAILY_DAYS | INT | 0 | 0 | はい | デイリーに参加した日数 |
+| STAT_DAILY_DAYS | INT | 0 | 0 | はい | 週替わりチャレンジに参加した日数 |

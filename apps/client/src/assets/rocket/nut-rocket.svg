@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -6 120 236">
+  <!-- ナットのロケット（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M42 112 L2 170 V184 L42 164 Z" fill="#00acc1" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M78 112 L118 170 V184 L78 164 Z" fill="#00acc1" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M5 174 L40 154" fill="none" stroke="#4dd0e1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M115 174 L80 154" fill="none" stroke="#4dd0e1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 150 V104 Q30 88 38 104 V150 Z" fill="#ffffff" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 128 H38" fill="none" stroke="#00acc1" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M23 150 L21 160 H39 L37 150 Z" fill="#90a4ae" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M82 150 V104 Q90 88 98 104 V150 Z" fill="#ffffff" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M82 128 H98" fill="none" stroke="#00acc1" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M83 150 L81 160 H99 L97 150 Z" fill="#90a4ae" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M42 170 V64 Q42 30 60 8 Q78 30 78 64 V170 Z" fill="#ffffff" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M66 20 Q76 40 76 64 V170 H70 V64 Q70 42 62 24 Z" fill="#d9d9d9" opacity="0.6"/>
+  <path d="M49 36 Q54 20 60 8 Q66 20 71 36 Z" fill="#cfd8dc" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M42 92 H78 M42 98 H78" fill="none" stroke="#00acc1" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M42 150 H78" fill="none" stroke="#00acc1" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="60" cy="62" r="9" fill="#cfd8dc" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="60" cy="62" r="6" fill="#b3e5fc"/>
+  <circle cx="60" cy="118" r="6" fill="#cfd8dc" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="60" cy="118" r="3.5" fill="#b3e5fc"/>
+  <path d="M60 8 V0" fill="none" stroke="#004d5a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M54 2 Q60 8 66 2" fill="none" stroke="#004d5a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="60" cy="-1" r="2.5" fill="#80deea" stroke="#004d5a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="44" y="164" width="32" height="7" rx="2" fill="#90a4ae" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M43.5 170 L40.5 180 H55.5 L52.5 170 Z" fill="#546e7a" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M54.5 170 L51.5 180 H68.5 L65.5 170 Z" fill="#546e7a" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M67.5 170 L64.5 180 H79.5 L76.5 170 Z" fill="#546e7a" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

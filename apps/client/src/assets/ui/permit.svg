@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: permit（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M3 7 H21 V10 a2 2 0 0 0 0 4 V17 H3 V14 a2 2 0 0 0 0 -4 Z" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="9" y="9" width="6" height="6" rx="1" fill="#ffb300" stroke="#1b1f27" stroke-width="1"/>
+</svg>

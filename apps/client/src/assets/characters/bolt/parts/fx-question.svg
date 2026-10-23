@@ -1,0 +1,5 @@
+<svg width="100" height="70" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -90 100 70">
+  <!-- ボルトの部品: fx / question（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M30 -82 q0 -8 8 -8 q8 0 8 7 q0 5 -7 8 v5" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="39" cy="-59" r="2.4" fill="#ffffff"/>
+</svg>

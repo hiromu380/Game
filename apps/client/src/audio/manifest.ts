@@ -5,6 +5,9 @@
  * （src にファイルパス）へ書き換えるだけでよい。
  * 現在は仮SEとして、Web Audio API で合成する「レシピ」を使っている（外部素材は使わない）。
  */
+import type { BgmKey } from './bgm';
+
+export type { BgmKey } from './bgm';
 
 /** 合成する音の1つの音符 */
 export interface SynthNote {
@@ -53,7 +56,18 @@ export type SoundKey =
   | 'chain2'
   | 'digitUp'
   | 'floor'
+  | 'useItem'
+  | 'teleport'
+  | 'charge'
+  | 'relicPick'
+  /** ショップ・レリックの候補にレジェンドが出た */
+  | 'legendary'
+  | 'merge'
+  | 'permitTick'
+  | 'permitLand'
   | 'quotaCross'
+  /** 計測不能（メーターが振り切れた）: 警報のように上下する音 */
+  | 'unmeasurable'
   | 'peak'
   | 'stamp'
   | 'quotaMet'
@@ -61,15 +75,36 @@ export type SoundKey =
   | 'runCleared'
   | 'unlock'
   | 'shiftStart'
-  | 'bossAlert';
+  | 'bossAlert'
+  // ---- カットシーン（ストーリー演出）: 台詞の代わりの「声」と、場面の音 ----
+  | 'boltBeep'
+  | 'boltQuestion'
+  | 'boltSad'
+  | 'boltHappy'
+  | 'chiefBuzz'
+  | 'chiefSoft'
+  | 'clank'
+  | 'craneWinch'
+  | 'footstep'
+  | 'twinkle'
+  | 'paper'
+  /** 紙芝居のセリフの声（話し手ごと。文字が出るたびに短く鳴る） */
+  | 'voiceBolt'
+  | 'voiceChief'
+  | 'collapse'
+  | 'countdown'
+  | 'launch'
+  | 'landing'
+  | 'strangerBeep';
 
+// 音量の目安: 何度も鳴る操作音（配置・回転・売買・リロール）は、ノルマ達成などのご褒美の音より小さくする
 export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   // ---- 組み立て操作 ----
   place: {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.25,
+      volume: 0.18,
       notes: [
         { freq: 330, at: 0, duration: 0.06 },
         { freq: 494, at: 0.05, duration: 0.07 },
@@ -80,7 +115,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 600, at: 0, duration: 0.05, slideTo: 900 }],
     },
   },
@@ -88,7 +123,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.22,
+      volume: 0.16,
       notes: [
         { freq: 988, at: 0, duration: 0.06 },
         { freq: 1319, at: 0.06, duration: 0.12 },
@@ -99,7 +134,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'square',
-      volume: 0.22,
+      volume: 0.16,
       notes: [
         { freq: 1319, at: 0, duration: 0.06 },
         { freq: 880, at: 0.06, duration: 0.1 },
@@ -110,7 +145,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 400, at: 0, duration: 0.15, slideTo: 1200 }],
     },
   },
@@ -118,7 +153,7 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
     kind: 'synth',
     recipe: {
       wave: 'triangle',
-      volume: 0.3,
+      volume: 0.22,
       notes: [{ freq: 700, at: 0, duration: 0.08, slideTo: 350 }],
     },
   },
@@ -246,6 +281,97 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       ],
     },
   },
+  /** 合体: 3つのパーツが1つの金色パーツになった（きらきらと上がる3音と、最後の高い鈴） */
+  merge: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.26,
+      notes: [
+        { freq: 523, at: 0, duration: 0.07 },
+        { freq: 659, at: 0.07, duration: 0.07 },
+        { freq: 784, at: 0.14, duration: 0.07 },
+        { freq: 1568, at: 0.21, duration: 0.3, slideTo: 1760 },
+      ],
+    },
+  },
+  /** 転送装置が信号を飛ばした（上がって下がる短い掃引） */
+  teleport: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.12,
+      notes: [
+        { freq: 660, at: 0, duration: 0.06, slideTo: 1320 },
+        { freq: 1320, at: 0.06, duration: 0.08, slideTo: 880 },
+      ],
+    },
+  },
+  /** 蓄電器が値を溜めた（低く唸る短い音） */
+  charge: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.12,
+      notes: [{ freq: 220, at: 0, duration: 0.12, slideTo: 330 }],
+    },
+  },
+  /** レリックを選んだ（きらっと上がる3音） */
+  relicPick: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.16,
+      notes: [
+        { freq: 784, at: 0, duration: 0.08 },
+        { freq: 988, at: 0.08, duration: 0.08 },
+        { freq: 1319, at: 0.16, duration: 0.28, slideTo: 1568 },
+      ],
+    },
+  },
+  /** レジェンドが出た（低い音から駆け上がって、高い音を長く伸ばす） */
+  legendary: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.16,
+      notes: [
+        { freq: 523, at: 0, duration: 0.07 },
+        { freq: 659, at: 0.07, duration: 0.07 },
+        { freq: 784, at: 0.14, duration: 0.07 },
+        { freq: 1047, at: 0.21, duration: 0.5, slideTo: 1175 },
+      ],
+    },
+  },
+  /** 消耗品を使った（ランダム配置権: ルーレットが回り始める） */
+  useItem: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 392, at: 0, duration: 0.05 },
+        { freq: 523, at: 0.05, duration: 0.05 },
+      ],
+    },
+  },
+  /** ルーレットの枠が1マス跳んだ（短いクリック。跳ぶたびに少しずつ高くする） */
+  permitTick: {
+    kind: 'synth',
+    recipe: { wave: 'square', volume: 0.1, notes: [{ freq: 880, at: 0, duration: 0.03 }] },
+  },
+  /** ルーレットが止まり、床が湧いた */
+  permitLand: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.24,
+      notes: [
+        { freq: 784, at: 0, duration: 0.07 },
+        { freq: 1175, at: 0.07, duration: 0.16 },
+      ],
+    },
+  },
   /** ノルマを超えた瞬間 */
   quotaCross: {
     kind: 'synth',
@@ -257,6 +383,20 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
         { freq: 988, at: 0.08, duration: 0.08 },
         { freq: 1175, at: 0.16, duration: 0.08 },
         { freq: 1568, at: 0.24, duration: 0.22 },
+      ],
+    },
+  },
+  unmeasurable: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.2,
+      notes: [
+        { freq: 1397, at: 0, duration: 0.14 },
+        { freq: 932, at: 0.14, duration: 0.14 },
+        { freq: 1397, at: 0.28, duration: 0.14 },
+        { freq: 932, at: 0.42, duration: 0.14 },
+        { freq: 1865, at: 0.6, duration: 0.5 },
       ],
     },
   },
@@ -335,13 +475,184 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
       ],
     },
   },
+  // ---- カットシーン ----
+  /** ボルトの声「ピポ」（上がる2音） */
+  boltBeep: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.18,
+      notes: [
+        { freq: 880, at: 0, duration: 0.08 },
+        { freq: 1320, at: 0.1, duration: 0.1 },
+      ],
+    },
+  },
+  /** ボルトの「ピ？」（語尾が上がる） */
+  boltQuestion: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.16,
+      notes: [{ freq: 700, at: 0, duration: 0.22, slideTo: 1200 }],
+    },
+  },
+  /** ボルトのしょんぼり（下がる） */
+  boltSad: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.25,
+      notes: [{ freq: 660, at: 0, duration: 0.5, slideTo: 330 }],
+    },
+  },
+  /** ボルトの喜び（上がる3音） */
+  boltHappy: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.16,
+      notes: [
+        { freq: 784, at: 0, duration: 0.08 },
+        { freq: 988, at: 0.09, duration: 0.08 },
+        { freq: 1319, at: 0.18, duration: 0.14 },
+      ],
+    },
+  },
+  /** 工場長の声（低いブザー） */
+  chiefBuzz: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.12,
+      notes: [
+        { freq: 110, at: 0, duration: 0.18 },
+        { freq: 98, at: 0.22, duration: 0.24 },
+      ],
+    },
+  },
+  /** 工場長のやさしい声（エンディング） */
+  chiefSoft: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.22,
+      notes: [{ freq: 196, at: 0, duration: 0.5, slideTo: 262 }],
+    },
+  },
+  /** 金属の音（部品の取り付け） */
+  clank: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 1800, at: 0, duration: 0.04 },
+        { freq: 620, at: 0.02, duration: 0.12, slideTo: 520 },
+      ],
+    },
+  },
+  /** クレーンの巻き上げ */
+  craneWinch: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.07,
+      notes: [{ freq: 70, at: 0, duration: 0.9, slideTo: 120 }],
+    },
+  },
+  /** 金属の足音 */
+  footstep: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.12, notes: [{ freq: 400, at: 0, duration: 0.05 }] },
+  },
+  /** 流れ星・きらめき */
+  twinkle: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.2,
+      notes: [
+        { freq: 2093, at: 0, duration: 0.12 },
+        { freq: 2637, at: 0.08, duration: 0.2 },
+      ],
+    },
+  },
+  /** 紙を広げる */
+  paper: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.08, notes: [{ freq: 800, at: 0, duration: 0.25 }] },
+  },
+  /** ボルトの声: 高く短い「ピッ」（少し上がる） */
+  voiceBolt: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.035,
+      notes: [{ freq: 880, at: 0, duration: 0.04, slideTo: 990 }],
+    },
+  },
+  /** 工場長の声: 低く短い「ブッ」 */
+  voiceChief: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.04,
+      notes: [{ freq: 150, at: 0, duration: 0.05, slideTo: 130 }],
+    },
+  },
+  /** 崩れる（下がる音階） */
+  collapse: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.14,
+      notes: [
+        { freq: 523, at: 0, duration: 0.1 },
+        { freq: 392, at: 0.12, duration: 0.1 },
+        { freq: 262, at: 0.24, duration: 0.1 },
+        { freq: 196, at: 0.36, duration: 0.3 },
+      ],
+    },
+  },
+  /** カウントダウンの秒読み */
+  countdown: {
+    kind: 'synth',
+    recipe: { wave: 'square', volume: 0.15, notes: [{ freq: 1047, at: 0, duration: 0.12 }] },
+  },
+  /** 打ち上げ（だんだん高く） */
+  launch: {
+    kind: 'synth',
+    recipe: { wave: 'noise', volume: 0.22, notes: [{ freq: 200, at: 0, duration: 2.4 }] },
+  },
+  /** 着地 */
+  landing: {
+    kind: 'synth',
+    recipe: {
+      wave: 'triangle',
+      volume: 0.3,
+      notes: [{ freq: 120, at: 0, duration: 0.3, slideTo: 60 }],
+    },
+  },
+  /** 見知らぬロボの声（ボルトと違う声色: 柔らかいサイン波で、下がってから上がる） */
+  strangerBeep: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sine',
+      volume: 0.25,
+      notes: [
+        { freq: 1175, at: 0, duration: 0.12, slideTo: 880 },
+        { freq: 880, at: 0.18, duration: 0.18, slideTo: 1397 },
+      ],
+    },
+  },
 };
 
-/** BGM のキー（仕組みのみ。曲はまだ入れていない） */
-export type BgmKey = 'building' | 'result';
-
-/** BGM の定義。曲を入れるときは { kind: 'file', src, volume } を設定する */
+/**
+ * BGM を音声ファイルに差し替えるときの定義（null のあいだは audio/bgm.ts のレシピから合成して鳴らす）
+ */
 export const BGM_ASSETS: Record<BgmKey, SoundAsset | null> = {
   building: null,
+  night: null,
   result: null,
 };

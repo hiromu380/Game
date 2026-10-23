@@ -30,11 +30,20 @@ const medium = run(row(['switch', 'gear', 'gear', 'gear', 'gear', 'gear', 'gear'
 /** 特大: tick 上限まで続く人工的なイベント列（1 tick に1回ずつ発動し、最後に出荷） */
 function hugeEvents(ticks: number): SimEvent[] {
   const events: SimEvent[] = [
-    { tick: 0, type: 'emit', signalId: 0, x: 0, y: 0, dir: 2, value: 1n as never },
+    { tick: 0, type: 'emit', signalId: 0, x: 0, y: 0, dir: 2, value: 1n as never, parent: null },
   ];
   for (let k = 1; k < ticks; k++) {
     events.push({ tick: k, type: 'activate', signalId: k - 1, x: 0, y: 0, partId: 'conveyor' });
-    events.push({ tick: k, type: 'emit', signalId: k, x: 0, y: 0, dir: 2, value: 1n as never });
+    events.push({
+      tick: k,
+      type: 'emit',
+      signalId: k,
+      x: 0,
+      y: 0,
+      dir: 2,
+      value: 1n as never,
+      parent: k - 1,
+    });
   }
   events.push({
     tick: ticks,
@@ -43,6 +52,8 @@ function hugeEvents(ticks: number): SimEvent[] {
     y: 0,
     value: scoreOf(12345),
     total: scoreOf(12345),
+    signalId: ticks - 1,
+    sync: 1,
   });
   return events;
 }
@@ -84,6 +95,35 @@ describe('連鎖の演出の流れ', () => {
     expect(new Set(notes).size).toBe(notes.length);
   });
 
+  it('同時出荷ボーナスは、出荷した出荷口ごとに1回だけ出す（弱では出さない）', () => {
+    // 右向きの分岐器が上下の出荷口へ（2口同時）
+    const board: Board = {
+      width: 2,
+      height: 3,
+      cells: [
+        null,
+        { id: 'dock', dir: 1 },
+        { id: 'switch', dir: 1 },
+        { id: 'splitter', dir: 1 },
+        null,
+        { id: 'dock', dir: 1 },
+      ],
+    };
+    const events = run(board).events;
+    const syncs = buildChoreography(events, strong).cues.filter((q) => q.kind === 'sync');
+    expect(syncs).toHaveLength(1);
+    expect(syncs[0]).toMatchObject({
+      count: 2,
+      docks: [
+        [1, 0],
+        [1, 2],
+      ],
+    });
+    const weak = buildChoreography(events, { ...strong, strength: 'minimal' });
+    expect(weak.cues.some((q) => q.kind === 'sync')).toBe(false);
+    expect(buildChoreography(small.events, strong).cues.some((q) => q.kind === 'sync')).toBe(false);
+  });
+
   it('床の効果を受けた瞬間に床の種類つきで数字を出し、パーツの倍率は床の後の値と比べる', () => {
     // スイッチ → ×2床のギア → 出荷口: 床の「×2」とギアの「×2」が別々に出る（まとめて ×4 にはしない）
     const floored = simulate({
@@ -104,11 +144,31 @@ describe('連鎖の演出の流れ', () => {
     expect(weak.some((c) => c.kind === 'floor')).toBe(false);
   });
 
+  it('信号が1つも出ない（スイッチがない）本番でも、例外にならずに「ドン」だけで終わる', () => {
+    const empty = run({ width: 3, height: 1, cells: [null, null, null] });
+    expect(empty.events).toEqual([]);
+    const c = buildChoreography(empty.events, strong);
+    expect(c.ticks).toEqual([]);
+    expect(kinds(c.cues)).toEqual(['windup', 'stamp']);
+    // 信号は出るが出荷しない盤面も同じ（ピークなし）
+    const noShip = buildChoreography(run(row(['switch', 'gear'])).events, strong);
+    expect(noShip.cues.some((q) => q.kind === 'peak')).toBe(false);
+  });
+
   it('合計の単位が変わる瞬間（1,000 以上）と、ノルマを超えた瞬間を出す', () => {
     const c = buildChoreography(hugeEvents(5), { ...strong, quota: 10 });
     expect(kinds(c.cues)).toEqual(expect.arrayContaining(['digitUp', 'quotaCross']));
     const none = buildChoreography(small.events, { ...strong, quota: 100 });
     expect(kinds(none.cues)).not.toContain('quotaCross');
+  });
+
+  it('合計が計測不能の桁数に達したら、桁上がりの代わりに「計測不能」を1回だけ出す', () => {
+    // 合計 12,345（5桁）を、4桁で計測不能になる設定で
+    const c = buildChoreography(hugeEvents(5), { ...strong, quota: null, unmeasurableDigits: 4 });
+    expect(kinds(c.cues).filter((k) => k === 'unmeasurable')).toHaveLength(1);
+    expect(kinds(c.cues)).not.toContain('digitUp');
+    // 既定（balance/ の桁数）では出ない
+    expect(kinds(buildChoreography(hugeEvents(5), strong).cues)).not.toContain('unmeasurable');
   });
 
   it('規模が大きいほど長いが、どんなに長い連鎖でも上限内に収まる', () => {
@@ -137,7 +197,16 @@ describe('連鎖の演出の流れ', () => {
     // 毎 tick 桁が上がる出荷（光を出したい瞬間が続く）
     for (let k = 0; k < 20; k++) {
       const v = scoreOf(10 ** (3 + k));
-      events.push({ tick: k, type: 'ship', x: 0, y: 0, value: v, total: v });
+      events.push({
+        tick: k,
+        type: 'ship',
+        x: 0,
+        y: 0,
+        value: v,
+        total: v,
+        signalId: null,
+        sync: 1,
+      });
     }
     const times = flashTimes(buildChoreography(events, { ...strong, quota: 5000 }).cues);
     expect(times.length).toBeGreaterThan(0);

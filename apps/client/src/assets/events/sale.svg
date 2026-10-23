@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: sale（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M16 30 L30 16 H47 V33 L33 47 Z" fill="#ffc107" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="41" cy="22" r="2.5" fill="#1b1f27"/>
+  <path d="M25 38 L37 26" fill="none" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="26" cy="29" r="2.5" fill="#ffffff" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="36" cy="35" r="2.5" fill="#ffffff" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-36 -96 72 100">
+  <!-- ナットの表情: surprised（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M4 -48 V-74" fill="none" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="4" cy="-78" r="5.5" fill="#80deea" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="-27,-25 -14,-48 14,-48 27,-25 14,-2 -14,-2" fill="#00acc1" stroke="#004d5a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="-20,-25 -10,-42 10,-42 20,-25 10,-8 -10,-8" fill="none" stroke="#4dd0e1" stroke-width="2"/>
+  <path d="M-27 -25 L-14 -2 H14 L27 -25" fill="#0092a4" opacity="0.5"/>
+  <circle cx="-21" cy="-12" r="1.8" fill="#004d5a"/>
+  <circle cx="21" cy="-12" r="1.8" fill="#004d5a"/>
+  <circle cx="0" cy="-26" r="13" fill="#37474f" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="0" cy="-26" r="10.5" fill="#e0f7fa"/>
+  <circle cx="0" cy="-26" r="2.5" fill="#004d5a"/>
+</svg>

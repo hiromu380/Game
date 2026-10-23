@@ -1,13 +1,20 @@
 /**
  * ショップ: その シフトに並んだ商品を購入する
  */
-import type { EconomyConfig, PartId, RuleSet, ShopOffer } from '@chain-factory/sim';
+import {
+  BALANCE,
+  type EconomyConfig,
+  type PartId,
+  type RuleSet,
+  type ShopOffer,
+} from '@chain-factory/sim';
 import { useState } from 'react';
 import type { PriceTrend } from '../online/market';
 import { useI18n } from '../i18n';
 import { describePart } from './partText';
 import { PartCatalog } from './PartCatalog';
 import { PartIcon } from './PartIcon';
+import { RarityTag } from './RarityTag';
 import { UiIcon } from './UiIcon';
 
 interface Props {
@@ -19,7 +26,7 @@ interface Props {
   budget: number;
   /** 次のリロール価格（リロールできないシフトでは null） */
   rerollCost: number | null;
-  /** 相場の前日比（値上がり・値下がりしたパーツだけ） */
+  /** 相場の前週比（値上がり・値下がりしたパーツだけ） */
   trends: Partial<Record<PartId, PriceTrend>>;
   disabled: boolean;
   /** 初回ガイドで買ってほしいパーツ（最初の1つを光らせる） */
@@ -54,6 +61,9 @@ export function ShopPanel(props: Props) {
         >
           <UiIcon name="reroll" size={16} />
           {rerollCost === null ? t('shop.rerollDisabled') : t('shop.reroll', { cost: rerollCost })}
+          {rerollCost !== null && budget < rerollCost && (
+            <span className="shop__short">{t('shop.short', { amount: rerollCost - budget })}</span>
+          )}
         </button>
       </div>
       <ul className="item-list">
@@ -62,18 +72,43 @@ export function ShopPanel(props: Props) {
           return (
             <li key={index}>
               <button
-                className={`item-button ${index === guidedIndex ? 'is-guided' : ''}`}
+                className={`item-button ${index === guidedIndex ? 'is-guided' : ''} ${
+                  offer.partId
+                    ? `rarity-frame rarity-frame--${BALANCE.parts[offer.partId].rarity ?? 'common'}`
+                    : ''
+                }`}
                 disabled={disabled || offer.sold || !affordable}
                 onClick={() => onBuy(index)}
               >
-                <PartIcon partId={offer.partId} />
-                <span className="item-button__text">
-                  <span className="item-button__name">{t(`part.${offer.partId}.name`)}</span>
-                  <span className="item-button__desc">{describePart(t, offer.partId, rules)}</span>
-                </span>
+                {offer.partId === undefined ? (
+                  <>
+                    <span className="item-icon">
+                      <UiIcon name="permit" size={36} />
+                    </span>
+                    <span className="item-button__text">
+                      <span className="item-button__name">{t(`item.${offer.itemId}.name`)}</span>
+                      <span className="item-button__desc">{t(`item.${offer.itemId}.desc`)}</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <PartIcon partId={offer.partId} />
+                    <span className="item-button__text">
+                      <span className="item-button__name">
+                        {t(`part.${offer.partId}.name`)}{' '}
+                        <RarityTag rarity={BALANCE.parts[offer.partId].rarity ?? 'common'} />
+                      </span>
+                      <span className="item-button__desc">
+                        {describePart(t, offer.partId, rules)}
+                      </span>
+                    </span>
+                  </>
+                )}
                 <span className="item-button__meta">
-                  {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
-                  {!offer.sold && trends[offer.partId] && (
+                  <span className="item-button__price">
+                    {offer.sold ? t('shop.sold') : t('shop.price', { price: offer.price })}
+                  </span>
+                  {!offer.sold && offer.partId && trends[offer.partId] && (
                     <span
                       className={`trend trend--${trends[offer.partId]}`}
                       title={t(trends[offer.partId] === 'up' ? 'shop.trendUp' : 'shop.trendDown')}
@@ -81,6 +116,16 @@ export function ShopPanel(props: Props) {
                       {trends[offer.partId] === 'up' ? '▲' : '▼'}
                     </span>
                   )}
+                  {!offer.sold &&
+                    (affordable ? (
+                      <span className="item-button__after">
+                        {t('shop.after', { amount: budget - offer.price })}
+                      </span>
+                    ) : (
+                      <span className="shop__short">
+                        {t('shop.short', { amount: offer.price - budget })}
+                      </span>
+                    ))}
                 </span>
               </button>
             </li>
