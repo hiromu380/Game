@@ -14,7 +14,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { CutsceneRenderer } from './CutsceneRenderer';
 import type { SceneId } from './playback';
 import { SCENE_LOADERS } from './scenes';
-import { pageAt, pageSchedule, STORY_PAGES } from './pages';
+import { applyPageFaces, pageAt, pageSchedule, STORY_PAGES } from './pages';
 import { sampleScene } from './timeline';
 
 interface Props {
@@ -100,7 +100,7 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
             if (state.index > 0) audio.play('paper' as SoundKey);
           }
           // 止め絵: 揺れ・光は出さず、ページの間だけゆっくり寄る
-          const frame = sampleScene(scene, current.at, options.current);
+          const frame = applyPageFaces(sampleScene(scene, current.at, options.current), current);
           const push = still ? 1 : 1 + zoom * state.progress;
           created.render({
             ...frame,

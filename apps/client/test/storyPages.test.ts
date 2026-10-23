@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { CUTSCENE_CONFIG } from '../src/config/cutscene';
 import ja from '../src/i18n/ja.json';
@@ -40,5 +41,19 @@ describe('紙芝居のページ', () => {
     expect(pageAt(schedule, 7)).toEqual({ index: 1, progress: 0.5, done: false });
     expect(pageAt(schedule, 10).done).toBe(true);
     expect(pageAt([], 0).done).toBe(true);
+  });
+
+  it('ページごとの表情は、そのキャラクターの表情の絵がある名前だけ', () => {
+    for (const pages of Object.values(STORY_PAGES)) {
+      for (const page of pages) {
+        for (const [character, face] of Object.entries(page.faces ?? {})) {
+          const file = new URL(
+            `../src/assets/characters/${character}/expressions/${face}.svg`,
+            import.meta.url,
+          );
+          expect(existsSync(file), `${character}/${face}`).toBe(true);
+        }
+      }
+    }
   });
 });

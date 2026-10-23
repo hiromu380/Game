@@ -4,10 +4,12 @@
  * 1ページ = シーンのある時刻の止め絵（at 秒）＋ 話し手のセリフ（1〜2行。i18n のキー）。地の文（説明）は入れない。
  * ページは自動でめくる。
  * 表示秒数は文の長さから決める（config/cutscene.ts の pages）。合計は上限時間（maxDurationSec）までに収める。
- * 絵はキーフレームの表（scenes/*.ts）をそのまま使い、その時刻の状態を描く
+ * 絵はキーフレームの表（scenes/*.ts）をそのまま使い、その時刻の状態を描く。
+ * 表情だけはセリフに合わせてページごとに差し替えられる（faces。絵の動きの表は変えずに済むように）
  */
 import { CUTSCENE_CONFIG } from '../config/cutscene';
 import type { SceneId } from './playback';
+import type { CharacterId, FrameState } from './timeline';
 
 export interface StoryPage {
   /** 止め絵にするシーンの時刻（秒） */
@@ -16,42 +18,88 @@ export interface StoryPage {
   speaker: Speaker;
   /** セリフ（i18n のキー） */
   text: string;
+  /** このページだけの表情（キャラクターごと。セリフの気持ちに合わせる。なければシーンの表のまま） */
+  faces?: Partial<Record<CharacterId, string>>;
 }
 
 export type Speaker = 'bolt' | 'chief';
 
 export const STORY_PAGES: Record<SceneId, StoryPage[]> = {
   opening: [
-    { speaker: 'chief', at: 2, text: 'story.page.opening.1' },
+    {
+      speaker: 'chief',
+      at: 2,
+      text: 'story.page.opening.1',
+      faces: { chief: 'stern', bolt: 'tired' },
+    },
     { speaker: 'bolt', at: 21, text: 'story.page.opening.2' },
-    { speaker: 'bolt', at: 31, text: 'story.page.opening.3' },
-    { speaker: 'chief', at: 39, text: 'story.page.opening.4' },
+    { speaker: 'bolt', at: 31, text: 'story.page.opening.3', faces: { bolt: 'sparkle' } },
+    {
+      speaker: 'chief',
+      at: 39,
+      text: 'story.page.opening.4',
+      faces: { chief: 'soft', bolt: 'surprised' },
+    },
     { speaker: 'bolt', at: 45, text: 'story.page.opening.5' },
-    { speaker: 'bolt', at: 51, text: 'story.page.opening.6' },
+    { speaker: 'bolt', at: 51, text: 'story.page.opening.6', faces: { bolt: 'happy' } },
   ],
   interlude1: [
-    { speaker: 'chief', at: 1.5, text: 'story.page.interlude1.1' },
-    { speaker: 'bolt', at: 6, text: 'story.page.interlude1.2' },
+    {
+      speaker: 'chief',
+      at: 1.5,
+      text: 'story.page.interlude1.1',
+      faces: { chief: 'stern', bolt: 'happy' },
+    },
+    { speaker: 'bolt', at: 6, text: 'story.page.interlude1.2', faces: { bolt: 'sparkle' } },
   ],
   interlude2: [
-    { speaker: 'bolt', at: 3, text: 'story.page.interlude2.1' },
-    { speaker: 'bolt', at: 7.5, text: 'story.page.interlude2.2' },
+    // ネジがカラカラでも明るく流す（暗い事実を明るく言うのが笑いどころ）
+    { speaker: 'bolt', at: 3, text: 'story.page.interlude2.1', faces: { bolt: 'happy' } },
+    { speaker: 'bolt', at: 7.5, text: 'story.page.interlude2.2', faces: { bolt: 'happy' } },
   ],
   gameOver: [
-    { speaker: 'chief', at: 1.5, text: 'story.page.gameOver.1' },
-    { speaker: 'bolt', at: 3.5, text: 'story.page.gameOver.2' },
+    {
+      speaker: 'chief',
+      at: 1.5,
+      text: 'story.page.gameOver.1',
+      faces: { chief: 'stern', bolt: 'sad' },
+    },
+    {
+      speaker: 'bolt',
+      at: 3.5,
+      text: 'story.page.gameOver.2',
+      faces: { chief: 'soft', bolt: 'happy' },
+    },
   ],
   ending: [
     { speaker: 'bolt', at: 4, text: 'story.page.ending.1' },
-    { speaker: 'chief', at: 12, text: 'story.page.ending.2' },
+    {
+      speaker: 'chief',
+      at: 12,
+      text: 'story.page.ending.2',
+      faces: { chief: 'soft', bolt: 'happy' },
+    },
     { speaker: 'bolt', at: 21, text: 'story.page.ending.3' },
     { speaker: 'bolt', at: 27, text: 'story.page.ending.4' },
     { speaker: 'bolt', at: 37, text: 'story.page.ending.5' },
     { speaker: 'bolt', at: 47, text: 'story.page.ending.6' },
-    { speaker: 'chief', at: 56, text: 'story.page.ending.7' },
+    { speaker: 'chief', at: 56, text: 'story.page.ending.7', faces: { chief: 'soft' } },
   ],
   demoTeaser: [{ speaker: 'bolt', at: 2, text: 'story.page.demoTeaser.1' }],
 };
+
+/** ページの表情を、その時刻の絵（シーンの表から求めた状態）に重ねる */
+export function applyPageFaces(frame: FrameState, page: StoryPage): FrameState {
+  const faces = page.faces;
+  if (!faces) return frame;
+  return {
+    ...frame,
+    actors: frame.actors.map((a) => {
+      const face = faces[a.character];
+      return face ? { ...a, face } : a;
+    }),
+  };
+}
 
 export type Lang = keyof typeof CUTSCENE_CONFIG.pages.perChar;
 
