@@ -99,8 +99,9 @@ export function Root() {
           onClose={() => setMemoriesOpen(false)}
         />
       )}
+      {/* 読み込み中も画面を覆う（後ろの画面が一瞬見えて、キー・クリックがそちらに届かないように） */}
       {replay && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="cutscene" aria-hidden="true" />}>
           <CutscenePlayer scene={replay} onDone={() => setReplay(null)} />
         </Suspense>
       )}

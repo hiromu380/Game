@@ -647,6 +647,14 @@ export function App({ start, onTitle }: Props) {
     </>
   );
 
+  // カットシーン（ゲーム画面・ラン終了画面のどちらでも、いちばん上に重ねる）。
+  // 読み込み中も画面を覆う（後ろの画面が一瞬見えて、キー・クリックがそちらに届かないように）
+  const cutsceneLayer = cutscene && (
+    <Suspense fallback={<div className="cutscene" aria-hidden="true" />}>
+      <CutscenePlayer scene={cutscene} onDone={() => finishCutscene(cutscene)} />
+    </Suspense>
+  );
+
   // ラン終了（全シフト達成 or ノルマ未達）
   if (!playing && run.phase !== 'building') {
     return (
@@ -668,6 +676,7 @@ export function App({ start, onTitle }: Props) {
             dispatch({ type: 'startOvertime' });
           }}
         />
+        {cutsceneLayer}
       </div>
     );
   }
@@ -704,11 +713,7 @@ export function App({ start, onTitle }: Props) {
           onCancel={() => setCommitConfirm(false)}
         />
       )}
-      {cutscene && (
-        <Suspense fallback={null}>
-          <CutscenePlayer scene={cutscene} onDone={() => finishCutscene(cutscene)} />
-        </Suspense>
-      )}
+      {cutsceneLayer}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
