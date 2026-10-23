@@ -8,8 +8,9 @@ export const PARTS: Balance['parts'] = {
   conveyor: { price: 1, maxActivations: 3, rarity: 'common' },
   dock: { price: 3, maxActivations: null, rarity: 'common' },
   junkbot: { price: 2, maxActivations: 2, rarity: 'common' },
-  gear: { price: 4, maxActivations: 1, rarity: 'common' },
-  press: { price: 5, maxActivations: 1, rarity: 'uncommon' },
+  // SIM_VERSION 13: よく買われる（購入率 30〜60%）ので値上げ。増幅ギア 4 → 5・プレス機 5 → 6・共鳴コイル → 7
+  gear: { price: 5, maxActivations: 1, rarity: 'common' },
+  press: { price: 6, maxActivations: 1, rarity: 'uncommon' },
   splitter: { price: 2, maxActivations: 1, rarity: 'common' },
   barrel: { price: 5, maxActivations: 1, rarity: 'uncommon' },
   rebooter: { price: 5, maxActivations: 1, rarity: 'legendary' },
@@ -23,8 +24,8 @@ export const PARTS: Balance['parts'] = {
   turntable: { price: 1, maxActivations: 8, rarity: 'uncommon' },
   // 信号には反応しない（常時効果のみ）ので発動回数は 0
   oiler: { price: 5, maxActivations: 0, rarity: 'rare' },
-  // SIM_VERSION 13: 1つでも ×2 になったので 2 → 5 円（1つなら増幅ギアより割高。並べてこそ得をする）
-  coil: { price: 5, maxActivations: 1, rarity: 'common' },
+  // SIM_VERSION 13: 1つでも ×2 になったので 2 → 7 円（1つなら増幅ギアより割高。並べてこそ得をする）
+  coil: { price: 7, maxActivations: 1, rarity: 'common' },
   solar: { price: 3, maxActivations: 1, rarity: 'common' },
   inspector: { price: 5, maxActivations: 1, rarity: 'uncommon' },
   piggyBank: { price: 5, maxActivations: 3, rarity: 'uncommon' },
