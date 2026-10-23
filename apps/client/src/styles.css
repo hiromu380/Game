@@ -3189,6 +3189,9 @@ a.button.button--primary {
   line-height: 1.5;
   color: var(--hazard-black);
 }
+.cutscene__untyped {
+  color: transparent;
+}
 .cutscene__text--bolt .cutscene__speaker {
   background: #8bc34a;
 }

@@ -4,7 +4,15 @@ import { CUTSCENE_CONFIG } from '../src/config/cutscene';
 import ja from '../src/i18n/ja.json';
 import en from '../src/i18n/en.json';
 import { SCENE_IDS } from '../src/story/playback';
-import { pageAt, pageSchedule, pageSeconds, STORY_PAGES } from '../src/story/pages';
+import {
+  isVoiced,
+  pageAt,
+  pageSchedule,
+  pageSeconds,
+  speakerBounce,
+  STORY_PAGES,
+  typedLength,
+} from '../src/story/pages';
 
 describe('紙芝居のページ', () => {
   it('全シーンにページがあり、文は ja・en の両方にある', () => {
@@ -55,5 +63,44 @@ describe('紙芝居のページ', () => {
         }
       }
     }
+  });
+
+  it('ページの頭で話し手が跳ね、すぐ戻る。演出「中」は半分、「弱」では跳ねない', () => {
+    const { height, seconds } = CUTSCENE_CONFIG.pages.bounce;
+    expect(speakerBounce(0, 'full')).toBe(0);
+    expect(speakerBounce(seconds / 2, 'full')).toBeCloseTo(height);
+    expect(speakerBounce(seconds / 2, 'reduced')).toBeCloseTo(height / 2);
+    expect(speakerBounce(seconds, 'full')).toBe(0);
+    expect(speakerBounce(seconds / 2, 'minimal')).toBe(0);
+  });
+
+  it('セリフは時間とともに1文字ずつ出て、全文で止まる。演出「弱」では最初から全文', () => {
+    const text = 'よーし、スイッチ入れまーす！';
+    const cps = CUTSCENE_CONFIG.pages.typing.ja;
+    expect(typedLength(text, 0, 'ja', 'full')).toBe(0);
+    expect(typedLength(text, 3 / cps, 'ja', 'full')).toBe(3);
+    expect(typedLength(text, 100, 'ja', 'full')).toBe([...text].length);
+    expect(typedLength(text, 0, 'ja', 'minimal')).toBe([...text].length);
+  });
+
+  it('文字が出きる時間は、ページの表示時間より十分に短い（読む時間が残る）', () => {
+    for (const pages of Object.values(STORY_PAGES)) {
+      for (const page of pages) {
+        for (const lang of ['ja', 'en'] as const) {
+          const text = (lang === 'ja' ? ja : en)[page.text as keyof typeof ja];
+          const typing = [...text].length / CUTSCENE_CONFIG.pages.typing[lang];
+          expect(typing, page.text).toBeLessThan(pageSeconds(text, lang) * 0.6);
+        }
+      }
+    }
+  });
+
+  it('声は文字・数字で鳴らし、空白・句読点では鳴らさない', () => {
+    expect(isVoiced('あ')).toBe(true);
+    expect(isVoiced('A')).toBe(true);
+    expect(isVoiced('9')).toBe(true);
+    expect(isVoiced('、')).toBe(false);
+    expect(isVoiced(' ')).toBe(false);
+    expect(isVoiced('！')).toBe(false);
   });
 });

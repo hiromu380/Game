@@ -9,6 +9,7 @@
  */
 import { CUTSCENE_CONFIG } from '../config/cutscene';
 import type { SceneId } from './playback';
+import type { EffectStrength } from '../config/effects';
 import type { CharacterId, FrameState } from './timeline';
 
 export interface StoryPage {
@@ -143,4 +144,38 @@ export function pageAt(schedule: { start: number; end: number }[], elapsed: numb
   const page = schedule[index]!;
   const progress = Math.min(1, Math.max(0, (elapsed - page.start) / (page.end - page.start)));
   return { index, progress, done: false };
+}
+
+/** ページが変わってからの秒数から、話し手が跳ねる高さ（シーンの px。上向きが正） */
+export function speakerBounce(sinceTurn: number, strength: EffectStrength): number {
+  const { height, seconds } = CUTSCENE_CONFIG.pages.bounce;
+  if (strength === 'minimal' || sinceTurn < 0 || sinceTurn >= seconds) return 0;
+  const scale = strength === 'reduced' ? 0.5 : 1;
+  return height * scale * Math.sin((Math.PI * sinceTurn) / seconds);
+}
+
+/** 話し手を跳ねさせた絵（話し手のキャラクターだけ持ち上げる） */
+export function applySpeakerBounce(frame: FrameState, page: StoryPage, lift: number): FrameState {
+  if (lift === 0) return frame;
+  return {
+    ...frame,
+    actors: frame.actors.map((a) => (a.character === page.speaker ? { ...a, y: a.y - lift } : a)),
+  };
+}
+
+/** ページが変わってからの秒数で、セリフの何文字目までを出すか（演出「弱」では全部） */
+export function typedLength(
+  text: string,
+  sinceTurn: number,
+  lang: Lang,
+  strength: EffectStrength,
+): number {
+  const length = [...text].length;
+  if (strength === 'minimal') return length;
+  return Math.min(length, Math.max(0, Math.floor(sinceTurn * CUTSCENE_CONFIG.pages.typing[lang])));
+}
+
+/** 声の音を鳴らす文字か（空白・句読点・記号では鳴らさない） */
+export function isVoiced(char: string): boolean {
+  return /[\p{L}\p{N}]/u.test(char);
 }

@@ -1,6 +1,7 @@
 /**
  * カットシーンの再生画面（画面全体に重ねる）。紙芝居: 止め絵と1〜2行の文を自動でめくる（story/pages.ts）
  *
+ * - ページが変わると話し手が少し跳ね、セリフは1文字ずつ出て、話し手ごとの声の音が鳴る（演出「弱」では止め絵と全文のまま）
  * - スキップ: クリック・タップ・キー・コントローラーのボタンを長押し（誤操作の防止）。押している間は進み具合の輪を出す
  * - 設定: 演出の強さ・揺れ・点滅を減らす（timeline.ts）、音量（効果音は AudioEngine の設定に従う）
  * - 必ず終わる: シーンの長さ・上限時間を過ぎたら、読み込みに失敗したら、そのままゲームへ戻る
@@ -14,7 +15,16 @@ import { useSettings } from '../settings/SettingsContext';
 import { CutsceneRenderer } from './CutsceneRenderer';
 import type { SceneId } from './playback';
 import { SCENE_LOADERS } from './scenes';
-import { applyPageFaces, pageAt, pageSchedule, STORY_PAGES } from './pages';
+import {
+  applyPageFaces,
+  applySpeakerBounce,
+  isVoiced,
+  pageAt,
+  pageSchedule,
+  speakerBounce,
+  STORY_PAGES,
+  typedLength,
+} from './pages';
 import { sampleScene } from './timeline';
 
 interface Props {
@@ -28,6 +38,8 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
   const { settings } = useSettings();
   const pages = STORY_PAGES[sceneId] ?? [];
   const [page, setPage] = useState(0);
+  /** いまのページのセリフを何文字目まで出したか */
+  const [typed, setTyped] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
   const [hold, setHold] = useState(0);
   const doneRef = useRef(onDone);
@@ -74,10 +86,9 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
         }
         renderer = created;
         // 経過時間は実時間で測る（描画が重くてコマが落ちても、めくる間隔がずれないように）
-        const schedule = pageSchedule(
-          pages.map((p) => t(p.text as never)),
-          lang,
-        );
+        const texts = pages.map((p) => t(p.text as never));
+        const schedule = pageSchedule(texts, lang);
+        let shownChars = -1;
         const startedAt = performance.now();
         let shown = -1;
         // 撮影モード（開発専用）: 指定の経過時間で止めて描く（docs/ui-review の撮影・コマの確認用）
@@ -96,11 +107,36 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
           if (!current) return state;
           if (state.index !== shown) {
             shown = state.index;
+            shownChars = -1;
             setPage(state.index);
             if (state.index > 0) audio.play('paper' as SoundKey);
           }
-          // 止め絵: 揺れ・光は出さず、ページの間だけゆっくり寄る
-          const frame = applyPageFaces(sampleScene(scene, current.at, options.current), current);
+          const sinceTurn = elapsed - (schedule[state.index]?.start ?? 0);
+          // セリフを1文字ずつ出し、出た文字に合わせて話し手の声を鳴らす（1コマに1回まで）
+          const text = texts[state.index] ?? '';
+          const count = typedLength(text, sinceTurn, lang, options.current.strength);
+          if (count !== shownChars) {
+            const chars = [...text];
+            const fresh = chars.slice(Math.max(0, shownChars), count);
+            const voiced = fresh.findIndex(
+              (c, i) =>
+                isVoiced(c) &&
+                (Math.max(0, shownChars) + i) % CUTSCENE_CONFIG.pages.voiceEvery === 0,
+            );
+            if (shownChars >= 0 && voiced >= 0 && options.current.strength !== 'minimal') {
+              // 音程は文字で決める（同じセリフはいつも同じ節回し）
+              const code = fresh[voiced]!.codePointAt(0) ?? 0;
+              audio.play(current.speaker === 'bolt' ? 'voiceBolt' : 'voiceChief', (code % 5) - 2);
+            }
+            shownChars = count;
+            setTyped(count);
+          }
+          // 止め絵: 揺れ・光は出さず、ページの間だけゆっくり寄る。ページの頭で話し手が跳ねる
+          const frame = applySpeakerBounce(
+            applyPageFaces(sampleScene(scene, current.at, options.current), current),
+            current,
+            speakerBounce(sinceTurn, options.current.strength),
+          );
           const push = still ? 1 : 1 + zoom * state.progress;
           created.render({
             ...frame,
@@ -197,7 +233,16 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
           aria-live="polite"
         >
           <span className="cutscene__speaker">{t(`story.name.${pages[page].speaker}`)}</span>
-          {t(pages[page].text as never)}
+          {/* まだ出していない文字も場所は取っておく（行が途中で折り返し直さないように。読み上げには全文を渡す） */}
+          {(() => {
+            const chars = [...t(pages[page].text as never)];
+            return (
+              <>
+                {chars.slice(0, typed).join('')}
+                <span className="cutscene__untyped">{chars.slice(typed).join('')}</span>
+              </>
+            );
+          })()}
         </p>
       )}
       <ol className="cutscene__pages" aria-hidden="true">

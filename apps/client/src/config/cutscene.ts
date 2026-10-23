@@ -29,7 +29,8 @@ export const CUTSCENE_CONFIG = {
   loadTimeoutMs: 5000,
   /**
    * 紙芝居（story/pages.ts）: 1ページの表示秒数 = base + 文字数 × perChar（言語ごと）を min〜max に収める。
-   * ページの間は turnMs かけて暗くして切り替える。止め絵はページの間に zoom だけゆっくり寄る（弱では寄らない）
+   * ページの間は turnMs かけて暗くして切り替える。止め絵はページの間に zoom だけゆっくり寄る（弱では寄らない）。
+   * ページが変わると話し手が跳ね、セリフは1文字ずつ出て、話し手ごとの声の音が鳴る
    */
   pages: {
     base: 1.8,
@@ -38,5 +39,11 @@ export const CUTSCENE_CONFIG = {
     max: 6.5,
     turnMs: 450,
     zoom: 0.04,
+    /** ページが変わったとき、話し手が少し跳ねる高さ（シーンの px）と長さ（秒）。演出「中」は半分、「弱」では跳ねない */
+    bounce: { height: 18, seconds: 0.35 },
+    /** セリフを1文字ずつ出す速さ（1秒あたりの文字数）。演出「弱」では一度に出す */
+    typing: { ja: 24, en: 60 },
+    /** 話し手の声（短い音）を何文字ごとに鳴らすか（毎文字だとうるさい） */
+    voiceEvery: 2,
   },
 } as const;

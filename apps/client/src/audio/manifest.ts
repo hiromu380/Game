@@ -88,6 +88,9 @@ export type SoundKey =
   | 'footstep'
   | 'twinkle'
   | 'paper'
+  /** 紙芝居のセリフの声（話し手ごと。文字が出るたびに短く鳴る） */
+  | 'voiceBolt'
+  | 'voiceChief'
   | 'collapse'
   | 'countdown'
   | 'launch'
@@ -579,6 +582,24 @@ export const SOUND_ASSETS: Record<SoundKey, SoundAsset> = {
   paper: {
     kind: 'synth',
     recipe: { wave: 'noise', volume: 0.08, notes: [{ freq: 800, at: 0, duration: 0.25 }] },
+  },
+  /** ボルトの声: 高く短い「ピッ」（少し上がる） */
+  voiceBolt: {
+    kind: 'synth',
+    recipe: {
+      wave: 'square',
+      volume: 0.035,
+      notes: [{ freq: 880, at: 0, duration: 0.04, slideTo: 990 }],
+    },
+  },
+  /** 工場長の声: 低く短い「ブッ」 */
+  voiceChief: {
+    kind: 'synth',
+    recipe: {
+      wave: 'sawtooth',
+      volume: 0.04,
+      notes: [{ freq: 150, at: 0, duration: 0.05, slideTo: 130 }],
+    },
   },
   /** 崩れる（下がる音階） */
   collapse: {
