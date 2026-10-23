@@ -296,6 +296,20 @@ export class CutsceneRenderer {
     this.app.ticker.add((ticker) => callback(ticker.deltaMS));
   }
 
+  /**
+   * いま描いている絵の写し（紙芝居のめくりで、前の絵を横へ抜くのに使う）。
+   * 描き直した直後に同じ処理の中で写す（WebGL の絵は画面に出した後は読めないため）
+   */
+  snapshot(): HTMLCanvasElement {
+    this.app.renderer.render(this.app.stage);
+    const source = this.app.canvas;
+    const copy = document.createElement('canvas');
+    copy.width = source.width;
+    copy.height = source.height;
+    copy.getContext('2d')?.drawImage(source, 0, 0);
+    return copy;
+  }
+
   destroy(): void {
     this.app.destroy(true, { children: true });
   }

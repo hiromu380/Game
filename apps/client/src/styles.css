@@ -3198,6 +3198,29 @@ a.button.button--primary {
 .cutscene__text--chief .cutscene__speaker {
   background: var(--hazard-yellow);
 }
+/* 紙芝居のめくり: 前の絵（写し）を横へ抜いて、下の次の絵を見せる。舞台（.cutscene__stage）と同じ位置に重ねる */
+.cutscene__cards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cutscene__card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: 12px 0 18px rgba(0, 0, 0, 0.45);
+  animation: cutscene-card-out 0.55s cubic-bezier(0.55, 0, 0.75, 0.4) forwards;
+}
+@keyframes cutscene-card-out {
+  from {
+    transform: translateX(0) rotate(0deg);
+  }
+  to {
+    transform: translateX(-108%) rotate(-1.5deg);
+  }
+}
 .cutscene__turn {
   position: absolute;
   inset: 0;
@@ -3227,7 +3250,8 @@ a.button.button--primary {
 }
 /* 横長で高さの低い画面（スマホの横画面など）: 絵を上に寄せて小さくし、セリフを絵の下に置く（人物に重ならないように） */
 @media (orientation: landscape) and (max-height: 540px) {
-  .cutscene__stage {
+  .cutscene__stage,
+  .cutscene__cards {
     bottom: 104px;
   }
   .cutscene__text {

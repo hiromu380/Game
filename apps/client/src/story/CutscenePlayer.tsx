@@ -41,6 +41,8 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
   /** いまのページのセリフを何文字目まで出したか */
   const [typed, setTyped] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
+  /** めくりで横へ抜く前の絵（紙芝居の抜き差し）を置く場所 */
+  const cardsRef = useRef<HTMLDivElement>(null);
   const [hold, setHold] = useState(0);
   const doneRef = useRef(onDone);
   const finished = useRef(false);
@@ -106,6 +108,13 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
           const current = pages[state.index];
           if (!current) return state;
           if (state.index !== shown) {
+            // 紙芝居のめくり: 前の絵を写して横へ抜き、下から次の絵を見せる（演出「弱」では暗転だけ）
+            if (shown >= 0 && options.current.strength !== 'minimal' && cardsRef.current) {
+              const card = created.snapshot();
+              card.className = 'cutscene__card';
+              card.addEventListener('animationend', () => card.remove());
+              cardsRef.current.replaceChildren(card);
+            }
             shown = state.index;
             shownChars = -1;
             setPage(state.index);
@@ -224,8 +233,11 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
   return (
     <div className="cutscene" role="dialog" aria-label={t(`story.scene.${sceneId}`)}>
       <div className="cutscene__stage" ref={parentRef} />
-      {/* ページの切り替え: 一瞬暗くしてからめくる（ページが変わるたびに作り直してアニメーションさせる） */}
-      <div key={`turn-${page}`} className="cutscene__turn" aria-hidden="true" />
+      <div className="cutscene__cards" ref={cardsRef} aria-hidden="true" />
+      {/* 演出「弱」のページの切り替え: 一瞬暗くしてからめくる（ページが変わるたびに作り直してアニメーションさせる） */}
+      {settings.effects === 'minimal' && (
+        <div key={`turn-${page}`} className="cutscene__turn" aria-hidden="true" />
+      )}
       {pages[page] && (
         <p
           key={`text-${page}`}
