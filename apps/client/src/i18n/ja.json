@@ -836,5 +836,7 @@
   "crash.body": "思わぬ不具合で動かなくなりました。解放したパーツ・実績・記録は保存されています。",
   "crash.reload": "再読み込み",
   "crash.discardRun": "このランを片付けて再読み込み",
-  "crash.discardHint": "何度も止まるときは、いま遊んでいるランを片付けてください（解放・実績・記録は残ります）"
+  "crash.discardHint": "何度も止まるときは、いま遊んでいるランを片付けてください（解放・実績・記録は残ります）",
+  "settings.fullscreen": "全画面",
+  "settings.fullscreenHint": "F11・Alt+Enter でも切り替えられる"
 }

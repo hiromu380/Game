@@ -20,6 +20,8 @@ export const IPC_CHANNELS = {
   showKeyboard: 'platform:showKeyboard',
   openExternal: 'platform:openExternal',
   readDemoSave: 'storage:readDemoSave',
+  getFullscreen: 'window:getFullscreen',
+  setFullscreen: 'window:setFullscreen',
 } as const;
 
 /**
@@ -87,4 +89,8 @@ export interface DesktopBridge {
    * （製品版の初回起動時に、体験版のデータを引き継ぐかを聞くため）
    */
   readDemoSave(): Promise<string | null>;
+  /** ウィンドウが全画面か */
+  getFullscreen(): Promise<boolean>;
+  /** 全画面にする・戻す。切り替えた後の状態を返す */
+  setFullscreen(on: boolean): Promise<boolean>;
 }

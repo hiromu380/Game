@@ -836,5 +836,7 @@
   "crash.body": "Something unexpected broke. Your unlocks, achievements and records are saved.",
   "crash.reload": "Reload",
   "crash.discardRun": "Clear this run and reload",
-  "crash.discardHint": "If it keeps stopping, clear the current run (unlocks, achievements and records stay)"
+  "crash.discardHint": "If it keeps stopping, clear the current run (unlocks, achievements and records stay)",
+  "settings.fullscreen": "Fullscreen",
+  "settings.fullscreenHint": "F11 or Alt+Enter also toggles it"
 }
