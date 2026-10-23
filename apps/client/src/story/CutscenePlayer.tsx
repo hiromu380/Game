@@ -64,6 +64,9 @@ export default function CutscenePlayer({ scene: sceneId, onDone }: Props) {
     void (async () => {
       try {
         const scene = await load();
+        // 作る前に、まだ要るかを確かめる（開発中の StrictMode は作り直しのために一度捨てる。
+        // 捨てる方まで作ると、後から壊したときに描画の共有の資源まで壊れ、残った方が描けなくなる）
+        if (disposed) return;
         const created = await CutsceneRenderer.create(parent, scene, (key) => t(key as never));
         if (disposed) {
           created.destroy();
