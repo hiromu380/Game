@@ -49,8 +49,11 @@ export interface PartParams {
   copierDelay: number;
   /** 潤滑油タンク: 隣接パーツの発動回数上限に足す値 */
   oilerBonus: number;
-  /** 共鳴コイル: 倍率 = 1 + 隣接する共鳴コイル数 × coilPerNeighbor */
+  /** 共鳴コイル: 倍率 = coilBase + 隣接する共鳴コイル数 × coilPerNeighbor */
+  coilBase: number;
   coilPerNeighbor: number;
+  /** 向きを変えるパーツ（分岐器・散布機・反射板）が、送る信号それぞれの値に足す量 */
+  redirectAdd: number;
   /** ソーラーパネル: 値に足す量 = 周囲8マスの空きマス数 × solarPerEmpty */
   solarPerEmpty: number;
   /** 検品台: 隣接4マスに出荷口があるときの倍率 */

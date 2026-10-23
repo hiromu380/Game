@@ -74,6 +74,15 @@ export function board(rows: string[]): Board {
   return { width, height, cells };
 }
 
+/**
+ * 向きを変えるパーツ（分岐器・散布機・反射板）の +redirectAdd を外したルール。
+ * 分岐器を「道具」として使う、ほかの仕組み（合流炉・同時出荷・床など）のテストで、値を追いやすくする
+ */
+export const NO_REDIRECT_ADD = {
+  ...DEFAULT_RULES,
+  params: { ...DEFAULT_RULES.params, redirectAdd: 0 },
+};
+
 /** 既定ルールでシミュレーションし、スコアを文字列で返す */
 export function run(rows: string[], seed = 1, rules = DEFAULT_RULES) {
   const result = simulate({ board: board(rows), seed, rules });

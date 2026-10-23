@@ -23,7 +23,8 @@ export const PARTS: Balance['parts'] = {
   turntable: { price: 1, maxActivations: 8, rarity: 'uncommon' },
   // 信号には反応しない（常時効果のみ）ので発動回数は 0
   oiler: { price: 5, maxActivations: 0, rarity: 'rare' },
-  coil: { price: 2, maxActivations: 1, rarity: 'common' },
+  // SIM_VERSION 13: 1つでも ×2 になったので 2 → 5 円（1つなら増幅ギアより割高。並べてこそ得をする）
+  coil: { price: 5, maxActivations: 1, rarity: 'common' },
   solar: { price: 3, maxActivations: 1, rarity: 'common' },
   inspector: { price: 5, maxActivations: 1, rarity: 'uncommon' },
   piggyBank: { price: 5, maxActivations: 3, rarity: 'uncommon' },
@@ -46,7 +47,11 @@ export const PART_PARAMS: Balance['partParams'] = {
   chainMeterStep: 5,
   copierDelay: 1,
   oilerBonus: 1,
+  // 1つでも効くように: 基本 ×2、隣のコイル1つごとに +1（SIM_VERSION 13。それまでは基本 ×1）
+  coilBase: 2,
   coilPerNeighbor: 1,
+  // 向きを変えるパーツは、送る信号それぞれの値に +2（1つでも効くように。SIM_VERSION 13）
+  redirectAdd: 2,
   solarPerEmpty: 1,
   inspectorMultiplier: 3,
   piggyBankIncome: 1,
