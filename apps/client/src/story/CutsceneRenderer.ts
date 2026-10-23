@@ -102,6 +102,10 @@ export class CutsceneRenderer {
     this.stage.sortableChildren = true;
     this.glow.blendMode = 'add';
     this.world.addChild(this.stage, this.glow, this.overlay);
+    // 16:9 のシーンの外（横長の画面の左右の余白）に、出番前の人物などが見えないよう切り抜く
+    const frame = new Graphics().rect(0, 0, W, H).fill(0xffffff);
+    this.world.addChild(frame);
+    this.world.mask = frame;
     app.stage.addChild(this.world);
     this.resize();
   }
