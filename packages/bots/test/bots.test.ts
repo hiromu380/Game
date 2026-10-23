@@ -26,7 +26,8 @@ describe('ボット', () => {
     expect(permits.used).toBeGreaterThan(0);
     const off = playRun(1, 'greedy', { ...OPTIONS, permits: false });
     expect(off.permits.used).toBe(0);
-  });
+    // 13 ラン遊ぶので長い。SIM_VERSION 13 でパーツが効くようになり、ボットの試す配置が増えて 60 秒を超えるようになった
+  }, 180_000);
 
   it('ランダムボットは1ランを最後まで（脱落まで）遊べる', () => {
     const log = playRun(1, 'random', OPTIONS);
