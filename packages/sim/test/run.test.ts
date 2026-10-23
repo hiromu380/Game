@@ -13,11 +13,13 @@ import {
   getDayAndPeriod,
   getRefund,
   getRerollCost,
+  overshootBonus,
   placePart,
   rerollShop,
   returnPart,
   rotatePart,
   runTrial,
+  scoreOf,
   seeds,
   sellPart,
   type RunActionResult,
@@ -253,6 +255,45 @@ describe('シフトの確定とノルマ', () => {
     const second = commit(first.state);
     expect(second.state.phase).toBe('cleared');
     expect(commitShift(second.state)).toEqual({ error: 'notBuilding' });
+  });
+
+  it('超過ボーナス: ノルマの10倍で1桁、100倍で2桁…（上限まで）。1桁ごとに perDigit 円', () => {
+    const bonus = { perDigit: 1, maxDigits: 3 };
+    expect(overshootBonus(scoreOf(99), 10, bonus)).toBe(0);
+    expect(overshootBonus(scoreOf(100), 10, bonus)).toBe(1);
+    expect(overshootBonus(scoreOf(999), 10, bonus)).toBe(1);
+    expect(overshootBonus(scoreOf(1000), 10, bonus)).toBe(2);
+    expect(overshootBonus(scoreOf(10n ** 30n), 10, bonus)).toBe(3);
+    expect(overshootBonus(scoreOf(10n ** 30n), 10, { perDigit: 2, maxDigits: 2 })).toBe(4);
+    // 設定のないラン（この仕組みより前のセーブ）はボーナスなし
+    expect(overshootBonus(scoreOf(10n ** 30n), 10, undefined)).toBe(0);
+  });
+
+  it('超過ボーナスは次のシフトの予算に足し、記録に残す（ノルマちょうどなら 0 で記録しない）', () => {
+    const balance = withBalance({
+      shifts: easyShifts(2, 99),
+      economy: { ...BALANCE.economy, overshoot: { perDigit: 1, maxDigits: 3 } },
+    });
+    const run = minimalRun(1, balance);
+    const plain = commit(run);
+    expect(plain.outcome.overshootBonus).toBe(0);
+    expect(plain.state.history[0]?.overshootBonus).toBeUndefined();
+    // スイッチの値を 100 にすると、ノルマ（1）の100倍 = 2桁の超過
+    const big = {
+      ...run,
+      config: { ...run.config, rules: { ...run.config.rules, switchSignalValue: 100 } },
+    };
+    const boosted = commit(big);
+    expect(boosted.outcome.overshootBonus).toBe(2);
+    expect(boosted.state.history[0]?.overshootBonus).toBe(2);
+    expect(boosted.state.budget).toBe(plain.state.budget + 2);
+    // 設定のないラン（この仕組みより前のセーブ）は、同じ出荷量でもボーナスなし
+    const old = commit({
+      ...big,
+      config: { ...big.config, economy: { ...big.config.economy, overshoot: undefined } },
+    });
+    expect(old.outcome.overshootBonus).toBe(0);
+    expect(old.state.budget).toBe(plain.state.budget);
   });
 
   it('9シフト（3日 × 朝・昼・夜）で、ノルマは段階的に上昇する', () => {

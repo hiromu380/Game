@@ -10,6 +10,7 @@ import {
   BALANCE,
   type Balance,
   type BossModifierId,
+  type OvershootBonus,
   type ShiftSpec,
   type StageBalance,
 } from '../balance';
@@ -29,6 +30,11 @@ export interface EconomyConfig {
   offersPerShift: number;
   reroll: { baseCost: number; costStep: number; enabled: boolean };
   refundPercent: number;
+  /**
+   * 超過ボーナス（balance/economy.ts の写し）。この項目より前に始めたラン（セーブ）にはなく、そのときはボーナスなし
+   * （進行中のランのルールは変えない）
+   */
+  overshoot?: OvershootBonus;
 }
 
 /** 日ごとのステージ（床の配置） */
@@ -198,6 +204,7 @@ export function buildRunConfig({
       offersPerShift: balance.economy.offersPerShift,
       reroll: { ...balance.economy.reroll, enabled: true },
       refundPercent: balance.economy.refundPercent,
+      overshoot: { ...balance.economy.overshoot },
     },
     shifts: balance.shifts.map((s) => ({ ...s })),
     shiftsPerDay: balance.shiftsPerDay,

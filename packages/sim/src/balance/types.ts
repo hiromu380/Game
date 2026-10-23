@@ -329,6 +329,8 @@ export interface Balance {
     refundPercent: number;
     /** ラン開始時に手持ちとして配られるパーツ */
     starterKit: Partial<Record<PartId, number>>;
+    /** 超過ボーナス: ノルマを桁で超えた分だけ、次のシフトの予算を増やす（run/shift.ts の overshootBonus） */
+    overshoot: OvershootBonus;
   };
 
   /** シフト表。配列の長さ = 1ランのシフト数（3日 × 朝・昼・夜） */
@@ -408,4 +410,10 @@ export interface Balance {
     /** 部品不足: ショップの品数の増減（リロールも不可になる） */
     partShortageOffersDelta: number;
   };
+}
+
+/** 超過ボーナス: 出荷量がノルマの 10^k 倍以上なら k 桁の超過。1桁ごとに perDigit 円（maxDigits 桁まで） */
+export interface OvershootBonus {
+  perDigit: number;
+  maxDigits: number;
 }

@@ -104,6 +104,7 @@ export {
   getDayAndPeriod,
   getShiftCount,
   isDayStart,
+  overshootBonus,
   runTrial,
   startOvertime,
 } from './run/shift';

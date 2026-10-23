@@ -5,6 +5,7 @@ import {
   BALANCE,
   getCurrentShift,
   isUnmeasurable,
+  overshootBonus,
   scoreCompare,
   scoreOf,
   scoreToString,
@@ -35,6 +36,9 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
   const { score, stats } = playback.result;
   const quota = getCurrentShift(run).quota;
   const met = scoreCompare(score, scoreOf(quota)) >= 0;
+  // 超過手当（ノルマを桁で超えた分、次のシフトの予算に足す）。試運転では「本番ならこれだけ」の目安
+  const bonus = met ? overshootBonus(score, quota, run.config.economy.overshoot) : 0;
+  const perDigit = run.config.economy.overshoot?.perDigit ?? 1;
 
   // 本番で次に進むときのボタン文言
   const closeLabel =
@@ -86,6 +90,17 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
           <>
             <dt>{t('playback.income')}</dt>
             <dd>{t('playback.incomePop', { amount: playback.result.income })}</dd>
+          </>
+        )}
+        {bonus > 0 && (
+          <>
+            <dt>{t('playback.overshoot')}</dt>
+            <dd>
+              {t('playback.overshootValue', {
+                amount: bonus,
+                times: formatScore(`1${'0'.repeat(bonus / perDigit)}`),
+              })}
+            </dd>
           </>
         )}
       </dl>

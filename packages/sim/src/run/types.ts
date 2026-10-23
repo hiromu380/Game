@@ -35,6 +35,8 @@ export interface ShiftRecord {
   chainCount: number;
   /** 経済系パーツが生んだ予算 */
   income: number;
+  /** 超過ボーナス（ノルマを桁で超えた分の予算。0 のときは記録しない） */
+  overshootBonus?: number;
   /** ボスシフトだった場合の修正ルール */
   boss: BossModifierId | null;
 }
@@ -160,6 +162,8 @@ export interface ShiftOutcome {
   cleared: boolean;
   quota: number;
   income: number;
+  /** 超過ボーナス（次のシフトの予算に足した額） */
+  overshootBonus: number;
   stats: SimStats;
 }
 

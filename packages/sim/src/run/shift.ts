@@ -1,14 +1,14 @@
 /**
  * シフトの進行: 試運転・本番・次のシフトへの移行
  */
-import type { ShiftSpec } from '../balance';
+import type { OvershootBonus, ShiftSpec } from '../balance';
 import { getShiftEconomy, getShiftRules } from '../config/bossModifiers';
 import { drawBoss, type EconomyConfig } from '../config/runConfig';
 import { isBlockedCell } from '../floor/layer';
 import { generateStage } from '../floor/stage';
 import { createPrng } from '../core/prng';
 import { getPart, setPart } from '../core/board';
-import { scoreCompare, scoreOf, scoreToString } from '../core/score';
+import { scoreCompare, scoreMul, scoreOf, scoreToString, type Score } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
@@ -117,10 +117,14 @@ export function commitShift(
   });
   const spec = getCurrentShift(state);
   const cleared = scoreCompare(result.score, scoreOf(spec.quota)) >= 0;
+  const bonus = cleared
+    ? overshootBonus(result.score, spec.quota, state.config.economy.overshoot)
+    : 0;
   const outcome: ShiftOutcome = {
     cleared,
     quota: spec.quota,
     income: result.income,
+    overshootBonus: bonus,
     stats: result.stats,
   };
 
@@ -133,6 +137,7 @@ export function commitShift(
       cleared,
       chainCount: result.stats.chainCount,
       income: result.income,
+      ...(bonus > 0 ? { overshootBonus: bonus } : {}),
       boss: state.config.bossPlan[state.shiftIndex]?.id ?? null,
     },
   ];
@@ -140,7 +145,7 @@ export function commitShift(
   if (!cleared) return { state: { ...state, phase: 'failed', history }, result, outcome };
 
   const nextIndex = state.shiftIndex + 1;
-  const carried = state.budget + spec.clearReward + result.income;
+  const carried = state.budget + spec.clearReward + result.income + bonus;
   if (nextIndex >= getShiftCount(state)) {
     // 延長戦中は次のシフトを作って続ける。本編なら全シフトクリアで終了
     if (state.overtime) {
@@ -151,8 +156,28 @@ export function commitShift(
     return { state: { ...state, phase: 'cleared', history, budget: carried }, result, outcome };
   }
 
-  // 残予算 + 報酬 + 収入 を持ち越して次のシフトへ
+  // 残予算 + 報酬 + 収入 + 超過ボーナス を持ち越して次のシフトへ
   return { state: enterShift({ ...state, history }, nextIndex, carried), result, outcome };
+}
+
+/**
+ * 超過ボーナス: 出荷量がノルマの 10^k 倍以上なら k 桁の超過として、k × perDigit 円（maxDigits 桁まで）。
+ * 設定のないラン（この仕組みより前に始めたセーブ）は 0
+ */
+export function overshootBonus(
+  score: Score,
+  quota: number,
+  bonus: OvershootBonus | undefined,
+): number {
+  if (!bonus || quota <= 0) return 0;
+  let digits = 0;
+  let threshold = scoreOf(quota);
+  while (digits < bonus.maxDigits) {
+    threshold = scoreMul(threshold, 10);
+    if (scoreCompare(score, threshold) < 0) break;
+    digits++;
+  }
+  return digits * bonus.perDigit;
 }
 
 /**
