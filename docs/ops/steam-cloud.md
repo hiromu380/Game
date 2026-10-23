@@ -5,11 +5,12 @@
 
 ## ゲームが保存する場所（apps/desktop/src/main/storage/fileStore.ts）
 
-| ファイル                                      | 中身                         | 同期     |
-| --------------------------------------------- | ---------------------------- | -------- |
-| `%APPDATA%\Chain Factory\save\save.json`      | 進行中のラン・メタ進行・実績 | **する** |
-| `%APPDATA%\Chain Factory\save\settings.json`  | 言語・音量・演出の設定       | **する** |
-| `%APPDATA%\Chain Factory\local\identity.json` | オンラインの認証トークン     | しない   |
+| ファイル                                             | 中身                             | 同期     |
+| ---------------------------------------------------- | -------------------------------- | -------- |
+| `%APPDATA%\Chain Factory\save\save.json`             | 進行中のラン・メタ進行・実績     | **する** |
+| `%APPDATA%\Chain Factory\save\settings.json`         | 言語・音量・演出の設定           | **する** |
+| `%APPDATA%\Chain Factory\local\identity.json`        | オンラインの認証トークン         | しない   |
+| `%APPDATA%\Chain Factory\local\save-unreadable.json` | 読めなかったセーブの控え（下記） | しない   |
 
 体験版はフォルダ名が `Chain Factory Demo`（製品版と混ざらないように別にしている）。
 
@@ -31,3 +32,9 @@
 - `local/identity.json`（認証トークン）は同期しない。別の端末では起動時に Steam で取り直す
 - セーブの形式にはバージョンがある（`SAVE_VERSION`）。古い版のゲームで新しいセーブを開くと読み込まない（新規扱い）。
   アップデートは全員に同時に届くので、通常は問題にならない
+
+## 読めなかったセーブの控え
+
+新しい版で書かれた save.json がクラウドから届いた（ベータ版から戻した等）・壊れていたときは、ゲームは新しく始め、
+上書きする前に元の中身を `local\save-unreadable.json` に1回だけ残す（apps/client/src/state/saveStore.ts）。
+問い合わせがあったら、新しい版に戻してから、この中身を `save\save.json` に戻してもらう。

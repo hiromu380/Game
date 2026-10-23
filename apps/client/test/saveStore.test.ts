@@ -7,6 +7,7 @@ import {
   markSceneSeen,
   SAVE_STORAGE_KEY,
   saveGame,
+  UNREADABLE_SAVE_KEY,
   type SimpleStorage,
 } from '../src/state/saveStore';
 
@@ -36,6 +37,26 @@ describe('セーブ/ロード', () => {
     expect(loadRun(storage)).toBeNull();
     storage.setItem(SAVE_STORAGE_KEY, JSON.stringify({ version: 999, run: {} }));
     expect(loadRun(storage)).toBeNull();
+  });
+
+  it('読めないセーブ（新しい版・壊れた）は、上書きする前に控えへ1回だけ残す', () => {
+    const storage = memoryStorage();
+    const newer = JSON.stringify({ version: 999, meta: { runs: 42 } });
+    storage.setItem(SAVE_STORAGE_KEY, newer);
+    saveGame({ run: createRun(1) }, storage);
+    expect(storage.data.get(UNREADABLE_SAVE_KEY)).toBe(newer);
+    expect(loadRun(storage)).not.toBeNull();
+    // 控えは最初のものを残し、あとから読めないデータが来ても上書きしない
+    storage.setItem(SAVE_STORAGE_KEY, '{broken');
+    saveGame({ run: createRun(2) }, storage);
+    expect(storage.data.get(UNREADABLE_SAVE_KEY)).toBe(newer);
+  });
+
+  it('読めるセーブを保存し直しても控えは作らない', () => {
+    const storage = memoryStorage();
+    saveGame({ run: createRun(1) }, storage);
+    saveGame({ run: createRun(2) }, storage);
+    expect(storage.data.has(UNREADABLE_SAVE_KEY)).toBe(false);
   });
 
   it('終わったラン（ノルマ未達・諦めた）は続きから遊べないので null', () => {

@@ -31,6 +31,8 @@ export const STORAGE_ENTRIES = {
   'chain-factory:settings': { file: 'settings.json', cloud: true },
   // 認証トークンは端末ごと。Steam 版は起動時に取り直せるので同期しない
   'chain-factory:online': { file: 'identity.json', cloud: false },
+  // 読めなかったセーブの控え（新しい版から同期された・壊れた save.json を上書きする前に残す）。この端末にだけ置く
+  'chain-factory:save:unreadable': { file: 'save-unreadable.json', cloud: false },
 } as const;
 
 export type StorageKey = keyof typeof STORAGE_ENTRIES;
