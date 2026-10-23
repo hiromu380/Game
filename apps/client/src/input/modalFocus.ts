@@ -33,6 +33,17 @@ export function installModalFocus(doc: Document = document): () => void {
   const onFocusIn = (e: FocusEvent) => {
     if (e.target instanceof HTMLElement && !e.target.closest('.modal')) lastOutside = e.target;
   };
+  // フォーカスが外れて何もない所（盤面の操作など）へ移ったら、戻り先も「なし」にする
+  // （盤面から開いたダイアログを閉じたとき、前に触った別のボタンへ戻らないように）
+  const onFocusOut = (e: FocusEvent) => {
+    if (
+      e.relatedTarget === null &&
+      e.target instanceof HTMLElement &&
+      !e.target.closest('.modal')
+    ) {
+      lastOutside = null;
+    }
+  };
 
   const sync = () => {
     // 閉じたダイアログを外し、開く前の要素へ戻す
@@ -62,10 +73,12 @@ export function installModalFocus(doc: Document = document): () => void {
   observer.observe(doc.body, { childList: true, subtree: true });
   doc.addEventListener('keydown', onKeyDown, true);
   doc.addEventListener('focusin', onFocusIn);
+  doc.addEventListener('focusout', onFocusOut);
   sync();
   return () => {
     observer.disconnect();
     doc.removeEventListener('keydown', onKeyDown, true);
     doc.removeEventListener('focusin', onFocusIn);
+    doc.removeEventListener('focusout', onFocusOut);
   };
 }
