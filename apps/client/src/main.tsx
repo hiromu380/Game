@@ -6,6 +6,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerServiceWorker } from './boot/serviceWorker';
+import { installStaleBuildRecovery } from './boot/staleBuild';
 import { I18nProvider } from './i18n';
 import { installControls } from './input/controls';
 import { installModalFocus } from './input/modalFocus';
@@ -18,6 +19,9 @@ import './styles.css';
 
 // 同梱フォントの定義は大きいので、最初の表示の後に読み込む（届くまでは予備の日本語フォントで表示）
 void import('./fonts');
+
+// 古い版のタブで画面の読み込みに失敗したら、読み込み直して新しい版にする
+installStaleBuildRecovery();
 
 // キーボード・コントローラーの入力を受け付ける（config/controls.ts）
 installControls();
