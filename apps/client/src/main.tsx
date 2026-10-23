@@ -11,6 +11,7 @@ import { I18nProvider } from './i18n';
 import { installControls } from './input/controls';
 import { installModalFocus } from './input/modalFocus';
 import { Root } from './Root';
+import { CrashBoundary } from './ui/CrashScreen';
 import { getPlatform } from './platform';
 import { SettingsProvider } from './settings/SettingsContext';
 import { initStorage } from './storage';
@@ -33,11 +34,13 @@ await initStorage();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SettingsProvider>
-      <I18nProvider>
-        <Root />
-      </I18nProvider>
-    </SettingsProvider>
+    <CrashBoundary>
+      <SettingsProvider>
+        <I18nProvider>
+          <Root />
+        </I18nProvider>
+      </SettingsProvider>
+    </CrashBoundary>
   </StrictMode>,
 );
 

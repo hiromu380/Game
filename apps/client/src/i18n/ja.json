@@ -831,5 +831,10 @@
   "breakdown.title": "最大の出荷の内訳",
   "breakdown.more": "…{count}段",
   "breakdown.sync": "同時出荷 ×{count}",
-  "breakdown.floor": "床"
+  "breakdown.floor": "床",
+  "crash.title": "ラインが止まった",
+  "crash.body": "思わぬ不具合で動かなくなりました。解放したパーツ・実績・記録は保存されています。",
+  "crash.reload": "再読み込み",
+  "crash.discardRun": "このランを片付けて再読み込み",
+  "crash.discardHint": "何度も止まるときは、いま遊んでいるランを片付けてください（解放・実績・記録は残ります）"
 }

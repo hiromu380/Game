@@ -3249,3 +3249,15 @@ a.button.button--primary {
   gap: 4px;
   flex: none;
 }
+
+/* ---- 不具合で止まったとき（ui/CrashScreen.tsx） ---- */
+.crash {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.crash__body {
+  width: min(480px, 100%);
+}
