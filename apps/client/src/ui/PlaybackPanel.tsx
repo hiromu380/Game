@@ -17,7 +17,7 @@ import { BOLT_BODY_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
-import { biggestShipBreakdown, describeChange } from '../playback/breakdown';
+import { ADDITIVE_PARTS, biggestShipBreakdown, describeChange } from '../playback/breakdown';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
 import { destinationName } from './RocketProgress';
 
@@ -148,11 +148,11 @@ function ShipBreakdownLine({ result }: { result: SimResult }) {
   const chips: { key: string; label: string; kind: 'part' | 'floor' }[] = [];
   breakdown.steps.forEach((step, i) => {
     if (step.floor) {
-      const change = describeChange(step.before, step.afterFloor);
+      const change = describeChange(step.before, step.afterFloor, step.floor === 'add');
       if (change)
         chips.push({ key: `f${i}`, label: `${t('breakdown.floor')} ${change}`, kind: 'floor' });
     }
-    const change = describeChange(step.afterFloor, step.after);
+    const change = describeChange(step.afterFloor, step.after, ADDITIVE_PARTS.has(step.partId));
     if (change)
       chips.push({
         key: `p${i}`,

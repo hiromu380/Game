@@ -107,12 +107,24 @@ export function biggestShipBreakdown(events: readonly SimEvent[]): ShipBreakdown
   return { start: root.value, steps, sync, shipped: biggest.value };
 }
 
-/** 値の変わり方の短い表し方（×3・+5・÷2）。割り切れない掛け算は「→」 */
-export function describeChange(before: Score, after: Score): string {
+/**
+ * 足し算で値を変えるパーツ・床（1 → 3 を「×3」でなく「+2」と書くため）。
+ * 金色で ×3 が重なった分も足し算で書く（段は1つにまとめているので）
+ */
+export const ADDITIVE_PARTS: ReadonlySet<PartId> = new Set([
+  'booster',
+  'solar',
+  'splitter',
+  'spreader',
+  'reflector',
+]);
+
+/** 値の変わり方の短い表し方（×3・+5・÷2）。割り切れない掛け算は「→」。additive なら増えた分を「+」で書く */
+export function describeChange(before: Score, after: Score, additive = false): string {
   const b = before as bigint;
   const a = after as bigint;
   if (a === b) return '';
-  if (b > 0n && a > b && a % b === 0n) return `×${a / b}`;
+  if (!additive && b > 0n && a > b && a % b === 0n) return `×${a / b}`;
   if (a > b) return `+${a - b}`;
   if (a > 0n && b % a === 0n) return `÷${b / a}`;
   return '→';

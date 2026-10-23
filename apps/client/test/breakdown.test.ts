@@ -1,6 +1,6 @@
 import { DEFAULT_RULES, simulate, type Board, type FloorLayer } from '@chain-factory/sim';
 import { describe, expect, it } from 'vitest';
-import { biggestShipBreakdown, describeChange } from '../src/playback/breakdown';
+import { ADDITIVE_PARTS, biggestShipBreakdown, describeChange } from '../src/playback/breakdown';
 
 const line = (ids: string[], floor: FloorLayer = []): ReturnType<typeof simulate> => {
   const board: Board = {
@@ -49,15 +49,24 @@ describe('出荷の計算の内訳', () => {
       ],
     };
     const b = biggestShipBreakdown(simulate({ board, seed: 1, rules: DEFAULT_RULES }).events)!;
-    expect(b.steps).toEqual([]);
+    // 分岐器の +2 は分岐器の段。×2 は sync にだけ出す
+    expect(
+      b.steps.map((s) => [
+        s.partId,
+        describeChange(s.before, s.after, ADDITIVE_PARTS.has(s.partId)),
+      ]),
+    ).toEqual([['splitter', `+${DEFAULT_RULES.params.redirectAdd}`]]);
     expect(b.sync).toBe(2);
-    expect(b.shipped).toBe(2n);
+    expect(b.shipped).toBe(6n);
   });
 
   it('出荷がなければ null。変わり方の表し方', () => {
     expect(biggestShipBreakdown(line(['switch', 'gear']).events)).toBeNull();
     expect(describeChange(2n as never, 6n as never)).toBe('×3');
     expect(describeChange(2n as never, 7n as never)).toBe('+5');
+    // 1 → 3 は掛け算にも見えるが、足し算のパーツなら +2
+    expect(describeChange(1n as never, 3n as never)).toBe('×3');
+    expect(describeChange(1n as never, 3n as never, true)).toBe('+2');
     expect(describeChange(8n as never, 4n as never)).toBe('÷2');
     expect(describeChange(3n as never, 3n as never)).toBe('');
   });
