@@ -11,6 +11,7 @@
 | `%APPDATA%\Chain Factory\save\settings.json`         | 言語・音量・演出の設定           | **する** |
 | `%APPDATA%\Chain Factory\local\identity.json`        | オンラインの認証トークン         | しない   |
 | `%APPDATA%\Chain Factory\local\save-unreadable.json` | 読めなかったセーブの控え（下記） | しない   |
+| `%APPDATA%\Chain Factory\local\window.json`          | ウィンドウの大きさ・位置・全画面 | しない   |
 
 体験版はフォルダ名が `Chain Factory Demo`（製品版と混ざらないように別にしている）。
 

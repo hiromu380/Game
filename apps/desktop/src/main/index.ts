@@ -75,7 +75,8 @@ if (started.kind === 'restarting') {
       steam.shutdown();
     });
 
-    createGameWindow(preloadPath);
+    // 大きさ・位置・全画面の記憶は端末ごと（Steam Cloud で同期しない local フォルダ）
+    createGameWindow(preloadPath, join(app.getPath('userData'), 'local', 'window.json'));
   });
 
   app.on('window-all-closed', () => app.quit());
