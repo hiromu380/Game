@@ -993,6 +993,9 @@ button:disabled {
 }
 .modal__body {
   width: min(420px, 100%);
+  /* 高さの低い画面（スマホの横画面など）でも上下が切れないよう、収まらなければ中をスクロールする */
+  max-height: 100%;
+  overflow-y: auto;
 }
 .settings__row {
   display: flex;
