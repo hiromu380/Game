@@ -4,20 +4,40 @@
  * 操作はどれも入力の state を変えず、コピーして返す。
  */
 import { TOSHIYORI } from '../balance/career';
+import { FACILITIES } from '../balance/facilities';
 import { GAME } from '../balance/game';
 import { rikishiFromCandidate } from '../career/create';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import { KAKUN_IDS } from '../lineage/kakun';
+import {
+  addNode,
+  approveIndependence,
+  closeNode,
+  nodeOfOyakata,
+  takeOverBranch,
+} from '../lineage/family';
 import { eligibleForToshiyori } from '../lineage/toshiyori';
 import { makeToshiyoriName } from '../core/names';
 import { styleOf } from '../career/create';
-import type { BashoReport, GameState, KakunId, LineageEntry, Policy } from '../model/types';
+import type {
+  BashoReport,
+  FacilityId,
+  GameState,
+  KakunId,
+  LineageEntry,
+  Policy,
+} from '../model/types';
+import { nextBuildCost, stableCapacity } from '../money/facilities';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
 /** 跡継ぎ・家訓の選択が済むまで場所を進められない */
 export function isBlocked(state: GameState): boolean {
-  return state.pending.successor !== null || state.pending.kakun !== null;
+  return (
+    state.pending.successor !== null ||
+    state.pending.kakun !== null ||
+    state.pending.takeOver !== null
+  );
 }
 
 export function currentLineage(state: GameState): LineageEntry {
@@ -37,8 +57,9 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
   let becameOyakata = false;
   if (eligibleForToshiyori(r) && mine) {
     const free = state.toshiyoriFree > 0;
+    const oyakataId = state.nextId++;
     state.oyakata.push({
-      id: state.nextId++,
+      id: oyakataId,
       name: free ? newToshiyoriName(state, id) : '',
       shikona: r.name,
       age: r.age,
@@ -49,6 +70,18 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
       generation: null,
       fromRikishiId: r.id,
       waitingSince: free ? null : state.bashoIndex,
+      since: state.bashoIndex,
+    });
+    addNode(state, {
+      name: state.oyakata[state.oyakata.length - 1]!.name,
+      shikona: r.name,
+      parentId: nodeOfOyakata(state, state.player.oyakataId)?.id ?? null,
+      stableId: r.stableId,
+      kind: free ? 'heyatsuki' : 'waiting',
+      oyakataId,
+      fromBashoIndex: state.bashoIndex,
+      toBashoIndex: null,
+      highestRank: r.career.highestRank,
     });
     if (free) state.toshiyoriFree--;
     becameOyakata = true;
@@ -87,7 +120,7 @@ export function acceptCandidate(input: GameState, candidateId: number): GameStat
   if (!c) return input;
   const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId);
   if (c.foreign && mine.some((r) => r.foreign)) return input; // 外国出身は1部屋1人
-  if (mine.length >= GAME.stableCapacity) return input; // 部屋に住めない
+  if (mine.length >= stableCapacity(state)) return input; // 部屋に住めない
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   state.rikishi.push(rikishiFromCandidate(c, state.player.stableId, master.style));
   state.pending.candidates = state.pending.candidates.filter((x) => x.id !== candidateId);
@@ -116,9 +149,12 @@ export function chooseSuccessor(input: GameState, oyakataId: number): GameState 
   const prev = state.player.oyakataId;
   const lineage = currentLineage(state);
   lineage.toBashoIndex = state.bashoIndex;
+  closeNode(state, nodeOfOyakata(state, prev));
   state.oyakata = state.oyakata.filter((o) => o.id !== prev);
   const next = state.oyakata.find((o) => o.id === oyakataId)!;
   next.role = 'master';
+  const nextNode = nodeOfOyakata(state, next.id);
+  if (nextNode) nextNode.kind = 'master';
   state.player.generation++;
   next.generation = state.player.generation;
   state.player.oyakataId = next.id;
@@ -135,14 +171,76 @@ export function chooseSuccessor(input: GameState, oyakataId: number): GameState 
     makuuchiYusho: 0,
   });
   state.pending.successor = null;
-  // 家訓の候補（まだ持っていないものから3つ）
+  offerKakun(state);
+  return state;
+}
+
+/** 本家の跡継ぎがいないとき、分家を継ぐ（次の代はその分家の親方） */
+export function chooseTakeOver(input: GameState, stableId: number): GameState {
+  if (!input.pending.takeOver?.includes(stableId)) return input;
+  const state = clone(input);
+  currentLineage(state).toBashoIndex = state.bashoIndex;
+  takeOverBranch(state, stableId);
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  state.player.generation++;
+  state.player.lineage.push({
+    generation: state.player.generation,
+    oyakataId: master.id,
+    name: master.name,
+    shikona: master.shikona,
+    fromBashoIndex: state.bashoIndex,
+    toBashoIndex: null,
+    sekitori: 0,
+    sanyaku: 0,
+    yokozuna: 0,
+    makuuchiYusho: 0,
+  });
+  state.pending.takeOver = null;
+  offerKakun(state);
+  return state;
+}
+
+/** 部屋付きの親方の独立の申し出に答える（認めるなら連れて行く内弟子を選ぶ） */
+export function answerIndependence(
+  input: GameState,
+  accept: boolean,
+  takeIds: readonly number[] = [],
+): GameState {
+  if (input.pending.independence === null) return input;
+  const state = clone(input);
+  const o = state.oyakata.find((x) => x.id === state.pending.independence);
+  state.pending.independence = null;
+  if (accept && o) approveIndependence(state, o, takeIds);
+  return state;
+}
+
+/** 建物を1段上げる（部屋の口座から払う。足りなければ何もしない） */
+export function buildFacility(input: GameState, id: FacilityId): GameState {
+  const cost = nextBuildCost(input.player.facilities, id);
+  if (cost === null || input.player.stableMoney < cost) return input;
+  const state = clone(input);
+  state.player.stableMoney -= cost;
+  state.player.facilities[id]++;
+  return state;
+}
+
+/** 契約のレベルを決める（0 で解約。費用は場所ごとに帳簿から払う） */
+export function setContract(input: GameState, id: FacilityId, level: number): GameState {
+  const def = FACILITIES[id];
+  if (def.kind !== 'contract' || level < 0 || level > def.costs.length) return input;
+  const state = clone(input);
+  state.player.facilities[id] = level;
+  return state;
+}
+
+/** 家訓の候補（まだ持っていないものから3つ） */
+function offerKakun(state: GameState): void {
   const rng = createPrng(deriveSeed(state.seed, SEED.kakun, state.bashoIndex));
   const pool = KAKUN_IDS.filter((k) => !state.player.kakun.includes(k));
   const picks: KakunId[] = [];
   while (picks.length < 3 && pool.length > 0)
     picks.push(pool.splice(rng.nextInt(pool.length), 1)[0]!);
   state.pending.kakun = picks.length ? picks : null;
-  return state;
 }
 
 /** 家訓を書き加える（枠がいっぱいなら replaceIndex の家訓と入れ替える。書かないなら null） */

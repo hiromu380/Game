@@ -2,8 +2,8 @@ import {
   acceptCandidate,
   answerRetirement,
   declineCandidate,
-  GAME,
   setPolicy,
+  stableCapacity,
   styleOf,
   type Candidate,
   type GameState,
@@ -12,6 +12,7 @@ import {
   type Rikishi,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { IndependencePanel } from './IndependencePanel';
 import { rankLabel, recordLabel } from '../format';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
@@ -31,7 +32,8 @@ export function StableTab({
   const mine = game.rikishi
     .filter((r) => r.stableId === game.player.stableId)
     .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
-  const full = mine.length >= GAME.stableCapacity;
+  const cap = stableCapacity(game);
+  const full = mine.length >= cap;
   const requests = game.pending.retireRequests
     .map((id) => game.rikishi.find((r) => r.id === id))
     .filter((r): r is Rikishi => !!r);
@@ -68,12 +70,14 @@ export function StableTab({
         </section>
       )}
 
+      {game.pending.independence !== null && (
+        <IndependencePanel game={game} ranks={ranks} setGame={setGame} />
+      )}
+
       {game.pending.candidates.length > 0 && (
         <section className="panel" aria-labelledby="cand-title">
           <h2 id="cand-title">{t('candidates.title')}</h2>
-          <p className="note">
-            {full ? t('candidates.full', { cap: GAME.stableCapacity }) : t('candidates.note')}
-          </p>
+          <p className="note">{full ? t('candidates.full', { cap }) : t('candidates.note')}</p>
           {game.pending.candidates.map((c) => (
             <CandidateRow
               key={c.id}
@@ -87,9 +91,7 @@ export function StableTab({
       )}
 
       <section className="panel" aria-labelledby="mine-title">
-        <h2 id="mine-title">
-          {t('stable.title', { count: mine.length, cap: GAME.stableCapacity })}
-        </h2>
+        <h2 id="mine-title">{t('stable.title', { count: mine.length, cap })}</h2>
         {mine.length === 0 && <p className="note">{t('stable.empty')}</p>}
         <ul className="rikishi-list">
           {mine.map((r) => (

@@ -4,3 +4,5 @@ export * from './bout';
 export * from './growth';
 export * from './career';
 export * from './game';
+export * from './lineage';
+export * from './facilities';

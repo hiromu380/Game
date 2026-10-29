@@ -46,12 +46,14 @@ export function rollAbilities(rng: Prng, min: number, max: number, style?: Style
   return a;
 }
 
+/** noise: 見立て（素質の星）の誤差の幅 */
 export function makeCandidate(
   rng: Prng,
   id: number,
   name: string,
   prestige: number,
   allowForeign: boolean,
+  noise = 10,
 ): Candidate {
   const background = rng.pick([
     'juniorHigh',
@@ -79,7 +81,7 @@ export function makeCandidate(
     RECRUIT.startAbilityMax + exp,
   );
   // 見える素質は誤差つき（1〜5）
-  const noisy = talent + rng.range(-10, 10);
+  const noisy = talent + rng.range(-noise, noise);
   const scoutGrade = clamp(Math.round((noisy - 30) / 14), 1, 5);
   return {
     id,

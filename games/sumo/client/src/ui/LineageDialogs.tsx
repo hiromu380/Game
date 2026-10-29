@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { chooseSuccessor, GAME, pickKakun, type GameState, type KakunId } from '@ichimon/sim';
+import {
+  chooseSuccessor,
+  chooseTakeOver,
+  GAME,
+  pickKakun,
+  type GameState,
+  type KakunId,
+} from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { rankLabel } from '../format';
 
@@ -99,6 +106,49 @@ export function KakunDialog({
             {t('kakun.skip')}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** 本家の跡継ぎがいない: 分家を継ぐ */
+export function TakeOverDialog({
+  game,
+  setGame,
+}: {
+  game: GameState;
+  setGame: (g: GameState) => void;
+}) {
+  const { t } = useI18n();
+  const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
+  const branches = game.stables.filter((s) => game.pending.takeOver!.includes(s.id));
+  return (
+    <div className="modal" role="dialog" aria-modal="true" aria-labelledby="take-title">
+      <div className="modal__box">
+        <h2 id="take-title">{t('takeOver.title')}</h2>
+        <p>{t('takeOver.body', { name: master.name, age: master.age })}</p>
+        <ul className="plain-list">
+          {branches.map((s) => (
+            <li key={s.id} className="row">
+              <div className="row__main">
+                <strong>{t('top.stable', { name: s.name })}</strong>
+                <span className="muted">
+                  {t('takeOver.meta', {
+                    shikona: s.branch!.masterShikona,
+                    age: s.branch!.masterAge,
+                    count: game.rikishi.filter((r) => r.stableId === s.id).length,
+                  })}
+                </span>
+              </div>
+              <button
+                className="button button--primary"
+                onClick={() => setGame(chooseTakeOver(game, s.id))}
+              >
+                {t('takeOver.choose')}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

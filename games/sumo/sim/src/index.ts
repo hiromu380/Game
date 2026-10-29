@@ -7,8 +7,12 @@ export { createGame, SAVE_VERSION, type NewGameOptions } from './world/create';
 export { advanceBasho } from './game/advance';
 export {
   acceptCandidate,
+  answerIndependence,
   answerRetirement,
   chooseSuccessor,
+  chooseTakeOver,
+  buildFacility,
+  setContract,
   declineCandidate,
   isBlocked,
   pickKakun,
@@ -20,3 +24,5 @@ export { KAKUN_IDS } from './lineage/kakun';
 export { styleOf } from './career/create';
 export { power } from './basho/strength';
 export { sum as sumMoney } from './money/ledger';
+export { migrateSave } from './game/migrate';
+export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './money/facilities';

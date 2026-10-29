@@ -15,6 +15,10 @@ export interface GrowthContext {
   styleMultiplier: Record<Style, number>;
   extraBodyKg: number;
   extraRecovery: number;
+  /** 稽古場などによる伸びの倍率 */
+  growthMultiplier: number;
+  /** トレーナーなどによるけがの確率の倍率 */
+  injuryMultiplier: number;
 }
 
 export const NEUTRAL_GROWTH: GrowthContext = {
@@ -23,6 +27,8 @@ export const NEUTRAL_GROWTH: GrowthContext = {
   styleMultiplier: { oshi: 1, yotsu: 1, waza: 1 },
   extraBodyKg: 0,
   extraRecovery: 0,
+  growthMultiplier: 1,
+  injuryMultiplier: 1,
 };
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
@@ -36,7 +42,8 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   }
   const ageFactor =
     r.age <= GROWTH.youthBonusUntil ? GROWTH.youthBonus : r.age <= r.peakAge ? 1 : 0;
-  const coach = 1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer);
+  const coach =
+    (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) * ctx.growthMultiplier;
   const grow = (key: keyof Abilities, rate: number) => {
     const a = r.abilities[key];
     if (a >= r.talent || ageFactor === 0) return;
@@ -76,7 +83,11 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
     for (const s of STYLES) r.abilities[s] = round1(Math.max(5, r.abilities[s] - loss));
   }
   // けが
-  const chance = (GROWTH.injuryBase + r.fatigue * GROWTH.injuryPerFatigue) * r.fragility * 2;
+  const chance =
+    (GROWTH.injuryBase + r.fatigue * GROWTH.injuryPerFatigue) *
+    r.fragility *
+    2 *
+    ctx.injuryMultiplier;
   if (rng.chance(chance)) {
     r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
     for (const s of STYLES)

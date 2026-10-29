@@ -62,4 +62,5 @@ export const SEED = {
   toshiyori: 8,
   condition: 9,
   kakun: 10,
+  lineage: 11,
 } as const;

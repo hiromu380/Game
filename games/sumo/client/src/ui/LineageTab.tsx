@@ -1,6 +1,7 @@
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName, rankLabel } from '../format';
+import { FamilyTree } from './FamilyTree';
 
 /** 一門の系譜: 歴代の親方・部屋の親方衆・家訓・名跡の空き */
 export function LineageTab({ game }: { game: GameState }) {
@@ -32,6 +33,12 @@ export function LineageTab({ game }: { game: GameState }) {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="panel">
+        <h2>{t('family.title')}</h2>
+        <p className="note">{t('family.note')}</p>
+        <FamilyTree game={game} />
       </section>
 
       <section className="panel">

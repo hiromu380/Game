@@ -7,7 +7,7 @@ import { BanzukeTab } from './BanzukeTab';
 import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
 import { ReportDialog } from './ReportDialog';
-import { SuccessorDialog, KakunDialog } from './LineageDialogs';
+import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
 
 type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage';
@@ -108,7 +108,7 @@ export function GameScreen({
       <main className="content">
         {tab === 'stable' && <StableTab game={game} ranks={ranks} setGame={setGame} />}
         {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
-        {tab === 'ledger' && <LedgerTab game={game} />}
+        {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}
         {tab === 'lineage' && <LineageTab game={game} />}
       </main>
 
@@ -137,7 +137,8 @@ export function GameScreen({
         <ReportDialog game={game} report={game.lastReport} onClose={() => setShowReport(false)} />
       )}
       {game.pending.successor && <SuccessorDialog game={game} setGame={setGame} />}
-      {!game.pending.successor && game.pending.kakun && (
+      {game.pending.takeOver && <TakeOverDialog game={game} setGame={setGame} />}
+      {!game.pending.successor && !game.pending.takeOver && game.pending.kakun && (
         <KakunDialog game={game} setGame={setGame} />
       )}
       {confirmQuit && (

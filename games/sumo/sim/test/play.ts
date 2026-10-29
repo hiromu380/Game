@@ -2,8 +2,10 @@
 import {
   acceptCandidate,
   advanceBasho,
+  answerIndependence,
   answerRetirement,
   chooseSuccessor,
+  chooseTakeOver,
   createGame,
   pickKakun,
   type GameState,
@@ -13,6 +15,8 @@ import {
 export function autoStep(s: GameState): GameState {
   let state = s;
   if (state.pending.successor) state = chooseSuccessor(state, state.pending.successor[0]!);
+  if (state.pending.takeOver) state = chooseTakeOver(state, state.pending.takeOver[0]!);
+  if (state.pending.independence !== null) state = answerIndependence(state, true, []);
   if (state.pending.kakun) state = pickKakun(state, state.pending.kakun[0]!, 0);
   for (const c of state.pending.candidates) {
     if (c.scoutGrade >= 3) state = acceptCandidate(state, c.id);

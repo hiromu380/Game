@@ -23,8 +23,14 @@ import { DIVISIONS } from '../balance/banzuke';
 import { ranksOf } from '../banzuke/rank';
 import { applyHighest, applyMochikyukinMinimum } from '../career/update';
 import { makeCandidates } from '../game/recruit';
+import { addNode } from '../lineage/family';
+import { NO_FACILITIES } from '../money/facilities';
 
-export const SAVE_VERSION = 1;
+/**
+ * 1: MVP / 2: 系譜図・分家（stables.branch・oyakata.since・player.family・pending.independence/takeOver）
+ * 3: 設備と契約（player.facilities）
+ */
+export const SAVE_VERSION = 3;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -62,12 +68,13 @@ export function createGame(options: NewGameOptions): GameState {
     name: playerOyakataName,
     isPlayer: true,
     style: oyakataStyle,
+    branch: null,
   };
   stables.push(playerStable);
   for (let i = 0; i < GAME.npcStables; i++) {
     const name = makeToshiyoriName(nameRng, usedToshiyori);
     usedToshiyori.add(name);
-    stables.push({ id: nextId++, name, isPlayer: false, style: rng.pick(STYLES) });
+    stables.push({ id: nextId++, name, isPlayer: false, style: rng.pick(STYLES), branch: null });
   }
   const npcStables = stables.slice(1);
 
@@ -133,6 +140,7 @@ export function createGame(options: NewGameOptions): GameState {
     generation: 1,
     fromRikishiId: null,
     waitingSince: null,
+    since: 0,
   };
 
   const state: GameState = {
@@ -166,13 +174,33 @@ export function createGame(options: NewGameOptions): GameState {
           makuuchiYusho: 0,
         },
       ],
+      family: [],
+      facilities: { ...NO_FACILITIES },
     },
     toshiyoriFree: 4,
     nextId,
-    pending: { candidates: [], retireRequests: [], successor: null, kakun: null },
+    pending: {
+      candidates: [],
+      retireRequests: [],
+      successor: null,
+      kakun: null,
+      independence: null,
+      takeOver: null,
+    },
     gameOver: null,
     lastReport: null,
   };
+  addNode(state, {
+    name: oyakata.name,
+    shikona: oyakata.shikona,
+    parentId: null,
+    stableId: playerStable.id,
+    kind: 'master',
+    oyakataId: oyakata.id,
+    fromBashoIndex: 0,
+    toBashoIndex: null,
+    highestRank: oyakata.highestRank,
+  });
   state.pending.candidates = makeCandidates(state);
   return state;
 }

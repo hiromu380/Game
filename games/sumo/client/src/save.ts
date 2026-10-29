@@ -1,7 +1,7 @@
 /**
- * セーブ（localStorage）。バージョンが合わないセーブは読まない（変換は版を上げるときに足す）
+ * セーブ（localStorage）。古い版は sim の migrateSave で今の版に変換する。読めないセーブは捨てる
  */
-import { SAVE_VERSION, type GameState } from '@ichimon/sim';
+import { migrateSave, type GameState } from '@ichimon/sim';
 
 const KEY = 'ichimon.save';
 const SETTINGS_KEY = 'ichimon.settings';
@@ -10,8 +10,7 @@ export function loadGame(): GameState | null {
   try {
     const text = localStorage.getItem(KEY);
     if (!text) return null;
-    const state = JSON.parse(text) as GameState;
-    return state.version === SAVE_VERSION ? state : null;
+    return migrateSave(JSON.parse(text));
   } catch {
     return null;
   }

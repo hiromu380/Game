@@ -4,7 +4,8 @@
 import { OYAKATA_PAY, STABLE_COSTS, STABLE_SUBSIDY, SUPPORTERS } from '../balance/money';
 import { isSanyaku, isSekitori } from '../banzuke/rank';
 import { KAKUN } from '../lineage/kakun';
-import type { KakunId, MoneyLine, Rank } from '../model/types';
+import type { FacilityId, KakunId, MoneyLine, Rank } from '../model/types';
+import { facilityUpkeep, NO_FACILITIES } from './facilities';
 
 export interface Ledger {
   income: MoneyLine[];
@@ -18,6 +19,7 @@ export function settleBasho(
   ranks: readonly (Rank | null)[],
   prestige: number,
   kakun: readonly KakunId[],
+  facilities: Record<FacilityId, number> = NO_FACILITIES,
 ): Ledger {
   const n = ranks.length;
   const lower = ranks.filter((r) => r === null || !isSekitori(r)).length;
@@ -61,6 +63,7 @@ export function settleBasho(
     { key: 'staff', amount: STABLE_COSTS.staffPerBasho },
     { key: 'misc', amount: n * STABLE_COSTS.miscPerRikishi },
     { key: 'sekitoriCosts', amount: sekitori.length * STABLE_COSTS.perSekitori },
+    { key: 'facilities', amount: facilityUpkeep(facilities) },
   ];
   const personal: MoneyLine[] = [
     { key: 'oyakataSalary', amount: OYAKATA_PAY.monthly * 2 },

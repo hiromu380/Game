@@ -175,6 +175,7 @@ describe('定年と跡継ぎ', () => {
         generation: null,
         fromRikishiId: null,
         waitingSince: null,
+        since: 0,
       });
     }
     return advanceBasho(s);

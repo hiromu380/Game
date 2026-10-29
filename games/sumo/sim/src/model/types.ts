@@ -90,6 +90,41 @@ export interface Stable {
   isPlayer: boolean;
   /** 架空の部屋の稽古の好み */
   style: Style;
+  /** 自分の一門の分家（自分の部屋から独立した部屋）。それ以外は null */
+  branch: BranchInfo | null;
+}
+
+/** 分家の部屋の親方（自動で運営する。親方個人は Oyakata として持たず、ここで年齢だけ数える） */
+export interface BranchInfo {
+  /** 独立元の部屋 */
+  parentStableId: number;
+  masterShikona: string;
+  masterAge: number;
+  /** 今の親方の系譜図の節 */
+  nodeId: number;
+}
+
+/** 系譜図の節（一門の親方1人） */
+export interface FamilyNode {
+  id: number;
+  /** 年寄名（名跡待ちの間は空） */
+  name: string;
+  shikona: string;
+  /** 師匠の節 */
+  parentId: number | null;
+  stableId: number;
+  /** master: 本家の師匠 / heyatsuki: 部屋付き / waiting: 名跡待ち / branch: 分家の師匠 / gone: 定年・退職・閉鎖 */
+  kind: 'master' | 'heyatsuki' | 'waiting' | 'branch' | 'gone';
+  /** 本家の師匠・部屋付きの親方なら Oyakata の ID */
+  oyakataId: number | null;
+  fromBashoIndex: number;
+  toBashoIndex: number | null;
+  highestRank: Rank | null;
+  /** 師匠として出した関取・三役・横綱、幕内優勝 */
+  sekitori: number;
+  sanyaku: number;
+  yokozuna: number;
+  makuuchiYusho: number;
 }
 
 /** master: 部屋の師匠 / heyatsuki: 部屋付きの親方 / waiting: 資格はあるが名跡の空き待ち（部屋で手伝う） */
@@ -113,7 +148,12 @@ export interface Oyakata {
   fromRikishiId: number | null;
   /** 名跡待ちになった場所（waiting のときだけ） */
   waitingSince: number | null;
+  /** 親方（部屋付き・師匠）になった場所 */
+  since: number;
 }
+
+/** 設備と契約: 寮・稽古場・トレーナー・スカウト */
+export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
 
 export type KakunId = 'tachiai' | 'yotsuFirst' | 'craft' | 'chanko' | 'restDay' | 'thrift';
 
@@ -161,6 +201,10 @@ export interface Pending {
   successor: number[] | null;
   /** 家訓の候補（代替わりのとき） */
   kakun: KakunId[] | null;
+  /** 部屋付きの親方からの独立の申し出（親方 ID） */
+  independence: number | null;
+  /** 跡継ぎがいないとき、継ぐことのできる分家の部屋 */
+  takeOver: number[] | null;
 }
 
 export interface PlayerState {
@@ -172,6 +216,10 @@ export interface PlayerState {
   prestige: number;
   kakun: KakunId[];
   lineage: LineageEntry[];
+  /** 系譜図（一門のすべての親方） */
+  family: FamilyNode[];
+  /** 設備と契約のレベル（0 = なし） */
+  facilities: Record<FacilityId, number>;
 }
 
 export interface GameState {

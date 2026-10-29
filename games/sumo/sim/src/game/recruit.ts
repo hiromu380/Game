@@ -3,6 +3,7 @@
  */
 import { RECRUIT } from '../balance/career';
 import { GAME } from '../balance/game';
+import { FACILITY_EFFECTS } from '../balance/facilities';
 import { makeCandidate, rikishiFromCandidate, styleOf } from '../career/create';
 import { lineageCharOf, makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
@@ -22,12 +23,15 @@ export function makeCandidates(state: GameState): Candidate[] {
     ? RECRUIT.playerCandidates.spring
     : RECRUIT.playerCandidates.normal;
   // 名声が高いと希望者が増える
+  const scout = state.player.facilities.scout;
   const n =
     rng.range(min, max) +
     Math.min(
       GAME.maxExtraCandidates,
       Math.floor(state.player.prestige / GAME.prestigePerCandidate),
-    );
+    ) +
+    scout * FACILITY_EFFECTS.scoutCandidatesPerLevel;
+  const noise = FACILITY_EFFECTS.scoutNoiseByLevel[scout] ?? FACILITY_EFFECTS.scoutNoiseByLevel[0];
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   const used = usedNames(state);
   const hasForeign = state.rikishi.some((r) => r.stableId === state.player.stableId && r.foreign);
@@ -39,7 +43,9 @@ export function makeCandidates(state: GameState): Candidate[] {
       rng.chance(0.75) ? lineageCharOf(master.shikona, rng) : undefined,
     );
     used.add(name);
-    result.push(makeCandidate(rng, state.nextId++, name, state.player.prestige, !hasForeign));
+    result.push(
+      makeCandidate(rng, state.nextId++, name, state.player.prestige, !hasForeign, noise),
+    );
   }
   return result;
 }
