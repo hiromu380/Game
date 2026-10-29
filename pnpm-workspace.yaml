@@ -2,6 +2,7 @@ packages:
   - 'packages/*'
   - 'apps/*'
   - 'tools/*'
+  - 'games/*/*'
 
 # インストール時のスクリプト実行を許可するパッケージ（wrangler dev が使う workerd と esbuild のバイナリ取得）
 onlyBuiltDependencies:

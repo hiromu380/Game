@@ -1,0 +1,72 @@
+/**
+ * 自分の部屋の会計（場所ごと）。金額は balance/money.ts（実際の値と推定）
+ */
+import { OYAKATA_PAY, STABLE_COSTS, STABLE_SUBSIDY, SUPPORTERS } from '../balance/money';
+import { isSanyaku, isSekitori } from '../banzuke/rank';
+import { KAKUN } from '../lineage/kakun';
+import type { KakunId, MoneyLine, Rank } from '../model/types';
+
+export interface Ledger {
+  income: MoneyLine[];
+  expenses: MoneyLine[];
+  /** 親方個人の収支 */
+  personal: MoneyLine[];
+}
+
+/** ranks: 部屋の力士の地位（番付に載っていない新弟子は null） */
+export function settleBasho(
+  ranks: readonly (Rank | null)[],
+  prestige: number,
+  kakun: readonly KakunId[],
+): Ledger {
+  const n = ranks.length;
+  const lower = ranks.filter((r) => r === null || !isSekitori(r)).length;
+  const sekitori = ranks.filter((r): r is Rank => r !== null && isSekitori(r));
+  const sanyaku = sekitori.filter(isSanyaku).length;
+  const bonus = sekitori.reduce((sum, r) => {
+    const y = STABLE_SUBSIDY.sekitoriBonusYearly;
+    const yearly =
+      r.title === 'Y'
+        ? y.Y
+        : r.title === 'O'
+          ? y.O
+          : r.title === 'S' || r.title === 'K'
+            ? y.sanyaku
+            : r.title === 'M'
+              ? y.M
+              : y.juryo;
+    return sum + Math.round(yearly / 6);
+  }, 0);
+  const income: MoneyLine[] = [
+    { key: 'trainee', amount: lower * STABLE_SUBSIDY.traineePerBasho },
+    { key: 'upkeep', amount: n * STABLE_SUBSIDY.upkeepPerBasho },
+    { key: 'dojo', amount: n * STABLE_SUBSIDY.dojoPerBasho },
+    { key: 'sekitoriBonus', amount: bonus },
+    {
+      key: 'supporters',
+      amount: Math.round(
+        SUPPORTERS.base +
+          sekitori.length * SUPPORTERS.perSekitori +
+          sanyaku * SUPPORTERS.perSanyaku +
+          prestige * SUPPORTERS.perPrestige,
+      ),
+    },
+  ];
+  const food =
+    n * STABLE_COSTS.foodPerRikishi * (kakun.includes('chanko') ? KAKUN.chankoFoodCost : 1);
+  const fixed = STABLE_COSTS.fixedPerBasho * (kakun.includes('thrift') ? KAKUN.thriftFixed : 1);
+  const expenses: MoneyLine[] = [
+    { key: 'food', amount: Math.round(food) },
+    { key: 'fixed', amount: Math.round(fixed) },
+    { key: 'staff', amount: STABLE_COSTS.staffPerBasho },
+    { key: 'misc', amount: n * STABLE_COSTS.miscPerRikishi },
+    { key: 'sekitoriCosts', amount: sekitori.length * STABLE_COSTS.perSekitori },
+  ];
+  const personal: MoneyLine[] = [
+    { key: 'oyakataSalary', amount: OYAKATA_PAY.monthly * 2 },
+    { key: 'living', amount: -OYAKATA_PAY.livingPerBasho },
+  ];
+  return { income, expenses, personal };
+}
+
+export const sum = (lines: readonly MoneyLine[]) => lines.reduce((n, l) => n + l.amount, 0);

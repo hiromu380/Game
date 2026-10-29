@@ -26,7 +26,7 @@ export default tseslint.config(
   },
   // シミュレーションは完全決定論。非決定的なAPIの使用を禁止する
   {
-    files: ['packages/sim/src/**/*.ts'],
+    files: ['packages/sim/src/**/*.ts', 'games/*/sim/src/**/*.ts'],
     rules: {
       'no-restricted-properties': [
         'error',

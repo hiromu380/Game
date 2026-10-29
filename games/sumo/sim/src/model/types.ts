@@ -1,0 +1,228 @@
+/**
+ * ゲームの状態（すべて JSON にそのまま保存できる形）
+ */
+
+export type Style = 'oshi' | 'yotsu' | 'waza';
+export type Policy = Style | 'body' | 'rest';
+export type Division = 'makuuchi' | 'juryo' | 'makushita' | 'sandanme' | 'jonidan' | 'jonokuchi';
+/** 幕内の中の地位（横綱・大関・関脇・小結・前頭） */
+export type Title = 'Y' | 'O' | 'S' | 'K' | 'M';
+export type Side = 'E' | 'W';
+
+export interface Rank {
+  division: Division;
+  /** 幕内のときだけ */
+  title: Title | null;
+  /** 枚目（1 始まり） */
+  number: number;
+  side: Side;
+}
+
+export interface Abilities {
+  oshi: number;
+  yotsu: number;
+  waza: number;
+}
+
+/** 1場所の成績 */
+export interface BashoRecord {
+  bashoIndex: number;
+  rank: Rank;
+  wins: number;
+  losses: number;
+  /** 休場（不戦敗を含まない、出なかった日） */
+  absences: number;
+  yusho: boolean;
+}
+
+export interface Career {
+  /** 番付に載った場所数 */
+  basho: number;
+  makuuchiBasho: number;
+  /** 十両以上 */
+  sekitoriBasho: number;
+  /** 小結以上 */
+  sanyakuBasho: number;
+  wins: number;
+  losses: number;
+  absences: number;
+  makuuchiYusho: number;
+  otherYusho: number;
+  kinboshi: number;
+  /** 持ち給金（0.5円単位の整数） */
+  mochikyukinHalf: number;
+  /** 最高位（番付の上からの順位。小さいほど上） */
+  highestOrder: number;
+  highestRank: Rank | null;
+  /** 本人が受け取ったお金の合計（円。演出用） */
+  earnings: number;
+}
+
+export interface Rikishi {
+  id: number;
+  name: string;
+  stableId: number;
+  age: number;
+  height: number;
+  weight: number;
+  abilities: Abilities;
+  /** 伸びの上限（隠れた値） */
+  talent: number;
+  peakAge: number;
+  /** けがのしやすさ 0〜1（隠れた値） */
+  fragility: number;
+  fatigue: number;
+  /** けがで休む残りの場所数 */
+  injury: number;
+  foreign: boolean;
+  policy: Policy;
+  career: Career;
+  /** 直近の成績（新しい順・最大6場所） */
+  recent: BashoRecord[];
+  /** 大関から落ちた直後の場所（10勝で戻れる） */
+  exOzeki: boolean;
+}
+
+export interface Stable {
+  id: number;
+  /** 部屋の名前（親方の年寄名と同じ） */
+  name: string;
+  isPlayer: boolean;
+  /** 架空の部屋の稽古の好み */
+  style: Style;
+}
+
+/** master: 部屋の師匠 / heyatsuki: 部屋付きの親方 / waiting: 資格はあるが名跡の空き待ち（部屋で手伝う） */
+export type OyakataRole = 'master' | 'heyatsuki' | 'waiting';
+
+export interface Oyakata {
+  id: number;
+  /** 年寄名（例: 大浜） */
+  name: string;
+  /** 現役時代の四股名 */
+  shikona: string;
+  age: number;
+  stableId: number;
+  role: OyakataRole;
+  style: Style;
+  /** 現役時代の最高位 */
+  highestRank: Rank | null;
+  /** 一門の何代目の親方か（自分の部屋の系譜だけ） */
+  generation: number | null;
+  /** 元の力士 ID（自分の部屋の弟子から親方になったとき） */
+  fromRikishiId: number | null;
+  /** 名跡待ちになった場所（waiting のときだけ） */
+  waitingSince: number | null;
+}
+
+export type KakunId = 'tachiai' | 'yotsuFirst' | 'craft' | 'chanko' | 'restDay' | 'thrift';
+
+/** 入門希望者（素質は一部だけ見える） */
+export interface Candidate {
+  id: number;
+  name: string;
+  age: number;
+  height: number;
+  weight: number;
+  foreign: boolean;
+  abilities: Abilities;
+  talent: number;
+  peakAge: number;
+  fragility: number;
+  /** 見える素質の目安（1〜5。実際の素質に誤差を加えたもの） */
+  scoutGrade: number;
+  /** 経歴（例: 中学卒・高校相撲・柔道） */
+  background: 'juniorHigh' | 'highSchool' | 'college' | 'otherSport';
+}
+
+/** 自分の系譜の1件（何代目の親方が誰か） */
+export interface LineageEntry {
+  generation: number;
+  oyakataId: number;
+  name: string;
+  shikona: string;
+  fromBashoIndex: number;
+  toBashoIndex: number | null;
+  /** その代に出した関取・三役・横綱の数、幕内優勝 */
+  sekitori: number;
+  sanyaku: number;
+  yokozuna: number;
+  makuuchiYusho: number;
+}
+
+export type GameOverReason = 'noSuccessor' | 'bankrupt';
+
+export interface Pending {
+  /** 入門希望者（場所前に受け入れるか決める） */
+  candidates: Candidate[];
+  /** 引退を申し出た自分の弟子 */
+  retireRequests: number[];
+  /** 定年: 跡継ぎを選ぶ（候補の親方 ID） */
+  successor: number[] | null;
+  /** 家訓の候補（代替わりのとき） */
+  kakun: KakunId[] | null;
+}
+
+export interface PlayerState {
+  stableId: number;
+  oyakataId: number;
+  generation: number;
+  stableMoney: number;
+  personalMoney: number;
+  prestige: number;
+  kakun: KakunId[];
+  lineage: LineageEntry[];
+}
+
+export interface GameState {
+  version: number;
+  seed: number;
+  /** 何場所目か（0 = 1年目の初場所） */
+  bashoIndex: number;
+  rikishi: Rikishi[];
+  /** 番付（上から順の力士 ID） */
+  banzuke: number[];
+  /** 幕内の地位（横綱・大関・関脇・小結）。ないものは前頭 */
+  titles: Record<number, Title>;
+  stables: Stable[];
+  oyakata: Oyakata[];
+  player: PlayerState;
+  /** 空いている年寄名跡の数 */
+  toshiyoriFree: number;
+  nextId: number;
+  pending: Pending;
+  gameOver: GameOverReason | null;
+  /** 直近の場所の結果（画面に出す） */
+  lastReport: BashoReport | null;
+}
+
+export interface BoutResult {
+  day: number;
+  eastId: number;
+  westId: number;
+  winnerId: number;
+  kimarite: string;
+  /** 懸賞の本数 */
+  kensho: number;
+  fusen: boolean;
+}
+
+export interface MoneyLine {
+  key: string;
+  amount: number;
+}
+
+export interface BashoReport {
+  bashoIndex: number;
+  /** 各段の優勝（力士 ID） */
+  yusho: Partial<Record<Division, number>>;
+  /** 自分の弟子の成績 */
+  mine: { id: number; record: BashoRecord; bouts: BoutResult[] }[];
+  /** 新しい横綱・大関・関取など（自分の部屋以外も） */
+  promotions: { id: number; to: 'Y' | 'O' | 'sekitori' | 'makuuchi' }[];
+  retired: { id: number; name: string; stableId: number; becameOyakata: boolean }[];
+  injuries: number[];
+  income: MoneyLine[];
+  expenses: MoneyLine[];
+  personal: MoneyLine[];
+}

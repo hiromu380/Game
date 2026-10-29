@@ -1,0 +1,252 @@
+/**
+ * 1場所を進める（場所前の判断が終わった状態から、次の場所前まで）
+ *
+ * 1. 返事をしていない引退の申し出は受け入れる。来なかった入門希望者は帰る
+ * 2. 本場所（全員の取組）
+ * 3. 記録と本人の収入・引退・番付編成・年寄名跡
+ * 4. 自分の部屋の会計
+ * 5. 稽古（伸び・衰え・けが）
+ * 6. 年の終わり: 年齢・名跡の空き・親方の定年（跡継ぎ選び）
+ * 7. 次の場所の入門希望者
+ *
+ * 入力の state は変えない（コピーして返す）。
+ */
+import { RECRUIT, TOSHIYORI } from '../balance/career';
+import { GAME } from '../balance/game';
+import { runBasho } from '../basho/run';
+import { makeBanzuke } from '../banzuke/make';
+import { isSanyaku, isSekitori, ranksOf } from '../banzuke/rank';
+import { NEUTRAL_GROWTH, npcPolicy, train, type GrowthContext } from '../career/growth';
+import { mustRetire, wantsToRetire } from '../career/retire';
+import { applyBasho, applyHighest, applyMochikyukinMinimum } from '../career/update';
+import { createPrng, deriveSeed, SEED } from '../core/prng';
+import { applyKakun } from '../lineage/kakun';
+import { settleBasho, sum } from '../money/ledger';
+import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
+import { makeCandidates, npcRecruits } from './recruit';
+import { currentLineage, isBlocked, newToshiyoriName, retireRikishi } from './state';
+
+export function advanceBasho(input: GameState): GameState {
+  if (input.gameOver || isBlocked(input)) return input;
+  const state: GameState = JSON.parse(JSON.stringify(input));
+  const report: BashoReport = {
+    bashoIndex: state.bashoIndex,
+    yusho: {},
+    mine: [],
+    promotions: [],
+    retired: [],
+    injuries: [],
+    income: [],
+    expenses: [],
+    personal: [],
+  };
+  const isMine = (id: number) => byId.get(id)?.stableId === state.player.stableId;
+
+  // 1. 引退の申し出・入門希望者
+  for (const id of state.pending.retireRequests) retireRikishi(state, id, report);
+  state.pending.retireRequests = [];
+  state.pending.candidates = [];
+  let byId = new Map(state.rikishi.map((r) => [r.id, r]));
+
+  // 架空の部屋の稽古の方針
+  const styleOfStable = new Map(state.stables.map((s) => [s.id, s.style]));
+  for (const r of state.rikishi) {
+    if (r.stableId !== state.player.stableId)
+      r.policy = npcPolicy(r, styleOfStable.get(r.stableId)!);
+  }
+
+  // 2. 本場所
+  const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId);
+  const injuryRng = createPrng(deriveSeed(state.seed, SEED.injury, state.bashoIndex));
+  for (const id of outcome.injured) {
+    byId.get(id)!.injury = injuryRng.range(1, 2);
+    if (isMine(id)) report.injuries.push(id);
+  }
+  for (const [d, id] of outcome.yusho) report.yusho[d] = id;
+
+  // 3. 記録
+  const yushoIds = new Set(outcome.yusho.values());
+  for (const id of state.banzuke) {
+    const r = byId.get(id)!;
+    const rec = outcome.records.get(id)!;
+    const rank = outcome.ranks.get(id)!;
+    const record: BashoRecord = {
+      bashoIndex: state.bashoIndex,
+      rank,
+      wins: rec.wins,
+      losses: rec.losses,
+      absences: rec.absences,
+      yusho: yushoIds.has(id),
+    };
+    applyBasho(r, {
+      record,
+      kinboshi: outcome.kinboshi.get(id) ?? 0,
+      kenshoYen: outcome.kenshoYen.get(id) ?? 0,
+      zensho: rec.wins === 15,
+    });
+    if (isMine(id)) {
+      report.mine.push({
+        id,
+        record,
+        bouts: outcome.bouts.filter((b) => b.eastId === id || b.westId === id),
+      });
+    }
+  }
+
+  // 引退（自分の弟子は申し出として次の場所前に聞く。年齢の上限は本人が決めている）
+  const retireRng = createPrng(deriveSeed(state.seed, SEED.retire, state.bashoIndex));
+  const retiring = new Set<number>();
+  for (const id of state.banzuke) {
+    const r = byId.get(id)!;
+    const rank = outcome.ranks.get(id)!;
+    if (isMine(id)) {
+      if (mustRetire(r)) retiring.add(id);
+      else if (wantsToRetire(r, rank, retireRng)) state.pending.retireRequests.push(id);
+    } else if (wantsToRetire(r, rank, retireRng)) {
+      retiring.add(id);
+    }
+  }
+
+  // 新しく番付に載る力士: 自分の部屋で入門した新弟子（前相撲）＋ 架空の部屋の新弟子
+  const onBanzuke = new Set(state.banzuke);
+  const mineNew = state.rikishi.filter((r) => !onBanzuke.has(r.id)).map((r) => r.id);
+  const npcNeed = Math.max(
+    0,
+    RECRUIT.npcPerYearTarget - (state.banzuke.length - retiring.size + mineNew.length),
+  );
+  const npcNew = npcRecruits(state, Math.min(npcNeed, 80));
+  state.rikishi.push(...npcNew);
+  byId = new Map(state.rikishi.map((r) => [r.id, r]));
+
+  const made = makeBanzuke({
+    banzuke: state.banzuke,
+    ranks: outcome.ranks,
+    records: outcome.records,
+    makuuchiYusho: outcome.yusho.get('makuuchi'),
+    recentOf: (id) => byId.get(id)!.recent,
+    exOzeki: (id) => byId.get(id)!.exOzeki,
+    retired: retiring,
+    newcomers: [...mineNew, ...npcNew.map((r) => r.id)],
+  });
+  for (const id of retiring) retireRikishi(state, id, report);
+  byId = new Map(state.rikishi.map((r) => [r.id, r]));
+  state.banzuke = made.banzuke.filter((id) => byId.has(id));
+  state.titles = made.titles;
+  const demoted = new Set(made.demotedOzeki);
+  const newRanks = ranksOf(state.banzuke, state.titles);
+  const lineage = currentLineage(state);
+  state.banzuke.forEach((id, i) => {
+    const r = byId.get(id)!;
+    const rank = newRanks.get(id)!;
+    const before = r.career.highestRank;
+    r.exOzeki = demoted.has(id);
+    applyMochikyukinMinimum(r, rank);
+    applyHighest(r, rank, i);
+    const firstSekitori = isSekitori(rank) && (before === null || !isSekitori(before));
+    const firstMakuuchi =
+      rank.division === 'makuuchi' && (before === null || before.division !== 'makuuchi');
+    const firstSanyaku = isSanyaku(rank) && (before === null || !isSanyaku(before));
+    if (made.newYokozuna.includes(id)) report.promotions.push({ id, to: 'Y' });
+    else if (made.newOzeki.includes(id) && !(before?.title === 'O' || before?.title === 'Y'))
+      report.promotions.push({ id, to: 'O' });
+    else if (firstMakuuchi) report.promotions.push({ id, to: 'makuuchi' });
+    else if (firstSekitori) report.promotions.push({ id, to: 'sekitori' });
+    if (r.stableId === state.player.stableId) {
+      if (firstSekitori) {
+        lineage.sekitori++;
+        state.player.prestige += GAME.prestige.newSekitori;
+      }
+      if (firstSanyaku) {
+        lineage.sanyaku++;
+        state.player.prestige += GAME.prestige.newSanyaku;
+      }
+      if (made.newOzeki.includes(id)) state.player.prestige += GAME.prestige.newOzeki;
+      if (made.newYokozuna.includes(id)) {
+        lineage.yokozuna++;
+        state.player.prestige += GAME.prestige.newYokozuna;
+      }
+    }
+  });
+  const yushoMakuuchi = outcome.yusho.get('makuuchi');
+  if (yushoMakuuchi !== undefined && byId.get(yushoMakuuchi)?.stableId === state.player.stableId) {
+    lineage.makuuchiYusho++;
+    state.player.prestige += GAME.prestige.makuuchiYusho;
+  }
+
+  // 4. 自分の部屋の会計
+  const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId);
+  const mineRanks: (Rank | null)[] = mine.map((r) => newRanks.get(r.id) ?? null);
+  const sekitoriNow = mineRanks.filter((r) => r !== null && isSekitori(r)).length;
+  state.player.prestige =
+    state.player.prestige * GAME.prestigeKeep + sekitoriNow * GAME.prestige.sekitoriPerBasho;
+  const ledger = settleBasho(mineRanks, state.player.prestige, state.player.kakun);
+  report.income = ledger.income;
+  report.expenses = ledger.expenses;
+  report.personal = ledger.personal;
+  state.player.stableMoney += sum(ledger.income) - sum(ledger.expenses);
+  state.player.personalMoney += sum(ledger.personal);
+  // 部屋の赤字は親方の個人のお金で埋める
+  if (state.player.stableMoney < 0) {
+    state.player.personalMoney += state.player.stableMoney;
+    state.player.stableMoney = 0;
+  }
+  if (state.player.personalMoney < 0) state.gameOver = 'bankrupt';
+
+  // 5. 稽古
+  const growthRng = createPrng(deriveSeed(state.seed, SEED.growth, state.bashoIndex));
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  const coaches = state.oyakata.filter(
+    (o) => o.stableId === state.player.stableId && o.role === 'heyatsuki',
+  ).length;
+  const playerCtx: GrowthContext = applyKakun(
+    { ...NEUTRAL_GROWTH, oyakataStyle: master.style, coaches },
+    state.player.kakun,
+  );
+  for (const r of state.rikishi) {
+    const ctx =
+      r.stableId === state.player.stableId
+        ? playerCtx
+        : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
+    train(r, ctx, growthRng);
+  }
+
+  // 6. 年の終わり（九州場所の後）
+  if (state.bashoIndex % 6 === 5) yearEnd(state);
+
+  // 7. 次の場所へ
+  state.bashoIndex++;
+  if (!state.gameOver) state.pending.candidates = makeCandidates(state);
+  state.lastReport = report;
+  return state;
+}
+
+function yearEnd(state: GameState) {
+  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex));
+  for (const r of state.rikishi) r.age++;
+  for (const o of state.oyakata) o.age++;
+  state.toshiyoriFree += rng.range(TOSHIYORI.freedPerYear[0], TOSHIYORI.freedPerYear[1]);
+  // 自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る
+  for (const o of state.oyakata.filter((x) => x.role === 'waiting')) {
+    if (state.toshiyoriFree > 0) {
+      o.role = 'heyatsuki';
+      o.name = newToshiyoriName(state, o.id);
+      o.waitingSince = null;
+      state.toshiyoriFree--;
+    } else if (state.bashoIndex - o.waitingSince! >= TOSHIYORI.waitYears * 6) {
+      state.oyakata = state.oyakata.filter((x) => x.id !== o.id);
+    }
+  }
+  // 空いた名跡は他の部屋がすぐに埋める。残るのは少しだけ
+  state.toshiyoriFree = Math.min(state.toshiyoriFree, rng.range(0, TOSHIYORI.freeAfterYearMax));
+  // 部屋付きの親方の定年
+  state.oyakata = state.oyakata.filter((o) => o.role === 'master' || o.age < TOSHIYORI.retireAge);
+  // 自分の親方の定年: 跡継ぎ選び
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  if (master.age >= TOSHIYORI.retireAge) {
+    const candidates = state.oyakata
+      .filter((o) => o.stableId === state.player.stableId && o.role === 'heyatsuki')
+      .map((o) => o.id);
+    if (candidates.length === 0) state.gameOver = 'noSuccessor';
+    else state.pending.successor = candidates;
+  }
+}
