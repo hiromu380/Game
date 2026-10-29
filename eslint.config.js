@@ -52,6 +52,7 @@ export default tseslint.config(
       'apps/client/build/**/*.{ts,mjs}',
       'apps/desktop/**/*.{ts,mjs,cjs}',
       'tools/**/*.mjs',
+      'games/*/client/build/**/*.{mjs,ts,tsx}',
       '.github/**/*.mjs',
     ],
     languageOptions: { globals: globals.node },

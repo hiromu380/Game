@@ -142,32 +142,30 @@ export function ReportDialog({
         {report.banzukeChanges.length > 0 && (
           <>
             <h3>{t('report.banzuke')}</h3>
-            <table className="results">
-              <tbody>
-                {report.banzukeChanges.map((c) => {
-                  const dir =
-                    c.to === null
-                      ? 0
-                      : rankValue(c.to) < rankValue(c.from)
-                        ? 1
-                        : rankValue(c.to) > rankValue(c.from)
-                          ? -1
-                          : 0;
-                  return (
-                    <tr key={c.id}>
-                      <td>{nameOf(c.id)}</td>
-                      <td>
-                        {rankLabel(t, c.from)} →{' '}
-                        {c.to ? rankLabel(t, c.to) : t('report.retiredShort')}
-                      </td>
-                      <td className={dir > 0 ? 'up' : dir < 0 ? 'down' : ''}>
-                        {dir > 0 ? t('report.up') : dir < 0 ? t('report.down') : t('report.same')}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <ul className="plain-list changes">
+              {report.banzukeChanges.map((c) => {
+                const dir =
+                  c.to === null
+                    ? 0
+                    : rankValue(c.to) < rankValue(c.from)
+                      ? 1
+                      : rankValue(c.to) > rankValue(c.from)
+                        ? -1
+                        : 0;
+                return (
+                  <li key={c.id} className="changes__item">
+                    <strong>{nameOf(c.id)}</strong>
+                    <span className={dir > 0 ? 'up' : dir < 0 ? 'down' : ''}>
+                      {dir > 0 ? t('report.up') : dir < 0 ? t('report.down') : t('report.same')}
+                    </span>
+                    <span className="changes__ranks">
+                      {rankLabel(t, c.from)} →{' '}
+                      {c.to ? rankLabel(t, c.to) : t('report.retiredShort')}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </>
         )}
 

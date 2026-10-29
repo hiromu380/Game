@@ -12,6 +12,7 @@ import {
   type Rikishi,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { CandidatePortrait, RikishiPortrait } from '../art/Portraits';
 import { IndependencePanel } from './IndependencePanel';
 import { rankLabel, recordLabel } from '../format';
 
@@ -45,6 +46,7 @@ export function StableTab({
           <h2 id="retire-title">{t('retire.title')}</h2>
           {requests.map((r) => (
             <div key={r.id} className="row">
+              <RikishiPortrait r={r} rank={ranks.get(r.id) ?? null} size={56} />
               <div className="row__main">
                 <strong>{r.name}</strong>
                 <span>
@@ -122,6 +124,7 @@ function CandidateRow({
   const { t } = useI18n();
   return (
     <div className="row">
+      <CandidatePortrait c={c} />
       <div className="row__main">
         <strong>{c.name}</strong>
         <span>
@@ -166,6 +169,9 @@ function RikishiCard({
   const last = r.recent[0];
   return (
     <li className="card">
+      <div className="card__portrait">
+        <RikishiPortrait r={r} rank={rank} size={88} />
+      </div>
       <div className="card__head">
         <span className="card__rank">{rankLabel(t, rank)}</span>
         <strong className="card__name">{r.name}</strong>

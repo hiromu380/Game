@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { advanceBasho, isBlocked, ranksOf, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { OyakataPortrait } from '../art/Portraits';
 import { useSettings } from '../settings';
 import { bashoName, money } from '../format';
 import { StableTab } from './StableTab';
@@ -54,6 +55,9 @@ export function GameScreen({
   return (
     <div className="game">
       <header className="topbar">
+        <div className="topbar__portrait">
+          <OyakataPortrait o={master} size={52} />
+        </div>
         <div className="topbar__main">
           <div className="topbar__basho">{bashoName(t, game.bashoIndex)}</div>
           <div className="topbar__stable">

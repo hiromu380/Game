@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { BoutResult, GameState } from '@ichimon/sim';
+import { isSekitori, ranksOf, type BoutResult, type GameState, type Rikishi } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
-import { boutScript, poseAt, type Pose } from '../playback/boutScript';
+import { boutScript, poseAt } from '../playback/boutScript';
+import { BoutStage } from '../art/BoutStage';
+import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
 
-/** 取組の短い演出（土俵を上から見た図）。動きを減らす設定では最後の場面だけを見せる */
+/** 取組の短い演出（向正面から見た土俵）。動きを減らす設定では最後の場面だけを見せる */
 export function BoutViewer({
   game,
   bout,
@@ -53,48 +55,48 @@ export function BoutViewer({
 
   const pose = poseAt(script, time);
   const byId = new Map(game.rikishi.map((r) => [r.id, r]));
+  const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const east = byId.get(bout.eastId);
   const west = byId.get(bout.westId);
-  const winner = bout.winnerId === bout.eastId ? east : west;
+  const winnerSide = bout.winnerId === bout.eastId ? 'E' : 'W';
+  const winner = winnerSide === 'E' ? east : west;
   const done = time >= script.duration;
-  const R = 120; // 土俵の半径（px）
-  // 名前は体と一緒に傾けない。東は上、西は下に出して、ぶつかったときに重ならないようにする
-  const body = (p: Pose, color: string, label: string, labelY: number) => (
-    <g>
-      <g transform={`translate(${p.x * R} ${p.y * R}) rotate(${p.rot})`}>
-        <ellipse rx={26} ry={30} fill={color} stroke="#1f1b16" strokeWidth={2} />
-        <rect x={-26} y={4} width={52} height={10} fill="#1f1b16" />
-      </g>
-      <text
-        x={p.x * R}
-        y={p.y * R + labelY}
-        textAnchor="middle"
-        fontSize={15}
-        fill="#1f1b16"
-        fontWeight="bold"
-      >
-        {label}
-      </text>
-    </g>
-  );
+  // 立ち合いの後は両手を前に出して押し合う
+  const clash = script.frames[1]?.t ?? 0.6;
+  const lookOf = (r: Rikishi | undefined) => {
+    const rank = r ? ranks.get(r.id) : undefined;
+    return rikishiLook({
+      id: r?.id ?? 0,
+      weight: r?.weight ?? 130,
+      stableId: r?.stableId ?? 0,
+      careerBasho: r?.career.basho ?? 10,
+      sekitori: rank ? isSekitori(rank) : false,
+      yokozuna: rank?.title === 'Y',
+      injured: false,
+      fatigue: 0,
+    });
+  };
 
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
       <div className="modal__box">
         <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
-        <svg
-          className="dohyo"
-          viewBox={`${-R * 1.6} ${-R * 1.1} ${R * 3.2} ${R * 2.2}`}
-          role="img"
-          aria-label={t('bout.aria')}
-        >
-          <rect x={-R * 1.5} y={-R * 1.05} width={R * 3} height={R * 2.1} fill="#d9c49a" />
-          <circle r={R} fill="#e8d5ad" stroke="#7a5a2a" strokeWidth={6} />
-          <line x1={-14} y1={-8} x2={-14} y2={8} stroke="#fff" strokeWidth={3} />
-          <line x1={14} y1={-8} x2={14} y2={8} stroke="#fff" strokeWidth={3} />
-          {body(pose.west, '#f0e6d8', west?.name ?? '', 52)}
-          {body(pose.east, '#e9dcc9', east?.name ?? '', -40)}
-        </svg>
+        <BoutStage
+          east={lookOf(east)}
+          west={lookOf(west)}
+          pose={pose}
+          arms={time >= clash - 0.15 && !done ? 'push' : 'side'}
+          winner={done ? winnerSide : null}
+          title={t('bout.aria')}
+        />
+        <p className="bout__names">
+          <span>
+            {t('rank.side.W')} <strong>{west?.name ?? '?'}</strong>
+          </span>
+          <span>
+            {t('rank.side.E')} <strong>{east?.name ?? '?'}</strong>
+          </span>
+        </p>
         <p className={`bout__result ${done ? 'is-done' : ''}`} aria-live="polite">
           {done
             ? t('bout.result', {

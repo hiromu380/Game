@@ -1,5 +1,6 @@
 import type { FamilyNode, GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { OyakataPortrait } from '../art/Portraits';
 import { bashoName, rankLabel } from '../format';
 
 /** 系譜図: 師匠 → 弟子の親方 → …（分家・定年した親方も含む） */
@@ -18,6 +19,16 @@ export function FamilyTree({ game }: { game: GameState }) {
     return (
       <li key={n.id} className={`tree__node tree__node--${n.kind}`}>
         <div className="tree__card">
+          <span className="tree__portrait">
+            <OyakataPortrait
+              o={{
+                id: n.oyakataId ?? n.id,
+                age: n.kind === 'gone' ? 66 : 45,
+                stableId: n.stableId,
+              }}
+              size={44}
+            />
+          </span>
           <strong>
             {n.kind === 'waiting'
               ? t('lineage.waitingName', { shikona: n.shikona })

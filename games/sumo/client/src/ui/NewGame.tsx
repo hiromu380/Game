@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createGame, type GameState, type Style } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { TitleArt } from '../art/TitleArt';
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
@@ -27,6 +28,7 @@ export function NewGame({
           {t('lang.toggle')}
         </button>
       </div>
+      <TitleArt title={t('newGame.artAria')} />
       <p className="newgame__lead">{t('newGame.lead')}</p>
       <fieldset className="choice">
         <legend>{t('newGame.styleQuestion')}</legend>

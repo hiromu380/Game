@@ -68,6 +68,9 @@ export function BanzukeTab({ game, ranks }: { game: GameState; ranks: ReadonlyMa
           </button>
         ))}
       </div>
+      <div className="banzuke__crest" aria-hidden="true">
+        {t('banzuke.crest')}
+      </div>
       <p className="note">{t('banzuke.note')}</p>
       <table className="banzuke">
         <thead>
