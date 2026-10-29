@@ -110,11 +110,11 @@ export function advanceBasho(input: GameState): GameState {
   // 新しく番付に載る力士: 自分の部屋で入門した新弟子（前相撲）＋ 架空の部屋の新弟子
   const onBanzuke = new Set(state.banzuke);
   const mineNew = state.rikishi.filter((r) => !onBanzuke.has(r.id)).map((r) => r.id);
-  const npcNeed = Math.max(
-    0,
-    RECRUIT.npcPerYearTarget - (state.banzuke.length - retiring.size + mineNew.length),
-  );
-  const npcNew = npcRecruits(state, Math.min(npcNeed, 80));
+  const kept = state.banzuke.length - retiring.size + mineNew.length;
+  let npcCount = Math.min(Math.max(0, RECRUIT.npcPerYearTarget - kept), 80);
+  // 番付の人数を偶数にする（奇数だと、毎日だれか1人が取組なしになる）
+  if ((kept + npcCount) % 2 === 1) npcCount++;
+  const npcNew = npcRecruits(state, npcCount);
   state.rikishi.push(...npcNew);
   byId = new Map(state.rikishi.map((r) => [r.id, r]));
 
