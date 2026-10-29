@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { advanceBasho, isBlocked, ranksOf, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { useSettings } from '../settings';
 import { bashoName, money } from '../format';
 import { StableTab } from './StableTab';
 import { BanzukeTab } from './BanzukeTab';
@@ -35,6 +36,7 @@ export function GameScreen({
   onToggleLang: () => void;
 }) {
   const { t, lang } = useI18n();
+  const { settings, update } = useSettings();
   const [tab, setTab] = useState<Tab>('stable');
   const [showReport, setShowReport] = useState(false);
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -84,6 +86,13 @@ export function GameScreen({
         <div className="topbar__tools">
           <button className="button button--ghost" onClick={onToggleLang}>
             {t('lang.toggle')}
+          </button>
+          <button
+            className="button button--ghost"
+            aria-pressed={settings.sound}
+            onClick={() => update({ sound: !settings.sound })}
+          >
+            {settings.sound ? t('sound.on') : t('sound.off')}
           </button>
           <button className="button button--ghost" onClick={() => setConfirmQuit(true)}>
             {t('top.quit')}

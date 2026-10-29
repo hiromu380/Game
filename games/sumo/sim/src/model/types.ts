@@ -270,6 +270,10 @@ export interface BashoReport {
   promotions: { id: number; to: 'Y' | 'O' | 'sekitori' | 'makuuchi' }[];
   retired: { id: number; name: string; stableId: number; becameOyakata: boolean }[];
   injuries: number[];
+  /** 自分の弟子の番付の上がり下がり（この場所の地位 → 次の番付。引退したら null） */
+  banzukeChanges: { id: number; from: Rank; to: Rank | null }[];
+  /** 場所の後の巡業（なければ null） */
+  jungyo: 'spring' | 'summer' | 'autumn' | 'winter' | null;
   income: MoneyLine[];
   expenses: MoneyLine[];
   personal: MoneyLine[];

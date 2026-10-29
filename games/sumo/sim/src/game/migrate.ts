@@ -11,7 +11,19 @@ export function migrateSave(raw: unknown): GameState | null {
   let s = raw as Raw;
   if (s.version === 1) s = v1to2(s);
   if (s.version === 2) s = v2to3(s);
+  if (s.version === 3) s = v3to4(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/** 3 → 4: 直近の場所の結果に、番付の上がり下がり（空）と巡業（なし）を足す */
+function v3to4(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  if (s.lastReport) {
+    s.lastReport.banzukeChanges = [];
+    s.lastReport.jungyo = null;
+  }
+  s.version = 4;
+  return s as unknown as Raw;
 }
 
 /** 2 → 3: 設備と契約（すべて 0） */

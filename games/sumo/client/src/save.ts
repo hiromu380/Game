@@ -25,19 +25,38 @@ export function saveGame(state: GameState | null): void {
   }
 }
 
+/** 1: 言語 / 2: 効果音の入り切り */
 export interface Settings {
-  version: 1;
+  version: 2;
   lang: 'ja' | 'en';
+  sound: boolean;
+}
+
+export const DEFAULT_SETTINGS: Settings = { version: 2, lang: 'ja', sound: true };
+
+/** 保存した設定を読む（版1は効果音を入れて版2にする） */
+export function parseSettings(text: string | null): Settings {
+  try {
+    const s = JSON.parse(text ?? 'null') as {
+      version?: number;
+      lang?: 'ja' | 'en';
+      sound?: boolean;
+    } | null;
+    if (s?.version === 1) return { version: 2, lang: s.lang === 'en' ? 'en' : 'ja', sound: true };
+    if (s?.version === 2)
+      return { version: 2, lang: s.lang === 'en' ? 'en' : 'ja', sound: s.sound !== false };
+  } catch {
+    // 既定に戻す
+  }
+  return DEFAULT_SETTINGS;
 }
 
 export function loadSettings(): Settings {
   try {
-    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? 'null') as Settings | null;
-    if (s?.version === 1) return s;
+    return parseSettings(localStorage.getItem(SETTINGS_KEY));
   } catch {
-    // 既定に戻す
+    return DEFAULT_SETTINGS;
   }
-  return { version: 1, lang: 'ja' };
 }
 
 export function saveSettings(s: Settings): void {

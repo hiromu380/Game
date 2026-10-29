@@ -647,6 +647,78 @@ h3 {
   color: var(--muted);
 }
 
+/* 星取表 */
+.hoshitori {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.hoshitori__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.hoshitori__rank {
+  font-size: 0.85rem;
+  color: var(--ai);
+}
+.hoshitori__bouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.star {
+  min-width: 36px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+.star--win {
+  color: var(--ink);
+}
+.star--loss {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+.star--absent {
+  color: var(--muted);
+  cursor: default;
+}
+.up {
+  color: var(--good);
+  font-weight: bold;
+}
+.down {
+  color: var(--shu);
+  font-weight: bold;
+}
+
+/* 取組の演出 */
+.dohyo {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+}
+.bout__result {
+  min-height: 3em;
+  font-size: 1.05rem;
+}
+.bout__result.is-done {
+  font-weight: bold;
+}
+
 @media (max-width: 560px) {
   .actionbar {
     padding: 8px 12px;

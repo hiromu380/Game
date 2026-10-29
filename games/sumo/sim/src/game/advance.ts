@@ -26,6 +26,7 @@ import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
 import { makeCandidates, npcRecruits } from './recruit';
 import { currentLineage, isBlocked, newToshiyoriName, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
+import { JUNGYO, JUNGYO_AFTER } from '../balance/events';
 import { FACILITY_EFFECTS } from '../balance/facilities';
 import {
   ageBranches,
@@ -45,6 +46,8 @@ export function advanceBasho(input: GameState): GameState {
     promotions: [],
     retired: [],
     injuries: [],
+    banzukeChanges: [],
+    jungyo: null,
     income: [],
     expenses: [],
     personal: [],
@@ -193,6 +196,24 @@ export function advanceBasho(input: GameState): GameState {
     yushoNode.makuuchiYusho++;
     if (main) lineage.makuuchiYusho++;
     state.player.prestige += GAME.prestige.makuuchiYusho * (main ? 1 : LINEAGE.branchPrestigeShare);
+  }
+
+  // 番付発表: 自分の弟子の上がり下がり
+  for (const m of report.mine) {
+    report.banzukeChanges.push({ id: m.id, from: m.record.rank, to: newRanks.get(m.id) ?? null });
+  }
+
+  // 巡業（春・夏・秋・冬）: 関取が地方を回る。疲れるが、人気（名声）が上がる
+  const jungyo = JUNGYO_AFTER[state.bashoIndex % 6] ?? null;
+  report.jungyo = jungyo;
+  if (jungyo) {
+    for (const id of state.banzuke) {
+      const rank = newRanks.get(id)!;
+      if (!isSekitori(rank)) continue;
+      const r = byId.get(id)!;
+      r.fatigue = Math.min(100, r.fatigue + JUNGYO.fatigue);
+      if (r.stableId === state.player.stableId) state.player.prestige += JUNGYO.prestigePerSekitori;
+    }
   }
 
   // 4. 自分の部屋の会計

@@ -129,7 +129,7 @@ describe('セーブの変換', () => {
     for (const st of v1.stables) delete st.branch;
     for (const o of v1.oyakata) delete o.since;
     const m = migrateSave(v1)!;
-    expect(m.version).toBe(3);
+    expect(m.version).toBe(4);
     expect(m.player.facilities).toEqual({ dorm: 0, dojo: 0, trainer: 0, scout: 0 });
     expect(m.player.family).toHaveLength(1);
     expect(m.stables.every((x) => x.branch === null)).toBe(true);

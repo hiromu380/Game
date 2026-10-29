@@ -29,8 +29,9 @@ import { NO_FACILITIES } from '../money/facilities';
 /**
  * 1: MVP / 2: 系譜図・分家（stables.branch・oyakata.since・player.family・pending.independence/takeOver）
  * 3: 設備と契約（player.facilities）
+ * 4: 場所の結果に番付の上がり下がりと巡業（lastReport.banzukeChanges・jungyo）
  */
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
