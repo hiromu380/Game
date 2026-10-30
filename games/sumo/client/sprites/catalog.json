@@ -131,6 +131,14 @@
           "outline": false
         },
         {
+          "id": "fence_corner",
+          "name": "板塀の角（瓦をのせた、コの字の塀）",
+          "size": [112, 112],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
           "id": "pine",
           "name": "松",
           "size": [80, 112],
@@ -140,11 +148,12 @@
         },
         {
           "id": "tree_season",
-          "name": "季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪）",
+          "name": "季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪。季節ごとに別の画像）",
           "size": [80, 112],
-          "frames": 4,
+          "frames": 1,
           "priority": "A",
-          "outline": true
+          "outline": true,
+          "variants": ["spring", "summer", "autumn", "winter"]
         },
         {
           "id": "lantern",
@@ -153,6 +162,14 @@
           "frames": 1,
           "priority": "A",
           "outline": true
+        },
+        {
+          "id": "rock",
+          "name": "庭石（苔むした大きな石）",
+          "size": [48, 44],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
         },
         {
           "id": "well",

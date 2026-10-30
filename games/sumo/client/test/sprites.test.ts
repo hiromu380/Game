@@ -57,21 +57,40 @@ describe('稽古場の絵の並べ方', () => {
     const { keikobaLayout, exteriorLayout, MODERN_FROM_DOJO } =
       await import('../src/art/sprites/keikoba');
     const g = (dojo: number, dorm: number) =>
-      ({ player: { facilities: { dojo, dorm, trainer: 0 } } }) as never;
+      ({ bashoIndex: 0, player: { facilities: { dojo, dorm, trainer: 0 } } }) as never;
     expect(keikobaLayout(g(MODERN_FROM_DOJO, 0))[0]!.sprite).toBe('keikoba_modern');
-    expect(exteriorLayout(g(0, 0)).map((p) => p.sprite)).toEqual([
-      'dorm_0',
-      'omoya',
-      'chanko',
-      'gate',
-    ]);
-    expect(exteriorLayout(g(0, 2))[0]!.sprite).toBe('dorm_2');
+    const sprites = exteriorLayout(g(0, 0)).map((p) => p.sprite);
+    expect(sprites).toContain('dorm_0');
+    expect(sprites).toContain('omoya');
+    expect(sprites).toContain('gate');
+    expect(sprites).not.toContain('clinic');
+    expect(exteriorLayout(g(0, 2)).map((p) => p.sprite)).toContain('dorm_2');
     // 治療院はトレーナー契約のとき。奥から順（足元の y が増える順）に描く
     const withClinic = exteriorLayout({
+      bashoIndex: 0,
       player: { facilities: { dojo: 0, dorm: 0, trainer: 1 } },
     } as never);
     expect(withClinic.map((p) => p.sprite)).toContain('clinic');
     const ys = withClinic.map((p) => p.y);
     expect([...ys].sort((a, b) => a - b)).toEqual(ys);
+  });
+
+  it('季節の木は場所の季節に合わせる（春場所は桜）', async () => {
+    const { exteriorLayout, seasonOf } = await import('../src/art/sprites/keikoba');
+    expect([0, 1, 2, 3, 4, 5].map(seasonOf)).toEqual([
+      'winter',
+      'spring',
+      'summer',
+      'summer',
+      'autumn',
+      'autumn',
+    ]);
+    const at = (bashoIndex: number) =>
+      exteriorLayout({
+        bashoIndex,
+        player: { facilities: { dojo: 0, dorm: 0, trainer: 0 } },
+      } as never).map((p) => p.sprite);
+    expect(at(7)).toContain('tree_season__spring');
+    expect(at(6)).toContain('tree_season__winter');
   });
 });

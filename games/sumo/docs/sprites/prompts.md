@@ -142,22 +142,52 @@ Draw a small one-story clinic hut for a sports trainer: white plaster walls, woo
 Draw two straight segments of a traditional dark wooden board fence (itabei) with a narrow tiled cap on top, side by side with a wide gap: the left one runs diagonally down to the lower-left, the right one runs diagonally down to the lower-right.
 ```
 
+### `fence_corner` — 板塀の角（優先 B・比率 1:1・1コマ）
+
+```
+Draw a corner section of a traditional wooden board fence (itabei) shaped like a U seen from above: dark wooden boards and posts on a white plaster base, a narrow black tiled cap on top, standing on a low stone-and-earth base.
+```
+
 ### `pine` — 松（優先 A・比率 3:4・1コマ）
 
 ```
 Draw a single Japanese black pine tree in garden style (niwaki): a twisted trunk and flat cloud-like layers of dark green needles.
 ```
 
-### `tree_season` — 季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪）（優先 A・比率 21:9・4コマ）
+### `tree_season__spring` — 季節の木・春の桜（優先 A・比率 1:1・1コマ）
 
 ```
-Draw the same single deciduous garden tree drawn four times side by side with wide gaps, as four seasons: 1) spring, full of pale pink cherry blossoms; 2) summer, fresh green leaves; 3) autumn, red and orange maple-like leaves; 4) winter, bare branches with a little white snow on them. Same trunk shape and size in all four.
+Draw a single garden cherry tree in full bloom: a twisted dark trunk and cloud-like layers of pale pink cherry blossoms, a few petals falling, on a small patch of grass with stones. Use the pine tree as the reference for the trunk shape and size.
+```
+
+### `tree_season__summer` — 季節の木・夏の青葉（優先 A・比率 1:1・1コマ）
+
+```
+Same tree as tree_season__spring (use it as the reference image), in summer: fresh bright green leaves instead of blossoms.
+```
+
+### `tree_season__autumn` — 季節の木・秋の紅葉（優先 A・比率 1:1・1コマ）
+
+```
+Same tree as tree_season__spring (use it as the reference image), in autumn: red and orange maple-like leaves, a few leaves falling.
+```
+
+### `tree_season__winter` — 季節の木・冬の枯れ木と雪（優先 A・比率 1:1・1コマ）
+
+```
+Same tree as tree_season__spring (use it as the reference image), in winter: bare branches with a little white snow on them and on the ground.
 ```
 
 ### `lantern` — 石灯籠（優先 A・比率 9:16・1コマ）
 
 ```
 Draw a small Japanese stone lantern (ishidoro) with a little square window and a pointed roof.
+```
+
+### `rock` — 庭石（優先 B・比率 1:1・1コマ）
+
+```
+Draw a large mossy garden rock (niwa-ishi) with patches of moss and lichen, a few small pebbles and grass tufts at its base.
 ```
 
 ### `well` — 井戸（優先 B・比率 3:4・1コマ）

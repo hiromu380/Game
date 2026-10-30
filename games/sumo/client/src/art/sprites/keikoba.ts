@@ -41,14 +41,41 @@ export function keikobaLayout(game: Pick<GameState, 'player'>): Placed[] {
   return out;
 }
 
-/** 外観（奥から順に描く）: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門 */
-export function exteriorLayout(game: Pick<GameState, 'player'>): Placed[] {
+/** 場所の季節（初場所は冬・春場所は春・夏場所と名古屋場所は夏・秋場所と九州場所は秋） */
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+const SEASON_OF_BASHO: readonly Season[] = [
+  'winter',
+  'spring',
+  'summer',
+  'summer',
+  'autumn',
+  'autumn',
+];
+
+export function seasonOf(bashoIndex: number): Season {
+  return SEASON_OF_BASHO[bashoIndex % 6]!;
+}
+
+/**
+ * 外観: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門と、塀・木・灯籠・庭石。
+ * 奥から順（足元の y が小さい順）に並べる
+ */
+export function exteriorLayout(game: Pick<GameState, 'player' | 'bashoIndex'>): Placed[] {
   const f = game.player.facilities;
   const out: Placed[] = [
     { sprite: `dorm_${Math.min(2, f.dorm)}`, x: 385, y: 220 },
     { sprite: 'omoya', x: 200, y: 240 },
+    { sprite: 'chanko', x: 420, y: 310 },
+    { sprite: 'gate', x: 230, y: 318 },
+    { sprite: 'fence_corner', x: 60, y: 185 },
+    { sprite: 'pine', x: 490, y: 200 },
+    { sprite: `tree_season__${seasonOf(game.bashoIndex)}`, x: 300, y: 170 },
+    { sprite: 'lantern', x: 300, y: 316 },
+    { sprite: 'rock', x: 30, y: 312 },
   ];
   if (f.trainer >= 1) out.push({ sprite: 'clinic', x: 90, y: 275 });
-  out.push({ sprite: 'chanko', x: 420, y: 310 }, { sprite: 'gate', x: 230, y: 318 });
-  return out;
+  return out.sort((a, b) => a.y - b.y);
 }
+
+/** 外観の土台（これがなければ外観を出さない） */
+export const EXTERIOR_BASE = 'omoya';

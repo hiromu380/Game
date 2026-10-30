@@ -59,6 +59,11 @@
     "size": [176, 176],
     "anchor": [88, 175]
   },
+  "fence_corner": {
+    "files": ["fence_corner.png"],
+    "size": [112, 112],
+    "anchor": [56, 111]
+  },
   "gate": {
     "files": ["gate.png"],
     "size": [128, 112],
@@ -79,15 +84,35 @@
     "size": [288, 176],
     "anchor": [144, 175]
   },
+  "lantern": {
+    "files": ["lantern.png"],
+    "size": [24, 40],
+    "anchor": [12, 39]
+  },
   "omoya": {
     "files": ["omoya.png"],
     "size": [224, 192],
     "anchor": [112, 191]
   },
+  "pine": {
+    "files": ["pine.png"],
+    "size": [80, 112],
+    "anchor": [40, 111]
+  },
+  "rock": {
+    "files": ["rock.png"],
+    "size": [48, 44],
+    "anchor": [24, 43]
+  },
   "teppo": {
     "files": ["teppo.png"],
     "size": [16, 56],
     "anchor": [8, 55]
+  },
+  "tree_season__spring": {
+    "files": ["tree_season__spring.png"],
+    "size": [80, 112],
+    "anchor": [40, 111]
   },
   "weights": {
     "files": ["weights.png"],

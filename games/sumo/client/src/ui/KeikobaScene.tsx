@@ -3,6 +3,7 @@ import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { sprite } from '../art/sprites';
 import {
+  EXTERIOR_BASE,
   EXTERIOR_STAGE,
   KEIKOBA_STAGE,
   exteriorLayout,
@@ -14,10 +15,20 @@ import {
 /** 絵の最大の幅（px）。稽古場はちょうど2倍、外観は少し小さめに縮める */
 const SCENE_MAX_WIDTH = 640;
 
-/** ドット絵を舞台に並べる。先頭の絵（床・建物）がまだ取り込まれていなければ null */
-function SpriteStage({ stage, items, label }: { stage: Stage; items: Placed[]; label: string }) {
+/** ドット絵を舞台に並べる。土台の絵（床・母屋）がまだ取り込まれていなければ null。取り込んでいない絵は飛ばす */
+function SpriteStage({
+  stage,
+  items,
+  base,
+  label,
+}: {
+  stage: Stage;
+  items: Placed[];
+  base: string;
+  label: string;
+}) {
+  if (!sprite(base)) return null;
   const placed = items.map((p) => ({ p, s: sprite(p.sprite) })).filter((x) => x.s !== null);
-  if (placed[0]?.p !== items[0]) return null;
   return (
     <div
       className="scene"
@@ -49,11 +60,12 @@ type View = 'keikoba' | 'exterior';
 export function KeikobaScene({ game }: { game: GameState }) {
   const { t } = useI18n();
   const [view, setView] = useState<View>('keikoba');
-  const views: { id: View; stage: Stage; items: Placed[] }[] = [
-    { id: 'keikoba', stage: KEIKOBA_STAGE, items: keikobaLayout(game) },
-    { id: 'exterior', stage: EXTERIOR_STAGE, items: exteriorLayout(game) },
+  const keikoba = keikobaLayout(game);
+  const views: { id: View; stage: Stage; items: Placed[]; base: string }[] = [
+    { id: 'keikoba', stage: KEIKOBA_STAGE, items: keikoba, base: keikoba[0]!.sprite },
+    { id: 'exterior', stage: EXTERIOR_STAGE, items: exteriorLayout(game), base: EXTERIOR_BASE },
   ];
-  const ready = views.filter((v) => sprite(v.items[0]!.sprite) !== null);
+  const ready = views.filter((v) => sprite(v.base) !== null);
   if (ready.length === 0) return null;
   const current = ready.find((v) => v.id === view) ?? ready[0]!;
   return (
@@ -72,7 +84,12 @@ export function KeikobaScene({ game }: { game: GameState }) {
           ))}
         </div>
       )}
-      <SpriteStage stage={current.stage} items={current.items} label={t(`scene.${current.id}`)} />
+      <SpriteStage
+        stage={current.stage}
+        items={current.items}
+        base={current.base}
+        label={t(`scene.${current.id}`)}
+      />
     </div>
   );
 }
