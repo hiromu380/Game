@@ -93,7 +93,7 @@ export function oyakataLook(i: { id: number; age: number; stableId: number }): L
     mouth: pick(MOUTHS, hash(i.id, 4)),
     hair: i.age >= 55 ? 'gray' : 'short',
     width: 34,
-    cloth: pick([PALETTE.sumi, PALETTE.ai, '#3b3328'], hash(i.stableId, 6)),
+    cloth: pick([PALETTE.sumi, PALETTE.ai, PALETTE.kimonoBrown], hash(i.stableId, 6)),
     sagari: false,
     tsuna: false,
     bandage: false,

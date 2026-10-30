@@ -53,9 +53,9 @@ export function wrestlerMotion(
   const time = Math.max(0, Math.min(duration, clock?.time ?? duration));
   const clash = Math.max(0.2, Math.min(duration, clock?.clash ?? 0.7));
   const finished = time >= duration;
-  const sign = side === 'E' ? -1 : 1;
+  const sign = side === 'E' ? 1 : -1;
   const fall = smooth((Math.abs(pose.rot) - 20) / 65);
-  const onset = smooth((time - (clash - 0.17)) / 0.30);
+  const onset = smooth((time - (clash - 0.17)) / 0.3);
   const release = 1 - smooth((time - (duration - 0.55)) / 0.4);
   const moving = finished ? 0 : onset * Math.max(0, release) * (1 - fall);
   // 片足ずつ上げる。立ち合い前の短時間に収め、突進中の跳躍は避ける。
@@ -65,15 +65,16 @@ export function wrestlerMotion(
   const rightLift = shikoLeg === 1 ? shiko : 0;
   const step = Math.sin(time * 19) * 0.095 * moving;
   const impact = windowPulse(time, clash - 0.08, clash + 0.2) * (1 - fall);
-  const pushing = !finished && arms === 'push' ? smooth((time - clash + 0.15) / 0.27) * (1 - fall) : 0;
-  const crouch = (1 - smooth(time / clash)) * 0.10 + impact * 0.055;
+  const pushing =
+    !finished && arms === 'push' ? smooth((time - clash + 0.15) / 0.27) * (1 - fall) : 0;
+  const crouch = (1 - smooth(time / clash)) * 0.1 + impact * 0.055;
   const bob = !finished ? Math.abs(Math.sin(time * 19)) * 0.025 * moving : 0;
-  const z0 = -0.40 * leftLift - step;
-  const z1 = 0.40 * rightLift + step;
+  const z0 = -0.4 * leftLift - step || 0;
+  const z1 = 0.4 * rightLift + step;
   return {
-    armsX: arms === 'up' && !finished ? -1.6 : -0.72 * pushing,
+    armsX: arms === 'up' && !finished ? -1.6 : -0.72 * pushing || 0,
     legsZ: [z0, z1],
-    legsX: [step * 1.8, -step * 1.8],
+    legsX: [step * 1.8 || 0, -step * 1.8 || 0],
     bodyScaleY: 1 - crouch,
     rootRise: 0.05 * shiko + bob + 0.08 * fall,
     leanZ: sign * (0.095 * pushing + 0.035 * impact),

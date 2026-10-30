@@ -7,7 +7,9 @@ const stand = { x: 0.35, y: 0, rot: 0 };
 describe('取組の3D関節モーション', () => {
   it('同じ入力なら必ず同じ結果になる', () => {
     const input = { ...clock, time: 1.1 };
-    expect(wrestlerMotion(input, stand, 'E', 'push')).toEqual(wrestlerMotion(input, stand, 'E', 'push'));
+    expect(wrestlerMotion(input, stand, 'E', 'push')).toEqual(
+      wrestlerMotion(input, stand, 'E', 'push'),
+    );
   });
 
   it('四股の脚上げは片側のみ。西と東で反対の脚を上げる', () => {
