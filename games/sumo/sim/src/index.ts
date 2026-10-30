@@ -23,6 +23,7 @@ export {
   hireStaff,
   dismissStaff,
   giveKojo,
+  answerElection,
 } from './game/state';
 export { alumnusAge, staffCandidates, staffOf, staffSkill } from './stable/staff';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';
@@ -37,3 +38,4 @@ export { freeNames, masterOf } from './world/association';
 export { rankValue } from './banzuke/rank';
 export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
 export { ensureRival } from './world/rival';
+export { officeAtLeast, isBoardMember } from './world/office';

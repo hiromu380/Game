@@ -326,6 +326,11 @@ export interface Pending {
   takeOver: number[] | null;
   /** 場所の間の出来事（target はけがの弟子など、出来事の相手） */
   happening: { id: HappeningId; target: number | null } | null;
+  /**
+   * 理事選挙（この場所の後に行う）。recommended: 一門の推薦（理事・副理事の枠。なければ null）。
+   * choice: 自分の答え（立候補する・見送る。推薦がなくても立候補できる＝造反）。返事がなければ、推薦があれば立候補・なければ見送り
+   */
+  election: { recommended: 'riji' | 'fukuRiji' | null; choice: 'run' | 'stay' | null } | null;
 }
 
 export interface PlayerState {
@@ -347,6 +352,20 @@ export interface PlayerState {
   diet: Diet;
   /** 部屋の人（元弟子の若者頭・世話人） */
   staff: StaffMember[];
+  /** 親方の協会での役職と、いまの役職になった場所 */
+  office: { rank: AssocRank; since: number };
+}
+
+/** 協会の役職（年寄 → 主任 → 委員 → 役員待遇委員 → 副理事・理事 → 理事長） */
+export type AssocRank =
+  'toshiyori' | 'shunin' | 'iin' | 'yakuinTaiguu' | 'fukuRiji' | 'riji' | 'rijicho';
+
+/** 理事会（直近の選挙で決まった顔ぶれ。親方 ID） */
+export interface Board {
+  electedAt: number;
+  riji: number[];
+  fukuRiji: number[];
+  rijicho: number | null;
 }
 
 export type Diet = 'standard' | 'hearty' | 'balanced' | 'frugal';
@@ -389,6 +408,8 @@ export interface GameState {
   journal: JournalEntry[];
   /** ライバルの部屋（いなければ null） */
   rival: RivalState | null;
+  /** 理事会（まだ選挙がなければ null） */
+  board: Board | null;
   /** 最近起きた出来事（同じ出来事が続かないように） */
   happeningLog: { id: HappeningId; bashoIndex: number }[];
 }
@@ -424,6 +445,16 @@ export type JournalEvent =
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
+  /** 協会の役職が上がった・理事選挙の結果 */
+  | { kind: 'office'; rank: AssocRank }
+  | {
+      kind: 'election';
+      result: 'elected' | 'lost' | 'stayed';
+      rank: AssocRank;
+      rebel: boolean;
+      /** 無投票（一門の調整で定員どおり）だったか */
+      uncontested: boolean;
+    }
   /** ライバルの部屋の出来事（ライバルになった・優勝・大関/横綱昇進・新弟子を取られた） */
   | {
       kind: 'rival';

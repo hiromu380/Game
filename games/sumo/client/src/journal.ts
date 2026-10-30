@@ -31,6 +31,8 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'kojo':
       return 'stable';
     case 'rival':
+    case 'office':
+    case 'election':
       return 'lineage';
     case 'earlier':
       return null;
@@ -44,6 +46,7 @@ export function isMilestone(e: JournalEntry): boolean {
     (e.kind === 'yusho' && e.division === 'makuuchi') ||
     e.kind === 'kojo' ||
     (e.kind === 'rival' && e.event !== 'new') ||
+    (e.kind === 'election' && e.result === 'elected') ||
     e.kind === 'successor' ||
     e.kind === 'independence' ||
     e.kind === 'open'
@@ -105,6 +108,12 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':
       return t('journal.branchClosed', { stable: e.stable });
+    case 'office':
+      return t('journal.office', { office: t(`office.${e.rank}`) });
+    case 'election':
+      return t(`journal.election.${e.result}${e.rebel ? 'Rebel' : ''}` as MessageKey, {
+        office: t(`office.${e.rank}`),
+      });
     case 'rival':
       return t(`journal.rival.${e.event}` as MessageKey, {
         stable: e.stable,

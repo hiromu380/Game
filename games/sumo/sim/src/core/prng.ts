@@ -65,4 +65,5 @@ export const SEED = {
   lineage: 11,
   happening: 12,
   rival: 13,
+  office: 14,
 } as const;

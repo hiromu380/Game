@@ -28,6 +28,8 @@ import { DOHYOIRI, KOJO_WORDS, type Dohyoiri, type KojoWord } from '../balance/c
 import { nextBuildCost, stableCapacity } from '../money/facilities';
 import { applyHappening } from './happening';
 import { note } from './journal';
+import { initialOffice, officeAtLeast } from '../world/office';
+import { OFFICE } from '../balance/office';
 import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
@@ -212,6 +214,7 @@ export function chooseSuccessor(input: GameState, oyakataId: number): GameState 
   );
   next.role = 'master';
   next.since = state.bashoIndex;
+  state.player.office = { rank: initialOffice(next.age), since: state.bashoIndex };
   const nextNode = nodeOfOyakata(state, next.id);
   if (nextNode) nextNode.kind = 'master';
   state.player.generation++;
@@ -248,6 +251,7 @@ export function chooseTakeOver(input: GameState, stableId: number): GameState {
   const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, stableId));
   takeOverBranch(state, stableId, (o) => retireOrSanyo(state, o, rng));
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  state.player.office = { rank: initialOffice(master.age), since: state.bashoIndex };
   state.player.generation++;
   state.player.lineage.push({
     generation: state.player.generation,
@@ -408,4 +412,17 @@ export function giveKojo(
     ...(title === 'Y' ? { dohyoiri } : {}),
   });
   return state;
+}
+
+/** 理事選挙に立候補するか（推薦がなくても立候補できる＝造反）。委員より下なら答えられない */
+export function answerElection(input: GameState, choice: 'run' | 'stay'): GameState {
+  const e = input.pending.election;
+  if (!e || !canRun(input)) return input;
+  const state = clone(input);
+  state.pending.election = { ...e, choice };
+  return state;
+}
+
+function canRun(state: GameState): boolean {
+  return officeAtLeast(state.player.office.rank, OFFICE.candidateFrom);
 }

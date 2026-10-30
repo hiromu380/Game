@@ -22,6 +22,8 @@ export function settleBasho(
   facilities: Record<FacilityId, number> = NO_FACILITIES,
   /** ちゃんこの方針による食費の倍率 */
   foodMultiplier = 1,
+  /** 親方の月給（協会の役職で変わる） */
+  oyakataMonthly: number = OYAKATA_PAY.monthly,
 ): Ledger {
   const n = ranks.length;
   const lower = ranks.filter((r) => r === null || !isSekitori(r)).length;
@@ -71,7 +73,7 @@ export function settleBasho(
     { key: 'facilities', amount: facilityUpkeep(facilities) },
   ];
   const personal: MoneyLine[] = [
-    { key: 'oyakataSalary', amount: OYAKATA_PAY.monthly * 2 },
+    { key: 'oyakataSalary', amount: oyakataMonthly * 2 },
     { key: 'living', amount: -OYAKATA_PAY.livingPerBasho },
   ];
   return { income, expenses, personal };

@@ -102,7 +102,7 @@ describe('ちゃんこの方針', () => {
     delete v11.player.diet;
     delete v11.player.staff;
     const m = migrateSave(v11)!;
-    expect(m.version).toBe(13);
+    expect(m.version).toBe(14);
     expect(m.player.diet).toBe('standard');
     expect(m.player.staff).toEqual([]);
   });

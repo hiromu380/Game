@@ -27,6 +27,7 @@ import { addNode } from '../lineage/family';
 import { populateAssociation } from './association';
 import { note } from '../game/journal';
 import { ensureRival } from './rival';
+import { initialOffice } from './office';
 import { NO_FACILITIES } from '../money/facilities';
 
 /**
@@ -42,8 +43,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 11: 出来事を増やした（happeningLog。同じ出来事が続かないように）
  * 12: 部屋の人とちゃんこの方針（player.staff・player.diet）
  * 13: ライバルの部屋（rival）
+ * 14: 協会の役職と理事選挙（player.office・board・pending.election）
  */
-export const SAVE_VERSION = 13;
+export const SAVE_VERSION = 14;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -202,6 +204,7 @@ export function createGame(options: NewGameOptions): GameState {
       alumni: [],
       diet: 'standard',
       staff: [],
+      office: { rank: initialOffice(oyakata.age), since: 0 },
     },
     names: [],
     ichimon: [],
@@ -214,12 +217,14 @@ export function createGame(options: NewGameOptions): GameState {
       independence: null,
       takeOver: null,
       happening: null,
+      election: null,
     },
     gameOver: null,
     lastReport: null,
     journal: [],
     happeningLog: [],
     rival: null,
+    board: null,
   };
   populateAssociation(state, rng, options.ichimonId);
   addNode(state, {

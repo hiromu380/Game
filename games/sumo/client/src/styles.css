@@ -1781,3 +1781,24 @@ html:lang(en) .choice__desc {
 .callout--rival {
   border-left-color: var(--ai);
 }
+
+/* 理事会 */
+.board {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0;
+}
+.board > div {
+  display: grid;
+  grid-template-columns: 7em 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.board dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+}
+.board dd {
+  margin: 0;
+}

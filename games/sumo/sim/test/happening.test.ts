@@ -80,7 +80,7 @@ describe('場所の間の出来事', () => {
     delete v7.pending.happening;
     for (const r of v7.rikishi) delete r.boost;
     const m = migrateSave(v7)!;
-    expect(m.version).toBe(13);
+    expect(m.version).toBe(14);
     expect(m.pending.happening).toBeNull();
     expect(m.rikishi.every((r) => r.boost === 1)).toBe(true);
   });

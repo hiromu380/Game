@@ -30,6 +30,8 @@ import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
 import { staffGrowth } from '../stable/staff';
 import { ensureRival, rivalSignsCandidates, settleRival } from '../world/rival';
+import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '../world/office';
+import { OFFICE } from '../balance/office';
 import { TRAITS } from '../balance/traits';
 import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
@@ -291,13 +293,15 @@ export function advanceBasho(input: GameState): GameState {
   state.player.prestige =
     state.player.prestige * GAME.prestigeKeep +
     sekitoriNow * GAME.prestige.sekitoriPerBasho +
-    popularSekitori * TRAITS.popular.prestigePerBasho;
+    popularSekitori * TRAITS.popular.prestigePerBasho +
+    OFFICE.prestigePerBasho[state.player.office.rank];
   const ledger = settleBasho(
     mineRanks,
     state.player.prestige,
     state.player.kakun,
     state.player.facilities,
     DIETS[state.player.diet].food,
+    OFFICE.monthly[state.player.office.rank],
   );
   report.income = ledger.income;
   report.expenses = ledger.expenses;
@@ -333,6 +337,9 @@ export function advanceBasho(input: GameState): GameState {
     state.player.kakun,
   );
   playerCtx.injuryMultiplier *= staff.injury;
+  // 理事などは協会の仕事で忙しく、部屋付きの親方がいなければ稽古の伸びが少し落ちる
+  if (isBoardMember(state.player.office.rank) && coaches === 0)
+    playerCtx.growthMultiplier *= OFFICE.busyGrowth;
   // 若者頭は幕下以下の弟子を見る
   const lowerCtx: GrowthContext = {
     ...playerCtx,
@@ -358,11 +365,15 @@ export function advanceBasho(input: GameState): GameState {
   // 6. 年の終わり（九州場所の後）
   if (state.bashoIndex % 6 === 5) yearEnd(state);
 
+  // 理事選挙（2年に1度、初場所の後）
+  holdElection(state);
+
   // 7. 次の場所へ
   state.bashoIndex++;
   if (!state.gameOver) {
     state.pending.candidates = makeCandidates(state);
     rollHappening(state);
+    scheduleElection(state);
   }
   state.lastReport = report;
   return state;
@@ -402,6 +413,8 @@ function yearEnd(state: GameState) {
   }
   // 部屋付きの親方の独立の申し出
   rollIndependence(state);
+  // 自分の親方の協会の役職
+  yearEndOffice(state);
   // 自分の親方の定年: 跡継ぎ選び（部屋付きの親方から。いなければ分家を継ぐ）
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   if (master.age >= TOSHIYORI.retireAge) {

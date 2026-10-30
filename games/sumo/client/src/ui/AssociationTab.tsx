@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { freeNames, isSekitori, masterOf, type GameState, type Rank } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { RivalPanel } from './RivalPanel';
+import { BoardPanel } from './BoardPanel';
 import { OyakataPortrait } from '../art/Portraits';
 
 /** 協会: 一門ごとの部屋（師匠・力士・関取の数）と、年寄名跡の空き */
@@ -29,6 +30,7 @@ export function AssociationTab({
   return (
     <div className="stack">
       <RivalPanel game={game} ranks={ranks} />
+      <BoardPanel game={game} />
       <section className="panel">
         <h2>{t('assoc.title')}</h2>
         <p className="note">{t('assoc.note')}</p>
