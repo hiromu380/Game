@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { isSekitori, ranksOf, type BoutResult, type GameState, type Rikishi } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { boutScript, poseAt } from '../playback/boutScript';
 import { BoutStage } from '../art/BoutStage';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
+
+const BoutStage3D = lazy(() => import('../art/three/BoutStage3D'));
 
 /** 取組の短い演出（向正面から見た土俵）。動きを減らす設定では最後の場面だけを見せる */
 export function BoutViewer({
@@ -81,14 +83,27 @@ export function BoutViewer({
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
       <div className="modal__box">
         <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
-        <BoutStage
-          east={lookOf(east)}
-          west={lookOf(west)}
-          pose={pose}
-          arms={time >= clash - 0.15 && !done ? 'push' : 'side'}
-          winner={done ? winnerSide : null}
-          title={t('bout.aria')}
-        />
+        <Suspense
+          fallback={
+            <BoutStage
+              east={lookOf(east)}
+              west={lookOf(west)}
+              pose={pose}
+              arms={time >= clash - 0.15 && !done ? 'push' : 'side'}
+              winner={done ? winnerSide : null}
+              title={t('bout.aria')}
+            />
+          }
+        >
+          <BoutStage3D
+            east={lookOf(east)}
+            west={lookOf(west)}
+            pose={pose}
+            arms={time >= clash - 0.15 && !done ? 'push' : 'side'}
+            winner={done ? winnerSide : null}
+            title={t('bout.title', { day: bout.day })}
+          />
+        </Suspense>
         <p className="bout__names">
           <span>
             {t('rank.side.W')} <strong>{west?.name ?? '?'}</strong>

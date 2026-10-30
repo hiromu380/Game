@@ -815,6 +815,12 @@ h3 {
   border: 3px solid var(--ink);
   border-radius: var(--radius);
 }
+.dohyo--3d {
+  aspect-ratio: 360 / 250;
+  background-color: var(--ai);
+  /* 描画ライブラリが読み込まれるまでは既存のSVGを表示する */
+  touch-action: pan-y;
+}
 .bout__names {
   display: flex;
   justify-content: space-between;
