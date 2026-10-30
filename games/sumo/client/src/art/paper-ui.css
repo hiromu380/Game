@@ -151,7 +151,8 @@
     writing-mode: vertical-rl;
     text-orientation: upright;
     min-height: 3em;
-    margin-inline: auto;
+    width: max-content;
+    margin: 0 auto;
   }
 }
 
