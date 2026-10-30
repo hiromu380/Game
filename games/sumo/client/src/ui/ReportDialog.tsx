@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   sumMoney,
   type BashoReport,
@@ -39,6 +39,8 @@ export function ReportDialog({
   const { t, lang } = useI18n();
   const { settings } = useSettings();
   const [watching, setWatching] = useState<BoutResult | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => titleRef.current?.focus({ preventScroll: true }), [watching]);
   const byId = new Map(game.rikishi.map((r) => [r.id, r]));
   const stableName = new Map(game.stables.map((s) => [s.id, s.name]));
   const nameOf = (id: number) =>
@@ -52,6 +54,12 @@ export function ReportDialog({
   );
   const myRetired = report.retired.filter((r) => r.stableId === game.player.stableId);
   const net = sumMoney(report.income) - sumMoney(report.expenses);
+  const kachikoshi = report.mine.filter(
+    (m) => m.record.wins * 2 > m.record.wins + m.record.losses + m.record.absences,
+  ).length;
+  const moves = report.banzukeChanges.filter((c) => c.to !== null);
+  const ups = moves.filter((c) => rankValue(c.to!) < rankValue(c.from)).length;
+  const downs = moves.filter((c) => rankValue(c.to!) > rankValue(c.from)).length;
   const sorted = [...report.mine].sort(
     (a, b) => rankValue(a.record.rank) - rankValue(b.record.rank),
   );
@@ -70,7 +78,25 @@ export function ReportDialog({
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <div className="modal__box modal__box--wide">
-        <h2 id="report-title">{t('report.title', { basho: bashoName(t, report.bashoIndex) })}</h2>
+        {/* 開いたら上から読めるように、見出しに焦点を置く（閉じるボタンに置くと下までスクロールしてしまう） */}
+        <h2 id="report-title" tabIndex={-1} ref={titleRef}>
+          {t('report.title', { basho: bashoName(t, report.bashoIndex) })}
+        </h2>
+
+        <dl className="tiles">
+          <div className="tile">
+            <dt>{t('report.tile.kachikoshi')}</dt>
+            <dd>{t('report.tile.ofTotal', { n: kachikoshi, total: report.mine.length })}</dd>
+          </div>
+          <div className="tile">
+            <dt>{t('report.tile.banzuke')}</dt>
+            <dd>{t('report.tile.updown', { up: ups, down: downs })}</dd>
+          </div>
+          <div className="tile">
+            <dt>{t('report.tile.net')}</dt>
+            <dd className={net < 0 ? 'is-minus' : ''}>{money(t, net, lang)}</dd>
+          </div>
+        </dl>
 
         {myPromotions.length > 0 && (
           <div className="callout">
@@ -211,8 +237,9 @@ export function ReportDialog({
               <span className="muted">{t(`sansho.${k}`)}</span>{' '}
               {report.sansho[k].length === 0
                 ? t('report.sanshoNone')
-                : report.sansho[k].map((id) => (
+                : report.sansho[k].map((id, i) => (
                     <span key={id} className={mineIds.has(id) ? 'is-mine-text' : ''}>
+                      {i > 0 && '・'}
                       {nameOf(id)}
                       <span className="muted">
                         （{stableName.get(byId.get(id)?.stableId ?? -1) ?? '—'}）
@@ -228,7 +255,7 @@ export function ReportDialog({
 
         <p className="ledger__net">{t('report.money', { value: money(t, net, lang) })}</p>
         <div className="modal__actions">
-          <button className="button button--primary" onClick={onClose} autoFocus>
+          <button className="button button--primary" onClick={onClose}>
             {t('common.close')}
           </button>
         </div>

@@ -24,6 +24,7 @@ import type {
   StaffRole,
 } from '../model/types';
 import { DIETS } from '../balance/staff';
+import { DOHYOIRI, KOJO_WORDS, type Dohyoiri, type KojoWord } from '../balance/ceremony';
 import { nextBuildCost, stableCapacity } from '../money/facilities';
 import { applyHappening } from './happening';
 import { note } from './journal';
@@ -377,5 +378,34 @@ export function dismissStaff(input: GameState, role: StaffRole): GameState {
   const state = clone(input);
   state.player.staff = state.player.staff.filter((x) => x.role !== role);
   note(state, { kind: 'staffLeave', role, name: s.name, retired: false });
+  return state;
+}
+
+/**
+ * 昇進伝達式の口上を決める（大関・横綱になった自分の弟子。横綱は土俵入りの型も）。
+ * 今の地位が大関・横綱のときだけ。日誌に残る
+ */
+export function giveKojo(
+  input: GameState,
+  rikishiId: number,
+  word: KojoWord,
+  dohyoiri?: Dohyoiri,
+): GameState {
+  const r = input.rikishi.find((x) => x.id === rikishiId);
+  const title = input.titles[rikishiId];
+  if (!r || r.stableId !== input.player.stableId || (title !== 'O' && title !== 'Y')) return input;
+  if (!KOJO_WORDS.includes(word)) return input;
+  if (title === 'Y' && (!dohyoiri || !DOHYOIRI.includes(dohyoiri))) return input;
+  const state = clone(input);
+  const me = state.rikishi.find((x) => x.id === rikishiId)!;
+  me.kojo = word;
+  if (title === 'Y') me.dohyoiri = dohyoiri;
+  note(state, {
+    kind: 'kojo',
+    shikona: me.name,
+    to: title,
+    word,
+    ...(title === 'Y' ? { dohyoiri } : {}),
+  });
   return state;
 }

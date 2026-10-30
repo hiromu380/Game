@@ -3,6 +3,7 @@
  * - clap: 拍子木（立ち合いの前）
  * - hit: ぶつかる音
  * - fall: 土俵に落ちる音
+ * - drum: 太鼓（見せ場）
  */
 let ctx: AudioContext | null = null;
 
@@ -61,7 +62,7 @@ function thump(ac: AudioContext, at: number, freq: number, gain: number, seconds
   osc.stop(at + seconds);
 }
 
-export function playSound(kind: 'clap' | 'hit' | 'fall'): void {
+export function playSound(kind: 'clap' | 'hit' | 'fall' | 'drum'): void {
   const ac = audio();
   if (!ac) return;
   const t = ac.currentTime;
@@ -71,6 +72,9 @@ export function playSound(kind: 'clap' | 'hit' | 'fall'): void {
   } else if (kind === 'hit') {
     thump(ac, t, 110, 0.6, 0.18);
     burst(ac, t, 500, 1, 0.25, 0.1);
+  } else if (kind === 'drum') {
+    // ドン・ドン・ドドン
+    [0, 0.32, 0.64, 0.8].forEach((d, i) => thump(ac, t + d, i === 3 ? 95 : 80, 0.55, 0.35));
   } else {
     thump(ac, t, 70, 0.5, 0.3);
     burst(ac, t, 300, 0.8, 0.3, 0.25);

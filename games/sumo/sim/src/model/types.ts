@@ -1,3 +1,4 @@
+import type { Dohyoiri, KojoWord } from '../balance/ceremony';
 /**
  * ゲームの状態（すべて JSON にそのまま保存できる形）
  */
@@ -89,6 +90,10 @@ export interface Rikishi {
   track: TrackEntry[];
   /** 次の稽古の伸びの倍率（出稽古など。稽古のあと 1 に戻る） */
   boost: number;
+  /** 昇進伝達式の口上の四字熟語（大関・横綱で選んだもの。最後に選んだもの） */
+  kojo?: KojoWord;
+  /** 横綱の土俵入りの型 */
+  dohyoiri?: Dohyoiri;
 }
 
 /** 場所ごとの成績（番付の上からの順位つき） */
@@ -402,6 +407,7 @@ export type JournalEvent =
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
+  | { kind: 'kojo'; shikona: string; to: 'O' | 'Y'; word: KojoWord; dohyoiri?: Dohyoiri }
   | { kind: 'staffHire'; role: StaffRole; name: string }
   | { kind: 'staffLeave'; role: StaffRole; name: string; retired: boolean }
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */

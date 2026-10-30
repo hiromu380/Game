@@ -9,6 +9,8 @@ import { BanzukeTab } from './BanzukeTab';
 import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
 import { AssociationTab } from './AssociationTab';
+import { HighlightDialog } from './HighlightDialog';
+import { highlightsOf, type Highlight } from '../highlights';
 import { JournalTab } from './JournalTab';
 import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
@@ -42,6 +44,7 @@ export function GameScreen({
   const { settings, update } = useSettings();
   const [tab, setTab] = useState<Tab>('stable');
   const [showReport, setShowReport] = useState(false);
+  const [highlights, setHighlights] = useState<Highlight[] | null>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
@@ -51,6 +54,8 @@ export function GameScreen({
 
   const go = (next: GameState) => {
     setGame(next);
+    const hl = next.lastReport ? highlightsOf(next, next.lastReport) : [];
+    setHighlights(hl.length > 0 ? hl : null);
     setShowReport(true);
   };
 
@@ -150,7 +155,16 @@ export function GameScreen({
         </button>
       </footer>
 
-      {showReport && game.lastReport && !blocked && (
+      {highlights && game.lastReport && !blocked && (
+        <HighlightDialog
+          game={game}
+          report={game.lastReport}
+          highlights={highlights}
+          setGame={setGame}
+          onDone={() => setHighlights(null)}
+        />
+      )}
+      {!highlights && showReport && game.lastReport && !blocked && (
         <ReportDialog game={game} report={game.lastReport} onClose={() => setShowReport(false)} />
       )}
       {game.pending.successor && <SuccessorDialog game={game} setGame={setGame} />}

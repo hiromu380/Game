@@ -22,6 +22,7 @@ export {
   setDiet,
   hireStaff,
   dismissStaff,
+  giveKojo,
 } from './game/state';
 export { alumnusAge, staffCandidates, staffOf, staffSkill } from './stable/staff';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';

@@ -527,6 +527,98 @@ h3 {
   margin: 16px 0 8px;
 }
 
+/* 要点の数字 */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.tile {
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 2px 2px 0 var(--line);
+}
+.tile dt {
+  font-size: 0.85rem;
+  color: var(--ai);
+}
+.tile dd {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+}
+.tile dd.is-minus {
+  color: var(--shu);
+}
+
+/* 場所の見せ場 */
+.highlight {
+  text-align: center;
+  border: 4px double var(--shu);
+}
+.highlight__basho {
+  margin: 0;
+  color: var(--ai);
+  font-size: 0.9rem;
+}
+.highlight__stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 8px auto;
+  padding: 12px 0 0;
+  background-color: var(--ai);
+  background-image: var(--pattern-seigaiha-strong);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+}
+.highlight__stage .figure {
+  animation: highlight-rise 0.6s ease-out;
+}
+.highlight__cup {
+  width: 72px;
+  height: 81px;
+  margin-bottom: 12px;
+}
+@keyframes highlight-rise {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .highlight__stage .figure {
+    animation: none;
+  }
+}
+.modal__box > h2.highlight__title {
+  font-size: clamp(1.8rem, 7vw, 2.4rem);
+  letter-spacing: 0.15em;
+}
+.highlight__body {
+  text-align: left;
+}
+.highlight__ceremony {
+  text-align: left;
+  padding: 8px 12px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+}
+.highlight__kojo {
+  margin: 8px 0;
+  padding: 12px 16px;
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  text-align: left;
+  background: var(--gold-bg);
+  border-left: 6px solid var(--shu);
+  border-radius: var(--radius);
+}
+
 /* 日誌 */
 .journal-year h3 {
   font-family: var(--font-head);

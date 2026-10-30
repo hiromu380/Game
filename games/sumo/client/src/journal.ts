@@ -28,6 +28,8 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'staffHire':
     case 'staffLeave':
       return 'business';
+    case 'kojo':
+      return 'stable';
     case 'earlier':
       return null;
   }
@@ -38,6 +40,7 @@ export function isMilestone(e: JournalEntry): boolean {
   return (
     (e.kind === 'promote' && (e.to === 'Y' || e.to === 'O')) ||
     (e.kind === 'yusho' && e.division === 'makuuchi') ||
+    e.kind === 'kojo' ||
     e.kind === 'successor' ||
     e.kind === 'independence' ||
     e.kind === 'open'
@@ -99,6 +102,18 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':
       return t('journal.branchClosed', { stable: e.stable });
+    case 'kojo':
+      return e.dohyoiri
+        ? t('journal.kojoDohyoiri', {
+            shikona: e.shikona,
+            word: t(`kojo.${e.word}` as MessageKey),
+            dohyoiri: t(`dohyoiri.${e.dohyoiri}.name` as MessageKey),
+          })
+        : t('journal.kojo', {
+            shikona: e.shikona,
+            rank: t(`rank.title.${e.to}` as MessageKey),
+            word: t(`kojo.${e.word}` as MessageKey),
+          });
     case 'diet':
       return t('journal.diet', { name: t(`diet.${e.diet}.name`) });
     case 'staffHire':
