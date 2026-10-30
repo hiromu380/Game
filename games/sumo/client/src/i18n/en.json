@@ -1137,5 +1137,6 @@
   "mid.lateEntry": "Enter late",
   "mid.note": "Sending him back keeps the missed days as losses, but he can win back bouts in the remaining days. Fighting hurt lowers his condition, makes new injuries likelier, and can slow or worsen his recovery.",
   "mid.continue": "Second half (from Day 9)",
-  "report.reentered": "Returned in the second half: {names} (fighting hurt may slow recovery)"
+  "report.reentered": "Returned in the second half: {names} (fighting hurt may slow recovery)",
+  "scene.keikoba": "The stable's practice room: the ring, a teppo pole and the master's raised seat"
 }

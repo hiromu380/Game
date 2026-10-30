@@ -1,0 +1,27 @@
+{
+  "dohyo": {
+    "files": ["dohyo.png"],
+    "size": [160, 96],
+    "anchor": [80, 95]
+  },
+  "keikoba_back": {
+    "files": ["keikoba_back.png"],
+    "size": [288, 176],
+    "anchor": [144, 175]
+  },
+  "teppo": {
+    "files": ["teppo.png"],
+    "size": [16, 56],
+    "anchor": [8, 55]
+  },
+  "weights": {
+    "files": ["weights.png"],
+    "size": [48, 40],
+    "anchor": [24, 39]
+  },
+  "zashiki": {
+    "files": ["zashiki.png"],
+    "size": [96, 64],
+    "anchor": [48, 63]
+  }
+}

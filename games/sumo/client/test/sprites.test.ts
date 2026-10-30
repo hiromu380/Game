@@ -42,3 +42,14 @@ describe('絵の一覧（sprites/catalog.json）', () => {
         expect(existsSync(join(client, 'src/assets/sprites', f))).toBe(true);
   });
 });
+
+describe('稽古場の絵の並べ方', () => {
+  it('奥の壁を先に置き、筋トレの器具は稽古場の改修2段目から', async () => {
+    const { keikobaLayout, WEIGHTS_FROM_DOJO } = await import('../src/art/sprites/keikoba');
+    const at = (dojo: number) =>
+      keikobaLayout({ player: { facilities: { dojo } } } as never).map((p) => p.sprite);
+    expect(at(0)[0]).toBe('keikoba_back');
+    expect(at(0)).not.toContain('weights');
+    expect(at(WEIGHTS_FROM_DOJO)).toContain('weights');
+  });
+});

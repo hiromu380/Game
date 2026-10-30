@@ -18,6 +18,7 @@ import {
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
+import { KeikobaScene } from './KeikobaScene';
 import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
 import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portraits';
@@ -61,6 +62,7 @@ export function StableTab({
   return (
     <div className="stack">
       <GuideCard game={game} />
+      <KeikobaScene game={game} />
       {detailRikishi && (
         <RikishiDetail
           subject={{
