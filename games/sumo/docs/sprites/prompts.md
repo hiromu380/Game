@@ -1,0 +1,271 @@
+# プロンプト集（Gemini の画像生成用）
+
+[spec.md](spec.md) の決まりで、部屋の全景の絵を Gemini（Nano Banana）で作るためのプロンプト。英語のまま貼り付ける（画像モデルは英語の指示のほうが崩れにくい）。
+
+## 使い方
+
+1. **最初に「見本」を作る**（下の「0. 見本」）。何枚か作って、いちばん好みの1枚を選び `client/sprites/raw/_reference.png` として保存する
+2. 以後はどの素材も、**見本の画像を添付してから**、「共通の文」＋「素材の文」を貼る
+3. 1回に1つの素材。気に入らなければ、同じ会話で直してほしい点だけを短く言う（下の「直すときの言い方」）
+4. よい1枚ができたら、ID の名前で保存して `client/sprites/raw/` に置く（例: `pine.png`、`rikishi_shiko__kuro.png`）
+5. 取り込む: リポジトリ直下で `python3 games/sumo/client/build/import-sprites.py`
+
+おすすめ: 下書きは Nano Banana 2（速い）、本番は Nano Banana Pro（細部と一貫性が強い）。縦横比は各プロンプトの「比率」に合わせる。
+
+## 共通の文（毎回、素材の文の前に貼る）
+
+```
+Use the attached reference image as the strict style guide: same line weight, same colors, same camera angle, same proportions.
+Style: cute deformed ukiyo-e (nishiki-e woodblock print) look, rendered as clean pixel-art-like game sprite. Flat color areas, bold dark sumi-ink outlines, only one step of shading (light side and shadow side), no gradients, no gloss, no photorealism, no 3D-render look. Traditional Japanese muted palette: sumi ink #2a2420, washi paper #f4ecdc, indigo #1f4466, vermilion #b3322a, ochre #c69a4a, pine green #4f7a4a, wood brown #8a5a34, roof tile slate #46505c, white plaster #f1e8d4.
+Camera: isometric 2:1 game view from above at about 30 degrees; the front of the object faces the lower-left, its side faces the lower-right; light comes from the upper-left.
+Background: one flat solid magenta color #FF00FF filling the whole background. No ground, no floor tiles, no cast shadow on the background, no text, no letters, no logo, no frame, no watermark. Draw the subject large, centered, fully inside the image, not cropped.
+```
+
+## 0. 見本（最初に1回）
+
+比率 16:9。添付なしで生成する。
+
+```
+Style: cute deformed ukiyo-e (nishiki-e woodblock print) look, rendered as clean pixel-art-like game sprite. Flat color areas, bold dark sumi-ink outlines, only one step of shading (light side and shadow side), no gradients, no gloss, no photorealism, no 3D-render look. Traditional Japanese muted palette: sumi ink #2a2420, washi paper #f4ecdc, indigo #1f4466, vermilion #b3322a, ochre #c69a4a, pine green #4f7a4a, wood brown #8a5a34, roof tile slate #46505c, white plaster #f1e8d4.
+Camera: isometric 2:1 game view from above at about 30 degrees; the front of the object faces the lower-left, its side faces the lower-right; light comes from the upper-left.
+Background: one flat solid magenta color #FF00FF filling the whole background. No ground, no floor tiles, no cast shadow on the background, no text, no letters, no logo, no frame, no watermark. Draw the subject large, centered, fully inside the image, not cropped.
+Draw a small style sheet with three separate items side by side with wide gaps: 1) a young chubby sumo wrestler, 2.5 heads tall, round face, small topknot chonmage, black practice mawashi, bare feet, standing and facing the lower-left; 2) a small traditional wooden gate with a tiled roof and a blank signboard; 3) a small Japanese black pine tree.
+```
+
+## 直すときの言い方
+
+- 背景に影や地面が出た → `Remove the ground and shadow. The background must be flat solid magenta #FF00FF only.`
+- 角度がずれた → `Keep the same isometric angle as the reference: front facing lower-left, side facing lower-right.`
+- リアルすぎる・立体的すぎる → `Make it flatter and more like a cute woodblock print: flat colors, bold ink outlines, one step of shading.`
+- コマがくっついた → `Draw the poses separately side by side with a wide empty gap between them.`
+- 頭身が違う → `Make the character 2.5 heads tall like the reference.`
+
+## 1. 稽古場
+
+### `keikoba_back` — 稽古場の奥の壁と床（断面）（優先 A・比率 4:3・1コマ）
+
+```
+Draw a cutaway diorama of a sumo stable practice hall (keikoba): only the back wall and the left side wall remain, the roof and the front walls are removed so we can see inside. Packed-earth floor raised slightly on a wooden base, white plaster walls with dark wooden pillars and beams, a small Shinto shrine shelf (kamidana) high on the back wall. Leave the floor empty (the ring, pillars and people are separate sprites).
+```
+
+### `dohyo` — 稽古土俵（優先 A・比率 16:9・1コマ）
+
+```
+Draw a square practice sumo ring (keiko-dohyo): a low raised square mound of ochre packed clay with a circle of straw rice-bale tawara on top, two short white starting lines in the middle. Nothing else.
+```
+
+### `teppo` — 鉄砲柱（優先 A・比率 9:16・1コマ）
+
+```
+Draw a single wooden teppo training pillar: a thick round wooden post standing upright, slightly worn where wrestlers push it, with a tiny base.
+```
+
+### `zashiki` — 上がり座敷（優先 A・比率 4:3・1コマ）
+
+```
+Draw a small raised tatami platform (agari-zashiki) where the stablemaster sits to watch practice: a low wooden platform with green-yellow tatami mats on top and one red zabuton cushion. No person.
+```
+
+### `weights` — 筋トレの器具（稽古場の改修2段目から）（優先 B・比率 1:1・1コマ）
+
+```
+Draw a simple strength-training corner: a short barbell on a wooden rack and two round iron weight plates, drawn in the same cute woodblock style.
+```
+
+## 2. 建物
+
+### `omoya` — 母屋（二階建て・縁側・暖簾）（優先 A・比率 1:1・1コマ）
+
+```
+Draw the main house of a sumo stable: a two-story traditional Japanese wooden house with a dark tiled gable roof and wide eaves, white plaster walls, dark wooden pillars, paper shoji windows, a wooden engawa veranda along the front, and an indigo noren curtain (plain, no letters) hanging at the entrance.
+```
+
+### `dorm_0` — 寮（増築なし）（優先 A・比率 1:1・1コマ）
+
+```
+Draw a two-story dormitory building for young sumo wrestlers: long narrow traditional wooden building with tiled roof, shoji windows on both floors, a small wooden balcony with futons hanging over the rail to air.
+```
+
+### `dorm_1` — 寮（増築1段目）（優先 B・比率 1:1・1コマ）
+
+```
+Draw the same dormitory building as before but extended: longer, with an added wing, tiled roof, shoji windows, futons airing on the balcony.
+```
+
+### `dorm_2` — 寮（増築2段目・三階建て）（優先 B・比率 3:4・1コマ）
+
+```
+Draw the same dormitory building but now three stories tall and long, tiled roof, rows of shoji windows, futons and towels airing on balconies.
+```
+
+### `chanko` — ちゃんこ場（屋根つきの炊事場）（優先 A・比率 4:3・1コマ）
+
+```
+Draw an open-sided chanko cooking shed: a small tiled lean-to roof on four wooden posts, a clay stove (kamado), a low wooden table and a huge black chanko pot; open on the front so we can see inside.
+```
+
+### `gate` — 門（看板は無地）（優先 A・比率 1:1・1コマ）
+
+```
+Draw the entrance gate of a sumo stable: a traditional wooden gate with two thick posts, a crossbeam, a small tiled roof on top, and a plain blank wooden signboard on the beam (no letters).
+```
+
+### `clinic` — 治療院（トレーナー契約のとき）（優先 B・比率 4:3・1コマ）
+
+```
+Draw a small one-story clinic hut for a sports trainer: white plaster walls, wooden frame, tiled roof, a plain light-blue cloth curtain at the door (no letters, no cross symbol).
+```
+
+## 3. 小物と植物
+
+### `fence` — 板塀（左下がり・右下がりの2本）（優先 A・比率 16:9・2コマ）
+
+```
+Draw two straight segments of a traditional dark wooden board fence (itabei) with a narrow tiled cap on top, side by side with a wide gap: the left one runs diagonally down to the lower-left, the right one runs diagonally down to the lower-right.
+```
+
+### `pine` — 松（優先 A・比率 3:4・1コマ）
+
+```
+Draw a single Japanese black pine tree in garden style (niwaki): a twisted trunk and flat cloud-like layers of dark green needles.
+```
+
+### `tree_season` — 季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪）（優先 A・比率 21:9・4コマ）
+
+```
+Draw the same single deciduous garden tree drawn four times side by side with wide gaps, as four seasons: 1) spring, full of pale pink cherry blossoms; 2) summer, fresh green leaves; 3) autumn, red and orange maple-like leaves; 4) winter, bare branches with a little white snow on them. Same trunk shape and size in all four.
+```
+
+### `lantern` — 石灯籠（優先 A・比率 9:16・1コマ）
+
+```
+Draw a small Japanese stone lantern (ishidoro) with a little square window and a pointed roof.
+```
+
+### `well` — 井戸（優先 B・比率 3:4・1コマ）
+
+```
+Draw an old wooden water well with a stone rim, a small tiled roof on two posts and a wooden bucket hanging on a rope.
+```
+
+### `nobori` — 幟（藍・紅・黄土・紫の4本）（優先 B・比率 21:9・4コマ）
+
+```
+Draw four tall narrow nobori banner flags on thin wooden poles, side by side with wide gaps, plain cloth with no letters: indigo, vermilion, ochre, purple.
+```
+
+### `laundry` — 物干し（まわしと浴衣）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a bamboo laundry pole on two wooden posts with drying sumo practice belts (long folded black and white mawashi strips), a towel and a light cotton yukata hanging from it.
+```
+
+### `pot` — ちゃんこの大鍋（湯気2コマ）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a huge black chanko-nabe cooking pot with a wooden lid slightly open, drawn twice side by side with a wide gap: 1) with a small puff of white steam above it; 2) with the steam puff a little higher and differently shaped.
+```
+
+### `tawara` — 米俵の山（優先 B・比率 4:3・1コマ）
+
+```
+Draw a small neat pile of rice straw bales (kome-dawara) tied with rope.
+```
+
+## 4. 人（まわしは幕下以下が黒・関取が白。稽古場の決まりどおり）
+
+### `rikishi_idle__kuro` — 力士・立つ（ふつう／息を吸う）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, round face, small topknot chonmage, bare feet), standing relaxed with arms at his sides, facing the lower-left. Draw him twice side by side with a wide gap: 1) normal; 2) breathing in, belly slightly bigger. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_idle__shiro` — 力士・立つ（ふつう／息を吸う）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, round face, small topknot chonmage, bare feet), standing relaxed with arms at his sides, facing the lower-left. Draw him twice side by side with a wide gap: 1) normal; 2) breathing in, belly slightly bigger. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `rikishi_shiko__kuro` — 力士・四股（足を上げる／踏む）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing shiko (the sumo leg stomp), facing the lower-left. Draw him twice side by side with a wide gap: 1) one leg raised high to the side, hands on his knees; 2) the leg stomped down, deep squat with knees wide. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_shiko__shiro` — 力士・四股（足を上げる／踏む）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing shiko (the sumo leg stomp), facing the lower-left. Draw him twice side by side with a wide gap: 1) one leg raised high to the side, hands on his knees; 2) the leg stomped down, deep squat with knees wide. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `rikishi_teppo__kuro` — 力士・鉄砲（右手／左手で突く）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing teppo training, thrusting his open palm forward at an invisible pillar, facing the lower-left, leaning forward. Draw him twice side by side with a wide gap: 1) right hand thrust forward; 2) left hand thrust forward. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_teppo__shiro` — 力士・鉄砲（右手／左手で突く）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing teppo training, thrusting his open palm forward at an invisible pillar, facing the lower-left, leaning forward. Draw him twice side by side with a wide gap: 1) right hand thrust forward; 2) left hand thrust forward. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `rikishi_suriashi__kuro` — 力士・すり足（右足／左足）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing suri-ashi (low sliding steps) in a low crouch with hands forward, facing the lower-left. Draw him twice side by side with a wide gap: 1) right foot forward; 2) left foot forward. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_suriashi__shiro` — 力士・すり足（右足／左足）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage, bare feet) doing suri-ashi (low sliding steps) in a low crouch with hands forward, facing the lower-left. Draw him twice side by side with a wide gap: 1) right foot forward; 2) left foot forward. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `rikishi_sit__kuro` — 力士・あぐらで座る／ちゃんこを食べる（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage) sitting cross-legged on the ground, facing the lower-left. Draw him twice side by side with a wide gap: 1) resting with hands on knees; 2) eating chanko from a bowl with chopsticks. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_sit__shiro` — 力士・あぐらで座る／ちゃんこを食べる（優先 A・比率 16:9・2コマ）
+
+```
+Draw a young chubby sumo wrestler (2.5 heads tall, small topknot chonmage) sitting cross-legged on the ground, facing the lower-left. Draw him twice side by side with a wide gap: 1) resting with hands on knees; 2) eating chanko from a bowl with chopsticks. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `rikishi_lie__kuro` — 力士・布団で横になる（けが・包帯）（優先 A・比率 16:9・1コマ）
+
+```
+Draw a young chubby sumo wrestler (small topknot chonmage) lying on his back on a white futon with a blanket over his belly, a white bandage around one arm and his head, resting because of an injury. Viewed from the same isometric angle. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `rikishi_lie__shiro` — 力士・布団で横になる（けが・包帯）（優先 A・比率 16:9・1コマ）
+
+```
+Draw a young chubby sumo wrestler (small topknot chonmage) lying on his back on a white futon with a blanket over his belly, a white bandage around one arm and his head, resting because of an injury. Viewed from the same isometric angle. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `moushiai__kuro` — 申し合い（2人が組む・押し込む）（優先 A・比率 21:9・2コマ）
+
+```
+Draw two chubby sumo wrestlers (2.5 heads tall, small topknots, bare feet) grappling each other in practice bout (moushiai), chest to chest, gripping each other's belts, the left one facing right and the right one facing left, drawn as one connected pair. Draw this pair twice side by side with a wide gap between the two pairs: 1) evenly locked; 2) the left wrestler pushing the right one back a little. His practice mawashi belt is BLACK (lower-division wrestler).
+```
+
+### `moushiai__shiro` — 申し合い（2人が組む・押し込む）（優先 A・比率 21:9・2コマ）
+
+```
+Draw two chubby sumo wrestlers (2.5 heads tall, small topknots, bare feet) grappling each other in practice bout (moushiai), chest to chest, gripping each other's belts, the left one facing right and the right one facing left, drawn as one connected pair. Draw this pair twice side by side with a wide gap between the two pairs: 1) evenly locked; 2) the left wrestler pushing the right one back a little. His practice mawashi belt is WHITE (sekitori, a senior wrestler); make him a bit bigger and heavier.
+```
+
+### `oyakata` — 親方（着物・正座で見る／立つ）（優先 A・比率 16:9・2コマ）
+
+```
+Draw a middle-aged stablemaster (oyakata), a former sumo wrestler, chubby, short hair, wearing a dark indigo kimono, facing the lower-left. Draw him twice side by side with a wide gap: 1) sitting in seiza on his knees with arms folded, watching; 2) standing with hands behind his back.
+```
+
+### `okami` — おかみさん（着物・立つ／盆を運ぶ）（優先 B・比率 16:9・2コマ）
+
+```
+Draw the stablemaster's wife (okami-san), friendly, hair tied up, wearing a calm muted-color kimono with an apron, facing the lower-left. Draw her twice side by side with a wide gap: 1) standing and smiling; 2) carrying a tray with rice balls.
+```

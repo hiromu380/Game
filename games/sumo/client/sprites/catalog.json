@@ -1,0 +1,277 @@
+{
+  "$comment": "部屋の全景に並べる絵の一覧（仕様書 docs/sprites/spec.md）。size は仕上がりのドット数 [幅, 高さ]。frames が 2 以上なら、1枚の画像に左から順に並べて生成する（コマ・向き・季節など）。variants があれば、その数だけ別の画像を生成する（ファイル名は <id>__<variant>.png）。priority A が最初に要るもの",
+  "version": 1,
+  "groups": [
+    {
+      "group": "keikoba",
+      "title": "稽古場",
+      "items": [
+        {
+          "id": "keikoba_back",
+          "name": "稽古場の奥の壁と床（断面）",
+          "size": [288, 176],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "dohyo",
+          "name": "稽古土俵",
+          "size": [160, 96],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "teppo",
+          "name": "鉄砲柱",
+          "size": [16, 56],
+          "frames": 1,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "zashiki",
+          "name": "上がり座敷",
+          "size": [96, 64],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "weights",
+          "name": "筋トレの器具（稽古場の改修2段目から）",
+          "size": [48, 40],
+          "frames": 1,
+          "priority": "B",
+          "outline": true
+        }
+      ]
+    },
+    {
+      "group": "buildings",
+      "title": "建物",
+      "items": [
+        {
+          "id": "omoya",
+          "name": "母屋（二階建て・縁側・暖簾）",
+          "size": [224, 192],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "dorm_0",
+          "name": "寮（増築なし）",
+          "size": [176, 176],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "dorm_1",
+          "name": "寮（増築1段目）",
+          "size": [208, 192],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "dorm_2",
+          "name": "寮（増築2段目・三階建て）",
+          "size": [208, 224],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "chanko",
+          "name": "ちゃんこ場（屋根つきの炊事場）",
+          "size": [144, 128],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "gate",
+          "name": "門（看板は無地）",
+          "size": [128, 112],
+          "frames": 1,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "clinic",
+          "name": "治療院（トレーナー契約のとき）",
+          "size": [112, 96],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        }
+      ]
+    },
+    {
+      "group": "props",
+      "title": "小物と植物",
+      "items": [
+        {
+          "id": "fence",
+          "name": "板塀（左下がり・右下がりの2本）",
+          "size": [64, 48],
+          "frames": 2,
+          "priority": "A",
+          "outline": false
+        },
+        {
+          "id": "pine",
+          "name": "松",
+          "size": [80, 112],
+          "frames": 1,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "tree_season",
+          "name": "季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪）",
+          "size": [80, 112],
+          "frames": 4,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "lantern",
+          "name": "石灯籠",
+          "size": [24, 40],
+          "frames": 1,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "well",
+          "name": "井戸",
+          "size": [48, 56],
+          "frames": 1,
+          "priority": "B",
+          "outline": true
+        },
+        {
+          "id": "nobori",
+          "name": "幟（藍・紅・黄土・紫の4本）",
+          "size": [16, 64],
+          "frames": 4,
+          "priority": "B",
+          "outline": true
+        },
+        {
+          "id": "laundry",
+          "name": "物干し（まわしと浴衣）",
+          "size": [80, 48],
+          "frames": 1,
+          "priority": "B",
+          "outline": true
+        },
+        {
+          "id": "pot",
+          "name": "ちゃんこの大鍋（湯気2コマ）",
+          "size": [40, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "tawara",
+          "name": "米俵の山",
+          "size": [40, 28],
+          "frames": 1,
+          "priority": "B",
+          "outline": true
+        }
+      ]
+    },
+    {
+      "group": "people",
+      "title": "人（まわしは幕下以下が黒・関取が白。稽古場の決まりどおり）",
+      "items": [
+        {
+          "id": "rikishi_idle",
+          "name": "力士・立つ（ふつう／息を吸う）",
+          "size": [32, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "rikishi_shiko",
+          "name": "力士・四股（足を上げる／踏む）",
+          "size": [32, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "rikishi_teppo",
+          "name": "力士・鉄砲（右手／左手で突く）",
+          "size": [32, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "rikishi_suriashi",
+          "name": "力士・すり足（右足／左足）",
+          "size": [32, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "rikishi_sit",
+          "name": "力士・あぐらで座る／ちゃんこを食べる",
+          "size": [32, 32],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "rikishi_lie",
+          "name": "力士・布団で横になる（けが・包帯）",
+          "size": [40, 24],
+          "frames": 1,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "moushiai",
+          "name": "申し合い（2人が組む・押し込む）",
+          "size": [48, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true,
+          "variants": ["kuro", "shiro"]
+        },
+        {
+          "id": "oyakata",
+          "name": "親方（着物・正座で見る／立つ）",
+          "size": [24, 40],
+          "frames": 2,
+          "priority": "A",
+          "outline": true
+        },
+        {
+          "id": "okami",
+          "name": "おかみさん（着物・立つ／盆を運ぶ）",
+          "size": [24, 40],
+          "frames": 2,
+          "priority": "B",
+          "outline": true
+        }
+      ]
+    }
+  ]
+}

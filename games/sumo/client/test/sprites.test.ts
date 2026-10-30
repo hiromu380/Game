@@ -1,0 +1,44 @@
+import { describe, expect, it } from 'vitest';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const client = join(__dirname, '..');
+const catalog = JSON.parse(readFileSync(join(client, 'sprites/catalog.json'), 'utf8')) as {
+  groups: {
+    items: { id: string; size: [number, number]; frames: number; variants?: string[] }[];
+  }[];
+};
+const items = catalog.groups.flatMap((g) => g.items);
+
+describe('絵の一覧（sprites/catalog.json）', () => {
+  it('ID は重ならず、大きさとコマ数がある', () => {
+    expect(new Set(items.map((i) => i.id)).size).toBe(items.length);
+    for (const i of items) {
+      expect(i.id).toMatch(/^[a-z][a-z0-9_]*$/);
+      expect(i.size[0]).toBeGreaterThan(0);
+      expect(i.size[1]).toBeGreaterThan(0);
+      expect(i.frames).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it('プロンプト集と仕様書に、すべての絵（種類ごと）が載っている', () => {
+    const prompts = readFileSync(join(client, '../docs/sprites/prompts.md'), 'utf8');
+    const spec = readFileSync(join(client, '../docs/sprites/spec.md'), 'utf8');
+    for (const i of items) {
+      expect(spec).toContain(`\`${i.id}\``);
+      for (const v of i.variants ?? [null]) {
+        const name = v ? `${i.id}__${v}` : i.id;
+        expect(prompts).toContain(`\`${name}\``);
+      }
+    }
+  });
+
+  it('取り込んだ絵の一覧（manifest.json）のファイルがそろっている', () => {
+    const path = join(client, 'src/art/sprites/manifest.json');
+    if (!existsSync(path)) return;
+    const manifest = JSON.parse(readFileSync(path, 'utf8')) as Record<string, { files: string[] }>;
+    for (const entry of Object.values(manifest))
+      for (const f of entry.files)
+        expect(existsSync(join(client, 'src/assets/sprites', f))).toBe(true);
+  });
+});
