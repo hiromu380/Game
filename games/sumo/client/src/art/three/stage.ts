@@ -10,6 +10,7 @@ import { PALETTE } from '../palette';
 import type { Pose } from '../../playback/boutScript';
 import { TAWARA_RADIUS, toStagePose } from './pose';
 import { dohyoBales } from './dohyoDetails';
+import { wrestlerMotion, type MotionClock } from './animation';
 
 type Side = 'E' | 'W';
 
@@ -19,6 +20,8 @@ export interface StageInput {
   pose: { east: Pose; west: Pose };
   arms: Arms;
   winner: Side | null;
+  /** 描画専用。省略時は最終姿勢で静止する。 */
+  motion?: MotionClock;
 }
 
 export interface MountedStage {
@@ -161,19 +164,26 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
   };
 
   const update = (input: StageInput) => {
-    for (const [puppet, pose] of [
-      [east, input.pose.east],
-      [west, input.pose.west],
+    for (const [index, puppet, pose, side] of [
+      [0, east, input.pose.east, 'E'],
+      [1, west, input.pose.west, 'W'],
     ] as const) {
       const p = toStagePose(pose);
-      puppet.root.position.set(p.x, 0.75, p.depth);
-      puppet.tilt.rotation.z = p.tilt;
-      for (let i = 0; i < 2; i++) puppet.arms[i]!.rotation.x = input.arms === 'push' ? -0.85 : 0;
-    }
-    for (let i = 0; i < shadows.length; i++) {
-      const p = toStagePose(i === 0 ? input.pose.east : input.pose.west);
-      shadows[i]!.position.x = p.x;
-      shadows[i]!.position.z = p.depth;
+      const movement = wrestlerMotion(input.motion, pose, side, input.arms);
+      // 勝敗と位置は台本からのみ取得。四股・腰・腕・脚は表示用の補間に限定する。
+      puppet.root.position.set(p.x, 0.75 + movement.rootRise, p.depth);
+      puppet.tilt.rotation.z = p.tilt + movement.leanZ;
+      puppet.tilt.scale.y = movement.bodyScaleY;
+      for (let i = 0; i < 2; i++) {
+        puppet.arms[i]!.rotation.x = movement.armsX;
+        puppet.legs[i]!.rotation.z = movement.legsZ[i]!;
+        puppet.legs[i]!.rotation.x = movement.legsX[i]!;
+      }
+      const shadow = shadows[index]!;
+      shadow.position.x = p.x;
+      shadow.position.z = p.depth;
+      shadow.scale.x = 0.72 * movement.shadowScale;
+      shadow.scale.y = 0.46 * movement.shadowScale;
     }
     fanPivot.rotation.z = input.winner === 'E' ? -0.75 : input.winner === 'W' ? 0.75 : 0;
     renderer.render(scene, camera);

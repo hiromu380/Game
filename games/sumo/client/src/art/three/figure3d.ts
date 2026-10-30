@@ -10,6 +10,7 @@ export interface Puppet {
   root: THREE.Group;
   tilt: THREE.Group;
   arms: [THREE.Group, THREE.Group];
+  legs: [THREE.Group, THREE.Group];
 }
 
 export function createIllustrator() {
@@ -91,10 +92,15 @@ export function createIllustrator() {
     parent.add(root);
 
     const w = 0.67 + ((look.width - 26) / 20) * 0.34;
-    // 足・手は短く、頭は大きい二頭身。丸みだけを3D化する。
-    for (const side of [-1, 1]) {
-      ball(figure, look.skin, [side * w * 0.53, 0.47, 0], [0.29, 0.44, 0.34]);
-      ball(figure, look.skin, [side * w * 0.54, 0.17, 0.2], [0.34, 0.17, 0.46]);
+    // 股関節を支点に脚を分離し、すり足と短い四股の動きを加えられるようにする。
+    const legs: [THREE.Group, THREE.Group] = [new THREE.Group(), new THREE.Group()];
+    for (let i = 0; i < 2; i++) {
+      const leg = legs[i]!;
+      const side = i === 0 ? -1 : 1;
+      leg.position.set(side * w * 0.53, 0.73, 0);
+      figure.add(leg);
+      ball(leg, look.skin, [0, -0.26, 0], [0.29, 0.44, 0.34]);
+      ball(leg, look.skin, [0, -0.56, 0.2], [0.34, 0.17, 0.46]);
     }
     ball(figure, look.kimono ? look.cloth : look.skin, [0, 1.22, 0], [w, 0.8, 0.63]);
     const arms: [THREE.Group, THREE.Group] = [new THREE.Group(), new THREE.Group()];
@@ -198,7 +204,7 @@ export function createIllustrator() {
     if (look.sweat) {
       ball(figure, PALETTE.aiLight, [0.69, 2.24, 0.17], [0.065, 0.16, 0.08]);
     }
-    return { root, tilt, arms };
+    return { root, tilt, arms, legs };
   };
 
   const dispose = () => {

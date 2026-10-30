@@ -5,6 +5,7 @@ import { boutScript, poseAt } from '../playback/boutScript';
 import { BoutStage } from '../art/BoutStage';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
+import type { MotionClock } from '../art/three/animation';
 
 const BoutStage3D = lazy(() => import('../art/three/BoutStage3D'));
 
@@ -101,7 +102,8 @@ export function BoutViewer({
             pose={pose}
             arms={time >= clash - 0.15 && !done ? 'push' : 'side'}
             winner={done ? winnerSide : null}
-            title={t('bout.title', { day: bout.day })}
+            title={t('bout.aria')}
+            motion={{ time, clash, duration: script.duration } satisfies MotionClock}
           />
         </Suspense>
         <p className="bout__names">

@@ -5,8 +5,9 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { BoutStage } from '../BoutStage';
 import { mountStage, type MountedStage } from './stage';
+import type { MotionClock } from './animation';
 
-type Props = ComponentProps<typeof BoutStage>;
+type Props = ComponentProps<typeof BoutStage> & { motion?: MotionClock };
 
 export default function BoutStage3D(props: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -55,6 +56,10 @@ export default function BoutStage3D(props: Props) {
     stageRef.current?.update(props);
   }, [props]);
 
-  if (fallback) return <BoutStage {...props} />;
+  if (fallback) {
+    const { motion: _motion, ...svgProps } = props;
+    void _motion;
+    return <BoutStage {...svgProps} />;
+  }
   return <canvas ref={canvasRef} className="dohyo dohyo--3d" role="img" aria-label={props.title} />;
 }
