@@ -29,7 +29,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 12) s = v12to13(s);
   if (s.version === 13) s = v13to14(s);
   if (s.version === 14) s = v14to15(s);
+  if (s.version === 15) s = v15to16(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 15 → 16: スカウト回り（まだ出ていない）
+ */
+function v15to16(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.scoutedAt = null;
+  s.version = 16;
+  return s as unknown as Raw;
 }
 
 /**

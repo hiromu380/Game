@@ -58,14 +58,12 @@ export function makeCandidate(
   prestige: number,
   allowForeign: boolean,
   noise = 10,
+  /** スカウト回り: 経歴を決める・素質を上乗せする・外国出身にする */
+  opts: { background?: Candidate['background']; talentBonus?: number; foreign?: boolean } = {},
 ): Candidate {
-  const background = rng.pick([
-    'juniorHigh',
-    'highSchool',
-    'highSchool',
-    'college',
-    'otherSport',
-  ] as const);
+  const background =
+    opts.background ??
+    rng.pick(['juniorHigh', 'highSchool', 'highSchool', 'college', 'otherSport'] as const);
   const age =
     background === 'juniorHigh'
       ? 15
@@ -76,7 +74,7 @@ export function makeCandidate(
           : rng.range(17, 22);
   const height = rng.range(RECRUIT.minHeight, 192);
   const weight = rng.range(Math.max(RECRUIT.minWeight, height - 90), height - 40);
-  const talent = rollTalent(rng, prestige);
+  const talent = clamp(rollTalent(rng, prestige) + (opts.talentBonus ?? 0), 1, 100);
   // 学生相撲の経験者は入門時に少し強い
   const exp = background === 'college' ? 8 : background === 'highSchool' ? 4 : 0;
   const abilities = rollAbilities(
@@ -93,7 +91,7 @@ export function makeCandidate(
     age,
     height,
     weight,
-    foreign: allowForeign && rng.chance(0.08),
+    foreign: opts.foreign ?? (allowForeign && rng.chance(0.08)),
     abilities,
     talent,
     peakAge: rng.range(GROWTH.peakAge[0], GROWTH.peakAge[1]),

@@ -31,6 +31,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'kojo':
       return 'stable';
     case 'patron':
+    case 'scout':
       return 'business';
     case 'rival':
     case 'office':
@@ -110,6 +111,11 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':
       return t('journal.branchClosed', { stable: e.stable });
+    case 'scout':
+      return t(e.count > 0 ? 'journal.scout' : 'journal.scoutNone', {
+        trip: t(`scout.${e.trip}.name` as MessageKey),
+        count: e.count,
+      });
     case 'patron':
       return t(`journal.patron.${e.event}` as MessageKey, {
         name: t(`patron.kind.${e.patronKind}` as MessageKey, { surname: e.surname }),

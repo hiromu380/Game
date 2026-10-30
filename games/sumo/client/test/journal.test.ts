@@ -39,6 +39,8 @@ const SAMPLES: JournalEntry[] = [
   { bashoIndex: 6, kind: 'branchClosed', stable: '浦風' },
   { bashoIndex: 7, kind: 'diet', diet: 'hearty' },
   { bashoIndex: 9, kind: 'office', rank: 'iin' },
+  { bashoIndex: 11, kind: 'scout', trip: 'interHigh', count: 2 },
+  { bashoIndex: 11, kind: 'scout', trip: 'countryside', count: 0 },
   ...(
     ['construction', 'ryotei', 'hospital', 'it', 'fishery', 'brewery', 'hometown'] as const
   ).flatMap((patronKind) =>

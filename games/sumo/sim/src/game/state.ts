@@ -19,6 +19,7 @@ import type {
   GameState,
   Diet,
   PartyLevel,
+  ScoutTripId,
   KakunId,
   LineageEntry,
   Policy,
@@ -33,6 +34,7 @@ import { initialOffice, officeAtLeast } from '../world/office';
 import { OFFICE } from '../balance/office';
 import { KOENKAI } from '../balance/koenkai';
 import { canVisit } from '../stable/koenkai';
+import { canScout, goScouting } from './recruit';
 import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
@@ -448,5 +450,14 @@ export function visitPatron(input: GameState, patronId: number): GameState {
   q.favor = Math.min(100, q.favor + KOENKAI.visitFavor);
   q.visitedAt = state.bashoIndex;
   state.player.personalMoney -= KOENKAI.visitCost;
+  return state;
+}
+
+/** スカウト回りに出る（1つの場所に1回。部屋の口座から払う）。会えた入門希望者は候補に加わる */
+export function scoutTrip(input: GameState, id: ScoutTripId): GameState {
+  if (!canScout(input, id)) return input;
+  const state = clone(input);
+  const count = goScouting(state, id);
+  note(state, { kind: 'scout', trip: id, count });
   return state;
 }

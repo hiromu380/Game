@@ -356,7 +356,12 @@ export interface PlayerState {
   office: { rank: AssocRank; since: number };
   /** 後援会 */
   koenkai: Koenkai;
+  /** 最後にスカウト回りに出た場所（1つの場所に1回） */
+  scoutedAt: number | null;
 }
+
+export type ScoutTripId =
+  'juniorHighMeet' | 'interHigh' | 'collegeMeet' | 'countryside' | 'overseas';
 
 export type PartyLevel = 'none' | 'small' | 'grand';
 export type PatronKind =
@@ -475,6 +480,8 @@ export type JournalEvent =
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
+  /** スカウト回り（会えた人数） */
+  | { kind: 'scout'; trip: ScoutTripId; count: number }
   /** タニマチが付いた・離れた */
   | { kind: 'patron'; event: 'join' | 'leave'; surname: string; patronKind: PatronKind }
   /** 協会の役職が上がった・理事選挙の結果 */

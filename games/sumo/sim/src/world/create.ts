@@ -47,8 +47,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 13: ライバルの部屋（rival）
  * 14: 協会の役職と理事選挙（player.office・board・pending.election）
  * 15: 後援会とタニマチ（player.koenkai）
+ * 16: スカウト回り（player.scoutedAt）
  */
-export const SAVE_VERSION = 15;
+export const SAVE_VERSION = 16;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -209,6 +210,7 @@ export function createGame(options: NewGameOptions): GameState {
       staff: [],
       office: { rank: initialOffice(oyakata.age), since: 0 },
       koenkai: { members: 0, corporate: 0, party: 'small', patrons: [] },
+      scoutedAt: null,
     },
     names: [],
     ichimon: [],
