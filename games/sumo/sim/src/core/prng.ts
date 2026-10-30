@@ -63,4 +63,5 @@ export const SEED = {
   condition: 9,
   kakun: 10,
   lineage: 11,
+  happening: 12,
 } as const;

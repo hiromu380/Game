@@ -7,6 +7,7 @@ export { createGame, SAVE_VERSION, type NewGameOptions } from './world/create';
 export { advanceBasho } from './game/advance';
 export {
   acceptCandidate,
+  answerHappening,
   answerIndependence,
   answerRetirement,
   chooseSuccessor,

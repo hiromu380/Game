@@ -24,6 +24,7 @@ import { applyKakun } from '../lineage/kakun';
 import { settleBasho, sum } from '../money/ledger';
 import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
 import { makeCandidates, npcRecruits } from './recruit';
+import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, newToshiyoriName, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { SANSHO } from '../balance/sansho';
@@ -61,8 +62,9 @@ export function advanceBasho(input: GameState): GameState {
   // 1. 引退の申し出・入門希望者
   for (const id of state.pending.retireRequests) retireRikishi(state, id, report);
   state.pending.retireRequests = [];
-  // 返事をしなかった独立の申し出は、引き留めたことにする
+  // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
   state.pending.independence = null;
+  if (state.pending.happening) applyHappening(state, Number.MAX_SAFE_INTEGER);
   state.pending.candidates = [];
   let byId = new Map(state.rikishi.map((r) => [r.id, r]));
 
@@ -288,15 +290,21 @@ export function advanceBasho(input: GameState): GameState {
     train(r, ctx, growthRng);
   }
 
-  // 強行出場の判断は1場所かぎり
-  for (const r of state.rikishi) r.playHurt = false;
+  // 強行出場の判断・出稽古の伸びは1場所かぎり
+  for (const r of state.rikishi) {
+    r.playHurt = false;
+    r.boost = 1;
+  }
 
   // 6. 年の終わり（九州場所の後）
   if (state.bashoIndex % 6 === 5) yearEnd(state);
 
   // 7. 次の場所へ
   state.bashoIndex++;
-  if (!state.gameOver) state.pending.candidates = makeCandidates(state);
+  if (!state.gameOver) {
+    state.pending.candidates = makeCandidates(state);
+    rollHappening(state);
+  }
   state.lastReport = report;
   return state;
 }

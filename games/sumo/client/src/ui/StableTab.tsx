@@ -17,6 +17,7 @@ import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portra
 import { RikishiDetail } from './RikishiDetail';
 import { useState } from 'react';
 import { IndependencePanel } from './IndependencePanel';
+import { HappeningPanel } from './HappeningPanel';
 import { rankLabel, recordLabel } from '../format';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
@@ -93,6 +94,8 @@ export function StableTab({
           ))}
         </section>
       )}
+
+      <HappeningPanel game={game} setGame={setGame} />
 
       {game.pending.independence !== null && (
         <IndependencePanel game={game} ranks={ranks} setGame={setGame} />

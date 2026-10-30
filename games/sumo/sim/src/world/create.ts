@@ -33,8 +33,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 5: 三賞と優勝決定戦（career.sansho・lastReport.sansho・playoff）
  * 6: けがを押して出場（rikishi.playHurt）
  * 7: 番付の推移と歴代の力士（rikishi.track・player.alumni）
+ * 8: 場所の間の出来事（pending.happening・rikishi.boost）
  */
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -191,6 +192,7 @@ export function createGame(options: NewGameOptions): GameState {
       kakun: null,
       independence: null,
       takeOver: null,
+      happening: null,
     },
     gameOver: null,
     lastReport: null,
@@ -261,6 +263,7 @@ function makeVeteran(
     exOzeki: false,
     playHurt: false,
     track: [],
+    boost: 1,
   };
 }
 

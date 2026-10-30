@@ -53,7 +53,9 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   const ageFactor =
     r.age <= GROWTH.youthBonusUntil ? GROWTH.youthBonus : r.age <= r.peakAge ? 1 : 0;
   const coach =
-    (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) * ctx.growthMultiplier;
+    r.boost *
+    (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) *
+    ctx.growthMultiplier;
   const grow = (key: keyof Abilities, rate: number) => {
     const a = r.abilities[key];
     if (a >= r.talent || ageFactor === 0) return;

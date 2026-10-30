@@ -87,6 +87,8 @@ export interface Rikishi {
   playHurt: boolean;
   /** 自分の部屋にいる間の場所ごとの成績（番付の推移のグラフ用。他の部屋の力士は空） */
   track: TrackEntry[];
+  /** 次の稽古の伸びの倍率（出稽古など。稽古のあと 1 に戻る） */
+  boost: number;
 }
 
 /** 場所ごとの成績（番付の上からの順位つき） */
@@ -179,6 +181,16 @@ export interface Oyakata {
   since: number;
 }
 
+/** 場所の間の出来事 */
+export type HappeningId =
+  | 'supporterParty'
+  | 'demegeiko'
+  | 'tvInterview'
+  | 'kidsSumo'
+  | 'famousDoctor'
+  | 'promisingKid'
+  | 'riceGift';
+
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
 
@@ -232,6 +244,8 @@ export interface Pending {
   independence: number | null;
   /** 跡継ぎがいないとき、継ぐことのできる分家の部屋 */
   takeOver: number[] | null;
+  /** 場所の間の出来事（target はけがの弟子など、出来事の相手） */
+  happening: { id: HappeningId; target: number | null } | null;
 }
 
 export interface PlayerState {

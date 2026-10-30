@@ -28,6 +28,7 @@ import type {
   Policy,
 } from '../model/types';
 import { nextBuildCost, stableCapacity } from '../money/facilities';
+import { applyHappening } from './happening';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
@@ -123,6 +124,14 @@ export function setPolicy(input: GameState, id: number, policy: Policy): GameSta
   const state = clone(input);
   const r = state.rikishi.find((x) => x.id === id);
   if (r && r.stableId === state.player.stableId) r.policy = policy;
+  return state;
+}
+
+/** 場所の間の出来事に答える（option は選択肢の番号） */
+export function answerHappening(input: GameState, option: number): GameState {
+  if (!input.pending.happening) return input;
+  const state = clone(input);
+  applyHappening(state, option);
   return state;
 }
 

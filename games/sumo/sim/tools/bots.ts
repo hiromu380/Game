@@ -7,6 +7,7 @@
  */
 import {
   acceptCandidate,
+  answerHappening,
   answerIndependence,
   answerRetirement,
   buildFacility,
@@ -36,6 +37,8 @@ function decide(s: GameState, kind: BotKind): GameState {
   if (state.pending.kakun) state = pickKakun(state, state.pending.kakun[0]!, 0);
   if (state.pending.independence !== null)
     state = answerIndependence(state, kind === 'careful', []);
+  // 出来事: careful は最初の選択肢（会合に出る・出稽古に出す・治療する…）、passive は断る
+  if (state.pending.happening && kind === 'careful') state = answerHappening(state, 0);
   for (const id of state.pending.retireRequests) state = answerRetirement(state, id, true);
   for (const c of state.pending.candidates) {
     const size = state.rikishi.filter((r) => r.stableId === state.player.stableId).length;

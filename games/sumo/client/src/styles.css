@@ -278,6 +278,13 @@ h3 {
   background: var(--shu);
   border-radius: 2px;
 }
+.panel--event {
+  border-color: var(--ai);
+  box-shadow: var(--print) var(--ai-light);
+}
+.panel--event > h2::before {
+  background: var(--ai);
+}
 .panel--alert {
   border-color: var(--shu);
   box-shadow: var(--print) var(--shu-light);

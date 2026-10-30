@@ -15,7 +15,17 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 4) s = v4to5(s);
   if (s.version === 5) s = v5to6(s);
   if (s.version === 6) s = v6to7(s);
+  if (s.version === 7) s = v7to8(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/** 7 → 8: 場所の間の出来事（なし）と稽古の伸びの倍率（1） */
+function v7to8(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.pending.happening = null;
+  for (const r of s.rikishi) r.boost = 1;
+  s.version = 8;
+  return s as unknown as Raw;
 }
 
 /** 6 → 7: 番付の推移（これから記録）と歴代の力士（なし） */
