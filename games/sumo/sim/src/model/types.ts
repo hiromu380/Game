@@ -1,4 +1,5 @@
 import type { Dohyoiri, KojoWord } from '../balance/ceremony';
+import type { InjuryPart, Treatment } from '../balance/injury';
 /**
  * ゲームの状態（すべて JSON にそのまま保存できる形）
  */
@@ -63,6 +64,15 @@ export interface Career {
   kimarite?: Record<string, number>;
 }
 
+export interface Wound {
+  part: InjuryPart;
+  /** 左右（左右のない部位は null） */
+  side: 'L' | 'R' | null;
+  /** 全治（場所） */
+  total: number;
+  treatment: Treatment;
+}
+
 export interface Rikishi {
   id: number;
   name: string;
@@ -88,6 +98,10 @@ export interface Rikishi {
   exOzeki: boolean;
   /** けがを押して次の場所に出る（親方の判断。自分の弟子だけ。場所が終わると戻る） */
   playHurt: boolean;
+  /** 今のけがの部位・全治・治療（けがの間だけ） */
+  wound?: Wound;
+  /** 古傷の部位（治った後も、また痛めやすい） */
+  oldInjuries?: InjuryPart[];
   /** 自分の部屋にいる間の場所ごとの成績（番付の推移のグラフ用。他の部屋の力士は空） */
   track: TrackEntry[];
   /** 次の稽古の伸びの倍率（出稽古など。稽古のあと 1 に戻る） */
@@ -331,6 +345,8 @@ export interface Pending {
    * choice: 自分の答え（立候補する・見送る。推薦がなくても立候補できる＝造反）。返事がなければ、推薦があれば立候補・なければ見送り
    */
   election: { recommended: 'riji' | 'fukuRiji' | null; choice: 'run' | 'stay' | null } | null;
+  /** けがの治療の方針を聞いている自分の弟子（返事をしなければ保存療法） */
+  treatment: number[];
 }
 
 export interface PlayerState {
@@ -504,6 +520,8 @@ export type JournalEvent =
       from?: string;
     }
   | { kind: 'kojo'; shikona: string; to: 'O' | 'Y'; word: KojoWord; dohyoiri?: Dohyoiri }
+  /** けが: 手術を受けた・古傷になった */
+  | { kind: 'injury'; event: 'surgery' | 'chronic'; shikona: string; part: InjuryPart }
   /** 引退相撲・断髪式（はさみを入れた人数） */
   | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
   | { kind: 'staffHire'; role: StaffRole; name: string }

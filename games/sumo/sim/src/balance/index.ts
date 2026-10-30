@@ -19,3 +19,4 @@ export * from './office';
 export * from './koenkai';
 export * from './scouting';
 export * from './danpatsu';
+export * from './injury';

@@ -35,6 +35,7 @@ import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '..
 import { OFFICE } from '../balance/office';
 import { settleKoenkai } from '../stable/koenkai';
 import { holdDanpatsu } from '../stable/danpatsu';
+import { tagInjuries } from '../career/injury';
 import { TRAITS } from '../balance/traits';
 import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
@@ -68,6 +69,8 @@ export function advanceBasho(input: GameState): GameState {
   // 1. 引退の申し出・入門希望者
   for (const id of state.pending.retireRequests) retireRikishi(state, id, report);
   state.pending.retireRequests = [];
+  // 返事をしなかった治療の方針は、保存療法
+  state.pending.treatment = [];
   // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
   state.pending.independence = null;
   if (state.pending.happening) applyHappening(state, Number.MAX_SAFE_INTEGER);
@@ -396,6 +399,8 @@ export function advanceBasho(input: GameState): GameState {
 
   // 7. 次の場所へ
   state.bashoIndex++;
+  // けがの部位と治療の方針・治ったけがの古傷
+  tagInjuries(state);
   if (!state.gameOver) {
     state.pending.candidates = makeCandidates(state);
     rollHappening(state);

@@ -48,8 +48,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 14: 協会の役職と理事選挙（player.office・board・pending.election）
  * 15: 後援会とタニマチ（player.koenkai）
  * 16: スカウト回り（player.scoutedAt）
+ * 17: けがの部位・治療・古傷（rikishi.wound・oldInjuries、pending.treatment）
  */
-export const SAVE_VERSION = 16;
+export const SAVE_VERSION = 17;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -224,6 +225,7 @@ export function createGame(options: NewGameOptions): GameState {
       takeOver: null,
       happening: null,
       election: null,
+      treatment: [],
     },
     gameOver: null,
     lastReport: null,

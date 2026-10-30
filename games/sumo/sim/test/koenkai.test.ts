@@ -51,7 +51,7 @@ describe('後援会とタニマチ', () => {
     v14.version = 14;
     delete v14.player.koenkai;
     const m = migrateSave(v14)!;
-    expect(m.version).toBe(16);
+    expect(m.version).toBe(17);
     expect(m.player.koenkai.patrons.length).toBe(1);
   });
 });

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { woundName } from '../injury';
 import {
   sumMoney,
   type BashoReport,
@@ -213,7 +214,16 @@ export function ReportDialog({
 
         {report.injuries.length > 0 && (
           <p className="warn">
-            {t('report.injuries', { names: report.injuries.map(nameOf).join('・') })}
+            {t('report.injuries', {
+              names: report.injuries
+                .map((id) => {
+                  const w = byId.get(id)?.wound;
+                  return w
+                    ? t('report.injuryOne', { name: nameOf(id), part: woundName(t, w) })
+                    : nameOf(id);
+                })
+                .join('・'),
+            })}
           </p>
         )}
         {myRetired.length > 0 && (

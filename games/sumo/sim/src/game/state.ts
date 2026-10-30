@@ -36,6 +36,8 @@ import { KOENKAI } from '../balance/koenkai';
 import { canVisit } from '../stable/koenkai';
 import { canScout, goScouting } from './recruit';
 import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
+import { applyTreatment, tagInjuries } from '../career/injury';
+import type { Treatment } from '../balance/injury';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
@@ -159,6 +161,7 @@ export function answerHappening(input: GameState, option: number): GameState {
       ...(name ? { name } : {}),
       ...(res.hit === null ? {} : { hit: res.hit }),
     });
+  tagInjuries(state);
   return state;
 }
 
@@ -166,8 +169,18 @@ export function answerHappening(input: GameState, option: number): GameState {
 export function setPlayHurt(input: GameState, id: number, playHurt: boolean): GameState {
   const r = input.rikishi.find((x) => x.id === id);
   if (!r || r.stableId !== input.player.stableId || r.injury === 0) return input;
+  // 手術の後は出られない
+  if (playHurt && r.wound?.treatment === 'surgery') return input;
   const state = clone(input);
   state.rikishi.find((x) => x.id === id)!.playHurt = playHurt;
+  return state;
+}
+
+/** けがの治療の方針（手術・保存療法）を決める */
+export function chooseTreatment(input: GameState, id: number, treatment: Treatment): GameState {
+  if (!input.pending.treatment.includes(id)) return input;
+  const state = clone(input);
+  applyTreatment(state, id, treatment);
   return state;
 }
 

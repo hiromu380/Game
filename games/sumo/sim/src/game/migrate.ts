@@ -30,7 +30,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 13) s = v13to14(s);
   if (s.version === 14) s = v14to15(s);
   if (s.version === 15) s = v15to16(s);
+  if (s.version === 16) s = v16to17(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 16 → 17: けがの治療の方針（まだ聞いていない）。今のけがの部位は次の場所の後に付く
+ */
+function v16to17(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.pending.treatment = [];
+  s.version = 17;
+  return s as unknown as Raw;
 }
 
 /**

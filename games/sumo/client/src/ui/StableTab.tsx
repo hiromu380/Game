@@ -3,6 +3,8 @@ import {
   answerRetirement,
   declineCandidate,
   setPlayHurt,
+  chooseTreatment,
+  type Treatment,
   setPolicy,
   stableCapacity,
   styleOf,
@@ -16,6 +18,7 @@ import {
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
+import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
 import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portraits';
 import { RikishiDetail } from './RikishiDetail';
@@ -150,6 +153,8 @@ export function StableTab({
                 update({ guide: withStep(settings.guide, 'policy') });
               }}
               onPlayHurt={(play) => setGame(setPlayHurt(game, r.id, play))}
+              askTreatment={game.pending.treatment.includes(r.id)}
+              onTreatment={(tr) => setGame(chooseTreatment(game, r.id, tr))}
               onDetail={() => setDetail(r.id)}
             />
           ))}
@@ -216,12 +221,16 @@ function RikishiCard({
   rank,
   onPolicy,
   onPlayHurt,
+  askTreatment,
+  onTreatment,
   onDetail,
 }: {
   r: Rikishi;
   rank: Rank | null;
   onPolicy: (p: Policy) => void;
   onPlayHurt: (play: boolean) => void;
+  askTreatment: boolean;
+  onTreatment: (t: Treatment) => void;
   onDetail: () => void;
 }) {
   const { t } = useI18n();
@@ -263,7 +272,19 @@ function RikishiCard({
           <span>{t('rikishi.style', { style: t(`style.${styleOf(r.abilities)}`) })}</span>
           <span>{t('rikishi.fatigue', { value: Math.round(r.fatigue) })}</span>
           {r.injury > 0 && (
-            <span className="tag tag--warn">{t('rikishi.injury', { basho: r.injury })}</span>
+            <span className="tag tag--warn">
+              {r.wound
+                ? t('rikishi.injuryPart', { part: woundName(t, r.wound), basho: r.injury })
+                : t('rikishi.injury', { basho: r.injury })}
+              {r.wound?.treatment === 'surgery' && t('rikishi.afterSurgery')}
+            </span>
+          )}
+          {(r.oldInjuries ?? []).length > 0 && (
+            <span className="tag" title={t('rikishi.oldInjuryDesc')}>
+              {t('rikishi.oldInjury', {
+                parts: r.oldInjuries!.map((p) => partName(t, p)).join(t('rikishi.oldInjurySep')),
+              })}
+            </span>
           )}
           {last && <span>{t('rikishi.last', { record: recordLabel(t, last) })}</span>}
           {(knownTraits(r) ?? []).map((tr) => (
@@ -278,7 +299,20 @@ function RikishiCard({
           )}
         </div>
       </div>
-      {r.injury > 0 && (
+      {askTreatment && r.wound && (
+        <div className="hurt" role="group" aria-label={t('treatment.label')}>
+          <span className="hurt__note">
+            {t('treatment.note', { part: woundName(t, r.wound), total: r.wound.total })}
+          </span>
+          <button className="policy__btn" onClick={() => onTreatment('surgery')}>
+            {t('treatment.surgery')}
+          </button>
+          <button className="policy__btn" onClick={() => onTreatment('rest')}>
+            {t('treatment.rest')}
+          </button>
+        </div>
+      )}
+      {r.injury > 0 && !askTreatment && r.wound?.treatment !== 'surgery' && (
         <div className="hurt" role="group" aria-label={t('hurt.label')}>
           <span className="hurt__note">{t('hurt.note')}</span>
           <button

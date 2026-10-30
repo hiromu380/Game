@@ -1,6 +1,7 @@
 /**
  * 力士の個性と得意技（純粋関数）。個性は ID・素質・身長から決まり、変わらない
  */
+import { chronicFactor } from './injury';
 import { KIMARITE_BY_ID } from '../balance/kimarite';
 import { TRAIT_EXCLUSIVE, TRAIT_IDS, TRAITS, type TraitId } from '../balance/traits';
 import type { Career, Rikishi } from '../model/types';
@@ -45,7 +46,8 @@ export function fragilityOf(r: Rikishi): number {
   return (
     r.fragility *
     (t.includes('tough') ? TRAITS.tough.fragility : 1) *
-    (t.includes('fragileBody') ? TRAITS.fragileBody.fragility : 1)
+    (t.includes('fragileBody') ? TRAITS.fragileBody.fragility : 1) *
+    chronicFactor(r)
   );
 }
 

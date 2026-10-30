@@ -30,6 +30,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
       return 'business';
     case 'kojo':
     case 'danpatsu':
+    case 'injury':
       return 'stable';
     case 'patron':
     case 'scout':
@@ -146,6 +147,11 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
             rank: t(`rank.title.${e.to}` as MessageKey),
             word: t(`kojo.${e.word}` as MessageKey),
           });
+    case 'injury':
+      return t(`journal.injury.${e.event}`, {
+        shikona: e.shikona,
+        part: t(`injury.part.${e.part}` as MessageKey),
+      });
     case 'danpatsu':
       return t(`journal.danpatsu.${e.venue}`, { shikona: e.shikona, hasami: e.hasami });
     case 'diet':

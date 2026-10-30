@@ -6,6 +6,7 @@ import type { Prng } from '../core/prng';
 import type { Rank, Rikishi } from '../model/types';
 import { isSekitori } from '../banzuke/rank';
 import { TRAITS } from '../balance/traits';
+import { INJURY } from '../balance/injury';
 import { hasTrait } from './traits';
 
 /** この場所の後に引退を考えるか（1場所あたりの確率で判定） */
@@ -34,6 +35,8 @@ export function wantsToRetire(r: Rikishi, rank: Rank, rng: Prng): boolean {
   if (!wasSekitori && hasTrait(r, 'sensitive')) perYear += TRAITS.sensitive.retirePerYear;
   // 長いけがは引退のきっかけになる
   if (r.injury >= 2 && r.age >= 27) perYear += 0.2;
+  // 古傷が多いと、続けるのがつらくなる
+  perYear += (r.oldInjuries?.length ?? 0) * INJURY.chronicRetirePerYear;
   return rng.chance(Math.min(0.95, perYear / 6));
 }
 
