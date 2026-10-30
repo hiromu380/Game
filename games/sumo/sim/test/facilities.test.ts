@@ -49,11 +49,17 @@ describe('設備と契約', () => {
     );
   });
 
-  it('スカウトの網を張ると入門希望者が増える（同じシードで比べる）', () => {
-    const s = createGame({ seed: 8 });
-    const a = advanceBasho(s);
-    const b = advanceBasho(setContract(s, 'scout', 2));
-    expect(b.pending.candidates.length).toBe(a.pending.candidates.length + 2);
+  it('スカウトの網を張ると入門希望者が増える（同じシードで2年分を数えて比べる）', () => {
+    const count = (scout: number) => {
+      let s = setContract(createGame({ seed: 8 }), 'scout', scout);
+      let n = 0;
+      for (let i = 0; i < 12; i++) {
+        s = advanceBasho(s);
+        n += s.pending.candidates.length;
+      }
+      return n;
+    };
+    expect(count(2)).toBeGreaterThan(count(0));
   });
 
   it('建物の契約の上げ下げはできない・範囲外のレベルは無視', () => {

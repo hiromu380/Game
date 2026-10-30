@@ -43,6 +43,6 @@ export const PROMOTION = {
   /** 大関から落ちた翌場所に、この勝ち星で大関へ戻る */
   ozekiReturnWins: 10,
   /** 横綱: 大関で2場所続けて優勝、または片方優勝でもう片方が準ずる成績（下の勝ち星以上）。合計の勝ち星も見る */
-  yokozunaWins2: 27,
-  yokozunaOtherMin: 13,
+  yokozunaWins2: 26,
+  yokozunaOtherMin: 12,
 };

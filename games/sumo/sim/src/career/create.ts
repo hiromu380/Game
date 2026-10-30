@@ -30,9 +30,11 @@ export function emptyCareer(): Career {
 /** 素質（伸びの上限）。名声が高いほど良い素質が来る */
 export function rollTalent(rng: Prng, prestige: number): number {
   const bonus = Math.min(RECRUIT.talentPrestigeMax, prestige * RECRUIT.talentPerPrestige);
-  const base = rng.chance(RECRUIT.talentRareChance)
-    ? rng.range(RECRUIT.talentMax, RECRUIT.talentRareMax)
-    : rng.range(RECRUIT.talentMin, RECRUIT.talentMax);
+  const base = rng.chance(RECRUIT.talentStarChance)
+    ? rng.range(RECRUIT.talentStarMin, 100)
+    : rng.chance(RECRUIT.talentRareChance)
+      ? rng.range(RECRUIT.talentMax, RECRUIT.talentRareMax)
+      : rng.range(RECRUIT.talentMin, RECRUIT.talentMax);
   return clamp(Math.round(base + bonus), RECRUIT.talentMin, 100);
 }
 

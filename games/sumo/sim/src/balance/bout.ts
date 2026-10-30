@@ -14,7 +14,7 @@ export const BOUT = {
   /** 疲労 1 あたりの減点 */
   fatiguePenalty: 0.05,
   /** 勝つ確率のなだらかさ（core/math.ts の winProbability） */
-  k: 9,
+  k: 7,
   /** 場所ごとの調子（気力）の幅 ± */
   conditionRange: 4,
 };

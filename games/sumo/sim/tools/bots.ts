@@ -38,7 +38,9 @@ function decide(s: GameState, kind: BotKind): GameState {
     state = answerIndependence(state, kind === 'careful', []);
   for (const id of state.pending.retireRequests) state = answerRetirement(state, id, true);
   for (const c of state.pending.candidates) {
-    if (kind === 'passive' || c.scoutGrade >= 3) state = acceptCandidate(state, c.id);
+    const size = state.rikishi.filter((r) => r.stableId === state.player.stableId).length;
+    // careful でも、弟子が少ないうちは部屋が回らないので広く受け入れる
+    if (kind === 'passive' || c.scoutGrade >= 3 || size < 12) state = acceptCandidate(state, c.id);
   }
   if (kind === 'careful') {
     const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;

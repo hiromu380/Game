@@ -4,7 +4,7 @@
 import { RECRUIT } from '../balance/career';
 import { GAME } from '../balance/game';
 import { FACILITY_EFFECTS } from '../balance/facilities';
-import { makeCandidate, rikishiFromCandidate, styleOf } from '../career/create';
+import { makeCandidate, rikishiFromCandidate, rollTalent, styleOf } from '../career/create';
 import { lineageCharOf, makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { Candidate, GameState, Rikishi } from '../model/types';
@@ -19,18 +19,24 @@ export function isSpringBasho(bashoIndex: number): boolean {
 /** 次の場所の前に来る入門希望者（state.nextId を進める） */
 export function makeCandidates(state: GameState): Candidate[] {
   const rng = createPrng(deriveSeed(state.seed, SEED.recruit, state.bashoIndex, 0));
-  const [min, max] = isSpringBasho(state.bashoIndex)
-    ? RECRUIT.playerCandidates.spring
-    : RECRUIT.playerCandidates.normal;
-  // 名声が高いと希望者が増える
+  // 春場所の前は卒業で多い。ほかは確率で1人（名声とスカウトの網で上がる）
+  const pc = RECRUIT.playerCandidates;
   const scout = state.player.facilities.scout;
-  const n =
-    rng.range(min, max) +
-    Math.min(
-      GAME.maxExtraCandidates,
-      Math.floor(state.player.prestige / GAME.prestigePerCandidate),
-    ) +
-    scout * FACILITY_EFFECTS.scoutCandidatesPerLevel;
+  const otherChance = Math.min(
+    pc.otherChanceMax,
+    pc.otherChance +
+      state.player.prestige * pc.otherChancePerPrestige +
+      scout * pc.otherChancePerScout,
+  );
+  const n = isSpringBasho(state.bashoIndex)
+    ? rng.range(pc.spring[0], pc.spring[1]) +
+      Math.min(
+        GAME.maxExtraCandidates,
+        Math.floor(state.player.prestige / GAME.prestigePerCandidate),
+      )
+    : rng.chance(otherChance)
+      ? 1
+      : 0;
   const noise = FACILITY_EFFECTS.scoutNoiseByLevel[scout] ?? FACILITY_EFFECTS.scoutNoiseByLevel[0];
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   const used = usedNames(state);
@@ -62,6 +68,8 @@ export function npcRecruits(state: GameState, count: number): Rikishi[] {
     const name = makeShikona(rng, used);
     used.add(name);
     const c = makeCandidate(rng, state.nextId++, name, 10, !foreignIn.has(stable.id));
+    // 架空の部屋も新弟子を選ぶ（素質をもう1回引いて良い方）
+    if (rng.chance(RECRUIT.npcScoutChance)) c.talent = Math.max(c.talent, rollTalent(rng, 10));
     if (c.foreign) foreignIn.add(stable.id);
     const r = rikishiFromCandidate(c, stable.id, stable.style);
     r.policy = styleOf(r.abilities);

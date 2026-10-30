@@ -29,11 +29,10 @@ export const FACILITY_EFFECTS = {
   /** 寮: レベルごとに住める人数 */
   dormCapacityPerLevel: 10,
   /** 稽古場: レベルごとの伸びの倍率 */
-  dojoGrowthPerLevel: 0.06,
+  dojoGrowthPerLevel: 0.04,
   /** トレーナー: レベルごとのけがの減り方と疲れの回復 */
   trainerInjuryCutPerLevel: 0.2,
   trainerRecoveryPerLevel: 3,
-  /** スカウト: レベルごとの入門希望者の増え方と、見立ての誤差の幅（素質の ±） */
-  scoutCandidatesPerLevel: 1,
+  /** スカウト: 見立ての誤差の幅（素質の ±。入門希望者の増え方は balance/career.ts） */
   scoutNoiseByLevel: [10, 6, 3] as const,
 };

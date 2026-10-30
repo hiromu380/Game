@@ -89,7 +89,7 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   // ピークを過ぎると衰える（年を取るほど速く）
   if (r.age > r.peakAge) {
     const over = r.age - r.peakAge;
-    const loss = (GROWTH.declinePerYear / 6) * (1 + over * 0.3);
+    const loss = (GROWTH.declinePerYear / 6) * (1 + over * GROWTH.declineAccel);
     for (const s of STYLES) r.abilities[s] = round1(Math.max(5, r.abilities[s] - loss));
   }
   // けが
