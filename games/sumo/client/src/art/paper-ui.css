@@ -26,17 +26,28 @@
   border: 2px solid var(--shu);
   transform: translateY(-50%) rotate(45deg);
 }
-.banzuke__crest::before { left: 3px; }
-.banzuke__crest::after { right: 3px; }
+.banzuke__crest::before {
+  left: 3px;
+}
+.banzuke__crest::after {
+  right: 3px;
+}
 .banzuke {
   border: 3px double var(--ink);
   background: var(--paper);
   font-variant-numeric: tabular-nums;
 }
 .banzuke th,
-.banzuke td { border-right: 1px solid var(--line); }
-.banzuke thead th { letter-spacing: 0.07em; }
-.banzuke__name { font-weight: 800; letter-spacing: 0.035em; }
+.banzuke td {
+  border-right: 1px solid var(--line);
+}
+.banzuke thead th {
+  letter-spacing: 0.07em;
+}
+.banzuke__name {
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
 .banzuke__cell.is-mine {
   outline: 2px solid var(--shu);
   outline-offset: -3px;
@@ -61,7 +72,9 @@
   padding: 9px 12px;
   border-bottom: 1px solid var(--line);
 }
-.ledger th { font-weight: 700; }
+.ledger th {
+  font-weight: 700;
+}
 .ledger__total th,
 .ledger__total td {
   background: var(--odo-light);
@@ -97,18 +110,30 @@
   border: 2px solid var(--ink);
   border-radius: 2px;
 }
-.tree::before { top: -4px; }
-.tree::after { bottom: -4px; }
+.tree::before {
+  top: -4px;
+}
+.tree::after {
+  bottom: -4px;
+}
 .tree__card {
   border: 2px solid var(--ink);
   background: var(--card);
   box-shadow: 3px 3px 0 var(--line);
 }
 .tree__node--master > .tree__card,
-.tree__node--branch > .tree__card { border-left: 5px solid var(--ai); }
-.tree__node--waiting > .tree__card { border-left: 5px double var(--odo); }
-.tree__node--gone > .tree__card { border-style: dashed; }
-.tree__portrait { background: var(--paper); }
+.tree__node--branch > .tree__card {
+  border-left: 5px solid var(--ai);
+}
+.tree__node--waiting > .tree__card {
+  border-left: 5px double var(--odo);
+}
+.tree__node--gone > .tree__card {
+  border-style: dashed;
+}
+.tree__portrait {
+  background: var(--paper);
+}
 
 /* 集計表も同じ帳面の罫線に寄せる。 */
 .results {
@@ -116,11 +141,13 @@
   background: var(--card);
 }
 .results th,
-.results td { padding-block: 8px; }
+.results td {
+  padding-block: 8px;
+}
 
 /* 横幅がある画面だけ縦書きの「番付らしさ」を足す。 */
 @media (min-width: 900px) {
-  .banzuke__name {
+  html:lang(ja) .banzuke__name {
     writing-mode: vertical-rl;
     text-orientation: upright;
     min-height: 3em;
@@ -130,9 +157,22 @@
 
 /* 幅390pxで掛け軸の枠を残しながらテキストの領域を確保する。 */
 @media (max-width: 560px) {
-  .tree { padding-inline: 10px; }
-  .tree__children { margin-left: 8px; padding-left: 10px; }
-  .tree__card { padding: 8px; gap: 2px 6px; }
-  .ledger th, .ledger td { padding: 7px 5px; }
-  .banzuke__crest { padding-inline: 18px; }
+  .tree {
+    padding-inline: 10px;
+  }
+  .tree__children {
+    margin-left: 8px;
+    padding-left: 10px;
+  }
+  .tree__card {
+    padding: 8px;
+    gap: 2px 6px;
+  }
+  .ledger th,
+  .ledger td {
+    padding: 7px 5px;
+  }
+  .banzuke__crest {
+    padding-inline: 18px;
+  }
 }

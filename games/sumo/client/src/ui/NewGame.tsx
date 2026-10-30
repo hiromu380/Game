@@ -23,13 +23,19 @@ export function NewGame({
   return (
     <main className="newgame">
       <div className="newgame__head">
-        <h1 className="newgame__title">{t('app.title')}</h1>
+        <div>
+          <p className="newgame__kicker">{t('newGame.kicker')}</p>
+          <h1 className="newgame__title">{t('app.title')}</h1>
+        </div>
         <button className="button button--ghost" onClick={onToggleLang}>
           {t('lang.toggle')}
         </button>
       </div>
       <TitleArt title={t('newGame.artAria')} />
-      <p className="newgame__lead">{t('newGame.lead')}</p>
+      <div className="newgame__intro">
+        <h2>{t('newGame.promise')}</h2>
+        <p className="newgame__lead">{t('newGame.lead')}</p>
+      </div>
       <fieldset className="choice">
         <legend>{t('newGame.styleQuestion')}</legend>
         {STYLES.map((s) => (

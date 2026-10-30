@@ -12,7 +12,7 @@
 
 :root {
   --font-head: 'Kaisei Tokumin', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  --font-body: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+  --font-body: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Kaisei Tokumin', serif;
   --radius: 8px;
   --print: 4px 4px 0; /* 版画のずらし */
   font-family: var(--font-body);
@@ -78,7 +78,7 @@ h3 {
 }
 .button--primary {
   background: var(--shu);
-  color: #fff;
+  color: var(--white);
   font-family: var(--font-head);
 }
 .button--danger {
@@ -174,7 +174,7 @@ h3 {
   padding: 10px 16px;
   background-color: var(--ai);
   background-image: var(--pattern-seigaiha-strong);
-  color: #fff;
+  color: var(--white);
   border-bottom: 4px solid var(--ink);
 }
 .topbar__portrait {
@@ -220,8 +220,8 @@ h3 {
   gap: 8px;
 }
 .topbar .button--ghost {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.7);
+  color: var(--white);
+  border-color: var(--white-line);
 }
 
 /* タブ（木札） */
@@ -248,7 +248,7 @@ h3 {
 }
 .tabs__tab.is-active {
   background: var(--shu);
-  color: #fff;
+  color: var(--white);
 }
 
 .content {
@@ -293,7 +293,7 @@ h3 {
   margin-left: 0.5em;
 }
 .warn {
-  color: #8a4b00;
+  color: var(--warning);
   font-weight: bold;
 }
 .block {
@@ -310,8 +310,8 @@ h3 {
   background: var(--paper);
 }
 .tag--warn {
-  border-color: #8a4b00;
-  color: #8a4b00;
+  border-color: var(--warning);
+  color: var(--warning);
 }
 .tag--good {
   border-color: var(--good);
@@ -384,7 +384,7 @@ h3 {
   border: 2px solid var(--ink);
   border-radius: var(--radius);
   padding: 12px;
-  background: #fff;
+  background: var(--card);
   background: var(--card);
 }
 .card__portrait {
@@ -712,7 +712,7 @@ h3 {
   padding: 8px 12px;
   border: 2px solid var(--ink);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--card);
 }
 .tree__card > :not(.tree__portrait) {
   grid-column: 2;
@@ -779,11 +779,11 @@ h3 {
   margin-top: 4px;
 }
 .star {
-  min-width: 38px;
+  min-width: 44px;
   min-height: 44px;
   border: 2px solid var(--ink);
   border-radius: 6px;
-  background: #fff;
+  background: var(--card);
   font-family: var(--font-head);
   font-size: 1.25rem;
   line-height: 1;
@@ -866,7 +866,7 @@ h3 {
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(42, 36, 32, 0.6);
+  background: var(--scrim);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -887,7 +887,7 @@ h3 {
   padding: 12px 20px;
   background-color: var(--shu);
   background-image: var(--pattern-seigaiha-strong);
-  color: #fff;
+  color: var(--white);
   border-bottom: 3px solid var(--ink);
 }
 .modal__box--wide {
@@ -918,7 +918,7 @@ h3 {
   }
   .card {
     grid-template-columns: 72px 1fr;
-    background-image: linear-gradient(90deg, var(--paper) 0 84px, #fff 84px);
+    background-image: none;
   }
   .card__portrait {
     width: 70px;
@@ -940,7 +940,6 @@ h3 {
     font-size: 2.4rem;
   }
 }
-
 
 /* 手描き背景と、同じ3Dモデルから生成した立体人物を重ねる。 */
 .title-art--scene {
@@ -980,7 +979,7 @@ h3 {
   overflow: hidden;
   vertical-align: middle;
   flex: none;
-  background: var(--paper);
+  background: transparent;
 }
 .portrait-3d > img,
 .portrait-3d > svg {
@@ -990,4 +989,110 @@ h3 {
   object-fit: contain;
 }
 
+/* 紙面の役割を見出し・朱印・罫線で統一する。小さな表示でも横帯を残さない。 */
+.newgame__kicker {
+  margin: 0 0 2px;
+  color: var(--ai);
+  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+}
+.newgame__intro h2 {
+  color: var(--ai);
+  font-size: 1.25rem;
+  margin: 0 0 12px;
+}
+.newgame__lead {
+  margin: 0;
+}
+.card {
+  background: var(--card);
+  background-image: none;
+}
+.card__head,
+.card__name,
+.row__main,
+.tree__card > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.bout__names > span {
+  max-width: 48%;
+  overflow-wrap: anywhere;
+}
+.modal {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.actionbar {
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 2;
+}
+.topbar,
+.tabs {
+  padding-inline: max(16px, calc((100vw - 980px) / 2));
+}
+@media (min-width: 900px) {
+  .newgame {
+    max-width: 1050px;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 24px 36px;
+    padding-top: 42px;
+  }
+  .newgame__head {
+    grid-column: 1 / -1;
+    border-bottom: 3px double var(--ink);
+    padding-bottom: 16px;
+  }
+  .newgame > .title-art {
+    grid-column: 1;
+    grid-row: 2 / 5;
+    align-self: center;
+  }
+  .newgame__intro {
+    grid-column: 2;
+  }
+  .newgame > .choice,
+  .newgame > .button--large {
+    grid-column: 2;
+  }
+  .newgame > .note {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .newgame__title {
+    font-size: 4rem;
+  }
+}
+@media (max-width: 560px) {
+  .newgame {
+    padding-top: 18px;
+  }
+  .newgame__intro h2 {
+    font-size: 1.05rem;
+  }
+  .topbar__main {
+    flex-basis: 230px;
+  }
+  .tabs {
+    gap: 5px;
+  }
+  .tabs__tab {
+    flex: 1;
+    padding-inline: 12px;
+  }
+  .banzuke__rank {
+    width: 6.5em;
+    font-size: 0.75rem;
+  }
+}
 
+.dohyo--3d {
+  position: relative;
+}
+.dohyo--3d > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}

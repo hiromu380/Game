@@ -37,20 +37,61 @@ export function TitleArt({ title }: { title: string }) {
         <rect width={360} height={230} fill={PALETTE.washi2} />
         <path d="M0 171 H360 V230 H0 Z" fill={PALETTE.odoLight} />
         {Array.from({ length: 9 }, (_, i) => (
-          <line key={i} x1={i * 45} y1={171} x2={i * 45 - 20} y2={230} stroke={PALETTE.odo} strokeWidth={1.5} />
+          <line
+            key={i}
+            x1={i * 45}
+            y1={171}
+            x2={i * 45 - 20}
+            y2={230}
+            stroke={PALETTE.odo}
+            strokeWidth={1.5}
+          />
+        ))}
+        {/* 障子と床柱で、和室の奥行きを平たい色面として表す。 */}
+        <path d="M0 0 H24 V171 H0 Z M336 0 H360 V171 H336 Z" fill={PALETTE.sumi2} />
+        <path d="M24 0 H336 V10 H24 Z" fill={PALETTE.odo} />
+        {[28, 270].map((x) => (
+          <g key={x}>
+            <rect
+              x={x}
+              y={90}
+              width={62}
+              height={65}
+              fill={PALETTE.card}
+              stroke={PALETTE.odo}
+              strokeWidth={2}
+            />
+            <path
+              d={`M${x} 112 H${x + 62} M${x} 134 H${x + 62} M${x + 21} 90 V155 M${x + 42} 90 V155`}
+              stroke={PALETTE.line}
+              strokeWidth={1}
+            />
+          </g>
         ))}
         <path d="M35 13 H325" stroke={INK} strokeWidth={4} strokeLinecap="round" />
         {[0, 1, 2].map((i) => (
-          <path key={i} d={`M${44 + i * 92} 15 H${132 + i * 92} V75 H${44 + i * 92} Z`} fill={PALETTE.ai} stroke={INK} strokeWidth={2} />
+          <path
+            key={i}
+            d={`M${44 + i * 92} 15 H${132 + i * 92} V75 H${44 + i * 92} Z`}
+            fill={PALETTE.ai}
+            stroke={INK}
+            strokeWidth={2}
+          />
         ))}
         <circle cx={180} cy={45} r={21} fill="none" stroke={PALETTE.white} strokeWidth={3.5} />
         <path d="M166 45 H194" stroke={PALETTE.white} strokeWidth={5} />
         {/* 背景にも平たい墨線を残し、3D人物だけを際立たせる */}
         <line x1={0} y1={171} x2={360} y2={171} stroke={INK} strokeWidth={2} />
       </svg>
-      <span className="title-art__figure title-art__figure--left"><ThreePortrait look={left} size="100%" variant="full" /></span>
-      <span className="title-art__figure title-art__figure--master"><ThreePortrait look={master} size="100%" variant="full" /></span>
-      <span className="title-art__figure title-art__figure--right"><ThreePortrait look={right} size="100%" variant="full" /></span>
+      <span className="title-art__figure title-art__figure--left">
+        <ThreePortrait look={left} size="100%" variant="full" />
+      </span>
+      <span className="title-art__figure title-art__figure--master">
+        <ThreePortrait look={master} size="100%" variant="full" />
+      </span>
+      <span className="title-art__figure title-art__figure--right">
+        <ThreePortrait look={right} size="100%" variant="full" />
+      </span>
     </div>
   );
 }
