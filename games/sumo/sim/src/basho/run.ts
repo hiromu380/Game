@@ -57,8 +57,15 @@ export function runBasho(
   const active = new Set<number>();
   for (const id of banzuke) {
     records.set(id, { wins: 0, losses: 0, absences: 0 });
-    condition.set(id, condRng.range(-BOUT.conditionRange, BOUT.conditionRange));
-    if (byId.get(id)!.injury === 0) active.add(id);
+    const r = byId.get(id)!;
+    // けがを押して出る力士は調子が大きく落ちる
+    const hurt = r.injury > 0 && r.playHurt;
+    condition.set(
+      id,
+      condRng.range(-BOUT.conditionRange, BOUT.conditionRange) -
+        (hurt ? GROWTH.playHurt.conditionPenalty : 0),
+    );
+    if (r.injury === 0 || hurt) active.add(id);
   }
   const met = new Map<number, Set<number>>();
   const hasMet = (a: number, b: number) => met.get(a)?.has(b) ?? false;
@@ -126,7 +133,8 @@ export function runBasho(
       const chance =
         (BOUT_INJURY + r.fatigue * GROWTH.injuryPerFatigue * 0.1) *
         r.fragility *
-        (id === loser ? 1.5 : 1);
+        (id === loser ? 1.5 : 1) *
+        (r.injury > 0 ? GROWTH.playHurt.boutInjuryMultiplier : 1);
       if (rng.chance(chance)) {
         active.delete(id);
         injured.push(id);

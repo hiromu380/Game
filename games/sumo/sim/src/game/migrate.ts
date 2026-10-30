@@ -13,7 +13,16 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 2) s = v2to3(s);
   if (s.version === 3) s = v3to4(s);
   if (s.version === 4) s = v4to5(s);
+  if (s.version === 5) s = v5to6(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/** 5 → 6: 強行出場の判断（なし） */
+function v5to6(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  for (const r of s.rikishi) r.playHurt = false;
+  s.version = 6;
+  return s as unknown as Raw;
 }
 
 /** 4 → 5: 三賞の回数（0）と、直近の結果の三賞・優勝決定戦（なし） */

@@ -287,6 +287,9 @@ export function advanceBasho(input: GameState): GameState {
     train(r, ctx, growthRng);
   }
 
+  // 強行出場の判断は1場所かぎり
+  for (const r of state.rikishi) r.playHurt = false;
+
   // 6. 年の終わり（九州場所の後）
   if (state.bashoIndex % 6 === 5) yearEnd(state);
 

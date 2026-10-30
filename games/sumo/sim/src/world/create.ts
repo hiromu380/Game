@@ -31,8 +31,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 3: 設備と契約（player.facilities）
  * 4: 場所の結果に番付の上がり下がりと巡業（lastReport.banzukeChanges・jungyo）
  * 5: 三賞と優勝決定戦（career.sansho・lastReport.sansho・playoff）
+ * 6: けがを押して出場（rikishi.playHurt）
  */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -256,6 +257,7 @@ function makeVeteran(
     career: emptyCareer(),
     recent: [],
     exOzeki: false,
+    playHurt: false,
   };
 }
 

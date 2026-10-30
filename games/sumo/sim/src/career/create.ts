@@ -123,6 +123,7 @@ export function rikishiFromCandidate(
     career: emptyCareer(),
     recent: [],
     exOzeki: false,
+    playHurt: false,
   };
 }
 

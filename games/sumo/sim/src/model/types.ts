@@ -83,6 +83,8 @@ export interface Rikishi {
   recent: BashoRecord[];
   /** 大関から落ちた直後の場所（10勝で戻れる） */
   exOzeki: boolean;
+  /** けがを押して次の場所に出る（親方の判断。自分の弟子だけ。場所が終わると戻る） */
+  playHurt: boolean;
 }
 
 export interface Stable {

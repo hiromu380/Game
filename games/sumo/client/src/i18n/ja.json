@@ -248,5 +248,9 @@
   "sansho.kanto": "敢闘賞",
   "sansho.gino": "技能賞",
   "report.sanshoNone": "該当者なし",
-  "report.playoff": "幕内は優勝決定戦にもつれました（{names}）。"
+  "report.playoff": "幕内は優勝決定戦にもつれました（{names}）。",
+  "hurt.label": "次の場所",
+  "hurt.note": "けがをしています。休めば治りますが全休で番付が下がります（公傷制度はありません）。押して出れば番付は守れても、調子が落ち、治らず悪化することもあります。",
+  "hurt.rest": "休場して治す",
+  "hurt.play": "強行出場"
 }

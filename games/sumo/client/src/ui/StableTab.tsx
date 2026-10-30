@@ -2,6 +2,7 @@ import {
   acceptCandidate,
   answerRetirement,
   declineCandidate,
+  setPlayHurt,
   setPolicy,
   stableCapacity,
   styleOf,
@@ -102,6 +103,7 @@ export function StableTab({
               r={r}
               rank={ranks.get(r.id) ?? null}
               onPolicy={(p) => setGame(setPolicy(game, r.id, p))}
+              onPlayHurt={(play) => setGame(setPlayHurt(game, r.id, play))}
             />
           ))}
         </ul>
@@ -160,10 +162,12 @@ function RikishiCard({
   r,
   rank,
   onPolicy,
+  onPlayHurt,
 }: {
   r: Rikishi;
   rank: Rank | null;
   onPolicy: (p: Policy) => void;
+  onPlayHurt: (play: boolean) => void;
 }) {
   const { t } = useI18n();
   const last = r.recent[0];
@@ -205,6 +209,25 @@ function RikishiCard({
           {last && <span>{t('rikishi.last', { record: recordLabel(t, last) })}</span>}
         </div>
       </div>
+      {r.injury > 0 && (
+        <div className="hurt" role="group" aria-label={t('hurt.label')}>
+          <span className="hurt__note">{t('hurt.note')}</span>
+          <button
+            className={`policy__btn ${!r.playHurt ? 'is-selected' : ''}`}
+            aria-pressed={!r.playHurt}
+            onClick={() => onPlayHurt(false)}
+          >
+            {t('hurt.rest')}
+          </button>
+          <button
+            className={`policy__btn ${r.playHurt ? 'is-selected' : ''}`}
+            aria-pressed={r.playHurt}
+            onClick={() => onPlayHurt(true)}
+          >
+            {t('hurt.play')}
+          </button>
+        </div>
+      )}
       <div className="policy" role="group" aria-label={t('policy.label')}>
         {POLICIES.map((p) => (
           <button

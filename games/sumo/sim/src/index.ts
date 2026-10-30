@@ -16,6 +16,7 @@ export {
   declineCandidate,
   isBlocked,
   pickKakun,
+  setPlayHurt,
   setPolicy,
 } from './game/state';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';

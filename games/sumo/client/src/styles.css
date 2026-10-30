@@ -475,6 +475,21 @@ h3 {
   gap: 6px;
   margin-top: 6px;
 }
+.hurt {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  border: 2px dashed #8a4b00;
+  border-radius: var(--radius);
+  background: #fbefd9;
+}
+.hurt__note {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+}
 .policy__btn {
   min-height: 44px;
   min-width: 64px;

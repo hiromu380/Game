@@ -113,6 +113,15 @@ export function setPolicy(input: GameState, id: number, policy: Policy): GameSta
   return state;
 }
 
+/** けがをしている自分の弟子を、次の場所に出すか（強行出場）休ませるか */
+export function setPlayHurt(input: GameState, id: number, playHurt: boolean): GameState {
+  const r = input.rikishi.find((x) => x.id === id);
+  if (!r || r.stableId !== input.player.stableId || r.injury === 0) return input;
+  const state = clone(input);
+  state.rikishi.find((x) => x.id === id)!.playHurt = playHurt;
+  return state;
+}
+
 /** 入門希望者を受け入れる（次の場所は前相撲、その次から番付に載る） */
 export function acceptCandidate(input: GameState, candidateId: number): GameState {
   const state = clone(input);

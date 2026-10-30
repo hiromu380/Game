@@ -36,6 +36,16 @@ const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 /** 1場所ぶんの稽古。けがをしたら true */
 export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   if (r.injury > 0) {
+    // けがを押して出た場所の後は治らず、悪化することがある
+    if (r.playHurt) {
+      if (rng.chance(GROWTH.playHurt.worsenChance)) {
+        r.injury++;
+        for (const s of STYLES)
+          r.abilities[s] = round1(Math.max(5, r.abilities[s] - GROWTH.injuryAbilityLoss));
+        return true;
+      }
+      return false;
+    }
     r.injury--;
     r.fatigue = clamp(r.fatigue - GROWTH.fatigueRest, 0, 100);
     return false;

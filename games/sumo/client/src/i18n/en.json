@@ -248,5 +248,9 @@
   "sansho.kanto": "Fighting Spirit",
   "sansho.gino": "Technique",
   "report.sanshoNone": "not awarded",
-  "report.playoff": "The makuuchi title went to a playoff ({names})."
+  "report.playoff": "The makuuchi title went to a playoff ({names}).",
+  "hurt.label": "Next tournament",
+  "hurt.note": "Injured. Resting heals him but he sits out and drops in the rankings (there is no injury exemption). Playing protects his rank, but he is weaker and the injury may not heal or may get worse.",
+  "hurt.rest": "Sit out and heal",
+  "hurt.play": "Play hurt"
 }

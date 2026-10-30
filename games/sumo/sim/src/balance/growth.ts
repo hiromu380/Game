@@ -32,4 +32,6 @@ export const GROWTH = {
   injuryBashoMax: 3,
   /** けがのとき能力が落ちる量 */
   injuryAbilityLoss: 2,
+  /** けがを押して出場（強行出場）: 調子の減点・場所中にけがをする確率の倍率・場所の後に悪化する確率 */
+  playHurt: { conditionPenalty: 8, boutInjuryMultiplier: 3, worsenChance: 0.3 },
 };
