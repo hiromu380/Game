@@ -1,4 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from 'react';
 import {
   isSekitori,
   KIMARITE_BY_ID,
@@ -13,6 +22,21 @@ import { boutFlow, boutScript, linesAt, poseAt, type CallLine } from '../playbac
 import { BoutStage } from '../art/BoutStage';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
+import type { MotionClock } from '../art/three/animation';
+
+/** 3D の読み込みに失敗したら SVG の舞台で受け止め、演出の時計を始める */
+function SvgStage({
+  onReady,
+  ...props
+}: ComponentProps<typeof BoutStage> & { motion?: MotionClock; onReady: () => void }) {
+  useEffect(onReady, [onReady]);
+  const { motion: _motion, ...svgProps } = props;
+  void _motion;
+  return <BoutStage {...svgProps} />;
+}
+const BoutStage3D = lazy(() =>
+  import('../art/three/BoutStage3D').catch(() => ({ default: SvgStage })),
+);
 
 /** 取組の演出（向正面から見た土俵と実況）。動きを減らす設定では最後の場面と実況の全文を見せる */
 export function BoutViewer({
@@ -30,7 +54,7 @@ export function BoutViewer({
   const byId = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r])), [game.rikishi]);
   const east = byId.get(bout.eastId);
   const west = byId.get(bout.westId);
-  const winnerSide = bout.winnerId === bout.eastId ? 'E' : 'W';
+  const winnerSide: 'E' | 'W' = bout.winnerId === bout.eastId ? 'E' : 'W';
   const seed = bout.day * 7919 + bout.eastId * 31 + bout.westId;
   const script = useMemo(() => {
     const flow = boutFlow({
@@ -46,9 +70,12 @@ export function BoutViewer({
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [time, setTime] = useState(reduced ? script.duration : 0);
   const [run, setRun] = useState(0);
+  // 3D の舞台の準備ができてから時計を進める
+  const [ready, setReady] = useState(false);
+  const onReady = useCallback(() => setReady(true), []);
   const skipped = useRef(false);
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || !ready) return;
     skipped.current = false;
     const played = new Set<number>();
     let raf = 0;
@@ -67,7 +94,7 @@ export function BoutViewer({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [script, sound, reduced, run]);
+  }, [script, sound, reduced, run, ready]);
 
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const pose = poseAt(script, time);
@@ -92,20 +119,34 @@ export function BoutViewer({
     });
   };
 
+  const stageProps = {
+    east: lookOf(east),
+    west: lookOf(west),
+    pose,
+    arms: pose.contact ? ('push' as const) : ('side' as const),
+    winner: decided ? winnerSide : null,
+    title: t('bout.aria'),
+  };
+
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
-      <div className="modal__box modal__box--wide">
+      <div className="modal__box modal__box--wide modal__box--bout">
         <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
         <div className="bout">
           <div className="bout__stage">
-            <BoutStage
-              east={lookOf(east)}
-              west={lookOf(west)}
-              pose={pose}
-              arms={pose.contact ? 'push' : 'side'}
-              winner={decided ? winnerSide : null}
-              title={t('bout.aria')}
-            />
+            <Suspense fallback={<BoutStage {...stageProps} />}>
+              <BoutStage3D
+                {...stageProps}
+                motion={
+                  {
+                    time,
+                    clash: script.frames[1]?.t ?? 0.6,
+                    duration: script.duration,
+                  } satisfies MotionClock
+                }
+                onReady={onReady}
+              />
+            </Suspense>
             <p className="bout__names">
               <span>
                 {t('rank.side.W')} <strong>{west?.name ?? '?'}</strong>

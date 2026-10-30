@@ -2,7 +2,7 @@
   "app.title": "Ichimon",
   "lang.toggle": "日本語",
   "newGame.lead": "You are a retired wrestler turned stablemaster, and today you opened your own stable. A few disciples, a new signboard, a thin bank book. Raise them well and leave someone to inherit the stable before you retire at 65.",
-  "newGame.styleQuestion": "Your style as a wrestler? (Disciples grow faster in your style)",
+  "newGame.styleQuestion": "Choose your style",
   "newGame.style.oshi": "Thrust and push, always forward",
   "newGame.style.yotsu": "Grab the belt and drive out",
   "newGame.style.waza": "Dodge, throw, use their strength",
@@ -869,5 +869,10 @@
   "report.tile.ofTotal": "{n} of {total}",
   "report.tile.banzuke": "Rankings",
   "report.tile.updown": "↑{up}  ↓{down}",
-  "report.tile.net": "Stable balance"
+  "report.tile.net": "Stable balance",
+  "newGame.kicker": "A sumo stable chronicle",
+  "newGame.artCaption": "Train your wrestlers. Build a home. Leave a legacy.",
+  "newGame.seal": "一門",
+  "newGame.promise": "One stable. Generations of stories.",
+  "newGame.styleHelp": "Your former specialty helps pupils of the same style grow."
 }

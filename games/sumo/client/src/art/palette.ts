@@ -18,6 +18,7 @@ export const PALETTE = {
   odo: '#c69a4a',
   odoLight: '#ead7a8',
   wakatake: '#4f7a4a',
+  goodText: '#3e6539',
   murasaki: '#5b3d6e',
   kincha: '#a8742a',
   gold: '#7a5a00',
@@ -26,6 +27,11 @@ export const PALETTE = {
   skin: ['#f6d7b8', '#eec5a0', '#e2b38a'] as const,
   cheek: '#ef9a8f',
   white: '#ffffff',
+  warning: '#8a4b00',
+  hairLight: '#665b4e',
+  scrim: 'rgba(42, 36, 32, 0.6)',
+  whiteLine: 'rgba(255, 255, 255, 0.7)',
+  kimonoBrown: '#3b3328',
 } as const;
 
 /** 関取の締め込みの色（部屋ごとに決まる） */
@@ -84,6 +90,10 @@ export function asanoha(color: string, opacity: number): string {
 /** CSS の変数を流し込む（起動時に1回） */
 export function applyPalette(root: HTMLElement = document.documentElement): void {
   const vars: Record<string, string> = {
+    '--white': PALETTE.white,
+    '--warning': PALETTE.warning,
+    '--scrim': PALETTE.scrim,
+    '--white-line': PALETTE.whiteLine,
     '--paper': PALETTE.washi,
     '--paper-2': PALETTE.washi2,
     '--card': PALETTE.card,
@@ -97,12 +107,12 @@ export function applyPalette(root: HTMLElement = document.documentElement): void
     '--shu-light': PALETTE.beniLight,
     '--odo': PALETTE.odo,
     '--odo-light': PALETTE.odoLight,
-    '--good': PALETTE.wakatake,
+    '--good': PALETTE.goodText,
     '--gold': PALETTE.gold,
     '--gold-bg': PALETTE.goldBg,
     '--focus': PALETTE.ai,
-    '--pattern-seigaiha': seigaiha(PALETTE.ai, 0.08),
-    '--pattern-seigaiha-strong': seigaiha(PALETTE.washi, 0.22),
+    '--pattern-seigaiha': seigaiha(PALETTE.ai, 0.035),
+    '--pattern-seigaiha-strong': seigaiha(PALETTE.washi, 0.1),
     '--pattern-asanoha': asanoha(PALETTE.odo, 0.18),
   };
   for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);

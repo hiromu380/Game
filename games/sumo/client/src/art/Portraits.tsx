@@ -1,5 +1,6 @@
 /**
- * ゲームの状態から絵を出す（力士・親方・入門希望者）
+ * ゲームの状態から絵を出す（力士・親方・入門希望者）。
+ * 3D肖像は一枚の静止画にしてキャッシュし、画面外は描画しない。
  */
 import {
   isSekitori,
@@ -9,7 +10,7 @@ import {
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
-import { Figure } from './Figure';
+import { ThreePortrait } from './ThreePortrait';
 import { oyakataLook, rikishiLook } from './look';
 
 /** 現役の力士の見た目（今の番付・体重・けが・疲れから） */
@@ -52,7 +53,7 @@ export function RikishiPortrait({
   size?: number;
   variant?: 'bust' | 'full';
 }) {
-  return <Figure look={lookOfRikishi(r, rank)} variant={variant} size={size} />;
+  return <ThreePortrait look={lookOfRikishi(r, rank)} variant={variant} size={size} />;
 }
 
 /** 入門希望者（まだ髷のない、ざんばら頭） */
@@ -67,7 +68,7 @@ export function CandidatePortrait({ c, size = 56 }: { c: Candidate; size?: numbe
     injured: false,
     fatigue: 0,
   });
-  return <Figure look={look} variant="bust" size={size} />;
+  return <ThreePortrait look={look} variant="bust" size={size} />;
 }
 
 export function OyakataPortrait({
@@ -77,5 +78,5 @@ export function OyakataPortrait({
   o: Pick<Oyakata, 'id' | 'age' | 'stableId'>;
   size?: number;
 }) {
-  return <Figure look={oyakataLook(o)} variant="bust" size={size} />;
+  return <ThreePortrait look={oyakataLook(o)} variant="bust" size={size} />;
 }

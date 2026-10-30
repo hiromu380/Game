@@ -102,18 +102,20 @@ export function StableTab({
       )}
 
       {game.pending.candidates.length > 0 && (
-        <section className="panel" aria-labelledby="cand-title">
+        <section className="panel candidates" aria-labelledby="cand-title">
           <h2 id="cand-title">{t('candidates.title')}</h2>
           <p className="note">{full ? t('candidates.full', { cap }) : t('candidates.note')}</p>
-          {game.pending.candidates.map((c) => (
-            <CandidateRow
-              key={c.id}
-              c={c}
-              disabled={full || (c.foreign && mine.some((r) => r.foreign))}
-              onAccept={() => setGame(acceptCandidate(game, c.id))}
-              onDecline={() => setGame(declineCandidate(game, c.id))}
-            />
-          ))}
+          <div className="candidates__list">
+            {game.pending.candidates.map((c) => (
+              <CandidateRow
+                key={c.id}
+                c={c}
+                disabled={full || (c.foreign && mine.some((r) => r.foreign))}
+                onAccept={() => setGame(acceptCandidate(game, c.id))}
+                onDecline={() => setGame(declineCandidate(game, c.id))}
+              />
+            ))}
+          </div>
         </section>
       )}
 
@@ -260,6 +262,7 @@ function RikishiCard({
         </div>
       )}
       <div className="policy" role="group" aria-label={t('policy.label')}>
+        <span className="policy__label">{t('policy.label')}</span>
         {POLICIES.map((p) => (
           <button
             key={p}
