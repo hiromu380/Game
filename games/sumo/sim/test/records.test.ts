@@ -45,7 +45,7 @@ describe('番付の推移と歴代の力士', () => {
     for (const r of v6.rikishi) delete r.track;
     delete v6.player.alumni;
     const m = migrateSave(v6)!;
-    expect(m.version).toBe(11);
+    expect(m.version).toBe(12);
     expect(m.player.alumni).toEqual([]);
     expect(advanceBasho(m).bashoIndex).toBe(1);
   });

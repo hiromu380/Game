@@ -14,6 +14,8 @@ export interface GrowthContext {
   /** 家訓などによる型ごとの倍率 */
   styleMultiplier: Record<Style, number>;
   extraBodyKg: number;
+  /** ちゃんこの方針による体重の増え方（休養以外のすべての稽古） */
+  dietGainKg: number;
   extraRecovery: number;
   /** 稽古場などによる伸びの倍率 */
   growthMultiplier: number;
@@ -26,6 +28,7 @@ export const NEUTRAL_GROWTH: GrowthContext = {
   coaches: 0,
   styleMultiplier: { oshi: 1, yotsu: 1, waza: 1 },
   extraBodyKg: 0,
+  dietGainKg: 0,
   extraRecovery: 0,
   growthMultiplier: 1,
   injuryMultiplier: 1,
@@ -86,7 +89,8 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
         : r.policy === 'rest'
           ? 0
           : GROWTH.otherGainKg;
-    r.weight = round1(Math.min(cap, r.weight + gain));
+    const total = r.policy === 'rest' ? 0 : Math.max(0, gain + ctx.dietGainKg);
+    r.weight = round1(Math.min(cap, r.weight + total));
   }
   // ピークを過ぎると衰える（年を取るほど速く）
   if (r.age > r.peakAge) {

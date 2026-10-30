@@ -17,13 +17,17 @@ import type {
   BashoReport,
   FacilityId,
   GameState,
+  Diet,
   KakunId,
   LineageEntry,
   Policy,
+  StaffRole,
 } from '../model/types';
+import { DIETS } from '../balance/staff';
 import { nextBuildCost, stableCapacity } from '../money/facilities';
 import { applyHappening } from './happening';
 import { note } from './journal';
+import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
@@ -336,5 +340,42 @@ export function pickKakun(
     }
   }
   state.pending.kakun = null;
+  return state;
+}
+
+/** ちゃんこの方針を決める（次の場所の稽古と帳簿から効く） */
+export function setDiet(input: GameState, diet: Diet): GameState {
+  if (input.player.diet === diet || !(diet in DIETS)) return input;
+  const state = clone(input);
+  state.player.diet = diet;
+  note(state, { kind: 'diet', diet });
+  return state;
+}
+
+/** 元弟子を若者頭・世話人に推薦して雇う（その役にいた人は辞める） */
+export function hireStaff(input: GameState, role: StaffRole, alumnusId: number): GameState {
+  const a = staffCandidates(input, role).find((x) => x.id === alumnusId);
+  if (!a) return input;
+  let state = dismissStaff(input, role);
+  if (state === input) state = clone(input);
+  state.player.staff.push({
+    role,
+    alumnusId: a.id,
+    name: a.name,
+    age: alumnusAge(state, a),
+    skill: staffSkill(a),
+    since: state.bashoIndex,
+  });
+  note(state, { kind: 'staffHire', role, name: a.name });
+  return state;
+}
+
+/** 若者頭・世話人に辞めてもらう */
+export function dismissStaff(input: GameState, role: StaffRole): GameState {
+  const s = input.player.staff.find((x) => x.role === role);
+  if (!s) return input;
+  const state = clone(input);
+  state.player.staff = state.player.staff.filter((x) => x.role !== role);
+  note(state, { kind: 'staffLeave', role, name: s.name, retired: false });
   return state;
 }

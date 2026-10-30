@@ -323,6 +323,24 @@ export interface PlayerState {
   facilities: Record<FacilityId, number>;
   /** 部屋の歴代の力士（引退した弟子） */
   alumni: Alumnus[];
+  /** ちゃんこの方針 */
+  diet: Diet;
+  /** 部屋の人（元弟子の若者頭・世話人） */
+  staff: StaffMember[];
+}
+
+export type Diet = 'standard' | 'hearty' | 'balanced' | 'frugal';
+export type StaffRole = 'wakaimonogashira' | 'sewanin';
+
+export interface StaffMember {
+  role: StaffRole;
+  /** 元弟子（Alumnus）の ID */
+  alumnusId: number;
+  name: string;
+  age: number;
+  /** 腕前 1〜3（最高位で決まる: 幕内 3・十両 2・幕下 1） */
+  skill: number;
+  since: number;
 }
 
 export interface GameState {
@@ -383,6 +401,9 @@ export type JournalEvent =
   | { kind: 'facility'; id: FacilityId; level: number }
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
+  | { kind: 'diet'; diet: Diet }
+  | { kind: 'staffHire'; role: StaffRole; name: string }
+  | { kind: 'staffLeave'; role: StaffRole; name: string; retired: boolean }
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */
   | { kind: 'earlier' };
 

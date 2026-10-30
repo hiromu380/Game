@@ -2,7 +2,7 @@
  * 自動で遊ぶ親方（バランス計測とテストで使う）
  *
  * - careful: 素質の見立てが3以上の入門希望者だけ受け入れる。疲れたら休ませ、軽い弟子は体づくり、ほかは親方の型。
- *   お金に余裕があれば稽古場・寮・トレーナー・スカウトに使う。けがは休ませる
+ *   お金に余裕があれば稽古場・寮・トレーナー・スカウトに使う。けがは休ませる。元弟子を若者頭・世話人に雇う
  * - passive: 入門希望者はみな受け入れ（部屋に入るだけ）、稽古の方針は変えない。設備も使わない
  */
 import {
@@ -18,6 +18,11 @@ import {
   setContract,
   setPolicy,
   stableCapacity,
+  hireStaff,
+  setDiet,
+  staffCandidates,
+  staffSkill,
+  STAFF_IDS,
   type GameState,
 } from '../src';
 
@@ -56,6 +61,13 @@ function decide(s: GameState, kind: BotKind): GameState {
       const cost = nextBuildCost(state.player.facilities, id);
       if (cost !== null && state.player.stableMoney > cost * 2) state = buildFacility(state, id);
     }
+    // 部屋の人: 空いている役に、腕前の一番高い元弟子を雇う。お金に余裕があれば栄養重視のちゃんこ
+    for (const role of STAFF_IDS) {
+      if (state.player.staff.some((x) => x.role === role)) continue;
+      const best = staffCandidates(state, role).sort((a, b) => staffSkill(b) - staffSkill(a))[0];
+      if (best) state = hireStaff(state, role, best.id);
+    }
+    state = setDiet(state, state.player.stableMoney > 30_000_000 ? 'balanced' : 'standard');
     const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId).length;
     const rich = state.player.stableMoney > 30_000_000;
     state = setContract(state, 'trainer', rich ? 1 : 0);

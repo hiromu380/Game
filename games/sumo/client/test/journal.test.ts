@@ -37,6 +37,10 @@ const SAMPLES: JournalEntry[] = [
   { bashoIndex: 5, kind: 'facility', id: 'dorm', level: 2 },
   { bashoIndex: 6, kind: 'branchSucceeded', stable: '浦風', shikona: '白岩' },
   { bashoIndex: 6, kind: 'branchClosed', stable: '浦風' },
+  { bashoIndex: 7, kind: 'diet', diet: 'hearty' },
+  { bashoIndex: 7, kind: 'staffHire', role: 'wakaimonogashira', name: '白岩' },
+  { bashoIndex: 7, kind: 'staffLeave', role: 'sewanin', name: '白岩', retired: true },
+  { bashoIndex: 7, kind: 'staffLeave', role: 'sewanin', name: '白岩', retired: false },
 ];
 
 describe('出来事の文言', () => {

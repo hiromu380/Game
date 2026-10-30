@@ -122,6 +122,13 @@
 - 出やすさ: 寄り切り・押し出し・寄り倒し・押し倒しで全体の6割ほど。ゲームの重みはこの傾向に合わせた推定（`balance/kimarite.ts`）
 - 出典: [nippon.com](https://www.nippon.com/ja/japan-topics/g02033/)、[Weblio 大相撲の決まり手一覧](https://www.weblio.jp/content/%E5%A4%A7%E7%9B%B8%E6%92%B2%E3%81%AE%E6%B1%BA%E3%81%BE%E3%82%8A%E6%89%8B%E4%B8%80%E8%A6%A7)、[sumo-world.com 決まり手](https://sumo-world.com/trick/)、[spaia 決まり手](https://spaia.jp/column/sumo/9416)
 
+## 若者頭・世話人（2026-10-30 調べ）
+
+- 世話人は協会の嘱託職員で、用具の管理などを受け持つ。新しく採るのは、引退した十両・幕下の力士で適格と認められた者（師匠の推薦が要る）。以前は幕内経験者もいた
+- 若者頭は若い力士の指導・監督を受け持つ元力士の職員
+- 定員と給与は確かめられていない。ゲームでは部屋に1人ずつ・給料は協会持ち（部屋の会計に出さない）・定年65歳とし、効果の大きさは推定（`balance/staff.ts`）
+- 出典: [Weblio「世話人」](https://www.weblio.jp/content/%E4%B8%96%E8%A9%B1%E4%BA%BA)、[日本相撲協会 事業報告（令和6年度）](https://sumo.or.jp/pdf/kyokai/zaimu/r6_jigyo_hokoku.pdf)
+
 ## まだ確かめていないこと（推定で入れる値）
 
 - 新弟子の年齢の上限（23歳未満とされることが多い）

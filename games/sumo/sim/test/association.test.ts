@@ -109,7 +109,7 @@ describe('協会: 名跡・一門・親方', () => {
       },
     });
     const m = migrateSave(v8)!;
-    expect(m.version).toBe(11);
+    expect(m.version).toBe(12);
     expect(m.oyakata.find((o) => o.stableId === 999999)).toMatchObject({
       role: 'master',
       shikona: '仮山',

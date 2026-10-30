@@ -28,6 +28,8 @@ import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
+import { staffGrowth } from '../stable/staff';
+import { DIETS, STAFF_EFFECTS } from '../balance/staff';
 import { SANSHO } from '../balance/sansho';
 import { selectSansho } from '../basho/sansho';
 import { JUNGYO, JUNGYO_AFTER } from '../balance/events';
@@ -275,6 +277,7 @@ export function advanceBasho(input: GameState): GameState {
     state.player.prestige,
     state.player.kakun,
     state.player.facilities,
+    DIETS[state.player.diet].food,
   );
   report.income = ledger.income;
   report.expenses = ledger.expenses;
@@ -294,6 +297,7 @@ export function advanceBasho(input: GameState): GameState {
   const coaches = state.oyakata.filter(
     (o) => o.stableId === state.player.stableId && o.role === 'heyatsuki',
   ).length;
+  const staff = staffGrowth(state);
   const playerCtx: GrowthContext = applyKakun(
     {
       ...NEUTRAL_GROWTH,
@@ -302,14 +306,25 @@ export function advanceBasho(input: GameState): GameState {
       growthMultiplier: 1 + state.player.facilities.dojo * FACILITY_EFFECTS.dojoGrowthPerLevel,
       injuryMultiplier:
         1 - state.player.facilities.trainer * FACILITY_EFFECTS.trainerInjuryCutPerLevel,
-      extraRecovery: state.player.facilities.trainer * FACILITY_EFFECTS.trainerRecoveryPerLevel,
+      extraRecovery:
+        state.player.facilities.trainer * FACILITY_EFFECTS.trainerRecoveryPerLevel + staff.recovery,
+      dietGainKg: staff.gainKg,
     },
     state.player.kakun,
   );
+  playerCtx.injuryMultiplier *= staff.injury;
+  // 若者頭は幕下以下の弟子を見る
+  const lowerCtx: GrowthContext = {
+    ...playerCtx,
+    growthMultiplier: playerCtx.growthMultiplier * staff.lowerGrowth,
+  };
   for (const r of state.rikishi) {
+    const rank = newRanks.get(r.id);
     const ctx =
       r.stableId === state.player.stableId
-        ? playerCtx
+        ? rank && isSekitori(rank)
+          ? playerCtx
+          : lowerCtx
         : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
     train(r, ctx, growthRng);
   }
@@ -337,6 +352,12 @@ function yearEnd(state: GameState) {
   const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex));
   for (const r of state.rikishi) r.age++;
   for (const o of state.oyakata) o.age++;
+  // 部屋の人も年をとり、定年で協会を去る
+  for (const s of state.player.staff) s.age++;
+  for (const s of state.player.staff.filter((x) => x.age >= STAFF_EFFECTS.retireAge)) {
+    note(state, { kind: 'staffLeave', role: s.role, name: s.name, retired: true });
+  }
+  state.player.staff = state.player.staff.filter((x) => x.age < STAFF_EFFECTS.retireAge);
   // 協会: 参与の退職・部屋付きの定年・架空の部屋（分家を含む）の師匠の定年と継承・独立
   yearEndAssociation(state, rng);
   // 空いた名跡は自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る

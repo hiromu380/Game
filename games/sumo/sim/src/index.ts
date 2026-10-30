@@ -19,7 +19,11 @@ export {
   pickKakun,
   setPlayHurt,
   setPolicy,
+  setDiet,
+  hireStaff,
+  dismissStaff,
 } from './game/state';
+export { alumnusAge, staffCandidates, staffOf, staffSkill } from './stable/staff';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';
 export { eligibleForToshiyori, toshiyoriProgress } from './lineage/toshiyori';
 export { KAKUN_IDS } from './lineage/kakun';

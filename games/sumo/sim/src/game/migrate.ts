@@ -21,7 +21,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 8) s = v8to9(s);
   if (s.version === 9) s = v9to10(s);
   if (s.version === 10) s = v10to11(s);
+  if (s.version === 11) s = v11to12(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 11 → 12: 部屋の人（まだいない）とちゃんこの方針（ふつう）
+ */
+function v11to12(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.diet = 'standard';
+  s.player.staff = [];
+  s.version = 12;
+  return s as unknown as Raw;
 }
 
 /**

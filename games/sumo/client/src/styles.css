@@ -520,6 +520,13 @@ h3 {
   color: var(--shu);
 }
 
+/* パネルの中の小見出し */
+.panel__sub {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  margin: 16px 0 8px;
+}
+
 /* 日誌 */
 .journal-year h3 {
   font-family: var(--font-head);

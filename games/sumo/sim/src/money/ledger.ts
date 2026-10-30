@@ -20,6 +20,8 @@ export function settleBasho(
   prestige: number,
   kakun: readonly KakunId[],
   facilities: Record<FacilityId, number> = NO_FACILITIES,
+  /** ちゃんこの方針による食費の倍率 */
+  foodMultiplier = 1,
 ): Ledger {
   const n = ranks.length;
   const lower = ranks.filter((r) => r === null || !isSekitori(r)).length;
@@ -55,7 +57,10 @@ export function settleBasho(
     },
   ];
   const food =
-    n * STABLE_COSTS.foodPerRikishi * (kakun.includes('chanko') ? KAKUN.chankoFoodCost : 1);
+    n *
+    STABLE_COSTS.foodPerRikishi *
+    foodMultiplier *
+    (kakun.includes('chanko') ? KAKUN.chankoFoodCost : 1);
   const fixed = STABLE_COSTS.fixedPerBasho * (kakun.includes('thrift') ? KAKUN.thriftFixed : 1);
   const expenses: MoneyLine[] = [
     { key: 'food', amount: Math.round(food) },

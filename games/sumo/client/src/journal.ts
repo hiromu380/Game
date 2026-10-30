@@ -24,6 +24,9 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
       return 'lineage';
     case 'happening':
     case 'facility':
+    case 'diet':
+    case 'staffHire':
+    case 'staffLeave':
       return 'business';
     case 'earlier':
       return null;
@@ -96,6 +99,15 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':
       return t('journal.branchClosed', { stable: e.stable });
+    case 'diet':
+      return t('journal.diet', { name: t(`diet.${e.diet}.name`) });
+    case 'staffHire':
+      return t('journal.staffHire', { name: e.name, role: t(`staff.${e.role}.name`) });
+    case 'staffLeave':
+      return t(e.retired ? 'journal.staffRetire' : 'journal.staffLeave', {
+        name: e.name,
+        role: t(`staff.${e.role}.name`),
+      });
     case 'earlier':
       return t('journal.earlier');
   }

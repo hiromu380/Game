@@ -39,8 +39,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 9: 協会（names・ichimon・stables.ichimonId・すべての部屋の親方。toshiyoriFree と分家の masterShikona/masterAge はなくす）
  * 10: 部屋の日誌（journal）
  * 11: 出来事を増やした（happeningLog。同じ出来事が続かないように）
+ * 12: 部屋の人とちゃんこの方針（player.staff・player.diet）
  */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -197,6 +198,8 @@ export function createGame(options: NewGameOptions): GameState {
       family: [],
       facilities: { ...NO_FACILITIES },
       alumni: [],
+      diet: 'standard',
+      staff: [],
     },
     names: [],
     ichimon: [],

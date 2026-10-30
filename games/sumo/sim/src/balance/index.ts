@@ -11,3 +11,4 @@ export * from './sansho';
 export * from './happenings';
 export * from './association';
 export * from './kimarite';
+export * from './staff';
