@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { advanceBasho, createGame, ensureRival, migrateSave, type Candidate } from '../src';
+import {
+  advanceBasho,
+  createGame,
+  ensureRival,
+  migrateSave,
+  stableStrength,
+  type Candidate,
+  type GameState,
+} from '../src';
 import { autoStep } from './play';
 
 describe('ライバルの部屋', () => {
@@ -66,5 +74,47 @@ describe('ライバルの部屋', () => {
     const m = migrateSave(v12)!;
     expect(m.version).toBe(16);
     expect(m.rival).not.toBeNull();
+  });
+
+  it('部屋の力は番付の地位の点の合計。関取の多い部屋ほど大きい', () => {
+    const s = createGame({ seed: 6 });
+    const mine = stableStrength(s, s.player.stableId);
+    const strongest = Math.max(...s.stables.map((x) => stableStrength(s, x.id)));
+    expect(mine).toBeGreaterThan(0);
+    expect(strongest).toBeGreaterThan(mine);
+  });
+
+  it('ライバルになって3年たち、もっと競る部屋が出てきたら替わる（それまでは替わらない）', () => {
+    const s = createGame({ seed: 7 });
+    const first = s.rival!.stableId;
+    // いまのライバルの力を極端に上げて、合わない部屋にする
+    const boost = (g: GameState) => {
+      for (const r of g.rikishi.filter((x) => x.stableId === first)) {
+        g.titles[r.id] = 'Y';
+      }
+      // 番付の上の方へ（地位の点を上げる）
+      const ids = g.rikishi.filter((x) => x.stableId === first).map((x) => x.id);
+      g.banzuke = [...ids, ...g.banzuke.filter((id) => !ids.includes(id))];
+    };
+    const early: GameState = JSON.parse(JSON.stringify(s));
+    boost(early);
+    early.bashoIndex = 12;
+    ensureRival(early, true);
+    expect(early.rival!.stableId).toBe(first);
+
+    const later: GameState = JSON.parse(JSON.stringify(s));
+    boost(later);
+    later.bashoIndex = 18;
+    ensureRival(later, true);
+    expect(later.rival!.stableId).not.toBe(first);
+    expect(later.rival).toMatchObject({ wins: 0, losses: 0, since: 18 });
+    expect(later.journal.some((e) => e.kind === 'rival' && e.event === 'switch')).toBe(true);
+
+    // 見直しでなければ、閉じていない限り替わらない
+    const plain: GameState = JSON.parse(JSON.stringify(s));
+    boost(plain);
+    plain.bashoIndex = 18;
+    ensureRival(plain);
+    expect(plain.rival!.stableId).toBe(first);
   });
 });

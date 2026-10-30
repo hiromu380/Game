@@ -417,8 +417,8 @@ function yearEnd(state: GameState) {
   state.player.staff = state.player.staff.filter((x) => x.age < STAFF_EFFECTS.retireAge);
   // 協会: 参与の退職・部屋付きの定年・架空の部屋（分家を含む）の師匠の定年と継承・独立
   yearEndAssociation(state, rng);
-  // ライバルの部屋が閉じていたら、新しいライバル
-  ensureRival(state);
+  // ライバルの部屋が閉じていたら新しいライバル。何年かたち、もっと競る部屋が出てきたら替わる
+  ensureRival(state, true);
   // 空いた名跡は自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る
   for (const o of state.oyakata.filter((x) => x.role === 'waiting')) {
     const node = nodeOfOyakata(state, o.id);

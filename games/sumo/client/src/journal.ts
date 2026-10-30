@@ -132,6 +132,7 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t(`journal.rival.${e.event}` as MessageKey, {
         stable: e.stable,
         shikona: e.shikona ?? '',
+        from: e.from ?? '',
       });
     case 'kojo':
       return e.dohyoiri

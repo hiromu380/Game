@@ -912,7 +912,7 @@
   "rival.sekitori": "関取（自分 対 相手）",
   "rival.size": "弟子の数",
   "rival.versus": "{mine} 対 {theirs}",
-  "rival.note": "同期の親方の部屋。関取どうしの直接対決に勝つと名声が上がる。有望な新弟子を取り合うことがあり、返事が遅れると向こうに入ってしまう。",
+  "rival.note": "同期で、番付の力が近い別の一門の部屋。関取どうしの直接対決に勝つと名声が上がる。有望な新弟子を取り合うことがあり、返事が遅れると向こうに入ってしまう。3年たって、もっと番付で競る部屋が出てくると、ライバルが替わる。部屋の力は番付の地位の点（横綱10・大関7・三役5・幕内3・十両2・幕下以下は少し）の合計。",
   "report.rival": "ライバルの{rival}部屋との直接対決: {wins}勝{losses}敗（通算 {total}）。関取は {mine} 対 {theirs}。",
   "candidates.contested": "{rival}部屋も狙っている",
   "journal.rival.new": "同期の親方の{stable}部屋を、ライバルと意識するようになる。",
@@ -1099,5 +1099,7 @@
   "race.after14": "14日目を終えて、優勝の目を残していたのはこの力士たち。",
   "race.winner": "優勝は{name}。",
   "race.watchMine": "{name}の千秋楽の一番を見る",
-  "race.mine": "うちの弟子"
+  "race.mine": "うちの弟子",
+  "rival.strength": "部屋の力（自分 対 相手）",
+  "journal.rival.switch": "番付で競るようになった{stable}部屋を、新しいライバルと意識する（{from}部屋とは一区切り）。"
 }

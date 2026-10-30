@@ -1,9 +1,9 @@
-import { isSekitori, masterOf, type GameState, type Rank } from '@ichimon/sim';
+import { isSekitori, masterOf, stableStrength, type GameState, type Rank } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
 import { bashoName } from '../format';
 
-/** ライバルの部屋（同期の親方の部屋）: 関取の数と直接対決の通算 */
+/** ライバルの部屋（同期で番付の力が近い部屋）: 関取の数・部屋の力と直接対決の通算 */
 export function RivalPanel({ game, ranks }: { game: GameState; ranks: ReadonlyMap<number, Rank> }) {
   const { t } = useI18n();
   const rival = game.rival && game.stables.find((s) => s.id === game.rival!.stableId);
@@ -47,6 +47,15 @@ export function RivalPanel({ game, ranks }: { game: GameState; ranks: ReadonlyMa
         <div className="tile">
           <dt>{t('rival.sekitori')}</dt>
           <dd>{t('rival.versus', { mine: mine.sekitori, theirs: theirs.sekitori })}</dd>
+        </div>
+        <div className="tile">
+          <dt>{t('rival.strength')}</dt>
+          <dd>
+            {t('rival.versus', {
+              mine: Math.round(stableStrength(game, game.player.stableId)),
+              theirs: Math.round(stableStrength(game, rival.id)),
+            })}
+          </dd>
         </div>
         <div className="tile">
           <dt>{t('rival.size')}</dt>

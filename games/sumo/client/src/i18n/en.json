@@ -912,7 +912,7 @@
   "rival.sekitori": "Sekitori (yours vs theirs)",
   "rival.size": "Wrestlers",
   "rival.versus": "{mine} vs {theirs}",
-  "rival.note": "Your contemporary’s stable. Beating them in sekitori bouts raises prestige. They compete for top recruits; hesitate and the recruit joins them.",
+  "rival.note": "A stable of another ichimon, run by a master of your generation, with banzuke strength close to yours. Beating them in sekitori bouts raises your prestige. You may compete for promising recruits; answer late and they sign there. After 3 years, if another stable becomes a closer match on the banzuke, your rival changes. Strength is the sum of rank points (yokozuna 10, ozeki 7, sanyaku 5, makuuchi 3, juryo 2, a little below).",
   "report.rival": "Head-to-head with rival {rival}: {wins}-{losses} (total {total}). Sekitori: {mine} vs {theirs}.",
   "candidates.contested": "{rival} wants him too",
   "journal.rival.new": "You start to see {stable} stable, run by a contemporary, as your rival.",
@@ -1099,5 +1099,7 @@
   "race.after14": "After Day 14, these wrestlers were still in the title race.",
   "race.winner": "{name} took the title.",
   "race.watchMine": "Watch {name}'s final-day bout",
-  "race.mine": "Ours"
+  "race.mine": "Ours",
+  "rival.strength": "Stable strength (you vs. them)",
+  "journal.rival.switch": "Now neck and neck on the banzuke, the {stable} stable becomes your new rival (moving on from {from})."
 }

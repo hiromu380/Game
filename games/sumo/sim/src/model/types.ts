@@ -497,9 +497,11 @@ export type JournalEvent =
   /** ライバルの部屋の出来事（ライバルになった・優勝・大関/横綱昇進・新弟子を取られた） */
   | {
       kind: 'rival';
-      event: 'new' | 'yusho' | 'O' | 'Y' | 'signed';
+      /** switch: 番付で競る部屋に替わった（from は前のライバル） */
+      event: 'new' | 'switch' | 'yusho' | 'O' | 'Y' | 'signed';
       stable: string;
       shikona?: string;
+      from?: string;
     }
   | { kind: 'kojo'; shikona: string; to: 'O' | 'Y'; word: KojoWord; dohyoiri?: Dohyoiri }
   /** 引退相撲・断髪式（はさみを入れた人数） */

@@ -40,7 +40,7 @@ export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './m
 export { freeNames, masterOf } from './world/association';
 export { rankValue } from './banzuke/rank';
 export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
-export { ensureRival } from './world/rival';
+export { ensureRival, stableStrength } from './world/rival';
 export { officeAtLeast, isBoardMember } from './world/office';
 export { canVisit, giftOf } from './stable/koenkai';
 export { danpatsuPlan, danpatsuTier, hasamiCount, type DanpatsuPlan } from './stable/danpatsu';
