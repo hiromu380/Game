@@ -15,8 +15,9 @@ const rikishi = {
 
 describe('3D肖像のキャッシュキー', () => {
   it('同じ見た目と画角は同じ画像を使う', () => {
-    expect(portraitKey(rikishiLook(rikishi), 'bust'))
-      .toBe(portraitKey(rikishiLook(rikishi), 'bust'));
+    expect(portraitKey(rikishiLook(rikishi), 'bust')).toBe(
+      portraitKey(rikishiLook(rikishi), 'bust'),
+    );
   });
   it('けが・疲労・地位が変わると画像を作り直す', () => {
     const base = portraitKey(rikishiLook(rikishi), 'bust');
