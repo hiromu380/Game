@@ -79,6 +79,11 @@
     "size": [112, 112],
     "anchor": [56, 111]
   },
+  "garbage": {
+    "files": ["garbage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
   "gate": {
     "files": ["gate.png"],
     "size": [128, 112],
@@ -108,6 +113,11 @@
     "files": ["lantern.png"],
     "size": [24, 40],
     "anchor": [12, 39]
+  },
+  "laundry_shed": {
+    "files": ["laundry_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "nafuda": {
     "files": ["nafuda.png"],
@@ -139,6 +149,11 @@
     "size": [80, 112],
     "anchor": [40, 111]
   },
+  "postbox": {
+    "files": ["postbox.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
+  },
   "roadwork": {
     "files": ["roadwork.png"],
     "size": [64, 56],
@@ -153,6 +168,11 @@
     "files": ["signal.png"],
     "size": [56, 80],
     "anchor": [28, 79]
+  },
+  "storage": {
+    "files": ["storage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "tent": {
     "files": ["tent.png"],

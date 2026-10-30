@@ -426,8 +426,40 @@
         },
         {
           "id": "bicycles",
-          "name": "駐輪場（自転車2台）",
+          "name": "駐輪場（自転車2台・「自転車駐車場」の看板）",
           "size": [72, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "postbox",
+          "name": "郵便ポストとごみ箱",
+          "size": [56, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "laundry_shed",
+          "name": "洗濯場（波板の屋根・洗濯機・流し）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "storage",
+          "name": "物置（波板の屋根・スチールの物置・ロッカー）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "garbage",
+          "name": "ごみ置き場（網の囲い・分別のごみ箱）",
+          "size": [72, 72],
           "frames": 1,
           "priority": "C",
           "outline": false

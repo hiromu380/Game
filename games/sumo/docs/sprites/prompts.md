@@ -408,10 +408,34 @@ Draw a dark steel pole with a pedestrian traffic signal (red standing figure, gr
 Draw a small roadwork site: three red-and-white traffic cones linked by yellow-and-black bars, a yellow A-frame barricade with a red warning light, sandbags and an old tyre on dark asphalt, on a square patch of earth, concrete and grass. No readable letters.
 ```
 
-### `bicycles` — 駐輪場（自転車2台）（優先 C・比率 1:1・1コマ）
+### `bicycles` — 駐輪場（自転車2台・看板つき）（優先 C・比率 1:1・1コマ）
 
 ```
-Draw a bicycle parking rack with two Japanese city bicycles (mamachari) with front baskets, one navy and one silver, and a blank blue sign on a post (no letters), on a square patch of earth, concrete and grass. No readable letters.
+Draw a bicycle parking rack with two Japanese city bicycles (mamachari) with front baskets, one navy and one silver, and a vertical sign on a post reading 自転車駐車場 under a bicycle pictogram, on a square patch of earth, concrete and grass.
+```
+
+### `postbox` — 郵便ポストとごみ箱（優先 C・比率 1:1・1コマ）
+
+```
+Draw a red Japanese post box on two posts with a grey recycling bin beside it, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `laundry_shed` — 洗濯場（波板の屋根・洗濯機・流し）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a small laundry corner under a corrugated metal roof on posts: a top-loading washing machine, a shelf with detergent, buckets and a laundry basket, a concrete utility sink with a hose, a drain grate, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `storage` — 物置（波板の屋根・スチールの物置・ロッカー）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a storage corner under a corrugated metal roof on posts: a rusty steel storage shed, a locker, stacked plastic crates, a hose and a cardboard box, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `garbage` — ごみ置き場（網の囲い・分別のごみ箱）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a garbage collection corner under a corrugated metal roof on posts: a wire-mesh cage full of garbage bags, sorting bins for recycling, bundled cardboard and a box, on a square patch of earth, concrete and grass. No readable letters.
 ```
 
 ## 行事・巡業の舞台
