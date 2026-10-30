@@ -1,4 +1,9 @@
 {
+  "bicycles": {
+    "files": ["bicycles.png"],
+    "size": [72, 64],
+    "anchor": [36, 63]
+  },
   "chanko": {
     "files": ["chanko.png"],
     "size": [144, 128],
@@ -119,6 +124,11 @@
     "size": [224, 192],
     "anchor": [112, 191]
   },
+  "parking_gate": {
+    "files": ["parking_gate.png"],
+    "size": [64, 64],
+    "anchor": [32, 63]
+  },
   "phonebox": {
     "files": ["phonebox.png"],
     "size": [56, 72],
@@ -129,10 +139,20 @@
     "size": [80, 112],
     "anchor": [40, 111]
   },
+  "roadwork": {
+    "files": ["roadwork.png"],
+    "size": [64, 56],
+    "anchor": [32, 55]
+  },
   "rock": {
     "files": ["rock.png"],
     "size": [48, 44],
     "anchor": [24, 43]
+  },
+  "signal": {
+    "files": ["signal.png"],
+    "size": [56, 80],
+    "anchor": [28, 79]
   },
   "tent": {
     "files": ["tent.png"],
@@ -148,6 +168,11 @@
     "files": ["teppo.png"],
     "size": [16, 56],
     "anchor": [8, 55]
+  },
+  "transformer": {
+    "files": ["transformer.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
   },
   "tree_season__spring": {
     "files": ["tree_season__spring.png"],

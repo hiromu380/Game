@@ -384,6 +384,36 @@ Draw a Japanese drink vending machine (red front, blue side) full of bottles and
 Draw a Japanese green public telephone booth with glass walls and a green payphone inside, with a grey trash bin beside it, on a square patch of earth, concrete and grass. No readable letters.
 ```
 
+### `transformer` — 変電設備の箱（地上の変圧器）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a green-grey ground-mounted electrical transformer cabinet with louvres, a small breaker box with conduits, warning stickers with no readable letters, and a small barrier stand beside it, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `parking_gate` — 駐車場の出入口（遮断機と精算機）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a parking lot entrance with a yellow barrier arm machine with a red-and-white striped bar, a ticket payment machine under a small canopy, and yellow guard pipes, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `signal` — 歩行者用の信号機の柱（優先 C・比率 1:1・1コマ）
+
+```
+Draw a dark steel pole with a pedestrian traffic signal (red standing figure, green walking figure), a push-button box and a control box, yellow guard pipes around it; draw the whole pole so it is not cut off at the top, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `roadwork` — 道路工事の囲い（カラーコーン・バリケード）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a small roadwork site: three red-and-white traffic cones linked by yellow-and-black bars, a yellow A-frame barricade with a red warning light, sandbags and an old tyre on dark asphalt, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `bicycles` — 駐輪場（自転車2台）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a bicycle parking rack with two Japanese city bicycles (mamachari) with front baskets, one navy and one silver, and a blank blue sign on a post (no letters), on a square patch of earth, concrete and grass. No readable letters.
+```
+
 ## 行事・巡業の舞台
 
 ### `dohyo_honbasho` — 本場所の土俵（優先 B・比率 1:1・1コマ）

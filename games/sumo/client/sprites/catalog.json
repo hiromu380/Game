@@ -391,6 +391,46 @@
           "frames": 1,
           "priority": "C",
           "outline": false
+        },
+        {
+          "id": "transformer",
+          "name": "変電設備の箱（地上の変圧器）",
+          "size": [56, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "parking_gate",
+          "name": "駐車場の出入口（遮断機と精算機）",
+          "size": [64, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "signal",
+          "name": "歩行者用の信号機の柱",
+          "size": [56, 80],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "roadwork",
+          "name": "道路工事の囲い（カラーコーン・バリケード）",
+          "size": [64, 56],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "bicycles",
+          "name": "駐輪場（自転車2台）",
+          "size": [72, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
         }
       ]
     },
