@@ -256,7 +256,9 @@ export type HappeningId =
   | 'highSchoolCoach'
   | 'overseasProspect'
   | 'famousDoctor'
-  | 'surgery';
+  | 'surgery'
+  | 'rivalDemegeiko'
+  | 'rivalTaunt';
 
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
@@ -279,6 +281,17 @@ export interface Candidate {
   scoutGrade: number;
   /** 経歴（例: 中学卒・高校相撲・柔道） */
   background: 'juniorHigh' | 'highSchool' | 'college' | 'otherSport';
+  /** ライバルの部屋も狙っている（この場所のうちに受け入れないと、向こうに入る） */
+  contested?: boolean;
+}
+
+/** ライバルの部屋（同期の親方の部屋）との通算の直接対決 */
+export interface RivalState {
+  stableId: number;
+  wins: number;
+  losses: number;
+  /** ライバルになった場所 */
+  since: number;
 }
 
 /** 自分の系譜の1件（何代目の親方が誰か） */
@@ -374,6 +387,8 @@ export interface GameState {
   lastReport: BashoReport | null;
   /** 部屋の日誌（古い順） */
   journal: JournalEntry[];
+  /** ライバルの部屋（いなければ null） */
+  rival: RivalState | null;
   /** 最近起きた出来事（同じ出来事が続かないように） */
   happeningLog: { id: HappeningId; bashoIndex: number }[];
 }
@@ -409,6 +424,13 @@ export type JournalEvent =
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
+  /** ライバルの部屋の出来事（ライバルになった・優勝・大関/横綱昇進・新弟子を取られた） */
+  | {
+      kind: 'rival';
+      event: 'new' | 'yusho' | 'O' | 'Y' | 'signed';
+      stable: string;
+      shikona?: string;
+    }
   | { kind: 'kojo'; shikona: string; to: 'O' | 'Y'; word: KojoWord; dohyoiri?: Dohyoiri }
   | { kind: 'staffHire'; role: StaffRole; name: string }
   | { kind: 'staffLeave'; role: StaffRole; name: string; retired: boolean }
@@ -449,6 +471,8 @@ export interface BashoReport {
   sansho: { shukun: number[]; kanto: number[]; gino: number[] };
   /** 幕内の優勝決定戦に出た力士（なければ null） */
   playoff: number[] | null;
+  /** ライバルの部屋との比べ（この場所の直接対決と、番付の関取の数） */
+  rival?: { stableId: number; wins: number; losses: number; sekitori: [number, number] };
   income: MoneyLine[];
   expenses: MoneyLine[];
   personal: MoneyLine[];

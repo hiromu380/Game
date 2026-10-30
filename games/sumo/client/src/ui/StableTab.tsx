@@ -113,6 +113,7 @@ export function StableTab({
           <div className="candidates__list">
             {game.pending.candidates.map((c) => (
               <CandidateRow
+                rivalName={game.stables.find((s) => s.id === game.rival?.stableId)?.name}
                 key={c.id}
                 c={c}
                 disabled={full || (c.foreign && mine.some((r) => r.foreign))}
@@ -147,11 +148,14 @@ export function StableTab({
 function CandidateRow({
   c,
   disabled,
+  rivalName,
   onAccept,
   onDecline,
 }: {
   c: Candidate;
   disabled: boolean;
+  /** ライバルの部屋の名前（取り合いの札に出す） */
+  rivalName: string | undefined;
   onAccept: () => void;
   onDecline: () => void;
 }) {
@@ -169,6 +173,9 @@ function CandidateRow({
             background: t(`background.${c.background}`),
           })}
           {c.foreign && <span className="tag">{t('candidates.foreign')}</span>}
+          {c.contested && rivalName && (
+            <span className="tag tag--warn">{t('candidates.contested', { rival: rivalName })}</span>
+          )}
         </span>
         <span>
           {t('candidates.grade')}

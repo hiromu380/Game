@@ -14,8 +14,10 @@ describe('部屋の日誌', () => {
   it('部屋を開いたことから始まる', () => {
     const s = createGame({ seed: 1 });
     const stable = s.stables.find((x) => x.isPlayer)!;
+    const rival = s.stables.find((x) => x.id === s.rival!.stableId)!;
     expect(s.journal).toEqual([
       { bashoIndex: 0, kind: 'open', stable: stable.name, shikona: expect.any(String) },
+      { bashoIndex: 0, kind: 'rival', event: 'new', stable: rival.name },
     ]);
   });
 
@@ -62,7 +64,7 @@ describe('部屋の日誌', () => {
     v9.version = 9;
     delete v9.journal;
     const m = migrateSave(v9)!;
-    expect(m.version).toBe(12);
+    expect(m.version).toBe(13);
     expect(m.journal[0]).toEqual({ bashoIndex: 0, kind: 'earlier' });
     expect(m.journal[1]).toMatchObject({ kind: 'open' });
     const retired = m.journal.filter(

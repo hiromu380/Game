@@ -38,6 +38,13 @@ const SAMPLES: JournalEntry[] = [
   { bashoIndex: 6, kind: 'branchSucceeded', stable: '浦風', shikona: '白岩' },
   { bashoIndex: 6, kind: 'branchClosed', stable: '浦風' },
   { bashoIndex: 7, kind: 'diet', diet: 'hearty' },
+  ...(['new', 'yusho', 'O', 'Y', 'signed'] as const).map((event): JournalEntry => ({
+    bashoIndex: 8,
+    kind: 'rival',
+    event,
+    stable: '浦風',
+    shikona: '白鵬丸',
+  })),
   { bashoIndex: 7, kind: 'staffHire', role: 'wakaimonogashira', name: '白岩' },
   { bashoIndex: 7, kind: 'staffLeave', role: 'sewanin', name: '白岩', retired: true },
   { bashoIndex: 7, kind: 'staffLeave', role: 'sewanin', name: '白岩', retired: false },
@@ -48,7 +55,7 @@ describe('出来事の文言', () => {
     for (const lang of ['ja', 'en'] as const) {
       const t = makeT(lang);
       const has = (key: string) => {
-        const text = t(key as MessageKey, { name: '白山' });
+        const text = t(key as MessageKey, { name: '白山', rival: '浦風' });
         expect(text, key).not.toBe(key);
         expect(text, key).not.toMatch(/\{/);
       };

@@ -98,6 +98,21 @@ export function ReportDialog({
           </div>
         </dl>
 
+        {report.rival && (
+          <p className="callout callout--rival">
+            {t('report.rival', {
+              rival: game.stables.find((s) => s.id === report.rival!.stableId)?.name ?? '',
+              wins: report.rival.wins,
+              losses: report.rival.losses,
+              total: game.rival
+                ? t('rival.record', { wins: game.rival.wins, losses: game.rival.losses })
+                : '',
+              mine: report.rival.sekitori[0],
+              theirs: report.rival.sekitori[1],
+            })}
+          </p>
+        )}
+
         {myPromotions.length > 0 && (
           <div className="callout">
             {myPromotions.map((p) => (

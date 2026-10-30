@@ -14,3 +14,4 @@ export * from './kimarite';
 export * from './staff';
 export * from './ceremony';
 export * from './traits';
+export * from './rival';

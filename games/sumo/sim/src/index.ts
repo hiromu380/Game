@@ -36,3 +36,4 @@ export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './m
 export { freeNames, masterOf } from './world/association';
 export { rankValue } from './banzuke/rank';
 export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
+export { ensureRival } from './world/rival';

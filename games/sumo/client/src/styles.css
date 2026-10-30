@@ -1760,3 +1760,24 @@ html:lang(en) .choice__desc {
   color: var(--ai);
   background: var(--ai-light);
 }
+
+/* ライバルの部屋 */
+.rival {
+  border-left: 6px solid var(--shu);
+}
+.rival__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.rival__head > div {
+  display: grid;
+}
+.rival__name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+}
+.callout--rival {
+  border-left-color: var(--ai);
+}

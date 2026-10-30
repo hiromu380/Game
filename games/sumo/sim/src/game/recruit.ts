@@ -1,6 +1,7 @@
 /**
  * 新弟子: 自分の部屋の入門希望者と、架空の部屋の新弟子
  */
+import { RIVAL } from '../balance/rival';
 import { RECRUIT } from '../balance/career';
 import { GAME } from '../balance/game';
 import { FACILITY_EFFECTS } from '../balance/facilities';
@@ -49,9 +50,13 @@ export function makeCandidates(state: GameState): Candidate[] {
       rng.chance(0.75) ? lineageCharOf(master.shikona, rng) : undefined,
     );
     used.add(name);
-    result.push(
-      makeCandidate(rng, state.nextId++, name, state.player.prestige, !hasForeign, noise),
-    );
+    const c = makeCandidate(rng, state.nextId++, name, state.player.prestige, !hasForeign, noise);
+    // 見立ての高い子は、ライバルの部屋も狙っていることがある（乱数は別の系統）
+    if (state.rival && c.scoutGrade >= RIVAL.contestMinGrade) {
+      const r = createPrng(deriveSeed(state.seed, SEED.rival, state.bashoIndex, c.id));
+      if (r.chance(RIVAL.contestChance)) c.contested = true;
+    }
+    result.push(c);
   }
   return result;
 }

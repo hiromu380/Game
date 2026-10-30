@@ -29,6 +29,7 @@ import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
 import { staffGrowth } from '../stable/staff';
+import { ensureRival, rivalSignsCandidates, settleRival } from '../world/rival';
 import { TRAITS } from '../balance/traits';
 import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
@@ -65,6 +66,8 @@ export function advanceBasho(input: GameState): GameState {
   // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
   state.pending.independence = null;
   if (state.pending.happening) applyHappening(state, Number.MAX_SAFE_INTEGER);
+  // 返事をしなかった取り合いの新弟子は、ライバルの部屋に入る
+  rivalSignsCandidates(state);
   state.pending.candidates = [];
   let byId = new Map(state.rikishi.map((r) => [r.id, r]));
 
@@ -261,6 +264,8 @@ export function advanceBasho(input: GameState): GameState {
   for (const m of report.mine) {
     report.banzukeChanges.push({ id: m.id, from: m.record.rank, to: newRanks.get(m.id) ?? null });
   }
+  // ライバルの部屋との直接対決・ライバルの大きな出来事
+  settleRival(state, outcome.bouts, report, newRanks, outcome.ranks);
 
   // 巡業（春・夏・秋・冬）: 関取が地方を回る。疲れるが、人気（名声）が上がる
   const jungyo = JUNGYO_AFTER[state.bashoIndex % 6] ?? null;
@@ -375,6 +380,8 @@ function yearEnd(state: GameState) {
   state.player.staff = state.player.staff.filter((x) => x.age < STAFF_EFFECTS.retireAge);
   // 協会: 参与の退職・部屋付きの定年・架空の部屋（分家を含む）の師匠の定年と継承・独立
   yearEndAssociation(state, rng);
+  // ライバルの部屋が閉じていたら、新しいライバル
+  ensureRival(state);
   // 空いた名跡は自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る
   for (const o of state.oyakata.filter((x) => x.role === 'waiting')) {
     const node = nodeOfOyakata(state, o.id);

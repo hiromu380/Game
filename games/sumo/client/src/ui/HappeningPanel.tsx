@@ -33,7 +33,8 @@ export function HappeningPanel({
   const def = HAPPENINGS.find((d) => d.id === h.id)!;
   const target = h.target === null ? undefined : game.rikishi.find((r) => r.id === h.target);
   const k = (suffix: string) => `happening.${h.id}.${suffix}` as MessageKey;
-  const vars = { name: target?.name ?? '' };
+  const rival = game.rival && game.stables.find((s) => s.id === game.rival!.stableId);
+  const vars = { name: target?.name ?? '', rival: rival?.name ?? '' };
   return (
     <section className="panel panel--event" aria-labelledby="happening-title">
       <h2 id="happening-title">{t(k('title'))}</h2>

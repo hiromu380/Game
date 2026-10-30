@@ -4,6 +4,7 @@
 import type { FamilyNode, GameState, JournalEntry } from '../model/types';
 import { SAVE_VERSION } from '../world/create';
 import { populateAssociation } from '../world/association';
+import { ensureRival } from '../world/rival';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 
 type Raw = Record<string, unknown> & { version?: number };
@@ -22,7 +23,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 9) s = v9to10(s);
   if (s.version === 10) s = v10to11(s);
   if (s.version === 11) s = v11to12(s);
+  if (s.version === 12) s = v12to13(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 12 → 13: ライバルの部屋（同期の親方の部屋を選ぶ）
+ */
+function v12to13(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.rival = null;
+  ensureRival(s);
+  s.version = 13;
+  return s as unknown as Raw;
 }
 
 /**

@@ -142,7 +142,7 @@ describe('セーブの変換', () => {
     }
     for (const o of v1.oyakata) delete o.since;
     const m = migrateSave(v1)!;
-    expect(m.version).toBe(12);
+    expect(m.version).toBe(13);
     expect(m.player.facilities).toEqual({ dorm: 0, dojo: 0, trainer: 0, scout: 0 });
     expect(m.player.family).toHaveLength(1);
     expect(m.names).toHaveLength(105);

@@ -26,6 +26,7 @@ import { makeCandidates } from '../game/recruit';
 import { addNode } from '../lineage/family';
 import { populateAssociation } from './association';
 import { note } from '../game/journal';
+import { ensureRival } from './rival';
 import { NO_FACILITIES } from '../money/facilities';
 
 /**
@@ -40,8 +41,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 10: 部屋の日誌（journal）
  * 11: 出来事を増やした（happeningLog。同じ出来事が続かないように）
  * 12: 部屋の人とちゃんこの方針（player.staff・player.diet）
+ * 13: ライバルの部屋（rival）
  */
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -217,6 +219,7 @@ export function createGame(options: NewGameOptions): GameState {
     lastReport: null,
     journal: [],
     happeningLog: [],
+    rival: null,
   };
   populateAssociation(state, rng, options.ichimonId);
   addNode(state, {
@@ -231,6 +234,7 @@ export function createGame(options: NewGameOptions): GameState {
     highestRank: oyakata.highestRank,
   });
   note(state, { kind: 'open', stable: playerStable.name, shikona: oyakata.shikona });
+  ensureRival(state);
   state.pending.candidates = makeCandidates(state);
   return state;
 }

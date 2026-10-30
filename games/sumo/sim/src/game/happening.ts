@@ -107,6 +107,8 @@ function eligible(state: GameState, def: HappeningDef): boolean {
       return state.player.alumni.length > 0;
     case 'noForeign':
       return !mine(state).some((r) => r.foreign);
+    case 'rival':
+      return state.rival !== null;
   }
 }
 

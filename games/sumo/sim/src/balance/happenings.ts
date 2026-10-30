@@ -57,7 +57,16 @@ export interface HappeningOption {
 
 /** 起きる条件 */
 export type HappeningRequirement =
-  'none' | 'sekitori' | 'upper' | 'many' | 'rich' | 'heyatsuki' | 'alumni' | 'noForeign';
+  | 'none'
+  | 'sekitori'
+  | 'upper'
+  | 'many'
+  | 'rich'
+  | 'heyatsuki'
+  | 'alumni'
+  | 'noForeign'
+  /** ライバルの部屋がある */
+  | 'rival';
 
 /** 誰の話か */
 export type HappeningTarget =
@@ -587,6 +596,31 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     options: [
       { key: 'go', group: 'sekitori', effect: { stableMoney: 200_000, prestige: 0.5, fatigue: 3 } },
       decline,
+    ],
+  },
+
+  // ── ライバルの部屋 ──
+  {
+    id: 'rivalDemegeiko',
+    requires: 'rival',
+    weight: 1.2,
+    options: [
+      {
+        key: 'send',
+        group: 'upper',
+        effect: { boost: 1.3, fatigue: 14, injuryRisk: 0.08, prestige: 0.5 },
+      },
+      decline,
+    ],
+  },
+  {
+    id: 'rivalTaunt',
+    requires: 'rival',
+    weight: 1,
+    options: [
+      { key: 'fireUp', group: 'all', effect: { boost: 1.1, fatigue: 5 } },
+      { key: 'laugh', effect: { prestige: 0.3 } },
+      { key: 'ignore', effect: {} },
     ],
   },
 
