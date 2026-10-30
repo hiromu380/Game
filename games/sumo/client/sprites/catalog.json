@@ -463,6 +463,46 @@
           "frames": 1,
           "priority": "C",
           "outline": false
+        },
+        {
+          "id": "gym_shed",
+          "name": "屋外の筋トレ場（波板の屋根・タイヤ・サンドバッグ・ベンチ）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "bicycle_shed",
+          "name": "屋根つきの自転車置き場（波板の屋根）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "smoking",
+          "name": "喫煙所（波板の屋根・灰皿・ベンチ・看板）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "drying_shed",
+          "name": "物干し場（波板の屋根・浴衣・手ぬぐい・Tシャツ）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "garden_shed",
+          "name": "園芸の一角（波板の屋根・小さな温室・植木鉢）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
         }
       ]
     },

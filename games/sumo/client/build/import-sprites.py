@@ -123,11 +123,23 @@ def key_out_flood(img: Image.Image, bg: tuple[int, int, int]) -> Image.Image:
     return img
 
 
+def tame_outline(img: Image.Image) -> Image.Image:
+    """背景の赤紫がまじって紫っぽくなった暗い輪郭線を、墨に戻す（紫の色面に寄せられないように）"""
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a and max(r, b) < 140 and g < min(r, b) - 30:
+                px[x, y] = (*SUMI, a)
+    return img
+
+
 def key_out(img: Image.Image) -> Image.Image:
     """マゼンタの背景とにじみを透明に。背景がマゼンタから外れた絵は、外からつながる背景を抜く"""
     bg = border_color(img)
     if dist(bg, KEY) > 60:
-        return key_out_flood(img, bg)
+        return tame_outline(key_out_flood(img, bg))
     img = img.convert('RGBA')
     px = img.load()
     w, h = img.size
@@ -139,7 +151,7 @@ def key_out(img: Image.Image) -> Image.Image:
             fringe = r - g > 70 and b - g > 70 and abs(r - b) < 90
             if d < KEY_DISTANCE or fringe:
                 px[x, y] = (0, 0, 0, 0)
-    return img
+    return tame_outline(img)
 
 
 def blobs(img: Image.Image, count: int) -> list[tuple[int, int, int, int]]:
@@ -322,6 +334,12 @@ def selftest() -> None:
         keyed = key_out(dull)
         assert keyed.getpixel((5, 5))[3] == 0, '赤紫の背景が抜けていない'
         assert keyed.getpixel((150, 150))[3] == 255, '背景に近い紅まで抜けた'
+        # 赤紫のまじった暗い輪郭は墨に
+        tinted = Image.new('RGB', (40, 40), KEY)
+        for y in range(10, 30):
+            for x in range(10, 30):
+                tinted.putpixel((x, y), (65, 0, 58))
+        assert key_out(tinted).getpixel((20, 20))[:3] == SUMI, '紫っぽい輪郭が墨に戻らない'
 
     print('selftest ok')
 

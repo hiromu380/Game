@@ -1,4 +1,9 @@
 {
+  "bicycle_shed": {
+    "files": ["bicycle_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
   "bicycles": {
     "files": ["bicycles.png"],
     "size": [72, 64],
@@ -74,6 +79,11 @@
     "size": [176, 176],
     "anchor": [88, 175]
   },
+  "drying_shed": {
+    "files": ["drying_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
   "fence_corner": {
     "files": ["fence_corner.png"],
     "size": [112, 112],
@@ -81,6 +91,11 @@
   },
   "garbage": {
     "files": ["garbage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garden_shed": {
+    "files": ["garden_shed.png"],
     "size": [72, 72],
     "anchor": [36, 71]
   },
@@ -93,6 +108,11 @@
     "files": ["gate_modern.png"],
     "size": [128, 128],
     "anchor": [64, 127]
+  },
+  "gym_shed": {
+    "files": ["gym_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "keikoba_back": {
     "files": ["keikoba_back.png"],
@@ -168,6 +188,11 @@
     "files": ["signal.png"],
     "size": [56, 80],
     "anchor": [28, 79]
+  },
+  "smoking": {
+    "files": ["smoking.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "storage": {
     "files": ["storage.png"],

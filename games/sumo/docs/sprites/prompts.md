@@ -438,6 +438,36 @@ Draw a storage corner under a corrugated metal roof on posts: a rusty steel stor
 Draw a garbage collection corner under a corrugated metal roof on posts: a wire-mesh cage full of garbage bags, sorting bins for recycling, bundled cardboard and a box, on a square patch of earth, concrete and grass. No readable letters.
 ```
 
+### `gym_shed` — 屋外の筋トレ場（波板の屋根・タイヤ・サンドバッグ・ベンチ）（優先 C・比率 1:1・1コマ）
+
+```
+Draw an outdoor training corner under a corrugated metal roof on posts: big tractor tyres, a squat rack, a hanging punching bag, a flat bench, dumbbells and plates on rubber mats, a duffel bag, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
+```
+
+### `bicycle_shed` — 屋根つきの自転車置き場（波板の屋根）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a covered bicycle parking corner under a corrugated metal roof on posts: two Japanese city bicycles with front baskets in bicycle stands, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
+```
+
+### `smoking` — 喫煙所（波板の屋根・灰皿・ベンチ・看板）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a smoking area under a corrugated metal roof on posts: two cylindrical standing ashtrays, a blue bench, a fire extinguisher, a small trash bin and a sign post with a smoking pictogram, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
+```
+
+### `drying_shed` — 物干し場（波板の屋根・浴衣・手ぬぐい・Tシャツ）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a laundry drying corner under a corrugated metal roof on posts: drying poles with yukata, towels and T-shirts on hangers, a clothes-peg hanger, laundry baskets and buckets, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
+```
+
+### `garden_shed` — 園芸の一角（波板の屋根・小さな温室・植木鉢）（優先 C・比率 1:1・1コマ）
+
+```
+Draw a gardening corner under a corrugated metal roof on posts: a small plastic greenhouse with potted plants, shelves of flower pots and seedling trays, watering cans, bags of soil and garden tools, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
+```
+
 ## 行事・巡業の舞台
 
 ### `dohyo_honbasho` — 本場所の土俵（優先 B・比率 1:1・1コマ）
