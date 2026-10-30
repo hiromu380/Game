@@ -1142,5 +1142,6 @@
   "scene.view": "部屋の絵",
   "scene.tab.keikoba": "稽古場",
   "scene.tab.exterior": "外観",
-  "scene.exterior": "部屋の外観。母屋と、力士の暮らす寮"
+  "scene.exterior": "部屋の外観。母屋と、力士の暮らす寮",
+  "scene.nobori": "。幟: {names}"
 }

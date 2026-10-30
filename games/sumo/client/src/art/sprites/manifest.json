@@ -14,6 +14,11 @@
     "size": [240, 176],
     "anchor": [120, 175]
   },
+  "chochin": {
+    "files": ["chochin.png"],
+    "size": [36, 64],
+    "anchor": [18, 63]
+  },
   "clinic": {
     "files": ["clinic.png"],
     "size": [112, 96],
@@ -89,6 +94,16 @@
     "size": [24, 40],
     "anchor": [12, 39]
   },
+  "nafuda": {
+    "files": ["nafuda.png"],
+    "size": [72, 64],
+    "anchor": [36, 63]
+  },
+  "nobori": {
+    "files": ["nobori.png"],
+    "size": [72, 128],
+    "anchor": [36, 127]
+  },
   "omoya": {
     "files": ["omoya.png"],
     "size": [224, 192],
@@ -113,6 +128,11 @@
     "files": ["tree_season__spring.png"],
     "size": [80, 112],
     "anchor": [40, 111]
+  },
+  "tsukubai": {
+    "files": ["tsukubai.png"],
+    "size": [56, 48],
+    "anchor": [28, 47]
   },
   "weights": {
     "files": ["weights.png"],

@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { Fragment, useState, type CSSProperties } from 'react';
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { sprite } from '../art/sprites';
+import { PALETTE } from '../art/palette';
 import {
   EXTERIOR_BASE,
   EXTERIOR_STAGE,
   KEIKOBA_STAGE,
+  NOBORI_TAG,
   exteriorLayout,
   keikobaLayout,
   type Placed,
@@ -36,21 +38,66 @@ function SpriteStage({
       aria-label={label}
       style={{ aspectRatio: `${stage.width} / ${stage.height}`, maxWidth: SCENE_MAX_WIDTH }}
     >
-      {placed.map(({ p, s }) => (
-        <img
-          key={p.sprite}
-          className="scene__sprite"
-          src={s!.url}
-          alt=""
-          draggable={false}
-          style={{
-            left: `${((p.x - s!.anchor[0]) / stage.width) * 100}%`,
-            top: `${((p.y - s!.anchor[1]) / stage.height) * 100}%`,
-            width: `${(s!.size[0] / stage.width) * 100}%`,
-          }}
-        />
-      ))}
+      {placed.map(({ p, s }, i) => {
+        const box = {
+          left: `${((p.x - s!.anchor[0]) / stage.width) * 100}%`,
+          top: `${((p.y - s!.anchor[1]) / stage.height) * 100}%`,
+          width: `${(s!.size[0] / stage.width) * 100}%`,
+        };
+        return (
+          <Fragment key={`${p.sprite}-${i}`}>
+            <img className="scene__sprite" src={s!.url} alt="" draggable={false} style={box} />
+            {p.label && <NoboriTag label={p.label} size={s!.size} style={box} />}
+          </Fragment>
+        );
+      })}
     </div>
+  );
+}
+
+/** 幟に重ねる名前の札（四股名の縦書き）。絵と同じ大きさの SVG で、絵と一緒に伸び縮みする */
+function NoboriTag({
+  label,
+  size,
+  style,
+}: {
+  label: string;
+  size: [number, number];
+  style: CSSProperties;
+}) {
+  const t = NOBORI_TAG;
+  const chars = [...label];
+  const font = Math.min(t.width - 1, (t.height - 2) / chars.length);
+  return (
+    <svg
+      className="scene__sprite"
+      style={style}
+      viewBox={`0 0 ${size[0]} ${size[1]}`}
+      aria-hidden="true"
+    >
+      <rect
+        x={t.x}
+        y={t.y}
+        width={t.width}
+        height={t.height}
+        fill={PALETTE.washi}
+        stroke={PALETTE.sumi}
+        strokeWidth={0.6}
+      />
+      {chars.map((c, i) => (
+        <text
+          key={i}
+          x={t.x + t.width / 2}
+          y={t.y + 1 + font * (i + 0.88)}
+          fontSize={font}
+          textAnchor="middle"
+          fill={PALETTE.sumi}
+          className="scene__nobori"
+        >
+          {c}
+        </text>
+      ))}
+    </svg>
   );
 }
 
@@ -68,6 +115,7 @@ export function KeikobaScene({ game }: { game: GameState }) {
   const ready = views.filter((v) => sprite(v.base) !== null);
   if (ready.length === 0) return null;
   const current = ready.find((v) => v.id === view) ?? ready[0]!;
+  const nobori = current.items.flatMap((p) => (p.label ? [p.label] : []));
   return (
     <div className="scene-box">
       {ready.length > 1 && (
@@ -88,7 +136,10 @@ export function KeikobaScene({ game }: { game: GameState }) {
         stage={current.stage}
         items={current.items}
         base={current.base}
-        label={t(`scene.${current.id}`)}
+        label={
+          t(`scene.${current.id}`) +
+          (nobori.length > 0 ? t('scene.nobori', { names: nobori.join('・') }) : '')
+        }
       />
     </div>
   );

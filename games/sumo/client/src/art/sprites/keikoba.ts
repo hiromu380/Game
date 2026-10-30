@@ -1,7 +1,7 @@
 /**
  * 部屋の絵（稽古場・外観）の並べ方（純粋関数）。座標は絵の足元（下の中央）で、舞台（stage）の上のドット
  */
-import type { GameState } from '@ichimon/sim';
+import { isSekitori, ranksOf, type GameState } from '@ichimon/sim';
 
 export interface Stage {
   width: number;
@@ -9,13 +9,25 @@ export interface Stage {
 }
 
 export const KEIKOBA_STAGE: Stage = { width: 320, height: 200 };
-export const EXTERIOR_STAGE: Stage = { width: 520, height: 320 };
+export const EXTERIOR_STAGE: Stage = { width: 520, height: 350 };
 
 export interface Placed {
   sprite: string;
   x: number;
   y: number;
+  /** 絵に重ねて書く字（幟の四股名） */
+  label?: string;
 }
+
+/** 幟の布に名前の札を重ねる場所（幟の絵のドット。左上と幅・高さ） */
+export const NOBORI_TAG = { x: 31, y: 54, width: 10, height: 38 } as const;
+/** 幟を立てる関取の数（番付の上から） */
+export const NOBORI_MAX = 3;
+const NOBORI_SPOTS: readonly [number, number][] = [
+  [320, 345],
+  [345, 348],
+  [370, 351],
+];
 
 /** 筋トレの器具が置かれる稽古場の改修の段・今どきの稽古場に建て替わる段 */
 export const WEIGHTS_FROM_DOJO = 2;
@@ -57,10 +69,13 @@ export function seasonOf(bashoIndex: number): Season {
 }
 
 /**
- * 外観: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門と、塀・木・灯籠・庭石。
+ * 外観: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門と、塀・木・灯籠・提灯・名札掛け・つくばい・庭石。
+ * 自分の部屋の関取の幟（四股名を重ねて書く）。
  * 奥から順（足元の y が小さい順）に並べる
  */
-export function exteriorLayout(game: Pick<GameState, 'player' | 'bashoIndex'>): Placed[] {
+export function exteriorLayout(
+  game: Pick<GameState, 'player' | 'bashoIndex' | 'rikishi' | 'banzuke' | 'titles'>,
+): Placed[] {
   const f = game.player.facilities;
   const out: Placed[] = [
     { sprite: `dorm_${Math.min(2, f.dorm)}`, x: 385, y: 220 },
@@ -71,9 +86,25 @@ export function exteriorLayout(game: Pick<GameState, 'player' | 'bashoIndex'>): 
     { sprite: 'pine', x: 490, y: 200 },
     { sprite: `tree_season__${seasonOf(game.bashoIndex)}`, x: 300, y: 170 },
     { sprite: 'lantern', x: 300, y: 316 },
-    { sprite: 'rock', x: 30, y: 312 },
+    { sprite: 'chochin', x: 170, y: 326 },
+    { sprite: 'nafuda', x: 120, y: 330 },
+    { sprite: 'tsukubai', x: 40, y: 320 },
+    { sprite: 'rock', x: 505, y: 262 },
   ];
   if (f.trainer >= 1) out.push({ sprite: 'clinic', x: 90, y: 275 });
+  // 関取の幟（番付の上から）
+  const ranks = ranksOf(game.banzuke, game.titles);
+  const mine = new Set(
+    game.rikishi.filter((r) => r.stableId === game.player.stableId).map((r) => r.id),
+  );
+  const names = new Map(game.rikishi.map((r) => [r.id, r.name]));
+  game.banzuke
+    .filter((id) => mine.has(id) && isSekitori(ranks.get(id)!))
+    .slice(0, NOBORI_MAX)
+    .forEach((id, i) => {
+      const [x, y] = NOBORI_SPOTS[i]!;
+      out.push({ sprite: 'nobori', x, y, label: names.get(id)! });
+    });
   return out.sort((a, b) => a.y - b.y);
 }
 

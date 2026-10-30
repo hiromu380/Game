@@ -172,6 +172,30 @@
           "outline": false
         },
         {
+          "id": "tsukubai",
+          "name": "つくばい（竹の筧と石の手水鉢）",
+          "size": [56, 48],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "nafuda",
+          "name": "名札掛け（瓦屋根の板に木の名札。字は書かない）",
+          "size": [72, 64],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "chochin",
+          "name": "提灯（柱から下がる赤い提灯）",
+          "size": [36, 64],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
           "id": "well",
           "name": "井戸",
           "size": [48, 56],
@@ -181,11 +205,11 @@
         },
         {
           "id": "nobori",
-          "name": "幟（藍・紅・黄土・紫の4本）",
-          "size": [16, 64],
-          "frames": 4,
+          "name": "幟（無地の紅白。関取の四股名はゲームが重ねて書く）",
+          "size": [72, 128],
+          "frames": 1,
           "priority": "B",
-          "outline": true
+          "outline": false
         },
         {
           "id": "laundry",

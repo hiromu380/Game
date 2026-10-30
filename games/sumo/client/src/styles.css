@@ -2025,6 +2025,10 @@ html:lang(en) .choice__desc {
   width: 100%;
   margin: 0 auto;
 }
+.scene__nobori {
+  font-family: var(--font-head);
+  font-weight: 800;
+}
 .scene__sprite {
   position: absolute;
   height: auto;

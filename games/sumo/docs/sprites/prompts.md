@@ -190,16 +190,34 @@ Draw a small Japanese stone lantern (ishidoro) with a little square window and a
 Draw a large mossy garden rock (niwa-ishi) with patches of moss and lichen, a few small pebbles and grass tufts at its base.
 ```
 
+### `tsukubai` — つくばい（優先 B・比率 1:1・1コマ）
+
+```
+Draw a Japanese garden water basin (tsukubai): a round stone basin full of water, a bamboo spout (kakei) pouring water into it, a flat stepping stone in front, ferns and low shrubs behind.
+```
+
+### `nafuda` — 名札掛け（優先 B・比率 1:1・1コマ）
+
+```
+Draw a wooden name-tag board (nafuda-kake) of a sumo stable standing outdoors on two braced posts, with a small tiled roof: rows of plain wooden name tags hanging on it, with no letters on the tags.
+```
+
+### `chochin` — 提灯（優先 B・比率 1:1・1コマ）
+
+```
+Draw a red paper lantern (chochin) with a little tiled hood, hanging from the arm of a wooden post braced on the ground, on a small patch of grass. No readable letters on the lantern.
+```
+
 ### `well` — 井戸（優先 B・比率 3:4・1コマ）
 
 ```
 Draw an old wooden water well with a stone rim, a small tiled roof on two posts and a wooden bucket hanging on a rope.
 ```
 
-### `nobori` — 幟（藍・紅・黄土・紫の4本）（優先 B・比率 21:9・4コマ）
+### `nobori` — 幟（無地の紅白）（優先 B・比率 1:1・1コマ）
 
 ```
-Draw four tall narrow nobori banner flags on thin wooden poles, side by side with wide gaps, plain cloth with no letters: indigo, vermilion, ochre, purple.
+Draw one tall nobori banner flag on a green bamboo pole tied to a short wooden stake, with a small tassel of colourful ribbons, standing on a small patch of grass. The cloth is plain red and white horizontal stripes with no letters at all (the game writes the wrestler's name on it).
 ```
 
 ### `laundry` — 物干し（まわしと浴衣）（優先 B・比率 16:9・1コマ）
