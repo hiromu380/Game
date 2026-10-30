@@ -1,7 +1,8 @@
 /**
- * はじめの画面の絵: 部屋ののれん・親方・弟子2人（四股を踏む）
+ * はじめの画面: 木版画の建物の中に静止3D肖像を並べる。
+ * モデルの描画が失敗したときも従来のSVGの人物がその場に残る。
  */
-import { FigureGroup } from './Figure';
+import { ThreePortrait } from './ThreePortrait';
 import { oyakataLook, rikishiLook } from './look';
 import { PALETTE } from './palette';
 
@@ -30,49 +31,26 @@ export function TitleArt({ title }: { title: string }) {
   });
   const master = oyakataLook({ id: 5, age: 48, stableId: 1 });
   return (
-    <svg className="title-art" viewBox="0 0 360 230" role="img" aria-label={title}>
-      {/* 板の間と壁 */}
-      <rect width={360} height={230} fill={PALETTE.washi2} />
-      <rect y={170} width={360} height={60} fill={PALETTE.odoLight} />
-      {Array.from({ length: 9 }, (_, i) => (
-        <line
-          key={i}
-          x1={i * 45}
-          y1={170}
-          x2={i * 45 - 20}
-          y2={230}
-          stroke={PALETTE.odo}
-          strokeWidth={1.2}
-        />
-      ))}
-      {/* のれん（3枚。真ん中に丸に一の紋） */}
-      <line x1={40} y1={10} x2={320} y2={10} stroke={INK} strokeWidth={4} />
-      {[0, 1, 2].map((i) => (
-        <rect
-          key={i}
-          x={44 + i * 92}
-          y={12}
-          width={88}
-          height={64}
-          fill={PALETTE.ai}
-          stroke={INK}
-          strokeWidth={2}
-        />
-      ))}
-      <circle cx={180} cy={44} r={20} fill="none" stroke={PALETTE.white} strokeWidth={4} />
-      <line x1={166} y1={44} x2={194} y2={44} stroke={PALETTE.white} strokeWidth={5} />
-      {/* 弟子（左: 四股、右: すり足）と親方 */}
-      <g transform="translate(26 70) scale(0.8)">
-        <g transform="rotate(-8 60 140)">
-          <FigureGroup look={left} arms="up" />
-        </g>
-      </g>
-      <g transform="translate(138 74) scale(0.72)">
-        <FigureGroup look={master} />
-      </g>
-      <g transform="translate(240 88) scale(0.68)">
-        <FigureGroup look={right} arms="push" />
-      </g>
-    </svg>
+    <div className="title-art title-art--scene" role="img" aria-label={title}>
+      <svg viewBox="0 0 360 230" className="title-art__background" aria-hidden="true">
+        {/* 木の板間、和紙の壁、藍の三つ割りのれん */}
+        <rect width={360} height={230} fill={PALETTE.washi2} />
+        <path d="M0 171 H360 V230 H0 Z" fill={PALETTE.odoLight} />
+        {Array.from({ length: 9 }, (_, i) => (
+          <line key={i} x1={i * 45} y1={171} x2={i * 45 - 20} y2={230} stroke={PALETTE.odo} strokeWidth={1.5} />
+        ))}
+        <path d="M35 13 H325" stroke={INK} strokeWidth={4} strokeLinecap="round" />
+        {[0, 1, 2].map((i) => (
+          <path key={i} d={`M${44 + i * 92} 15 H${132 + i * 92} V75 H${44 + i * 92} Z`} fill={PALETTE.ai} stroke={INK} strokeWidth={2} />
+        ))}
+        <circle cx={180} cy={45} r={21} fill="none" stroke={PALETTE.white} strokeWidth={3.5} />
+        <path d="M166 45 H194" stroke={PALETTE.white} strokeWidth={5} />
+        {/* 背景にも平たい墨線を残し、3D人物だけを際立たせる */}
+        <line x1={0} y1={171} x2={360} y2={171} stroke={INK} strokeWidth={2} />
+      </svg>
+      <span className="title-art__figure title-art__figure--left"><ThreePortrait look={left} size="100%" variant="full" /></span>
+      <span className="title-art__figure title-art__figure--master"><ThreePortrait look={master} size="100%" variant="full" /></span>
+      <span className="title-art__figure title-art__figure--right"><ThreePortrait look={right} size="100%" variant="full" /></span>
+    </div>
   );
 }
