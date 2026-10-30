@@ -41,6 +41,13 @@ export function money(t: TranslateFn, input: number, lang: 'ja' | 'en'): string 
   return t('money.man', { value: Math.round(yen / 10_000).toLocaleString('ja-JP') });
 }
 
+/** 初日・○日目・千秋楽 */
+export function dayLabel(t: TranslateFn, day: number): string {
+  if (day === 1) return t('day.first');
+  if (day === 15) return t('day.last');
+  return t('day.n', { n: day });
+}
+
 export function bashoName(t: TranslateFn, bashoIndex: number): string {
   return t('basho.label', {
     year: Math.floor(bashoIndex / 6) + 1,

@@ -11,6 +11,7 @@ import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, money, rankLabel, recordLabel } from '../format';
 import { useSettings } from '../settings';
 import { BoutViewer } from './BoutViewer';
+import { RaceSection } from './RacePanel';
 
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
 const DIV_ORDER = new Map(DIVS.map((d, i) => [d, i]));
@@ -244,6 +245,7 @@ export function ReportDialog({
         {report.playoff && (
           <p>{t('report.playoff', { names: report.playoff.map(nameOf).join('・') })}</p>
         )}
+        <RaceSection game={game} report={report} onWatch={setWatching} />
 
         <h3>{t('report.sansho')}</h3>
         <ul className="plain-list">

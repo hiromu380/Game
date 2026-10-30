@@ -1950,3 +1950,36 @@ html:lang(en) .choice__desc {
     gap: 2px;
   }
 }
+
+/* 幕内の優勝争い */
+.race {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 4px 0 8px;
+}
+.race th,
+.race td {
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.race th {
+  white-space: nowrap;
+  font-weight: normal;
+}
+.race tr.is-decided th {
+  font-weight: bold;
+}
+.race__record {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.race__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.race__contenders li {
+  padding: 2px 0;
+}

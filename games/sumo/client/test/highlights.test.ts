@@ -53,6 +53,29 @@ describe('場所の見せ場', () => {
     expect(highlightsOf(s, report(s, {}))).toEqual([]);
   });
 
+  it('自分の弟子が優勝の目を残して千秋楽を迎えたら、優勝争いを幕内優勝の前に見せる', () => {
+    const s = createGame({ seed: 1 });
+    const a = s.rikishi.find((r) => r.stableId === s.player.stableId)!;
+    const other = s.rikishi.find((r) => r.stableId !== s.player.stableId)!;
+    const race = {
+      decidedDay: 15,
+      leaders: [],
+      contenders: [
+        { id: other.id, wins: 13, losses: 1 },
+        { id: a.id, wins: 12, losses: 2 },
+      ],
+      musubi: null,
+      deciding: null,
+    };
+    const hl = highlightsOf(s, report(s, { race, yusho: { makuuchi: a.id } }));
+    expect(hl.map((h) => h.kind)).toEqual(['race', 'yusho']);
+    const none = highlightsOf(
+      s,
+      report(s, { race: { ...race, contenders: race.contenders.slice(0, 1) } }),
+    );
+    expect(none).toEqual([]);
+  });
+
   it('元弟子の断髪式は最後に見せる', () => {
     const s = createGame({ seed: 1 });
     const a = s.rikishi.find((r) => r.stableId === s.player.stableId)!;

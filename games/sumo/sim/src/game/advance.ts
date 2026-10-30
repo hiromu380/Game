@@ -14,6 +14,7 @@
 import { RECRUIT, TOSHIYORI } from '../balance/career';
 import { GAME } from '../balance/game';
 import { runBasho } from '../basho/run';
+import { yushoRace } from '../basho/race';
 import { makeBanzuke } from '../banzuke/make';
 import { isSanyaku, isSekitori, ranksOf } from '../banzuke/rank';
 import { NEUTRAL_GROWTH, npcPolicy, train, type GrowthContext } from '../career/growth';
@@ -104,6 +105,15 @@ export function advanceBasho(input: GameState): GameState {
     }
   }
   report.playoff = outcome.playoff.get('makuuchi') ?? null;
+  const makuuchiWinner = outcome.yusho.get('makuuchi');
+  if (makuuchiWinner !== undefined) {
+    report.race = yushoRace(
+      state.banzuke.filter((id) => outcome.ranks.get(id)!.division === 'makuuchi'),
+      outcome.bouts,
+      makuuchiWinner,
+      report.playoff !== null,
+    );
+  }
   // 決まり手ごとの白星（得意技）
   for (const b of outcome.bouts) {
     if (b.fusen) continue;

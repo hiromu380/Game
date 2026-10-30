@@ -509,6 +509,20 @@ export type JournalEvent =
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */
   | { kind: 'earlier' };
 
+/** 幕内の優勝争い（場所の流れ） */
+export interface YushoRace {
+  /** 優勝が決まった日（優勝決定戦にもつれたら 16） */
+  decidedDay: number;
+  /** 10日目から千秋楽までの、日ごとの先頭（勝ち数・負け数と、並んでいる力士） */
+  leaders: { day: number; wins: number; losses: number; ids: number[] }[];
+  /** 14日目を終えて優勝の目があった力士（先頭から1差まで） */
+  contenders: { id: number; wins: number; losses: number }[];
+  /** 千秋楽の結びの一番 */
+  musubi: BoutResult | null;
+  /** 千秋楽に優勝を決めた一番（その日に決まったときだけ） */
+  deciding: BoutResult | null;
+}
+
 export interface BoutResult {
   day: number;
   eastId: number;
@@ -545,6 +559,8 @@ export interface BashoReport {
   playoff: number[] | null;
   /** ライバルの部屋との比べ（この場所の直接対決と、番付の関取の数） */
   rival?: { stableId: number; wins: number; losses: number; sekitori: [number, number] };
+  /** 幕内の優勝争い（古い結果にはない） */
+  race?: YushoRace;
   /** この場所の後に行った自分の部屋の元弟子の断髪式（名前を出すタニマチ・ライバルの師匠） */
   danpatsu?: {
     alumnusId: number;

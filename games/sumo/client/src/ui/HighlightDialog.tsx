@@ -17,6 +17,7 @@ import { playSound } from '../sound';
 import { kojoChoices, type Highlight } from '../highlights';
 import { DanpatsuCard } from './DanpatsuCard';
 import { recordValue } from './RecordsPanel';
+import { RaceCard } from './RacePanel';
 
 /** 賜杯（優勝のしるし） */
 function Cup() {
@@ -91,6 +92,19 @@ export function HighlightDialog({
         game={game}
         report={report}
         h={h}
+        counter={counter}
+        last={last}
+        onNext={next}
+      />
+    );
+  }
+  if (h.kind === 'race') {
+    return (
+      <RaceCard
+        key={index}
+        game={game}
+        report={report}
+        id={h.id}
         counter={counter}
         last={last}
         onNext={next}

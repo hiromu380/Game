@@ -1,5 +1,5 @@
 /**
- * 場所の見せ場: 自分の部屋の優勝・昇進・三賞・部屋の新記録・元弟子の断髪式を、見せる順に並べる（純粋関数）
+ * 場所の見せ場: 自分の部屋の優勝争い・優勝・昇進・三賞・部屋の新記録・元弟子の断髪式を、見せる順に並べる（純粋関数）
  */
 import {
   KOJO_WORDS,
@@ -14,6 +14,8 @@ export type Highlight =
   | { kind: 'promotion'; id: number; to: 'Y' | 'O' | 'makuuchi' | 'sekitori' }
   | { kind: 'yusho'; id: number; division: Division; wins: number; losses: number }
   | { kind: 'sansho'; id: number; prizes: ('shukun' | 'kanto' | 'gino')[] }
+  /** 自分の弟子が優勝の目を残して千秋楽を迎えた（id はその弟子） */
+  | { kind: 'race'; id: number }
   /** 部屋の新記録（id は記録を塗り替えた今の弟子） */
   | { kind: 'record'; id: number; news: RecordNews }
   | {
@@ -36,6 +38,9 @@ export function highlightsOf(game: GameState, report: BashoReport, prev?: GameSt
   for (const p of report.promotions) {
     if (mine(p.id)) out.push({ order: PROMO_ORDER[p.to], h: { kind: 'promotion', ...p } });
   }
+  // 千秋楽の優勝争い（幕内優勝の前に）
+  const contender = report.race?.contenders.find((c) => mine(c.id));
+  if (contender) out.push({ order: 1.5, h: { kind: 'race', id: contender.id } });
   DIVS.forEach((d, i) => {
     const id = report.yusho[d];
     if (id === undefined || !mine(id)) return;

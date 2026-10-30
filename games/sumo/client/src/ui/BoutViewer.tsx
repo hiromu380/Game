@@ -18,6 +18,7 @@ import {
   type Rikishi,
 } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
+import { dayLabel } from '../format';
 import { boutFlow, boutScript, linesAt, poseAt, type CallLine } from '../playback/boutScript';
 import { BoutStage } from '../art/BoutStage';
 import { rikishiLook } from '../art/look';
@@ -140,7 +141,7 @@ export function BoutViewer({
     return (
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
         <div className="modal__box">
-          <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
+          <h2 id="bout-title">{t('bout.title', { day: dayLabel(t, bout.day) })}</h2>
           <p>
             {t('bout.fusen', {
               winner: winner?.name ?? '',
@@ -160,7 +161,7 @@ export function BoutViewer({
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
       <div className="modal__box modal__box--wide modal__box--bout">
-        <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
+        <h2 id="bout-title">{t('bout.title', { day: dayLabel(t, bout.day) })}</h2>
         <div className="bout">
           <div className="bout__stage">
             <Suspense fallback={<BoutStage {...stageProps} />}>

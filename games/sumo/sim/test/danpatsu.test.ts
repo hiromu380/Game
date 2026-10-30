@@ -10,8 +10,8 @@ import {
   type Rank,
 } from '../src';
 
-const OZEKI: Rank = { division: 'makuuchi', title: 'O', number: 1, side: 'east' };
-const JURYO: Rank = { division: 'juryo', title: null, number: 5, side: 'west' };
+const OZEKI: Rank = { division: 'makuuchi', title: 'O', number: 1, side: 'E' };
+const JURYO: Rank = { division: 'juryo', title: null, number: 5, side: 'W' };
 
 function alumnus(
   s: GameState,
@@ -47,7 +47,7 @@ describe('引退相撲・断髪式', () => {
   it('関取30場所未満はホテルで次の場所の後。関取でなければ行わない', () => {
     const p = danpatsuPlan(alumnus(s, { id: 2, top: JURYO, sekitoriBasho: 5, at: 7 }))!;
     expect(p).toEqual({ bashoIndex: 8, venue: 'hotel' });
-    const lower: Rank = { division: 'makushita', title: null, number: 3, side: 'east' };
+    const lower: Rank = { division: 'makushita', title: null, number: 3, side: 'E' };
     expect(danpatsuPlan(alumnus(s, { id: 3, top: lower, sekitoriBasho: 0, at: 7 }))).toBeNull();
   });
 
