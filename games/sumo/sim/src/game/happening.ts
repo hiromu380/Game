@@ -21,6 +21,7 @@ import { clamp } from '../core/math';
 import { lineageCharOf, makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED, type Prng } from '../core/prng';
 import type { GameState, Rank, Rikishi } from '../model/types';
+import { hasTrait } from '../career/traits';
 
 function mine(state: GameState): Rikishi[] {
   return state.rikishi.filter((r) => r.stableId === state.player.stableId);
@@ -109,6 +110,18 @@ function eligible(state: GameState, def: HappeningDef): boolean {
   }
 }
 
+/** 当人を選ぶ。ホームシック・脱走は繊細な弟子、食事の誘いは人気者が先に選ばれる */
+function pickTarget(id: HappeningDef['id'], pool: Rikishi[], rng: Prng): Rikishi {
+  const prefer =
+    id === 'homesick' || id === 'runaway'
+      ? 'sensitive'
+      : id === 'tanimachiDinner' || id === 'hometownCheer'
+        ? 'popular'
+        : null;
+  const preferred = prefer ? pool.filter((r) => hasTrait(r, prefer)) : [];
+  return rng.pick(preferred.length > 0 ? preferred : pool);
+}
+
 /** 次の場所の前の出来事を選ぶ（state を直接変える） */
 export function rollHappening(state: GameState): void {
   state.pending.happening = null;
@@ -121,7 +134,7 @@ export function rollHappening(state: GameState): void {
   const def = pool.find((d) => (roll -= d.weight) < 0) ?? pool[pool.length - 1]!;
   state.pending.happening = {
     id: def.id,
-    target: def.target ? rng.pick(targetsOf(state, def.target)).id : null,
+    target: def.target ? pickTarget(def.id, targetsOf(state, def.target), rng).id : null,
   };
   state.happeningLog.push({ id: def.id, bashoIndex: state.bashoIndex });
   // 古い記録は捨てる（空ける場所数より前のものは要らない）

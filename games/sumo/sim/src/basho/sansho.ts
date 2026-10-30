@@ -39,8 +39,8 @@ export function selectSansho(
     const loser = b.winnerId === b.eastId ? b.westId : b.eastId;
     const lt = ranks.get(loser)?.title;
     if (lt === 'Y' || lt === 'O') topWins.set(b.winnerId, (topWins.get(b.winnerId) ?? 0) + 1);
-    // 非技（勇み足など）は相手の自滅なので、技の数に数えない
-    if (KIMARITE_BY_ID.get(b.kimarite)?.group === 'hiwaza') continue;
+    // 非技（勇み足など）は相手の自滅、不戦勝は取っていないので、技の数に数えない
+    if (b.fusen || KIMARITE_BY_ID.get(b.kimarite)?.group === 'hiwaza') continue;
     if (!kimarite.has(b.winnerId)) kimarite.set(b.winnerId, new Set());
     kimarite.get(b.winnerId)!.add(b.kimarite);
   }

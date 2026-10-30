@@ -35,3 +35,4 @@ export { migrateSave } from './game/migrate';
 export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './money/facilities';
 export { freeNames, masterOf } from './world/association';
 export { rankValue } from './banzuke/rank';
+export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';

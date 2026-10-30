@@ -1753,3 +1753,10 @@ html:lang(en) .choice__name,
 html:lang(en) .choice__desc {
   grid-column: 3;
 }
+
+/* 個性の札 */
+.tag--trait {
+  border-color: var(--ai);
+  color: var(--ai);
+  background: var(--ai-light);
+}

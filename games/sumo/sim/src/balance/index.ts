@@ -13,3 +13,4 @@ export * from './association';
 export * from './kimarite';
 export * from './staff';
 export * from './ceremony';
+export * from './traits';

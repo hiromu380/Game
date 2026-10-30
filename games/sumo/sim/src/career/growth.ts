@@ -5,6 +5,8 @@ import { GROWTH } from '../balance/growth';
 import { clamp, round1 } from '../core/math';
 import type { Prng } from '../core/prng';
 import type { Abilities, Rikishi, Style } from '../model/types';
+import { TRAITS } from '../balance/traits';
+import { fragilityOf, traitsOf } from './traits';
 
 export interface GrowthContext {
   /** 親方の現役時代の型 */
@@ -55,7 +57,13 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   }
   const ageFactor =
     r.age <= GROWTH.youthBonusUntil ? GROWTH.youthBonus : r.age <= r.peakAge ? 1 : 0;
+  const traits = traitsOf(r);
+  const traitGrowth =
+    (traits.includes('diligent') ? TRAITS.diligent.growth : 1) *
+    (traits.includes('lazy') ? TRAITS.lazy.growth : 1) *
+    (traits.includes('practiceChamp') ? TRAITS.practiceChamp.growth : 1);
   const coach =
+    traitGrowth *
     r.boost *
     (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) *
     ctx.growthMultiplier;
@@ -64,7 +72,9 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
     if (a >= r.talent || ageFactor === 0) return;
     const style = key as Style;
     const bonus =
-      (ctx.oyakataStyle === style ? GROWTH.oyakataStyleBonus : 1) * ctx.styleMultiplier[style];
+      (ctx.oyakataStyle === style ? GROWTH.oyakataStyleBonus : 1) *
+      ctx.styleMultiplier[style] *
+      (style === 'waza' && traits.includes('studious') ? TRAITS.studious.waza : 1);
     const noise = 0.5 + rng.nextInt(1001) / 1000;
     r.abilities[key] = round1(
       Math.min(r.talent, a + (r.talent - a) * rate * ageFactor * coach * bonus * noise),
@@ -75,7 +85,12 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   } else {
     for (const s of STYLES) grow(s, r.policy === s ? GROWTH.focusRate : GROWTH.otherRate);
     r.fatigue = clamp(
-      r.fatigue + GROWTH.fatigueTraining - GROWTH.fatigueRecovery - ctx.extraRecovery,
+      r.fatigue +
+        GROWTH.fatigueTraining +
+        (traits.includes('diligent') ? TRAITS.diligent.fatigue : 0) +
+        (traits.includes('lazy') ? TRAITS.lazy.fatigue : 0) -
+        GROWTH.fatigueRecovery -
+        ctx.extraRecovery,
       0,
       100,
     );
@@ -89,7 +104,13 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
         : r.policy === 'rest'
           ? 0
           : GROWTH.otherGainKg;
-    const total = r.policy === 'rest' ? 0 : Math.max(0, gain + ctx.dietGainKg);
+    const total =
+      r.policy === 'rest'
+        ? 0
+        : Math.max(
+            0,
+            gain + ctx.dietGainKg + (traits.includes('glutton') ? TRAITS.glutton.gainKg : 0),
+          );
     r.weight = round1(Math.min(cap, r.weight + total));
   }
   // ピークを過ぎると衰える（年を取るほど速く）
@@ -101,7 +122,7 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   // けが
   const chance =
     (GROWTH.injuryBase + r.fatigue * GROWTH.injuryPerFatigue) *
-    r.fragility *
+    fragilityOf(r) *
     2 *
     ctx.injuryMultiplier;
   if (rng.chance(chance)) {

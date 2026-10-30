@@ -6,13 +6,17 @@ import {
   setPolicy,
   stableCapacity,
   styleOf,
+  tokuiWaza,
+  traitsOf,
+  TRAITS,
+  type TraitId,
   type Candidate,
   type GameState,
   type Policy,
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { useI18n, type MessageKey } from '../i18n';
 import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portraits';
 import { RikishiDetail } from './RikishiDetail';
 import { useState } from 'react';
@@ -60,6 +64,7 @@ export function StableTab({
             foreign: detailRikishi.foreign,
             career: detailRikishi.career,
             track: detailRikishi.track,
+            traits: knownTraits(detailRikishi),
           }}
           onClose={() => setDetail(null)}
         />
@@ -240,6 +245,16 @@ function RikishiCard({
             <span className="tag tag--warn">{t('rikishi.injury', { basho: r.injury })}</span>
           )}
           {last && <span>{t('rikishi.last', { record: recordLabel(t, last) })}</span>}
+          {(knownTraits(r) ?? []).map((tr) => (
+            <span key={tr} className="tag tag--trait" title={t(`trait.${tr}.desc` as MessageKey)}>
+              ◆{t(`trait.${tr}.name` as MessageKey)}
+            </span>
+          ))}
+          {tokuiWaza(r.career) && (
+            <span>
+              {t('rikishi.tokui', { kimarite: t(`kimarite.${tokuiWaza(r.career)}` as MessageKey) })}
+            </span>
+          )}
         </div>
       </div>
       {r.injury > 0 && (
@@ -276,4 +291,9 @@ function RikishiCard({
       </div>
     </li>
   );
+}
+
+/** 自分の弟子の個性（番付に載って何場所かたつと分かってくる。それまでは null） */
+function knownTraits(r: Rikishi): readonly TraitId[] | null {
+  return r.career.basho >= TRAITS.knownAfterBasho ? traitsOf(r) : null;
 }

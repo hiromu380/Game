@@ -59,6 +59,8 @@ export interface Career {
   highestRank: Rank | null;
   /** 本人が受け取ったお金の合計（円。演出用） */
   earnings: number;
+  /** 決まり手ごとの白星の数（得意技に使う。古いセーブにはない） */
+  kimarite?: Record<string, number>;
 }
 
 export interface Rikishi {

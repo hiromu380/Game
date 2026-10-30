@@ -1,11 +1,13 @@
 import {
   toshiyoriProgress,
+  tokuiWaza,
   type Abilities,
+  type TraitId,
   type Career,
   type Rank,
   type TrackEntry,
 } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { useI18n, type MessageKey } from '../i18n';
 import { money, rankLabel } from '../format';
 import { Figure } from '../art/Figure';
 import type { Look } from '../art/look';
@@ -25,6 +27,8 @@ export interface DetailSubject {
   track: readonly TrackEntry[];
   /** 引退した力士なら、引退のときの説明 */
   retiredNote?: string;
+  /** 個性（まだ分からなければ null。引退した力士は持たない） */
+  traits?: readonly TraitId[] | null;
 }
 
 /** 力士の詳細: 経歴・番付の推移・稼いだお金・年寄名跡の資格まで */
@@ -53,6 +57,29 @@ export function RikishiDetail({
             <div>
               <dt>{t('detail.rank')}</dt>
               <dd>{s.retiredNote ?? rankLabel(t, s.rank)}</dd>
+            </div>
+            {s.traits !== undefined && (
+              <div>
+                <dt>{t('detail.traits')}</dt>
+                <dd>
+                  {s.traits === null
+                    ? t('traits.unknown')
+                    : s.traits.length === 0
+                      ? t('traits.none')
+                      : s.traits.map((tr) => (
+                          <span key={tr} className="block">
+                            <strong>{t(`trait.${tr}.name` as MessageKey)}</strong>{' '}
+                            <span className="muted">{t(`trait.${tr}.desc` as MessageKey)}</span>
+                          </span>
+                        ))}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>{t('detail.tokui')}</dt>
+              <dd>
+                {tokuiWaza(c) ? t(`kimarite.${tokuiWaza(c)}` as MessageKey) : t('detail.tokuiNone')}
+              </dd>
             </div>
             <div>
               <dt>{t('detail.highest')}</dt>

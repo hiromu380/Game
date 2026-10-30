@@ -15,6 +15,8 @@ import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { BoutResult, Division, Rank, Rikishi, Title } from '../model/types';
 import { divisionCounts, ranksOf } from '../banzuke/rank';
 import { eastWinProbability, kimariteFor } from './strength';
+import { TRAITS } from '../balance/traits';
+import { fragilityOf, hasTrait, traitsOf } from '../career/traits';
 
 export interface Record3 {
   wins: number;
@@ -60,9 +62,14 @@ export function runBasho(
     const r = byId.get(id)!;
     // けがを押して出る力士は調子が大きく落ちる
     const hurt = r.injury > 0 && r.playHurt;
+    // 個性: 冷静なら上下が小さく、本場所に強い・稽古場横綱なら上下にずれる（乱数の使い方は変えない）
+    const t = traitsOf(r);
     condition.set(
       id,
-      condRng.range(-BOUT.conditionRange, BOUT.conditionRange) -
+      condRng.range(-BOUT.conditionRange, BOUT.conditionRange) *
+        (t.includes('calm') ? TRAITS.calm.conditionRange : 1) +
+        (t.includes('bigStage') ? TRAITS.bigStage.condition : 0) +
+        (t.includes('practiceChamp') ? TRAITS.practiceChamp.condition : 0) -
         (hurt ? GROWTH.playHurt.conditionPenalty : 0),
     );
     if (r.injury === 0 || hurt) active.add(id);
@@ -109,9 +116,16 @@ export function runBasho(
     records.get(loser)!.losses++;
     const rankE = ranks.get(east)!;
     const rankW = ranks.get(west)!;
+    // 人気者の取組には懸賞が多く集まる
+    const popular = hasTrait(re, 'popular') || hasTrait(rw, 'popular');
     const kensho =
       rankE.division === 'makuuchi'
-        ? Math.max(KENSHO.perBoutByTitle[rankE.title!], KENSHO.perBoutByTitle[rankW.title ?? 'M'])
+        ? Math.round(
+            Math.max(
+              KENSHO.perBoutByTitle[rankE.title!],
+              KENSHO.perBoutByTitle[rankW.title ?? 'M'],
+            ) * (popular ? TRAITS.popular.kensho : 1),
+          )
         : 0;
     if (kensho) kenshoYen.set(winner, (kenshoYen.get(winner) ?? 0) + kensho * KENSHO.toRikishi);
     const rankWinner = winner === east ? rankE : rankW;
@@ -132,7 +146,7 @@ export function runBasho(
       const r = byId.get(id)!;
       const chance =
         (BOUT_INJURY + r.fatigue * GROWTH.injuryPerFatigue * 0.1) *
-        r.fragility *
+        fragilityOf(r) *
         (id === loser ? 1.5 : 1) *
         (r.injury > 0 ? GROWTH.playHurt.boutInjuryMultiplier : 1);
       if (rng.chance(chance)) {
@@ -142,6 +156,36 @@ export function runBasho(
     }
   };
   const canPlay = (id: number) => active.has(id) && played(id) < boutsOf(id);
+  /**
+   * 不戦勝: 関取の段の人数が休場で奇数になり、組む相手がいない日。
+   * 休場している関取（まだ番数の残っている者）との割が組まれていたことにして、不戦勝・不戦敗にする
+   */
+  const fusen = (c: number, day: number) => {
+    const absent = groups
+      .slice(0, 2)
+      .flat()
+      .find(
+        (id) =>
+          !active.has(id) &&
+          played(id) < boutsOf(id) &&
+          byId.get(id)!.stableId !== byId.get(c)!.stableId &&
+          !hasMet(c, id),
+      );
+    if (absent === undefined) return;
+    meet(c, absent);
+    records.get(c)!.wins++;
+    records.get(absent)!.losses++;
+    const [east, west] = order.get(c)! < order.get(absent)! ? [c, absent] : [absent, c];
+    bouts.push({
+      day,
+      eastId: east,
+      westId: west,
+      winnerId: c,
+      kimarite: 'fusen',
+      kensho: 0,
+      fusen: true,
+    });
+  };
 
   for (let day = 1; day <= BOUTS.sekitori; day++) {
     let carry: number | null = null;
@@ -157,6 +201,7 @@ export function runBasho(
               canPlay(id) && byId.get(id)!.stableId !== byId.get(c)!.stableId && !hasMet(c, id),
           );
           if (opp !== undefined) playBout(c, opp, day);
+          else fusen(c, day);
         }
         carry = null;
         return;
@@ -205,22 +250,32 @@ export function runBasho(
         pairs.push([a, partner]);
       }
       // 余った者どうしが同じ部屋なら、組んだ取組と入れ替える（例: 段の一番下に同じ部屋の新弟子が並んだとき）
-      const ok = (x: number, y: number) =>
-        byId.get(x)!.stableId !== byId.get(y)!.stableId && !hasMet(x, y);
+      // 同じ部屋どうしは当たらない。再戦はできるだけ避けるが、組めなければ許す（取組なしの日を作らない）
+      const differentStable = (x: number, y: number) =>
+        byId.get(x)!.stableId !== byId.get(y)!.stableId;
+      const fresh = (x: number, y: number) => differentStable(x, y) && !hasMet(x, y);
       while (leftover.length >= 2) {
         const u = leftover.shift()!;
-        const vi = leftover.findIndex((v) => ok(u, v));
-        if (vi >= 0) {
-          pairs.push([u, leftover.splice(vi, 1)[0]!]);
-          continue;
+        let paired = false;
+        for (const ok of [fresh, differentStable]) {
+          const vi = leftover.findIndex((v) => ok(u, v));
+          if (vi >= 0) {
+            pairs.push([u, leftover.splice(vi, 1)[0]!]);
+            paired = true;
+            break;
+          }
+          const v = leftover[0]!;
+          const k = pairs.findIndex(([x, y]) => (ok(u, x) && ok(v, y)) || (ok(u, y) && ok(v, x)));
+          if (k < 0) continue;
+          const [x, y] = pairs[k]!;
+          leftover.shift();
+          if (ok(u, x) && ok(v, y)) pairs.splice(k, 1, [u, x], [v, y]);
+          else pairs.splice(k, 1, [u, y], [v, x]);
+          paired = true;
+          break;
         }
-        const v = leftover[0]!;
-        const k = pairs.findIndex(([x, y]) => (ok(u, x) && ok(v, y)) || (ok(u, y) && ok(v, x)));
-        if (k < 0) continue; // 入れ替えられない（u はこの日は取組なし）
-        const [x, y] = pairs[k]!;
-        leftover.shift();
-        if (ok(u, x) && ok(v, y)) pairs.splice(k, 1, [u, x], [v, y]);
-        else pairs.splice(k, 1, [u, y], [v, x]);
+        // それでも組めなければ、u はこの日は取組なし（同じ部屋しか残っていない）
+        void paired;
       }
       if (leftover.length === 1 && gi < groups.length - 1) carry = leftover[0]!;
       for (const [x, y] of pairs) playBout(x, y, day);

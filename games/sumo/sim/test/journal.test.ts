@@ -49,7 +49,7 @@ describe('部屋の日誌', () => {
   });
 
   it('長く遊ぶと、昇進・引退・継承が時系列で並ぶ', () => {
-    const s = play(3, 180);
+    const s = play(7, 180);
     const kinds = new Set(s.journal.map((e) => e.kind));
     for (const k of ['open', 'join', 'promote', 'retire', 'successor']) expect(kinds).toContain(k);
     for (let i = 1; i < s.journal.length; i++)

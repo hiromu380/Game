@@ -128,6 +128,28 @@ export function BoutViewer({
     title: t('bout.aria'),
   };
 
+  // 不戦勝は取組がないので、結果だけを見せる
+  if (bout.fusen) {
+    return (
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
+        <div className="modal__box">
+          <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
+          <p>
+            {t('bout.fusen', {
+              winner: winner?.name ?? '',
+              loser: (winnerSide === 'E' ? west : east)?.name ?? '',
+            })}
+          </p>
+          <div className="modal__actions">
+            <button className="button button--primary" onClick={onClose}>
+              {t('common.close')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
       <div className="modal__box modal__box--wide modal__box--bout">

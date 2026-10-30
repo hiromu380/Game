@@ -29,6 +29,8 @@ import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
 import { staffGrowth } from '../stable/staff';
+import { TRAITS } from '../balance/traits';
+import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
 import { SANSHO } from '../balance/sansho';
 import { selectSansho } from '../basho/sansho';
@@ -95,6 +97,13 @@ export function advanceBasho(input: GameState): GameState {
     }
   }
   report.playoff = outcome.playoff.get('makuuchi') ?? null;
+  // 決まり手ごとの白星（得意技）
+  for (const b of outcome.bouts) {
+    if (b.fusen) continue;
+    const c = byId.get(b.winnerId)!.career;
+    c.kimarite ??= {};
+    c.kimarite[b.kimarite] = (c.kimarite[b.kimarite] ?? 0) + 1;
+  }
 
   // 3. 記録
   const yushoIds = new Set(outcome.yusho.values());
@@ -270,8 +279,14 @@ export function advanceBasho(input: GameState): GameState {
   const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId);
   const mineRanks: (Rank | null)[] = mine.map((r) => newRanks.get(r.id) ?? null);
   const sekitoriNow = mineRanks.filter((r) => r !== null && isSekitori(r)).length;
+  // 人気者の関取がいると、部屋の名声も少し上がる
+  const popularSekitori = mine.filter(
+    (r, i) => mineRanks[i] && isSekitori(mineRanks[i]!) && hasTrait(r, 'popular'),
+  ).length;
   state.player.prestige =
-    state.player.prestige * GAME.prestigeKeep + sekitoriNow * GAME.prestige.sekitoriPerBasho;
+    state.player.prestige * GAME.prestigeKeep +
+    sekitoriNow * GAME.prestige.sekitoriPerBasho +
+    popularSekitori * TRAITS.popular.prestigePerBasho;
   const ledger = settleBasho(
     mineRanks,
     state.player.prestige,
