@@ -29,6 +29,15 @@ const built = await preview({
   preview: { host: '127.0.0.1', port: 5174, strictPort: true },
 });
 
+/** 遅延肖像は各表示領域を通してから撮影する。フォールバックの混在を防ぐ。 */
+async function settlePortraits(page) {
+  for (const portrait of await page.locator('.portrait-3d').all()) {
+    await portrait.scrollIntoViewIfNeeded();
+    await portrait.locator('img').waitFor({ timeout: 10000 });
+  }
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 async function screens() {
   const out = join(output, 'screens');
   mkdirSync(out, { recursive: true });
@@ -50,9 +59,11 @@ async function screens() {
       await page.goto('http://127.0.0.1:5174/');
       await page.waitForTimeout(1300);
       await page.evaluate(() => document.fonts.ready);
+      await settlePortraits(page);
       await page.screenshot({ path: `${out}/title-${width}.png`, fullPage: true });
       await page.getByRole('button', { name: '部屋を開く', exact: true }).click();
       await page.waitForTimeout(1000);
+      await settlePortraits(page);
       await page.screenshot({ path: `${out}/stable-${width}.png`, fullPage: true });
       for (const [name, file] of [
         ['番付', 'banzuke'],
@@ -77,7 +88,8 @@ async function screens() {
         el.scrollTop = 0;
       });
       await page.locator('button.star').first().click();
-      await page.waitForTimeout(650);
+      await page.locator('.modal__box--bout canvas').waitFor();
+      await page.waitForTimeout(1100);
       await page.screenshot({ path: `${out}/bout-action-${width}.png`, fullPage: false });
       await page.waitForTimeout(3300);
       await page.screenshot({ path: `${out}/bout-final-${width}.png`, fullPage: false });
