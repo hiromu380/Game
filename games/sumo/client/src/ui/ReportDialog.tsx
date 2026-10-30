@@ -226,6 +226,11 @@ export function ReportDialog({
             })}
           </p>
         )}
+        {(report.reentered ?? []).length > 0 && (
+          <p className="warn">
+            {t('report.reentered', { names: report.reentered!.map(nameOf).join('・') })}
+          </p>
+        )}
         {myRetired.length > 0 && (
           <p>
             {myRetired.map((r) => (

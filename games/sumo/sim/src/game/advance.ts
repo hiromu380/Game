@@ -15,6 +15,7 @@ import { RECRUIT, TOSHIYORI } from '../balance/career';
 import { GAME } from '../balance/game';
 import { runBasho } from '../basho/run';
 import { yushoRace } from '../basho/race';
+import { MID_BASHO } from '../balance/injury';
 import { makeBanzuke } from '../banzuke/make';
 import { isSanyaku, isSekitori, ranksOf } from '../banzuke/rank';
 import { NEUTRAL_GROWTH, npcPolicy, train, type GrowthContext } from '../career/growth';
@@ -46,11 +47,9 @@ import { FACILITY_EFFECTS } from '../balance/facilities';
 import { closeNode, masterNodeOf, nodeOfOyakata, rollIndependence } from '../lineage/family';
 import { takeName, yearEndAssociation } from '../world/association';
 
-export function advanceBasho(input: GameState): GameState {
-  if (input.gameOver || isBlocked(input)) return input;
-  const state: GameState = JSON.parse(JSON.stringify(input));
-  const report: BashoReport = {
-    bashoIndex: state.bashoIndex,
+function emptyReport(bashoIndex: number): BashoReport {
+  return {
+    bashoIndex,
     yusho: {},
     mine: [],
     promotions: [],
@@ -64,9 +63,10 @@ export function advanceBasho(input: GameState): GameState {
     expenses: [],
     personal: [],
   };
-  const isMine = (id: number) => byId.get(id)?.stableId === state.player.stableId;
+}
 
-  // 1. 引退の申し出・入門希望者
+/** 1. 場所の前の片付け: 返事をしていない申し出・出来事・入門希望者。架空の部屋の稽古の方針 */
+function prepareBasho(state: GameState, report: BashoReport): void {
   for (const id of state.pending.retireRequests) retireRikishi(state, id, report);
   state.pending.retireRequests = [];
   // 返事をしなかった治療の方針は、保存療法
@@ -77,22 +77,97 @@ export function advanceBasho(input: GameState): GameState {
   // 返事をしなかった取り合いの新弟子は、ライバルの部屋に入る
   rivalSignsCandidates(state);
   state.pending.candidates = [];
-  let byId = new Map(state.rikishi.map((r) => [r.id, r]));
-
   // 架空の部屋の稽古の方針
   const styleOfStable = new Map(state.stables.map((s) => [s.id, s.style]));
   for (const r of state.rikishi) {
     if (r.stableId !== state.player.stableId)
       r.policy = npcPolicy(r, styleOfStable.get(r.stableId)!);
   }
+}
+
+/** 中日（8日目）を終えたところの様子 */
+export interface MidBasho {
+  day: number;
+  /** 自分の弟子（番付に載っている）の途中の星と、休んでいるか */
+  mine: { id: number; wins: number; losses: number; out: boolean; injuredDay: number | null }[];
+  /** 幕内の先頭（勝ち数と、並んでいる力士） */
+  leaders: { wins: number; losses: number; ids: number[] };
+}
+
+/**
+ * 本場所の前半（中日まで）を見る。advanceBasho と同じ準備・同じ乱数なので、前半はこのとおりになる。
+ * 判断の要る場面がある（止まっている）ときは null
+ */
+export function previewBasho(input: GameState): MidBasho | null {
+  if (input.gameOver || isBlocked(input)) return null;
+  const state: GameState = JSON.parse(JSON.stringify(input));
+  prepareBasho(state, emptyReport(state.bashoIndex));
+  const byId = new Map(state.rikishi.map((r) => [r.id, r]));
+  const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId, {
+    stopAfterDay: MID_BASHO.day,
+  });
+  const mine = state.banzuke
+    .filter((id) => byId.get(id)!.stableId === state.player.stableId)
+    .map((id) => {
+      const rec = outcome.records.get(id)!;
+      return {
+        id,
+        wins: rec.wins,
+        losses: rec.losses,
+        out: outcome.absent.has(id),
+        injuredDay: outcome.injuredDay.get(id) ?? null,
+      };
+    });
+  const makuuchi = state.banzuke.filter((id) => outcome.ranks.get(id)!.division === 'makuuchi');
+  const top = Math.max(...makuuchi.map((id) => outcome.records.get(id)!.wins));
+  return {
+    day: MID_BASHO.day,
+    mine,
+    leaders: {
+      wins: top,
+      losses: MID_BASHO.day - top,
+      ids: makuuchi.filter((id) => outcome.records.get(id)!.wins === top).slice(0, 4),
+    },
+  };
+}
+
+/** reenter: 中日の後から出す自分の弟子（休場している者。けがを押して出る） */
+export function advanceBasho(
+  input: GameState,
+  options: { reenter?: readonly number[] } = {},
+): GameState {
+  if (input.gameOver || isBlocked(input)) return input;
+  const state: GameState = JSON.parse(JSON.stringify(input));
+  const report = emptyReport(state.bashoIndex);
+  const isMine = (id: number) => byId.get(id)?.stableId === state.player.stableId;
+
+  // 1. 引退の申し出・入門希望者
+  prepareBasho(state, report);
+  let byId = new Map(state.rikishi.map((r) => [r.id, r]));
+  const reenter = new Set((options.reenter ?? []).filter(isMine));
+  const styleOfStable = new Map(state.stables.map((s) => [s.id, s.style]));
 
   // 2. 本場所
-  const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId);
+  const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId, {
+    reenter,
+  });
   const injuryRng = createPrng(deriveSeed(state.seed, SEED.injury, state.bashoIndex));
   for (const id of outcome.injured) {
     byId.get(id)!.injury = injuryRng.range(1, 2);
     if (isMine(id)) report.injuries.push(id);
   }
+  // 中日の後に出た弟子: けがを押して出たので、治りが遅れる（場所中のけがは重くなることがある）
+  for (const id of outcome.reentered) {
+    const r = byId.get(id)!;
+    const day = outcome.injuredDay.get(id);
+    if (day !== undefined && day <= MID_BASHO.day) {
+      const rng = createPrng(deriveSeed(state.seed, SEED.wound, state.bashoIndex, id, 2));
+      if (rng.chance(MID_BASHO.worsenChance)) r.injury++;
+    } else if (r.injury > 0) {
+      r.playHurt = true;
+    }
+  }
+  if (outcome.reentered.size > 0) report.reentered = [...outcome.reentered];
   const stableName = (stableId: number) => state.stables.find((s) => s.id === stableId)!.name;
   for (const [d, id] of outcome.yusho) {
     report.yusho[d] = id;

@@ -1123,5 +1123,19 @@
   "treatment.rest": "Rest",
   "journal.injury.surgery": "{shikona} has surgery on his {part}.",
   "journal.injury.chronic": "{shikona}'s {part} healed, but it remains an old injury.",
-  "report.injuryOne": "{name} ({part})"
+  "report.injuryOne": "{name} ({part})",
+  "mid.title": "After {day}",
+  "mid.lead": "The first eight days are over. Before the second half (from Day 9), you can decide whether to send absent wrestlers back in.",
+  "mid.leaders": "Top-division leaders: {record} {names}",
+  "mid.mine": "Your wrestlers so far",
+  "mid.hurtOn": "Injured on {day}, withdrawn",
+  "mid.outWound": "Out from Day 1 (injured {part})",
+  "mid.outFromStart": "Out from Day 1",
+  "mid.choice": "{name}: second half",
+  "mid.stay": "Stay out",
+  "mid.reenter": "Return",
+  "mid.lateEntry": "Enter late",
+  "mid.note": "Sending him back keeps the missed days as losses, but he can win back bouts in the remaining days. Fighting hurt lowers his condition, makes new injuries likelier, and can slow or worsen his recovery.",
+  "mid.continue": "Second half (from Day 9)",
+  "report.reentered": "Returned in the second half: {names} (fighting hurt may slow recovery)"
 }

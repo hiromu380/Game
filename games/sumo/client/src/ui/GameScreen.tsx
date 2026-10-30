@@ -1,5 +1,12 @@
 import { useMemo, useEffect, useState } from 'react';
-import { advanceBasho, isBlocked, ranksOf, type GameState } from '@ichimon/sim';
+import {
+  advanceBasho,
+  isBlocked,
+  previewBasho,
+  ranksOf,
+  type GameState,
+  type MidBasho,
+} from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
 import { useSettings } from '../settings';
@@ -17,6 +24,7 @@ import { JournalTab } from './JournalTab';
 import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
+import { MidBashoDialog } from './MidBashoDialog';
 
 type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
@@ -53,6 +61,8 @@ export function GameScreen({
   const [showReport, setShowReport] = useState(false);
   const [highlights, setHighlights] = useState<Highlight[] | null>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
+  // 中日（8日目）で止まっている場所（前半の様子）
+  const [mid, setMid] = useState<MidBasho | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
@@ -157,12 +167,26 @@ export function GameScreen({
         <button
           className="button button--primary"
           disabled={blocked}
-          onClick={() => go(advanceBasho(game))}
+          onClick={() => {
+            const m = previewBasho(game);
+            if (m) setMid(m);
+            else go(advanceBasho(game));
+          }}
         >
           {t('action.basho')}
         </button>
       </footer>
 
+      {mid && (
+        <MidBashoDialog
+          game={game}
+          mid={mid}
+          onContinue={(reenter) => {
+            setMid(null);
+            go(advanceBasho(game, { reenter }));
+          }}
+        />
+      )}
       {highlights && game.lastReport && !blocked && (
         <HighlightDialog
           game={game}

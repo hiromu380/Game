@@ -44,3 +44,17 @@ export const INJURY = {
   /** 古傷1つあたりの、1年で引退を考える確率の上乗せ */
   chronicRetirePerYear: 0.05,
 } as const;
+
+/**
+ * 中日（8日目）の判断: 休場している弟子を後半から出す（再出場・途中出場）。推定の調整値
+ */
+export const MID_BASHO = {
+  /** 何日目の後で止まるか */
+  day: 8,
+  /** 再出場した力士の調子の減点 */
+  conditionPenalty: 10,
+  /** 再出場した力士が取組でけがをする確率の倍率 */
+  boutInjuryMultiplier: 3,
+  /** 場所中のけがを押して再出場したとき、場所の後にけがが1場所ぶん重くなる確率 */
+  worsenChance: 0.5,
+} as const;

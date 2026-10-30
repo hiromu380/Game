@@ -1983,3 +1983,31 @@ html:lang(en) .choice__desc {
 .race__contenders li {
   padding: 2px 0;
 }
+
+/* 中日（8日目） */
+.mid__list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.mid__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mid__rank {
+  min-width: 7em;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+.mid__record {
+  font-variant-numeric: tabular-nums;
+}
+.mid__choice {
+  flex-basis: 100%;
+}

@@ -579,6 +579,8 @@ export interface BashoReport {
   playoff: number[] | null;
   /** ライバルの部屋との比べ（この場所の直接対決と、番付の関取の数） */
   rival?: { stableId: number; wins: number; losses: number; sekitori: [number, number] };
+  /** 中日の後に再出場・途中出場した自分の弟子 */
+  reentered?: number[];
   /** 幕内の優勝争い（古い結果にはない） */
   race?: YushoRace;
   /** この場所の後に行った自分の部屋の元弟子の断髪式（名前を出すタニマチ・ライバルの師匠） */

@@ -42,6 +42,7 @@ export { freeNames, masterOf } from './world/association';
 export { rankValue } from './banzuke/rank';
 export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
 export { ensureRival, stableStrength } from './world/rival';
+export { previewBasho, type MidBasho } from './game/advance';
 export { chronicFactor } from './career/injury';
 export { officeAtLeast, isBoardMember } from './world/office';
 export { canVisit, giftOf } from './stable/koenkai';

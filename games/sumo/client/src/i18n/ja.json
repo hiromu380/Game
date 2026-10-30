@@ -1123,5 +1123,19 @@
   "treatment.rest": "保存療法",
   "journal.injury.surgery": "{shikona}が{part}の手術を受ける。",
   "journal.injury.chronic": "{shikona}の{part}のけがは治ったが、古傷として残る。",
-  "report.injuryOne": "{name}（{part}）"
+  "report.injuryOne": "{name}（{part}）",
+  "mid.title": "{day}を終えて",
+  "mid.lead": "前半の8日間が終わりました。後半（9日目から）に進む前に、休んでいる弟子を出すか決められます。",
+  "mid.leaders": "幕内の先頭: {record} {names}",
+  "mid.mine": "うちの弟子の星",
+  "mid.hurtOn": "{day}にけがで休場",
+  "mid.outWound": "{part}のけがで初日から休場",
+  "mid.outFromStart": "初日から休場",
+  "mid.choice": "{name}の後半",
+  "mid.stay": "休場のまま",
+  "mid.reenter": "再出場",
+  "mid.lateEntry": "途中出場",
+  "mid.note": "後半から出すと、休んだ番は負けに数えたまま、残りの番で白星を取り返せます。ただ、けがを押して出るので調子が落ち、またけがをしやすく、場所の後に治りが遅れたり重くなったりします。",
+  "mid.continue": "後半へ（9日目から）",
+  "report.reentered": "後半から出場: {names}（けがを押して出たので、治りが遅れることがあります）"
 }

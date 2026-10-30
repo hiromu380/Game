@@ -10,6 +10,7 @@
 import { BOUTS, DIVISIONS } from '../balance/banzuke';
 import { BOUT } from '../balance/bout';
 import { GROWTH } from '../balance/growth';
+import { MID_BASHO } from '../balance/injury';
 import { KENSHO } from '../balance/money';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { BoutResult, Division, Rank, Rikishi, Title } from '../model/types';
@@ -38,6 +39,19 @@ export interface BashoOutcome {
   kenshoYen: Map<number, number>;
   /** 優勝決定戦に出た力士（同点が2人以上いた段だけ。勝ち抜きの順） */
   playoff: Map<Division, number[]>;
+  /** 場所中にけがをした日 */
+  injuredDay: Map<number, number>;
+  /** 中日の後に再出場・途中出場した力士 */
+  reentered: Set<number>;
+  /** 最後の日に休場していた力士（stopAfterDay で止めたとき、その日の後に休んでいる力士） */
+  absent: Set<number>;
+}
+
+export interface BashoOptions {
+  /** 中日の後から出す力士（休場している自分の弟子） */
+  reenter?: ReadonlySet<number>;
+  /** この日の後で止める（中日の様子を見るため。結果は途中のもの） */
+  stopAfterDay?: number;
 }
 
 /** 場所中のけがの確率（1番あたり） */
@@ -49,6 +63,7 @@ export function runBasho(
   banzuke: readonly number[],
   titles: Record<number, Title>,
   byId: ReadonlyMap<number, Rikishi>,
+  options: BashoOptions = {},
 ): BashoOutcome {
   const rng = createPrng(deriveSeed(seed, SEED.bout, bashoIndex));
   const condRng = createPrng(deriveSeed(seed, SEED.condition, bashoIndex));
@@ -84,6 +99,8 @@ export function runBasho(
   };
   const bouts: BoutResult[] = [];
   const injured: number[] = [];
+  const injuredDay = new Map<number, number>();
+  const reentered = new Set<number>();
   const kinboshi = new Map<number, number>();
   const kenshoYen = new Map<number, number>();
   const boutsOf = (id: number) => {
@@ -148,10 +165,12 @@ export function runBasho(
         (BOUT_INJURY + r.fatigue * GROWTH.injuryPerFatigue * 0.1) *
         fragilityOf(r) *
         (id === loser ? 1.5 : 1) *
-        (r.injury > 0 ? GROWTH.playHurt.boutInjuryMultiplier : 1);
+        (r.injury > 0 ? GROWTH.playHurt.boutInjuryMultiplier : 1) *
+        (reentered.has(id) ? MID_BASHO.boutInjuryMultiplier : 1);
       if (rng.chance(chance)) {
         active.delete(id);
-        injured.push(id);
+        if (!injured.includes(id)) injured.push(id);
+        injuredDay.set(id, day);
       }
     }
   };
@@ -187,7 +206,17 @@ export function runBasho(
     });
   };
 
-  for (let day = 1; day <= BOUTS.sekitori; day++) {
+  const lastDay = Math.min(BOUTS.sekitori, options.stopAfterDay ?? BOUTS.sekitori);
+  for (let day = 1; day <= lastDay; day++) {
+    // 中日の後: 休場している力士を出す（前半の取組と乱数の使い方は変わらない）
+    if (day === MID_BASHO.day + 1) {
+      for (const id of options.reenter ?? []) {
+        if (!records.has(id) || active.has(id) || played(id) >= boutsOf(id)) continue;
+        active.add(id);
+        reentered.add(id);
+        condition.set(id, condition.get(id)! - MID_BASHO.conditionPenalty);
+      }
+    }
     let carry: number | null = null;
     groups.forEach((group, gi) => {
       const sekitori = gi <= 1;
@@ -282,10 +311,16 @@ export function runBasho(
     });
   }
 
-  // けがで出なかった番は休場（全休・途中休場）。組む相手がいなかっただけの番は数えない
+  // けがで出なかった番は休場（全休・途中休場・途中出場）。組む相手がいなかっただけの番は数えない
+  const absent = new Set(banzuke.filter((id) => !active.has(id)));
   for (const id of banzuke) {
     const r = records.get(id)!;
-    r.absences = active.has(id) ? 0 : boutsOf(id) - r.wins - r.losses;
+    r.absences =
+      active.has(id) && !reentered.has(id) ? 0 : Math.max(0, boutsOf(id) - r.wins - r.losses);
+  }
+  if (lastDay < BOUTS.sekitori) {
+    // 途中で止めたとき: 休場はその日までに出なかった番だけ（残りの日の番は数えない）
+    for (const id of banzuke) records.get(id)!.absences = 0;
   }
 
   // 優勝（同点は決定戦。番付の上の者から順に勝ち抜き）
@@ -310,5 +345,17 @@ export function runBasho(
     yusho.set(d, champ);
   });
 
-  return { ranks, records, bouts, yusho, injured, kinboshi, kenshoYen, playoff };
+  return {
+    ranks,
+    records,
+    bouts,
+    yusho,
+    injured,
+    kinboshi,
+    kenshoYen,
+    playoff,
+    injuredDay,
+    reentered,
+    absent,
+  };
 }
