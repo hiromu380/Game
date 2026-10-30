@@ -95,7 +95,7 @@ export function BoutViewer({
 
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="bout-title">
-      <div className="modal__box">
+      <div className="modal__box modal__box--bout">
         <h2 id="bout-title">{t('bout.title', { day: bout.day })}</h2>
         <Suspense
           fallback={

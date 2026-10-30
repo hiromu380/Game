@@ -2,7 +2,7 @@
   "app.title": "一門",
   "lang.toggle": "English",
   "newGame.lead": "あなたは引退して親方になった元力士です。今日、自分の部屋を開きました。弟子は数人、看板は新品、通帳は心もとない。定年の65歳までに弟子を育て、部屋を継ぐ者を残してください。",
-  "newGame.styleQuestion": "現役時代の型は？（同じ型の稽古は弟子がよく伸びる）",
+  "newGame.styleQuestion": "親方の型を選ぶ",
   "newGame.style.oshi": "突いて押して、前へ出る",
   "newGame.style.yotsu": "まわしを取って、じっくり寄る",
   "newGame.style.waza": "いなし、投げ、相手の力を使う",
@@ -244,5 +244,8 @@
   "newGame.artAria": "部屋ののれんの前に立つ親方と、四股を踏む弟子・すり足の新弟子",
   "banzuke.crest": "蒙御免",
   "newGame.kicker": "相撲部屋経営譚",
-  "newGame.promise": "ひとつの部屋から、幾代もの物語。"
+  "newGame.promise": "ひとつの部屋から、幾代もの物語。",
+  "newGame.seal": "一門",
+  "newGame.artCaption": "稽古をつけ、暮らしを支え、次の親方へ。",
+  "newGame.styleHelp": "現役時代の得意技。同じ型の弟子がよく育ちます。"
 }
