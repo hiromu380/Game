@@ -64,7 +64,7 @@ describe('部屋の日誌', () => {
     v9.version = 9;
     delete v9.journal;
     const m = migrateSave(v9)!;
-    expect(m.version).toBe(14);
+    expect(m.version).toBe(15);
     expect(m.journal[0]).toEqual({ bashoIndex: 0, kind: 'earlier' });
     expect(m.journal[1]).toMatchObject({ kind: 'open' });
     const retired = m.journal.filter(

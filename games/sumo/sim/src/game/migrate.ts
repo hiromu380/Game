@@ -6,6 +6,8 @@ import { SAVE_VERSION } from '../world/create';
 import { populateAssociation } from '../world/association';
 import { ensureRival } from '../world/rival';
 import { initialOffice } from '../world/office';
+import { initKoenkai } from '../stable/koenkai';
+import { ranksOf } from '../banzuke/rank';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 
 type Raw = Record<string, unknown> & { version?: number };
@@ -26,7 +28,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 11) s = v11to12(s);
   if (s.version === 12) s = v12to13(s);
   if (s.version === 13) s = v13to14(s);
+  if (s.version === 14) s = v14to15(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 14 → 15: 後援会（いまの名声と関取の数から会員数を決め、地元の後援者が1人）
+ */
+function v14to15(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.koenkai = initKoenkai(s, ranksOf(s.banzuke, s.titles));
+  s.version = 15;
+  return s as unknown as Raw;
 }
 
 /**

@@ -116,7 +116,7 @@ describe('理事選挙', () => {
     delete v13.board;
     delete v13.pending.election;
     const m = migrateSave(v13)!;
-    expect(m.version).toBe(14);
+    expect(m.version).toBe(15);
     expect(m.player.office.rank).toBe('toshiyori');
     expect(m.board).toBeNull();
   });

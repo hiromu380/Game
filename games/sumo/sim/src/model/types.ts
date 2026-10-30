@@ -354,6 +354,36 @@ export interface PlayerState {
   staff: StaffMember[];
   /** 親方の協会での役職と、いまの役職になった場所 */
   office: { rank: AssocRank; since: number };
+  /** 後援会 */
+  koenkai: Koenkai;
+}
+
+export type PartyLevel = 'none' | 'small' | 'grand';
+export type PatronKind =
+  'construction' | 'ryotei' | 'hospital' | 'it' | 'fishery' | 'brewery' | 'hometown';
+
+/** 大口の後援者（タニマチ） */
+export interface Patron {
+  id: number;
+  surname: string;
+  kind: PatronKind;
+  /** 関係（0〜100） */
+  favor: number;
+  /** ひいきの力士（自分の弟子。いなければ null） */
+  favoriteId: number | null;
+  since: number;
+  /** 最後に挨拶に行った場所 */
+  visitedAt: number | null;
+  /** 前の場所のご祝儀（円） */
+  lastGift: number;
+}
+
+export interface Koenkai {
+  members: number;
+  corporate: number;
+  /** 千秋楽パーティーの規模 */
+  party: PartyLevel;
+  patrons: Patron[];
 }
 
 /** 協会の役職（年寄 → 主任 → 委員 → 役員待遇委員 → 副理事・理事 → 理事長） */
@@ -445,6 +475,8 @@ export type JournalEvent =
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
+  /** タニマチが付いた・離れた */
+  | { kind: 'patron'; event: 'join' | 'leave'; surname: string; patronKind: PatronKind }
   /** 協会の役職が上がった・理事選挙の結果 */
   | { kind: 'office'; rank: AssocRank }
   | {

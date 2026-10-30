@@ -24,6 +24,8 @@ export function settleBasho(
   foodMultiplier = 1,
   /** 親方の月給（協会の役職で変わる） */
   oyakataMonthly: number = OYAKATA_PAY.monthly,
+  /** 後援会の会費・タニマチのご祝儀・千秋楽パーティー（なければ目安の式） */
+  koenkai?: { dues: number; patrons: number; party: number },
 ): Ledger {
   const n = ranks.length;
   const lower = ranks.filter((r) => r === null || !isSekitori(r)).length;
@@ -48,15 +50,22 @@ export function settleBasho(
     { key: 'upkeep', amount: n * STABLE_SUBSIDY.upkeepPerBasho },
     { key: 'dojo', amount: n * STABLE_SUBSIDY.dojoPerBasho },
     { key: 'sekitoriBonus', amount: bonus },
-    {
-      key: 'supporters',
-      amount: Math.round(
-        SUPPORTERS.base +
-          sekitori.length * SUPPORTERS.perSekitori +
-          sanyaku * SUPPORTERS.perSanyaku +
-          prestige * SUPPORTERS.perPrestige,
-      ),
-    },
+    ...(koenkai
+      ? [
+          { key: 'koenkai', amount: koenkai.dues },
+          { key: 'patrons', amount: koenkai.patrons },
+        ]
+      : [
+          {
+            key: 'supporters',
+            amount: Math.round(
+              SUPPORTERS.base +
+                sekitori.length * SUPPORTERS.perSekitori +
+                sanyaku * SUPPORTERS.perSanyaku +
+                prestige * SUPPORTERS.perPrestige,
+            ),
+          },
+        ]),
   ];
   const food =
     n *
@@ -71,6 +80,7 @@ export function settleBasho(
     { key: 'misc', amount: n * STABLE_COSTS.miscPerRikishi },
     { key: 'sekitoriCosts', amount: sekitori.length * STABLE_COSTS.perSekitori },
     { key: 'facilities', amount: facilityUpkeep(facilities) },
+    ...(koenkai && koenkai.party > 0 ? [{ key: 'party', amount: koenkai.party }] : []),
   ];
   const personal: MoneyLine[] = [
     { key: 'oyakataSalary', amount: oyakataMonthly * 2 },

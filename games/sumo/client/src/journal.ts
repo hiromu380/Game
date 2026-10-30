@@ -30,6 +30,8 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
       return 'business';
     case 'kojo':
       return 'stable';
+    case 'patron':
+      return 'business';
     case 'rival':
     case 'office':
     case 'election':
@@ -108,6 +110,10 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':
       return t('journal.branchClosed', { stable: e.stable });
+    case 'patron':
+      return t(`journal.patron.${e.event}` as MessageKey, {
+        name: t(`patron.kind.${e.patronKind}` as MessageKey, { surname: e.surname }),
+      });
     case 'office':
       return t('journal.office', { office: t(`office.${e.rank}`) });
     case 'election':

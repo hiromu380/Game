@@ -39,6 +39,17 @@ const SAMPLES: JournalEntry[] = [
   { bashoIndex: 6, kind: 'branchClosed', stable: '浦風' },
   { bashoIndex: 7, kind: 'diet', diet: 'hearty' },
   { bashoIndex: 9, kind: 'office', rank: 'iin' },
+  ...(
+    ['construction', 'ryotei', 'hospital', 'it', 'fishery', 'brewery', 'hometown'] as const
+  ).flatMap((patronKind) =>
+    (['join', 'leave'] as const).map((event): JournalEntry => ({
+      bashoIndex: 10,
+      kind: 'patron',
+      event,
+      surname: '佐伯',
+      patronKind,
+    })),
+  ),
   ...(['elected', 'lost', 'stayed'] as const).flatMap((result) =>
     [true, false].map((rebel): JournalEntry => ({
       bashoIndex: 9,

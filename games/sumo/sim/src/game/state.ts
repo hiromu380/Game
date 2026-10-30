@@ -18,6 +18,7 @@ import type {
   FacilityId,
   GameState,
   Diet,
+  PartyLevel,
   KakunId,
   LineageEntry,
   Policy,
@@ -30,6 +31,8 @@ import { applyHappening } from './happening';
 import { note } from './journal';
 import { initialOffice, officeAtLeast } from '../world/office';
 import { OFFICE } from '../balance/office';
+import { KOENKAI } from '../balance/koenkai';
+import { canVisit } from '../stable/koenkai';
 import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
@@ -425,4 +428,25 @@ export function answerElection(input: GameState, choice: 'run' | 'stay'): GameSt
 
 function canRun(state: GameState): boolean {
   return officeAtLeast(state.player.office.rank, OFFICE.candidateFrom);
+}
+
+/** 千秋楽パーティーの規模（次の場所の後から） */
+export function setParty(input: GameState, level: PartyLevel): GameState {
+  if (input.player.koenkai.party === level || !(level in KOENKAI.party)) return input;
+  const state = clone(input);
+  state.player.koenkai.party = level;
+  return state;
+}
+
+/** タニマチに挨拶に行く（親方の貯金から。1人に場所ごと1回） */
+export function visitPatron(input: GameState, patronId: number): GameState {
+  const p = input.player.koenkai.patrons.find((x) => x.id === patronId);
+  if (!p || !canVisit(p, input.bashoIndex) || input.player.personalMoney < KOENKAI.visitCost)
+    return input;
+  const state = clone(input);
+  const q = state.player.koenkai.patrons.find((x) => x.id === patronId)!;
+  q.favor = Math.min(100, q.favor + KOENKAI.visitFavor);
+  q.visitedAt = state.bashoIndex;
+  state.player.personalMoney -= KOENKAI.visitCost;
+  return state;
 }

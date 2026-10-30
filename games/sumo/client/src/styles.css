@@ -1802,3 +1802,14 @@ html:lang(en) .choice__desc {
 .board dd {
   margin: 0;
 }
+
+/* 後援会: タニマチとの関係 */
+.favor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+}
+.favor .bar {
+  flex: 1;
+}

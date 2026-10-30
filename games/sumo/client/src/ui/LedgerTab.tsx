@@ -3,6 +3,7 @@ import { useI18n, type MessageKey } from '../i18n';
 import { money } from '../format';
 import { Facilities } from './Facilities';
 import { StaffPanel } from './StaffPanel';
+import { KoenkaiPanel } from './KoenkaiPanel';
 
 /** 帳簿: 直近の場所の収入・支出・親方個人の収支（金額の出典は docs/realism.md） */
 export function LedgerTab({ game, setGame }: { game: GameState; setGame: (g: GameState) => void }) {
@@ -27,6 +28,7 @@ export function LedgerTab({ game, setGame }: { game: GameState; setGame: (g: Gam
   );
   return (
     <div className="stack">
+      <KoenkaiPanel game={game} setGame={setGame} />
       <StaffPanel game={game} setGame={setGame} />
       <Facilities game={game} setGame={setGame} />
       <section className="panel">

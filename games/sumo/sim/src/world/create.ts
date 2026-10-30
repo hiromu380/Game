@@ -28,6 +28,7 @@ import { populateAssociation } from './association';
 import { note } from '../game/journal';
 import { ensureRival } from './rival';
 import { initialOffice } from './office';
+import { initKoenkai } from '../stable/koenkai';
 import { NO_FACILITIES } from '../money/facilities';
 
 /**
@@ -44,8 +45,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 12: 部屋の人とちゃんこの方針（player.staff・player.diet）
  * 13: ライバルの部屋（rival）
  * 14: 協会の役職と理事選挙（player.office・board・pending.election）
+ * 15: 後援会とタニマチ（player.koenkai）
  */
-export const SAVE_VERSION = 14;
+export const SAVE_VERSION = 15;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -205,6 +207,7 @@ export function createGame(options: NewGameOptions): GameState {
       diet: 'standard',
       staff: [],
       office: { rank: initialOffice(oyakata.age), since: 0 },
+      koenkai: { members: 0, corporate: 0, party: 'small', patrons: [] },
     },
     names: [],
     ichimon: [],
@@ -240,6 +243,7 @@ export function createGame(options: NewGameOptions): GameState {
   });
   note(state, { kind: 'open', stable: playerStable.name, shikona: oyakata.shikona });
   ensureRival(state);
+  state.player.koenkai = initKoenkai(state, ranksOf(state.banzuke, state.titles));
   state.pending.candidates = makeCandidates(state);
   return state;
 }

@@ -32,6 +32,7 @@ import { staffGrowth } from '../stable/staff';
 import { ensureRival, rivalSignsCandidates, settleRival } from '../world/rival';
 import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '../world/office';
 import { OFFICE } from '../balance/office';
+import { settleKoenkai } from '../stable/koenkai';
 import { TRAITS } from '../balance/traits';
 import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
@@ -295,6 +296,16 @@ export function advanceBasho(input: GameState): GameState {
     sekitoriNow * GAME.prestige.sekitoriPerBasho +
     popularSekitori * TRAITS.popular.prestigePerBasho +
     OFFICE.prestigePerBasho[state.player.office.rank];
+  // 後援会: 会費・タニマチのご祝儀・千秋楽パーティー
+  const koenkai = settleKoenkai(
+    state,
+    newRanks,
+    report.mine.map((m) => ({
+      id: m.id,
+      kachikoshi: m.record.wins * 2 > m.record.wins + m.record.losses + m.record.absences,
+    })),
+    new Set(report.promotions.map((p) => p.id)),
+  );
   const ledger = settleBasho(
     mineRanks,
     state.player.prestige,
@@ -302,6 +313,7 @@ export function advanceBasho(input: GameState): GameState {
     state.player.facilities,
     DIETS[state.player.diet].food,
     OFFICE.monthly[state.player.office.rank],
+    koenkai,
   );
   report.income = ledger.income;
   report.expenses = ledger.expenses;

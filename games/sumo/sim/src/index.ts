@@ -24,6 +24,8 @@ export {
   dismissStaff,
   giveKojo,
   answerElection,
+  setParty,
+  visitPatron,
 } from './game/state';
 export { alumnusAge, staffCandidates, staffOf, staffSkill } from './stable/staff';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';
@@ -39,3 +41,4 @@ export { rankValue } from './banzuke/rank';
 export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
 export { ensureRival } from './world/rival';
 export { officeAtLeast, isBoardMember } from './world/office';
+export { canVisit, giftOf } from './stable/koenkai';
