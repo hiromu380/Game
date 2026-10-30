@@ -200,6 +200,28 @@ export function ReportDialog({
             ) : null,
           )}
         </ul>
+        {report.playoff && (
+          <p>{t('report.playoff', { names: report.playoff.map(nameOf).join('・') })}</p>
+        )}
+
+        <h3>{t('report.sansho')}</h3>
+        <ul className="plain-list">
+          {(['shukun', 'kanto', 'gino'] as const).map((k) => (
+            <li key={k}>
+              <span className="muted">{t(`sansho.${k}`)}</span>{' '}
+              {report.sansho[k].length === 0
+                ? t('report.sanshoNone')
+                : report.sansho[k].map((id) => (
+                    <span key={id} className={mineIds.has(id) ? 'is-mine-text' : ''}>
+                      {nameOf(id)}
+                      <span className="muted">
+                        （{stableName.get(byId.get(id)?.stableId ?? -1) ?? '—'}）
+                      </span>
+                    </span>
+                  ))}
+            </li>
+          ))}
+        </ul>
         {topPromotions.map((p) => (
           <p key={p.id}>{t(`report.promotion.${p.to}` as MessageKey, { name: nameOf(p.id) })}</p>
         ))}

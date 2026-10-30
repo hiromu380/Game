@@ -19,6 +19,7 @@ export function emptyCareer(): Career {
     makuuchiYusho: 0,
     otherYusho: 0,
     kinboshi: 0,
+    sansho: { shukun: 0, kanto: 0, gino: 0 },
     mochikyukinHalf: MOCHIKYUKIN.startHalf,
     highestOrder: Number.MAX_SAFE_INTEGER,
     highestRank: null,

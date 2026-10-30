@@ -49,6 +49,8 @@ export interface Career {
   makuuchiYusho: number;
   otherYusho: number;
   kinboshi: number;
+  /** 三賞の回数 */
+  sansho: { shukun: number; kanto: number; gino: number };
   /** 持ち給金（0.5円単位の整数） */
   mochikyukinHalf: number;
   /** 最高位（番付の上からの順位。小さいほど上） */
@@ -274,6 +276,10 @@ export interface BashoReport {
   banzukeChanges: { id: number; from: Rank; to: Rank | null }[];
   /** 場所の後の巡業（なければ null） */
   jungyo: 'spring' | 'summer' | 'autumn' | 'winter' | null;
+  /** 三賞（力士 ID。該当者なしは空） */
+  sansho: { shukun: number[]; kanto: number[]; gino: number[] };
+  /** 幕内の優勝決定戦に出た力士（なければ null） */
+  playoff: number[] | null;
   income: MoneyLine[];
   expenses: MoneyLine[];
   personal: MoneyLine[];

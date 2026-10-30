@@ -34,6 +34,8 @@ export interface BashoOutcome {
   kinboshi: Map<number, number>;
   /** 懸賞の手取り（円） */
   kenshoYen: Map<number, number>;
+  /** 優勝決定戦に出た力士（同点が2人以上いた段だけ。勝ち抜きの順） */
+  playoff: Map<Division, number[]>;
 }
 
 /** 場所中のけがの確率（1番あたり） */
@@ -225,11 +227,13 @@ export function runBasho(
 
   // 優勝（同点は決定戦。番付の上の者から順に勝ち抜き）
   const yusho = new Map<Division, number>();
+  const playoff = new Map<Division, number[]>();
   DIVISIONS.forEach((d, gi) => {
     const group = groups[gi]!;
     if (group.length === 0) return;
     const best = Math.max(...group.map((id) => records.get(id)!.wins));
     const tied = group.filter((id) => records.get(id)!.wins === best);
+    if (tied.length > 1) playoff.set(d, tied);
     let champ = tied[0]!;
     for (const challenger of tied.slice(1)) {
       const p = eastWinProbability(
@@ -243,5 +247,5 @@ export function runBasho(
     yusho.set(d, champ);
   });
 
-  return { ranks, records, bouts, yusho, injured, kinboshi, kenshoYen };
+  return { ranks, records, bouts, yusho, injured, kinboshi, kenshoYen, playoff };
 }

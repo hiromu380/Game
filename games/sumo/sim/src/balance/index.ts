@@ -7,3 +7,4 @@ export * from './game';
 export * from './lineage';
 export * from './facilities';
 export * from './events';
+export * from './sansho';

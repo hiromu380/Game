@@ -798,6 +798,14 @@ h3 {
   border-color: var(--line);
   cursor: default;
 }
+.is-mine-text {
+  color: var(--shu);
+  font-weight: bold;
+}
+.is-mine-text::before {
+  content: '◆';
+  margin-right: 2px;
+}
 .up {
   color: var(--good);
   font-weight: bold;

@@ -242,5 +242,11 @@
   "jungyo.autumn": "Autumn tour: sekitori travel the regions. A little tiring, but popularity grows.",
   "jungyo.winter": "Winter tour: sekitori travel the regions. A little tiring, but popularity grows.",
   "newGame.artAria": "The master in front of the stable curtain, a disciple stamping and a new recruit sliding",
-  "banzuke.crest": "Banzuke"
+  "banzuke.crest": "Banzuke",
+  "report.sansho": "Special prizes",
+  "sansho.shukun": "Outstanding Performance",
+  "sansho.kanto": "Fighting Spirit",
+  "sansho.gino": "Technique",
+  "report.sanshoNone": "not awarded",
+  "report.playoff": "The makuuchi title went to a playoff ({names})."
 }

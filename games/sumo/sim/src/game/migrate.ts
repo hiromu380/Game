@@ -12,7 +12,20 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 1) s = v1to2(s);
   if (s.version === 2) s = v2to3(s);
   if (s.version === 3) s = v3to4(s);
+  if (s.version === 4) s = v4to5(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/** 4 → 5: 三賞の回数（0）と、直近の結果の三賞・優勝決定戦（なし） */
+function v4to5(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  for (const r of s.rikishi) r.career.sansho = { shukun: 0, kanto: 0, gino: 0 };
+  if (s.lastReport) {
+    s.lastReport.sansho = { shukun: [], kanto: [], gino: [] };
+    s.lastReport.playoff = null;
+  }
+  s.version = 5;
+  return s as unknown as Raw;
 }
 
 /** 3 → 4: 直近の場所の結果に、番付の上がり下がり（空）と巡業（なし）を足す */

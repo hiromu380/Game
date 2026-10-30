@@ -26,6 +26,8 @@ import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
 import { makeCandidates, npcRecruits } from './recruit';
 import { currentLineage, isBlocked, newToshiyoriName, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
+import { SANSHO } from '../balance/sansho';
+import { selectSansho } from '../basho/sansho';
 import { JUNGYO, JUNGYO_AFTER } from '../balance/events';
 import { FACILITY_EFFECTS } from '../balance/facilities';
 import {
@@ -48,6 +50,8 @@ export function advanceBasho(input: GameState): GameState {
     injuries: [],
     banzukeChanges: [],
     jungyo: null,
+    sansho: { shukun: [], kanto: [], gino: [] },
+    playoff: null,
     income: [],
     expenses: [],
     personal: [],
@@ -77,6 +81,7 @@ export function advanceBasho(input: GameState): GameState {
     if (isMine(id)) report.injuries.push(id);
   }
   for (const [d, id] of outcome.yusho) report.yusho[d] = id;
+  report.playoff = outcome.playoff.get('makuuchi') ?? null;
 
   // 3. 記録
   const yushoIds = new Set(outcome.yusho.values());
@@ -104,6 +109,22 @@ export function advanceBasho(input: GameState): GameState {
         record,
         bouts: outcome.bouts.filter((b) => b.eastId === id || b.westId === id),
       });
+    }
+  }
+
+  // 三賞（賞金は本人へ。自分の弟子なら部屋の名声）
+  report.sansho = selectSansho(
+    outcome.ranks,
+    outcome.records,
+    outcome.bouts,
+    outcome.yusho.get('makuuchi'),
+  );
+  for (const kind of ['shukun', 'kanto', 'gino'] as const) {
+    for (const id of report.sansho[kind]) {
+      const r = byId.get(id)!;
+      r.career.sansho[kind]++;
+      r.career.earnings += SANSHO.prize;
+      if (isMine(id)) state.player.prestige += GAME.prestige.sansho;
     }
   }
 

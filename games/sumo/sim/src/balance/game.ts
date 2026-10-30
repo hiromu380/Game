@@ -16,6 +16,7 @@ export const GAME = {
     newOzeki: 10,
     newYokozuna: 20,
     makuuchiYusho: 8,
+    sansho: 3,
   },
   /** 名声は場所ごとに少しずつ薄れる（掛ける割合）。昔の栄光だけでは人は来ない */
   prestigeKeep: 0.97,
