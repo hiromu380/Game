@@ -10,7 +10,11 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tools/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "balance": "tsx tools/balance.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }
