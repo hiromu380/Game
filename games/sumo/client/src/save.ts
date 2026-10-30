@@ -2,6 +2,7 @@
  * セーブ（localStorage）。古い版は sim の migrateSave で今の版に変換する。読めないセーブは捨てる
  */
 import { migrateSave, type GameState } from '@ichimon/sim';
+import type { GuideProgress } from './guide';
 
 const KEY = 'ichimon.save';
 const SETTINGS_KEY = 'ichimon.settings';
@@ -47,30 +48,52 @@ export function parseSaveFile(text: string): GameState | null {
   }
 }
 
-/** 1: 言語 / 2: 効果音の入り切り */
+/** 1: 言語 / 2: 効果音の入り切り / 3: はじめての人向けの案内の進み具合 */
 export interface Settings {
-  version: 2;
+  version: 3;
   lang: 'ja' | 'en';
   sound: boolean;
+  guide: GuideProgress;
 }
 
-export const DEFAULT_SETTINGS: Settings = { version: 2, lang: 'ja', sound: true };
+export const DEFAULT_GUIDE: GuideProgress = { dismissed: false, done: [], tips: [] };
 
-/** 保存した設定を読む（版1は効果音を入れて版2にする） */
+export const DEFAULT_SETTINGS: Settings = {
+  version: 3,
+  lang: 'ja',
+  sound: true,
+  guide: DEFAULT_GUIDE,
+};
+
+const strings = (x: unknown): string[] =>
+  Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : [];
+
+/** 保存した設定を読む（版1は効果音を入れ、版1・2は案内をはじめから。壊れていれば既定） */
 export function parseSettings(text: string | null): Settings {
   try {
     const s = JSON.parse(text ?? 'null') as {
       version?: number;
       lang?: 'ja' | 'en';
       sound?: boolean;
+      guide?: { dismissed?: boolean; done?: unknown; tips?: unknown };
     } | null;
-    if (s?.version === 1) return { version: 2, lang: s.lang === 'en' ? 'en' : 'ja', sound: true };
-    if (s?.version === 2)
-      return { version: 2, lang: s.lang === 'en' ? 'en' : 'ja', sound: s.sound !== false };
+    if (!s || ![1, 2, 3].includes(s.version ?? 0)) return DEFAULT_SETTINGS;
+    return {
+      version: 3,
+      lang: s.lang === 'en' ? 'en' : 'ja',
+      sound: s.version === 1 ? true : s.sound !== false,
+      guide:
+        s.version === 3 && s.guide
+          ? {
+              dismissed: s.guide.dismissed === true,
+              done: strings(s.guide.done) as GuideProgress['done'],
+              tips: strings(s.guide.tips) as GuideProgress['tips'],
+            }
+          : DEFAULT_GUIDE,
+    };
   } catch {
-    // 既定に戻す
+    return DEFAULT_SETTINGS;
   }
-  return DEFAULT_SETTINGS;
 }
 
 export function loadSettings(): Settings {

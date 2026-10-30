@@ -24,6 +24,9 @@ import { IndependencePanel } from './IndependencePanel';
 import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { ScoutPanel } from './ScoutPanel';
+import { GuideCard } from './Guide';
+import { withStep } from '../guide';
+import { useSettings } from '../settings';
 import { rankLabel, recordLabel } from '../format';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
@@ -39,6 +42,7 @@ export function StableTab({
   setGame: (g: GameState) => void;
 }) {
   const { t } = useI18n();
+  const { settings, update } = useSettings();
   const [detail, setDetail] = useState<number | null>(null);
   const detailRikishi = detail === null ? undefined : game.rikishi.find((r) => r.id === detail);
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
@@ -53,6 +57,7 @@ export function StableTab({
 
   return (
     <div className="stack">
+      <GuideCard game={game} />
       {detailRikishi && (
         <RikishiDetail
           subject={{
@@ -140,7 +145,10 @@ export function StableTab({
               key={r.id}
               r={r}
               rank={ranks.get(r.id) ?? null}
-              onPolicy={(p) => setGame(setPolicy(game, r.id, p))}
+              onPolicy={(p) => {
+                setGame(setPolicy(game, r.id, p));
+                update({ guide: withStep(settings.guide, 'policy') });
+              }}
               onPlayHurt={(play) => setGame(setPlayHurt(game, r.id, play))}
               onDetail={() => setDetail(r.id)}
             />

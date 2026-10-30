@@ -1020,5 +1020,21 @@
   "scout.overseas.name": "海外へ行く",
   "scout.overseas.desc": "素質のある外国出身の若者に1人会える。費用は高い",
   "journal.scout": "{trip}に出向き、{count}人に会う。",
-  "journal.scoutNone": "{trip}に出向いたが、これという子はいなかった。"
+  "journal.scoutNone": "{trip}に出向いたが、これという子はいなかった。",
+  "guide.title": "親方の手引き",
+  "guide.lead": "部屋を開いたら、まずはここから。済んだものに印がつきます。",
+  "guide.step.accept": "入門希望者が来たら受け入れる（「受け入れる」を押す）",
+  "guide.step.policy": "弟子ごとに稽古の方針を選ぶ（押し・四つ・技・体づくり・休養）",
+  "guide.step.basho": "「本場所へ」で15日間を進める",
+  "guide.step.bout": "場所の結果で星（○●）を押して、取組を見る",
+  "guide.step.ledger": "「帳簿」タブで、お金の出入りを見る",
+  "guide.doneAria": "（済み）",
+  "guide.dismiss": "手引きを閉じる",
+  "guide.tipOk": "わかった",
+  "guide.tip.stable": "部屋: 弟子の稽古の方針を決め、入門希望者や出来事に答えます。準備ができたら下の「本場所へ」。",
+  "guide.tip.banzuke": "番付: 全部の力士の地位です。自分の部屋の力士は ◆ で示します。段を切り替えて見られます。",
+  "guide.tip.ledger": "帳簿: 前の場所のお金の出入り。後援会・部屋の人・ちゃんこ・設備もここで決めます。赤字は親方の貯金で埋まります。",
+  "guide.tip.lineage": "一門: 歴代の親方と系譜図。部屋付きの親方が育つと、跡継ぎや分家になります。",
+  "guide.tip.association": "協会: ライバルの部屋、理事会、5つの一門の部屋と空いている年寄名跡を見られます。",
+  "guide.tip.journal": "日誌: 部屋の出来事の記録。セーブの書き出し・読み込みもここです。"
 }

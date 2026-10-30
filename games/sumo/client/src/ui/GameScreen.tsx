@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { advanceBasho, isBlocked, ranksOf, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
@@ -9,6 +9,8 @@ import { BanzukeTab } from './BanzukeTab';
 import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
 import { AssociationTab } from './AssociationTab';
+import { TabTip } from './Guide';
+import { withStep } from '../guide';
 import { HighlightDialog } from './HighlightDialog';
 import { highlightsOf, type Highlight } from '../highlights';
 import { JournalTab } from './JournalTab';
@@ -43,6 +45,11 @@ export function GameScreen({
   const { t, lang } = useI18n();
   const { settings, update } = useSettings();
   const [tab, setTab] = useState<Tab>('stable');
+  // 手引き: 帳簿を開いたら「帳簿を見る」を済みにする
+  useEffect(() => {
+    if (tab === 'ledger' && !settings.guide.done.includes('ledger'))
+      update({ guide: withStep(settings.guide, 'ledger') });
+  }, [tab, settings.guide, update]);
   const [showReport, setShowReport] = useState(false);
   const [highlights, setHighlights] = useState<Highlight[] | null>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -126,6 +133,7 @@ export function GameScreen({
       </nav>
 
       <main className="content">
+        <TabTip tab={tab} />
         {tab === 'stable' && <StableTab game={game} ranks={ranks} setGame={setGame} />}
         {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
         {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { KIMARITE } from '@ichimon/sim';
 import { makeT, type MessageKey } from '../src/i18n';
 import { boutFlow, boutScript, linesAt, poseAt, type Side } from '../src/playback/boutScript';
-import { parseSettings } from '../src/save';
+import { DEFAULT_SETTINGS, parseSettings } from '../src/save';
 
 const STYLES = ['oshi', 'yotsu', 'waza'] as const;
 
@@ -93,15 +93,23 @@ describe('取組の演出の台本', () => {
 });
 
 describe('ユーザー設定', () => {
-  it('版1（言語だけ）は効果音を入れて版2にする。壊れていれば既定', () => {
+  it('版1・2は版3に（版1は効果音を入れる。案内ははじめから）。壊れていれば既定', () => {
     expect(parseSettings(JSON.stringify({ version: 1, lang: 'en' }))).toEqual({
-      version: 2,
+      ...DEFAULT_SETTINGS,
       lang: 'en',
-      sound: true,
     });
     expect(parseSettings(JSON.stringify({ version: 2, lang: 'ja', sound: false })).sound).toBe(
       false,
     );
-    expect(parseSettings('{oops')).toEqual({ version: 2, lang: 'ja', sound: true });
+    expect(parseSettings('{oops')).toEqual(DEFAULT_SETTINGS);
+    const v3 = {
+      ...DEFAULT_SETTINGS,
+      guide: { dismissed: true, done: ['bout', 9], tips: ['ledger'] },
+    };
+    expect(parseSettings(JSON.stringify(v3)).guide).toEqual({
+      dismissed: true,
+      done: ['bout'],
+      tips: ['ledger'],
+    });
   });
 });

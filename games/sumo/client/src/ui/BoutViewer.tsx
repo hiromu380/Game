@@ -22,6 +22,8 @@ import { boutFlow, boutScript, linesAt, poseAt, type CallLine } from '../playbac
 import { BoutStage } from '../art/BoutStage';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
+import { useSettings } from '../settings';
+import { withStep } from '../guide';
 import type { MotionClock } from '../art/three/animation';
 
 /** 3D の読み込みに失敗したら SVG の舞台で受け止め、演出の時計を始める */
@@ -51,6 +53,11 @@ export function BoutViewer({
   onClose: () => void;
 }) {
   const { t } = useI18n();
+  const { settings, update } = useSettings();
+  // 手引き: 取組を見たら済みにする
+  useEffect(() => {
+    if (!settings.guide.done.includes('bout')) update({ guide: withStep(settings.guide, 'bout') });
+  }, [settings.guide, update]);
   const byId = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r])), [game.rikishi]);
   const east = byId.get(bout.eastId);
   const west = byId.get(bout.westId);

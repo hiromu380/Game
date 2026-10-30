@@ -1813,3 +1813,52 @@ html:lang(en) .choice__desc {
 .favor .bar {
   flex: 1;
 }
+
+/* はじめての人向けの案内 */
+.guide {
+  border: 2px solid var(--ai);
+  background: var(--ai-light);
+}
+.guide__steps {
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.guide__steps li {
+  display: flex;
+  gap: 8px;
+}
+.guide__steps li.is-done {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.guide__mark {
+  width: 1.2em;
+  font-weight: bold;
+  color: var(--good);
+}
+.tabtip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 2px dashed var(--ai);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.tabtip p {
+  margin: 0;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
