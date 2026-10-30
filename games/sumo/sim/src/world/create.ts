@@ -1,6 +1,7 @@
 /**
  * ゲーム開始時の相撲界（架空の部屋と力士の番付全体・自分の部屋・自分の親方）
  */
+import { GROWTH } from '../balance/growth';
 import { RECRUIT, TOSHIYORI } from '../balance/career';
 import { GAME } from '../balance/game';
 import { START_MONEY } from '../balance/money';
@@ -271,7 +272,7 @@ function makeVeteran(
     waza: round1(x - 4 + rng.range(0, 3)),
   };
   abilities[style] = round1(abilities[style] + 9);
-  const peakAge = rng.range(25, 30);
+  const peakAge = rng.range(GROWTH.peakAge[0], GROWTH.peakAge[1]);
   const best = Math.max(abilities.oshi, abilities.yotsu, abilities.waza);
   // 若い力士は伸びしろがある
   const talent = clamp(

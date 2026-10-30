@@ -51,6 +51,16 @@ export const OFFICE = {
   electionEveryBasho: 12,
   rijiSeats: 10,
   fukuRijiSeats: 3,
+  /** 理事候補としての格の重み（推定）: 年齢・現役の最高位・育てた関取・自分の部屋の名声 */
+  standing: {
+    perAge: 0.4,
+    yokozuna: 40,
+    ozeki: 25,
+    sanyaku: 12,
+    makuuchi: 5,
+    perSekitori: 4,
+    perPrestige: 1 / 12,
+  },
   /** 一門の推薦を受けられる役職の下限 */
   candidateFrom: 'iin' as AssocRank,
   /** 一門の推薦なしで立候補したとき、当選する確率（名声で上がる。推定） */

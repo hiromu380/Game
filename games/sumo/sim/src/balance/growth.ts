@@ -14,10 +14,12 @@ export const GROWTH = {
   /** 部屋付きの親方1人あたりの稽古の倍率（上限つき） */
   coachBonusPer: 0.05,
   coachBonusMax: 0.1,
+  /** ピークの年齢の範囲（幕内の平均年齢が実際の29歳前後になるように。2026-10-30 調整） */
+  peakAge: [28, 32] as const,
   /** ピークを過ぎた後の衰え（年あたり、場所ごとに 1/6） */
-  declinePerYear: 1.6,
+  declinePerYear: 1.2,
   /** 衰えの加速（ピークから1年ごとに） */
-  declineAccel: 0.25,
+  declineAccel: 0.2,
   /** 体づくり: 体重の増え方（kg/場所）と、身長からの体重の上限（身長 − この値） */
   bodyGainKg: 3,
   otherGainKg: 0.8,

@@ -1,6 +1,7 @@
 /**
  * 力士・入門希望者を作る
  */
+import { GROWTH } from '../balance/growth';
 import { RECRUIT } from '../balance/career';
 import { MOCHIKYUKIN } from '../balance/money';
 import { clamp } from '../core/math';
@@ -95,7 +96,7 @@ export function makeCandidate(
     foreign: allowForeign && rng.chance(0.08),
     abilities,
     talent,
-    peakAge: rng.range(25, 30),
+    peakAge: rng.range(GROWTH.peakAge[0], GROWTH.peakAge[1]),
     fragility: rng.range(10, 90) / 100,
     scoutGrade,
     background,

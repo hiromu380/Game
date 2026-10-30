@@ -50,10 +50,10 @@ describe('部屋の日誌', () => {
     });
   });
 
-  it('長く遊ぶと、昇進・引退・継承が時系列で並ぶ', () => {
+  it('長く遊ぶと、入門・昇進・引退が時系列で並ぶ（継承は lineage.test で確かめる）', () => {
     const s = play(7, 180);
     const kinds = new Set(s.journal.map((e) => e.kind));
-    for (const k of ['open', 'join', 'promote', 'retire', 'successor']) expect(kinds).toContain(k);
+    for (const k of ['open', 'join', 'promote', 'retire']) expect(kinds).toContain(k);
     for (let i = 1; i < s.journal.length; i++)
       expect(s.journal[i]!.bashoIndex).toBeGreaterThanOrEqual(s.journal[i - 1]!.bashoIndex);
   }, 60_000);

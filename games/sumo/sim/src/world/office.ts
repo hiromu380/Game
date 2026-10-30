@@ -48,16 +48,21 @@ export function yearEndOffice(state: GameState): void {
   }
 }
 
-/** 理事候補としての格（年齢・現役の地位・部屋の関取。自分の親方は名声も） */
+/**
+ * 理事候補としての格: 年齢より実績（現役時代の地位・師匠として育てた関取）を重く見る。
+ * 自分の親方は部屋の名声も数える。いまの役職は数えない（一度上がると上がり続けないように）
+ */
 function standing(state: GameState, o: Oyakata, sekitoriOf: Map<number, number>): number {
   const top = o.highestRank ? rankValue(o.highestRank) : 10_000;
-  const rankBonus = top < 2 ? 30 : top < 6 ? 20 : top < 12 ? 10 : top < 100 ? 5 : 0;
+  const w = OFFICE.standing;
+  const rankBonus =
+    top < 2 ? w.yokozuna : top < 6 ? w.ozeki : top < 12 ? w.sanyaku : top < 100 ? w.makuuchi : 0;
   const isMe = o.id === state.player.oyakataId;
   return (
-    o.age +
+    o.age * w.perAge +
     rankBonus +
-    (o.role === 'master' ? (sekitoriOf.get(o.stableId) ?? 0) * 2 : 0) +
-    (isMe ? state.player.prestige / 10 + OFFICE_ORDER.indexOf(state.player.office.rank) * 3 : 0)
+    (o.role === 'master' ? (sekitoriOf.get(o.stableId) ?? 0) * w.perSekitori : 0) +
+    (isMe ? state.player.prestige * w.perPrestige : 0)
   );
 }
 
@@ -174,12 +179,17 @@ export function holdElection(state: GameState): void {
       state.player.prestige + (won ? OFFICE.rebelWinPrestige : OFFICE.rebelLosePrestige),
     );
   }
-  // 理事長: 理事のうち、いちばん格の高い親方
+  // 理事長: 前の期から続けて理事の親方のうち、いちばん格の高い親方（はじめての選挙は理事全員から）
   const scoreOf = (id: number) => s.score.get(id) ?? 0;
-  const rijicho = [...riji].sort((a, b) => scoreOf(b) - scoreOf(a) || a - b)[0] ?? null;
+  const before = state.board;
+  const veterans = before ? riji.filter((id) => before.riji.includes(id)) : riji;
+  const rijicho =
+    [...(veterans.length > 0 ? veterans : riji)].sort(
+      (a, b) => scoreOf(b) - scoreOf(a) || a - b,
+    )[0] ?? null;
   state.board = { electedAt: state.bashoIndex, riji, fukuRiji, rijicho };
 
-  const before = state.player.office.rank;
+  const prev = state.player.office.rank;
   const now: AssocRank =
     rijicho === me
       ? 'rijicho'
@@ -187,12 +197,12 @@ export function holdElection(state: GameState): void {
         ? 'riji'
         : fukuRiji.includes(me)
           ? 'fukuRiji'
-          : isBoardMember(before)
+          : isBoardMember(prev)
             ? 'yakuinTaiguu'
-            : before;
-  if (now !== before) state.player.office = { rank: now, since: state.bashoIndex };
+            : prev;
+  if (now !== prev) state.player.office = { rank: now, since: state.bashoIndex };
   const elected = isBoardMember(now);
-  if (choice === 'run' || elected || isBoardMember(before)) {
+  if (choice === 'run' || elected || isBoardMember(prev)) {
     note(state, {
       kind: 'election',
       result: elected ? 'elected' : choice === 'run' ? 'lost' : 'stayed',

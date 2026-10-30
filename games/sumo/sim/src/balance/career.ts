@@ -45,7 +45,7 @@ export const RECRUIT = {
 
 export const RETIRE = {
   /** この年齢を過ぎると引退を考え始める */
-  ageSoft: 30,
+  ageSoft: 31,
   /** この年齢で必ず引退 */
   ageHard: 40,
   /** 年あたりの引退の確率（年齢と地位で上がる） */
