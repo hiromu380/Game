@@ -115,6 +115,15 @@
           "frames": 1,
           "priority": "B",
           "outline": false
+        },
+        {
+          "id": "dorm_modern",
+          "name": "現代風の寮（鉄筋の二階建て。使い方は未定）",
+          "size": [176, 176],
+          "frames": 1,
+          "priority": "C",
+          "outline": false,
+          "variants": ["a", "b"]
         }
       ]
     },

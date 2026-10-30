@@ -9,7 +9,7 @@ export interface Stage {
 }
 
 export const KEIKOBA_STAGE: Stage = { width: 320, height: 200 };
-export const EXTERIOR_STAGE: Stage = { width: 440, height: 250 };
+export const EXTERIOR_STAGE: Stage = { width: 520, height: 320 };
 
 export interface Placed {
   sprite: string;
@@ -41,11 +41,14 @@ export function keikobaLayout(game: Pick<GameState, 'player'>): Placed[] {
   return out;
 }
 
-/** 外観: 母屋と、寮の増築の段に合わせた寮 */
+/** 外観（奥から順に描く）: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門 */
 export function exteriorLayout(game: Pick<GameState, 'player'>): Placed[] {
-  const dorm = Math.min(2, game.player.facilities.dorm);
-  return [
-    { sprite: 'omoya', x: 130, y: 240 },
-    { sprite: `dorm_${dorm}`, x: 315, y: 246 },
+  const f = game.player.facilities;
+  const out: Placed[] = [
+    { sprite: `dorm_${Math.min(2, f.dorm)}`, x: 385, y: 220 },
+    { sprite: 'omoya', x: 200, y: 240 },
   ];
+  if (f.trainer >= 1) out.push({ sprite: 'clinic', x: 90, y: 275 });
+  out.push({ sprite: 'chanko', x: 420, y: 310 }, { sprite: 'gate', x: 230, y: 318 });
+  return out;
 }

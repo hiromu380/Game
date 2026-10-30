@@ -1,4 +1,14 @@
 {
+  "chanko": {
+    "files": ["chanko.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
+  "clinic": {
+    "files": ["clinic.png"],
+    "size": [112, 96],
+    "anchor": [56, 95]
+  },
   "dohyo": {
     "files": ["dohyo.png"],
     "size": [160, 96],
@@ -18,6 +28,21 @@
     "files": ["dorm_2.png"],
     "size": [208, 224],
     "anchor": [104, 223]
+  },
+  "dorm_modern__a": {
+    "files": ["dorm_modern__a.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "dorm_modern__b": {
+    "files": ["dorm_modern__b.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "gate": {
+    "files": ["gate.png"],
+    "size": [128, 112],
+    "anchor": [64, 111]
   },
   "keikoba_back": {
     "files": ["keikoba_back.png"],

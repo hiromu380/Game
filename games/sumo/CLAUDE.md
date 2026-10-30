@@ -216,7 +216,7 @@
 - 見出しフォント（Kaisei Tokumin・OFL）は使う字だけに絞って同梱する。i18n の文言や名前の字を変えたら `client/build/subset-font.mjs` を実行し直す（収録漏れはテストで分かる）
 - 絵を変えたら `client/build/gallery.tsx` で一覧を書き出して確かめる
 - 部屋の全景の絵（スプライト）は `docs/sprites/spec.md` の決まりで作り、`client/build/import-sprites.py` でドット絵に仕上げて取り込む（背景マゼンタ・斜め上から・正面は左下・色は palette.ts に寄せる）。一覧の正本は `client/sprites/catalog.json`。生成AIで作った絵は `docs/assets.md` に記録する
-- 部屋タブの先頭に部屋の絵: 稽古場（改修2段目で器具、3段目で今どきの稽古場）と外観（母屋と、増築の段に合わせた寮）を切り替える。絵の置き方は `client/src/art/sprites/keikoba.ts`。取り込んでいない絵は出さない
+- 部屋タブの先頭に部屋の絵: 稽古場（改修2段目で器具、3段目で今どきの稽古場）と外観（寮〔増築の段に合わせる〕・母屋・治療院〔トレーナー契約のとき〕・ちゃんこ場・門）を切り替える。現代風の寮（dorm_modern）は取り込み済みで、使い方は未定。絵の置き方は `client/src/art/sprites/keikoba.ts`。取り込んでいない絵は出さない
 - バランスの調整は自動プレイの結果を根拠に行い、記録する
 - 大きな変更の前には計画を示してから着手する
 

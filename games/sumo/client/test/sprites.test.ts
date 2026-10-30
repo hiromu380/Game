@@ -56,9 +56,22 @@ describe('稽古場の絵の並べ方', () => {
   it('改修3段目は今どきの稽古場。外観の寮は増築の段で変わる', async () => {
     const { keikobaLayout, exteriorLayout, MODERN_FROM_DOJO } =
       await import('../src/art/sprites/keikoba');
-    const g = (dojo: number, dorm: number) => ({ player: { facilities: { dojo, dorm } } }) as never;
+    const g = (dojo: number, dorm: number) =>
+      ({ player: { facilities: { dojo, dorm, trainer: 0 } } }) as never;
     expect(keikobaLayout(g(MODERN_FROM_DOJO, 0))[0]!.sprite).toBe('keikoba_modern');
-    expect(exteriorLayout(g(0, 0)).map((p) => p.sprite)).toEqual(['omoya', 'dorm_0']);
-    expect(exteriorLayout(g(0, 2))[1]!.sprite).toBe('dorm_2');
+    expect(exteriorLayout(g(0, 0)).map((p) => p.sprite)).toEqual([
+      'dorm_0',
+      'omoya',
+      'chanko',
+      'gate',
+    ]);
+    expect(exteriorLayout(g(0, 2))[0]!.sprite).toBe('dorm_2');
+    // 治療院はトレーナー契約のとき。奥から順（足元の y が増える順）に描く
+    const withClinic = exteriorLayout({
+      player: { facilities: { dojo: 0, dorm: 0, trainer: 1 } },
+    } as never);
+    expect(withClinic.map((p) => p.sprite)).toContain('clinic');
+    const ys = withClinic.map((p) => p.y);
+    expect([...ys].sort((a, b) => a - b)).toEqual(ys);
   });
 });

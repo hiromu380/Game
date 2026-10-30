@@ -104,6 +104,18 @@ Draw the same dormitory building as before but extended: longer, with an added w
 Draw the same dormitory building but now three stories tall and long, tiled roof, rows of shoji windows, futons and towels airing on balconies.
 ```
 
+### `dorm_modern__a` — 現代風の寮（優先 C・比率 1:1・1コマ）
+
+```
+Draw a modern two-storey reinforced-concrete dormitory of a present-day sumo stable: flat grey roof, grey and navy walls, a balcony with a metal railing and colourful towels hanging, a front door with an intercom, gas and electric meters, air-conditioner units and pipes on the side wall, an outdoor metal staircase at the back, on a low concrete base.
+```
+
+### `dorm_modern__b` — 現代風の寮（もう1案）（優先 C・比率 1:1・1コマ）
+
+```
+Same building as dorm_modern__a, with a slightly different set of towels and a mailbox by the glass door (use dorm_modern__a as the reference image).
+```
+
 ### `chanko` — ちゃんこ場（屋根つきの炊事場）（優先 A・比率 4:3・1コマ）
 
 ```
