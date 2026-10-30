@@ -79,6 +79,11 @@
     "size": [176, 176],
     "anchor": [88, 175]
   },
+  "drying_open": {
+    "files": ["drying_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
   "drying_shed": {
     "files": ["drying_shed.png"],
     "size": [72, 72],
@@ -91,6 +96,16 @@
   },
   "garbage": {
     "files": ["garbage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garbage_open": {
+    "files": ["garbage_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garden_open": {
+    "files": ["garden_open.png"],
     "size": [72, 72],
     "anchor": [36, 71]
   },
@@ -108,6 +123,11 @@
     "files": ["gate_modern.png"],
     "size": [128, 128],
     "anchor": [64, 127]
+  },
+  "gym_open": {
+    "files": ["gym_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "gym_shed": {
     "files": ["gym_shed.png"],
@@ -133,6 +153,11 @@
     "files": ["lantern.png"],
     "size": [24, 40],
     "anchor": [12, 39]
+  },
+  "laundry_open": {
+    "files": ["laundry_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
   },
   "laundry_shed": {
     "files": ["laundry_shed.png"],

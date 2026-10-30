@@ -468,6 +468,36 @@ Draw a laundry drying corner under a corrugated metal roof on posts: drying pole
 Draw a gardening corner under a corrugated metal roof on posts: a small plastic greenhouse with potted plants, shelves of flower pots and seedling trays, watering cans, bags of soil and garden tools, with a standpipe faucet and a drain grate at the corner, a hose and a cardboard box, on a square patch of concrete, earth and grass (same roof and base as the other backyard corners). No readable letters.
 ```
 
+### `laundry_open` — 洗濯場（屋根なし・洗濯機2台・流し）（優先 C・比率 1:1・1コマ）
+
+```
+Same corner as laundry_shed (use it as the reference image) but without the roof and posts: open to the sky, with a few buckets and storage crates in front. No readable letters.
+```
+
+### `garbage_open` — ごみ置き場（屋根なし・網の囲い・分別のごみ箱）（優先 C・比率 1:1・1コマ）
+
+```
+Same corner as garbage (use it as the reference image) but without the roof and posts: open to the sky, with a few buckets and storage crates in front. No readable letters.
+```
+
+### `drying_open` — 物干し場（屋根なし・浴衣・手ぬぐい・Tシャツ）（優先 C・比率 1:1・1コマ）
+
+```
+Same corner as drying_shed (use it as the reference image) but without the roof and posts: open to the sky, with a few buckets and storage crates in front. No readable letters.
+```
+
+### `garden_open` — 園芸の一角（屋根なし・小さな温室・植木鉢）（優先 C・比率 1:1・1コマ）
+
+```
+Same corner as garden_shed (use it as the reference image) but without the roof and posts: open to the sky, with a few buckets and storage crates in front. No readable letters.
+```
+
+### `gym_open` — 屋外の筋トレ場（屋根なし・タイヤ・サンドバッグ・ベンチ）（優先 C・比率 1:1・1コマ）
+
+```
+Same corner as gym_shed (use it as the reference image) but without the roof and posts: open to the sky, with a few buckets and storage crates in front. No readable letters.
+```
+
 ## 行事・巡業の舞台
 
 ### `dohyo_honbasho` — 本場所の土俵（優先 B・比率 1:1・1コマ）

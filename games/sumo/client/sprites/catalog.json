@@ -503,6 +503,46 @@
           "frames": 1,
           "priority": "C",
           "outline": false
+        },
+        {
+          "id": "laundry_open",
+          "name": "洗濯場（屋根なし・洗濯機2台・流し）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "garbage_open",
+          "name": "ごみ置き場（屋根なし・網の囲い・分別のごみ箱）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "drying_open",
+          "name": "物干し場（屋根なし・浴衣・手ぬぐい・Tシャツ）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "garden_open",
+          "name": "園芸の一角（屋根なし・小さな温室・植木鉢）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "gym_open",
+          "name": "屋外の筋トレ場（屋根なし・タイヤ・サンドバッグ・ベンチ）",
+          "size": [72, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
         }
       ]
     },
