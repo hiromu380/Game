@@ -29,6 +29,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'staffLeave':
       return 'business';
     case 'kojo':
+    case 'danpatsu':
       return 'stable';
     case 'patron':
     case 'scout':
@@ -48,6 +49,7 @@ export function isMilestone(e: JournalEntry): boolean {
     (e.kind === 'promote' && (e.to === 'Y' || e.to === 'O')) ||
     (e.kind === 'yusho' && e.division === 'makuuchi') ||
     e.kind === 'kojo' ||
+    (e.kind === 'danpatsu' && e.venue === 'kokugikan') ||
     (e.kind === 'rival' && e.event !== 'new') ||
     (e.kind === 'election' && e.result === 'elected') ||
     e.kind === 'successor' ||
@@ -143,6 +145,8 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
             rank: t(`rank.title.${e.to}` as MessageKey),
             word: t(`kojo.${e.word}` as MessageKey),
           });
+    case 'danpatsu':
+      return t(`journal.danpatsu.${e.venue}`, { shikona: e.shikona, hasami: e.hasami });
     case 'diet':
       return t('journal.diet', { name: t(`diet.${e.diet}.name`) });
     case 'staffHire':

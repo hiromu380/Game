@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Alumnus, GameState } from '@ichimon/sim';
+import { danpatsuPlan, type Alumnus, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName, rankLabel } from '../format';
 import { lookOfAlumnus } from '../art/Portraits';
@@ -37,6 +37,7 @@ export function Alumni({ game }: { game: GameState }) {
                   </span>
                 </span>
                 {a.becameOyakata && <span className="tag">{t('alumni.oyakata')}</span>}
+                <DanpatsuTag a={a} now={game.bashoIndex} />
                 {a.career.makuuchiYusho > 0 && (
                   <span className="tag tag--gold">
                     {t('alumni.yusho', { n: a.career.makuuchiYusho })}
@@ -66,5 +67,19 @@ export function Alumni({ game }: { game: GameState }) {
         />
       )}
     </section>
+  );
+}
+
+/** 断髪式がまだなら、いつ行うか */
+function DanpatsuTag({ a, now }: { a: Alumnus; now: number }) {
+  const { t } = useI18n();
+  const plan = danpatsuPlan(a);
+  if (!plan || plan.bashoIndex < now) return null;
+  return (
+    <span className="tag">
+      {t(plan.venue === 'kokugikan' ? 'alumni.danpatsuKokugikan' : 'alumni.danpatsu', {
+        basho: bashoName(t, plan.bashoIndex),
+      })}
+    </span>
   );
 }

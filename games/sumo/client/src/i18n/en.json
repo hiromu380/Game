@@ -1036,5 +1036,22 @@
   "guide.tip.ledger": "Ledger: last tournament’s money. Manage supporters, staff, chanko and facilities here. Deficits come out of your savings.",
   "guide.tip.lineage": "Lineage: past masters and the family tree. Coaches you raise become heirs or open branch stables.",
   "guide.tip.association": "Association: your rival, the board, the five ichimon and free elder names.",
-  "guide.tip.journal": "Journal: the stable’s history. Export and import saves here too."
+  "guide.tip.journal": "Journal: the stable’s history. Export and import saves here too.",
+  "highlight.danpatsu.title": "Hair-Cutting Ceremony",
+  "highlight.danpatsu.titleKokugikan": "Retirement Ceremony",
+  "highlight.danpatsu.kokugikan": "At the Kokugikan, the retirement ceremony for {name} (highest rank {rank}). After bouts and sumo songs, about {hasami} people stepped onto the ring one by one to snip his topknot.",
+  "highlight.danpatsu.hotel": "In a hotel banquet hall, the hair-cutting ceremony for {name} (highest rank {rank}). About {hasami} people took a snip of his topknot.",
+  "highlight.danpatsu.guests": "Among them: {guests}.",
+  "highlight.danpatsu.patron": "{name}",
+  "highlight.danpatsu.rival": "rival master {name}",
+  "highlight.danpatsu.sep": ", ",
+  "highlight.danpatsu.cutButton": "Make the final cut",
+  "highlight.danpatsu.cut": "Finally, his master {master} made the last cut, and the topknot fell.",
+  "highlight.danpatsu.afterOyakata": "From now on he stays as an elder, raising the next wrestlers.",
+  "highlight.danpatsu.afterLeave": "{name} heads into a second life without a topknot.",
+  "journal.danpatsu.kokugikan": "Retirement ceremony for {shikona} at the Kokugikan. About {hasami} people took a snip.",
+  "journal.danpatsu.hotel": "Hair-cutting ceremony for {shikona}. About {hasami} people took a snip.",
+  "alumni.danpatsu": "Ceremony after {basho}",
+  "alumni.danpatsuKokugikan": "Kokugikan ceremony after {basho}",
+  "highlight.danpatsu.gap": " "
 }

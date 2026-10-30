@@ -15,6 +15,7 @@ import { PALETTE } from '../art/palette';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import { kojoChoices, type Highlight } from '../highlights';
+import { DanpatsuCard } from './DanpatsuCard';
 
 /** 賜杯（優勝のしるし） */
 function Cup() {
@@ -69,12 +70,10 @@ export function HighlightDialog({
   const [spoken, setSpoken] = useState(false);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const h = highlights[index]!;
-  const r = game.rikishi.find((x) => x.id === h.id);
+  const r = h.kind === 'danpatsu' ? undefined : game.rikishi.find((x) => x.id === h.id);
   useEffect(() => {
     if (settings.sound) playSound('drum');
   }, [index, settings.sound]);
-  if (!r) return null;
-  const rank = ranks.get(r.id) ?? null;
   const last = index === highlights.length - 1;
   const next = () => {
     setWord(null);
@@ -83,6 +82,22 @@ export function HighlightDialog({
     if (last) onDone();
     else setIndex(index + 1);
   };
+  const counter = highlights.length > 1 ? ` ${index + 1} / ${highlights.length}` : '';
+  if (h.kind === 'danpatsu') {
+    return (
+      <DanpatsuCard
+        key={index}
+        game={game}
+        report={report}
+        h={h}
+        counter={counter}
+        last={last}
+        onNext={next}
+      />
+    );
+  }
+  if (!r) return null;
+  const rank = ranks.get(r.id) ?? null;
   const ceremony = h.kind === 'promotion' && (h.to === 'O' || h.to === 'Y');
 
   let title: string;
@@ -121,7 +136,7 @@ export function HighlightDialog({
         </h2>
         <p className="highlight__basho">
           {bashoName(t, report.bashoIndex)}
-          {highlights.length > 1 && ` ${index + 1} / ${highlights.length}`}
+          {counter}
         </p>
         <div className="highlight__stage">
           {h.kind === 'yusho' && <Cup />}

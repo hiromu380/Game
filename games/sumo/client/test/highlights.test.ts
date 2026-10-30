@@ -53,6 +53,17 @@ describe('場所の見せ場', () => {
     expect(highlightsOf(s, report(s, {}))).toEqual([]);
   });
 
+  it('元弟子の断髪式は最後に見せる', () => {
+    const s = createGame({ seed: 1 });
+    const a = s.rikishi.find((r) => r.stableId === s.player.stableId)!;
+    const d = { alumnusId: 5, venue: 'hotel' as const, hasami: 50, patrons: [], rival: null };
+    const hl = highlightsOf(
+      s,
+      report(s, { danpatsu: [d], sansho: { shukun: [a.id], kanto: [], gino: [] } }),
+    );
+    expect(hl.map((h) => h.kind)).toEqual(['sansho', 'danpatsu']);
+  });
+
   it('口上の候補は力士ごとに決まった3つで、重ならない', () => {
     for (let id = 1; id < 40; id++) {
       const c = kojoChoices(id);

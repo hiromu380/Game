@@ -1036,5 +1036,22 @@
   "guide.tip.ledger": "帳簿: 前の場所のお金の出入り。後援会・部屋の人・ちゃんこ・設備もここで決めます。赤字は親方の貯金で埋まります。",
   "guide.tip.lineage": "一門: 歴代の親方と系譜図。部屋付きの親方が育つと、跡継ぎや分家になります。",
   "guide.tip.association": "協会: ライバルの部屋、理事会、5つの一門の部屋と空いている年寄名跡を見られます。",
-  "guide.tip.journal": "日誌: 部屋の出来事の記録。セーブの書き出し・読み込みもここです。"
+  "guide.tip.journal": "日誌: 部屋の出来事の記録。セーブの書き出し・読み込みもここです。",
+  "highlight.danpatsu.title": "断髪式",
+  "highlight.danpatsu.titleKokugikan": "引退相撲・断髪式",
+  "highlight.danpatsu.kokugikan": "両国の国技館で、{name}（最高位 {rank}）の引退相撲。取組と相撲甚句の後、約{hasami}人が順に土俵へ上がり、髷にはさみを入れました。",
+  "highlight.danpatsu.hotel": "ホテルの宴会場で、{name}（最高位 {rank}）の断髪式。約{hasami}人が順に、髷にはさみを入れました。",
+  "highlight.danpatsu.guests": "{guests}の顔もありました。",
+  "highlight.danpatsu.patron": "{name}さん",
+  "highlight.danpatsu.rival": "ライバルの{name}親方",
+  "highlight.danpatsu.sep": "、",
+  "highlight.danpatsu.cutButton": "止めばさみを入れる",
+  "highlight.danpatsu.cut": "最後に師匠の{master}親方が止めばさみを入れ、髷が落ちました。",
+  "highlight.danpatsu.afterOyakata": "これからは親方として、部屋で後に続く弟子を育てます。",
+  "highlight.danpatsu.afterLeave": "{name}は、髷のない頭で第二の人生へ。",
+  "journal.danpatsu.kokugikan": "{shikona}の引退相撲。国技館で約{hasami}人がはさみを入れた。",
+  "journal.danpatsu.hotel": "{shikona}の断髪式。約{hasami}人がはさみを入れた。",
+  "alumni.danpatsu": "断髪式 {basho}の後",
+  "alumni.danpatsuKokugikan": "引退相撲 {basho}の後",
+  "highlight.danpatsu.gap": ""
 }

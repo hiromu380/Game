@@ -33,6 +33,7 @@ import { ensureRival, rivalSignsCandidates, settleRival } from '../world/rival';
 import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '../world/office';
 import { OFFICE } from '../balance/office';
 import { settleKoenkai } from '../stable/koenkai';
+import { holdDanpatsu } from '../stable/danpatsu';
 import { TRAITS } from '../balance/traits';
 import { hasTrait } from '../career/traits';
 import { DIETS, STAFF_EFFECTS } from '../balance/staff';
@@ -282,6 +283,9 @@ export function advanceBasho(input: GameState): GameState {
       if (r.stableId === state.player.stableId) state.player.prestige += JUNGYO.prestigePerSekitori;
     }
   }
+
+  // 引退相撲・断髪式（関取だった元弟子）
+  holdDanpatsu(state, report);
 
   // 4. 自分の部屋の会計
   const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId);

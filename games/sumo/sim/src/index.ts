@@ -43,4 +43,5 @@ export { traitsOf, hasTrait, tokuiWaza, fragilityOf } from './career/traits';
 export { ensureRival } from './world/rival';
 export { officeAtLeast, isBoardMember } from './world/office';
 export { canVisit, giftOf } from './stable/koenkai';
+export { danpatsuPlan, danpatsuTier, hasamiCount, type DanpatsuPlan } from './stable/danpatsu';
 export { canScout } from './game/recruit';

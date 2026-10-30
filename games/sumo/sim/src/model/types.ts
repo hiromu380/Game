@@ -502,6 +502,8 @@ export type JournalEvent =
       shikona?: string;
     }
   | { kind: 'kojo'; shikona: string; to: 'O' | 'Y'; word: KojoWord; dohyoiri?: Dohyoiri }
+  /** 引退相撲・断髪式（はさみを入れた人数） */
+  | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
   | { kind: 'staffHire'; role: StaffRole; name: string }
   | { kind: 'staffLeave'; role: StaffRole; name: string; retired: boolean }
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */
@@ -543,6 +545,14 @@ export interface BashoReport {
   playoff: number[] | null;
   /** ライバルの部屋との比べ（この場所の直接対決と、番付の関取の数） */
   rival?: { stableId: number; wins: number; losses: number; sekitori: [number, number] };
+  /** この場所の後に行った自分の部屋の元弟子の断髪式（名前を出すタニマチ・ライバルの師匠） */
+  danpatsu?: {
+    alumnusId: number;
+    venue: 'kokugikan' | 'hotel';
+    hasami: number;
+    patrons: string[];
+    rival: string | null;
+  }[];
   income: MoneyLine[];
   expenses: MoneyLine[];
   personal: MoneyLine[];
