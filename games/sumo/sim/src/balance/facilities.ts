@@ -27,7 +27,7 @@ export const FACILITIES: Record<FacilityId, FacilityDef> = {
 
 export const FACILITY_EFFECTS = {
   /** 寮: レベルごとに住める人数 */
-  dormCapacityPerLevel: 10,
+  dormCapacityPerLevel: 5,
   /** 稽古場: レベルごとの伸びの倍率 */
   dojoGrowthPerLevel: 0.04,
   /** トレーナー: レベルごとのけがの減り方と疲れの回復 */

@@ -14,15 +14,15 @@ export const GAME = {
     newSekitori: 3,
     newSanyaku: 5,
     newOzeki: 10,
-    newYokozuna: 20,
-    makuuchiYusho: 8,
+    newYokozuna: 15,
+    makuuchiYusho: 5,
     sansho: 3,
   },
   /** 名声は場所ごとに少しずつ薄れる（掛ける割合）。昔の栄光だけでは人は来ない */
-  prestigeKeep: 0.97,
+  prestigeKeep: 0.96,
   /** 名声 → 入門希望者の増え方（名声いくつで1人増えるか・上限） */
   prestigePerCandidate: 30,
-  maxExtraCandidates: 2,
+  maxExtraCandidates: 1,
   /** 部屋に住める力士の数の目安（推定。建物の大きさ。新弟子検査の制度ではない） */
   stableCapacity: 30,
 };

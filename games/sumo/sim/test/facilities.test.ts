@@ -5,6 +5,7 @@ import {
   buildFacility,
   createGame,
   FACILITIES,
+  FACILITY_EFFECTS,
   GAME,
   setContract,
   stableCapacity,
@@ -25,7 +26,9 @@ describe('設備と契約', () => {
     const s = createGame({ seed: 1 });
     expect(stableCapacity(s)).toBe(GAME.stableCapacity);
     s.player.stableMoney = 1e9;
-    expect(stableCapacity(buildFacility(s, 'dorm'))).toBe(GAME.stableCapacity + 10);
+    expect(stableCapacity(buildFacility(s, 'dorm'))).toBe(
+      GAME.stableCapacity + FACILITY_EFFECTS.dormCapacityPerLevel,
+    );
   });
 
   it('部屋がいっぱいだと入門希望者を受け入れられない', () => {

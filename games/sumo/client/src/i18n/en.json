@@ -195,7 +195,7 @@
   "facility.max": "Fully built",
   "facility.build": "Build ({cost})",
   "facility.dorm.name": "Dormitory extension",
-  "facility.dorm.desc": "Room for 10 more wrestlers",
+  "facility.dorm.desc": "Room for 5 more wrestlers",
   "facility.dojo.name": "Practice ring renovation",
   "facility.dojo.desc": "New ring, posts and equipment. Training grows 6% more per level",
   "facility.trainer.name": "Trainer and clinic",

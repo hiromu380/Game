@@ -47,7 +47,7 @@ describe('場所の間の出来事', () => {
     const s = withHappening('promisingKid');
     const next = answerHappening(s, 0);
     expect(next.pending.candidates.length).toBe(s.pending.candidates.length + 1);
-    expect(next.pending.candidates.at(-1)!.talent).toBeGreaterThanOrEqual(70);
+    expect(next.pending.candidates.at(-1)!.talent).toBeGreaterThanOrEqual(60);
   });
 
   it('出稽古: 幕下以上の弟子の次の稽古が伸びる（稽古のあと元に戻る）', () => {

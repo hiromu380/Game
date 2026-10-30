@@ -34,6 +34,9 @@ interface RunResult {
   makuuchiAge: number;
   newSekitoriAge: number[];
   retireAge: number[];
+  /** 代ごとの関取・幕内優勝・名声（その代の終わり） */
+  perGen: { sekitori: number; yusho: number }[];
+  prestigeEnd: number;
 }
 
 function run(seed: number, bot: BotKind): RunResult {
@@ -82,6 +85,8 @@ function run(seed: number, bot: BotKind): RunResult {
     makuuchiAge: age / Math.max(1, samples),
     newSekitoriAge,
     retireAge,
+    perGen: lineage.map((l) => ({ sekitori: l.sekitori, yusho: l.makuuchiYusho })),
+    prestigeEnd: s.player.prestige,
   };
 }
 
@@ -104,6 +109,18 @@ for (const bot of ['careful', 'passive'] as const) {
   lines.push(
     `| ${bot} | ${f1(avg(rs.map((r) => r.basho)))} | ${ended.filter((r) => r.gameOver === 'noSuccessor').length} / ${ended.filter((r) => r.gameOver === 'bankrupt').length} | ${f1(avg(rs.map((r) => r.generations)))} | ${f1(avg(rs.map((r) => r.sekitori)))} | ${f1(avg(rs.map((r) => r.sanyaku)))} | ${f1(avg(rs.map((r) => r.yokozuna)))} | ${f1(avg(rs.map((r) => r.yusho)))} | ${f1(avg(rs.map((r) => r.peakMine)))} | ${man(avg(rs.map((r) => r.minMoney)))} | ${man(avg(rs.map((r) => r.endMoney)))} | ${f1(avg(rs.map((r) => r.branches)))} |`,
   );
+}
+lines.push('', '## 代ごと（1代目・2代目の平均。その代まで続いたランだけ）', '');
+lines.push(
+  '| ボット | 1代目 関取 / 幕内優勝 | 2代目 関取 / 幕内優勝 | 最後の名声 |',
+  '|---|---|---|---|',
+);
+for (const bot of ['careful', 'passive'] as const) {
+  const rs = all.filter((r) => r.bot === bot);
+  const gen = (i: number) => rs.filter((r) => r.perGen[i]).map((r) => r.perGen[i]!);
+  const cell = (i: number) =>
+    `${f1(avg(gen(i).map((g) => g.sekitori)))} / ${f1(avg(gen(i).map((g) => g.yusho)))}`;
+  lines.push(`| ${bot} | ${cell(0)} | ${cell(1)} | ${f1(avg(rs.map((r) => r.prestigeEnd)))} |`);
 }
 lines.push('', '## 番付全体の様子（実際の目安と比べる）', '');
 lines.push('| 項目 | 計測 |', '|---|---|');

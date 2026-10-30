@@ -37,7 +37,7 @@ export const RECRUIT = {
   talentStarMin: 92,
   talentPerPrestige: 0.05,
   /** 名声による素質の上乗せの上限 */
-  talentPrestigeMax: 6,
+  talentPrestigeMax: 4,
   /** 入門時の能力 */
   startAbilityMin: 14,
   startAbilityMax: 28,

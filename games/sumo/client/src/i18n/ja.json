@@ -195,7 +195,7 @@
   "facility.max": "これ以上は建てられません",
   "facility.build": "建てる（{cost}）",
   "facility.dorm.name": "寮の増築",
-  "facility.dorm.desc": "住める力士が10人増える",
+  "facility.dorm.desc": "住める力士が5人増える",
   "facility.dojo.name": "稽古場の改修",
   "facility.dojo.desc": "土俵・鉄砲柱・器具を新しくする。稽古の伸びが6%ずつ増える",
   "facility.trainer.name": "トレーナー・治療院",

@@ -97,7 +97,7 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     requires: 'none',
     weight: 1,
     options: [
-      { key: 'visit', effect: { stableMoney: -100_000, candidate: [70, 92] } },
+      { key: 'visit', effect: { stableMoney: -100_000, candidate: [60, 82] } },
       { key: 'decline', effect: {} },
     ],
   },

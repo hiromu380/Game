@@ -15,7 +15,7 @@ export const KAKUN_IDS: readonly KakunId[] = [
 
 export const KAKUN = {
   /** 型の稽古の倍率 */
-  styleBoost: 1.15,
+  styleBoost: 1.1,
   /** ちゃんこ: 体づくりの増え方（kg）と食費の増え方 */
   chankoKg: 1,
   chankoFoodCost: 1.1,
