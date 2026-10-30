@@ -324,5 +324,12 @@
   "happening.riceGift.thank": "Visit to thank them",
   "happening.riceGift.thank.desc": "Saves on food and adds a little prestige",
   "happening.riceGift.receive": "Gratefully accept",
-  "happening.riceGift.receive.desc": "Saves a little more on food"
+  "happening.riceGift.receive.desc": "Saves a little more on food",
+  "share.saveTree": "Save the family tree as an image",
+  "share.saving": "Making the image...",
+  "share.failed": "Could not make the image. Please try again.",
+  "share.fileName": "{stable}-ichimon-family-tree.png",
+  "share.treeTitle": "{stable} ichimon family tree",
+  "share.treeSub": "{generations} generations, {sekitori} sekitori, {yokozuna} yokozuna, {yusho} makuuchi titles ({basho})",
+  "share.cardStats": "Sekitori {sekitori}, yokozuna {yokozuna}, titles {yusho}"
 }

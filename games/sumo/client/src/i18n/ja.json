@@ -324,5 +324,12 @@
   "happening.riceGift.thank": "お礼に出向く",
   "happening.riceGift.thank.desc": "食費が浮き、名声も少し上がる",
   "happening.riceGift.receive": "ありがたく受け取る",
-  "happening.riceGift.receive.desc": "食費が少し多めに浮く"
+  "happening.riceGift.receive.desc": "食費が少し多めに浮く",
+  "share.saveTree": "系譜図を画像で保存",
+  "share.saving": "作っています…",
+  "share.failed": "画像を作れませんでした。もう一度お試しください。",
+  "share.fileName": "{stable}一門の系譜.png",
+  "share.treeTitle": "{stable}一門 系譜図",
+  "share.treeSub": "{generations}代・関取 {sekitori}人・横綱 {yokozuna}人・幕内優勝 {yusho}回（{basho}）",
+  "share.cardStats": "関取 {sekitori}・横綱 {yokozuna}・優勝 {yusho}"
 }

@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  HAPPENINGS} from '../src';
-import {
-  advanceBasho,
-  answerHappening,
-  createGame,
-  migrateSave,
-  type GameState,
-} from '../src';
+import type { HAPPENINGS } from '../src';
+import { advanceBasho, answerHappening, createGame, migrateSave, type GameState } from '../src';
 
 /** 出来事が起きている状態を作る */
 function withHappening(

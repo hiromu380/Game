@@ -1,6 +1,7 @@
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName } from '../format';
+import { ShareTree } from './ShareTree';
 
 /** 一門が途絶えた（跡継ぎがいない・お金が尽きた） */
 export function GameOver({ game, onNewGame }: { game: GameState; onNewGame: () => void }) {
@@ -33,6 +34,7 @@ export function GameOver({ game, onNewGame }: { game: GameState; onNewGame: () =
           </li>
         ))}
       </ol>
+      <ShareTree game={game} />
       <button className="button button--primary button--large" onClick={onNewGame}>
         {t('gameOver.newGame')}
       </button>
