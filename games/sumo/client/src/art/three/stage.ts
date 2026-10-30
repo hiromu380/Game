@@ -12,6 +12,7 @@ import { TAWARA_RADIUS, toStagePose } from './pose';
 import { dohyoBales } from './dohyoDetails';
 import { wrestlerMotion, type MotionClock } from './animation';
 import { chooseRenderQuality, shouldRenderFrame } from './quality';
+import { createBoundsReader } from './bounds';
 
 type Side = 'E' | 'W';
 
@@ -285,7 +286,9 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     west.heading.rotation.y = 1.04;
     east.root.scale.setScalar(0.95);
     west.root.scale.setScalar(0.95);
-    const bounds = new THREE.Box3();
+    const boxes = [new THREE.Box3(), new THREE.Box3()];
+    const measure = [createBoundsReader(east.root), createBoundsReader(west.root)];
+    const correction = new THREE.Vector3();
 
     let disposed = false;
     let lastDrawAt = Number.NEGATIVE_INFINITY;
@@ -321,6 +324,11 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
 
     const update = (input: StageInput) => {
       if (disposed) return;
+      const now = performance.now();
+      const animating = input.motion !== undefined && input.motion.time < input.motion.duration;
+      const winnerChanged = previousWinner !== input.winner;
+      // 描画しないフレームでは、頂点の接地計算も省く。
+      if (!shouldRenderFrame(now, lastDrawAt, quality.maxFps, animating, winnerChanged)) return;
       for (const [index, puppet, pose, side] of [
         [0, east, input.pose.east, 'E'],
         [1, west, input.pose.west, 'W'],
@@ -344,17 +352,18 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
           puppet.legs[i]!.rotation.x = movement.legsX[i]!;
         }
         // 倒れた頭・肩・足のうち最も低い面を土俵に合わせ、浮きとめり込みを防ぐ。
-        puppet.root.updateMatrixWorld(true);
-        bounds.setFromObject(puppet.root, true);
+        const bounds = boxes[index]!;
+        measure[index]!(bounds);
         puppet.root.position.y = 0.76 - bounds.min.y;
+        bounds.translate(correction.set(0, puppet.root.position.y, 0));
         const shadow = shadows[index]!;
         shadow.position.x = x;
         shadow.position.z = p.depth;
         shadow.scale.x = 0.72 * movement.shadowScale;
         shadow.scale.y = 0.46 * movement.shadowScale;
       }
-      const eastBox = new THREE.Box3().setFromObject(east.root, true);
-      const westBox = new THREE.Box3().setFromObject(west.root, true);
+      const eastBox = boxes[0]!;
+      const westBox = boxes[1]!;
       for (const [puppet, box, other, pose] of [
         [east, eastBox, westBox, input.pose.east],
         [west, westBox, eastBox, input.pose.west],
@@ -387,16 +396,11 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
       shadows[0]!.position.x = east.root.position.x;
       shadows[1]!.position.x = west.root.position.x;
       fanPivot.rotation.z = input.winner === 'E' ? -0.75 : input.winner === 'W' ? 0.75 : 0;
-      const now = performance.now();
-      const animating = input.motion !== undefined && input.motion.time < input.motion.duration;
-      const winnerChanged = previousWinner !== input.winner;
       previousWinner = input.winner;
-      if (shouldRenderFrame(now, lastDrawAt, quality.maxFps, animating, winnerChanged)) {
-        draw();
-        // 残り時間を次へ持ち越し、60Hz画面でも30/45fpsの間隔を維持する。
-        const interval = 1000 / quality.maxFps;
-        lastDrawAt = Number.isFinite(lastDrawAt) ? now - ((now - lastDrawAt) % interval) : now;
-      }
+      draw();
+      // 残り時間を次へ持ち越し、60Hz画面でも30/45fpsの間隔を維持する。
+      const interval = 1000 / quality.maxFps;
+      lastDrawAt = Number.isFinite(lastDrawAt) ? now - ((now - lastDrawAt) % interval) : now;
     };
 
     resize();
