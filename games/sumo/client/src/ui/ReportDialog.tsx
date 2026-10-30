@@ -248,7 +248,7 @@ export function ReportDialog({
           <div className="callout">
             <SpriteStage
               stage={JUNGYO_STAGE}
-              items={jungyoLayout()}
+              items={jungyoLayout(report.jungyo)}
               base={JUNGYO_BASE}
               label={t('scene.jungyo')}
               maxWidth={JUNGYO_STAGE.width}

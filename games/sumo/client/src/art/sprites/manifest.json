@@ -119,6 +119,11 @@
     "size": [224, 192],
     "anchor": [112, 191]
   },
+  "phonebox": {
+    "files": ["phonebox.png"],
+    "size": [56, 72],
+    "anchor": [28, 71]
+  },
   "pine": {
     "files": ["pine.png"],
     "size": [80, 112],
@@ -131,6 +136,11 @@
   },
   "tent": {
     "files": ["tent.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
+  "tent_ai": {
+    "files": ["tent_ai.png"],
     "size": [144, 128],
     "anchor": [72, 127]
   },
@@ -154,10 +164,25 @@
     "size": [176, 144],
     "anchor": [88, 143]
   },
+  "vending": {
+    "files": ["vending.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
+  },
+  "washbasin": {
+    "files": ["washbasin.png"],
+    "size": [64, 60],
+    "anchor": [32, 59]
+  },
   "weights": {
     "files": ["weights.png"],
     "size": [48, 40],
     "anchor": [24, 39]
+  },
+  "well": {
+    "files": ["well.png"],
+    "size": [64, 64],
+    "anchor": [32, 63]
   },
   "zashiki": {
     "files": ["zashiki.png"],

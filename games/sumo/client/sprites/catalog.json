@@ -198,7 +198,7 @@
         {
           "id": "well",
           "name": "井戸",
-          "size": [48, 56],
+          "size": [64, 64],
           "frames": 1,
           "priority": "B",
           "outline": true
@@ -367,6 +367,30 @@
           "frames": 1,
           "priority": "C",
           "outline": false
+        },
+        {
+          "id": "washbasin",
+          "name": "洗い場（コンクリートの流し・蛇口・ホース・バケツ）",
+          "size": [64, 60],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "vending",
+          "name": "自動販売機とごみ箱",
+          "size": [56, 64],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "phonebox",
+          "name": "公衆電話の箱とごみ箱",
+          "size": [56, 72],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
         }
       ]
     },
@@ -401,6 +425,14 @@
         {
           "id": "tent",
           "name": "赤いテント",
+          "size": [144, 128],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "tent_ai",
+          "name": "藍と白のテント",
           "size": [144, 128],
           "frames": 1,
           "priority": "B",

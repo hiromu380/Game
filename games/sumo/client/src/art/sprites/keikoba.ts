@@ -69,7 +69,7 @@ export function seasonOf(bashoIndex: number): Season {
 }
 
 /**
- * 外観: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門と、塀・木・灯籠・提灯・名札掛け・つくばい・庭石。
+ * 外観: 寮（増築の段に合わせる）・母屋・治療院（トレーナー契約のとき）・ちゃんこ場・門と、塀・木・灯籠・提灯・名札掛け・つくばい・井戸・庭石。
  * 自分の部屋の関取の幟（四股名を重ねて書く）。
  * 奥から順（足元の y が小さい順）に並べる
  */
@@ -89,6 +89,7 @@ export function exteriorLayout(
     { sprite: 'chochin', x: 170, y: 326 },
     { sprite: 'nafuda', x: 120, y: 330 },
     { sprite: 'tsukubai', x: 40, y: 320 },
+    { sprite: 'well', x: 305, y: 262 },
     { sprite: 'rock', x: 505, y: 262 },
   ];
   if (f.trainer >= 1) out.push({ sprite: 'clinic', x: 90, y: 275 });
@@ -111,14 +112,15 @@ export function exteriorLayout(
 /** 外観の土台（これがなければ外観を出さない） */
 export const EXTERIOR_BASE = 'omoya';
 
-/** 巡業の舞台: 外に置いた土俵と吊り屋根・紅白幕・テント・幟 */
+/** 巡業の舞台: 外に置いた土俵と吊り屋根・紅白幕・テント（春と秋は赤、夏と冬は藍白）・幟 */
 export const JUNGYO_STAGE: Stage = { width: 440, height: 310 };
 export const JUNGYO_BASE = 'dohyo_honbasho';
 
-export function jungyoLayout(): Placed[] {
+export function jungyoLayout(season: Season): Placed[] {
+  const tent = season === 'summer' || season === 'winter' ? 'tent_ai' : 'tent';
   return [
     { sprite: 'kohaku_maku', x: 95, y: 230 },
-    { sprite: 'tent', x: 360, y: 220 },
+    { sprite: tent, x: 360, y: 220 },
     { sprite: 'dohyo_honbasho', x: 220, y: 305 },
     { sprite: 'tsuriyane', x: 220, y: 150 },
     { sprite: 'nobori', x: 40, y: 290 },

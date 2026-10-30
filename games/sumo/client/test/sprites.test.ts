@@ -121,4 +121,14 @@ describe('稽古場の絵の並べ方', () => {
     const name = (id: number) => g.rikishi.find((r) => r.id === id)!.name;
     expect(nobori.map((p) => p.label)).toEqual(top.slice(0, 3).map(name));
   });
+
+  it('巡業のテントは春と秋が赤、夏と冬が藍白', async () => {
+    const { jungyoLayout } = await import('../src/art/sprites/keikoba');
+    const tents = (s: 'spring' | 'summer' | 'autumn' | 'winter') =>
+      jungyoLayout(s)
+        .filter((p) => p.sprite.startsWith('tent'))
+        .map((p) => p.sprite);
+    expect(tents('spring')).toEqual(['tent']);
+    expect(tents('summer')).toEqual(['tent_ai']);
+  });
 });

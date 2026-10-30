@@ -366,6 +366,24 @@ Draw the modern entrance gate of a present-day sumo stable: a dark grey steel ga
 Draw a cutaway diorama of the treatment room of a present-day sumo stable: only two walls remain. Several padded treatment tables, a reclining treatment chair, a rack of resistance bands, a trainer's desk with a computer and filing cabinets, anatomy posters on the wall, a small sink, shelves of tape and supplies. No people.
 ```
 
+### `washbasin` — 洗い場（優先 C・比率 1:1・1コマ）
+
+```
+Draw an outdoor concrete washing sink of a sumo stable: a long concrete basin with a faucet post, a coiled green garden hose on a hook, a scrubbing brush, plastic buckets beside it, a drain grate with a puddle, on a square patch of earth and grass.
+```
+
+### `vending` — 自動販売機（優先 C・比率 1:1・1コマ）
+
+```
+Draw a Japanese drink vending machine (red front, blue side) full of bottles and cans, with a grey trash bin beside it, on a square patch of earth, concrete and grass. No readable letters.
+```
+
+### `phonebox` — 公衆電話（優先 C・比率 1:1・1コマ）
+
+```
+Draw a Japanese green public telephone booth with glass walls and a green payphone inside, with a grey trash bin beside it, on a square patch of earth, concrete and grass. No readable letters.
+```
+
 ## 行事・巡業の舞台
 
 ### `dohyo_honbasho` — 本場所の土俵（優先 B・比率 1:1・1コマ）
@@ -378,6 +396,12 @@ Draw a full tournament sumo ring (dohyo) standing outdoors: a tall square platfo
 
 ```
 Draw the hanging roof (tsuriyane) of a sumo ring: a Shinto-shrine-style roof with crossed chigi and katsuogi on the ridge, hung by ropes from a chain, purple-blue cloth around the eaves, white paper shide, and four big tassels hanging from the corners: blue, red, white and green (black tortoise, vermilion bird, white tiger, azure dragon colours).
+```
+
+### `tent_ai` — 藍と白のテント（優先 B・比率 1:1・1コマ）
+
+```
+Same tent as the red one (use it as the reference image), but the cloth has wide indigo and white stripes.
 ```
 
 ### `kohaku_maku` — 紅白幕の囲い（優先 B・比率 1:1・1コマ）
