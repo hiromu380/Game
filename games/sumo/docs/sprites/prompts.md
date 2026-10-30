@@ -287,3 +287,33 @@ Draw a middle-aged stablemaster (oyakata), a former sumo wrestler, chubby, short
 ```
 Draw the stablemaster's wife (okami-san), friendly, hair tied up, wearing a calm muted-color kimono with an apron, facing the lower-left. Draw her twice side by side with a wide gap: 1) standing and smiling; 2) carrying a tray with rice balls.
 ```
+
+### `dorm_modern_3f` — 現代風の寮（三階建て）（優先 C・比率 3:4・1コマ）
+
+```
+Draw a modern three-storey reinforced-concrete apartment-style dormitory of a present-day sumo stable: flat grey roof with an air-conditioner unit, navy and grey walls, an open corridor with metal railings on each floor covered with colourful hanging towels, apartment doors with intercoms and water heaters, an outdoor metal staircase on the side, on a low concrete base.
+```
+
+### `chanko_modern__a` — 現代風のちゃんこ場（優先 C・比率 4:3・1コマ）
+
+```
+Draw a cutaway diorama of the modern professional kitchen of a present-day sumo stable: only two walls remain. Stainless-steel gas ranges, a big extractor hood, huge stock pots, a two-door refrigerator, stainless sinks, a central prep table with trays of vegetables, tofu and meat, shelves of bowls and crates of vegetables, fire extinguishers on the wall, tiled floor. No people.
+```
+
+### `chanko_modern__b` — 現代風のちゃんこ場（もう1案）（優先 C・比率 4:3・1コマ）
+
+```
+Same kitchen as chanko_modern__a with a slightly different arrangement: the shelf of bowls on the right, one stock pot on the range, a cutting board with vegetables on the front table (use chanko_modern__a as the reference image).
+```
+
+### `gate_modern` — 現代風の門（優先 C・比率 1:1・1コマ）
+
+```
+Draw the modern entrance gate of a present-day sumo stable: a dark grey steel gate frame with a blank wooden name board (no text), security cameras and lights, an intercom keypad, a sliding mesh gate and mesh fences on both sides, on a concrete base with low concrete blocks at the corners.
+```
+
+### `clinic_modern` — 現代風の治療室（優先 C・比率 4:3・1コマ）
+
+```
+Draw a cutaway diorama of the treatment room of a present-day sumo stable: only two walls remain. Several padded treatment tables, a reclining treatment chair, a rack of resistance bands, a trainer's desk with a computer and filing cabinets, anatomy posters on the wall, a small sink, shelves of tape and supplies. No people.
+```

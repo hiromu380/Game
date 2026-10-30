@@ -4,10 +4,25 @@
     "size": [144, 128],
     "anchor": [72, 127]
   },
+  "chanko_modern__a": {
+    "files": ["chanko_modern__a.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
+  },
+  "chanko_modern__b": {
+    "files": ["chanko_modern__b.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
+  },
   "clinic": {
     "files": ["clinic.png"],
     "size": [112, 96],
     "anchor": [56, 95]
+  },
+  "clinic_modern": {
+    "files": ["clinic_modern.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
   },
   "dohyo": {
     "files": ["dohyo.png"],
@@ -29,6 +44,11 @@
     "size": [208, 224],
     "anchor": [104, 223]
   },
+  "dorm_modern_3f": {
+    "files": ["dorm_modern_3f.png"],
+    "size": [176, 232],
+    "anchor": [88, 231]
+  },
   "dorm_modern__a": {
     "files": ["dorm_modern__a.png"],
     "size": [176, 176],
@@ -43,6 +63,11 @@
     "files": ["gate.png"],
     "size": [128, 112],
     "anchor": [64, 111]
+  },
+  "gate_modern": {
+    "files": ["gate_modern.png"],
+    "size": [128, 128],
+    "anchor": [64, 127]
   },
   "keikoba_back": {
     "files": ["keikoba_back.png"],

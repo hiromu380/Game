@@ -115,15 +115,6 @@
           "frames": 1,
           "priority": "B",
           "outline": false
-        },
-        {
-          "id": "dorm_modern",
-          "name": "現代風の寮（鉄筋の二階建て。使い方は未定）",
-          "size": [176, 176],
-          "frames": 1,
-          "priority": "C",
-          "outline": false,
-          "variants": ["a", "b"]
         }
       ]
     },
@@ -287,6 +278,54 @@
           "frames": 2,
           "priority": "B",
           "outline": true
+        }
+      ]
+    },
+    {
+      "group": "modern",
+      "title": "現代風（使い方は未定）",
+      "items": [
+        {
+          "id": "dorm_modern",
+          "name": "現代風の寮（鉄筋の二階建て。使い方は未定）",
+          "size": [176, 176],
+          "frames": 1,
+          "priority": "C",
+          "outline": false,
+          "variants": ["a", "b"]
+        },
+        {
+          "id": "dorm_modern_3f",
+          "name": "現代風の寮（鉄筋の三階建て・外階段）",
+          "size": [176, 232],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "chanko_modern",
+          "name": "現代風のちゃんこ場（業務用の厨房の断面）",
+          "size": [240, 176],
+          "frames": 1,
+          "priority": "C",
+          "outline": false,
+          "variants": ["a", "b"]
+        },
+        {
+          "id": "gate_modern",
+          "name": "現代風の門（鉄の門扉・防犯カメラ・看板は無地）",
+          "size": [128, 128],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
+        },
+        {
+          "id": "clinic_modern",
+          "name": "現代風の治療室（施術台・器具の断面）",
+          "size": [240, 176],
+          "frames": 1,
+          "priority": "C",
+          "outline": false
         }
       ]
     }
