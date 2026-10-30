@@ -45,6 +45,14 @@
           "frames": 1,
           "priority": "B",
           "outline": true
+        },
+        {
+          "id": "keikoba_modern",
+          "name": "稽古場（改修3段目・今どきの稽古場）",
+          "size": [288, 176],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
         }
       ]
     },

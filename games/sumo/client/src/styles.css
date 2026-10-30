@@ -2013,12 +2013,17 @@ html:lang(en) .choice__desc {
 }
 
 /* 部屋の絵（ドット絵） */
+.scene-box {
+  display: grid;
+  gap: 8px;
+}
+.scene-box__tabs {
+  justify-self: center;
+}
 .scene {
   position: relative;
   width: 100%;
-  max-width: 640px;
   margin: 0 auto;
-  aspect-ratio: 320 / 200;
 }
 .scene__sprite {
   position: absolute;

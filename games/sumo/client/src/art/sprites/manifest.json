@@ -4,10 +4,35 @@
     "size": [160, 96],
     "anchor": [80, 95]
   },
+  "dorm_0": {
+    "files": ["dorm_0.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "dorm_1": {
+    "files": ["dorm_1.png"],
+    "size": [208, 192],
+    "anchor": [104, 191]
+  },
+  "dorm_2": {
+    "files": ["dorm_2.png"],
+    "size": [208, 224],
+    "anchor": [104, 223]
+  },
   "keikoba_back": {
     "files": ["keikoba_back.png"],
     "size": [288, 176],
     "anchor": [144, 175]
+  },
+  "keikoba_modern": {
+    "files": ["keikoba_modern.png"],
+    "size": [288, 176],
+    "anchor": [144, 175]
+  },
+  "omoya": {
+    "files": ["omoya.png"],
+    "size": [224, 192],
+    "anchor": [112, 191]
   },
   "teppo": {
     "files": ["teppo.png"],

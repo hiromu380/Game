@@ -52,4 +52,13 @@ describe('稽古場の絵の並べ方', () => {
     expect(at(0)).not.toContain('weights');
     expect(at(WEIGHTS_FROM_DOJO)).toContain('weights');
   });
+
+  it('改修3段目は今どきの稽古場。外観の寮は増築の段で変わる', async () => {
+    const { keikobaLayout, exteriorLayout, MODERN_FROM_DOJO } =
+      await import('../src/art/sprites/keikoba');
+    const g = (dojo: number, dorm: number) => ({ player: { facilities: { dojo, dorm } } }) as never;
+    expect(keikobaLayout(g(MODERN_FROM_DOJO, 0))[0]!.sprite).toBe('keikoba_modern');
+    expect(exteriorLayout(g(0, 0)).map((p) => p.sprite)).toEqual(['omoya', 'dorm_0']);
+    expect(exteriorLayout(g(0, 2))[1]!.sprite).toBe('dorm_2');
+  });
 });

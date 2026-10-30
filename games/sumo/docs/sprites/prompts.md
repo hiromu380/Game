@@ -54,6 +54,12 @@ Draw a cutaway diorama of a sumo stable practice hall (keikoba): only the back w
 Draw a square practice sumo ring (keiko-dohyo): a low raised square mound of ochre packed clay with a circle of straw rice-bale tawara on top, two short white starting lines in the middle. Nothing else.
 ```
 
+### `keikoba_modern` — 稽古場（改修3段目・今どきの稽古場）（優先 B・比率 4:3・1コマ）
+
+```
+Draw a cutaway diorama of a modern, renovated sumo stable practice hall: only the back wall and the left side wall remain, the roof and front walls removed. Grey walls with dark blue steel pillars, a small Shinto shrine shelf (kamidana) high on the wall, air conditioners, a wall clock, a whiteboard, glass sliding doors. A square practice sumo ring of packed clay with a straw-bale circle in the middle of the floor, and a corner with weight-training machines (power rack, barbell, weight machine) on a rubber mat. No people.
+```
+
 ### `teppo` — 鉄砲柱（優先 A・比率 9:16・1コマ）
 
 ```
