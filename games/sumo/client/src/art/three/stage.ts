@@ -11,6 +11,7 @@ import type { Pose } from '../../playback/boutScript';
 import { TAWARA_RADIUS, toStagePose } from './pose';
 import { dohyoBales } from './dohyoDetails';
 import { wrestlerMotion, type MotionClock } from './animation';
+import { chooseRenderQuality, shouldRenderFrame } from './quality';
 
 type Side = 'E' | 'W';
 
@@ -38,7 +39,6 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     antialias: true,
     powerPreference: 'low-power',
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
 
@@ -148,13 +148,29 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
   east.root.rotation.y = -0.24;
   west.root.rotation.y = 0.24;
 
+  let disposed = false;
+  let lastDrawAt = Number.NEGATIVE_INFINITY;
+  let previousWinner: Side | null = null;
+  let lastSize = "";
+  const coarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  let quality = chooseRenderQuality(360, 250, window.devicePixelRatio || 1, coarsePointer);
   const resize = () => {
+    if (disposed) return;
     const bounds = canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(bounds.width || 360));
     const height = Math.max(1, Math.round(bounds.height || 250));
+    quality = chooseRenderQuality(width, height, window.devicePixelRatio || 1, coarsePointer);
+    const sizeKey = `${width}:${height}:${quality.pixelRatio}`;
+    if (sizeKey === lastSize) {
+      renderer.render(scene, camera);
+      return;
+    }
+    lastSize = sizeKey;
+    renderer.setPixelRatio(quality.pixelRatio);
     renderer.setSize(width, height, false);
-    const halfHeight = 3.55;
-    const halfWidth = halfHeight * (width / height);
+    // 狭い画面でも東西の俵と倒れた力士を見切れさせない。
+    const halfWidth = Math.max(5.1, 3.55 * width / height);
+    const halfHeight = halfWidth * height / width;
     camera.left = -halfWidth;
     camera.right = halfWidth;
     camera.top = halfHeight;
@@ -164,6 +180,7 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
   };
 
   const update = (input: StageInput) => {
+    if (disposed) return;
     for (const [index, puppet, pose, side] of [
       [0, east, input.pose.east, 'E'],
       [1, west, input.pose.west, 'W'],
@@ -186,7 +203,14 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
       shadow.scale.y = 0.46 * movement.shadowScale;
     }
     fanPivot.rotation.z = input.winner === 'E' ? -0.75 : input.winner === 'W' ? 0.75 : 0;
-    renderer.render(scene, camera);
+    const now = performance.now();
+    const animating = input.motion !== undefined && input.motion.time < input.motion.duration;
+    const winnerChanged = previousWinner !== input.winner;
+    previousWinner = input.winner;
+    if (shouldRenderFrame(now, lastDrawAt, quality.maxFps, animating, winnerChanged)) {
+      renderer.render(scene, camera);
+      lastDrawAt = now;
+    }
   };
 
   resize();
@@ -195,9 +219,14 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     update,
     resize,
     dispose: () => {
+      if (disposed) return;
+      disposed = true;
       dispose();
       shadowMaterial.dispose();
       renderer.dispose();
+      // renderer.dispose()だけではコンテキスト数制限に達する端末がある。
+      // 閉じた取組のコンテキストを明示的に返却する。
+      renderer.forceContextLoss();
     },
   };
 }

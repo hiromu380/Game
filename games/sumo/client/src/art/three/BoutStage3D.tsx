@@ -20,6 +20,9 @@ export default function BoutStage3D(props: Props) {
 
     let stage: MountedStage | null = null;
     let resizeObserver: ResizeObserver | null = null;
+    const onVisibility = () => {
+      if (!document.hidden) stage?.resize();
+    };
     const lost = (event: Event) => {
       event.preventDefault();
       setFallback(true);
@@ -29,6 +32,7 @@ export default function BoutStage3D(props: Props) {
       stage = mountStage(canvas, props);
       stageRef.current = stage;
       canvas.addEventListener('webglcontextlost', lost);
+      document.addEventListener('visibilitychange', onVisibility);
       if (typeof ResizeObserver !== 'undefined') {
         resizeObserver = new ResizeObserver(() => stage?.resize());
         resizeObserver.observe(canvas);
@@ -42,6 +46,7 @@ export default function BoutStage3D(props: Props) {
 
     return () => {
       resizeObserver?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       if (stage) window.removeEventListener('resize', stage.resize);
       canvas.removeEventListener('webglcontextlost', lost);
       stageRef.current = null;

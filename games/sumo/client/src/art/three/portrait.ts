@@ -8,7 +8,7 @@ import { PALETTE } from '../palette';
 import { createIllustrator } from './figure3d';
 import { portraitKey, type PortraitVariant } from '../portraitKey';
 
-const MAX_PORTRAITS = 96;
+const MAX_PORTRAITS = 64;
 const CACHE = new Map<string, string>();
 let renderer: THREE.WebGLRenderer | null = null;
 
@@ -24,6 +24,15 @@ function sharedRenderer(): THREE.WebGLRenderer {
     renderer.setPixelRatio(1);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
+    const activeRenderer = renderer;
+    renderer.domElement.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+      if (renderer === activeRenderer) {
+        activeRenderer.dispose();
+        renderer = null;
+        CACHE.clear();
+      }
+    });
   }
   return renderer;
 }
@@ -32,7 +41,12 @@ function sharedRenderer(): THREE.WebGLRenderer {
 export function renderPortrait(look: Look, variant: PortraitVariant): string {
   const key = portraitKey(look, variant);
   const cached = CACHE.get(key);
-  if (cached) return cached;
+  if (cached) {
+    // 最近表示した肖像を後ろへ移し、古いものから破棄する。
+    CACHE.delete(key);
+    CACHE.set(key, cached);
+    return cached;
+  }
 
   const gpu = sharedRenderer();
   const pixels = variant === 'bust' ? 256 : 320;
@@ -55,7 +69,8 @@ export function renderPortrait(look: Look, variant: PortraitVariant): string {
     const puppet = illustrator.createWrestler(look, scene);
     puppet.root.rotation.y = -0.11;
     gpu.render(scene, camera);
-    const url = gpu.domElement.toDataURL('image/png');
+    // WebP非対応の環境ではブラウザがPNGへ自動フォールバックする。
+    const url = gpu.domElement.toDataURL('image/webp', 0.94);
     if (CACHE.size >= MAX_PORTRAITS) {
       const first = CACHE.keys().next().value;
       if (first) CACHE.delete(first);
