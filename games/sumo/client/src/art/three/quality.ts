@@ -17,9 +17,7 @@ export function chooseRenderQuality(
 ): RenderQuality {
   const w = Number.isFinite(width) ? Math.max(1, width) : 1;
   const h = Number.isFinite(height) ? Math.max(1, height) : 1;
-  const device = Number.isFinite(devicePixelRatio)
-    ? Math.max(0.5, devicePixelRatio)
-    : 1;
+  const device = Number.isFinite(devicePixelRatio) ? Math.max(0.5, devicePixelRatio) : 1;
   const maxPixels = coarsePointer ? 480_000 : 1_350_000;
   const maximumRatio = coarsePointer ? 1.3 : 1.5;
   const pixelRatio = Math.min(device, maximumRatio, Math.sqrt(maxPixels / (w * h)));

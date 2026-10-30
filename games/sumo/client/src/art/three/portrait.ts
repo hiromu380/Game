@@ -11,8 +11,11 @@ import { portraitKey, type PortraitVariant } from '../portraitKey';
 const MAX_PORTRAITS = 64;
 const CACHE = new Map<string, string>();
 let renderer: THREE.WebGLRenderer | null = null;
+let unavailableUntil = 0;
+let releaseTimer: ReturnType<typeof setTimeout> | undefined;
 
 function sharedRenderer(): THREE.WebGLRenderer {
+  if (performance.now() < unavailableUntil) throw new Error('WebGLの再試行を待機中');
   if (!renderer) {
     // preserveDrawingBufferにより描画直後の静止画を読み取り、1つのGPUコンテキストを使い回す。
     renderer = new THREE.WebGLRenderer({
@@ -31,6 +34,7 @@ function sharedRenderer(): THREE.WebGLRenderer {
         activeRenderer.dispose();
         renderer = null;
         CACHE.clear();
+        unavailableUntil = performance.now() + 5000;
       }
     });
   }
@@ -48,19 +52,33 @@ export function renderPortrait(look: Look, variant: PortraitVariant): string {
     return cached;
   }
 
-  const gpu = sharedRenderer();
-  const pixels = variant === 'bust' ? 256 : 320;
+  let gpu: THREE.WebGLRenderer;
+  try {
+    gpu = sharedRenderer();
+  } catch (error) {
+    unavailableUntil = performance.now() + 5000;
+    throw error;
+  }
+  clearTimeout(releaseTimer);
+  // 肖像は画像化済みなので、使わないGPUコンテキストを常駐させない。
+  releaseTimer = setTimeout(() => {
+    if (renderer !== gpu) return;
+    renderer = null;
+    gpu.dispose();
+    gpu.forceContextLoss();
+  }, 8000);
+  const pixels = variant === 'bust' ? 192 : 320;
   gpu.setSize(pixels, pixels, false);
   gpu.setClearColor(PALETTE.washi, 0);
 
   const scene = new THREE.Scene();
-  const half = variant === 'bust' ? 0.91 : 1.9;
-  const center = variant === 'bust' ? 2.19 : 1.54;
+  const half = variant === 'bust' ? 1.02 : 1.68;
+  const center = variant === 'bust' ? 2.2 : 1.55;
   const camera = new THREE.OrthographicCamera(-half, half, half, -half, 0.1, 20);
-  camera.position.set(0, center + 0.13, 8);
+  camera.position.set(0, center + 1.0, 8);
   camera.lookAt(0, center, 0);
-  scene.add(new THREE.AmbientLight(PALETTE.white, 1.1));
-  const light = new THREE.DirectionalLight(PALETTE.white, 0.55);
+  scene.add(new THREE.AmbientLight(PALETTE.white, 1.65));
+  const light = new THREE.DirectionalLight(PALETTE.white, 1.15);
   light.position.set(-3, 5, 7);
   scene.add(light);
 
@@ -81,4 +99,39 @@ export function renderPortrait(look: Look, variant: PortraitVariant): string {
     illustrator.dispose();
     scene.clear();
   }
+}
+
+/** 一覧をまとめて同期描画せず、一枚ずつ空き時間に画像化する。 */
+const pending: (() => void)[] = [];
+let scheduled = false;
+function drain() {
+  scheduled = false;
+  pending.shift()?.();
+  if (pending.length) schedule();
+}
+function schedule() {
+  if (scheduled) return;
+  scheduled = true;
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(drain, { timeout: 150 });
+  else setTimeout(drain, 16);
+}
+export function requestPortrait(
+  look: Look,
+  variant: PortraitVariant,
+  signal: AbortSignal,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    pending.push(() => {
+      if (signal.aborted) {
+        reject(new DOMException('中止', 'AbortError'));
+        return;
+      }
+      try {
+        resolve(renderPortrait(look, variant));
+      } catch (error) {
+        reject(error);
+      }
+    });
+    schedule();
+  });
 }

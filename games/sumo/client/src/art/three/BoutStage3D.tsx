@@ -7,21 +7,33 @@ import { BoutStage } from '../BoutStage';
 import { mountStage, type MountedStage } from './stage';
 import type { MotionClock } from './animation';
 
-type Props = ComponentProps<typeof BoutStage> & { motion?: MotionClock };
+type Props = ComponentProps<typeof BoutStage> & { motion?: MotionClock; onReady: () => void };
 
 export default function BoutStage3D(props: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const initial = useRef(props);
+  const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<MountedStage | null>(null);
   const [fallback, setFallback] = useState(false);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || fallback) return;
+    const host = hostRef.current;
+    if (!host || fallback) return;
+    // StrictModeで解放直後のcanvasを再利用すると、喪失中のコンテキストを拾ってしまう。
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('aria-hidden', 'true');
+    host.append(canvas);
 
     let stage: MountedStage | null = null;
     let resizeObserver: ResizeObserver | null = null;
+    const onResize = () => {
+      try {
+        stage?.resize();
+      } catch {
+        setFallback(true);
+      }
+    };
     const onVisibility = () => {
-      if (!document.hidden) stage?.resize();
+      if (!document.hidden) onResize();
     };
     const lost = (event: Event) => {
       event.preventDefault();
@@ -29,42 +41,49 @@ export default function BoutStage3D(props: Props) {
     };
 
     try {
-      stage = mountStage(canvas, props);
+      stage = mountStage(canvas, initial.current);
       stageRef.current = stage;
+      initial.current.onReady();
       canvas.addEventListener('webglcontextlost', lost);
       document.addEventListener('visibilitychange', onVisibility);
       if (typeof ResizeObserver !== 'undefined') {
-        resizeObserver = new ResizeObserver(() => stage?.resize());
+        resizeObserver = new ResizeObserver(onResize);
         resizeObserver.observe(canvas);
       } else {
-        window.addEventListener('resize', stage.resize);
+        window.addEventListener('resize', onResize);
       }
     } catch {
       stage?.dispose();
+      initial.current.onReady();
       setFallback(true);
     }
 
     return () => {
       resizeObserver?.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
-      if (stage) window.removeEventListener('resize', stage.resize);
+      window.removeEventListener('resize', onResize);
       canvas.removeEventListener('webglcontextlost', lost);
       stageRef.current = null;
       stage?.dispose();
+      canvas.remove();
     };
     // 描画器とキャラクターはこの取組の開始時に一度だけ構築する。
     // 位置・傾きの更新は下の別の effect で行う。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fallback]);
 
   useEffect(() => {
-    stageRef.current?.update(props);
+    try {
+      stageRef.current?.update(props);
+    } catch {
+      setFallback(true);
+    }
   }, [props]);
 
   if (fallback) {
-    const { motion: _motion, ...svgProps } = props;
+    const { motion: _motion, onReady: _onReady, ...svgProps } = props;
     void _motion;
+    void _onReady;
     return <BoutStage {...svgProps} />;
   }
-  return <canvas ref={canvasRef} className="dohyo dohyo--3d" role="img" aria-label={props.title} />;
+  return <div ref={hostRef} className="dohyo dohyo--3d" role="img" aria-label={props.title} />;
 }

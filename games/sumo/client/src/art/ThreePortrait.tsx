@@ -7,7 +7,11 @@ import { Figure } from './Figure';
 import type { Look } from './look';
 import { portraitKey, type PortraitVariant } from './portraitKey';
 
-export function ThreePortrait({ look, variant = 'bust', size = 72 }: {
+export function ThreePortrait({
+  look,
+  variant = 'bust',
+  size = 72,
+}: {
   look: Look;
   variant?: PortraitVariant;
   size?: number | string;
@@ -21,12 +25,13 @@ export function ThreePortrait({ look, variant = 'bust', size = 72 }: {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     let observer: IntersectionObserver | undefined;
     const start = () => {
       void import('./three/portrait')
-        .then(({ renderPortrait }) => {
+        .then(async ({ requestPortrait }) => {
           if (cancelled) return;
-          const url = renderPortrait(lookRef.current, variant);
+          const url = await requestPortrait(lookRef.current, variant, controller.signal);
           if (!cancelled) setImage({ key, url });
         })
         .catch(() => {
@@ -35,26 +40,41 @@ export function ThreePortrait({ look, variant = 'bust', size = 72 }: {
     };
     const element = spanRef.current;
     if (element && typeof IntersectionObserver !== 'undefined') {
-      observer = new IntersectionObserver((entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer?.disconnect();
-        start();
-      }, { rootMargin: '160px' });
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer?.disconnect();
+          start();
+        },
+        { rootMargin: '160px' },
+      );
       observer.observe(element);
     } else {
       start();
     }
     return () => {
       cancelled = true;
+      controller.abort();
       observer?.disconnect();
     };
   }, [key, variant]);
 
   return (
-    <span ref={spanRef} className="portrait-3d" style={{ width: size, height: typeof size === 'number' ? size : 'auto', aspectRatio: '1 / 1' }} aria-hidden="true">
-      {image?.key === key
-        ? <img src={image.url} alt="" decoding="async" />
-        : <Figure look={look} variant={variant} size={typeof size === 'number' ? size : 128} />}
+    <span
+      ref={spanRef}
+      className="portrait-3d"
+      style={{
+        width: size,
+        height: typeof size === 'number' ? size : 'auto',
+        aspectRatio: '1 / 1',
+      }}
+      aria-hidden="true"
+    >
+      {image?.key === key ? (
+        <img src={image.url} alt="" decoding="async" />
+      ) : (
+        <Figure look={look} variant={variant} size={typeof size === 'number' ? size : 128} />
+      )}
     </span>
   );
 }

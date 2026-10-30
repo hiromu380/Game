@@ -1,13 +1,24 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isSekitori, ranksOf, type BoutResult, type GameState, type Rikishi } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { boutScript, poseAt } from '../playback/boutScript';
 import { BoutStage } from '../art/BoutStage';
+import type { ComponentProps } from 'react';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
 import type { MotionClock } from '../art/three/animation';
 
-const BoutStage3D = lazy(() => import('../art/three/BoutStage3D'));
+/** 通信失敗もSVGで受け止め、演出時計を開始する。 */
+function SvgStage({
+  onReady,
+  ...props
+}: ComponentProps<typeof BoutStage> & { motion?: MotionClock; onReady: () => void }) {
+  useEffect(onReady, [onReady]);
+  return <BoutStage {...props} />;
+}
+const BoutStage3D = lazy(() =>
+  import('../art/three/BoutStage3D').catch(() => ({ default: SvgStage })),
+);
 
 /** 取組の短い演出（向正面から見た土俵）。動きを減らす設定では最後の場面だけを見せる */
 export function BoutViewer({
@@ -34,10 +45,12 @@ export function BoutViewer({
   const reduced =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [time, setTime] = useState(reduced ? script.duration : 0);
+  const [ready, setReady] = useState(false);
+  const onReady = useCallback(() => setReady(true), []);
   const played = useRef(new Set<number>());
   const skipped = useRef(false);
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || !ready) return;
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -54,7 +67,7 @@ export function BoutViewer({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [script, sound, reduced]);
+  }, [script, sound, reduced, ready]);
 
   const pose = poseAt(script, time);
   const byId = new Map(game.rikishi.map((r) => [r.id, r]));
@@ -104,6 +117,7 @@ export function BoutViewer({
             winner={done ? winnerSide : null}
             title={t('bout.aria')}
             motion={{ time, clash, duration: script.duration } satisfies MotionClock}
+            onReady={onReady}
           />
         </Suspense>
         <p className="bout__names">
