@@ -70,8 +70,64 @@ def nearest(rgb: tuple[int, int, int], palette: list[tuple[int, int, int]], cach
     return best
 
 
+def border_color(img: Image.Image) -> tuple[int, int, int]:
+    """四辺の色の中央値（背景の色）"""
+    rgb = img.convert('RGB')
+    w, h = rgb.size
+    px = rgb.load()
+    ring = [px[x, y] for x in range(w) for y in (0, 1, h - 2, h - 1)] + [px[x, y] for y in range(h) for x in (0, 1, w - 2, w - 1)]
+    return tuple(sorted(c[i] for c in ring)[len(ring) // 2] for i in range(3))
+
+
+def dist(a: tuple, b: tuple) -> float:
+    return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2) ** 0.5
+
+
+# マゼンタでない背景（くすんだ赤紫など）: 外からつながる背景と、それにごく近い色だけを抜く
+FLOOD_DISTANCE = 55
+HOLE_DISTANCE = 25
+
+
+def key_out_flood(img: Image.Image, bg: tuple[int, int, int]) -> Image.Image:
+    """背景が純粋なマゼンタでない絵。赤い物が背景と近い色でも消えないよう、外側からつながる所だけを抜く"""
+    img = img.convert('RGBA')
+    px = img.load()
+    w, h = img.size
+    clear = [[False] * w for _ in range(h)]
+    q = deque((x, y) for x in range(w) for y in (0, h - 1)) + deque((x, y) for y in range(h) for x in (0, w - 1))
+    while q:
+        x, y = q.popleft()
+        if clear[y][x] or dist(px[x, y], bg) > FLOOD_DISTANCE:
+            continue
+        clear[y][x] = True
+        for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= nx < w and 0 <= ny < h and not clear[ny][nx]:
+                q.append((nx, ny))
+    for y in range(h):
+        for x in range(w):
+            # 囲まれた隙間に残った背景（背景の色とほとんど同じ所だけ）
+            if clear[y][x] or dist(px[x, y], bg) <= HOLE_DISTANCE:
+                px[x, y] = (0, 0, 0, 0)
+    # 縁のにじみ: 抜いた所に接する、背景の色みの残った所（2周）
+    for _ in range(2):
+        drop = []
+        for y in range(1, h - 1):
+            for x in range(1, w - 1):
+                r, g, b, a = px[x, y]
+                if a == 0 or not (r - g > 50 and b - g > 25):
+                    continue
+                if any(px[nx, ny][3] == 0 for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1))):
+                    drop.append((x, y))
+        for x, y in drop:
+            px[x, y] = (0, 0, 0, 0)
+    return img
+
+
 def key_out(img: Image.Image) -> Image.Image:
-    """マゼンタの背景とにじみを透明に"""
+    """マゼンタの背景とにじみを透明に。背景がマゼンタから外れた絵は、外からつながる背景を抜く"""
+    bg = border_color(img)
+    if dist(bg, KEY) > 60:
+        return key_out_flood(img, bg)
     img = img.convert('RGBA')
     px = img.load()
     w, h = img.size
@@ -254,6 +310,19 @@ def selftest() -> None:
         assert right.getpixel((8, 12))[:3] == (0xf4, 0xec, 0xdc), '右のコマが和紙色でない'
         m = json.loads((t / 'manifest.json').read_text(encoding='utf-8'))
         assert m['two__a'] == {'files': ['two__a_0.png', 'two__a_1.png'], 'size': [16, 16], 'anchor': [8, 15]}
+        # くすんだ赤紫の背景: 墨の縁で囲んだ紅は残り、背景は抜ける
+        bg = (180, 55, 119)
+        dull = Image.new('RGB', (300, 300), bg)
+        p3 = dull.load()
+        for y in range(60, 240):
+            for x in range(60, 240):
+                edge = x < 66 or x > 233 or y < 66 or y > 233
+                p3[x, y] = SUMI if edge else (190, 60, 45)
+        assert border_color(dull) == bg
+        keyed = key_out(dull)
+        assert keyed.getpixel((5, 5))[3] == 0, '赤紫の背景が抜けていない'
+        assert keyed.getpixel((150, 150))[3] == 255, '背景に近い紅まで抜けた'
+
     print('selftest ok')
 
 

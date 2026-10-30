@@ -365,3 +365,29 @@ Draw the modern entrance gate of a present-day sumo stable: a dark grey steel ga
 ```
 Draw a cutaway diorama of the treatment room of a present-day sumo stable: only two walls remain. Several padded treatment tables, a reclining treatment chair, a rack of resistance bands, a trainer's desk with a computer and filing cabinets, anatomy posters on the wall, a small sink, shelves of tape and supplies. No people.
 ```
+
+## 行事・巡業の舞台
+
+### `dohyo_honbasho` — 本場所の土俵（優先 B・比率 1:1・1コマ）
+
+```
+Draw a full tournament sumo ring (dohyo) standing outdoors: a tall square platform of packed clay with straw-bale tawara around the square edge and the inner circle, small steps cut into the sides, two white starting lines, a little pile of salt in one corner, on a patch of grass.
+```
+
+### `tsuriyane` — 吊り屋根（優先 B・比率 1:1・1コマ）
+
+```
+Draw the hanging roof (tsuriyane) of a sumo ring: a Shinto-shrine-style roof with crossed chigi and katsuogi on the ridge, hung by ropes from a chain, purple-blue cloth around the eaves, white paper shide, and four big tassels hanging from the corners: blue, red, white and green (black tortoise, vermilion bird, white tiger, azure dragon colours).
+```
+
+### `kohaku_maku` — 紅白幕の囲い（優先 B・比率 1:1・1コマ）
+
+```
+Draw a square enclosure made of bamboo poles tied with rope, hung with red-and-white striped curtains (kohaku-maku) on three sides and partly open on the front, standing on a square patch of packed earth and grass.
+```
+
+### `tent` — 赤いテント（優先 B・比率 1:1・1コマ）
+
+```
+Draw a simple event tent with a red cloth roof and red side curtains tied back, on thin white poles, standing on a square patch of packed earth and grass.
+```

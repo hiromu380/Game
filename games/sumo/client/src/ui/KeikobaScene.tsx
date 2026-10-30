@@ -18,16 +18,18 @@ import {
 const SCENE_MAX_WIDTH = 640;
 
 /** ドット絵を舞台に並べる。土台の絵（床・母屋）がまだ取り込まれていなければ null。取り込んでいない絵は飛ばす */
-function SpriteStage({
+export function SpriteStage({
   stage,
   items,
   base,
   label,
+  maxWidth = SCENE_MAX_WIDTH,
 }: {
   stage: Stage;
   items: Placed[];
   base: string;
   label: string;
+  maxWidth?: number;
 }) {
   if (!sprite(base)) return null;
   const placed = items.map((p) => ({ p, s: sprite(p.sprite) })).filter((x) => x.s !== null);
@@ -36,7 +38,7 @@ function SpriteStage({
       className="scene"
       role="img"
       aria-label={label}
-      style={{ aspectRatio: `${stage.width} / ${stage.height}`, maxWidth: SCENE_MAX_WIDTH }}
+      style={{ aspectRatio: `${stage.width} / ${stage.height}`, maxWidth }}
     >
       {placed.map(({ p, s }, i) => {
         const box = {

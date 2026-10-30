@@ -110,3 +110,18 @@ export function exteriorLayout(
 
 /** 外観の土台（これがなければ外観を出さない） */
 export const EXTERIOR_BASE = 'omoya';
+
+/** 巡業の舞台: 外に置いた土俵と吊り屋根・紅白幕・テント・幟 */
+export const JUNGYO_STAGE: Stage = { width: 440, height: 310 };
+export const JUNGYO_BASE = 'dohyo_honbasho';
+
+export function jungyoLayout(): Placed[] {
+  return [
+    { sprite: 'kohaku_maku', x: 95, y: 230 },
+    { sprite: 'tent', x: 360, y: 220 },
+    { sprite: 'dohyo_honbasho', x: 220, y: 305 },
+    { sprite: 'tsuriyane', x: 220, y: 150 },
+    { sprite: 'nobori', x: 40, y: 290 },
+    { sprite: 'nobori', x: 395, y: 302 },
+  ];
+}

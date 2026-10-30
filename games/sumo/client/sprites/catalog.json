@@ -369,6 +369,44 @@
           "outline": false
         }
       ]
+    },
+    {
+      "group": "event",
+      "title": "行事・巡業の舞台",
+      "items": [
+        {
+          "id": "dohyo_honbasho",
+          "name": "本場所の土俵（四角い土台・俵・上がり段。外に置く）",
+          "size": [200, 160],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "tsuriyane",
+          "name": "吊り屋根（房つき）",
+          "size": [176, 144],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "kohaku_maku",
+          "name": "紅白幕の囲い",
+          "size": [176, 160],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "tent",
+          "name": "赤いテント",
+          "size": [144, 128],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        }
+      ]
     }
   ]
 }

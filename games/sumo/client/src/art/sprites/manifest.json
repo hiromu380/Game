@@ -34,6 +34,11 @@
     "size": [160, 96],
     "anchor": [80, 95]
   },
+  "dohyo_honbasho": {
+    "files": ["dohyo_honbasho.png"],
+    "size": [200, 160],
+    "anchor": [100, 159]
+  },
   "dorm_0": {
     "files": ["dorm_0.png"],
     "size": [176, 176],
@@ -89,6 +94,11 @@
     "size": [288, 176],
     "anchor": [144, 175]
   },
+  "kohaku_maku": {
+    "files": ["kohaku_maku.png"],
+    "size": [176, 160],
+    "anchor": [88, 159]
+  },
   "lantern": {
     "files": ["lantern.png"],
     "size": [24, 40],
@@ -119,6 +129,11 @@
     "size": [48, 44],
     "anchor": [24, 43]
   },
+  "tent": {
+    "files": ["tent.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
   "teppo": {
     "files": ["teppo.png"],
     "size": [16, 56],
@@ -133,6 +148,11 @@
     "files": ["tsukubai.png"],
     "size": [56, 48],
     "anchor": [28, 47]
+  },
+  "tsuriyane": {
+    "files": ["tsuriyane.png"],
+    "size": [176, 144],
+    "anchor": [88, 143]
   },
   "weights": {
     "files": ["weights.png"],

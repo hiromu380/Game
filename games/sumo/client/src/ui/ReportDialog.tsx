@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { SpriteStage } from './KeikobaScene';
+import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
 import {
   sumMoney,
@@ -242,7 +244,18 @@ export function ReportDialog({
             ))}
           </p>
         )}
-        {report.jungyo && <p className="callout">{t(`jungyo.${report.jungyo}` as MessageKey)}</p>}
+        {report.jungyo && (
+          <div className="callout">
+            <SpriteStage
+              stage={JUNGYO_STAGE}
+              items={jungyoLayout()}
+              base={JUNGYO_BASE}
+              label={t('scene.jungyo')}
+              maxWidth={JUNGYO_STAGE.width}
+            />
+            <p>{t(`jungyo.${report.jungyo}` as MessageKey)}</p>
+          </div>
+        )}
 
         <h3>{t('report.champions')}</h3>
         <ul className="plain-list">
