@@ -14,3 +14,16 @@ export function eligibleForToshiyori(r: Rikishi): boolean {
     c.sekitoriBasho >= TOSHIYORI.sekitoriBasho
   );
 }
+
+/** 年寄名跡の資格まで、それぞれあと何場所か（0 なら満たしている）。外国籍は null（帰化しないと継げない） */
+export function toshiyoriProgress(
+  r: Pick<Rikishi, 'foreign' | 'career'>,
+): { sanyaku: number; makuuchi: number; sekitori: number } | null {
+  if (r.foreign) return null;
+  const c = r.career;
+  return {
+    sanyaku: Math.max(0, TOSHIYORI.sanyakuBasho - c.sanyakuBasho),
+    makuuchi: Math.max(0, TOSHIYORI.makuuchiBasho - c.makuuchiBasho),
+    sekitori: Math.max(0, TOSHIYORI.sekitoriBasho - c.sekitoriBasho),
+  };
+}

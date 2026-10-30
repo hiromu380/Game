@@ -13,7 +13,9 @@ import {
   type Rikishi,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
-import { CandidatePortrait, RikishiPortrait } from '../art/Portraits';
+import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portraits';
+import { RikishiDetail } from './RikishiDetail';
+import { useState } from 'react';
 import { IndependencePanel } from './IndependencePanel';
 import { rankLabel, recordLabel } from '../format';
 
@@ -30,6 +32,8 @@ export function StableTab({
   setGame: (g: GameState) => void;
 }) {
   const { t } = useI18n();
+  const [detail, setDetail] = useState<number | null>(null);
+  const detailRikishi = detail === null ? undefined : game.rikishi.find((r) => r.id === detail);
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
   const mine = game.rikishi
     .filter((r) => r.stableId === game.player.stableId)
@@ -42,6 +46,23 @@ export function StableTab({
 
   return (
     <div className="stack">
+      {detailRikishi && (
+        <RikishiDetail
+          subject={{
+            name: detailRikishi.name,
+            look: lookOfRikishi(detailRikishi, ranks.get(detailRikishi.id) ?? null),
+            rank: ranks.get(detailRikishi.id) ?? null,
+            age: detailRikishi.age,
+            height: detailRikishi.height,
+            weight: detailRikishi.weight,
+            abilities: detailRikishi.abilities,
+            foreign: detailRikishi.foreign,
+            career: detailRikishi.career,
+            track: detailRikishi.track,
+          }}
+          onClose={() => setDetail(null)}
+        />
+      )}
       {requests.length > 0 && (
         <section className="panel panel--alert" aria-labelledby="retire-title">
           <h2 id="retire-title">{t('retire.title')}</h2>
@@ -104,6 +125,7 @@ export function StableTab({
               rank={ranks.get(r.id) ?? null}
               onPolicy={(p) => setGame(setPolicy(game, r.id, p))}
               onPlayHurt={(play) => setGame(setPlayHurt(game, r.id, play))}
+              onDetail={() => setDetail(r.id)}
             />
           ))}
         </ul>
@@ -163,19 +185,25 @@ function RikishiCard({
   rank,
   onPolicy,
   onPlayHurt,
+  onDetail,
 }: {
   r: Rikishi;
   rank: Rank | null;
   onPolicy: (p: Policy) => void;
   onPlayHurt: (play: boolean) => void;
+  onDetail: () => void;
 }) {
   const { t } = useI18n();
   const last = r.recent[0];
   return (
     <li className="card">
-      <div className="card__portrait">
+      <button
+        className="card__portrait"
+        onClick={onDetail}
+        aria-label={t('detail.open', { name: r.name })}
+      >
         <RikishiPortrait r={r} rank={rank} size={88} />
-      </div>
+      </button>
       <div className="card__head">
         <span className="card__rank">{rankLabel(t, rank)}</span>
         <strong className="card__name">{r.name}</strong>

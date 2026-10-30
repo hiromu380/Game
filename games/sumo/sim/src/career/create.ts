@@ -124,6 +124,7 @@ export function rikishiFromCandidate(
     recent: [],
     exOzeki: false,
     playHurt: false,
+    track: [],
   };
 }
 

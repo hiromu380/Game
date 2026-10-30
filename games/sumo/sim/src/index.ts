@@ -20,7 +20,7 @@ export {
   setPolicy,
 } from './game/state';
 export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';
-export { eligibleForToshiyori } from './lineage/toshiyori';
+export { eligibleForToshiyori, toshiyoriProgress } from './lineage/toshiyori';
 export { KAKUN_IDS } from './lineage/kakun';
 export { styleOf } from './career/create';
 export { power } from './basho/strength';

@@ -85,6 +85,29 @@ export interface Rikishi {
   exOzeki: boolean;
   /** けがを押して次の場所に出る（親方の判断。自分の弟子だけ。場所が終わると戻る） */
   playHurt: boolean;
+  /** 自分の部屋にいる間の場所ごとの成績（番付の推移のグラフ用。他の部屋の力士は空） */
+  track: TrackEntry[];
+}
+
+/** 場所ごとの成績（番付の上からの順位つき） */
+export interface TrackEntry extends BashoRecord {
+  /** 番付の上からの順位（0 = 筆頭）と、そのときの番付の人数 */
+  order: number;
+  total: number;
+}
+
+/** 自分の部屋から引退した力士の記録（歴代の力士） */
+export interface Alumnus {
+  id: number;
+  name: string;
+  retiredAge: number;
+  retiredBashoIndex: number;
+  /** 引退したときの師匠（何代目） */
+  generation: number;
+  becameOyakata: boolean;
+  foreign: boolean;
+  career: Career;
+  track: TrackEntry[];
 }
 
 export interface Stable {
@@ -224,6 +247,8 @@ export interface PlayerState {
   family: FamilyNode[];
   /** 設備と契約のレベル（0 = なし） */
   facilities: Record<FacilityId, number>;
+  /** 部屋の歴代の力士（引退した弟子） */
+  alumni: Alumnus[];
 }
 
 export interface GameState {

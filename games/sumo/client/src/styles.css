@@ -386,6 +386,9 @@ h3 {
   background-image: linear-gradient(90deg, var(--paper) 0 108px, #fff 108px);
 }
 .card__portrait {
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
   grid-area: portrait;
   align-self: start;
   background: var(--paper);
@@ -508,6 +511,79 @@ h3 {
 .policy__btn.is-selected::before {
   content: '● ';
   color: var(--shu);
+}
+
+/* 力士の詳細 */
+.detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 20px;
+  align-items: start;
+}
+.detail__figure {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 6px;
+}
+.detail__facts {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.detail__facts div {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: 8px;
+  border-bottom: 1.5px dashed var(--line);
+  padding-bottom: 2px;
+}
+.detail__facts dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+}
+.detail__facts dd {
+  margin: 0;
+}
+.rank-chart {
+  overflow-x: auto;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 4px;
+  background: var(--card);
+}
+.rank-chart svg {
+  display: block;
+}
+
+/* 歴代の力士 */
+.alumni {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.alumni__item {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.alumni__main {
+  display: grid;
+  flex: 1;
+}
+.alumni__main strong {
+  font-family: var(--font-head);
 }
 
 /* 段の切り替え・契約のレベル */
@@ -943,6 +1019,13 @@ h3 {
     grid-template-columns: 1fr;
     grid-column: 1 / -1;
     grid-area: auto;
+  }
+  .detail {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .detail__facts {
+    width: 100%;
   }
   .topbar__stats {
     width: 100%;

@@ -14,7 +14,17 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 3) s = v3to4(s);
   if (s.version === 4) s = v4to5(s);
   if (s.version === 5) s = v5to6(s);
+  if (s.version === 6) s = v6to7(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/** 6 → 7: 番付の推移（これから記録）と歴代の力士（なし） */
+function v6to7(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  for (const r of s.rikishi) r.track = [];
+  s.player.alumni = [];
+  s.version = 7;
+  return s as unknown as Raw;
 }
 
 /** 5 → 6: 強行出場の判断（なし） */

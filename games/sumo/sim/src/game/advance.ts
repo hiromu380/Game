@@ -104,6 +104,7 @@ export function advanceBasho(input: GameState): GameState {
       zensho: rec.wins === 15,
     });
     if (isMine(id)) {
+      r.track.push({ ...record, order: state.banzuke.indexOf(id), total: state.banzuke.length });
       report.mine.push({
         id,
         record,

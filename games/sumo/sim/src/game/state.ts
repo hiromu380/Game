@@ -93,6 +93,19 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
     }
   }
   report?.retired.push({ id, name: r.name, stableId: r.stableId, becameOyakata });
+  if (mine && r.career.basho > 0) {
+    state.player.alumni.push({
+      id: r.id,
+      name: r.name,
+      retiredAge: r.age,
+      retiredBashoIndex: state.bashoIndex,
+      generation: state.player.generation,
+      becameOyakata,
+      foreign: r.foreign,
+      career: r.career,
+      track: r.track,
+    });
+  }
   state.rikishi = state.rikishi.filter((x) => x.id !== id);
   state.banzuke = state.banzuke.filter((x) => x !== id);
   delete state.titles[id];
