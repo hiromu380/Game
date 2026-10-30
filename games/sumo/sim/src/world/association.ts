@@ -17,6 +17,7 @@ import type { Prng } from '../core/prng';
 import type { GameState, Ichimon, Oyakata, Rank, Stable, Style } from '../model/types';
 import { addNode, closeNode } from '../lineage/family';
 import { stableCapacity } from '../money/facilities';
+import { note } from '../game/journal';
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
@@ -237,9 +238,13 @@ function retireNpcMaster(state: GameState, master: Oyakata, rng: Prng): void {
         highestRank: heir.highestRank,
       });
       stable.branch.nodeId = node.id;
+      note(state, { kind: 'branchSucceeded', stable: stable.name, shikona: heir.shikona });
     }
   } else {
-    if (stable.branch) closeNode(state, oldNode);
+    if (stable.branch) {
+      closeNode(state, oldNode);
+      note(state, { kind: 'branchClosed', stable: stable.name });
+    }
     closeStable(state, stable.id, rng);
   }
   retireOrSanyo(state, master, rng);
@@ -299,6 +304,7 @@ function npcIndependence(state: GameState, rng: Prng): void {
         highestRank: o.highestRank,
       });
       stable.branch = { parentStableId: from.id, nodeId: node.id };
+      note(state, { kind: 'independence', stable: o.name, shikona: o.shikona });
     }
     state.stables.push(stable);
     o.role = 'master';

@@ -302,7 +302,41 @@ export interface GameState {
   gameOver: GameOverReason | null;
   /** 直近の場所の結果（画面に出す） */
   lastReport: BashoReport | null;
+  /** 部屋の日誌（古い順） */
+  journal: JournalEntry[];
 }
+
+/** 日誌の1行。bashoIndex は出来事が起きた場所（場所前の出来事は、これから取る場所） */
+export type JournalEntry = { bashoIndex: number } & JournalEvent;
+
+export type JournalEvent =
+  | { kind: 'open'; stable: string; shikona: string }
+  | { kind: 'join'; shikona: string; age: number }
+  | {
+      kind: 'promote';
+      shikona: string;
+      stable: string;
+      to: 'Y' | 'O' | 'sekitori' | 'makuuchi';
+    }
+  | { kind: 'yusho'; shikona: string; stable: string; division: Division; wins: number }
+  | { kind: 'sansho'; shikona: string; prize: 'shukun' | 'kanto' | 'gino' }
+  | {
+      kind: 'retire';
+      shikona: string;
+      age: number;
+      highest: Rank | null;
+      /** 親方として残ったときの名跡（名跡待ちは空文字） */
+      oyakata: string | null;
+    }
+  | { kind: 'happening'; id: HappeningId; option: string }
+  | { kind: 'independence'; stable: string; shikona: string }
+  | { kind: 'successor'; generation: number; stable: string; shikona: string }
+  | { kind: 'kakun'; id: KakunId }
+  | { kind: 'facility'; id: FacilityId; level: number }
+  | { kind: 'branchSucceeded'; stable: string; shikona: string }
+  | { kind: 'branchClosed'; stable: string }
+  /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */
+  | { kind: 'earlier' };
 
 export interface BoutResult {
   day: number;

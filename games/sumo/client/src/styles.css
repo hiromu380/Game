@@ -520,6 +520,40 @@ h3 {
   color: var(--shu);
 }
 
+/* 日誌 */
+.journal-year h3 {
+  font-family: var(--font-head);
+  margin: 16px 0 6px;
+  border-bottom: 2px solid var(--ink);
+}
+.journal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.journal li {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.journal li.is-milestone .journal__text {
+  font-weight: bold;
+}
+.journal__when {
+  color: var(--ai);
+  font-size: 0.9rem;
+}
+@media (max-width: 560px) {
+  .journal li {
+    grid-template-columns: 1fr;
+  }
+}
+.newgame__load {
+  margin-top: 8px;
+}
+
 /* 協会 */
 .panel--mine {
   border-color: var(--shu);

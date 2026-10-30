@@ -23,6 +23,7 @@ import type {
 } from '../model/types';
 import { nextBuildCost, stableCapacity } from '../money/facilities';
 import { applyHappening } from './happening';
+import { note } from './journal';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
@@ -50,6 +51,7 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
   if (!r) return;
   const mine = r.stableId === state.player.stableId;
   let becameOyakata = false;
+  let oyakataName: string | null = null;
   const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, id));
   if (eligibleForToshiyori(r) && mine) {
     const oyakataId = state.nextId++;
@@ -80,6 +82,7 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
       highestRank: r.career.highestRank,
     });
     becameOyakata = true;
+    oyakataName = name ?? '';
   } else if (eligibleForToshiyori(r) && rng.chance(TOSHIYORI.npcTakeChance)) {
     becameOyakata = npcRetireeTakesName(
       state,
@@ -92,6 +95,15 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
     );
   }
   report?.retired.push({ id, name: r.name, stableId: r.stableId, becameOyakata });
+  if (mine) {
+    note(state, {
+      kind: 'retire',
+      shikona: r.name,
+      age: r.age,
+      highest: r.career.highestRank,
+      oyakata: oyakataName,
+    });
+  }
   if (mine && r.career.basho > 0) {
     state.player.alumni.push({
       id: r.id,
@@ -123,7 +135,10 @@ export function setPolicy(input: GameState, id: number, policy: Policy): GameSta
 export function answerHappening(input: GameState, option: number): GameState {
   if (!input.pending.happening) return input;
   const state = clone(input);
-  applyHappening(state, option);
+  const id = input.pending.happening.id;
+  const key = applyHappening(state, option);
+  // 返事をしないまま進めたとき（断ったことになる）は書かない
+  if (key) note(state, { kind: 'happening', id, option: key });
   return state;
 }
 
@@ -146,6 +161,7 @@ export function acceptCandidate(input: GameState, candidateId: number): GameStat
   if (mine.length >= stableCapacity(state)) return input; // 部屋に住めない
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   state.rikishi.push(rikishiFromCandidate(c, state.player.stableId, master.style));
+  note(state, { kind: 'join', shikona: c.name, age: c.age });
   state.pending.candidates = state.pending.candidates.filter((x) => x.id !== candidateId);
   return state;
 }
@@ -201,6 +217,12 @@ export function chooseSuccessor(input: GameState, oyakataId: number): GameState 
     makuuchiYusho: 0,
   });
   state.pending.successor = null;
+  note(state, {
+    kind: 'successor',
+    generation: state.player.generation,
+    stable: next.name,
+    shikona: next.shikona,
+  });
   offerKakun(state);
   return state;
 }
@@ -227,6 +249,12 @@ export function chooseTakeOver(input: GameState, stableId: number): GameState {
     makuuchiYusho: 0,
   });
   state.pending.takeOver = null;
+  note(state, {
+    kind: 'successor',
+    generation: state.player.generation,
+    stable: master.name,
+    shikona: master.shikona,
+  });
   offerKakun(state);
   return state;
 }
@@ -241,7 +269,10 @@ export function answerIndependence(
   const state = clone(input);
   const o = state.oyakata.find((x) => x.id === state.pending.independence);
   state.pending.independence = null;
-  if (accept && o) approveIndependence(state, o, takeIds);
+  if (accept && o) {
+    approveIndependence(state, o, takeIds);
+    note(state, { kind: 'independence', stable: o.name, shikona: o.shikona });
+  }
   return state;
 }
 
@@ -252,6 +283,7 @@ export function buildFacility(input: GameState, id: FacilityId): GameState {
   const state = clone(input);
   state.player.stableMoney -= cost;
   state.player.facilities[id]++;
+  note(state, { kind: 'facility', id, level: state.player.facilities[id] });
   return state;
 }
 
@@ -283,13 +315,16 @@ export function pickKakun(
   if (!input.pending.kakun) return input;
   const state = clone(input);
   if (kakun && state.pending.kakun!.includes(kakun)) {
-    if (state.player.kakun.length < GAME.kakunSlots) state.player.kakun.push(kakun);
-    else if (
+    if (state.player.kakun.length < GAME.kakunSlots) {
+      state.player.kakun.push(kakun);
+      note(state, { kind: 'kakun', id: kakun });
+    } else if (
       replaceIndex !== undefined &&
       replaceIndex >= 0 &&
       replaceIndex < state.player.kakun.length
     ) {
       state.player.kakun[replaceIndex] = kakun;
+      note(state, { kind: 'kakun', id: kakun });
     }
   }
   state.pending.kakun = null;

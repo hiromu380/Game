@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createGame, type GameState, type Style } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { TitleArt } from '../art/TitleArt';
+import { LoadSaveButton } from './SavePanel';
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
@@ -44,6 +45,9 @@ export function NewGame({
         {t('newGame.start')}
       </button>
       <p className="note">{t('newGame.note')}</p>
+      <div className="newgame__load">
+        <LoadSaveButton onLoad={onStart} />
+      </div>
     </main>
   );
 }

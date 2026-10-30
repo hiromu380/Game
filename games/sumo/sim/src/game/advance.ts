@@ -27,6 +27,7 @@ import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
+import { note } from './journal';
 import { SANSHO } from '../balance/sansho';
 import { selectSansho } from '../basho/sansho';
 import { JUNGYO, JUNGYO_AFTER } from '../balance/events';
@@ -77,7 +78,20 @@ export function advanceBasho(input: GameState): GameState {
     byId.get(id)!.injury = injuryRng.range(1, 2);
     if (isMine(id)) report.injuries.push(id);
   }
-  for (const [d, id] of outcome.yusho) report.yusho[d] = id;
+  const stableName = (stableId: number) => state.stables.find((s) => s.id === stableId)!.name;
+  for (const [d, id] of outcome.yusho) {
+    report.yusho[d] = id;
+    const r = byId.get(id)!;
+    if (masterNodeOf(state, r.stableId)) {
+      note(state, {
+        kind: 'yusho',
+        shikona: r.name,
+        stable: stableName(r.stableId),
+        division: d,
+        wins: outcome.records.get(id)!.wins,
+      });
+    }
+  }
   report.playoff = outcome.playoff.get('makuuchi') ?? null;
 
   // 3. 記録
@@ -122,7 +136,10 @@ export function advanceBasho(input: GameState): GameState {
       const r = byId.get(id)!;
       r.career.sansho[kind]++;
       r.career.earnings += SANSHO.prize;
-      if (isMine(id)) state.player.prestige += GAME.prestige.sansho;
+      if (isMine(id)) {
+        state.player.prestige += GAME.prestige.sansho;
+        note(state, { kind: 'sansho', shikona: r.name, prize: kind });
+      }
     }
   }
 
@@ -179,14 +196,26 @@ export function advanceBasho(input: GameState): GameState {
     const firstMakuuchi =
       rank.division === 'makuuchi' && (before === null || before.division !== 'makuuchi');
     const firstSanyaku = isSanyaku(rank) && (before === null || !isSanyaku(before));
-    if (made.newYokozuna.includes(id)) report.promotions.push({ id, to: 'Y' });
-    else if (made.newOzeki.includes(id) && !(before?.title === 'O' || before?.title === 'Y'))
-      report.promotions.push({ id, to: 'O' });
-    else if (firstMakuuchi) report.promotions.push({ id, to: 'makuuchi' });
-    else if (firstSekitori) report.promotions.push({ id, to: 'sekitori' });
+    const promo = made.newYokozuna.includes(id)
+      ? 'Y'
+      : made.newOzeki.includes(id) && !(before?.title === 'O' || before?.title === 'Y')
+        ? 'O'
+        : firstMakuuchi
+          ? 'makuuchi'
+          : firstSekitori
+            ? 'sekitori'
+            : null;
+    if (promo) report.promotions.push({ id, to: promo });
     // 一門の部屋（本家・分家）の成績は、師匠の系譜図の節と名声に数える（分家は名声の一部だけ）
     const node = masterNodeOf(state, r.stableId);
     if (node) {
+      if (promo)
+        note(state, {
+          kind: 'promote',
+          shikona: r.name,
+          stable: stableName(r.stableId),
+          to: promo,
+        });
       const main = r.stableId === state.player.stableId;
       const share = main ? 1 : LINEAGE.branchPrestigeShare;
       if (firstSekitori) {

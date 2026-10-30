@@ -49,9 +49,9 @@ export function rollHappening(state: GameState): void {
 }
 
 /** 出来事に答える（option は選択肢の番号。最後の選択肢が「断る」） */
-export function applyHappening(state: GameState, option: number): void {
+export function applyHappening(state: GameState, option: number): string | null {
   const h = state.pending.happening;
-  if (!h) return;
+  if (!h) return null;
   state.pending.happening = null;
   const def = HAPPENINGS.find((d) => d.id === h.id)!;
   const opt = def.options[option] ?? def.options[def.options.length - 1]!;
@@ -93,4 +93,5 @@ export function applyHappening(state: GameState, option: number): void {
     state.player.personalMoney += state.player.stableMoney;
     state.player.stableMoney = 0;
   }
+  return opt.key;
 }

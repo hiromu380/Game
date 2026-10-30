@@ -1,7 +1,7 @@
 /**
  * セーブの変換（古い版 → 今の版）。読めない形なら null
  */
-import type { FamilyNode, GameState } from '../model/types';
+import type { FamilyNode, GameState, JournalEntry } from '../model/types';
 import { SAVE_VERSION } from '../world/create';
 import { populateAssociation } from '../world/association';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
@@ -19,7 +19,52 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 6) s = v6to7(s);
   if (s.version === 7) s = v7to8(s);
   if (s.version === 8) s = v8to9(s);
+  if (s.version === 9) s = v9to10(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 9 → 10: 部屋の日誌。歴代の師匠・独立した分家・引退した弟子から、主な出来事だけを作り直す
+ */
+function v9to10(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  const events: JournalEntry[] = [{ bashoIndex: 0, kind: 'earlier' }];
+  for (const l of s.player.lineage) {
+    events.push(
+      l.generation === 1
+        ? { bashoIndex: l.fromBashoIndex, kind: 'open', stable: l.name, shikona: l.shikona }
+        : {
+            bashoIndex: l.fromBashoIndex,
+            kind: 'successor',
+            generation: l.generation,
+            stable: l.name,
+            shikona: l.shikona,
+          },
+    );
+  }
+  for (const n of s.player.family) {
+    if (n.kind !== 'branch') continue;
+    events.push({
+      bashoIndex: n.fromBashoIndex,
+      kind: 'independence',
+      stable: n.name,
+      shikona: n.shikona,
+    });
+  }
+  for (const a of s.player.alumni) {
+    events.push({
+      bashoIndex: a.retiredBashoIndex,
+      kind: 'retire',
+      shikona: a.name,
+      age: a.retiredAge,
+      highest: a.career.highestRank,
+      oyakata: a.becameOyakata ? '' : null,
+    });
+  }
+  // 同じ場所の中は作った順のまま（安定ソート）
+  s.journal = events.sort((a, b) => a.bashoIndex - b.bashoIndex);
+  s.version = 10;
+  return s as unknown as Raw;
 }
 
 /**

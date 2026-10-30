@@ -25,6 +25,7 @@ import { applyHighest, applyMochikyukinMinimum } from '../career/update';
 import { makeCandidates } from '../game/recruit';
 import { addNode } from '../lineage/family';
 import { populateAssociation } from './association';
+import { note } from '../game/journal';
 import { NO_FACILITIES } from '../money/facilities';
 
 /**
@@ -36,8 +37,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 7: 番付の推移と歴代の力士（rikishi.track・player.alumni）
  * 8: 場所の間の出来事（pending.happening・rikishi.boost）
  * 9: 協会（names・ichimon・stables.ichimonId・すべての部屋の親方。toshiyoriFree と分家の masterShikona/masterAge はなくす）
+ * 10: 部屋の日誌（journal）
  */
-export const SAVE_VERSION = 9;
+export const SAVE_VERSION = 10;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -209,6 +211,7 @@ export function createGame(options: NewGameOptions): GameState {
     },
     gameOver: null,
     lastReport: null,
+    journal: [],
   };
   populateAssociation(state, rng, options.ichimonId);
   addNode(state, {
@@ -222,6 +225,7 @@ export function createGame(options: NewGameOptions): GameState {
     toBashoIndex: null,
     highestRank: oyakata.highestRank,
   });
+  note(state, { kind: 'open', stable: playerStable.name, shikona: oyakata.shikona });
   state.pending.candidates = makeCandidates(state);
   return state;
 }
