@@ -29,7 +29,7 @@ export function ScoutPanel({
     return t('scout.foreignLimit');
   };
   return (
-    <section className="panel">
+    <section className="panel" id="scout-panel">
       <h2>{t('scout.title')}</h2>
       <p className="note">{done ? t('scout.doneNote') : t('scout.note')}</p>
       <ul className="plain-list">

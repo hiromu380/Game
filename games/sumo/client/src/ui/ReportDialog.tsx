@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { SpriteStage } from './KeikobaScene';
+import { boxDrawn } from './KeikobaScene';
+import { Hakoniwa } from './Hakoniwa';
 import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
 import {
@@ -246,10 +247,10 @@ export function ReportDialog({
         )}
         {report.jungyo && (
           <div className="callout">
-            <SpriteStage
-              stage={JUNGYO_STAGE}
-              items={jungyoLayout(report.jungyo)}
+            <Hakoniwa
+              items={boxDrawn(jungyoLayout(report.jungyo))}
               base={JUNGYO_BASE}
+              view={{ x0: 0, y0: 0, x1: JUNGYO_STAGE.width, y1: JUNGYO_STAGE.height }}
               label={t('scene.jungyo')}
               maxWidth={JUNGYO_STAGE.width}
             />

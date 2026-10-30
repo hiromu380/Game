@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
+import type { SceneAction } from '../art/hakoniwa/grid';
 import {
   advanceBasho,
   isBlocked,
@@ -27,6 +28,16 @@ import { GameOver } from './GameOver';
 import { MidBashoDialog } from './MidBashoDialog';
 
 type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
+
+/** 部屋の絵で押した所 → 開くタブと、その中の欄 */
+const SCENE_TARGET: Record<SceneAction, [Tab, string | null]> = {
+  ledger: ['ledger', null],
+  staff: ['ledger', 'staff-panel'],
+  stable: ['stable', 'mine-title'],
+  policy: ['stable', 'mine-title'],
+  scout: ['stable', 'scout-panel'],
+  banzuke: ['banzuke', null],
+};
 const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
 
 /** 早送り（1年）は、判断が要ることが起きたら止まる */
@@ -68,6 +79,17 @@ export function GameScreen({
   const blocked = isBlocked(game);
 
   if (game.gameOver) return <GameOver game={game} onNewGame={() => setGame(null)} />;
+
+  // 部屋の絵で押した所の画面へ（タブを替え、その欄まで送る）
+  const goTo = (a: SceneAction) => {
+    const [to, id] = SCENE_TARGET[a];
+    setTab(to);
+    if (id)
+      setTimeout(
+        () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        60,
+      );
+  };
 
   const go = (next: GameState) => {
     setGame(next);
@@ -144,7 +166,9 @@ export function GameScreen({
 
       <main className="content">
         <TabTip tab={tab} />
-        {tab === 'stable' && <StableTab game={game} ranks={ranks} setGame={setGame} />}
+        {tab === 'stable' && (
+          <StableTab game={game} ranks={ranks} setGame={setGame} onSceneAction={goTo} />
+        )}
         {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
         {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}
         {tab === 'lineage' && <LineageTab game={game} />}

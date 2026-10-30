@@ -1144,5 +1144,22 @@
   "scene.tab.exterior": "Exterior",
   "scene.exterior": "The stable from outside: the main house and the wrestlers' dormitory",
   "scene.nobori": ". Banners: {names}",
-  "scene.jungyo": "A regional tour venue: an outdoor ring under a hanging roof, with red-and-white curtains and a tent"
+  "scene.jungyo": "A regional tour venue: an outdoor ring under a hanging roof, with red-and-white curtains and a tent",
+  "scene.actions": "Places you can tap",
+  "scene.piece.omoya": "Main house",
+  "scene.piece.dorm": "Dormitory",
+  "scene.piece.chanko": "Kitchen",
+  "scene.piece.gate": "Gate",
+  "scene.piece.clinic": "Clinic",
+  "scene.piece.nafuda": "Name board",
+  "scene.piece.nobori": "Banner",
+  "scene.piece.dohyo": "Ring",
+  "scene.piece.teppo": "Teppo pole",
+  "scene.piece.keikoba_modern": "Practice room",
+  "scene.go.ledger": "Ledger & supporters",
+  "scene.go.staff": "Kitchen & staff",
+  "scene.go.stable": "Your wrestlers",
+  "scene.go.policy": "Training plans",
+  "scene.go.scout": "Scouting & recruits",
+  "scene.go.banzuke": "Banzuke"
 }

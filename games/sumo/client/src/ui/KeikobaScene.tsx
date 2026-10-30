@@ -1,148 +1,94 @@
-import { Fragment, useState, type CSSProperties } from 'react';
+import { useCallback, useState } from 'react';
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { sprite } from '../art/sprites';
-import { PALETTE } from '../art/palette';
-import {
-  EXTERIOR_BASE,
-  EXTERIOR_STAGE,
-  KEIKOBA_STAGE,
-  NOBORI_TAG,
-  exteriorLayout,
-  keikobaLayout,
-  type Placed,
-  type Stage,
-} from '../art/sprites/keikoba';
+import { KEIKOBA_STAGE, keikobaLayout, type Placed } from '../art/sprites/keikoba';
+import { depthOrder, frontCorner, toScreen, type SceneAction } from '../art/hakoniwa/grid';
+import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound';
+import { drawGround } from '../art/hakoniwa/ground';
+import { Hakoniwa, type Drawn } from './Hakoniwa';
 
-/** 絵の最大の幅（px）。稽古場はちょうど2倍、外観は少し小さめに縮める */
-const SCENE_MAX_WIDTH = 640;
-
-/** ドット絵を舞台に並べる。土台の絵（床・母屋）がまだ取り込まれていなければ null。取り込んでいない絵は飛ばす */
-export function SpriteStage({
-  stage,
-  items,
-  base,
-  label,
-  maxWidth = SCENE_MAX_WIDTH,
-}: {
-  stage: Stage;
-  items: Placed[];
-  base: string;
-  label: string;
-  maxWidth?: number;
-}) {
-  if (!sprite(base)) return null;
-  const placed = items.map((p) => ({ p, s: sprite(p.sprite) })).filter((x) => x.s !== null);
-  return (
-    <div
-      className="scene"
-      role="img"
-      aria-label={label}
-      style={{ aspectRatio: `${stage.width} / ${stage.height}`, maxWidth }}
-    >
-      {placed.map(({ p, s }, i) => {
-        const box = {
-          left: `${((p.x - s!.anchor[0]) / stage.width) * 100}%`,
-          top: `${((p.y - s!.anchor[1]) / stage.height) * 100}%`,
-          width: `${(s!.size[0] / stage.width) * 100}%`,
-        };
-        return (
-          <Fragment key={`${p.sprite}-${i}`}>
-            <img className="scene__sprite" src={s!.url} alt="" draggable={false} style={box} />
-            {p.label && <NoboriTag label={p.label} size={s!.size} style={box} />}
-          </Fragment>
-        );
-      })}
-    </div>
-  );
+/** 枠の下の中央で置く絵（稽古場・巡業）を、箱庭の描く物にする */
+export function boxDrawn(items: Placed[]): Drawn[] {
+  return items.map((p) => ({ ...p, anchor: 'box' as const }));
 }
 
-/** 幟に重ねる名前の札（四股名の縦書き）。絵と同じ大きさの SVG で、絵と一緒に伸び縮みする */
-function NoboriTag({
-  label,
-  size,
-  style,
+/** 外観の見える範囲: 左は左奥の塀の手前まで、右は右手前の縁石まで、下は道まで */
+const EXTERIOR_VIEW = {
+  x0: toScreen(0, PLOT.d - 1).x - 12,
+  x1: toScreen(PLOT.w, 1).x + 12,
+  y1: toScreen(PLOT.w - 2, PLOT.d + STREET).y,
+};
+
+type View = 'exterior' | 'keikoba';
+
+/** 部屋の絵: 外観（敷地の箱庭）と稽古場を切り替える。押した建物・物の画面へ行ける */
+export function KeikobaScene({
+  game,
+  onAction,
 }: {
-  label: string;
-  size: [number, number];
-  style: CSSProperties;
+  game: GameState;
+  onAction?: (a: SceneAction) => void;
 }) {
-  const t = NOBORI_TAG;
-  const chars = [...label];
-  const font = Math.min(t.width - 1, (t.height - 2) / chars.length);
-  return (
-    <svg
-      className="scene__sprite"
-      style={style}
-      viewBox={`0 0 ${size[0]} ${size[1]}`}
-      aria-hidden="true"
-    >
-      <rect
-        x={t.x}
-        y={t.y}
-        width={t.width}
-        height={t.height}
-        fill={PALETTE.washi}
-        stroke={PALETTE.sumi}
-        strokeWidth={0.6}
-      />
-      {chars.map((c, i) => (
-        <text
-          key={i}
-          x={t.x + t.width / 2}
-          y={t.y + 1 + font * (i + 0.88)}
-          fontSize={font}
-          textAnchor="middle"
-          fill={PALETTE.sumi}
-          className="scene__nobori"
-        >
-          {c}
-        </text>
-      ))}
-    </svg>
-  );
-}
-
-type View = 'keikoba' | 'exterior';
-
-/** 部屋の絵: 稽古場と外観を切り替える。絵がまだなければ出さない */
-export function KeikobaScene({ game }: { game: GameState }) {
   const { t } = useI18n();
-  const [view, setView] = useState<View>('keikoba');
+  const [view, setView] = useState<View>('exterior');
+  const season = seasonOf(game.bashoIndex);
+  const drawBase = useCallback(
+    (ctx: CanvasRenderingContext2D) => drawGround(ctx, season),
+    [season],
+  );
   const keikoba = keikobaLayout(game);
-  const views: { id: View; stage: Stage; items: Placed[]; base: string }[] = [
-    { id: 'keikoba', stage: KEIKOBA_STAGE, items: keikoba, base: keikoba[0]!.sprite },
-    { id: 'exterior', stage: EXTERIOR_STAGE, items: exteriorLayout(game), base: EXTERIOR_BASE },
-  ];
-  const ready = views.filter((v) => sprite(v.base) !== null);
-  if (ready.length === 0) return null;
-  const current = ready.find((v) => v.id === view) ?? ready[0]!;
-  const nobori = current.items.flatMap((p) => (p.label ? [p.label] : []));
+  const views: View[] = (['exterior', 'keikoba'] as const).filter((v) =>
+    sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),
+  );
+  if (views.length === 0) return null;
+  const current = views.includes(view) ? view : views[0]!;
+  const exterior: Drawn[] = depthOrder(compoundPieces(game)).map((p) => ({
+    sprite: p.sprite,
+    ...frontCorner(p),
+    anchor: 'tip',
+    action: p.action,
+    label: p.label,
+  }));
+  const nobori = exterior.flatMap((d) => (d.label ? [d.label] : []));
   return (
-    <div className="scene-box">
-      {ready.length > 1 && (
+    <section className="scene-box" aria-label={t('scene.view')}>
+      {views.length > 1 && (
         <div className="segmented scene-box__tabs" role="group" aria-label={t('scene.view')}>
-          {ready.map((v) => (
+          {views.map((v) => (
             <button
-              key={v.id}
-              className={`segmented__btn ${current.id === v.id ? 'is-active' : ''}`}
-              aria-pressed={current.id === v.id}
-              onClick={() => setView(v.id)}
+              key={v}
+              className={`segmented__btn ${current === v ? 'is-active' : ''}`}
+              aria-pressed={current === v}
+              onClick={() => setView(v)}
             >
-              {t(`scene.tab.${v.id}`)}
+              {t(`scene.tab.${v}`)}
             </button>
           ))}
         </div>
       )}
-      <SpriteStage
-        stage={current.stage}
-        items={current.items}
-        base={current.base}
-        label={
-          t(`scene.${current.id}`) +
-          (nobori.length > 0 ? t('scene.nobori', { names: nobori.join('・') }) : '')
-        }
-      />
-    </div>
+      {current === 'exterior' ? (
+        <Hakoniwa
+          items={exterior}
+          base="omoya"
+          drawBase={drawBase}
+          view={EXTERIOR_VIEW}
+          label={
+            t('scene.exterior') +
+            (nobori.length > 0 ? t('scene.nobori', { names: nobori.join('・') }) : '')
+          }
+          onAction={onAction}
+        />
+      ) : (
+        <Hakoniwa
+          items={boxDrawn(keikoba)}
+          base={keikoba[0]!.sprite}
+          view={{ x0: 0, y0: 0, x1: KEIKOBA_STAGE.width, y1: KEIKOBA_STAGE.height }}
+          label={t('scene.keikoba')}
+          onAction={onAction}
+          maxWidth={KEIKOBA_STAGE.width * 2}
+        />
+      )}
+    </section>
   );
 }

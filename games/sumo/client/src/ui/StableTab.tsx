@@ -18,6 +18,7 @@ import {
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
+import type { SceneAction } from '../art/hakoniwa/grid';
 import { KeikobaScene } from './KeikobaScene';
 import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
@@ -40,10 +41,12 @@ export function StableTab({
   game,
   ranks,
   setGame,
+  onSceneAction,
 }: {
   game: GameState;
   ranks: ReadonlyMap<number, Rank>;
   setGame: (g: GameState) => void;
+  onSceneAction?: (a: SceneAction) => void;
 }) {
   const { t } = useI18n();
   const { settings, update } = useSettings();
@@ -62,7 +65,7 @@ export function StableTab({
   return (
     <div className="stack">
       <GuideCard game={game} />
-      <KeikobaScene game={game} />
+      <KeikobaScene game={game} onAction={onSceneAction} />
       {detailRikishi && (
         <RikishiDetail
           subject={{

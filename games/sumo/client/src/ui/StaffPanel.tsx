@@ -37,7 +37,7 @@ export function StaffPanel({
   const { t } = useI18n();
   const [choosing, setChoosing] = useState<StaffRole | null>(null);
   return (
-    <section className="panel">
+    <section className="panel" id="staff-panel">
       <h2>{t('staff.title')}</h2>
       <p className="note">{t('staff.note')}</p>
       <ul className="plain-list">

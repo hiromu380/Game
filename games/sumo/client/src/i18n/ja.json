@@ -1144,5 +1144,22 @@
   "scene.tab.exterior": "外観",
   "scene.exterior": "部屋の外観。母屋と、力士の暮らす寮",
   "scene.nobori": "。幟: {names}",
-  "scene.jungyo": "巡業の会場。外に組んだ土俵と吊り屋根、紅白幕とテント"
+  "scene.jungyo": "巡業の会場。外に組んだ土俵と吊り屋根、紅白幕とテント",
+  "scene.actions": "部屋の絵で押せる所",
+  "scene.piece.omoya": "母屋",
+  "scene.piece.dorm": "寮",
+  "scene.piece.chanko": "ちゃんこ場",
+  "scene.piece.gate": "門",
+  "scene.piece.clinic": "治療院",
+  "scene.piece.nafuda": "名札掛け",
+  "scene.piece.nobori": "幟",
+  "scene.piece.dohyo": "土俵",
+  "scene.piece.teppo": "鉄砲柱",
+  "scene.piece.keikoba_modern": "稽古場",
+  "scene.go.ledger": "帳簿・後援会へ",
+  "scene.go.staff": "ちゃんこ・部屋の人へ",
+  "scene.go.stable": "弟子の一覧へ",
+  "scene.go.policy": "稽古の方針へ",
+  "scene.go.scout": "スカウト・入門希望者へ",
+  "scene.go.banzuke": "番付へ"
 }

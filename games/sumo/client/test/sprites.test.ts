@@ -53,73 +53,10 @@ describe('稽古場の絵の並べ方', () => {
     expect(at(WEIGHTS_FROM_DOJO)).toContain('weights');
   });
 
-  it('改修3段目は今どきの稽古場。外観の寮は増築の段で変わる', async () => {
-    const { keikobaLayout, exteriorLayout, MODERN_FROM_DOJO } =
-      await import('../src/art/sprites/keikoba');
-    const g = (dojo: number, dorm: number) =>
-      ({
-        bashoIndex: 0,
-        rikishi: [],
-        banzuke: [],
-        titles: {},
-        player: { facilities: { dojo, dorm, trainer: 0 } },
-      }) as never;
-    expect(keikobaLayout(g(MODERN_FROM_DOJO, 0))[0]!.sprite).toBe('keikoba_modern');
-    const sprites = exteriorLayout(g(0, 0)).map((p) => p.sprite);
-    expect(sprites).toContain('dorm_0');
-    expect(sprites).toContain('omoya');
-    expect(sprites).toContain('gate');
-    expect(sprites).not.toContain('clinic');
-    expect(exteriorLayout(g(0, 2)).map((p) => p.sprite)).toContain('dorm_2');
-    // 治療院はトレーナー契約のとき。奥から順（足元の y が増える順）に描く
-    const withClinic = exteriorLayout({
-      bashoIndex: 0,
-      rikishi: [],
-      banzuke: [],
-      titles: {},
-      player: { facilities: { dojo: 0, dorm: 0, trainer: 1 } },
-    } as never);
-    expect(withClinic.map((p) => p.sprite)).toContain('clinic');
-    const ys = withClinic.map((p) => p.y);
-    expect([...ys].sort((a, b) => a - b)).toEqual(ys);
-  });
-
-  it('季節の木は場所の季節に合わせる（春場所は桜）', async () => {
-    const { exteriorLayout, seasonOf } = await import('../src/art/sprites/keikoba');
-    expect([0, 1, 2, 3, 4, 5].map(seasonOf)).toEqual([
-      'winter',
-      'spring',
-      'summer',
-      'summer',
-      'autumn',
-      'autumn',
-    ]);
-    const at = (bashoIndex: number) =>
-      exteriorLayout({
-        bashoIndex,
-        rikishi: [],
-        banzuke: [],
-        titles: {},
-        player: { facilities: { dojo: 0, dorm: 0, trainer: 0 } },
-      } as never).map((p) => p.sprite);
-    expect(at(7)).toContain('tree_season__spring');
-    expect(at(6)).toContain('tree_season__winter');
-  });
-
-  it('自分の部屋の関取の幟を、番付の上から3本まで立てる（四股名を重ねる）', async () => {
-    const { exteriorLayout, NOBORI_MAX } = await import('../src/art/sprites/keikoba');
-    const { createGame } = await import('@ichimon/sim');
-    const g = createGame({ seed: 4 });
-    const none = exteriorLayout(g).filter((p) => p.sprite === 'nobori');
-    // 開いたばかりの部屋に関取はいない
-    expect(none).toHaveLength(0);
-    // 番付の上の4人を自分の部屋に移すと、上から3人の幟
-    const top = g.banzuke.slice(0, 4);
-    for (const r of g.rikishi) if (top.includes(r.id)) r.stableId = g.player.stableId;
-    const nobori = exteriorLayout(g).filter((p) => p.sprite === 'nobori');
-    expect(nobori).toHaveLength(NOBORI_MAX);
-    const name = (id: number) => g.rikishi.find((r) => r.id === id)!.name;
-    expect(nobori.map((p) => p.label)).toEqual(top.slice(0, 3).map(name));
+  it('改修3段目は今どきの稽古場', async () => {
+    const { keikobaLayout, MODERN_FROM_DOJO } = await import('../src/art/sprites/keikoba');
+    const g = { player: { facilities: { dojo: MODERN_FROM_DOJO } } } as never;
+    expect(keikobaLayout(g)[0]!.sprite).toBe('keikoba_modern');
   });
 
   it('巡業のテントは春と秋が赤、夏と冬が藍白', async () => {

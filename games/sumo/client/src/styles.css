@@ -2012,6 +2012,72 @@ html:lang(en) .choice__desc {
   flex-basis: 100%;
 }
 
+/* 部屋の箱庭（1枚のキャンバスに描いて拡大する） */
+.hakoniwa {
+  display: grid;
+  gap: 8px;
+}
+.hakoniwa__stage {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+.hakoniwa__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.hakoniwa__canvas.is-pointing {
+  cursor: pointer;
+}
+.hakoniwa__overlay {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+}
+.hakoniwa__tip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: grid;
+  padding: 4px 8px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+.hakoniwa__tip-go {
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.hakoniwa__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: var(--card);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.chip:hover,
+.chip:focus-visible {
+  border-color: var(--ink);
+}
+
 /* 部屋の絵（ドット絵） */
 .scene-box {
   display: grid;
@@ -2035,4 +2101,12 @@ html:lang(en) .choice__desc {
   image-rendering: pixelated;
   user-select: none;
   pointer-events: none;
+}
+@media (max-width: 600px) {
+  .hakoniwa__actions .chip .muted {
+    display: none;
+  }
+  .hakoniwa__actions .chip {
+    padding: 0 10px;
+  }
 }
