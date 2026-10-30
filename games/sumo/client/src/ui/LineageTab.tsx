@@ -1,4 +1,4 @@
-import type { GameState } from '@ichimon/sim';
+import { freeNames, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName, rankLabel } from '../format';
 import { FamilyTree } from './FamilyTree';
@@ -67,7 +67,7 @@ export function LineageTab({ game }: { game: GameState }) {
             </li>
           ))}
         </ul>
-        <p className="note">{t('lineage.successorNote', { free: game.toshiyoriFree })}</p>
+        <p className="note">{t('lineage.successorNote', { free: freeNames(game).length })}</p>
       </section>
 
       <section className="panel">

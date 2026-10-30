@@ -3,6 +3,8 @@
  */
 import type { FamilyNode, GameState } from '../model/types';
 import { SAVE_VERSION } from '../world/create';
+import { populateAssociation } from '../world/association';
+import { createPrng, deriveSeed, SEED } from '../core/prng';
 
 type Raw = Record<string, unknown> & { version?: number };
 
@@ -16,7 +18,45 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 5) s = v5to6(s);
   if (s.version === 6) s = v6to7(s);
   if (s.version === 7) s = v7to8(s);
+  if (s.version === 8) s = v8to9(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 8 → 9: 協会。分家の師匠を親方として作り、一門・名跡・架空の部屋の親方を足す（ゲームのシードから決める）
+ */
+function v8to9(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState & { toshiyoriFree?: number };
+  const rng = createPrng(deriveSeed(s.seed, SEED.world, 9));
+  delete s.toshiyoriFree;
+  for (const st of s.stables) {
+    st.ichimonId = 0;
+    const b = st.branch as
+      (typeof st.branch & { masterShikona?: string; masterAge?: number }) | null;
+    if (b) {
+      s.oyakata.push({
+        id: s.nextId++,
+        name: st.name,
+        shikona: b.masterShikona ?? '',
+        age: b.masterAge ?? 50,
+        stableId: st.id,
+        role: 'master',
+        style: st.style,
+        highestRank: null,
+        generation: null,
+        fromRikishiId: null,
+        waitingSince: null,
+        since: s.bashoIndex,
+      });
+      delete b.masterShikona;
+      delete b.masterAge;
+    }
+  }
+  s.names = [];
+  s.ichimon = [];
+  populateAssociation(s, rng);
+  s.version = 9;
+  return s as unknown as Raw;
 }
 
 /** 7 → 8: 場所の間の出来事（なし）と稽古の伸びの倍率（1） */

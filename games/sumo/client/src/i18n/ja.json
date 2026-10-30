@@ -331,5 +331,21 @@
   "share.fileName": "{stable}一門の系譜.png",
   "share.treeTitle": "{stable}一門 系譜図",
   "share.treeSub": "{generations}代・関取 {sekitori}人・横綱 {yokozuna}人・幕内優勝 {yusho}回（{basho}）",
-  "share.cardStats": "関取 {sekitori}・横綱 {yokozuna}・優勝 {yusho}"
+  "share.cardStats": "関取 {sekitori}・横綱 {yokozuna}・優勝 {yusho}",
+  "tab.association": "協会",
+  "role.sanyo": "参与",
+  "assoc.title": "日本相撲協会（架空）",
+  "assoc.note": "すべての部屋は5つの一門のどれかに属します。師匠が定年になると部屋付きの親方が名跡を交換して継ぎ、継ぐ人がいなければ部屋は閉じ、力士は同じ一門の部屋へ移ります。年寄名跡は105で、空かないと親方になれません。",
+  "assoc.stables": "部屋",
+  "assoc.oyakata": "親方",
+  "assoc.names": "年寄名跡",
+  "assoc.namesValue": "{held} / {total}",
+  "assoc.noFree": "いま空いている名跡はありません。",
+  "assoc.free": "空いている名跡: {names}",
+  "assoc.ichimon": "{name}一門",
+  "assoc.mine": "自分の一門",
+  "assoc.ichimonStats": "{stables}部屋・力士 {all}人・関取 {sekitori}人",
+  "assoc.yours": "自分の部屋",
+  "assoc.branch": "分家",
+  "assoc.stableStats": "師匠 {master}（{age}歳）・力士 {all}人・関取 {sekitori}人・ほかの親方 {staff}人"
 }

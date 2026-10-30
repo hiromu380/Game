@@ -24,6 +24,7 @@ import { ranksOf } from '../banzuke/rank';
 import { applyHighest, applyMochikyukinMinimum } from '../career/update';
 import { makeCandidates } from '../game/recruit';
 import { addNode } from '../lineage/family';
+import { populateAssociation } from './association';
 import { NO_FACILITIES } from '../money/facilities';
 
 /**
@@ -34,8 +35,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 6: けがを押して出場（rikishi.playHurt）
  * 7: 番付の推移と歴代の力士（rikishi.track・player.alumni）
  * 8: 場所の間の出来事（pending.happening・rikishi.boost）
+ * 9: 協会（names・ichimon・stables.ichimonId・すべての部屋の親方。toshiyoriFree と分家の masterShikona/masterAge はなくす）
  */
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -53,6 +55,8 @@ export interface NewGameOptions {
   seed: number;
   /** 自分の親方の現役時代の型（選ばなければ乱数） */
   oyakataStyle?: Style;
+  /** 自分の部屋が入る一門（1〜5。選ばなければ乱数） */
+  ichimonId?: number;
 }
 
 export function createGame(options: NewGameOptions): GameState {
@@ -73,13 +77,21 @@ export function createGame(options: NewGameOptions): GameState {
     name: playerOyakataName,
     isPlayer: true,
     style: oyakataStyle,
+    ichimonId: 0,
     branch: null,
   };
   stables.push(playerStable);
   for (let i = 0; i < GAME.npcStables; i++) {
     const name = makeToshiyoriName(nameRng, usedToshiyori);
     usedToshiyori.add(name);
-    stables.push({ id: nextId++, name, isPlayer: false, style: rng.pick(STYLES), branch: null });
+    stables.push({
+      id: nextId++,
+      name,
+      isPlayer: false,
+      style: rng.pick(STYLES),
+      ichimonId: 0,
+      branch: null,
+    });
   }
   const npcStables = stables.slice(1);
 
@@ -183,7 +195,8 @@ export function createGame(options: NewGameOptions): GameState {
       facilities: { ...NO_FACILITIES },
       alumni: [],
     },
-    toshiyoriFree: 4,
+    names: [],
+    ichimon: [],
     nextId,
     pending: {
       candidates: [],
@@ -197,6 +210,7 @@ export function createGame(options: NewGameOptions): GameState {
     gameOver: null,
     lastReport: null,
   };
+  populateAssociation(state, rng, options.ichimonId);
   addNode(state, {
     name: oyakata.name,
     shikona: oyakata.shikona,

@@ -520,6 +520,83 @@ h3 {
   color: var(--shu);
 }
 
+/* 協会 */
+.panel--mine {
+  border-color: var(--shu);
+}
+.assoc-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0 0 8px;
+}
+.assoc-stats dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+  font-size: 0.85rem;
+}
+.assoc-stats dd {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.assoc-head {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+.assoc-head::before {
+  content: '▸';
+  color: var(--shu);
+}
+.assoc-head[aria-expanded='true']::before {
+  content: '▾';
+}
+.assoc-head__name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+}
+.assoc-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.assoc-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.assoc-list li.is-mine {
+  border: 2px solid var(--shu);
+  background: var(--shu-light);
+}
+.assoc-list .figure {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.assoc-list__main {
+  display: grid;
+}
+.assoc-list__main strong {
+  font-family: var(--font-head);
+}
+
 /* 力士の詳細 */
 .detail {
   display: grid;

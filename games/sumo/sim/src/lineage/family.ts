@@ -3,10 +3,7 @@
  *
  * どれも state を直接変える（呼び出し側でコピー済み）。
  */
-import { TOSHIYORI } from '../balance/career';
-import { stableCapacity } from '../money/facilities';
 import { LINEAGE } from '../balance/lineage';
-import { makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { FamilyNode, GameState, Oyakata } from '../model/types';
 
@@ -64,7 +61,7 @@ export function rollIndependence(state: GameState): void {
   }
 }
 
-/** 独立を認める: 新しい部屋（分家）を開き、選んだ内弟子を連れて出る */
+/** 独立を認める: 新しい部屋（分家）を開き、選んだ内弟子を連れて出る。親方はそのまま新しい部屋の師匠になる */
 export function approveIndependence(
   state: GameState,
   oyakata: Oyakata,
@@ -83,113 +80,57 @@ export function approveIndependence(
     toBashoIndex: null,
     highestRank: oyakata.highestRank,
   });
-  // 部屋付きの節はここで閉じ、分家の師匠の節に引き継ぐ（同じ人。系譜図では分家の節だけを見せる）
-  if (node) {
-    branchNode.parentId = node.parentId;
-    state.player.family = state.player.family.filter((n) => n.id !== node.id);
-  }
+  // 部屋付きの節は分家の師匠の節に引き継ぐ（同じ人。系譜図では分家の節だけを見せる）
+  if (node) state.player.family = state.player.family.filter((n) => n.id !== node.id);
+  const parent = state.stables.find((s) => s.id === state.player.stableId)!;
   state.stables.push({
     id: stableId,
     name: oyakata.name,
     isPlayer: false,
     style: oyakata.style,
-    branch: {
-      parentStableId: state.player.stableId,
-      masterShikona: oyakata.shikona,
-      masterAge: oyakata.age,
-      nodeId: branchNode.id,
-    },
+    ichimonId: parent.ichimonId,
+    branch: { parentStableId: parent.id, nodeId: branchNode.id },
   });
   const allowed = new Set(takeIds.slice(0, LINEAGE.maxTakeDisciples));
   for (const r of state.rikishi) {
     if (r.stableId === state.player.stableId && allowed.has(r.id)) r.stableId = stableId;
   }
-  state.oyakata = state.oyakata.filter((o) => o.id !== oyakata.id);
+  oyakata.role = 'master';
+  oyakata.stableId = stableId;
+  oyakata.since = state.bashoIndex;
   state.pending.retireRequests = state.pending.retireRequests.filter((id) =>
     state.rikishi.some((r) => r.id === id && r.stableId === state.player.stableId),
   );
 }
 
-/** 年の終わり: 分家の親方の年齢と、定年のときの代替わり・閉鎖 */
-export function ageBranches(state: GameState): void {
-  const rng = createPrng(deriveSeed(state.seed, SEED.lineage, state.bashoIndex, 1));
-  for (const s of [...state.stables]) {
-    if (!s.branch) continue;
-    s.branch.masterAge++;
-    if (s.branch.masterAge < TOSHIYORI.retireAge) continue;
-    const old = state.player.family.find((n) => n.id === s.branch!.nodeId);
-    closeNode(state, old);
-    if (rng.chance(LINEAGE.branchSuccessionChance)) {
-      const used = new Set(state.rikishi.map((r) => r.name));
-      const shikona = makeShikona(rng, used);
-      const next = addNode(state, {
-        name: s.name,
-        shikona,
-        parentId: old?.id ?? null,
-        stableId: s.id,
-        kind: 'branch',
-        oyakataId: null,
-        fromBashoIndex: state.bashoIndex,
-        toBashoIndex: null,
-        highestRank: null,
-      });
-      s.branch.masterShikona = shikona;
-      s.branch.masterAge = rng.range(LINEAGE.branchSuccessorAge[0], LINEAGE.branchSuccessorAge[1]);
-      s.branch.nodeId = next.id;
-    } else {
-      closeBranch(state, s.id);
-    }
-  }
-}
-
-/** 分家を閉じる: 力士は本家（入りきらなければ他の部屋）へ移る */
-export function closeBranch(state: GameState, stableId: number): void {
-  const rng = createPrng(deriveSeed(state.seed, SEED.lineage, state.bashoIndex, stableId));
-  const others = state.stables.filter((x) => !x.isPlayer && !x.branch && x.id !== stableId);
-  let mine = state.rikishi.filter((r) => r.stableId === state.player.stableId).length;
-  for (const r of state.rikishi) {
-    if (r.stableId !== stableId) continue;
-    if (mine < stableCapacity(state)) {
-      r.stableId = state.player.stableId;
-      mine++;
-    } else {
-      r.stableId = rng.pick(others).id;
-    }
-  }
-  state.stables = state.stables.filter((x) => x.id !== stableId);
-}
-
-/** 本家の跡継ぎがいないとき、分家を継ぐ: 本家は閉じ、力士は分家へ移る。分家の親方として次の代を操作する */
-export function takeOverBranch(state: GameState, stableId: number): void {
+/**
+ * 本家の跡継ぎがいないとき、分家を継ぐ: 本家は閉じ、力士と親方衆は分家へ移る。分家の師匠として次の代を操作する
+ * （前の師匠は参与として分家に残るか、協会を去る）
+ */
+export function takeOverBranch(
+  state: GameState,
+  stableId: number,
+  retireOld: (o: Oyakata) => void,
+): void {
   const branch = state.stables.find((s) => s.id === stableId && s.branch);
   if (!branch?.branch) return;
+  const master = state.oyakata.find((o) => o.stableId === stableId && o.role === 'master');
+  if (!master) return;
   const oldStable = state.player.stableId;
-  closeNode(state, nodeOfOyakata(state, state.player.oyakataId));
-  state.oyakata = state.oyakata.filter((o) => o.stableId !== oldStable);
+  const oldMaster = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  closeNode(state, nodeOfOyakata(state, oldMaster.id));
   for (const r of state.rikishi) if (r.stableId === oldStable) r.stableId = stableId;
+  for (const o of state.oyakata) if (o.stableId === oldStable) o.stableId = stableId;
   state.stables = state.stables.filter((s) => s.id !== oldStable);
-  const oyakataId = state.nextId++;
+  retireOld(oldMaster);
   const node = state.player.family.find((n) => n.id === branch.branch!.nodeId);
-  state.oyakata.push({
-    id: oyakataId,
-    name: branch.name,
-    shikona: branch.branch.masterShikona,
-    age: branch.branch.masterAge,
-    stableId,
-    role: 'master',
-    style: branch.style,
-    highestRank: node?.highestRank ?? null,
-    generation: state.player.generation + 1,
-    fromRikishiId: null,
-    waitingSince: null,
-    since: node?.fromBashoIndex ?? state.bashoIndex,
-  });
   if (node) {
     node.kind = 'master';
-    node.oyakataId = oyakataId;
+    node.oyakataId = master.id;
   }
+  master.generation = state.player.generation + 1;
   branch.isPlayer = true;
   branch.branch = null;
   state.player.stableId = stableId;
-  state.player.oyakataId = oyakataId;
+  state.player.oyakataId = master.id;
 }

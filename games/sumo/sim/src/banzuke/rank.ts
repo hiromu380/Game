@@ -85,3 +85,23 @@ export function isSanyaku(rank: Rank): boolean {
 export function rankKey(rank: Rank): string {
   return `${rank.title ?? rank.division}-${rank.number}-${rank.side}`;
 }
+
+const DIVISION_ORDER: Record<Rank['division'], number> = {
+  makuuchi: 0,
+  juryo: 1,
+  makushita: 2,
+  sandanme: 3,
+  jonidan: 4,
+  jonokuchi: 5,
+};
+const TITLE_VALUE: Record<Title, number> = { Y: 0, O: 1, S: 2, K: 3, M: 4 };
+
+/** 地位の高さ（小さいほど上。比べるためだけの値） */
+export function rankValue(rank: Rank): number {
+  return (
+    DIVISION_ORDER[rank.division] * 10000 +
+    (rank.title ? TITLE_VALUE[rank.title] * 1000 : 0) +
+    rank.number * 2 +
+    (rank.side === 'W' ? 1 : 0)
+  );
+}

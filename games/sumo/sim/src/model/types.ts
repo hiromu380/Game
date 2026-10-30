@@ -119,18 +119,30 @@ export interface Stable {
   isPlayer: boolean;
   /** 架空の部屋の稽古の好み */
   style: Style;
-  /** 自分の一門の分家（自分の部屋から独立した部屋）。それ以外は null */
+  /** 所属する一門 */
+  ichimonId: number;
+  /** 自分の系譜の分家（自分の部屋・分家から独立した部屋）。それ以外は null */
   branch: BranchInfo | null;
 }
 
-/** 分家の部屋の親方（自動で運営する。親方個人は Oyakata として持たず、ここで年齢だけ数える） */
+/** 分家の部屋（自動で運営する。師匠は Oyakata として持つ） */
 export interface BranchInfo {
   /** 独立元の部屋 */
   parentStableId: number;
-  masterShikona: string;
-  masterAge: number;
-  /** 今の親方の系譜図の節 */
+  /** 今の師匠の系譜図の節 */
   nodeId: number;
+}
+
+/** 一門（部屋のまとまり。すべての親方がどれかに属する） */
+export interface Ichimon {
+  id: number;
+  name: string;
+}
+
+/** 年寄名跡（holderId は持っている親方。空きは null） */
+export interface ToshiyoriName {
+  name: string;
+  holderId: number | null;
 }
 
 /** 系譜図の節（一門の親方1人） */
@@ -156,8 +168,11 @@ export interface FamilyNode {
   makuuchiYusho: number;
 }
 
-/** master: 部屋の師匠 / heyatsuki: 部屋付きの親方 / waiting: 資格はあるが名跡の空き待ち（部屋で手伝う） */
-export type OyakataRole = 'master' | 'heyatsuki' | 'waiting';
+/**
+ * master: 部屋の師匠 / heyatsuki: 部屋付きの親方 / waiting: 資格はあるが名跡の空き待ち（部屋で手伝う）/
+ * sanyo: 定年後の再雇用（参与。70歳まで名跡を持ったまま部屋にいる）
+ */
+export type OyakataRole = 'master' | 'heyatsuki' | 'waiting' | 'sanyo';
 
 export interface Oyakata {
   id: number;
@@ -278,8 +293,10 @@ export interface GameState {
   stables: Stable[];
   oyakata: Oyakata[];
   player: PlayerState;
-  /** 空いている年寄名跡の数 */
-  toshiyoriFree: number;
+  /** 年寄名跡（105） */
+  names: ToshiyoriName[];
+  /** 一門（5つ） */
+  ichimon: Ichimon[];
   nextId: number;
   pending: Pending;
   gameOver: GameOverReason | null;

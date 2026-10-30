@@ -25,19 +25,14 @@ import { settleBasho, sum } from '../money/ledger';
 import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
 import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
-import { currentLineage, isBlocked, newToshiyoriName, retireRikishi } from './state';
+import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { SANSHO } from '../balance/sansho';
 import { selectSansho } from '../basho/sansho';
 import { JUNGYO, JUNGYO_AFTER } from '../balance/events';
 import { FACILITY_EFFECTS } from '../balance/facilities';
-import {
-  ageBranches,
-  closeNode,
-  masterNodeOf,
-  nodeOfOyakata,
-  rollIndependence,
-} from '../lineage/family';
+import { closeNode, masterNodeOf, nodeOfOyakata, rollIndependence } from '../lineage/family';
+import { takeName, yearEndAssociation } from '../world/association';
 
 export function advanceBasho(input: GameState): GameState {
   if (input.gameOver || isBlocked(input)) return input;
@@ -313,37 +308,29 @@ function yearEnd(state: GameState) {
   const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex));
   for (const r of state.rikishi) r.age++;
   for (const o of state.oyakata) o.age++;
-  state.toshiyoriFree += rng.range(TOSHIYORI.freedPerYear[0], TOSHIYORI.freedPerYear[1]);
-  // 自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る
+  // 協会: 参与の退職・部屋付きの定年・架空の部屋（分家を含む）の師匠の定年と継承・独立
+  yearEndAssociation(state, rng);
+  // 空いた名跡は自分の部屋の名跡待ちに先に回す（前もって継承の話をつけている）。待ちすぎた者は協会を去る
   for (const o of state.oyakata.filter((x) => x.role === 'waiting')) {
     const node = nodeOfOyakata(state, o.id);
-    if (state.toshiyoriFree > 0) {
+    const name = takeName(state, o.id, rng);
+    if (name) {
       o.role = 'heyatsuki';
-      o.name = newToshiyoriName(state, o.id);
+      o.name = name;
       o.waitingSince = null;
       o.since = state.bashoIndex;
-      state.toshiyoriFree--;
       if (node) {
         node.kind = 'heyatsuki';
-        node.name = o.name;
+        node.name = name;
       }
     } else if (state.bashoIndex - o.waitingSince! >= TOSHIYORI.waitYears * 6) {
       state.oyakata = state.oyakata.filter((x) => x.id !== o.id);
       closeNode(state, node);
     }
   }
-  // 空いた名跡は他の部屋がすぐに埋める。残るのは少しだけ
-  state.toshiyoriFree = Math.min(state.toshiyoriFree, rng.range(0, TOSHIYORI.freeAfterYearMax));
-  // 部屋付きの親方の定年
-  for (const o of state.oyakata) {
-    if (o.role !== 'master' && o.age >= TOSHIYORI.retireAge)
-      closeNode(state, nodeOfOyakata(state, o.id));
-  }
-  state.oyakata = state.oyakata.filter((o) => o.role === 'master' || o.age < TOSHIYORI.retireAge);
-  // 分家の親方の定年（代替わり・閉鎖）と、部屋付きの親方の独立の申し出
-  ageBranches(state);
+  // 部屋付きの親方の独立の申し出
   rollIndependence(state);
-  // 自分の親方の定年: 跡継ぎ選び
+  // 自分の親方の定年: 跡継ぎ選び（部屋付きの親方から。いなければ分家を継ぐ）
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   if (master.age >= TOSHIYORI.retireAge) {
     const candidates = state.oyakata

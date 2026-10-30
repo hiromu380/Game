@@ -79,7 +79,12 @@ describe('分家（独立）', () => {
     const branch = next.stables.find((x) => x.branch)!;
     expect(branch.name).toBe(o.name);
     expect(next.rikishi.filter((r) => r.stableId === branch.id).map((r) => r.id)).toEqual(take);
-    expect(next.oyakata.some((x) => x.id === o.id)).toBe(false);
+    // 親方は新しい部屋の師匠になる（名跡はそのまま）
+    expect(next.oyakata.find((x) => x.id === o.id)).toMatchObject({
+      role: 'master',
+      stableId: branch.id,
+    });
+    expect(branch.ichimonId).toBe(next.stables.find((x) => x.isPlayer)!.ichimonId);
     const node = next.player.family.find((n) => n.id === branch.branch!.nodeId)!;
     expect(node).toMatchObject({
       kind: 'branch',
@@ -126,12 +131,22 @@ describe('セーブの変換', () => {
     delete v1.player.family;
     delete v1.pending.independence;
     delete v1.pending.takeOver;
-    for (const st of v1.stables) delete st.branch;
+    // 版1には架空の部屋の親方・名跡・一門がない
+    v1.oyakata = v1.oyakata.filter((o: { id: number }) => o.id === v1.player.oyakataId);
+    delete v1.names;
+    delete v1.ichimon;
+    v1.toshiyoriFree = 4;
+    for (const st of v1.stables) {
+      delete st.branch;
+      delete st.ichimonId;
+    }
     for (const o of v1.oyakata) delete o.since;
     const m = migrateSave(v1)!;
-    expect(m.version).toBe(8);
+    expect(m.version).toBe(9);
     expect(m.player.facilities).toEqual({ dorm: 0, dojo: 0, trainer: 0, scout: 0 });
     expect(m.player.family).toHaveLength(1);
+    expect(m.names).toHaveLength(105);
+    expect(m.ichimon).toHaveLength(5);
     expect(m.stables.every((x) => x.branch === null)).toBe(true);
     expect(advanceBasho(m).bashoIndex).toBe(1);
   });

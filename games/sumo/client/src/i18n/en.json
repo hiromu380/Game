@@ -331,5 +331,21 @@
   "share.fileName": "{stable}-ichimon-family-tree.png",
   "share.treeTitle": "{stable} ichimon family tree",
   "share.treeSub": "{generations} generations, {sekitori} sekitori, {yokozuna} yokozuna, {yusho} makuuchi titles ({basho})",
-  "share.cardStats": "Sekitori {sekitori}, yokozuna {yokozuna}, titles {yusho}"
+  "share.cardStats": "Sekitori {sekitori}, yokozuna {yokozuna}, titles {yusho}",
+  "tab.association": "Association",
+  "role.sanyo": "Advisor",
+  "assoc.title": "Sumo Association (fictional)",
+  "assoc.note": "Every stable belongs to one of five ichimon. When a master retires, a coach swaps elder names with him and inherits the stable; with no heir the stable closes and its wrestlers move within the ichimon. There are 105 elder names, and one must be free to become an elder.",
+  "assoc.stables": "Stables",
+  "assoc.oyakata": "Elders",
+  "assoc.names": "Elder names",
+  "assoc.namesValue": "{held} / {total}",
+  "assoc.noFree": "No elder names are free right now.",
+  "assoc.free": "Free names: {names}",
+  "assoc.ichimon": "{name} ichimon",
+  "assoc.mine": "Your ichimon",
+  "assoc.ichimonStats": "{stables} stables, {all} wrestlers, {sekitori} sekitori",
+  "assoc.yours": "Your stable",
+  "assoc.branch": "Branch",
+  "assoc.stableStats": "Master {master} (age {age}), {all} wrestlers, {sekitori} sekitori, {staff} other elders"
 }

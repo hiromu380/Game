@@ -28,3 +28,5 @@ export { power } from './basho/strength';
 export { sum as sumMoney } from './money/ledger';
 export { migrateSave } from './game/migrate';
 export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './money/facilities';
+export { freeNames, masterOf } from './world/association';
+export { rankValue } from './banzuke/rank';

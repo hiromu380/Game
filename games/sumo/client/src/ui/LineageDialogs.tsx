@@ -3,6 +3,7 @@ import {
   chooseSuccessor,
   chooseTakeOver,
   GAME,
+  masterOf,
   pickKakun,
   type GameState,
   type KakunId,
@@ -134,8 +135,8 @@ export function TakeOverDialog({
                 <strong>{t('top.stable', { name: s.name })}</strong>
                 <span className="muted">
                   {t('takeOver.meta', {
-                    shikona: s.branch!.masterShikona,
-                    age: s.branch!.masterAge,
+                    shikona: masterOf(game, s.id)?.shikona ?? '',
+                    age: masterOf(game, s.id)?.age ?? '',
                     count: game.rikishi.filter((r) => r.stableId === s.id).length,
                   })}
                 </span>

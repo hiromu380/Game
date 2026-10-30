@@ -9,15 +9,9 @@ import { GAME } from '../balance/game';
 import { rikishiFromCandidate } from '../career/create';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import { KAKUN_IDS } from '../lineage/kakun';
-import {
-  addNode,
-  approveIndependence,
-  closeNode,
-  nodeOfOyakata,
-  takeOverBranch,
-} from '../lineage/family';
+import { addNode, approveIndependence, nodeOfOyakata, takeOverBranch } from '../lineage/family';
+import { npcRetireeTakesName, retireOrSanyo, swapNames, takeName } from '../world/association';
 import { eligibleForToshiyori } from '../lineage/toshiyori';
-import { makeToshiyoriName } from '../core/names';
 import { styleOf } from '../career/create';
 import type {
   BashoReport,
@@ -56,42 +50,46 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
   if (!r) return;
   const mine = r.stableId === state.player.stableId;
   let becameOyakata = false;
+  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, id));
   if (eligibleForToshiyori(r) && mine) {
-    const free = state.toshiyoriFree > 0;
     const oyakataId = state.nextId++;
+    const name = takeName(state, oyakataId, rng);
     state.oyakata.push({
       id: oyakataId,
-      name: free ? newToshiyoriName(state, id) : '',
+      name: name ?? '',
       shikona: r.name,
       age: r.age,
       stableId: r.stableId,
-      role: free ? 'heyatsuki' : 'waiting',
+      role: name ? 'heyatsuki' : 'waiting',
       style: styleOf(r.abilities),
       highestRank: r.career.highestRank,
       generation: null,
       fromRikishiId: r.id,
-      waitingSince: free ? null : state.bashoIndex,
+      waitingSince: name ? null : state.bashoIndex,
       since: state.bashoIndex,
     });
     addNode(state, {
-      name: state.oyakata[state.oyakata.length - 1]!.name,
+      name: name ?? '',
       shikona: r.name,
       parentId: nodeOfOyakata(state, state.player.oyakataId)?.id ?? null,
       stableId: r.stableId,
-      kind: free ? 'heyatsuki' : 'waiting',
+      kind: name ? 'heyatsuki' : 'waiting',
       oyakataId,
       fromBashoIndex: state.bashoIndex,
       toBashoIndex: null,
       highestRank: r.career.highestRank,
     });
-    if (free) state.toshiyoriFree--;
     becameOyakata = true;
-  } else if (eligibleForToshiyori(r) && state.toshiyoriFree > 0) {
-    const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, id));
-    if (rng.chance(TOSHIYORI.npcTakeChance)) {
-      state.toshiyoriFree--;
-      becameOyakata = true;
-    }
+  } else if (eligibleForToshiyori(r) && rng.chance(TOSHIYORI.npcTakeChance)) {
+    becameOyakata = npcRetireeTakesName(
+      state,
+      r.stableId,
+      r.name,
+      r.career.highestRank,
+      r.age,
+      styleOf(r.abilities),
+      rng,
+    );
   }
   report?.retired.push({ id, name: r.name, stableId: r.stableId, becameOyakata });
   if (mine && r.career.basho > 0) {
@@ -111,12 +109,6 @@ export function retireRikishi(state: GameState, id: number, report: BashoReport 
   state.banzuke = state.banzuke.filter((x) => x !== id);
   delete state.titles[id];
   state.pending.retireRequests = state.pending.retireRequests.filter((x) => x !== id);
-}
-
-export function newToshiyoriName(state: GameState, salt: number): string {
-  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, salt));
-  const used = new Set([...state.oyakata.map((o) => o.name), ...state.stables.map((s) => s.name)]);
-  return makeToshiyoriName(rng, used);
 }
 
 /** 稽古の方針を決める（自分の弟子だけ） */
@@ -180,10 +172,17 @@ export function chooseSuccessor(input: GameState, oyakataId: number): GameState 
   const prev = state.player.oyakataId;
   const lineage = currentLineage(state);
   lineage.toBashoIndex = state.bashoIndex;
-  closeNode(state, nodeOfOyakata(state, prev));
-  state.oyakata = state.oyakata.filter((o) => o.id !== prev);
+  const old = state.oyakata.find((o) => o.id === prev)!;
   const next = state.oyakata.find((o) => o.id === oyakataId)!;
+  // 名跡を交換して部屋の名前を残す。先代は参与として残るか、協会を去る
+  swapNames(state, next, old);
+  retireOrSanyo(
+    state,
+    old,
+    createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, prev)),
+  );
   next.role = 'master';
+  next.since = state.bashoIndex;
   const nextNode = nodeOfOyakata(state, next.id);
   if (nextNode) nextNode.kind = 'master';
   state.player.generation++;
@@ -211,7 +210,8 @@ export function chooseTakeOver(input: GameState, stableId: number): GameState {
   if (!input.pending.takeOver?.includes(stableId)) return input;
   const state = clone(input);
   currentLineage(state).toBashoIndex = state.bashoIndex;
-  takeOverBranch(state, stableId);
+  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, stableId));
+  takeOverBranch(state, stableId, (o) => retireOrSanyo(state, o, rng));
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   state.player.generation++;
   state.player.lineage.push({

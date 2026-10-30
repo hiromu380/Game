@@ -8,12 +8,13 @@ import { StableTab } from './StableTab';
 import { BanzukeTab } from './BanzukeTab';
 import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
+import { AssociationTab } from './AssociationTab';
 import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
 
-type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage';
-const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage'];
+type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association';
+const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association'];
 
 /** 早送り（1年）は、判断が要ることが起きたら止まる */
 function advanceYear(start: GameState): GameState {
@@ -123,6 +124,7 @@ export function GameScreen({
         {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
         {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}
         {tab === 'lineage' && <LineageTab game={game} />}
+        {tab === 'association' && <AssociationTab game={game} ranks={ranks} />}
       </main>
 
       <footer className="actionbar">
