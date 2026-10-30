@@ -20,7 +20,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 7) s = v7to8(s);
   if (s.version === 8) s = v8to9(s);
   if (s.version === 9) s = v9to10(s);
+  if (s.version === 10) s = v10to11(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 10 → 11: 出来事の記録（最近起きたもの）。起きている出来事は、今の版の出来事として残す（同じ鍵）
+ */
+function v10to11(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.happeningLog = [];
+  s.version = 11;
+  return s as unknown as Raw;
 }
 
 /**

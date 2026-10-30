@@ -199,12 +199,57 @@ export interface Oyakata {
 /** 場所の間の出来事 */
 export type HappeningId =
   | 'supporterParty'
+  | 'riceGift'
+  | 'tanimachiDinner'
+  | 'newSponsor'
+  | 'sponsorScandal'
+  | 'hometownCheer'
+  | 'kenshoOffer'
+  | 'merchandise'
+  | 'chankoVideo'
   | 'demegeiko'
-  | 'tvInterview'
+  | 'rengoKeiko'
+  | 'soken'
+  | 'kneeWorry'
+  | 'guestCoach'
+  | 'bulkUp'
+  | 'lateStudy'
+  | 'strictSenior'
+  | 'summerCamp'
+  | 'heatWave'
+  | 'coldSnap'
+  | 'homesick'
+  | 'runaway'
+  | 'parentsVisit'
+  | 'newChanko'
+  | 'snsTrouble'
+  | 'drinkingTrouble'
+  | 'wedding'
+  | 'japaneseClass'
+  | 'alumniVisit'
+  | 'quarrel'
+  | 'veteranDoubt'
+  | 'leakyRoof'
+  | 'managerQuits'
+  | 'taxAudit'
+  | 'lodging'
+  | 'nutritionist'
+  | 'chiropractor'
+  | 'ichimonMeeting'
+  | 'associationDuty'
   | 'kidsSumo'
-  | 'famousDoctor'
+  | 'tvInterview'
+  | 'hospitalVisit'
+  | 'disasterRelief'
+  | 'overseasEvent'
+  | 'newYearVisit'
+  | 'setsubun'
   | 'promisingKid'
-  | 'riceGift';
+  | 'collegeStar'
+  | 'highSchoolCoach'
+  | 'overseasProspect'
+  | 'famousDoctor'
+  | 'surgery';
 
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
@@ -304,6 +349,8 @@ export interface GameState {
   lastReport: BashoReport | null;
   /** 部屋の日誌（古い順） */
   journal: JournalEntry[];
+  /** 最近起きた出来事（同じ出来事が続かないように） */
+  happeningLog: { id: HappeningId; bashoIndex: number }[];
 }
 
 /** 日誌の1行。bashoIndex は出来事が起きた場所（場所前の出来事は、これから取る場所） */
@@ -328,7 +375,8 @@ export type JournalEvent =
       /** 親方として残ったときの名跡（名跡待ちは空文字） */
       oyakata: string | null;
     }
-  | { kind: 'happening'; id: HappeningId; option: string }
+  /** name: 出来事の当人の四股名 / hit: 確率の結果が起きたか（確率のない選択肢は持たない） */
+  | { kind: 'happening'; id: HappeningId; option: string; name?: string; hit?: boolean }
   | { kind: 'independence'; stable: string; shikona: string }
   | { kind: 'successor'; generation: number; stable: string; shikona: string }
   | { kind: 'kakun'; id: KakunId }

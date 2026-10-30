@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGame, HAPPENINGS, type JournalEntry } from '@ichimon/sim';
-import { makeT } from '../src/i18n';
+import { makeT, type MessageKey } from '../src/i18n';
 import { journalGroup, journalText } from '../src/journal';
 import { parseSaveFile, saveFileText } from '../src/save';
 
@@ -38,6 +38,31 @@ const SAMPLES: JournalEntry[] = [
   { bashoIndex: 6, kind: 'branchSucceeded', stable: '浦風', shikona: '白岩' },
   { bashoIndex: 6, kind: 'branchClosed', stable: '浦風' },
 ];
+
+describe('出来事の文言', () => {
+  it('すべての出来事に題・本文・選択肢と説明があり、確率の選択肢には結果の文がある（どちらの言語でも）', () => {
+    for (const lang of ['ja', 'en'] as const) {
+      const t = makeT(lang);
+      const has = (key: string) => {
+        const text = t(key as MessageKey, { name: '白山' });
+        expect(text, key).not.toBe(key);
+        expect(text, key).not.toMatch(/\{/);
+      };
+      for (const h of HAPPENINGS) {
+        has(`happening.${h.id}.title`);
+        has(`happening.${h.id}.body`);
+        for (const o of h.options) {
+          has(`happening.${h.id}.${o.key}`);
+          has(`happening.${h.id}.${o.key}.desc`);
+          if (o.chance) {
+            has(`happening.${h.id}.${o.key}.hit`);
+            has(`happening.${h.id}.${o.key}.miss`);
+          }
+        }
+      }
+    }
+  });
+});
 
 describe('部屋の日誌の文', () => {
   it('すべての種類が、どちらの言語でも文になる（鍵がそのまま出ない）', () => {

@@ -33,7 +33,7 @@ describe('一年の行事', () => {
     delete v3.lastReport.banzukeChanges;
     delete v3.lastReport.jungyo;
     const m = migrateSave(v3)!;
-    expect(m.version).toBe(10);
+    expect(m.version).toBe(11);
     expect(m.lastReport!.banzukeChanges).toEqual([]);
     expect(m.lastReport!.jungyo).toBeNull();
   });

@@ -135,10 +135,18 @@ export function setPolicy(input: GameState, id: number, policy: Policy): GameSta
 export function answerHappening(input: GameState, option: number): GameState {
   if (!input.pending.happening) return input;
   const state = clone(input);
-  const id = input.pending.happening.id;
-  const key = applyHappening(state, option);
+  const { id, target } = input.pending.happening;
+  const name = input.rikishi.find((r) => r.id === target)?.name;
+  const res = applyHappening(state, option);
   // 返事をしないまま進めたとき（断ったことになる）は書かない
-  if (key) note(state, { kind: 'happening', id, option: key });
+  if (res)
+    note(state, {
+      kind: 'happening',
+      id,
+      option: res.key,
+      ...(name ? { name } : {}),
+      ...(res.hit === null ? {} : { hit: res.hit }),
+    });
   return state;
 }
 

@@ -70,11 +70,16 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
         (e.oyakata ? t('journal.retire.oyakata', { name: e.oyakata }) : t('journal.retire.stays'))
       );
     }
-    case 'happening':
-      return t('journal.happening', {
+    case 'happening': {
+      const k = `happening.${e.id}.${e.option}`;
+      const vars = { name: e.name ?? '' };
+      const text = t('journal.happening', {
         title: t(`happening.${e.id}.title` as MessageKey),
-        option: t(`happening.${e.id}.${e.option}` as MessageKey),
+        option: t(k as MessageKey, vars),
       });
+      if (e.hit === undefined) return text;
+      return `${text} ${t(`${k}.${e.hit ? 'hit' : 'miss'}` as MessageKey, vars)}`;
+    }
     case 'independence':
       return t('journal.independence', { stable: e.stable, shikona: e.shikona });
     case 'successor':

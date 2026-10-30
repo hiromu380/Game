@@ -38,8 +38,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 8: 場所の間の出来事（pending.happening・rikishi.boost）
  * 9: 協会（names・ichimon・stables.ichimonId・すべての部屋の親方。toshiyoriFree と分家の masterShikona/masterAge はなくす）
  * 10: 部屋の日誌（journal）
+ * 11: 出来事を増やした（happeningLog。同じ出来事が続かないように）
  */
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -212,6 +213,7 @@ export function createGame(options: NewGameOptions): GameState {
     gameOver: null,
     lastReport: null,
     journal: [],
+    happeningLog: [],
   };
   populateAssociation(state, rng, options.ichimonId);
   addNode(state, {
