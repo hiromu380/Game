@@ -10,3 +10,4 @@ export * from './events';
 export * from './sansho';
 export * from './happenings';
 export * from './association';
+export * from './kimarite';

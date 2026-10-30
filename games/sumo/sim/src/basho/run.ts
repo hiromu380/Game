@@ -123,7 +123,7 @@ export function runBasho(
       eastId: east,
       westId: west,
       winnerId: winner,
-      kimarite: kimariteFor(byId.get(winner)!, (items) => rng.pick(items)),
+      kimarite: kimariteFor(byId.get(winner)!, byId.get(loser)!, winner === east ? p : 1 - p, rng),
       kensho,
       fusen: false,
     });

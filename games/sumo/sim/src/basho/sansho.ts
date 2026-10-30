@@ -6,6 +6,7 @@
  * - 技能賞: 違う決まり手で多く勝った力士
  * それぞれ上限の人数まで。基準に届く力士がいなければ「該当者なし」
  */
+import { KIMARITE_BY_ID } from '../balance/kimarite';
 import { SANSHO } from '../balance/sansho';
 import type { BoutResult, Rank } from '../model/types';
 import type { Record3 } from './run';
@@ -38,6 +39,8 @@ export function selectSansho(
     const loser = b.winnerId === b.eastId ? b.westId : b.eastId;
     const lt = ranks.get(loser)?.title;
     if (lt === 'Y' || lt === 'O') topWins.set(b.winnerId, (topWins.get(b.winnerId) ?? 0) + 1);
+    // 非技（勇み足など）は相手の自滅なので、技の数に数えない
+    if (KIMARITE_BY_ID.get(b.kimarite)?.group === 'hiwaza') continue;
     if (!kimarite.has(b.winnerId)) kimarite.set(b.winnerId, new Set());
     kimarite.get(b.winnerId)!.add(b.kimarite);
   }

@@ -1048,8 +1048,91 @@ h3 {
 .bout__names strong {
   font-family: var(--font-head);
 }
+.bout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px 16px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .bout {
+    grid-template-columns: 1fr;
+  }
+}
+.bout__stage {
+  position: relative;
+}
+/* 決まり手の札（勝負が決まったら土俵の上に出す） */
+.bout__kimarite {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  padding: 6px 18px 8px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 3px 3px 0 var(--ink);
+  animation: kimarite-in 0.35s ease-out;
+}
+.bout__kimarite-group {
+  font-size: 0.8rem;
+  color: var(--ai);
+}
+.bout__kimarite-name {
+  font-family: var(--font-head);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  white-space: nowrap;
+  line-height: 1.1;
+  color: var(--shu);
+}
+@keyframes kimarite-in {
+  from {
+    transform: translate(-50%, -8px) scale(0.9);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bout__kimarite {
+    animation: none;
+  }
+}
+.bout__call {
+  min-height: 12em;
+  padding: 8px 12px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.bout__call ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bout__line {
+  margin: 0 0 4px;
+  color: var(--muted);
+}
+.bout__line.is-now {
+  color: var(--ink);
+  font-weight: bold;
+}
+.bout__line.is-gyoji {
+  font-family: var(--font-head);
+}
+.bout__speaker {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  border: 1.5px solid var(--ai);
+  border-radius: 999px;
+  vertical-align: 2px;
+}
 .bout__result {
-  min-height: 3em;
+  margin: 8px 0 0;
   font-size: 1.1rem;
 }
 .bout__result.is-done {
