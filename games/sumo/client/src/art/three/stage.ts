@@ -75,28 +75,49 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
 
   let shadowMaterial: THREE.MeshToonMaterial | undefined;
   try {
-    scene.add(new THREE.AmbientLight(PALETTE.white, 1.65));
-    const light = new THREE.DirectionalLight(PALETTE.white, 1.15);
+    scene.add(new THREE.AmbientLight(PALETTE.white, 1.15));
+    const light = new THREE.DirectionalLight(PALETTE.white, 1.6);
     light.position.set(-3, 7, 9);
     scene.add(light);
 
     // 背景は錦絵の色面。実写の木目や過度なライト演出は加えない。
     box(scene, PALETTE.washi2, [0, 2.35, -5.0], [13, 7, 0.15], false);
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 6; col++) {
-        const x = (col - 2.5) * 2.0 + (row % 2) * 0.7;
-        const y = row * 0.72 + 0.2;
-        tube(
-          scene,
-          PALETTE.odo,
-          [
-            new THREE.Vector3(x - 0.45, y, -4.88),
-            new THREE.Vector3(x, y + 0.26, -4.88),
-            new THREE.Vector3(x + 0.45, y, -4.88),
-          ],
-          0.018,
-        );
-      }
+    // 遠景の山は刷り重ねた二色の版。反復する装飾を減らして力士へ視線を集める。
+    for (const [color, z, points] of [
+      [
+        PALETTE.aiLight,
+        -4.85,
+        [
+          [-7, 1.3],
+          [-5.2, 3.2],
+          [-3.6, 2.1],
+          [-1.2, 3.6],
+          [1.1, 2.3],
+          [3.4, 3.5],
+          [5.1, 2.2],
+          [7, 3.0],
+        ],
+      ],
+      [
+        PALETTE.line,
+        -4.78,
+        [
+          [-7, 0.9],
+          [-4.8, 1.8],
+          [-2.2, 1.3],
+          [0.2, 2.2],
+          [2.8, 1.2],
+          [5.3, 2.2],
+          [7, 1.5],
+        ],
+      ],
+    ] as const) {
+      const shape = new THREE.Shape();
+      shape.moveTo(-7, -1);
+      for (const [x, y] of points) shape.lineTo(x, y);
+      shape.lineTo(7, -1);
+      shape.closePath();
+      part(scene, remember(new THREE.ShapeGeometry(shape)), color, [0, 0, z], [1, 1, 1], false);
     }
 
     // 外に出た足も地面で受け止める。勝敗判定には使用しない。
@@ -109,6 +130,7 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
 
     // 俵を一続きのゴム輪のようにせず、藁の束が並ぶ形で表現する。
     const baleGeometry = remember(new THREE.CylinderGeometry(0.145, 0.145, 0.69, 8));
+    const baleTie = remember(new THREE.TorusGeometry(0.147, 0.012, 4, 10));
     const up = new THREE.Vector3(0, 1, 0);
     for (const bale of dohyoBales()) {
       const cylinder = part(
@@ -120,6 +142,20 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
         false,
       );
       cylinder.quaternion.setFromUnitVectors(up, new THREE.Vector3(bale.dx, 0, bale.dz));
+      for (const offset of [-0.21, 0.21]) {
+        const tie = part(
+          scene,
+          baleTie,
+          PALETTE.kincha,
+          [bale.x + bale.dx * offset, 0.8, bale.z + bale.dz * offset],
+          [1, 1, 1],
+          false,
+        );
+        tie.quaternion.setFromUnitVectors(
+          new THREE.Vector3(0, 0, 1),
+          new THREE.Vector3(bale.dx, 0, bale.dz),
+        );
+      }
     }
     const innerInk = remember(new THREE.TorusGeometry(TAWARA_RADIUS - 0.16, 0.019, 4, 48));
     const inkRing = new THREE.Mesh(innerInk, material(PALETTE.sumi));
@@ -144,15 +180,41 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     roof.quadraticCurveTo(0, 5.12, -4.42, 4.8);
     roof.closePath();
     const roofGeometry = remember(
-      new THREE.ExtrudeGeometry(roof, { depth: 2.8, bevelEnabled: false, curveSegments: 10 }),
+      new THREE.ExtrudeGeometry(roof, { depth: 1.9, bevelEnabled: false, curveSegments: 10 }),
     );
-    part(scene, roofGeometry, PALETTE.sumi2, [0, 0, -2.75], [1, 1, 1]);
+    part(scene, roofGeometry, PALETTE.sumi2, [0, 0, -1.75], [1, 1, 1]);
     box(scene, PALETTE.odo, [0, 4.91, 0.13], [8.8, 0.1, 0.15], false);
-    box(scene, PALETTE.murasaki, [0, 4.73, -1.2], [7.82, 0.45, 3.28], false);
+    box(scene, PALETTE.murasaki, [0, 4.73, -1.0], [7.82, 0.36, 2.3], false);
+    const curtain = new THREE.Shape();
+    curtain.moveTo(-3.91, 4.9);
+    curtain.lineTo(3.91, 4.9);
+    curtain.lineTo(3.91, 4.45);
+    curtain.quadraticCurveTo(1.4, 4.15, 0, 4.63);
+    curtain.quadraticCurveTo(-1.4, 4.15, -3.91, 4.45);
+    curtain.closePath();
+    part(
+      scene,
+      remember(
+        new THREE.ExtrudeGeometry(curtain, { depth: 0.04, bevelEnabled: false, curveSegments: 16 }),
+      ),
+      PALETTE.murasaki,
+      [0, 0, 0.18],
+      [1, 1, 1],
+    );
     for (const x of [-2.35, 2.35]) {
       const crest = remember(new THREE.TorusGeometry(0.17, 0.025, 5, 18));
       part(scene, crest, PALETTE.washi, [x, 4.72, 0.46], [1, 1, 1], false);
-      box(scene, PALETTE.washi, [x, 4.72, 0.47], [0.23, 0.03, 0.02], false);
+      for (const angle of [0, 2.094, 4.189]) {
+        const petal = remember(new THREE.TorusGeometry(0.065, 0.014, 4, 12));
+        part(
+          scene,
+          petal,
+          PALETTE.washi,
+          [x + Math.sin(angle) * 0.065, 4.72 + Math.cos(angle) * 0.065, 0.47],
+          [1, 1, 1],
+          false,
+        );
+      }
     }
     // 屋根下の梁。派手な装飾を足さず、木の組み物で立体感を出す。
     for (const z of [-2.65, 0.19]) {
@@ -160,6 +222,9 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     }
     for (const x of [-3.52, 3.52]) {
       box(scene, PALETTE.odo, [x, 4.53, -1.2], [0.13, 0.17, 3.13], false);
+    }
+    for (const x of [-3, -1.5, 0, 1.5, 3]) {
+      box(scene, PALETTE.odo, [x, 4.77, 0.18], [0.08, 0.24, 0.18], false);
     }
     for (const x of [-3.34, 3.34]) {
       const rope = remember(new THREE.CylinderGeometry(0.028, 0.028, 0.47, 6));
@@ -312,7 +377,7 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
         Math.abs(eastBox.max.x) + 0.4,
         Math.abs(westBox.min.x) + 0.4,
         Math.abs(westBox.max.x) + 0.4,
-        4.1 / ratio,
+        3.6 / ratio,
       );
       camera.left = -halfWidth;
       camera.right = halfWidth;

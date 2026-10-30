@@ -77,15 +77,18 @@ export function renderPortrait(look: Look, variant: PortraitVariant): string {
   const camera = new THREE.OrthographicCamera(-half, half, half, -half, 0.1, 20);
   camera.position.set(0, center + 1.0, 8);
   camera.lookAt(0, center, 0);
-  scene.add(new THREE.AmbientLight(PALETTE.white, 1.65));
-  const light = new THREE.DirectionalLight(PALETTE.white, 1.15);
+  scene.add(new THREE.AmbientLight(PALETTE.white, 1.15));
+  const light = new THREE.DirectionalLight(PALETTE.white, 1.6);
   light.position.set(-3, 5, 7);
   scene.add(light);
 
   const illustrator = createIllustrator();
   try {
     const puppet = illustrator.createWrestler(look, scene);
-    puppet.root.rotation.y = -0.11;
+    puppet.root.rotation.y = -0.2;
+    // 全身像は肘を少し外へ。直立の棒状の腕を避ける。
+    puppet.arms[0].rotation.z = -0.08;
+    puppet.arms[1].rotation.z = 0.08;
     gpu.render(scene, camera);
     // WebP非対応の環境ではブラウザがPNGへ自動フォールバックする。
     const url = gpu.domElement.toDataURL('image/webp', 0.94);

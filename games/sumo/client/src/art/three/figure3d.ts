@@ -22,7 +22,7 @@ export function createIllustrator() {
     geometries.add(geometry);
     return geometry;
   };
-  const ramp = new THREE.DataTexture(new Uint8Array([120, 190, 255]), 3, 1, THREE.RedFormat);
+  const ramp = new THREE.DataTexture(new Uint8Array([135, 205, 255]), 3, 1, THREE.RedFormat);
   ramp.minFilter = ramp.magFilter = THREE.NearestFilter;
   ramp.needsUpdate = true;
   const material = (color: string, outline = false): THREE.Material => {
@@ -129,7 +129,25 @@ export function createIllustrator() {
       if (!look.kimono) ball(leg, look.skin, [0, -0.26, 0], [0.29, 0.44, 0.34]);
       ball(leg, look.skin, [0, -0.56, 0.2], [0.34, 0.17, 0.46]);
     }
-    ball(figure, look.kimono ? look.cloth : look.skin, [0, 1.22, 0], [w, 0.8, 0.63]);
+    // 胸から腹へ重心が下がる輪郭を、一続きの面として作る。
+    // 球を重ねる継ぎ目を減らし、肩幅と腹の張りがある力士の体つきにする。
+    const torso = remember(
+      new THREE.LatheGeometry(
+        [
+          [0, 0.45],
+          [0.43, 0.48],
+          [0.65, 0.7],
+          [0.78, 1.02],
+          [0.77, 1.35],
+          [0.68, 1.65],
+          [0.49, 1.83],
+          [0.26, 1.92],
+          [0, 1.94],
+        ].map(([r, y]) => new THREE.Vector2(r, y)),
+        24,
+      ),
+    );
+    part(figure, torso, look.kimono ? look.cloth : look.skin, [0, 0, 0], [w / 0.76, 1, 0.82]);
     const arms: [THREE.Group, THREE.Group] = [new THREE.Group(), new THREE.Group()];
     for (let i = 0; i < 2; i++) {
       const side = i === 0 ? -1 : 1;
@@ -139,9 +157,22 @@ export function createIllustrator() {
       if (look.kimono) {
         box(pivot, look.cloth, [side * 0.08, -0.28, 0], [0.44, 0.7, 0.56]);
       } else {
-        ball(pivot, look.skin, [side * 0.08, -0.28, 0.09], [0.29, 0.48, 0.32]);
+        ball(pivot, look.skin, [side * 0.07, -0.18, 0.05], [0.29, 0.31, 0.31]);
+        ball(pivot, look.skin, [side * 0.09, -0.4, 0.12], [0.255, 0.28, 0.29]);
       }
-      ball(pivot, look.skin, [side * 0.1, -0.58, 0.14], [0.23, 0.2, 0.25]);
+      ball(pivot, look.skin, [side * 0.1, -0.61, 0.17], [0.215, 0.2, 0.23]);
+      if (!look.kimono) {
+        ball(pivot, look.skin, [-side * 0.05, -0.57, 0.31], [0.095, 0.13, 0.11], false);
+        tube(
+          pivot,
+          PALETTE.sumi2,
+          [
+            new THREE.Vector3(side * 0.04, -0.68, 0.375),
+            new THREE.Vector3(side * 0.16, -0.68, 0.375),
+          ],
+          0.009,
+        );
+      }
     }
 
     if (look.kimono) {
@@ -178,8 +209,8 @@ export function createIllustrator() {
           PALETTE.sumi2,
           [
             new THREE.Vector3(side * 0.14, 1.6, 0.55),
-            new THREE.Vector3(side * 0.33, 1.55, 0.57),
-            new THREE.Vector3(side * 0.47, 1.6, 0.53),
+            new THREE.Vector3(side * 0.31, 1.55, 0.535),
+            new THREE.Vector3(side * 0.46, 1.6, 0.44),
           ],
           0.013,
         );
@@ -188,14 +219,26 @@ export function createIllustrator() {
         figure,
         PALETTE.sumi2,
         [
-          new THREE.Vector3(-0.04, 1.19, 0.635),
-          new THREE.Vector3(0, 1.17, 0.65),
-          new THREE.Vector3(0.04, 1.19, 0.635),
+          new THREE.Vector3(-0.04, 1.19, 0.641),
+          new THREE.Vector3(0, 1.17, 0.655),
+          new THREE.Vector3(0.04, 1.19, 0.641),
         ],
         0.015,
       );
       const sash = remember(new THREE.CylinderGeometry(0.7, 0.72, 0.29, 24));
       part(figure, sash, look.cloth, [0, 0.94, 0], [w / 0.7, 1, 0.96]);
+      // 帯の折り返しと結び目で、腹巻き状の単純な輪から区別する。
+      tube(
+        figure,
+        PALETTE.sumi2,
+        [
+          new THREE.Vector3(-w * 0.75, 1.02, 0.46),
+          new THREE.Vector3(0, 1.02, 0.705),
+          new THREE.Vector3(w * 0.75, 1.02, 0.46),
+        ],
+        0.012,
+      );
+      ball(figure, look.cloth, [0, 0.94, -0.69], [0.23, 0.16, 0.15]);
       box(figure, look.cloth, [0, 0.66, 0.61], [0.29, 0.52, 0.11]);
       if (look.sagari)
         for (let i = -5; i <= 5; i++) {
@@ -281,6 +324,24 @@ export function createIllustrator() {
     // 大銀杏は先の広がった銀杏の葉型。ちょんまげとは輪郭で区別できる。
     const hair = look.hair === 'gray' ? PALETTE.muted : PALETTE.sumi;
     ball(figure, hair, [0, 2.7, -0.06], [0.64, 0.27, 0.52]);
+    if (look.hair === 'oicho' || look.hair === 'chonmage') {
+      for (const side of [-1, 1]) {
+        // 鬢を耳へ流し、髷を単独の突起ではなく結った髪として読ませる。
+        ball(figure, hair, [side * 0.55, 2.55, -0.05], [0.11, 0.23, 0.34], false);
+        for (const offset of [0, 0.12]) {
+          tube(
+            figure,
+            PALETTE.hairLight,
+            [
+              new THREE.Vector3(side * 0.12, 2.88 - offset * 0.2, 0.24),
+              new THREE.Vector3(side * 0.38, 2.8 - offset * 0.3, 0.34),
+              new THREE.Vector3(side * 0.55, 2.64 - offset, 0.19),
+            ],
+            0.007,
+          );
+        }
+      }
+    }
     if (look.hair === 'zanbara') {
       for (let i = -3; i <= 3; i++) {
         ball(
