@@ -1862,3 +1862,91 @@ html:lang(en) .choice__desc {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* 部屋の殿堂 */
+.fame {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.fame__card {
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--gold-bg);
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.fame__main {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+.fame__main .tag:first-child,
+.fame__main .muted {
+  margin-left: 0;
+}
+.fame__name {
+  font-family: var(--font-head);
+  font-size: 1.15em;
+}
+
+/* 部屋の歴代記録 */
+.records {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.records__row {
+  display: grid;
+  grid-template-columns: 12em 1fr;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.records__row dt {
+  font-weight: bold;
+}
+.records__row dd {
+  margin: 0;
+}
+.records__holders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.records__holders li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+.records__rank {
+  min-width: 2.5em;
+  color: var(--ink-2);
+}
+.records__top .records__name {
+  font-family: var(--font-head);
+  font-weight: bold;
+}
+.records__value {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .records__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

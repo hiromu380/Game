@@ -16,6 +16,7 @@ import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import { kojoChoices, type Highlight } from '../highlights';
 import { DanpatsuCard } from './DanpatsuCard';
+import { recordValue } from './RecordsPanel';
 
 /** 賜杯（優勝のしるし） */
 function Cup() {
@@ -62,7 +63,7 @@ export function HighlightDialog({
   setGame: (g: GameState) => void;
   onDone: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { settings } = useSettings();
   const [index, setIndex] = useState(0);
   const [word, setWord] = useState<KojoWord | null>(null);
@@ -116,6 +117,15 @@ export function HighlightDialog({
       name: r.name,
       wins: h.wins,
       losses: h.losses,
+    });
+  } else if (h.kind === 'record') {
+    title = t('highlight.record.title');
+    body = t('highlight.record.body', {
+      name: r.name,
+      record: t(`records.key.${h.news.key}` as MessageKey),
+      value: recordValue(t, lang, h.news.key, h.news.holder.value),
+      prevName: h.news.previous.name,
+      prevValue: recordValue(t, lang, h.news.key, h.news.previous.value),
     });
   } else {
     title = t('highlight.sansho.title');

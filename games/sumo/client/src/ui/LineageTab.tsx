@@ -4,8 +4,9 @@ import { bashoName, rankLabel } from '../format';
 import { FamilyTree } from './FamilyTree';
 import { ShareTree } from './ShareTree';
 import { Alumni } from './Alumni';
+import { HallOfFame, RecordsPanel } from './RecordsPanel';
 
-/** 一門の系譜: 歴代の親方・部屋の親方衆・家訓・名跡の空き */
+/** 一門の系譜: 歴代の親方・殿堂・歴代記録・部屋の親方衆・家訓・名跡の空き */
 export function LineageTab({ game }: { game: GameState }) {
   const { t } = useI18n();
   const staff = game.oyakata.filter((o) => o.stableId === game.player.stableId);
@@ -44,6 +45,8 @@ export function LineageTab({ game }: { game: GameState }) {
         <FamilyTree game={game} />
       </section>
 
+      <HallOfFame game={game} />
+      <RecordsPanel game={game} />
       <Alumni game={game} />
 
       <section className="panel">

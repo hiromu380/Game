@@ -61,7 +61,7 @@ export function GameScreen({
 
   const go = (next: GameState) => {
     setGame(next);
-    const hl = next.lastReport ? highlightsOf(next, next.lastReport) : [];
+    const hl = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
     setHighlights(hl.length > 0 ? hl : null);
     setShowReport(true);
   };

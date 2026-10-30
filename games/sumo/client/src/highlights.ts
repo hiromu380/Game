@@ -1,5 +1,5 @@
 /**
- * 場所の見せ場: 自分の部屋の優勝・昇進・三賞・元弟子の断髪式を、見せる順に並べる（純粋関数）
+ * 場所の見せ場: 自分の部屋の優勝・昇進・三賞・部屋の新記録・元弟子の断髪式を、見せる順に並べる（純粋関数）
  */
 import {
   KOJO_WORDS,
@@ -8,11 +8,14 @@ import {
   type GameState,
   type KojoWord,
 } from '@ichimon/sim';
+import { recordsBroken, type RecordNews } from './records';
 
 export type Highlight =
   | { kind: 'promotion'; id: number; to: 'Y' | 'O' | 'makuuchi' | 'sekitori' }
   | { kind: 'yusho'; id: number; division: Division; wins: number; losses: number }
   | { kind: 'sansho'; id: number; prizes: ('shukun' | 'kanto' | 'gino')[] }
+  /** 部屋の新記録（id は記録を塗り替えた今の弟子） */
+  | { kind: 'record'; id: number; news: RecordNews }
   | {
       kind: 'danpatsu';
       alumnusId: number;
@@ -25,7 +28,8 @@ export type Highlight =
 const PROMO_ORDER = { Y: 0, O: 1, makuuchi: 3, sekitori: 4 } as const;
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
 
-export function highlightsOf(game: GameState, report: BashoReport): Highlight[] {
+/** prev: 進める前の状態（あれば、部屋の新記録も見せる） */
+export function highlightsOf(game: GameState, report: BashoReport, prev?: GameState): Highlight[] {
   const mine = (id: number) =>
     game.rikishi.find((r) => r.id === id)?.stableId === game.player.stableId;
   const out: { order: number; h: Highlight }[] = [];
@@ -50,6 +54,12 @@ export function highlightsOf(game: GameState, report: BashoReport): Highlight[] 
     }
   }
   for (const [id, p] of prizes) out.push({ order: 20, h: { kind: 'sansho', id, prizes: p } });
+  if (prev) {
+    for (const news of recordsBroken(prev, game)) {
+      if (game.rikishi.some((r) => r.id === news.holder.id))
+        out.push({ order: 25, h: { kind: 'record', id: news.holder.id, news } });
+    }
+  }
   // 元弟子の断髪式は最後に
   for (const d of report.danpatsu ?? []) out.push({ order: 30, h: { kind: 'danpatsu', ...d } });
   return out.sort((a, b) => a.order - b.order).map((x) => x.h);
