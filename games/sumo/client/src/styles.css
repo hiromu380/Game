@@ -2,6 +2,7 @@
  * 一門: 和紙・墨・藍・朱。色の値は art/palette.ts から CSS 変数に流し込む（ここでは名前で使うだけ）
  * 相撲絵のように、墨の均一な線と平たい色面。影はぼかさず、版画のようにずらした色面で出す。docs/art-style.md
  */
+@import './art/paper-ui.css';
 @font-face {
   font-family: 'Kaisei Tokumin';
   src: url('./assets/fonts/kaisei-tokumin-800.woff2') format('woff2');

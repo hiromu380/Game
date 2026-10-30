@@ -9,6 +9,7 @@ import { createIllustrator } from './figure3d';
 import { PALETTE } from '../palette';
 import type { Pose } from '../../playback/boutScript';
 import { TAWARA_RADIUS, toStagePose } from './pose';
+import { dohyoBales } from './dohyoDetails';
 
 type Side = 'E' | 'W';
 
@@ -65,16 +66,20 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     }
   }
 
-  // 土俵の台と表土。角ばりをわずかに残して木版画らしく。
-  const bottom = remember(new THREE.CylinderGeometry(3.98, 4.1, 0.58, 36));
-  part(scene, bottom, PALETTE.odo, [0, 0.31, 0], [1, 1, 1]);
-  const top = remember(new THREE.CylinderGeometry(3.77, 3.77, 0.12, 36));
-  part(scene, top, PALETTE.odoLight, [0, 0.67, 0], [1, 1, 1], false);
-  const ring = remember(new THREE.TorusGeometry(TAWARA_RADIUS, 0.14, 8, 48));
-  const tawara = new THREE.Mesh(ring, material(PALETTE.odoLight));
-  tawara.rotation.x = -Math.PI / 2;
-  tawara.position.y = 0.78;
-  scene.add(tawara);
+  // 土俵は四角い盛り土の上に円形の勝負俵を置く。実際の土俵に近い輪郭にする。
+  box(scene, PALETTE.sumi, [0, -0.025, 0.06], [8.12, 0.07, 8.12], false);
+  box(scene, PALETTE.odo, [0, 0.33, 0], [7.9, 0.66, 7.9], true);
+  const top = remember(new THREE.CylinderGeometry(3.74, 3.74, 0.11, 40));
+  part(scene, top, PALETTE.odoLight, [0, 0.70, 0], [1, 1, 1], false);
+
+  // 俵を一続きのゴム輪のようにせず、藁の束が並ぶ形で表現する。
+  const baleGeometry = remember(new THREE.CylinderGeometry(0.145, 0.145, 0.69, 8));
+  const up = new THREE.Vector3(0, 1, 0);
+  for (const bale of dohyoBales()) {
+    const cylinder = part(scene, baleGeometry, PALETTE.odoLight,
+      [bale.x, 0.80, bale.z], [1, 1, 1], false);
+    cylinder.quaternion.setFromUnitVectors(up, new THREE.Vector3(bale.dx, 0, bale.dz));
+  }
   const innerInk = remember(new THREE.TorusGeometry(TAWARA_RADIUS - 0.16, 0.019, 4, 48));
   const inkRing = new THREE.Mesh(innerInk, material(PALETTE.sumi));
   inkRing.rotation.x = -Math.PI / 2;
@@ -83,10 +88,22 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
   // 仕切り線（奥行き方向）。
   for (const x of [-0.43, 0.43]) box(scene, PALETTE.white, [x, 0.747, 0], [0.1, 0.013, 0.58], false);
 
+  // 建物と土俵の陰影は写真風の影ではなく版画の明暗二色でつける。
+  for (const y of [0.21, 0.41]) {
+    box(scene, PALETTE.sumi2, [0, y, 3.96], [7.75, 0.025, 0.03], false);
+  }
+
   // 吊り屋根・水引幕・房。カメラ視野に入る上半分を低ポリゴンで構成。
   box(scene, PALETTE.sumi, [0, 5.05, -1.2], [8.75, 0.23, 4.15], false);
   box(scene, PALETTE.odo, [0, 5.2, -1.2], [8.15, 0.16, 3.55], false);
   box(scene, PALETTE.murasaki, [0, 4.73, -1.2], [7.82, 0.45, 3.28], false);
+  // 屋根下の梁。派手な装飾を足さず、木の組み物で立体感を出す。
+  for (const z of [-2.65, 0.19]) {
+    box(scene, PALETTE.sumi2, [0, 4.50, z], [7.85, 0.12, 0.13], false);
+  }
+  for (const x of [-3.52, 3.52]) {
+    box(scene, PALETTE.odo, [x, 4.53, -1.2], [0.13, 0.17, 3.13], false);
+  }
   for (const x of [-3.34, 3.34]) {
     const rope = remember(new THREE.CylinderGeometry(0.028, 0.028, 0.47, 6));
     part(scene, rope, PALETTE.sumi, [x, 4.19, 0.34], [1, 1, 1], false);
@@ -95,7 +112,9 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
   }
 
   const gyoji = new THREE.Group();
-  gyoji.position.set(2.25, 0.7, -1.72);
+  // 行司は土俵の奥の正面に下げる。倒れた力士の進路（左右の俵）を空ける。
+  gyoji.position.set(0, 0.70, -3.32);
+  gyoji.scale.setScalar(0.82);
   scene.add(gyoji);
   ball(gyoji, PALETTE.murasaki, [0, 0.78, 0], [0.35, 0.6, 0.25]);
   ball(gyoji, PALETTE.skin[0], [0, 1.53, 0], [0.27, 0.29, 0.22]);
@@ -109,6 +128,19 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
 
   const east = createWrestler(initial.east, scene);
   const west = createWrestler(initial.west, scene);
+  // 足元に薄い印刷色の楕円を敷き、地面との接地だけを分かりやすくする。
+  const shadowGeometry = remember(new THREE.CircleGeometry(1, 24));
+  const shadowMaterial = new THREE.MeshBasicMaterial({
+    color: PALETTE.sumi, transparent: true, opacity: 0.16, depthWrite: false,
+  });
+  const shadows = [east, west].map(() => {
+    const mark = new THREE.Mesh(shadowGeometry, shadowMaterial);
+    mark.rotation.x = -Math.PI / 2;
+    mark.scale.set(0.72, 0.46, 1);
+    mark.position.y = 0.766;
+    scene.add(mark);
+    return mark;
+  });
   // 取組台本の初期位置に合わせ、互いに土俵の中心へ向ける。
   east.root.rotation.y = -0.24;
   west.root.rotation.y = 0.24;
@@ -138,6 +170,11 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
       puppet.tilt.rotation.z = p.tilt;
       for (let i = 0; i < 2; i++) puppet.arms[i]!.rotation.x = input.arms === 'push' ? -0.85 : 0;
     }
+    for (let i = 0; i < shadows.length; i++) {
+      const p = toStagePose(i === 0 ? input.pose.east : input.pose.west);
+      shadows[i]!.position.x = p.x;
+      shadows[i]!.position.z = p.depth;
+    }
     fanPivot.rotation.z = input.winner === 'E' ? -0.75 : input.winner === 'W' ? 0.75 : 0;
     renderer.render(scene, camera);
   };
@@ -149,6 +186,7 @@ export function mountStage(canvas: HTMLCanvasElement, initial: StageInput): Moun
     resize,
     dispose: () => {
       dispose();
+      shadowMaterial.dispose();
       renderer.dispose();
     },
   };
