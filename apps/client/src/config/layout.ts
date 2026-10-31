@@ -8,15 +8,16 @@ export const LAYOUT = {
    */
   compactMaxWidthPx: 600,
   /**
-   * 横長の画面（PC・Steam Deck・タブレット横）。アプリとして1画面に収め、ページをスクロールさせない:
-   * 画面の幅いっぱいを使い、盤面は画面の高さに合わせ、右の列だけをスクロールする
+   * 横長の画面（PC・Steam Deck・タブレット横・スマホ横）。アプリとして1画面に収め、ページをスクロールさせない:
+   * 画面の幅いっぱいを使い、盤面は画面の高さに合わせ、右の列だけをスクロールする。
+   * スマホの横画面（800×360・812×375 など）も含める（縦に積むと盤面が画面の高さに収まらない）
    */
-  fitQuery: '(min-width: 821px) and (orientation: landscape)',
+  fitQuery: '(min-width: 601px) and (orientation: landscape)',
   /**
    * 横長で高さが低い画面（Steam Deck の 1280×800・ノートPC）。上に加えて、ショップ・手持ちをタブで切り替え、
    * 見出しなどを詰める
    */
-  shortQuery: '(min-width: 821px) and (orientation: landscape) and (max-height: 860px)',
+  shortQuery: '(min-width: 601px) and (orientation: landscape) and (max-height: 860px)',
   /** 横長の画面で、盤面の一辺の上限（px）。シフトの情報などは右の列に置き、盤面は画面の高さいっぱいまで使う */
   boardMaxPx: 1400,
 } as const;

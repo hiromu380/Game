@@ -1,0 +1,20 @@
+{
+  "name": "@ichimon/sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "一門（仮）: 純粋なシミュレーション・制度・実際の金額（外部依存ゼロ）",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tools/tsconfig.json --noEmit",
+    "test": "vitest run",
+    "balance": "tsx tools/balance.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  }
+}

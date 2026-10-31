@@ -12,3 +12,6 @@ apps/desktop/renderer/
 apps/desktop/release/
 apps/desktop/steamworks_sdk/
 tools/fonts/.cache/
+games/sumo/client/build/.font-cache/
+docs/ui-review/wip/
+dist-single

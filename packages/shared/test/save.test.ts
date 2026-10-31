@@ -14,6 +14,9 @@ import {
   convertV1toV2,
   convertV2toV3,
   convertV3toV4,
+  convertV4toV5,
+  convertV5toV6,
+  convertV6toV7,
   createSave,
   migrateSave,
   SAVE_VERSION,
@@ -43,10 +46,10 @@ const V1_SAVE: SaveDataV1 = {
 };
 
 describe('セーブデータ', () => {
-  it('最新バージョン（v4）で保存し、JSON を往復しても同じ内容になる', () => {
+  it('最新バージョン（v7）で保存し、JSON を往復しても同じ内容になる', () => {
     const save = createSave(createRun(42));
     expect(save.version).toBe(SAVE_VERSION);
-    expect(SAVE_VERSION).toBe(4);
+    expect(SAVE_VERSION).toBe(7);
     expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
   });
 
@@ -58,9 +61,9 @@ describe('セーブデータ', () => {
 });
 
 describe('v1 → v2 の変換', () => {
-  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（v4 まで続けて変換）', () => {
+  it('ランの盤面・予算・手持ち・履歴を引き継ぎ、RunConfig とメタ進行を補う（最新まで続けて変換）', () => {
     const v2 = migrateSave(JSON.parse(JSON.stringify(V1_SAVE)))!;
-    expect(v2.version).toBe(4);
+    expect(v2.version).toBe(SAVE_VERSION);
     expect(v2.meta).toEqual(createInitialMeta());
     expect(v2.achievements).toEqual(createInitialAchievements());
 
@@ -119,7 +122,7 @@ describe('v2 → v3（実績の追加）', () => {
     const v2 = { ...JSON.parse(JSON.stringify(v3)), version: 2 };
     delete v2.achievements;
     const migrated = migrateSave(v2)!;
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(migrated.run).toEqual(v3.run);
     expect(migrated.meta).toEqual(v3.meta);
     expect(migrated.achievements).toEqual(createInitialAchievements());
@@ -159,7 +162,7 @@ describe('v3 → v4（床タイル）', () => {
 
   it('床のないランとしてそのまま続けられる（床なし・ボーナス床なし・効果量は基準値で補う）', () => {
     const migrated = migrateSave(v3RunSave())!;
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(SAVE_VERSION);
     expect(convertV3toV4(v3RunSave() as never).version).toBe(4);
     const run = migrated.run!;
     expect(run.bonusFloor).toBeNull();
@@ -187,5 +190,120 @@ describe('v3 → v4（床タイル）', () => {
     const save = v3RunSave({ ...config, bossPlan });
     const run = migrateSave(save)!.run!;
     expect(getCurrentFloor(run, night)[5]).toEqual({ tile: 'blocked', source: 'boss' });
+  });
+});
+
+describe('v4 → v5（ランダム配置権）', () => {
+  /** 配置権を導入する前（v4）に保存されていたランの形 */
+  function v4RunSave() {
+    const run = JSON.parse(JSON.stringify(createRun(12)));
+    delete run.config.floorPermit;
+    delete run.items;
+    delete run.itemFloors;
+    run.shop = run.shop.filter((o: { itemId?: string }) => o.itemId === undefined);
+    return {
+      version: 4,
+      run,
+      meta: createInitialMeta(),
+      achievements: createInitialAchievements(),
+    };
+  }
+
+  it('配置権の出ないランとしてそのまま続けられる（消耗品は空・配置権の床なし）', () => {
+    const migrated = migrateSave(v4RunSave())!;
+    expect(migrated.version).toBe(SAVE_VERSION);
+    expect(convertV4toV5(v4RunSave() as never).version).toBe(5);
+    const run = migrated.run!;
+    expect(run.items).toEqual([]);
+    expect(run.itemFloors).toBeNull();
+    expect(run.config.floorPermit).toBeUndefined();
+    // 次のシフトのショップにも配置権は出ない
+    const a = placePart(run, 'switch', 0, 0, 1);
+    const b = a.ok ? placePart(a.state, 'dock', 1, 0, 1) : a;
+    if (!b.ok) return; // 1日目のステージで左上がふさがっているシード（このテストの対象外）
+    const committed = commitShift(b.state);
+    if ('error' in committed) return;
+    expect(committed.state.shop.every((o) => o.itemId === undefined)).toBe(true);
+  });
+
+  it('v5 で保存したラン（配置権あり）は JSON を往復しても同じ', () => {
+    const save = createSave(createRun(12));
+    expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+  });
+});
+
+describe('v5 → v6（ストーリー演出）', () => {
+  function v5Save() {
+    const save = JSON.parse(JSON.stringify(createSave(createRun(3))));
+    delete save.story;
+    save.version = 5;
+    return save;
+  }
+
+  it('見たシーンの記録を足し、すでに遊んでいる人はオープニングを見た扱いにする（ランはそのまま）', () => {
+    const v5 = v5Save();
+    const migrated = migrateSave(v5)!;
+    expect(migrated.version).toBe(SAVE_VERSION);
+    expect(migrated.story).toEqual({ seen: ['opening'] });
+    expect(migrated.run).toEqual(v5.run);
+    expect(convertV5toV6(v5).story.seen).toEqual(['opening']);
+  });
+
+  it('新しく作ったセーブは何も見ていない。見たシーンは JSON を往復しても残り、壊れた項目は捨てる', () => {
+    expect(createSave(null).story).toEqual({ seen: [] });
+    const save = createSave(null, undefined, undefined, { seen: ['opening', 'interlude1'] });
+    expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+    const broken = { ...save, story: { seen: ['opening', 3, null] } };
+    expect(migrateSave(broken)!.story.seen).toEqual(['opening']);
+    expect(migrateSave({ ...save, story: undefined })!.story.seen).toEqual([]);
+  });
+});
+
+describe('v6 → v7（レリック）', () => {
+  function v6Save(relics?: string[]) {
+    const save = JSON.parse(JSON.stringify(createSave(createRun(3))));
+    delete save.meta.relicsFound;
+    delete save.meta.ascension;
+    if (relics) save.run.relics = relics;
+    save.version = 6;
+    return save;
+  }
+
+  it('レリックの図鑑を足す（空）。ランとほかのメタ進行はそのまま', () => {
+    const v6 = v6Save();
+    const migrated = migrateSave(v6)!;
+    expect(migrated.version).toBe(7);
+    expect(migrated.meta.relicsFound).toEqual([]);
+    expect(migrated.meta.ascension).toEqual({ unlocked: 0, selected: 0 });
+    expect(migrated.meta.unlockedParts).toEqual(v6.meta.unlockedParts);
+    expect(migrated.run).toEqual(v6.run);
+  });
+
+  it('進行中のランで手に入れているレリックは、見つけた扱いにする', () => {
+    expect(convertV6toV7(v6Save(['coupon', 'gearGloves'])).meta.relicsFound).toEqual([
+      'coupon',
+      'gearGloves',
+    ]);
+  });
+
+  it('図鑑は JSON を往復しても残り、知らない ID・重複・壊れた値は捨てる', () => {
+    const meta = { ...createInitialMeta(), relicsFound: ['coupon' as const] };
+    const save = createSave(null, meta);
+    expect(migrateSave(JSON.parse(JSON.stringify(save)))).toEqual(save);
+    const broken = { ...save, meta: { ...meta, relicsFound: ['coupon', 'coupon', 'nope', 3] } };
+    expect(migrateSave(broken)!.meta.relicsFound).toEqual(['coupon']);
+    expect(migrateSave({ ...save, meta: { ...meta, relicsFound: 'x' } })!.meta.relicsFound).toEqual(
+      [],
+    );
+  });
+
+  it('残業レベルは 0〜上限の整数に収め、選んだレベルは解放済みを超えない', () => {
+    const base = createSave(null);
+    const load = (ascension: unknown) =>
+      migrateSave({ ...base, meta: { ...base.meta, ascension } })!.meta.ascension;
+    expect(load({ unlocked: 3, selected: 2 })).toEqual({ unlocked: 3, selected: 2 });
+    expect(load({ unlocked: 3, selected: 9 })).toEqual({ unlocked: 3, selected: 3 });
+    expect(load({ unlocked: 999, selected: -1 })).toEqual({ unlocked: 10, selected: 0 });
+    expect(load('x')).toEqual({ unlocked: 0, selected: 0 });
   });
 });

@@ -10,7 +10,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { BALANCE, PART_IDS, type MetaCondition } from '@chain-factory/sim';
-import type { RunLog } from './runner';
+import type { RunLog } from '@chain-factory/bots';
 
 interface ReportJson {
   meta: Record<string, unknown>;

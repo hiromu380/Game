@@ -1,0 +1,476 @@
+/**
+ * 状態の補助と、プレイヤーの操作（場所前の判断）
+ *
+ * 操作はどれも入力の state を変えず、コピーして返す。
+ */
+import { TOSHIYORI } from '../balance/career';
+import { FACILITIES } from '../balance/facilities';
+import { GAME } from '../balance/game';
+import { rikishiFromCandidate } from '../career/create';
+import { createPrng, deriveSeed, SEED } from '../core/prng';
+import { KAKUN_IDS } from '../lineage/kakun';
+import { addNode, approveIndependence, nodeOfOyakata, takeOverBranch } from '../lineage/family';
+import { npcRetireeTakesName, retireOrSanyo, swapNames, takeName } from '../world/association';
+import { eligibleForToshiyori } from '../lineage/toshiyori';
+import { styleOf } from '../career/create';
+import type {
+  BashoReport,
+  FacilityId,
+  GameState,
+  Diet,
+  PartyLevel,
+  ScoutTripId,
+  KakunId,
+  LineageEntry,
+  Policy,
+  StaffRole,
+} from '../model/types';
+import { DIETS } from '../balance/staff';
+import { DOHYOIRI, KOJO_WORDS, type Dohyoiri, type KojoWord } from '../balance/ceremony';
+import { nextBuildCost, stableCapacity } from '../money/facilities';
+import { applyHappening } from './happening';
+import { note } from './journal';
+import { initialOffice, officeAtLeast } from '../world/office';
+import { OFFICE } from '../balance/office';
+import { KOENKAI } from '../balance/koenkai';
+import { canVisit } from '../stable/koenkai';
+import { canScout, goScouting } from './recruit';
+import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
+import { applyTreatment, tagInjuries } from '../career/injury';
+import type { Treatment } from '../balance/injury';
+
+const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
+
+/** 跡継ぎ・家訓の選択が済むまで場所を進められない */
+export function isBlocked(state: GameState): boolean {
+  return (
+    state.pending.successor !== null ||
+    state.pending.kakun !== null ||
+    state.pending.takeOver !== null
+  );
+}
+
+export function currentLineage(state: GameState): LineageEntry {
+  return state.player.lineage[state.player.lineage.length - 1]!;
+}
+
+/**
+ * 力士を引退させる（state を直接変える）。
+ * 年寄名跡の資格があれば親方として協会に残る:
+ * - 自分の弟子: 名跡が空いていれば部屋付きの親方。空いていなければ「名跡待ち」（空いたら先に回る。待てる年数に上限）
+ * - 他の部屋の資格者: 名跡が空いていれば一定の確率で取る
+ */
+export function retireRikishi(state: GameState, id: number, report: BashoReport | null): void {
+  const r = state.rikishi.find((x) => x.id === id);
+  if (!r) return;
+  const mine = r.stableId === state.player.stableId;
+  let becameOyakata = false;
+  let oyakataName: string | null = null;
+  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, id));
+  if (eligibleForToshiyori(r) && mine) {
+    const oyakataId = state.nextId++;
+    const name = takeName(state, oyakataId, rng);
+    state.oyakata.push({
+      id: oyakataId,
+      name: name ?? '',
+      shikona: r.name,
+      age: r.age,
+      stableId: r.stableId,
+      role: name ? 'heyatsuki' : 'waiting',
+      style: styleOf(r.abilities),
+      highestRank: r.career.highestRank,
+      generation: null,
+      fromRikishiId: r.id,
+      waitingSince: name ? null : state.bashoIndex,
+      since: state.bashoIndex,
+    });
+    addNode(state, {
+      name: name ?? '',
+      shikona: r.name,
+      parentId: nodeOfOyakata(state, state.player.oyakataId)?.id ?? null,
+      stableId: r.stableId,
+      kind: name ? 'heyatsuki' : 'waiting',
+      oyakataId,
+      fromBashoIndex: state.bashoIndex,
+      toBashoIndex: null,
+      highestRank: r.career.highestRank,
+    });
+    becameOyakata = true;
+    oyakataName = name ?? '';
+  } else if (eligibleForToshiyori(r) && rng.chance(TOSHIYORI.npcTakeChance)) {
+    becameOyakata = npcRetireeTakesName(
+      state,
+      r.stableId,
+      r.name,
+      r.career.highestRank,
+      r.age,
+      styleOf(r.abilities),
+      rng,
+    );
+  }
+  report?.retired.push({ id, name: r.name, stableId: r.stableId, becameOyakata });
+  if (mine) {
+    note(state, {
+      kind: 'retire',
+      shikona: r.name,
+      age: r.age,
+      highest: r.career.highestRank,
+      oyakata: oyakataName,
+    });
+  }
+  if (mine && r.career.basho > 0) {
+    state.player.alumni.push({
+      id: r.id,
+      name: r.name,
+      retiredAge: r.age,
+      retiredBashoIndex: state.bashoIndex,
+      generation: state.player.generation,
+      becameOyakata,
+      foreign: r.foreign,
+      career: r.career,
+      track: r.track,
+    });
+  }
+  state.rikishi = state.rikishi.filter((x) => x.id !== id);
+  state.banzuke = state.banzuke.filter((x) => x !== id);
+  delete state.titles[id];
+  state.pending.retireRequests = state.pending.retireRequests.filter((x) => x !== id);
+}
+
+/** 稽古の方針を決める（自分の弟子だけ） */
+export function setPolicy(input: GameState, id: number, policy: Policy): GameState {
+  const state = clone(input);
+  const r = state.rikishi.find((x) => x.id === id);
+  if (r && r.stableId === state.player.stableId) r.policy = policy;
+  return state;
+}
+
+/** 場所の間の出来事に答える（option は選択肢の番号） */
+export function answerHappening(input: GameState, option: number): GameState {
+  if (!input.pending.happening) return input;
+  const state = clone(input);
+  const { id, target } = input.pending.happening;
+  const name = input.rikishi.find((r) => r.id === target)?.name;
+  const res = applyHappening(state, option);
+  // 返事をしないまま進めたとき（断ったことになる）は書かない
+  if (res)
+    note(state, {
+      kind: 'happening',
+      id,
+      option: res.key,
+      ...(name ? { name } : {}),
+      ...(res.hit === null ? {} : { hit: res.hit }),
+    });
+  tagInjuries(state);
+  return state;
+}
+
+/** けがをしている自分の弟子を、次の場所に出すか（強行出場）休ませるか */
+export function setPlayHurt(input: GameState, id: number, playHurt: boolean): GameState {
+  const r = input.rikishi.find((x) => x.id === id);
+  if (!r || r.stableId !== input.player.stableId || r.injury === 0) return input;
+  // 手術の後は出られない
+  if (playHurt && r.wound?.treatment === 'surgery') return input;
+  const state = clone(input);
+  state.rikishi.find((x) => x.id === id)!.playHurt = playHurt;
+  return state;
+}
+
+/** けがの治療の方針（手術・保存療法）を決める */
+export function chooseTreatment(input: GameState, id: number, treatment: Treatment): GameState {
+  if (!input.pending.treatment.includes(id)) return input;
+  const state = clone(input);
+  applyTreatment(state, id, treatment);
+  return state;
+}
+
+/** 入門希望者を受け入れる（次の場所は前相撲、その次から番付に載る） */
+export function acceptCandidate(input: GameState, candidateId: number): GameState {
+  const state = clone(input);
+  const c = state.pending.candidates.find((x) => x.id === candidateId);
+  if (!c) return input;
+  const mine = state.rikishi.filter((r) => r.stableId === state.player.stableId);
+  if (c.foreign && mine.some((r) => r.foreign)) return input; // 外国出身は1部屋1人
+  if (mine.length >= stableCapacity(state)) return input; // 部屋に住めない
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  state.rikishi.push(rikishiFromCandidate(c, state.player.stableId, master.style));
+  note(state, { kind: 'join', shikona: c.name, age: c.age });
+  state.pending.candidates = state.pending.candidates.filter((x) => x.id !== candidateId);
+  return state;
+}
+
+export function declineCandidate(input: GameState, candidateId: number): GameState {
+  const state = clone(input);
+  state.pending.candidates = state.pending.candidates.filter((x) => x.id !== candidateId);
+  return state;
+}
+
+/** 引退の申し出に答える（受け入れる → すぐ引退。慰留 → もう少し続ける） */
+export function answerRetirement(input: GameState, id: number, accept: boolean): GameState {
+  const state = clone(input);
+  if (!state.pending.retireRequests.includes(id)) return input;
+  if (accept) retireRikishi(state, id, null);
+  else state.pending.retireRequests = state.pending.retireRequests.filter((x) => x !== id);
+  return state;
+}
+
+/** 定年: 跡継ぎを選ぶ。選んだ親方が次の代として部屋を継ぐ */
+export function chooseSuccessor(input: GameState, oyakataId: number): GameState {
+  if (!input.pending.successor?.includes(oyakataId)) return input;
+  const state = clone(input);
+  const prev = state.player.oyakataId;
+  const lineage = currentLineage(state);
+  lineage.toBashoIndex = state.bashoIndex;
+  const old = state.oyakata.find((o) => o.id === prev)!;
+  const next = state.oyakata.find((o) => o.id === oyakataId)!;
+  // 名跡を交換して部屋の名前を残す。先代は参与として残るか、協会を去る
+  swapNames(state, next, old);
+  retireOrSanyo(
+    state,
+    old,
+    createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, prev)),
+  );
+  next.role = 'master';
+  next.since = state.bashoIndex;
+  state.player.office = { rank: initialOffice(next.age), since: state.bashoIndex };
+  const nextNode = nodeOfOyakata(state, next.id);
+  if (nextNode) nextNode.kind = 'master';
+  state.player.generation++;
+  next.generation = state.player.generation;
+  state.player.oyakataId = next.id;
+  state.player.lineage.push({
+    generation: state.player.generation,
+    oyakataId: next.id,
+    name: next.name,
+    shikona: next.shikona,
+    fromBashoIndex: state.bashoIndex,
+    toBashoIndex: null,
+    sekitori: 0,
+    sanyaku: 0,
+    yokozuna: 0,
+    makuuchiYusho: 0,
+  });
+  state.pending.successor = null;
+  note(state, {
+    kind: 'successor',
+    generation: state.player.generation,
+    stable: next.name,
+    shikona: next.shikona,
+  });
+  offerKakun(state);
+  return state;
+}
+
+/** 本家の跡継ぎがいないとき、分家を継ぐ（次の代はその分家の親方） */
+export function chooseTakeOver(input: GameState, stableId: number): GameState {
+  if (!input.pending.takeOver?.includes(stableId)) return input;
+  const state = clone(input);
+  currentLineage(state).toBashoIndex = state.bashoIndex;
+  const rng = createPrng(deriveSeed(state.seed, SEED.toshiyori, state.bashoIndex, stableId));
+  takeOverBranch(state, stableId, (o) => retireOrSanyo(state, o, rng));
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  state.player.office = { rank: initialOffice(master.age), since: state.bashoIndex };
+  state.player.generation++;
+  state.player.lineage.push({
+    generation: state.player.generation,
+    oyakataId: master.id,
+    name: master.name,
+    shikona: master.shikona,
+    fromBashoIndex: state.bashoIndex,
+    toBashoIndex: null,
+    sekitori: 0,
+    sanyaku: 0,
+    yokozuna: 0,
+    makuuchiYusho: 0,
+  });
+  state.pending.takeOver = null;
+  note(state, {
+    kind: 'successor',
+    generation: state.player.generation,
+    stable: master.name,
+    shikona: master.shikona,
+  });
+  offerKakun(state);
+  return state;
+}
+
+/** 部屋付きの親方の独立の申し出に答える（認めるなら連れて行く内弟子を選ぶ） */
+export function answerIndependence(
+  input: GameState,
+  accept: boolean,
+  takeIds: readonly number[] = [],
+): GameState {
+  if (input.pending.independence === null) return input;
+  const state = clone(input);
+  const o = state.oyakata.find((x) => x.id === state.pending.independence);
+  state.pending.independence = null;
+  if (accept && o) {
+    approveIndependence(state, o, takeIds);
+    note(state, { kind: 'independence', stable: o.name, shikona: o.shikona });
+  }
+  return state;
+}
+
+/** 建物を1段上げる（部屋の口座から払う。足りなければ何もしない） */
+export function buildFacility(input: GameState, id: FacilityId): GameState {
+  const cost = nextBuildCost(input.player.facilities, id);
+  if (cost === null || input.player.stableMoney < cost) return input;
+  const state = clone(input);
+  state.player.stableMoney -= cost;
+  state.player.facilities[id]++;
+  note(state, { kind: 'facility', id, level: state.player.facilities[id] });
+  return state;
+}
+
+/** 契約のレベルを決める（0 で解約。費用は場所ごとに帳簿から払う） */
+export function setContract(input: GameState, id: FacilityId, level: number): GameState {
+  const def = FACILITIES[id];
+  if (def.kind !== 'contract' || level < 0 || level > def.costs.length) return input;
+  const state = clone(input);
+  state.player.facilities[id] = level;
+  return state;
+}
+
+/** 家訓の候補（まだ持っていないものから3つ） */
+function offerKakun(state: GameState): void {
+  const rng = createPrng(deriveSeed(state.seed, SEED.kakun, state.bashoIndex));
+  const pool = KAKUN_IDS.filter((k) => !state.player.kakun.includes(k));
+  const picks: KakunId[] = [];
+  while (picks.length < 3 && pool.length > 0)
+    picks.push(pool.splice(rng.nextInt(pool.length), 1)[0]!);
+  state.pending.kakun = picks.length ? picks : null;
+}
+
+/** 家訓を書き加える（枠がいっぱいなら replaceIndex の家訓と入れ替える。書かないなら null） */
+export function pickKakun(
+  input: GameState,
+  kakun: KakunId | null,
+  replaceIndex?: number,
+): GameState {
+  if (!input.pending.kakun) return input;
+  const state = clone(input);
+  if (kakun && state.pending.kakun!.includes(kakun)) {
+    if (state.player.kakun.length < GAME.kakunSlots) {
+      state.player.kakun.push(kakun);
+      note(state, { kind: 'kakun', id: kakun });
+    } else if (
+      replaceIndex !== undefined &&
+      replaceIndex >= 0 &&
+      replaceIndex < state.player.kakun.length
+    ) {
+      state.player.kakun[replaceIndex] = kakun;
+      note(state, { kind: 'kakun', id: kakun });
+    }
+  }
+  state.pending.kakun = null;
+  return state;
+}
+
+/** ちゃんこの方針を決める（次の場所の稽古と帳簿から効く） */
+export function setDiet(input: GameState, diet: Diet): GameState {
+  if (input.player.diet === diet || !(diet in DIETS)) return input;
+  const state = clone(input);
+  state.player.diet = diet;
+  note(state, { kind: 'diet', diet });
+  return state;
+}
+
+/** 元弟子を若者頭・世話人に推薦して雇う（その役にいた人は辞める） */
+export function hireStaff(input: GameState, role: StaffRole, alumnusId: number): GameState {
+  const a = staffCandidates(input, role).find((x) => x.id === alumnusId);
+  if (!a) return input;
+  let state = dismissStaff(input, role);
+  if (state === input) state = clone(input);
+  state.player.staff.push({
+    role,
+    alumnusId: a.id,
+    name: a.name,
+    age: alumnusAge(state, a),
+    skill: staffSkill(a),
+    since: state.bashoIndex,
+  });
+  note(state, { kind: 'staffHire', role, name: a.name });
+  return state;
+}
+
+/** 若者頭・世話人に辞めてもらう */
+export function dismissStaff(input: GameState, role: StaffRole): GameState {
+  const s = input.player.staff.find((x) => x.role === role);
+  if (!s) return input;
+  const state = clone(input);
+  state.player.staff = state.player.staff.filter((x) => x.role !== role);
+  note(state, { kind: 'staffLeave', role, name: s.name, retired: false });
+  return state;
+}
+
+/**
+ * 昇進伝達式の口上を決める（大関・横綱になった自分の弟子。横綱は土俵入りの型も）。
+ * 今の地位が大関・横綱のときだけ。日誌に残る
+ */
+export function giveKojo(
+  input: GameState,
+  rikishiId: number,
+  word: KojoWord,
+  dohyoiri?: Dohyoiri,
+): GameState {
+  const r = input.rikishi.find((x) => x.id === rikishiId);
+  const title = input.titles[rikishiId];
+  if (!r || r.stableId !== input.player.stableId || (title !== 'O' && title !== 'Y')) return input;
+  if (!KOJO_WORDS.includes(word)) return input;
+  if (title === 'Y' && (!dohyoiri || !DOHYOIRI.includes(dohyoiri))) return input;
+  const state = clone(input);
+  const me = state.rikishi.find((x) => x.id === rikishiId)!;
+  me.kojo = word;
+  if (title === 'Y') me.dohyoiri = dohyoiri;
+  note(state, {
+    kind: 'kojo',
+    shikona: me.name,
+    to: title,
+    word,
+    ...(title === 'Y' ? { dohyoiri } : {}),
+  });
+  return state;
+}
+
+/** 理事選挙に立候補するか（推薦がなくても立候補できる＝造反）。委員より下なら答えられない */
+export function answerElection(input: GameState, choice: 'run' | 'stay'): GameState {
+  const e = input.pending.election;
+  if (!e || !canRun(input)) return input;
+  const state = clone(input);
+  state.pending.election = { ...e, choice };
+  return state;
+}
+
+function canRun(state: GameState): boolean {
+  return officeAtLeast(state.player.office.rank, OFFICE.candidateFrom);
+}
+
+/** 千秋楽パーティーの規模（次の場所の後から） */
+export function setParty(input: GameState, level: PartyLevel): GameState {
+  if (input.player.koenkai.party === level || !(level in KOENKAI.party)) return input;
+  const state = clone(input);
+  state.player.koenkai.party = level;
+  return state;
+}
+
+/** タニマチに挨拶に行く（親方の貯金から。1人に場所ごと1回） */
+export function visitPatron(input: GameState, patronId: number): GameState {
+  const p = input.player.koenkai.patrons.find((x) => x.id === patronId);
+  if (!p || !canVisit(p, input.bashoIndex) || input.player.personalMoney < KOENKAI.visitCost)
+    return input;
+  const state = clone(input);
+  const q = state.player.koenkai.patrons.find((x) => x.id === patronId)!;
+  q.favor = Math.min(100, q.favor + KOENKAI.visitFavor);
+  q.visitedAt = state.bashoIndex;
+  state.player.personalMoney -= KOENKAI.visitCost;
+  return state;
+}
+
+/** スカウト回りに出る（1つの場所に1回。部屋の口座から払う）。会えた入門希望者は候補に加わる */
+export function scoutTrip(input: GameState, id: ScoutTripId): GameState {
+  if (!canScout(input, id)) return input;
+  const state = clone(input);
+  const count = goScouting(state, id);
+  note(state, { kind: 'scout', trip: id, count });
+  return state;
+}

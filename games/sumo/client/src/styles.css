@@ -1,0 +1,2112 @@
+/*
+ * 一門: 和紙・墨・藍・朱。色の値は art/palette.ts から CSS 変数に流し込む（ここでは名前で使うだけ）
+ * 相撲絵のように、墨の均一な線と平たい色面。影はぼかさず、版画のようにずらした色面で出す。docs/art-style.md
+ */
+@import './art/paper-ui.css';
+@font-face {
+  font-family: 'Kaisei Tokumin';
+  src: url('./assets/fonts/kaisei-tokumin-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Kaisei Tokumin';
+  src: url('./assets/fonts/kaisei-tokumin-800.woff2') format('woff2');
+  font-weight: 800;
+  font-display: swap;
+}
+
+:root {
+  --font-head: 'Kaisei Tokumin', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --font-body: 'Kaisei Tokumin', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --radius: 4px;
+  --print: 2px 3px 0; /* 版画のずらし */
+  font-family: var(--font-body);
+  color: var(--ink);
+  line-height: 1.75;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background-color: var(--paper);
+}
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5em;
+  line-height: 1.3;
+  font-family: var(--font-head);
+  font-weight: 800;
+}
+h2 {
+  font-size: 1.2rem;
+}
+h3 {
+  font-size: 1.05rem;
+  margin-top: 1em;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.app {
+  min-height: 100vh;
+}
+.figure {
+  display: block;
+  flex: none;
+}
+
+/* ボタン（スマホの操作領域 44px 以上） */
+.button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--ink);
+  transition:
+    background-color 140ms,
+    color 140ms;
+}
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.button--primary {
+  background: var(--shu);
+  color: var(--white);
+  font-family: var(--font-head);
+}
+.button--danger {
+  background: var(--ink);
+  color: var(--paper);
+}
+.button--ghost {
+  background: transparent;
+  box-shadow: none;
+}
+.button--large {
+  min-height: 56px;
+  font-size: 1.2rem;
+  width: 100%;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--paper-2);
+}
+.button--primary:hover:not(:disabled) {
+  background-color: var(--ink);
+}
+
+/* はじめ */
+/* 表紙は余白、主役の絵、朱の選択肢という三つの階層で見せる。 */
+.newgame {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 32px 28px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px 64px;
+}
+.newgame__head {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 24px;
+}
+.newgame__brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.newgame__mon {
+  width: 52px;
+  height: 52px;
+  padding: 7px;
+  background: var(--ai);
+  border-radius: 50%;
+}
+.newgame__kicker {
+  margin: 0 0 4px;
+  color: var(--ai);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+}
+.newgame__title {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  font-size: 4.8rem;
+  letter-spacing: 0.14em;
+  margin: 0;
+  line-height: 1.15;
+}
+.newgame__seal {
+  display: inline-block;
+  border: 1px solid var(--shu);
+  color: var(--shu);
+  font-size: 0.65rem;
+  line-height: 1.2;
+  padding: 4px 3px;
+  margin-bottom: 10px;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.1em;
+  transform: rotate(-5deg);
+}
+.newgame__picture {
+  align-self: center;
+  margin: 0;
+  min-width: 0;
+}
+.newgame__picture figcaption {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  margin-top: 16px;
+}
+.newgame__setup {
+  display: grid;
+  align-content: center;
+  gap: 24px;
+  min-width: 0;
+}
+.newgame__intro h2 {
+  font-size: 1.5rem;
+  line-height: 1.65;
+  color: var(--ai);
+  margin: 0 0 12px;
+}
+.newgame__lead {
+  font-size: 0.9rem;
+  line-height: 1.95;
+  margin: 0;
+  color: var(--ink-2);
+}
+.newgame > .note {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--line);
+  margin: 0;
+  padding-top: 18px;
+  font-size: 0.75rem;
+}
+.title-art {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--line);
+}
+.choice {
+  border: none;
+  border-top: 3px double var(--line);
+  margin: 0;
+  padding: 12px 0 0;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.choice legend {
+  padding: 0 12px 0 0;
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+}
+.choice__help {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.choice__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1.8em 3em 1fr;
+  gap: 8px;
+  align-items: center;
+  min-height: 60px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+}
+.choice__item.is-selected {
+  border-color: var(--shu);
+  background: var(--shu-light);
+  box-shadow: inset 3px 0 var(--shu);
+}
+.choice__item input {
+  accent-color: var(--shu);
+  margin: 0;
+}
+.choice__number {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.choice__name {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+}
+.choice__desc {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.newgame .button--large {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 22px;
+  letter-spacing: 0.1em;
+}
+
+/* 上の帯（藍に青海波） */
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 20px 16px;
+  background-color: var(--ai);
+  background-image: none;
+  color: var(--white);
+  border-bottom: 1px solid var(--ink);
+}
+.topbar__portrait {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+.topbar__main {
+  flex: 1 1 220px;
+}
+.topbar__basho {
+  font-size: 0.9rem;
+}
+.topbar__stable {
+  font-size: 1.35rem;
+  font-family: var(--font-head);
+}
+.topbar__sub {
+  display: block;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+}
+.topbar__stats {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+.topbar__stats dt {
+  font-size: 0.75rem;
+}
+.topbar__stats dd {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1.05rem;
+}
+.topbar__tools {
+  display: flex;
+  gap: 8px;
+}
+.topbar .button--ghost {
+  color: var(--white);
+  border-color: var(--white-line);
+}
+
+/* タブ（木札） */
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.tabs__tab {
+  min-height: 60px;
+  padding: 0 26px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font-family: var(--font-head);
+  font-size: 1rem;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tabs__tab.is-active {
+  border-bottom-color: var(--shu);
+  color: var(--shu);
+  background: var(--shu-light);
+}
+.tabs__tab:hover {
+  color: var(--ink);
+}
+
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 16px 130px;
+}
+.stack {
+  display: grid;
+  gap: 24px;
+}
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 3px 0 var(--line);
+}
+.panel > h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panel > h2::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--shu);
+  transform: rotate(45deg);
+}
+.panel--event {
+  border-color: var(--ai);
+  box-shadow: var(--print) var(--ai-light);
+}
+.panel--event > h2::before {
+  background: var(--ai);
+}
+.panel--alert {
+  border-color: var(--shu);
+  box-shadow: var(--print) var(--shu-light);
+}
+.note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-left: 0.5em;
+}
+.warn {
+  color: var(--warning);
+  font-weight: bold;
+}
+.block {
+  display: block;
+}
+.tag {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0 8px;
+  border: 1.5px solid var(--ink-2);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  background: var(--paper);
+}
+.tag--warn {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+.tag--good {
+  border-color: var(--good);
+  color: var(--good);
+}
+.tag--gold {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-bg);
+  font-weight: bold;
+}
+.callout {
+  border: 2px solid var(--ink);
+  border-left: 8px solid var(--shu);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  background: var(--shu-light);
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.row > .figure,
+.row > .portrait-3d {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.row__main {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 220px;
+}
+.row__main > strong {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+}
+.row__actions {
+  display: flex;
+  gap: 8px;
+}
+.grade {
+  color: var(--shu);
+  letter-spacing: 0.1em;
+}
+.grade__off {
+  color: var(--line);
+}
+
+/* 弟子のカード */
+/* 二列の名入り肖像札。スマホでは一枚ずつ読み進められる。 */
+.rikishi-list {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  grid-template-areas: 'portrait head' 'body body' 'policy policy';
+  gap: 16px 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--ink);
+  border-radius: 2px;
+  background: var(--card);
+  min-width: 0;
+}
+.card__portrait {
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  grid-area: portrait;
+  align-self: start;
+  width: 96px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 48% 48% 4px 4px;
+}
+.card__portrait > .portrait-3d {
+  width: 100% !important;
+  height: 100% !important;
+}
+.card__head {
+  grid-area: head;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  align-items: start;
+}
+.card__rank {
+  font-size: 0.75rem;
+  color: var(--ai);
+  font-family: var(--font-head);
+}
+.card__name {
+  font-size: 1.6rem;
+  font-family: var(--font-head);
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+.card__meta {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.card__body {
+  grid-area: body;
+  display: grid;
+  gap: 14px;
+}
+.card__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  align-content: start;
+}
+.abilities {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.abilities__item {
+  display: grid;
+  grid-template-columns: 3em 1fr;
+  align-items: center;
+}
+.abilities__item dt {
+  font-size: 0.8rem;
+  font-family: var(--font-head);
+}
+.abilities__item dd {
+  margin: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.abilities__num {
+  min-width: 2em;
+  text-align: right;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.bar {
+  flex: 1;
+  height: 6px;
+  background: var(--paper-2);
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+}
+.bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--ai);
+}
+.abilities__item:nth-child(2) .bar__fill {
+  background: var(--good);
+}
+.abilities__item:nth-child(3) .bar__fill {
+  background: var(--odo);
+}
+.policy {
+  grid-area: policy;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.policy__label {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.hurt {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  border: 2px dashed #8a4b00;
+  border-radius: var(--radius);
+  background: #fbefd9;
+}
+.hurt__note {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+}
+.policy__btn {
+  min-height: 44px;
+  flex: 1 1 auto;
+  min-width: 44px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.policy__btn.is-selected {
+  border-color: var(--ai);
+  background: var(--ai);
+  color: var(--white);
+  font-weight: 800;
+}
+.policy__btn.is-selected::before {
+  content: '・';
+}
+.policy__btn:hover:not(.is-selected) {
+  background: var(--paper-2);
+}
+.candidates__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.candidates__list .row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 8px 14px;
+  padding-top: 16px;
+  align-content: start;
+}
+.candidates__list .row__actions {
+  grid-column: 2;
+}
+.candidates__list .row__main {
+  font-size: 0.8rem;
+}
+.candidates__list .button {
+  font-size: 0.8rem;
+  padding-inline: 12px;
+}
+
+/* パネルの中の小見出し */
+.panel__sub {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  margin: 16px 0 8px;
+}
+
+/* 要点の数字 */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.tile {
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 2px 2px 0 var(--line);
+}
+.tile dt {
+  font-size: 0.85rem;
+  color: var(--ai);
+}
+.tile dd {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+}
+.tile dd.is-minus {
+  color: var(--shu);
+}
+
+/* 場所の見せ場 */
+.highlight {
+  text-align: center;
+  border: 4px double var(--shu);
+}
+.highlight__basho {
+  margin: 0;
+  color: var(--ai);
+  font-size: 0.9rem;
+}
+.highlight__stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 8px auto;
+  padding: 12px 0 0;
+  background-color: var(--ai);
+  background-image: var(--pattern-seigaiha-strong);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+}
+.highlight__stage .figure {
+  animation: highlight-rise 0.6s ease-out;
+}
+.highlight__cup {
+  width: 72px;
+  height: 81px;
+  margin-bottom: 12px;
+}
+@keyframes highlight-rise {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .highlight__stage .figure {
+    animation: none;
+  }
+}
+.modal__box > h2.highlight__title {
+  font-size: clamp(1.8rem, 7vw, 2.4rem);
+  letter-spacing: 0.15em;
+}
+.highlight__body {
+  text-align: left;
+}
+.highlight__ceremony {
+  text-align: left;
+  padding: 8px 12px;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+}
+.highlight__kojo {
+  margin: 8px 0;
+  padding: 12px 16px;
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  text-align: left;
+  background: var(--gold-bg);
+  border-left: 6px solid var(--shu);
+  border-radius: var(--radius);
+}
+
+/* 日誌 */
+.journal-year h3 {
+  font-family: var(--font-head);
+  margin: 16px 0 6px;
+  border-bottom: 2px solid var(--ink);
+}
+.journal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.journal li {
+  display: grid;
+  grid-template-columns: 6em 1fr;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.journal li.is-milestone .journal__text {
+  font-weight: bold;
+}
+.journal__when {
+  color: var(--ai);
+  font-size: 0.9rem;
+}
+@media (max-width: 560px) {
+  .journal li {
+    grid-template-columns: 1fr;
+  }
+}
+.newgame__load {
+  margin-top: 8px;
+}
+
+/* 協会 */
+.panel--mine {
+  border-color: var(--shu);
+}
+.assoc-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0 0 8px;
+}
+.assoc-stats dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+  font-size: 0.85rem;
+}
+.assoc-stats dd {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.assoc-head {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+.assoc-head::before {
+  content: '▸';
+  color: var(--shu);
+}
+.assoc-head[aria-expanded='true']::before {
+  content: '▾';
+}
+.assoc-head__name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+}
+.assoc-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.assoc-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.assoc-list li.is-mine {
+  border: 2px solid var(--shu);
+  background: var(--shu-light);
+}
+.assoc-list .figure {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+.assoc-list__main {
+  display: grid;
+}
+.assoc-list__main strong {
+  font-family: var(--font-head);
+}
+
+/* 力士の詳細 */
+.detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px 20px;
+  align-items: start;
+}
+.detail__figure {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 6px;
+}
+.detail__facts {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.detail__facts div {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: 8px;
+  border-bottom: 1.5px dashed var(--line);
+  padding-bottom: 2px;
+}
+.detail__facts dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+}
+.detail__facts dd {
+  margin: 0;
+}
+.rank-chart {
+  overflow-x: auto;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 4px;
+  background: var(--card);
+}
+.rank-chart svg {
+  display: block;
+}
+
+/* 歴代の力士 */
+.alumni {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.alumni__item {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.alumni__main {
+  display: grid;
+  flex: 1;
+}
+.alumni__main strong {
+  font-family: var(--font-head);
+}
+
+/* 段の切り替え・契約のレベル */
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.segmented__btn {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  font: inherit;
+  cursor: pointer;
+}
+.segmented__btn.is-active {
+  border-color: var(--ink);
+  background: var(--odo-light);
+  font-weight: bold;
+}
+
+/* 番付表 */
+.banzuke__crest {
+  text-align: center;
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+  letter-spacing: 0.3em;
+  margin: 4px 0 8px;
+}
+.banzuke {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 2px solid var(--ink);
+}
+.banzuke th,
+.banzuke td {
+  border-bottom: 1.5px solid var(--line);
+  padding: 6px 4px;
+  vertical-align: top;
+}
+.banzuke thead th {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-head);
+}
+.banzuke__rank {
+  width: 7.5em;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ai);
+  font-family: var(--font-head);
+  background: var(--paper);
+}
+.banzuke thead .banzuke__rank {
+  color: var(--paper);
+  background: var(--ink);
+}
+.banzuke__cell {
+  text-align: center;
+}
+.banzuke__cell.is-mine {
+  background: var(--shu-light);
+  outline: 2px solid var(--shu);
+  outline-offset: -2px;
+}
+.banzuke__name {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+}
+.banzuke__sub {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.mark {
+  color: var(--shu);
+  margin-right: 2px;
+}
+
+/* 帳簿・結果 */
+.ledger,
+.results {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ledger caption {
+  text-align: left;
+  font-family: var(--font-head);
+  padding-bottom: 4px;
+}
+.ledger th,
+.ledger td,
+.results th,
+.results td {
+  padding: 6px 4px;
+  border-bottom: 1.5px dashed var(--line);
+  text-align: left;
+}
+.results th,
+.results td:nth-child(2) {
+  white-space: nowrap;
+}
+.results th {
+  font-size: 0.85rem;
+  color: var(--ai);
+}
+.changes__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.changes__item strong {
+  font-family: var(--font-head);
+}
+.changes__ranks {
+  flex-basis: 100%;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+}
+.ledger td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ledger__total th,
+.ledger__total td {
+  font-weight: bold;
+  border-bottom: 2px solid var(--ink);
+}
+.ledger__net {
+  font-weight: bold;
+  font-family: var(--font-head);
+}
+.plain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.lineage {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 10px;
+}
+.lineage__gen {
+  color: var(--shu);
+  font-family: var(--font-head);
+  margin-right: 0.5em;
+}
+.lineage__period,
+.lineage__stats {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* 内弟子の選択 */
+.checklist {
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  margin: 8px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px 12px;
+}
+.checklist__item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+}
+.checklist__item input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--shu);
+}
+
+/* 系譜図 */
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.tree,
+.tree__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tree__children {
+  margin-left: 22px;
+  padding-left: 18px;
+  border-left: 2.5px solid var(--ink);
+}
+.tree__node {
+  position: relative;
+  padding-top: 10px;
+}
+.tree__children > .tree__node::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 38px;
+  width: 16px;
+  border-top: 2.5px solid var(--ink);
+}
+.tree__card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.tree__card > :not(.tree__portrait) {
+  grid-column: 2;
+}
+.tree__portrait {
+  grid-row: 1 / span 4;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+}
+.tree__card > strong {
+  font-family: var(--font-head);
+}
+.tree__card .tag {
+  justify-self: start;
+  margin-left: 0;
+}
+.tree__node--master > .tree__card {
+  border-color: var(--shu);
+  box-shadow: var(--print) var(--shu-light);
+}
+.tree__node--branch > .tree__card {
+  border-style: dashed;
+  border-color: var(--ai);
+}
+.tree__node--gone > .tree__card {
+  background: var(--paper-2);
+}
+.tree__meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* 星取表 */
+.hoshitori {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.hoshitori__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.hoshitori__head strong {
+  font-family: var(--font-head);
+}
+.hoshitori__rank {
+  font-size: 0.85rem;
+  color: var(--ai);
+}
+.hoshitori__bouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.star {
+  min-width: 44px;
+  min-height: 44px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--card);
+  font-family: var(--font-head);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink);
+}
+.star--loss {
+  background: var(--paper-2);
+}
+.star--absent {
+  color: var(--muted);
+  border-color: var(--line);
+  cursor: default;
+}
+.is-mine-text {
+  color: var(--shu);
+  font-weight: bold;
+}
+.is-mine-text::before {
+  content: '◆';
+  margin-right: 2px;
+}
+.up {
+  color: var(--good);
+  font-weight: bold;
+}
+.down {
+  color: var(--shu);
+  font-weight: bold;
+}
+
+/* 取組の演出 */
+.dohyo {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.dohyo--3d {
+  aspect-ratio: 360 / 250;
+  background-color: var(--ai);
+  /* 描画ライブラリが読み込まれるまでは既存のSVGを表示する */
+  touch-action: pan-y;
+}
+.bout__names {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 4px 0;
+  font-size: 1.05rem;
+}
+.bout__names strong {
+  font-family: var(--font-head);
+}
+.bout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px 16px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .bout {
+    grid-template-columns: 1fr;
+  }
+}
+.bout__stage {
+  position: relative;
+}
+/* 決まり手の札（勝負が決まったら土俵の上に出す） */
+.bout__kimarite {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  padding: 6px 18px 8px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 3px 3px 0 var(--ink);
+  animation: kimarite-in 0.35s ease-out;
+}
+.bout__kimarite-group {
+  font-size: 0.8rem;
+  color: var(--ai);
+}
+.bout__kimarite-name {
+  font-family: var(--font-head);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  white-space: nowrap;
+  line-height: 1.1;
+  color: var(--shu);
+}
+@keyframes kimarite-in {
+  from {
+    transform: translate(-50%, -8px) scale(0.9);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bout__kimarite {
+    animation: none;
+  }
+}
+.bout__call {
+  min-height: 12em;
+  padding: 8px 12px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.bout__call ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bout__line {
+  margin: 0 0 4px;
+  color: var(--muted);
+}
+.bout__line.is-now {
+  color: var(--ink);
+  font-weight: bold;
+}
+.bout__line.is-gyoji {
+  font-family: var(--font-head);
+}
+.bout__speaker {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  border: 1.5px solid var(--ai);
+  border-radius: 999px;
+  vertical-align: 2px;
+}
+.bout__result {
+  margin: 8px 0 0;
+  font-size: 1.1rem;
+}
+.bout__result.is-done {
+  font-family: var(--font-head);
+}
+
+/* 下の操作帯（黄土に麻の葉） */
+.actionbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 16px;
+  background-color: var(--card);
+  border-top: 1px solid var(--ink);
+}
+.actionbar__hint {
+  flex: 1 1 240px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+/* ダイアログ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 10;
+}
+.modal__box {
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.modal__box > h2 {
+  margin: -24px -24px 24px;
+  padding: 18px 24px;
+  background-color: var(--ai);
+  color: var(--white);
+  border-bottom: 1px solid var(--ink);
+}
+.modal__box--wide {
+  width: min(760px, 100%);
+}
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 560px) {
+  .actionbar {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .actionbar__hint {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+  }
+  .actionbar .button {
+    flex: 1 1 0;
+    padding: 0 8px;
+  }
+  .content {
+    padding-bottom: 160px;
+  }
+  .detail {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .detail__facts {
+    width: 100%;
+  }
+  .topbar__stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .banzuke__rank {
+    width: 5.5em;
+  }
+  .newgame__title {
+    font-size: 2.4rem;
+  }
+}
+
+/* 手描き背景と、同じ3Dモデルから生成した立体人物を重ねる。 */
+.title-art--scene {
+  position: relative;
+  aspect-ratio: 420 / 300;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.title-art__background {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.title-art__figure {
+  position: absolute;
+  display: block;
+  bottom: 9%;
+  width: 37%;
+}
+.title-art__figure--left {
+  left: 0;
+  transform: rotate(-4deg);
+}
+.title-art__figure--master {
+  left: 33%;
+  width: 34%;
+  bottom: 10%;
+}
+.title-art__figure--right {
+  right: 0;
+  transform: rotate(4deg);
+}
+/* 3D肖像は静止画。元のSVG表示でも領域は変わらない。 */
+.portrait-3d {
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  vertical-align: middle;
+  flex: none;
+  background: transparent;
+}
+.portrait-3d > img,
+.portrait-3d > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 紙面の役割を見出し・朱印・罫線で統一する。小さな表示でも横帯を残さない。 */
+.card__head,
+.card__name,
+.row__main,
+.tree__card > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.bout__names > span {
+  max-width: 48%;
+  overflow-wrap: anywhere;
+}
+.modal {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.actionbar {
+  padding-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 10px));
+  z-index: 2;
+}
+.topbar,
+.tabs {
+  padding-inline: max(16px, calc((100vw - 980px) / 2));
+}
+@media (max-width: 899px) {
+  .newgame {
+    max-width: 640px;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 24px 32px;
+  }
+  .newgame__head {
+    padding-bottom: 20px;
+  }
+  .newgame__title {
+    font-size: 3.5rem;
+  }
+  .newgame__mon {
+    width: 40px;
+    height: 40px;
+  }
+  .newgame__brand {
+    gap: 12px;
+  }
+  .newgame__picture figcaption {
+    margin-top: 12px;
+    font-size: 0.7rem;
+  }
+  .newgame__setup {
+    gap: 20px;
+  }
+  .newgame__intro h2 {
+    font-size: 1.2rem;
+  }
+  .newgame__intro {
+    margin-top: 4px;
+  }
+  .rikishi-list {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .newgame {
+    padding-inline: 20px;
+  }
+  .newgame__kicker {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+  .newgame__title {
+    font-size: 3rem;
+  }
+  .newgame__mon {
+    display: none;
+  }
+  .newgame__head .button {
+    font-size: 0.8rem;
+    padding-inline: 10px;
+  }
+  .newgame__intro h2 {
+    font-size: 1.1rem;
+  }
+  .newgame__lead {
+    font-size: 0.85rem;
+  }
+  .choice__item {
+    grid-template-columns: auto 1.5em 2.5em 1fr;
+    padding-inline: 10px;
+  }
+  .choice__desc {
+    font-size: 0.75rem;
+  }
+  .panel {
+    padding: 18px;
+  }
+  .content {
+    padding-top: 20px;
+  }
+  .topbar {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    gap: 10px 12px;
+  }
+  .topbar__main {
+    flex-basis: 230px;
+  }
+  .topbar__stats {
+    padding-top: 12px;
+    border-top: 1px solid var(--white-line);
+    gap: 12px;
+  }
+  .topbar__tools {
+    width: 100%;
+  }
+  .topbar__tools .button {
+    flex: 1;
+    font-size: 0.8rem;
+  }
+  .tabs {
+    gap: 0;
+  }
+  .tabs__tab {
+    flex: 1;
+    min-height: 52px;
+    padding-inline: 12px;
+  }
+  .card {
+    padding: 16px;
+    gap: 14px;
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+  .card__portrait {
+    width: 88px;
+    height: 98px;
+  }
+  .card__name {
+    font-size: 1.5rem;
+  }
+  .candidates__list {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .candidates__list .row__actions {
+    justify-content: end;
+  }
+  .banzuke__rank {
+    width: 6.5em;
+    font-size: 0.75rem;
+  }
+  .modal {
+    padding-inline: 12px;
+  }
+  .modal__box {
+    padding: 18px;
+  }
+  .modal__box > h2 {
+    margin: -18px -18px 18px;
+    padding: 14px 18px;
+  }
+}
+.modal__box--bout {
+  width: min(680px, 100%);
+}
+.bout__names {
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.bout__result {
+  text-align: center;
+  padding-block: 8px;
+}
+.bout__result.is-done {
+  color: var(--shu);
+}
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}
+
+.dohyo--3d {
+  position: relative;
+}
+.dohyo--3d > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 英語の型名も説明と重ならない二段組みにする。 */
+html:lang(en) .choice__item {
+  grid-template-columns: auto 1.8em 1fr;
+  gap: 0 8px;
+}
+html:lang(en) .choice__item input,
+html:lang(en) .choice__number {
+  grid-row: 1 / 3;
+}
+html:lang(en) .choice__name,
+html:lang(en) .choice__desc {
+  grid-column: 3;
+}
+
+/* 個性の札 */
+.tag--trait {
+  border-color: var(--ai);
+  color: var(--ai);
+  background: var(--ai-light);
+}
+
+/* ライバルの部屋 */
+.rival {
+  border-left: 6px solid var(--shu);
+}
+.rival__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.rival__head > div {
+  display: grid;
+}
+.rival__name {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+}
+.callout--rival {
+  border-left-color: var(--ai);
+}
+
+/* 理事会 */
+.board {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0;
+}
+.board > div {
+  display: grid;
+  grid-template-columns: 7em 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1.5px dashed var(--line);
+}
+.board dt {
+  font-family: var(--font-head);
+  color: var(--ai);
+}
+.board dd {
+  margin: 0;
+}
+
+/* 後援会: タニマチとの関係 */
+.favor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+}
+.favor .bar {
+  flex: 1;
+}
+
+/* はじめての人向けの案内 */
+.guide {
+  border: 2px solid var(--ai);
+  background: var(--ai-light);
+}
+.guide__steps {
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.guide__steps li {
+  display: flex;
+  gap: 8px;
+}
+.guide__steps li.is-done {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.guide__mark {
+  width: 1.2em;
+  font-weight: bold;
+  color: var(--good);
+}
+.tabtip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 2px dashed var(--ai);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.tabtip p {
+  margin: 0;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 部屋の殿堂 */
+.fame {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.fame__card {
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--gold-bg);
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.fame__main {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+.fame__main .tag:first-child,
+.fame__main .muted {
+  margin-left: 0;
+}
+.fame__name {
+  font-family: var(--font-head);
+  font-size: 1.15em;
+}
+
+/* 部屋の歴代記録 */
+.records {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.records__row {
+  display: grid;
+  grid-template-columns: 12em 1fr;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.records__row dt {
+  font-weight: bold;
+}
+.records__row dd {
+  margin: 0;
+}
+.records__holders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.records__holders li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
+}
+.records__rank {
+  min-width: 2.5em;
+  color: var(--ink-2);
+}
+.records__top .records__name {
+  font-family: var(--font-head);
+  font-weight: bold;
+}
+.records__value {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 600px) {
+  .records__row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
+
+/* 幕内の優勝争い */
+.race {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 4px 0 8px;
+}
+.race th,
+.race td {
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.race th {
+  white-space: nowrap;
+  font-weight: normal;
+}
+.race tr.is-decided th {
+  font-weight: bold;
+}
+.race__record {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.race__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.race__contenders li {
+  padding: 2px 0;
+}
+
+/* 中日（8日目） */
+.mid__list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.mid__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mid__rank {
+  min-width: 7em;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+.mid__record {
+  font-variant-numeric: tabular-nums;
+}
+.mid__choice {
+  flex-basis: 100%;
+}
+
+/* 部屋の箱庭（1枚のキャンバスに描いて拡大する） */
+.hakoniwa {
+  display: grid;
+  gap: 8px;
+}
+.hakoniwa__stage {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+.hakoniwa__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.hakoniwa__canvas.is-pointing {
+  cursor: pointer;
+}
+.hakoniwa__overlay {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+}
+.hakoniwa__tip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: grid;
+  padding: 4px 8px;
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+.hakoniwa__tip-go {
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.hakoniwa__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  background: var(--card);
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.chip:hover,
+.chip:focus-visible {
+  border-color: var(--ink);
+}
+
+/* 部屋の絵（ドット絵） */
+.scene-box {
+  display: grid;
+  gap: 8px;
+}
+.scene-box__tabs {
+  justify-self: center;
+}
+.scene {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+.scene__nobori {
+  font-family: var(--font-head);
+  font-weight: 800;
+}
+.scene__sprite {
+  position: absolute;
+  height: auto;
+  image-rendering: pixelated;
+  user-select: none;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .hakoniwa__actions .chip .muted {
+    display: none;
+  }
+  .hakoniwa__actions .chip {
+    padding: 0 10px;
+  }
+}

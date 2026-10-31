@@ -2,8 +2,8 @@
  * シードをワーカーに分けて並列にランを実行する
  */
 import { Worker } from 'node:worker_threads';
-import type { BotName } from './bots';
-import type { RunLog, RunnerOptions } from './runner';
+import type { BotName } from '@chain-factory/bots';
+import type { RunLog, RunnerOptions } from '@chain-factory/bots';
 
 export async function runParallel(
   seeds: number[],

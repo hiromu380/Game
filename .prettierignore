@@ -1,4 +1,5 @@
 dist
+dist-single
 node_modules
 pnpm-lock.yaml
 legacy
@@ -9,3 +10,9 @@ apps/desktop/release
 docs/ops/steam-achievements-list.md
 apps/client/src/styles/palette.css
 apps/client/art/preview.html
+# 生成物（apps/client/art/ のスクリプトが書き出す。手で編集しない）
+apps/client/src/assets/characters/
+docs/characters/preview.html
+apps/client/build/store/svg/
+docs/art-preview.html
+docs/ui-review/*/report.md

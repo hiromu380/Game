@@ -8,7 +8,7 @@
 import {
   createInitialAchievements,
   evaluateAchievements,
-  recordDailyParticipation,
+  recordWeeklyParticipation,
   shiftContextOf,
   unlockAchievements,
   type AchievementContext,
@@ -27,9 +27,9 @@ function apply(progress: AchievementProgress, context: AchievementContext): Achi
 
 /**
  * 本番を確定したとき
- * - どのモードでも: 出荷量・連鎖・ボス・延長戦（デイリーはサーバーで検証済みのシードで確定している）
+ * - どのモードでも: 出荷量・連鎖・ボス・延長戦（週替わりはサーバーで検証済みのシードで確定している）
  * - 通常ラン: 更新後のメタ進行（ランが終わったとき）
- * - デイリー本番: 参加日数・全シフトクリア
+ * - 週替わりの本番: 参加日数・全シフトクリア
  */
 export function achievementsAfterCommit(
   progress: AchievementProgress,
@@ -44,21 +44,21 @@ export function achievementsAfterCommit(
   if (!EDITION_CONFIG.achievements) return progress;
   const { mode, before, committed } = input;
   let next = progress;
-  if (mode.kind === 'daily') next = recordDailyParticipation(next, mode.dailyId);
+  if (mode.kind === 'weekly') next = recordWeeklyParticipation(next, mode.dayId);
   return apply(next, {
     shift: shiftContextOf(before, committed),
     meta: input.meta,
-    daily: mode.kind === 'daily' ? { cleared: committed.state.phase === 'cleared' } : undefined,
+    weekly: mode.kind === 'weekly' ? { cleared: committed.state.phase === 'cleared' } : undefined,
   });
 }
 
-/** デイリーのランキングを受け取ったとき（自分の結果がある = その日の本番を終えている） */
+/** 確定した結果発表で自分の順位を受け取ったとき（暫定ランキングでは判定しない） */
 export function achievementsAfterRanking(
   progress: AchievementProgress,
   topPercent: number,
 ): AchievementProgress {
   if (!EDITION_CONFIG.achievements) return progress;
-  return apply(progress, { daily: { topPercent } });
+  return apply(progress, { weekly: { topPercent } });
 }
 
 /** 起動時: メタ進行の記録で満たしている実績を解除する（セーブの移行直後・取りこぼしの回収） */

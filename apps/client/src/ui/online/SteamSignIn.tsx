@@ -2,7 +2,7 @@
  * デスクトップ版の本人確認: Steam のチケットで登録・再ログインする（人間確認の代わり）
  *
  * 開いたら自動で1回試す。Steam が動いていない・Steam 側の障害のときは理由と「再試行」を出す。
- * 同じ Steam アカウントなら別の端末でも同じプレイヤーになる（進行中のデイリーも続きから遊べる）。
+ * 同じ Steam アカウントなら別の端末でも同じプレイヤーになる（進行中の週替わりも続きから遊べる）。
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../i18n';
@@ -39,7 +39,7 @@ export function SteamSignIn({ onRegistered }: Props) {
       {busy && <p className="panel__hint">{t('online.steamSignIn')}</p>}
       {error && (
         <>
-          <p className="panel__hint daily__error">{t(`error.online.${error}`)}</p>
+          <p className="panel__hint weekly__error">{t(`error.online.${error}`)}</p>
           <button onClick={retry}>{t('online.retry')}</button>
         </>
       )}
