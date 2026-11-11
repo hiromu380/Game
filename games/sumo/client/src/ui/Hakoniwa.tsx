@@ -100,7 +100,7 @@ function place(d: Drawn, s: Loaded, index: number): Placed {
 /** 人の絵を、描けるキャンバスにする（同じ見た目は使い回す） */
 const people = new Map<string, HTMLCanvasElement>();
 function personCanvas(look: Actor['look'], frame: 0 | 1, flip: boolean): HTMLCanvasElement {
-  const key = `${look.pose}:${frame}:${look.skin}:${look.mawashi}:${look.hair}:${look.build}:${flip ? 1 : 0}`;
+  const key = `${look.pose}:${frame}:${look.skin}:${look.mawashi}:${look.hair}:${look.build}:${look.cloth ?? ''}:${flip ? 1 : 0}`;
   const hit = people.get(key);
   if (hit) return hit;
   const px = personPixels({ ...look, frame, flip });

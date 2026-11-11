@@ -1,13 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentProps,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   isSekitori,
   KIMARITE_BY_ID,
@@ -20,28 +11,13 @@ import {
 import { useI18n, type MessageKey } from '../i18n';
 import { dayLabel } from '../format';
 import { boutFlow, boutScript, linesAt, poseAt, type CallLine } from '../playback/boutScript';
-import { BoutStage } from '../art/BoutStage';
+import { BoutStagePixel } from './BoutStagePixel';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
 import { useSettings } from '../settings';
 import { withStep } from '../guide';
-import type { MotionClock } from '../art/three/animation';
 
-/** 3D の読み込みに失敗したら SVG の舞台で受け止め、演出の時計を始める */
-function SvgStage({
-  onReady,
-  ...props
-}: ComponentProps<typeof BoutStage> & { motion?: MotionClock; onReady: () => void }) {
-  useEffect(onReady, [onReady]);
-  const { motion: _motion, ...svgProps } = props;
-  void _motion;
-  return <BoutStage {...svgProps} />;
-}
-const BoutStage3D = lazy(() =>
-  import('../art/three/BoutStage3D').catch(() => ({ default: SvgStage })),
-);
-
-/** 取組の演出（向正面から見た土俵と実況）。動きを減らす設定では最後の場面と実況の全文を見せる */
+/** 取組の演出（ドット絵の土俵と実況）。動きを減らす設定では最後の場面と実況の全文を見せる */
 export function BoutViewer({
   game,
   bout,
@@ -78,7 +54,7 @@ export function BoutViewer({
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const [time, setTime] = useState(reduced ? script.duration : 0);
   const [run, setRun] = useState(0);
-  // 3D の舞台の準備ができてから時計を進める
+  // 舞台の絵の準備ができてから時計を進める
   const [ready, setReady] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
   const skipped = useRef(false);
@@ -86,6 +62,7 @@ export function BoutViewer({
     if (reduced || !ready) return;
     skipped.current = false;
     const played = new Set<number>();
+    let cheered = false;
     let raf = 0;
     const start = performance.now();
     const tick = (now: number) => {
@@ -97,6 +74,11 @@ export function BoutViewer({
           if (sound) playSound(f.sound);
         }
       });
+      // 勝負が決まったら歓声
+      if (!cheered && s >= script.finishAt) {
+        cheered = true;
+        if (sound) playSound('cheer');
+      }
       setTime(Math.min(s, script.duration));
       if (s < script.duration) raf = requestAnimationFrame(tick);
     };
@@ -127,15 +109,6 @@ export function BoutViewer({
     });
   };
 
-  const stageProps = {
-    east: lookOf(east),
-    west: lookOf(west),
-    pose,
-    arms: pose.contact ? ('push' as const) : ('side' as const),
-    winner: decided ? winnerSide : null,
-    title: t('bout.aria'),
-  };
-
   // 不戦勝は取組がないので、結果だけを見せる
   if (bout.fusen) {
     return (
@@ -164,19 +137,18 @@ export function BoutViewer({
         <h2 id="bout-title">{t('bout.title', { day: dayLabel(t, bout.day) })}</h2>
         <div className="bout">
           <div className="bout__stage">
-            <Suspense fallback={<BoutStage {...stageProps} />}>
-              <BoutStage3D
-                {...stageProps}
-                motion={
-                  {
-                    time,
-                    clash: script.frames[1]?.t ?? 0.6,
-                    duration: script.duration,
-                  } satisfies MotionClock
-                }
-                onReady={onReady}
-              />
-            </Suspense>
+            <BoutStagePixel
+              east={lookOf(east)}
+              west={lookOf(west)}
+              pose={pose}
+              time={time}
+              clash={script.frames[1]?.t ?? 0.6}
+              finishAt={script.finishAt}
+              winner={decided ? winnerSide : null}
+              title={t('bout.aria')}
+              still={reduced}
+              onReady={onReady}
+            />
             <p className="bout__names">
               <span>
                 {t('rank.side.W')} <strong>{west?.name ?? '?'}</strong>

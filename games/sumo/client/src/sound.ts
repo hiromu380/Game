@@ -4,6 +4,8 @@
  * - hit: ぶつかる音
  * - fall: 土俵に落ちる音
  * - drum: 太鼓（見せ場）
+ * - tick: 星取りの札が入る小さな木の音
+ * - cheer: 勝負が決まったときの歓声（ざわめきが盛り上がって引く）
  */
 let ctx: AudioContext | null = null;
 
@@ -62,7 +64,32 @@ function thump(ac: AudioContext, at: number, freq: number, gain: number, seconds
   osc.stop(at + seconds);
 }
 
-export function playSound(kind: 'clap' | 'hit' | 'fall' | 'drum'): void {
+/** 歓声: 帯域を絞った雑音を、ふくらませてから引かせる */
+function swell(ac: AudioContext, at: number, gain: number, seconds: number) {
+  const src = ac.createBufferSource();
+  const buf = ac.createBuffer(1, Math.ceil(ac.sampleRate * seconds), ac.sampleRate);
+  const data = buf.getChannelData(0);
+  let s = 6789;
+  for (let i = 0; i < data.length; i++) {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    data[i] = s / 0x3fffffff - 1;
+  }
+  src.buffer = buf;
+  const filter = ac.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 900;
+  filter.Q.value = 0.6;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.001, at);
+  g.gain.exponentialRampToValueAtTime(gain, at + 0.25);
+  g.gain.exponentialRampToValueAtTime(0.001, at + seconds);
+  src.connect(filter).connect(g).connect(ac.destination);
+  src.start(at);
+}
+
+export type SoundKind = 'clap' | 'hit' | 'fall' | 'drum' | 'tick' | 'cheer';
+
+export function playSound(kind: SoundKind): void {
   const ac = audio();
   if (!ac) return;
   const t = ac.currentTime;
@@ -72,6 +99,10 @@ export function playSound(kind: 'clap' | 'hit' | 'fall' | 'drum'): void {
   } else if (kind === 'hit') {
     thump(ac, t, 110, 0.6, 0.18);
     burst(ac, t, 500, 1, 0.25, 0.1);
+  } else if (kind === 'tick') {
+    burst(ac, t, 1800, 6, 0.16, 0.04);
+  } else if (kind === 'cheer') {
+    swell(ac, t, 0.16, 1.4);
   } else if (kind === 'drum') {
     // ドン・ドン・ドドン
     [0, 0.32, 0.64, 0.8].forEach((d, i) => thump(ac, t + d, i === 3 ? 95 : 80, 0.55, 0.35));

@@ -16,7 +16,11 @@ export type Pose =
   | 'lie'
   | 'oyakata'
   | 'oyakataSit'
-  | 'sweep';
+  | 'sweep'
+  /** 仕切り（腰を落として両手を下ろす） */
+  | 'shikiri'
+  /** 行司（コマ 0: 軍配を構える / 1: 軍配を上げる） */
+  | 'gyoji';
 
 export interface PersonLook {
   pose: Pose;
@@ -30,6 +34,8 @@ export interface PersonLook {
   hair: 'zanbara' | 'mage';
   /** 体の大きさ（0 = 細い 〜 2 = 大きい） */
   build: 0 | 1 | 2;
+  /** まわしの色を替える（関取の締め込み。#rrggbb）。省くと mawashi の白・黒 */
+  cloth?: string;
   flip?: boolean;
 }
 
@@ -98,7 +104,7 @@ function mawashi(s: Sheet, b: Body, col: Rgb): void {
 
 function rikishi(s: Sheet, look: PersonLook): void {
   const skin = rgb(PALETTE.skin[look.skin]);
-  const belt = look.mawashi === 'white' ? WHITE : SUMI;
+  const belt = look.cloth ? rgb(look.cloth) : look.mawashi === 'white' ? WHITE : SUMI;
   const f = look.frame;
   const big = look.build;
   const cx = FOOT.x;
@@ -116,6 +122,18 @@ function rikishi(s: Sheet, look: PersonLook): void {
   const arm = (x0: number, y0: number, x1: number, y1: number) => s.limb(x0, y0, x1, y1, 1.8, skin);
 
   switch (look.pose) {
+    case 'shikiri': {
+      // 仕切り: 腰を割って前へかがみ、両手を土俵に下ろす（コマ 1 で片手を浮かす）
+      const b = body(-2, 4);
+      leg(cx + 2, ground - 5, cx + 7, ground - 1);
+      leg(cx - 3, ground - 5, cx - 6, ground - 1);
+      s.ball(b.cx, b.cy, b.rx, b.ry, skin);
+      mawashi(s, b, belt);
+      arm(b.cx - b.rx + 1, b.cy - 1, b.cx - b.rx - 2, ground - 1 - f * 2);
+      arm(b.cx - 2, b.cy + 2, b.cx - 5, ground - 1);
+      head(s, b.cx - 4, b.cy - b.ry - 2, skin, look.hair);
+      break;
+    }
     case 'idle':
     case 'sweep': {
       const b = body(0, f);
@@ -247,16 +265,44 @@ function oyakata(s: Sheet, look: PersonLook): void {
   head(s, cx - 1, ground - 23 + look.frame * 0.5, skin, 'zanbara', true);
 }
 
+/** 行司: 烏帽子・紫の装束・軍配。軍配は左（flip で右）へ上げる */
+function gyoji(s: Sheet, look: PersonLook): void {
+  const skin = rgb(PALETTE.skin[look.skin]);
+  const robe = rgb(PALETTE.murasaki);
+  const cx = FOOT.x;
+  const ground = FOOT.y;
+  s.rect(cx - 5, ground - 2, 4, 2, WHITE);
+  s.rect(cx + 2, ground - 2, 4, 2, WHITE);
+  s.ball(cx, ground - 10, 7, 8, robe);
+  s.rect(cx - 6, ground - 6, 13, 4, dark(robe));
+  s.rect(cx - 1, ground - 18, 2, 4, WHITE);
+  // 軍配: 構える（胸の前）／上げる（勝った方へ）
+  if (look.frame === 0) {
+    s.limb(cx - 5, ground - 12, cx - 7, ground - 9, 1.5, robe);
+    s.limb(cx - 7, ground - 9, cx - 8, ground - 13, 0.6, WOOD);
+    s.ball(cx - 8, ground - 15, 2.2, 2.6, rgb(PALETTE.odo), false);
+  } else {
+    s.limb(cx - 5, ground - 13, cx - 10, ground - 18, 1.5, robe);
+    s.limb(cx - 10, ground - 18, cx - 12, ground - 22, 0.6, WOOD);
+    s.ball(cx - 12, ground - 24, 2.4, 2.8, rgb(PALETTE.odo), false);
+  }
+  head(s, cx - 1, ground - 22, skin, 'zanbara');
+  // 烏帽子
+  s.rect(cx - 3, ground - 31, 5, 4, SUMI);
+  s.rect(cx - 2, ground - 33, 3, 2, SUMI);
+}
+
 const cache = new Map<string, Pixels>();
 
 /** 人の絵（同じ見た目は使い回す） */
 export function personPixels(look: PersonLook): Pixels {
-  const key = `${look.pose}:${look.frame}:${look.skin}:${look.mawashi}:${look.hair}:${look.build}:${look.flip ? 1 : 0}`;
+  const key = `${look.pose}:${look.frame}:${look.skin}:${look.mawashi}:${look.hair}:${look.build}:${look.cloth ?? ''}:${look.flip ? 1 : 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const s = new Sheet(PERSON.width, PERSON.height);
   if (look.pose === 'lie') lie(s, look);
   else if (look.pose === 'oyakata' || look.pose === 'oyakataSit') oyakata(s, look);
+  else if (look.pose === 'gyoji') gyoji(s, look);
   else rikishi(s, look);
   const out = s.out(look.flip ?? false);
   cache.set(key, out);

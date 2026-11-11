@@ -1325,7 +1325,7 @@ h3 {
 }
 .bout {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
   gap: 12px 16px;
   align-items: start;
 }
@@ -1681,7 +1681,24 @@ h3 {
   }
 }
 .modal__box--bout {
-  width: min(680px, 100%);
+  width: min(960px, 100%);
+}
+/* 取組の舞台（ドット絵。1枚のキャンバスを拡大する） */
+.bout-stage {
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--ink);
+  /* 画面の高さに収まる幅まで */
+  width: min(100%, calc((100vh - 280px) * 184 / 170));
+  min-width: min(100%, 280px);
+  margin: 0 auto;
+}
+.bout-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
 }
 .bout__names {
   padding-block: 12px;
