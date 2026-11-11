@@ -6,6 +6,10 @@ import type { InjuryPart, Treatment } from '../balance/injury';
 
 export type Style = 'oshi' | 'yotsu' | 'waza';
 export type Policy = Style | 'body' | 'rest';
+/** 稽古の量 */
+export type Intensity = 'light' | 'normal' | 'hard';
+/** 本場所の後半の構え（中日に決める） */
+export type Stance = 'push' | 'safe';
 export type Division = 'makuuchi' | 'juryo' | 'makushita' | 'sandanme' | 'jonidan' | 'jonokuchi';
 /** 幕内の中の地位（横綱・大関・関脇・小結・前頭） */
 export type Title = 'Y' | 'O' | 'S' | 'K' | 'M';
@@ -98,6 +102,8 @@ export interface Rikishi {
   exOzeki: boolean;
   /** けがを押して次の場所に出る（親方の判断。自分の弟子だけ。場所が終わると戻る） */
   playHurt: boolean;
+  /** 稽古の量（自分の弟子だけ。なければ「ふつう」） */
+  intensity?: Intensity;
   /** 今のけがの部位・全治・治療（けがの間だけ） */
   wound?: Wound;
   /** 古傷の部位（治った後も、また痛めやすい） */
@@ -529,6 +535,18 @@ export type JournalEvent =
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */
   | { kind: 'earlier' };
 
+/** 稽古の成果: 能力・体重・疲れの動きと、稽古でのけが */
+export interface TrainingResult {
+  id: number;
+  oshi: number;
+  yotsu: number;
+  waza: number;
+  weight: number;
+  fatigue: number;
+  intensity: Intensity;
+  injured: boolean;
+}
+
 /** 幕内の優勝争い（場所の流れ） */
 export interface YushoRace {
   /** 優勝が決まった日（優勝決定戦にもつれたら 16） */
@@ -579,6 +597,10 @@ export interface BashoReport {
   playoff: number[] | null;
   /** ライバルの部屋との比べ（この場所の直接対決と、番付の関取の数） */
   rival?: { stableId: number; wins: number; losses: number; sekitori: [number, number] };
+  /** 稽古の成果（自分の弟子。場所の後の稽古で動いた量。古い結果にはない） */
+  training?: TrainingResult[];
+  /** 中日に決めた後半の構え（自分の弟子） */
+  stance?: Record<number, Stance>;
   /** 中日の後に再出場・途中出場した自分の弟子 */
   reentered?: number[];
   /** 幕内の優勝争い（古い結果にはない） */

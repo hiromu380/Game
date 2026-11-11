@@ -24,7 +24,8 @@ import { applyBasho, applyHighest, applyMochikyukinMinimum } from '../career/upd
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import { applyKakun } from '../lineage/kakun';
 import { settleBasho, sum } from '../money/ledger';
-import type { BashoRecord, BashoReport, GameState, Rank } from '../model/types';
+import type { BashoRecord, BashoReport, GameState, Rank, Stance } from '../model/types';
+import { round1 } from '../core/math';
 import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, retireRikishi } from './state';
@@ -131,10 +132,13 @@ export function previewBasho(input: GameState): MidBasho | null {
   };
 }
 
-/** reenter: 中日の後から出す自分の弟子（休場している者。けがを押して出る） */
+/**
+ * reenter: 中日の後から出す自分の弟子（休場している者。けがを押して出る）
+ * stance: 自分の弟子の後半の構え（攻める・無理をしない。なければいつも通り）
+ */
 export function advanceBasho(
   input: GameState,
-  options: { reenter?: readonly number[] } = {},
+  options: { reenter?: readonly number[]; stance?: Readonly<Record<number, Stance>> } = {},
 ): GameState {
   if (input.gameOver || isBlocked(input)) return input;
   const state: GameState = JSON.parse(JSON.stringify(input));
@@ -148,9 +152,21 @@ export function advanceBasho(
   const styleOfStable = new Map(state.stables.map((s) => [s.id, s.style]));
 
   // 2. 本場所
+  const stance = new Map(
+    Object.entries(options.stance ?? {})
+      .map(([id, s]) => [Number(id), s] as const)
+      .filter(([id]) => isMine(id)),
+  );
   const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId, {
     reenter,
+    stance,
   });
+  if (stance.size > 0) report.stance = Object.fromEntries(stance);
+  // 攻めた弟子は、場所の後に疲れが残る
+  for (const [id, s] of stance) {
+    const r = byId.get(id)!;
+    r.fatigue = Math.min(100, r.fatigue + MID_BASHO.stance[s].fatigue);
+  }
   const injuryRng = createPrng(deriveSeed(state.seed, SEED.injury, state.bashoIndex));
   for (const id of outcome.injured) {
     byId.get(id)!.injury = injuryRng.range(1, 2);
@@ -449,15 +465,29 @@ export function advanceBasho(
     ...playerCtx,
     growthMultiplier: playerCtx.growthMultiplier * staff.lowerGrowth,
   };
+  report.training = [];
   for (const r of state.rikishi) {
     const rank = newRanks.get(r.id);
-    const ctx =
-      r.stableId === state.player.stableId
-        ? rank && isSekitori(rank)
-          ? playerCtx
-          : lowerCtx
-        : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
-    train(r, ctx, growthRng);
+    const own = r.stableId === state.player.stableId;
+    const ctx = own
+      ? rank && isSekitori(rank)
+        ? playerCtx
+        : lowerCtx
+      : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
+    const before = own ? { ...r.abilities, weight: r.weight, fatigue: r.fatigue } : null;
+    const injured = train(r, ctx, growthRng);
+    // 稽古の成果（自分の弟子）: 動いた量を結果に残す
+    if (before)
+      report.training.push({
+        id: r.id,
+        oshi: round1(r.abilities.oshi - before.oshi),
+        yotsu: round1(r.abilities.yotsu - before.yotsu),
+        waza: round1(r.abilities.waza - before.waza),
+        weight: round1(r.weight - before.weight),
+        fatigue: Math.round(r.fatigue - before.fatigue),
+        intensity: r.intensity ?? 'normal',
+        injured,
+      });
   }
 
   // 強行出場の判断・出稽古の伸びは1場所かぎり

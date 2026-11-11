@@ -24,6 +24,7 @@ import type {
   LineageEntry,
   Policy,
   StaffRole,
+  Intensity,
 } from '../model/types';
 import { DIETS } from '../balance/staff';
 import { DOHYOIRI, KOJO_WORDS, type Dohyoiri, type KojoWord } from '../balance/ceremony';
@@ -142,6 +143,14 @@ export function setPolicy(input: GameState, id: number, policy: Policy): GameSta
   const state = clone(input);
   const r = state.rikishi.find((x) => x.id === id);
   if (r && r.stableId === state.player.stableId) r.policy = policy;
+  return state;
+}
+
+/** 稽古の量を決める（自分の弟子だけ） */
+export function setIntensity(input: GameState, id: number, intensity: Intensity): GameState {
+  const state = clone(input);
+  const r = state.rikishi.find((x) => x.id === id);
+  if (r && r.stableId === state.player.stableId) r.intensity = intensity;
   return state;
 }
 

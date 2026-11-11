@@ -13,7 +13,7 @@ import { GROWTH } from '../balance/growth';
 import { MID_BASHO } from '../balance/injury';
 import { KENSHO } from '../balance/money';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
-import type { BoutResult, Division, Rank, Rikishi, Title } from '../model/types';
+import type { BoutResult, Division, Rank, Rikishi, Stance, Title } from '../model/types';
 import { divisionCounts, ranksOf } from '../banzuke/rank';
 import { eastWinProbability, kimariteFor } from './strength';
 import { TRAITS } from '../balance/traits';
@@ -50,6 +50,8 @@ export interface BashoOutcome {
 export interface BashoOptions {
   /** 中日の後から出す力士（休場している自分の弟子） */
   reenter?: ReadonlySet<number>;
+  /** 後半の構え（中日の後の取組から効く） */
+  stance?: ReadonlyMap<number, Stance>;
   /** この日の後で止める（中日の様子を見るため。結果は途中のもの） */
   stopAfterDay?: number;
 }
@@ -166,7 +168,10 @@ export function runBasho(
         fragilityOf(r) *
         (id === loser ? 1.5 : 1) *
         (r.injury > 0 ? GROWTH.playHurt.boutInjuryMultiplier : 1) *
-        (reentered.has(id) ? MID_BASHO.boutInjuryMultiplier : 1);
+        (reentered.has(id) ? MID_BASHO.boutInjuryMultiplier : 1) *
+        (day > MID_BASHO.day && options.stance?.has(id)
+          ? MID_BASHO.stance[options.stance.get(id)!].injury
+          : 1);
       if (rng.chance(chance)) {
         active.delete(id);
         if (!injured.includes(id)) injured.push(id);
@@ -215,6 +220,11 @@ export function runBasho(
         active.add(id);
         reentered.add(id);
         condition.set(id, condition.get(id)! - MID_BASHO.conditionPenalty);
+      }
+      // 後半の構えで調子が動く
+      for (const [id, s] of options.stance ?? []) {
+        if (condition.has(id))
+          condition.set(id, condition.get(id)! + MID_BASHO.stance[s].condition);
       }
     }
     let carry: number | null = null;

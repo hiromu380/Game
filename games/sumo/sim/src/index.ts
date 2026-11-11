@@ -20,6 +20,7 @@ export {
   setPlayHurt,
   chooseTreatment,
   setPolicy,
+  setIntensity,
   setDiet,
   hireStaff,
   dismissStaff,

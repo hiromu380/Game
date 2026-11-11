@@ -62,7 +62,10 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
     (traits.includes('diligent') ? TRAITS.diligent.growth : 1) *
     (traits.includes('lazy') ? TRAITS.lazy.growth : 1) *
     (traits.includes('practiceChamp') ? TRAITS.practiceChamp.growth : 1);
+  // 稽古の量（自分の弟子だけが持つ）
+  const intensity = GROWTH.intensity[r.intensity ?? 'normal'];
   const coach =
+    intensity.growth *
     traitGrowth *
     r.boost *
     (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) *
@@ -87,6 +90,7 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
     r.fatigue = clamp(
       r.fatigue +
         GROWTH.fatigueTraining +
+        intensity.fatigue +
         (traits.includes('diligent') ? TRAITS.diligent.fatigue : 0) +
         (traits.includes('lazy') ? TRAITS.lazy.fatigue : 0) -
         GROWTH.fatigueRecovery -
@@ -124,6 +128,7 @@ export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
     (GROWTH.injuryBase + r.fatigue * GROWTH.injuryPerFatigue) *
     fragilityOf(r) *
     2 *
+    (r.policy === 'rest' ? 1 : intensity.injury) *
     ctx.injuryMultiplier;
   if (rng.chance(chance)) {
     r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);

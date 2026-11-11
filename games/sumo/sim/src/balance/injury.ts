@@ -57,4 +57,12 @@ export const MID_BASHO = {
   boutInjuryMultiplier: 3,
   /** 場所中のけがを押して再出場したとき、場所の後にけがが1場所ぶん重くなる確率 */
   worsenChance: 0.5,
+  /**
+   * 後半の構え: 攻める（調子が上がるが、けがをしやすく、場所の後に疲れが残る）・
+   * 無理をしない（けがをしにくいが、調子が下がる）
+   */
+  stance: {
+    push: { condition: 4, injury: 2, fatigue: 8 },
+    safe: { condition: -4, injury: 0.5, fatigue: 0 },
+  },
 } as const;

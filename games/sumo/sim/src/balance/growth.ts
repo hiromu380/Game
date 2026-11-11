@@ -36,6 +36,15 @@ export const GROWTH = {
   injuryBashoMax: 3,
   /** けがのとき能力が落ちる量 */
   injuryAbilityLoss: 2,
+  /**
+   * 稽古の量（軽め・ふつう・猛稽古）: 伸びの倍率・疲れの増え方・稽古でけがをする確率の倍率。
+   * 猛稽古はよく伸びるが、疲れがたまり、けがをしやすい（休養のときは効かない）
+   */
+  intensity: {
+    light: { growth: 0.7, fatigue: -8, injury: 0.6 },
+    normal: { growth: 1, fatigue: 0, injury: 1 },
+    hard: { growth: 1.35, fatigue: 10, injury: 1.7 },
+  },
   /** けがを押して出場（強行出場）: 調子の減点・場所中にけがをする確率の倍率・場所の後に悪化する確率 */
   playHurt: { conditionPenalty: 8, boutInjuryMultiplier: 3, worsenChance: 0.3 },
 };
