@@ -3,7 +3,7 @@ import type { BashoReport, GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName, rankLabel } from '../format';
 import { lookOfAlumnus } from '../art/Portraits';
-import { ThreePortrait } from '../art/ThreePortrait';
+import { PixelPortrait } from '../art/PixelPortrait';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import type { Highlight } from '../highlights';
@@ -58,7 +58,7 @@ export function DanpatsuCard({
           {counter}
         </p>
         <div className="highlight__stage">
-          <ThreePortrait look={cut ? { ...look, hair: 'short' } : look} variant="full" size={120} />
+          <PixelPortrait look={cut ? { ...look, hair: 'short' } : look} variant="full" size={120} />
         </div>
         <p className="highlight__body">
           {t(

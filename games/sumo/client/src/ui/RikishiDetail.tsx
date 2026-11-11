@@ -9,7 +9,7 @@ import {
 } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { money, rankLabel } from '../format';
-import { Figure } from '../art/Figure';
+import { PixelPortrait } from '../art/PixelPortrait';
 import type { Look } from '../art/look';
 import { RankChart } from './RankChart';
 
@@ -51,7 +51,7 @@ export function RikishiDetail({
         <h2 id="detail-title">{s.name}</h2>
         <div className="detail">
           <div className="detail__figure">
-            <Figure look={s.look} size={120} />
+            <PixelPortrait look={s.look} variant="full" size={120} />
           </div>
           <dl className="detail__facts">
             <div>

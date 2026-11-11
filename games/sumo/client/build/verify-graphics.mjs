@@ -29,9 +29,9 @@ const built = await preview({
   preview: { host: '127.0.0.1', port: 5174, strictPort: true },
 });
 
-/** 遅延肖像は各表示領域を通してから撮影する。フォールバックの混在を防ぐ。 */
+/** 顔の絵が画像になってから撮影する。 */
 async function settlePortraits(page) {
-  for (const portrait of await page.locator('.portrait-3d').all()) {
+  for (const portrait of await page.locator('.portrait').all()) {
     await portrait.scrollIntoViewIfNeeded();
     await portrait.locator('img').waitFor({ timeout: 10000 });
   }

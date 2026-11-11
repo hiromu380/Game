@@ -1,7 +1,7 @@
 /** 開発時専用の造形・取組検証画面。Viteの製品エントリには含めない。 */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ThreePortrait } from '../src/art/ThreePortrait';
+import { PixelPortrait } from '../src/art/PixelPortrait';
 import { rikishiLook, oyakataLook } from '../src/art/look';
 import { applyPalette } from '../src/art/palette';
 import '../src/styles.css';
@@ -59,19 +59,19 @@ createRoot(document.getElementById('root')!).render(
       <h1>造形検証</h1>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
         {cases.map((c) => (
-          <ThreePortrait
+          <PixelPortrait
             key={c.id}
             look={rikishiLook({ ...c, stableId: c.id })}
             size={160}
             variant="full"
           />
         ))}
-        <ThreePortrait
+        <PixelPortrait
           look={oyakataLook({ id: 7, age: 45, stableId: 1 })}
           size={160}
           variant="full"
         />
-        <ThreePortrait
+        <PixelPortrait
           look={oyakataLook({ id: 8, age: 62, stableId: 2 })}
           size={160}
           variant="full"

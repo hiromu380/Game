@@ -4,6 +4,7 @@
  * 足元は絵の下の中央（FOOT）。左下を向く。flip で左右を返す
  */
 import { PALETTE } from '../palette';
+import { dark, rgb, Sheet, SUMI, type Pixels, type Rgb } from '../pixel/sheet';
 
 export type Pose =
   | 'idle'
@@ -36,92 +37,14 @@ export const PERSON = { width: 30, height: 36 } as const;
 /** 足元（絵の中の点） */
 export const FOOT = { x: 15, y: 34 } as const;
 
-export interface Pixels {
-  width: number;
-  height: number;
-  /** RGBA（幅 × 高さ × 4） */
-  data: Uint8ClampedArray;
-}
+export type { Pixels } from '../pixel/sheet';
 
-type Rgb = readonly [number, number, number];
-
-function rgb(hex: string): Rgb {
-  const n = parseInt(hex.slice(1), 16);
-  return [n >> 16, (n >> 8) & 255, n & 255];
-}
-function dark(c: Rgb, k = 0.78): Rgb {
-  return [Math.round(c[0] * k), Math.round(c[1] * k), Math.round(c[2] * k)];
-}
-
-const SUMI = rgb(PALETTE.sumi);
 const CHEEK = rgb(PALETTE.cheek);
 const WHITE = rgb(PALETTE.washi);
 const AI = rgb(PALETTE.ai);
 const BENI = rgb(PALETTE.beni);
 const WOOD = rgb(PALETTE.wood);
 const GRAY = rgb(PALETTE.hairLight);
-
-/** 小さなドットの画布。色を置き、最後に墨の輪郭を回す */
-class Sheet {
-  readonly w = PERSON.width;
-  readonly h = PERSON.height;
-  private readonly c: (Rgb | null)[];
-  constructor() {
-    this.c = new Array<Rgb | null>(this.w * this.h).fill(null);
-  }
-  px(x: number, y: number, col: Rgb): void {
-    x = Math.round(x);
-    y = Math.round(y);
-    if (x >= 0 && y >= 0 && x < this.w && y < this.h) this.c[y * this.w + x] = col;
-  }
-  rect(x: number, y: number, w: number, h: number, col: Rgb): void {
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) this.px(x + i, y + j, col);
-  }
-  /** だ円。右下に1段の陰（版画の明暗） */
-  ball(cx: number, cy: number, rx: number, ry: number, col: Rgb, shade = true): void {
-    const inside = (x: number, y: number, ox: number, oy: number) =>
-      ((x - cx - ox) / rx) ** 2 + ((y - cy - oy) / ry) ** 2 <= 1;
-    for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++)
-      for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
-        if (!inside(x, y, 0, 0)) continue;
-        this.px(x, y, shade && !inside(x, y, -1.2, -1.2) ? dark(col) : col);
-      }
-  }
-  /** 太さのある線（腕・脚） */
-  limb(x0: number, y0: number, x1: number, y1: number, r: number, col: Rgb): void {
-    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)));
-    for (let i = 0; i <= n; i++)
-      this.ball(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, r, r, col, false);
-  }
-  /** すでに色のある所だけ塗る（まわしを体の形に沿わせる） */
-  over(x: number, y: number, w: number, h: number, col: Rgb): void {
-    for (let j = 0; j < h; j++)
-      for (let i = 0; i < w; i++) {
-        const xx = Math.round(x + i);
-        const yy = Math.round(y + j);
-        if (xx >= 0 && yy >= 0 && xx < this.w && yy < this.h && this.c[yy * this.w + xx])
-          this.c[yy * this.w + xx] = col;
-      }
-  }
-  out(flip: boolean): Pixels {
-    const data = new Uint8ClampedArray(this.w * this.h * 4);
-    const at = (x: number, y: number) =>
-      x >= 0 && y >= 0 && x < this.w && y < this.h ? this.c[y * this.w + x] : null;
-    for (let y = 0; y < this.h; y++)
-      for (let x = 0; x < this.w; x++) {
-        let col = at(x, y) ?? null;
-        // 色のない所で、隣（上下左右）に色があれば輪郭
-        if (!col && (at(x - 1, y) || at(x + 1, y) || at(x, y - 1) || at(x, y + 1))) col = SUMI;
-        if (!col) continue;
-        const o = (y * this.w + (flip ? this.w - 1 - x : x)) * 4;
-        data[o] = col[0];
-        data[o + 1] = col[1];
-        data[o + 2] = col[2];
-        data[o + 3] = 255;
-      }
-    return { width: this.w, height: this.h, data };
-  }
-}
 
 interface Body {
   /** 体の中心（腹）と大きさ */
@@ -331,7 +254,7 @@ export function personPixels(look: PersonLook): Pixels {
   const key = `${look.pose}:${look.frame}:${look.skin}:${look.mawashi}:${look.hair}:${look.build}:${look.flip ? 1 : 0}`;
   const hit = cache.get(key);
   if (hit) return hit;
-  const s = new Sheet();
+  const s = new Sheet(PERSON.width, PERSON.height);
   if (look.pose === 'lie') lie(s, look);
   else if (look.pose === 'oyakata' || look.pose === 'oyakataSit') oyakata(s, look);
   else rikishi(s, look);

@@ -3,7 +3,7 @@ import { tokuiWaza, type Alumnus, type GameState } from '@ichimon/sim';
 import { useI18n, type MessageKey, type TranslateFn } from '../i18n';
 import { bashoName, money, rankLabel } from '../format';
 import { lookOfAlumnus } from '../art/Portraits';
-import { Figure } from '../art/Figure';
+import { PixelPortrait } from '../art/PixelPortrait';
 import { fameReasons, hallOfFame, stableRecords, type RecordKey } from '../records';
 import { RikishiDetail } from './RikishiDetail';
 
@@ -36,7 +36,11 @@ export function HallOfFame({ game }: { game: GameState }) {
             return (
               <li key={a.id}>
                 <button className="fame__card" onClick={() => setOpen(a)}>
-                  <Figure look={lookOfAlumnus(a, game.player.stableId)} variant="bust" size={64} />
+                  <PixelPortrait
+                    look={lookOfAlumnus(a, game.player.stableId)}
+                    variant="bust"
+                    size={64}
+                  />
                   <span className="fame__main">
                     <strong className="fame__name">{a.name}</strong>
                     <span>

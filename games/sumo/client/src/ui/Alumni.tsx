@@ -3,7 +3,7 @@ import { danpatsuPlan, type Alumnus, type GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName, rankLabel } from '../format';
 import { lookOfAlumnus } from '../art/Portraits';
-import { Figure } from '../art/Figure';
+import { PixelPortrait } from '../art/PixelPortrait';
 import { RikishiDetail } from './RikishiDetail';
 
 /** 部屋の歴代の力士（最高位の高い順）。押すと詳細 */
@@ -24,7 +24,11 @@ export function Alumni({ game }: { game: GameState }) {
           {list.map((a) => (
             <li key={a.id}>
               <button className="alumni__item" onClick={() => setOpen(a)}>
-                <Figure look={lookOfAlumnus(a, game.player.stableId)} variant="bust" size={48} />
+                <PixelPortrait
+                  look={lookOfAlumnus(a, game.player.stableId)}
+                  variant="bust"
+                  size={48}
+                />
                 <span className="alumni__main">
                   <strong>{a.name}</strong>
                   <span className="muted">
