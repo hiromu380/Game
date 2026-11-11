@@ -1,12 +1,14 @@
-import { useCallback, useState } from 'react';
-import type { GameState } from '@ichimon/sim';
+import { useCallback, useMemo, useState } from 'react';
+import type { GameState, Rank } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { sprite } from '../art/sprites';
 import { KEIKOBA_STAGE, keikobaLayout, type Placed } from '../art/sprites/keikoba';
 import { depthOrder, frontCorner, toScreen, type SceneAction } from '../art/hakoniwa/grid';
 import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound';
 import { drawGround } from '../art/hakoniwa/ground';
-import { Hakoniwa, type Drawn } from './Hakoniwa';
+import { compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
+import { Hakoniwa, type Drawn, type SceneActor } from './Hakoniwa';
+import { RikishiTalk } from './RikishiTalk';
 
 /** 枠の下の中央で置く絵（稽古場・巡業）を、箱庭の描く物にする */
 export function boxDrawn(items: Placed[]): Drawn[] {
@@ -20,18 +22,43 @@ const EXTERIOR_VIEW = {
   y1: toScreen(PLOT.w - 2, PLOT.d + STREET).y,
 };
 
+/** ちゃんこ場の湯気が上がる所（屋根の上） */
+const CHANKO_SMOKE = (() => {
+  const p = toScreen(20, 13);
+  return { x: p.x, y: p.y - 46 };
+})();
+
+/** スマホでも人が見分けられる幅（はみ出る分は横に動かして見る） */
+const EXTERIOR_MIN_WIDTH = 640;
+
 type View = 'exterior' | 'keikoba';
 
 /** 部屋の絵: 外観（敷地の箱庭）と稽古場を切り替える。押した建物・物の画面へ行ける */
 export function KeikobaScene({
   game,
+  ranks,
+  setGame,
   onAction,
+  onDetail,
 }: {
   game: GameState;
+  ranks?: ReadonlyMap<number, Rank>;
+  /** 渡すと、弟子を押して話しかけ、稽古を決められる */
+  setGame?: (g: GameState) => void;
   onAction?: (a: SceneAction) => void;
+  onDetail?: (id: number) => void;
 }) {
   const { t } = useI18n();
   const [view, setView] = useState<View>('exterior');
+  const [picked, setPicked] = useState<number | null>(null);
+  const names = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r.name])), [game.rikishi]);
+  const titled = (cast: Actor[]): SceneActor[] =>
+    cast.map((a) => ({
+      ...a,
+      title: a.rikishiId === null ? t('scene.oyakata') : (names.get(a.rikishiId) ?? ''),
+    }));
+  const talkTo = game.rikishi.find((r) => r.id === picked && r.stableId === game.player.stableId);
+  const onPick = setGame ? (id: number) => setPicked((now) => (now === id ? null : id)) : undefined;
   const season = seasonOf(game.bashoIndex);
   const drawBase = useCallback(
     (ctx: CanvasRenderingContext2D) => drawGround(ctx, season),
@@ -78,6 +105,13 @@ export function KeikobaScene({
             (nobori.length > 0 ? t('scene.nobori', { names: nobori.join('・') }) : '')
           }
           onAction={onAction}
+          actors={titled(compoundCast(game))}
+          onPick={onPick}
+          selected={talkTo?.id ?? null}
+          season={season}
+          smoke={CHANKO_SMOKE}
+          minWidth={EXTERIOR_MIN_WIDTH}
+          focus={0.42}
         />
       ) : (
         <Hakoniwa
@@ -86,9 +120,25 @@ export function KeikobaScene({
           view={{ x0: 0, y0: 0, x1: KEIKOBA_STAGE.width, y1: KEIKOBA_STAGE.height }}
           label={t('scene.keikoba')}
           onAction={onAction}
+          actors={titled(keikobaCast(game).keikoba)}
+          onPick={onPick}
+          selected={talkTo?.id ?? null}
           maxWidth={KEIKOBA_STAGE.width * 2}
         />
       )}
+      {setGame &&
+        (talkTo ? (
+          <RikishiTalk
+            game={game}
+            r={talkTo}
+            rank={ranks?.get(talkTo.id) ?? null}
+            setGame={setGame}
+            onDetail={onDetail}
+            onClose={() => setPicked(null)}
+          />
+        ) : (
+          <p className="note scene-box__hint">{t('talk.hint')}</p>
+        ))}
     </section>
   );
 }

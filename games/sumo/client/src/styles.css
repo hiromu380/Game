@@ -2016,6 +2016,12 @@ html:lang(en) .choice__desc {
 .hakoniwa {
   display: grid;
   gap: 8px;
+  min-width: 0;
+}
+.hakoniwa__scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
 .hakoniwa__stage {
   position: relative;
@@ -2081,6 +2087,7 @@ html:lang(en) .choice__desc {
 /* 部屋の絵（ドット絵） */
 .scene-box {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .scene-box__tabs {
@@ -2109,4 +2116,98 @@ html:lang(en) .choice__desc {
   .hakoniwa__actions .chip {
     padding: 0 10px;
   }
+}
+
+/* 弟子に話しかける */
+.scene-box__hint {
+  text-align: center;
+  margin: 0;
+}
+.talk {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.talk__who {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.talk__main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.talk__name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+.talk__name strong {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+}
+.talk__voice {
+  position: relative;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--card);
+  line-height: 1.6;
+}
+.talk__voice::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-left: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(45deg);
+}
+.talk__state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+}
+.talk__meter {
+  display: inline-grid;
+  grid-template-columns: auto 120px auto;
+  gap: 8px;
+  align-items: center;
+}
+.bar__fill--warn {
+  background: var(--shu) !important;
+}
+.talk__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.policy__btn--hard.is-selected {
+  border-color: var(--shu);
+  background: var(--shu);
+}
+.policy--intensity {
+  grid-area: auto;
+  grid-column: 1 / -1;
+  border-top: none;
+  padding-top: 0;
+}
+.talk .policy {
+  grid-area: auto;
+}
+.policy__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

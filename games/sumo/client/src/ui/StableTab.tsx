@@ -2,6 +2,7 @@ import {
   acceptCandidate,
   answerRetirement,
   declineCandidate,
+  setIntensity,
   setPlayHurt,
   chooseTreatment,
   type Treatment,
@@ -14,12 +15,14 @@ import {
   type TraitId,
   type Candidate,
   type GameState,
+  type Intensity,
   type Policy,
   type Rank,
   type Rikishi,
 } from '@ichimon/sim';
 import type { SceneAction } from '../art/hakoniwa/grid';
 import { KeikobaScene } from './KeikobaScene';
+import { IntensityPicker } from './RikishiTalk';
 import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
 import { CandidatePortrait, lookOfRikishi, RikishiPortrait } from '../art/Portraits';
@@ -65,7 +68,13 @@ export function StableTab({
   return (
     <div className="stack">
       <GuideCard game={game} />
-      <KeikobaScene game={game} onAction={onSceneAction} />
+      <KeikobaScene
+        game={game}
+        ranks={ranks}
+        setGame={setGame}
+        onAction={onSceneAction}
+        onDetail={setDetail}
+      />
       {detailRikishi && (
         <RikishiDetail
           subject={{
@@ -157,6 +166,7 @@ export function StableTab({
                 setGame(setPolicy(game, r.id, p));
                 update({ guide: withStep(settings.guide, 'policy') });
               }}
+              onIntensity={(i) => setGame(setIntensity(game, r.id, i))}
               onPlayHurt={(play) => setGame(setPlayHurt(game, r.id, play))}
               askTreatment={game.pending.treatment.includes(r.id)}
               onTreatment={(tr) => setGame(chooseTreatment(game, r.id, tr))}
@@ -225,6 +235,7 @@ function RikishiCard({
   r,
   rank,
   onPolicy,
+  onIntensity,
   onPlayHurt,
   askTreatment,
   onTreatment,
@@ -233,6 +244,7 @@ function RikishiCard({
   r: Rikishi;
   rank: Rank | null;
   onPolicy: (p: Policy) => void;
+  onIntensity: (i: Intensity) => void;
   onPlayHurt: (play: boolean) => void;
   askTreatment: boolean;
   onTreatment: (t: Treatment) => void;
@@ -349,6 +361,7 @@ function RikishiCard({
           </button>
         ))}
       </div>
+      <IntensityPicker r={r} onChange={onIntensity} />
     </li>
   );
 }
