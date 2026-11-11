@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
-import { ranksOf, type GameState, type MidBasho } from '@ichimon/sim';
+import { isSekitori, ranksOf, type GameState, type MidBasho, type Stance } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { dayLabel, rankLabel } from '../format';
 import { woundName } from '../injury';
 
-/** 中日（8日目）: 前半の星と幕内の先頭。休場している弟子を後半から出すか決める */
+type StanceChoice = Stance | 'normal';
+const STANCES: StanceChoice[] = ['push', 'normal', 'safe'];
+
+/** 中日（8日目）: 前半の星と幕内の先頭。後半の取り口（攻める・いつも通り・無理をしない）と、休場している弟子を出すかを決める */
 export function MidBashoDialog({
   game,
   mid,
@@ -12,10 +15,25 @@ export function MidBashoDialog({
 }: {
   game: GameState;
   mid: MidBasho;
-  onContinue: (reenter: number[]) => void;
+  onContinue: (reenter: number[], stance: Record<number, Stance>) => void;
 }) {
   const { t } = useI18n();
   const [reenter, setReenter] = useState<Set<number>>(new Set());
+  const [stance, setStance] = useState<Record<number, Stance>>({});
+  const choose = (id: number, s: StanceChoice) => {
+    const next = { ...stance };
+    if (s === 'normal') delete next[id];
+    else next[id] = s;
+    setStance(next);
+  };
+  /** 勝ち越しまでの残り（関取は15番で8勝、幕下以下は7番で4勝） */
+  const need = (m: MidBasho['mine'][number]): string => {
+    const rank = ranks.get(m.id);
+    const kachi = rank && isSekitori(rank) ? 8 : 4;
+    if (m.wins >= kachi) return t('mid.need.done');
+    if (m.losses >= kachi) return t('mid.need.lost');
+    return t('mid.need.wins', { n: kachi - m.wins });
+  };
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const byId = new Map(game.rikishi.map((r) => [r.id, r]));
   const name = (id: number) => byId.get(id)?.name ?? '?';
@@ -49,6 +67,29 @@ export function MidBashoDialog({
                 <span className="mid__record">
                   {t('race.record', { wins: m.wins, losses: m.losses })}
                 </span>
+                {!m.out && <span className="tag">{need(m)}</span>}
+                {!m.out && (
+                  <div
+                    className="segmented mid__stance"
+                    role="group"
+                    aria-label={t('mid.stance', { name: name(m.id) })}
+                  >
+                    {STANCES.map((s) => {
+                      const now = (stance[m.id] ?? 'normal') === s;
+                      return (
+                        <button
+                          key={s}
+                          className={`segmented__btn ${now ? 'is-active' : ''}`}
+                          aria-pressed={now}
+                          title={t(`stance.desc.${s}`)}
+                          onClick={() => choose(m.id, s)}
+                        >
+                          {t(`stance.${s}`)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 {m.out && (
                   <span className="tag tag--warn">
                     {m.injuredDay !== null
@@ -84,9 +125,13 @@ export function MidBashoDialog({
             );
           })}
         </ul>
+        {mid.mine.some((m) => !m.out) && <p className="note">{t('mid.stanceNote')}</p>}
         {mid.mine.some((m) => m.out) && <p className="note">{t('mid.note')}</p>}
         <div className="modal__actions">
-          <button className="button button--primary" onClick={() => onContinue([...reenter])}>
+          <button
+            className="button button--primary"
+            onClick={() => onContinue([...reenter], stance)}
+          >
             {t('mid.continue')}
           </button>
         </div>

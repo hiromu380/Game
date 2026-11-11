@@ -18,6 +18,7 @@ import { kojoChoices, type Highlight } from '../highlights';
 import { DanpatsuCard } from './DanpatsuCard';
 import { recordValue } from './RecordsPanel';
 import { RaceCard } from './RacePanel';
+import { BigBoutCard } from './BigBoutCard';
 
 /** 賜杯（優勝のしるし） */
 function Cup() {
@@ -88,6 +89,19 @@ export function HighlightDialog({
   if (h.kind === 'danpatsu') {
     return (
       <DanpatsuCard
+        key={index}
+        game={game}
+        report={report}
+        h={h}
+        counter={counter}
+        last={last}
+        onNext={next}
+      />
+    );
+  }
+  if (h.kind === 'bigBout') {
+    return (
+      <BigBoutCard
         key={index}
         game={game}
         report={report}

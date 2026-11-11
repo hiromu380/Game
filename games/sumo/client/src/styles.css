@@ -2211,3 +2211,52 @@ html:lang(en) .choice__desc {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* 中日: 後半の取り口 */
+.mid__stance {
+  margin-left: auto;
+}
+.mid__stance .segmented__btn {
+  min-height: 40px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+@media (max-width: 600px) {
+  .mid__stance {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .mid__stance .segmented__btn {
+    flex: 1;
+    min-height: 44px;
+  }
+}
+
+/* 稽古の成果 */
+.training {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.training th,
+.training td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+.training thead th {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+.training th[scope='row'],
+.training thead th:first-child {
+  text-align: left;
+}
+.training th[scope='row'] .tag {
+  margin-left: 6px;
+}
+.table-wrap {
+  overflow-x: auto;
+}

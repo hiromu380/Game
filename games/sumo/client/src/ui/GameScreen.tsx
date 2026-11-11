@@ -205,9 +205,9 @@ export function GameScreen({
         <MidBashoDialog
           game={game}
           mid={mid}
-          onContinue={(reenter) => {
+          onContinue={(reenter, stance) => {
             setMid(null);
-            go(advanceBasho(game, { reenter }));
+            go(advanceBasho(game, { reenter, stance }));
           }}
         />
       )}

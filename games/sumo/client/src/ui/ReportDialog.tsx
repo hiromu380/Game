@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { boxDrawn } from './KeikobaScene';
+import { TrainingSection } from './TrainingSection';
 import { Hakoniwa } from './Hakoniwa';
 import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
@@ -213,6 +214,10 @@ export function ReportDialog({
               })}
             </ul>
           </>
+        )}
+
+        {(report.training ?? []).length > 0 && (
+          <TrainingSection results={report.training!} nameOf={nameOf} />
         )}
 
         {report.injuries.length > 0 && (

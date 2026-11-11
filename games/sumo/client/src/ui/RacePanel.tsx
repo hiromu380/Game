@@ -12,7 +12,7 @@ function decidedText(t: TranslateFn, race: YushoRace): string {
 }
 
 /** 力士の名前（引退した力士は場所の結果から） */
-function useNames(game: GameState, report: BashoReport) {
+export function useNames(game: GameState, report: BashoReport) {
   const byId = new Map(game.rikishi.map((r) => [r.id, r]));
   const stable = new Map(game.stables.map((s) => [s.id, s.name]));
   return {

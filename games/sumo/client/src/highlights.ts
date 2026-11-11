@@ -1,9 +1,10 @@
 /**
- * 場所の見せ場: 自分の部屋の優勝争い・優勝・昇進・三賞・部屋の新記録・元弟子の断髪式を、見せる順に並べる（純粋関数）
+ * 場所の見せ場: 勝ち越しをかけた大一番・自分の部屋の優勝争い・優勝・昇進・三賞・部屋の新記録・元弟子の断髪式を、見せる順に並べる（純粋関数）
  */
 import {
   KOJO_WORDS,
   type BashoReport,
+  type BoutResult,
   type Division,
   type GameState,
   type KojoWord,
@@ -14,6 +15,8 @@ export type Highlight =
   | { kind: 'promotion'; id: number; to: 'Y' | 'O' | 'makuuchi' | 'sekitori' }
   | { kind: 'yusho'; id: number; division: Division; wins: number; losses: number }
   | { kind: 'sansho'; id: number; prizes: ('shukun' | 'kanto' | 'gino')[] }
+  /** 勝ち越しをかけた最後の一番（7勝7敗・3勝3敗で迎えた。結果は見てから明かす） */
+  | { kind: 'bigBout'; id: number; bout: BoutResult; wins: number; losses: number }
   /** 自分の弟子が優勝の目を残して千秋楽を迎えた（id はその弟子） */
   | { kind: 'race'; id: number }
   /** 部屋の新記録（id は記録を塗り替えた今の弟子） */
@@ -30,11 +33,41 @@ export type Highlight =
 const PROMO_ORDER = { Y: 0, O: 1, makuuchi: 3, sekitori: 4 } as const;
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
 
+/** 見せる大一番の数の上限（番付の上から） */
+export const BIG_BOUT_MAX = 2;
+
+/**
+ * 勝ち越しをかけた最後の一番: あと1勝で勝ち越し・あと1敗で負け越しの星で、最後の番を迎えた自分の弟子
+ * （関取は15番で7勝7敗、幕下以下は7番で3勝3敗。不戦は除く）
+ */
+export function bigBouts(report: BashoReport): Extract<Highlight, { kind: 'bigBout' }>[] {
+  const out: Extract<Highlight, { kind: 'bigBout' }>[] = [];
+  for (const m of report.mine) {
+    const total = m.record.wins + m.record.losses + m.record.absences;
+    const edge = total >= 15 ? 7 : 3;
+    const bouts = [...m.bouts].sort((a, b) => a.day - b.day);
+    const bout = bouts[bouts.length - 1];
+    if (!bout || bout.fusen || bouts.length < total) continue;
+    const before = bouts.slice(0, -1);
+    const wins = before.filter((b) => b.winnerId === m.id).length;
+    const losses = before.length - wins;
+    if (wins === edge && losses === edge)
+      out.push({ kind: 'bigBout', id: m.id, bout, wins, losses });
+  }
+  return out;
+}
+
 /** prev: 進める前の状態（あれば、部屋の新記録も見せる） */
 export function highlightsOf(game: GameState, report: BashoReport, prev?: GameState): Highlight[] {
   const mine = (id: number) =>
     game.rikishi.find((r) => r.id === id)?.stableId === game.player.stableId;
   const out: { order: number; h: Highlight }[] = [];
+  // 勝ち越しをかけた大一番は、結果を知る前に（最初に）見せる
+  const order = new Map(report.mine.map((m, i) => [m.id, i]));
+  bigBouts(report)
+    .sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+    .slice(0, BIG_BOUT_MAX)
+    .forEach((h, i) => out.push({ order: -10 + i, h }));
   for (const p of report.promotions) {
     if (mine(p.id)) out.push({ order: PROMO_ORDER[p.to], h: { kind: 'promotion', ...p } });
   }
