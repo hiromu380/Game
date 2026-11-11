@@ -1,11 +1,11 @@
 /**
  * 箱庭に立つ人: 弟子が稽古の方針どおりに動く（純粋関数。乱数を使わない）
  * 稽古場: 申し合い（四つ・押し）・鉄砲（押し）・すり足（技）・四股（体づくり）・見取り（休養）・親方は上がり座敷
- * 外観: けが人は寮の縁側で布団・番付の下の2人は掃除・ちゃんこ番・稽古場に入りきらない弟子は庭で四股
+ * 外観: けが人は寮の縁側で布団・番付の下の2人は掃除（門の前の道と敷石）・ちゃんこ番・稽古場に入りきらない弟子は庭で四股
  */
 import { isSekitori, ranksOf, type GameState, type Rikishi } from '@ichimon/sim';
 import type { PersonLook, Pose } from './people';
-import { toScreen } from './grid';
+import { depthAmong, toScreen, type Piece } from './grid';
 
 export interface Actor {
   /** 描き分けの鍵（弟子の ID か、親方） */
@@ -18,6 +18,8 @@ export interface Actor {
   y: number;
   /** 奥行き（大きいほど手前に描く） */
   z: number;
+  /** マス目の足元（外観。物との前後を決めるのに使う） */
+  g?: { gx: number; gy: number };
   /** 行き来する先（すり足・掃除）。コマごとに少しずつ進んで戻る */
   to?: { x: number; y: number };
   /** 動きのずれ（全員が同じ拍で動かないように） */
@@ -151,6 +153,14 @@ export function keikobaCast(
   return { keikoba, overflow };
 }
 
+/** 外観の人の奥行きを、奥から手前へ並べた物に合わせる（門や幟の奥にいる人は、その後ろに描く） */
+export function amongPieces<T extends Actor>(
+  actors: readonly T[],
+  ordered: readonly Pick<Piece, 'gx' | 'gy' | 'w' | 'd'>[],
+): T[] {
+  return actors.map((a) => (a.g ? { ...a, z: depthAmong(a.g, ordered) } : a));
+}
+
 /** 外観の立ち位置（マス目） */
 export const COMPOUND_SPOTS = {
   /** 寮の縁側の布団（けが人） */
@@ -159,19 +169,19 @@ export const COMPOUND_SPOTS = {
     [18.2, 7.5],
     [20, 7.5],
   ],
-  /** 掃除（門のまわりの敷石） */
+  /** 掃除（門の前の道と、敷石） */
   sweep: [
-    { at: [8.4, 15.6], to: [9.2, 16.6] },
+    { at: [9.4, 19], to: [11.6, 19.2] },
     { at: [11.6, 14.6], to: [11, 15.4] },
   ],
   /** ちゃんこ番（ちゃんこ場の前） */
-  chanko: [[17.2, 15.6]],
+  chanko: [[17.3, 13.6]],
   /** 庭の四股 */
   yard: [
     [13.2, 14.4],
     [14.6, 15.4],
-    [6.6, 14.2],
-    [5.4, 13.4],
+    [16.3, 14.5],
+    [4.6, 16.8],
   ],
   /** 母屋の縁側で休む */
   engawa: [
@@ -202,6 +212,7 @@ export function compoundCast(
       x: p.x,
       y: p.y,
       z: at[0]! + at[1]! + 0.01,
+      g: { gx: at[0]!, gy: at[1]! },
       to: to ? toScreen(to[0]!, to[1]!) : undefined,
       phase: r.id % 4,
     });
@@ -254,6 +265,7 @@ export function compoundCast(
     x: o.x,
     y: o.y,
     z: COMPOUND_SPOTS.oyakata[0] + COMPOUND_SPOTS.oyakata[1] + 0.01,
+    g: { gx: COMPOUND_SPOTS.oyakata[0], gy: COMPOUND_SPOTS.oyakata[1] },
     phase: 0,
   });
   return out;

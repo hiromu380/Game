@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createGame, type GameState } from '@ichimon/sim';
-import { depthOrder, frontCorner, overlaps, toScreen } from '../src/art/hakoniwa/grid';
+import { depthAmong, depthOrder, frontCorner, overlaps, toScreen } from '../src/art/hakoniwa/grid';
+import { amongPieces, compoundCast } from '../src/art/hakoniwa/actors';
 import {
   compoundPieces,
   GATE,
@@ -93,5 +94,37 @@ describe('部屋の敷地（外観）', () => {
     const name = (id: number) => g.rikishi.find((r) => r.id === id)!.name;
     expect(nobori.map((p) => p.label)).toEqual(top.slice(0, 3).map(name));
     for (const p of nobori) expect(p.gy + p.d).toBeLessThanOrEqual(PLOT.d);
+  });
+});
+
+describe('箱庭の人と物の前後', () => {
+  const box = { gx: 8, gy: 17, w: 5, d: 1 };
+  const back = { gx: 4, gy: 8, w: 7, d: 4 };
+  const ordered = depthOrder([box, back]);
+
+  it('物の手前の辺より手前にいれば物の後に、奥にいれば物の前に描く', () => {
+    expect(ordered).toEqual([back, box]);
+    // 奥の建物の手前・門の奥
+    const yard = depthAmong({ gx: 9, gy: 14 }, ordered);
+    expect(yard).toBeGreaterThan(0);
+    expect(yard).toBeLessThan(1);
+    // 門の前の道
+    expect(depthAmong({ gx: 10, gy: 19 }, ordered)).toBeGreaterThan(1);
+    // どの物よりも奥
+    expect(depthAmong({ gx: 1, gy: 1 }, ordered)).toBeLessThan(0);
+  });
+
+  it('外観の人は、建物の中（足元のマス）に立たない', () => {
+    const g = game({ dorm: 1, trainer: 1 });
+    const pieces = depthOrder(compoundPieces(g));
+    const solid = pieces.filter((p) => p.w >= 3 && p.d >= 3);
+    for (const a of amongPieces(compoundCast(g), pieces)) {
+      expect(a.g, a.key).toBeDefined();
+      for (const p of solid) {
+        const inside =
+          a.g!.gx > p.gx && a.g!.gx < p.gx + p.w && a.g!.gy > p.gy && a.g!.gy < p.gy + p.d;
+        expect(inside, `${a.key} in ${p.sprite}`).toBe(false);
+      }
+    }
   });
 });

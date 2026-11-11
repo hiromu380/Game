@@ -44,6 +44,23 @@ export function depthOrder<T extends Pick<Piece, 'gx' | 'gy' | 'w' | 'd'>>(
   );
 }
 
+/**
+ * マス目の点（人の足元）を、奥から手前へ並べた物のどこで描くか。
+ * 点より奥にある物（点が、その物の手前の辺より手前にある）のうち、いちばん手前の物のすぐ後。奥の物がなければ最初（-0.5）
+ */
+export function depthAmong(
+  at: { gx: number; gy: number },
+  ordered: readonly Pick<Piece, 'gx' | 'gy' | 'w' | 'd'>[],
+): number {
+  let z = -0.5;
+  ordered.forEach((p, i) => {
+    const front = (at.gy >= p.gy + p.d && at.gx > p.gx) || (at.gx >= p.gx + p.w && at.gy > p.gy);
+    if (front) z = i + 0.5;
+  });
+  // 同じ所に並ぶ人どうしは、手前の人を後に
+  return z + (at.gx + at.gy) / 1000;
+}
+
 /** 2つの物の足元が重なるか */
 export function overlaps(a: Piece, b: Piece): boolean {
   return a.gx < b.gx + b.w && b.gx < a.gx + a.w && a.gy < b.gy + b.d && b.gy < a.gy + a.d;

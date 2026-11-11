@@ -6,7 +6,7 @@ import { KEIKOBA_STAGE, keikobaLayout, type Placed } from '../art/sprites/keikob
 import { depthOrder, frontCorner, toScreen, type SceneAction } from '../art/hakoniwa/grid';
 import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound';
 import { drawGround } from '../art/hakoniwa/ground';
-import { compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
+import { amongPieces, compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
 import { Hakoniwa, type Drawn, type SceneActor } from './Hakoniwa';
 import { RikishiTalk } from './RikishiTalk';
 
@@ -70,7 +70,8 @@ export function KeikobaScene({
   );
   if (views.length === 0) return null;
   const current = views.includes(view) ? view : views[0]!;
-  const exterior: Drawn[] = depthOrder(compoundPieces(game)).map((p) => ({
+  const ordered = depthOrder(compoundPieces(game));
+  const exterior: Drawn[] = ordered.map((p) => ({
     sprite: p.sprite,
     ...frontCorner(p),
     anchor: 'tip',
@@ -105,7 +106,7 @@ export function KeikobaScene({
             (nobori.length > 0 ? t('scene.nobori', { names: nobori.join('・') }) : '')
           }
           onAction={onAction}
-          actors={titled(compoundCast(game))}
+          actors={titled(amongPieces(compoundCast(game), ordered))}
           onPick={onPick}
           selected={talkTo?.id ?? null}
           season={season}
