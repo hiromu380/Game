@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createGame, type GameState } from '@ichimon/sim';
 import { depthAmong, depthOrder, frontCorner, overlaps, toScreen } from '../src/art/hakoniwa/grid';
 import { amongPieces, compoundCast } from '../src/art/hakoniwa/actors';
+import { titleCast } from '../src/ui/TitleScene';
 import {
   compoundPieces,
   GATE,
@@ -118,7 +119,10 @@ describe('箱庭の人と物の前後', () => {
     const g = game({ dorm: 1, trainer: 1 });
     const pieces = depthOrder(compoundPieces(g));
     const solid = pieces.filter((p) => p.w >= 3 && p.d >= 3);
-    for (const a of amongPieces(compoundCast(g), pieces)) {
+    for (const a of [
+      ...amongPieces(compoundCast(g), pieces),
+      ...amongPieces(titleCast(), pieces),
+    ]) {
       expect(a.g, a.key).toBeDefined();
       for (const p of solid) {
         const inside =

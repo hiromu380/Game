@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createGame, type GameState, type Style } from '@ichimon/sim';
 import { useI18n } from '../i18n';
-import { TitleArt } from '../art/TitleArt';
+import { TitleScene } from './TitleScene';
 import { Mon } from '../art/Mon';
 import { LoadSaveButton } from './SavePanel';
 
@@ -44,7 +44,7 @@ export function NewGame({
         </button>
       </div>
       <figure className="newgame__picture">
-        <TitleArt title={t('newGame.artAria')} />
+        <TitleScene label={t('newGame.artAria')} />
         <figcaption>{t('newGame.artCaption')}</figcaption>
       </figure>
       <div className="newgame__setup">
