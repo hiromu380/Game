@@ -33,6 +33,7 @@ import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { ScoutPanel } from './ScoutPanel';
 import { GuideCard } from './Guide';
+import { NextGoalCard } from './GoalsPanel';
 import { withStep } from '../guide';
 import { useSettings } from '../settings';
 import { rankLabel, recordLabel } from '../format';
@@ -68,6 +69,7 @@ export function StableTab({
   return (
     <div className="stack">
       <GuideCard game={game} />
+      <NextGoalCard game={game} />
       <KeikobaScene
         game={game}
         ranks={ranks}

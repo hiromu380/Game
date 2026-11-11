@@ -61,7 +61,10 @@ export interface RecordRow {
   holders: Holder[];
 }
 
-function people(game: GameState): { id: number; name: string; career: Career; active: boolean }[] {
+/** 部屋で土俵に上がった人（元弟子と今の弟子） */
+export function stablePeople(
+  game: GameState,
+): { id: number; name: string; career: Career; active: boolean }[] {
   const now = game.rikishi
     .filter((r) => r.stableId === game.player.stableId && r.career.basho > 0)
     .map((r) => ({ id: r.id, name: r.name, career: r.career, active: true }));
@@ -76,7 +79,7 @@ function people(game: GameState): { id: number; name: string; career: Career; ac
 
 /** 項目ごとの上位（同じ値は先に入門した＝ID の小さい方が上） */
 export function stableRecords(game: GameState, top = 3): RecordRow[] {
-  const all = people(game);
+  const all = stablePeople(game);
   return RECORD_KEYS.map((key) => ({
     key,
     holders: all
