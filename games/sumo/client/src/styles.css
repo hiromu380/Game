@@ -3,22 +3,10 @@
  * 相撲絵のように、墨の均一な線と平たい色面。影はぼかさず、版画のようにずらした色面で出す。docs/art-style.md
  */
 @import './art/paper-ui.css';
-@font-face {
-  font-family: 'Kaisei Tokumin';
-  src: url('./assets/fonts/kaisei-tokumin-400.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Kaisei Tokumin';
-  src: url('./assets/fonts/kaisei-tokumin-800.woff2') format('woff2');
-  font-weight: 800;
-  font-display: swap;
-}
-
 :root {
-  --font-head: 'Kaisei Tokumin', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  --font-body: 'Kaisei Tokumin', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  /* フォントと角の形は art/retro.css で決める */
+  --font-head: monospace;
+  --font-body: monospace;
   --radius: 4px;
   --print: 2px 3px 0; /* 版画のずらし */
   font-family: var(--font-body);

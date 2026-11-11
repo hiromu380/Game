@@ -47,6 +47,9 @@ export const PALETTE = {
   scrim: 'rgba(42, 36, 32, 0.6)',
   whiteLine: 'rgba(255, 255, 255, 0.7)',
   kimonoBrown: '#3b3328',
+  /** 画面の地（昔のゲームの紺）と、市松のもう1色 */
+  night: '#1a2238',
+  night2: '#202a44',
 } as const;
 
 /** 関取の締め込みの色（部屋ごとに決まる） */
@@ -109,6 +112,8 @@ export function applyPalette(root: HTMLElement = document.documentElement): void
     '--warning': PALETTE.warning,
     '--scrim': PALETTE.scrim,
     '--white-line': PALETTE.whiteLine,
+    '--night': PALETTE.night,
+    '--night-2': PALETTE.night2,
     '--paper': PALETTE.washi,
     '--paper-2': PALETTE.washi2,
     '--card': PALETTE.card,

@@ -1,0 +1,280 @@
+/*
+ * 昔のゲームの画面: ドットのフォント・角ばった太い枠のウィンドウ・ずらした影・コマンド風のタブとボタン。
+ * styles.css の後に読み込み、形と配色を上書きする。色は palette.ts の CSS 変数だけを使う。docs/art-style.md「昔のゲームの画面」
+ */
+@font-face {
+  font-family: 'DotGothic16';
+  src: url('../assets/fonts/dotgothic16-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-head: 'DotGothic16', 'MS Gothic', 'Osaka-Mono', monospace;
+  --font-body: 'DotGothic16', 'MS Gothic', 'Osaka-Mono', monospace;
+  --radius: 0px;
+  --print: 4px 4px 0;
+  --pad: 20px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  /* ドットの字は太らせない・にじませない */
+  font-synthesis: none;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+h1,
+h2,
+h3,
+strong,
+b,
+th {
+  font-weight: 400;
+}
+
+/* 背景: 紺の地に、2ドットの市松 */
+body {
+  background-color: var(--night);
+  background-image:
+    linear-gradient(
+      45deg,
+      var(--night-2) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--night-2) 75%
+    ),
+    linear-gradient(45deg, var(--night-2) 25%, transparent 25%, transparent 75%, var(--night-2) 75%);
+  background-size: 4px 4px;
+  background-position:
+    0 0,
+    2px 2px;
+}
+
+/* ウィンドウ: 墨の太い枠の内側に、もう1本の線。影は右下へずらす */
+.panel,
+.modal__box,
+.talk,
+.goals-card,
+.tabtip,
+.newgame {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 4px var(--line),
+    5px 5px 0 var(--ink);
+}
+.panel {
+  padding: var(--pad);
+}
+/* 題字の帯 */
+.panel > h2 {
+  margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 14px;
+  padding: 6px 12px;
+  background: var(--ai);
+  color: var(--white);
+  border-bottom: 3px solid var(--ink);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+.panel > h2::before {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  background: var(--odo);
+  transform: none;
+}
+.panel > h2 .tag {
+  background: var(--card);
+}
+.panel--alert > h2 {
+  background: var(--shu);
+}
+.modal__box > h2 {
+  border-bottom: 3px solid var(--ink);
+  letter-spacing: 0.08em;
+}
+.goals-card {
+  border-left-width: 3px;
+}
+.talk {
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 4px var(--line),
+    5px 5px 0 var(--ink);
+}
+
+/* 上の帯とタブ: 黒い帯に、選んだ項目を反転して見せる */
+.topbar {
+  background: var(--ink);
+  border-bottom: 3px solid var(--odo);
+  padding-block: 12px;
+}
+.topbar__portrait {
+  border-color: var(--odo);
+}
+.tabs {
+  gap: 0;
+  background: var(--ink);
+  border-bottom: 3px solid var(--ink);
+}
+.tabs__tab {
+  min-height: 48px;
+  padding: 0 20px;
+  border-bottom: 0;
+  color: var(--paper-2);
+}
+.tabs__tab:hover {
+  color: var(--white);
+}
+.tabs__tab.is-active {
+  background: var(--card);
+  color: var(--ink);
+}
+.tabs__tab.is-active::before {
+  content: '▶';
+  margin-right: 6px;
+  color: var(--shu);
+}
+
+/* ボタン: 太い枠と下の段。指したら反転 */
+.button {
+  border: 2px solid var(--ink);
+  box-shadow:
+    inset -2px -2px 0 var(--line),
+    0 3px 0 var(--ink);
+  transition: none;
+  font-weight: 400;
+}
+.button:hover:not(:disabled) {
+  background-color: var(--ink);
+  color: var(--card);
+  box-shadow: 0 3px 0 var(--ink);
+}
+.button--primary {
+  box-shadow:
+    inset -2px -2px 0 var(--ink-2),
+    0 3px 0 var(--ink);
+}
+.button--ghost {
+  box-shadow: none;
+}
+.topbar .button--ghost:hover:not(:disabled) {
+  background-color: var(--card);
+  color: var(--ink);
+}
+.policy__btn,
+.segmented__btn,
+.chip,
+.choice__item {
+  border: 2px solid var(--ink);
+  font-weight: 400;
+}
+.policy__btn.is-selected,
+.segmented__btn.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--card);
+  font-weight: 400;
+}
+.policy__btn.is-selected::before,
+.segmented__btn.is-active::before {
+  content: '▶';
+  margin-right: 4px;
+  color: var(--odo);
+}
+.policy__btn--hard.is-selected {
+  background: var(--shu);
+  border-color: var(--ink);
+}
+.policy__btn:hover:not(.is-selected):not(:disabled),
+.segmented__btn:hover:not(.is-active) {
+  background: var(--odo-light);
+}
+.tag {
+  border-width: 2px;
+  padding: 0 6px;
+}
+.bar {
+  height: 8px;
+  border: 1px solid var(--ink);
+}
+.card {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.callout {
+  border-width: 2px;
+  border-left-width: 6px;
+  font-weight: 400;
+}
+
+/* 下の帯（コマンド） */
+.actionbar {
+  background: var(--ink);
+  border-top: 3px solid var(--odo);
+}
+.actionbar__hint {
+  color: var(--paper);
+}
+
+/* ウィンドウの外（紺の地）に直に出る字 */
+.stack > .note,
+.scene-box > .note {
+  color: var(--paper-2);
+}
+.hakoniwa__stage,
+.title-scene {
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.title-scene .hakoniwa__stage {
+  border: 0;
+  box-shadow: none;
+}
+
+/* 表紙 */
+.newgame {
+  margin-block: 24px;
+}
+.newgame__title {
+  letter-spacing: 0.1em;
+  /* 細いドットの字を、ずらして重ねて太らせる。金の影を落とす */
+  text-shadow:
+    3px 0 0 var(--ink),
+    0 3px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    7px 7px 0 var(--odo);
+}
+.newgame__seal {
+  text-shadow: none;
+}
+.choice__item.is-selected {
+  background: var(--ink);
+  color: var(--card);
+}
+.choice__item.is-selected .choice__desc,
+.choice__item.is-selected .choice__number {
+  color: var(--paper-2);
+}
+
+/* 小さな字は、ドットがつぶれない大きさまで */
+.note,
+.card__meta,
+.topbar__stats dt,
+.policy__label {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --pad: 14px;
+  }
+  .tabs__tab {
+    padding: 0 12px;
+  }
+}

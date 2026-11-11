@@ -1,5 +1,5 @@
 /**
- * 見出しフォントのサブセット化（Kaisei Tokumin Regular / ExtraBold・SIL Open Font License 1.1）
+ * 画面のフォントのサブセット化（DotGothic16 Regular・SIL Open Font License 1.1。16ドットの日本語ビットマップ風フォント）
  *
  *   PYFTSUBSET=<pyftsubset の場所> node games/sumo/client/build/subset-font.mjs
  *
@@ -40,12 +40,12 @@ export function collectCharset() {
   return [...chars].sort((a, b) => a.codePointAt(0) - b.codePointAt(0)).join('');
 }
 
-async function fetchTtf(weight) {
+async function fetchTtf() {
   mkdirSync(cacheDir, { recursive: true });
-  const file = join(cacheDir, `kaisei-tokumin-${weight}.ttf`);
+  const file = join(cacheDir, 'dotgothic16-400.ttf');
   if (existsSync(file)) return file;
   const css = await (
-    await fetch(`https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@${weight}`, {
+    await fetch('https://fonts.googleapis.com/css2?family=DotGothic16', {
       headers: { 'User-Agent': 'Mozilla/4.0' },
     })
   ).text();
@@ -59,16 +59,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const charset = collectCharset();
   writeFileSync(join(here, 'charset.txt'), `${charset}\n`);
   mkdirSync(outDir, { recursive: true });
-  for (const weight of [400, 800]) {
-    const out = join(outDir, `kaisei-tokumin-${weight}.woff2`);
-    execFileSync(process.env.PYFTSUBSET ?? 'pyftsubset', [
-      await fetchTtf(weight),
-      `--text-file=${join(here, 'charset.txt')}`,
-      '--flavor=woff2',
-      '--layout-features=*',
-      '--no-hinting',
-      `--output-file=${out}`,
-    ]);
-    console.log(`${out}: ${Math.round(statSync(out).size / 1024)} KB, ${[...charset].length} 文字`);
-  }
+  const out = join(outDir, 'dotgothic16-400.woff2');
+  execFileSync(process.env.PYFTSUBSET ?? 'pyftsubset', [
+    await fetchTtf(),
+    `--text-file=${join(here, 'charset.txt')}`,
+    '--flavor=woff2',
+    '--layout-features=*',
+    '--no-hinting',
+    `--output-file=${out}`,
+  ]);
+  console.log(`${out}: ${Math.round(statSync(out).size / 1024)} KB, ${[...charset].length} 文字`);
 }
