@@ -26,6 +26,8 @@ import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
 import { MidBashoDialog } from './MidBashoDialog';
+import { BashoTicker } from './BashoTicker';
+import { BASHO_DAYS, tickerRow } from '../ticker';
 
 type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 
@@ -74,6 +76,10 @@ export function GameScreen({
   const [confirmQuit, setConfirmQuit] = useState(false);
   // 中日（8日目）で止まっている場所（前半の様子）
   const [mid, setMid] = useState<MidBasho | null>(null);
+  // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
+  const [ticker, setTicker] = useState<
+    { half: 'first'; mid: MidBasho } | { half: 'second'; next: GameState; from: number } | null
+  >(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
@@ -193,7 +199,7 @@ export function GameScreen({
           disabled={blocked}
           onClick={() => {
             const m = previewBasho(game);
-            if (m) setMid(m);
+            if (m) setTicker({ half: 'first', mid: m });
             else go(advanceBasho(game));
           }}
         >
@@ -201,13 +207,56 @@ export function GameScreen({
         </button>
       </footer>
 
+      {ticker?.half === 'first' && (
+        <BashoTicker
+          title={t('ticker.first')}
+          rows={ticker.mid.mine.map((m) => ({
+            ...tickerRow(m.id, m.bouts),
+            name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
+            rank: ranks.get(m.id) ?? null,
+            absentFrom: m.out ? (m.injuredDay ?? 0) : undefined,
+          }))}
+          from={1}
+          to={ticker.mid.day}
+          doneLabel={t('ticker.toMid')}
+          onDone={() => {
+            setMid(ticker.mid);
+            setTicker(null);
+          }}
+        />
+      )}
       {mid && (
         <MidBashoDialog
           game={game}
           mid={mid}
           onContinue={(reenter, stance) => {
             setMid(null);
-            go(advanceBasho(game, { reenter, stance }));
+            const next = advanceBasho(game, { reenter, stance });
+            // 後半を見せてから結果へ（終わってしまった・結果がないときは、すぐ結果へ）
+            if (next.lastReport && !next.gameOver)
+              setTicker({ half: 'second', next, from: mid.day + 1 });
+            else go(next);
+          }}
+        />
+      )}
+      {ticker?.half === 'second' && ticker.next.lastReport && (
+        <BashoTicker
+          title={t('ticker.second')}
+          rows={ticker.next.lastReport.mine.map((m) => ({
+            ...tickerRow(m.id, m.bouts),
+            name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
+            rank: m.record.rank,
+            // 休みのある弟子は、最後の取組の後から休場の札を出す
+            absentFrom:
+              m.record.absences > 0 ? Math.max(0, ...m.bouts.map((b) => b.day)) : undefined,
+          }))}
+          from={ticker.from}
+          to={BASHO_DAYS}
+          doneLabel={t('ticker.toResult')}
+          onDone={() => {
+            const next = ticker.next;
+            setTicker(null);
+            go(next);
           }}
         />
       )}

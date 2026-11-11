@@ -1264,5 +1264,14 @@
   "goals.yokozuna.name": "Produce a yokozuna",
   "goals.yokozuna.hint": "Back-to-back titles as ozeki, or the equivalent. The pride of the stable.",
   "goals.succession.name": "Hand the stable to the next generation",
-  "goals.succession.hint": "Raise a successor who holds elder stock before the master retires. Long-serving sekitori become candidates."
+  "goals.succession.hint": "Raise a successor who holds elder stock before the master retires. Long-serving sekitori become candidates.",
+  "ticker.first": "Tournament: first half",
+  "ticker.second": "Tournament: second half",
+  "ticker.ready": "The drums sound",
+  "ticker.skip": "Skip",
+  "ticker.toMid": "To the mid-basho decisions",
+  "ticker.toResult": "To the results",
+  "ticker.rowAria": "{name}: {wins} wins, {losses} losses",
+  "ticker.legend": "○ win, ● loss, □ win by default, ■ loss by default, · no bout that day. Makushita and below fight seven bouts.",
+  "ticker.absent": "Out"
 }

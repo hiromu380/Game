@@ -24,7 +24,7 @@ import { applyBasho, applyHighest, applyMochikyukinMinimum } from '../career/upd
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import { applyKakun } from '../lineage/kakun';
 import { settleBasho, sum } from '../money/ledger';
-import type { BashoRecord, BashoReport, GameState, Rank, Stance } from '../model/types';
+import type { BashoRecord, BashoReport, BoutResult, GameState, Rank, Stance } from '../model/types';
 import { round1 } from '../core/math';
 import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
@@ -89,8 +89,15 @@ function prepareBasho(state: GameState, report: BashoReport): void {
 /** 中日（8日目）を終えたところの様子 */
 export interface MidBasho {
   day: number;
-  /** 自分の弟子（番付に載っている）の途中の星と、休んでいるか */
-  mine: { id: number; wins: number; losses: number; out: boolean; injuredDay: number | null }[];
+  /** 自分の弟子（番付に載っている）の途中の星と、休んでいるか。bouts は中日までの取組（日の順） */
+  mine: {
+    id: number;
+    wins: number;
+    losses: number;
+    out: boolean;
+    injuredDay: number | null;
+    bouts: BoutResult[];
+  }[];
   /** 幕内の先頭（勝ち数と、並んでいる力士） */
   leaders: { wins: number; losses: number; ids: number[] };
 }
@@ -117,6 +124,9 @@ export function previewBasho(input: GameState): MidBasho | null {
         losses: rec.losses,
         out: outcome.absent.has(id),
         injuredDay: outcome.injuredDay.get(id) ?? null,
+        bouts: outcome.bouts
+          .filter((b) => b.eastId === id || b.westId === id)
+          .sort((a, b) => a.day - b.day),
       };
     });
   const makuuchi = state.banzuke.filter((id) => outcome.ranks.get(id)!.division === 'makuuchi');

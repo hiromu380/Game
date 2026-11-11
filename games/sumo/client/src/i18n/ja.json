@@ -1264,5 +1264,14 @@
   "goals.yokozuna.name": "横綱を出す",
   "goals.yokozuna.hint": "大関で2場所続けて優勝、またはそれに準ずる成績。部屋の誉れです。",
   "goals.succession.name": "部屋を次の代へ継ぐ",
-  "goals.succession.hint": "親方の定年までに、年寄名跡を持つ跡継ぎを育てます。関取を長く務めた弟子が候補になります。"
+  "goals.succession.hint": "親方の定年までに、年寄名跡を持つ跡継ぎを育てます。関取を長く務めた弟子が候補になります。",
+  "ticker.first": "本場所 前半",
+  "ticker.second": "本場所 後半",
+  "ticker.ready": "触れ太鼓が鳴る",
+  "ticker.skip": "飛ばす",
+  "ticker.toMid": "中日の判断へ",
+  "ticker.toResult": "結果へ",
+  "ticker.rowAria": "{name}: {wins}勝{losses}敗",
+  "ticker.legend": "○ 白星・● 黒星・□ 不戦勝・■ 不戦敗・「・」は取組のない日。幕下以下は7番です。",
+  "ticker.absent": "休場"
 }

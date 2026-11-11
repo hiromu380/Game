@@ -21,6 +21,8 @@ describe('中日（8日目）の判断', () => {
         .bouts.filter((b) => b.day <= 8);
       expect(bouts.filter((b) => b.winnerId === m.id).length).toBe(m.wins);
       expect(bouts.filter((b) => b.winnerId !== m.id).length).toBe(m.losses);
+      // 中日までの取組（1日ずつ見せる星取り用）も、進めた場所と同じ
+      expect(m.bouts).toEqual(bouts);
     }
     expect(mid.leaders.ids.length).toBeGreaterThan(0);
   });
