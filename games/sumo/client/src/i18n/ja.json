@@ -1,7 +1,7 @@
 {
   "app.title": "一門",
   "lang.toggle": "English",
-  "newGame.lead": "あなたは引退して親方になった元力士です。今日、自分の部屋を開きました。弟子は数人、看板は新品、通帳は心もとない。定年の65歳までに弟子を育て、部屋を継ぐ者を残してください。",
+  "newGame.lead": "元力士のあなたは、今日、自分の部屋を開きました。定年の65歳までに弟子を育て、跡継ぎを残してください。",
   "newGame.styleQuestion": "親方の型を選ぶ",
   "newGame.style.oshi": "突いて押して、前へ出る",
   "newGame.style.yotsu": "まわしを取って、じっくり寄る",
@@ -21,7 +21,7 @@
   "tab.banzuke": "番付",
   "tab.ledger": "帳簿",
   "tab.lineage": "一門",
-  "action.hint": "稽古の方針と新弟子を決めたら、本場所へ。",
+  "action.hint": "準備ができたら、本場所へ。",
   "action.hintRetire": "引退を申し出ている弟子がいます。返事をしないまま進めると、引退を受け入れます。",
   "action.lastReport": "前の結果",
   "action.year": "1年進める",
@@ -1273,5 +1273,8 @@
   "ticker.toResult": "結果へ",
   "ticker.rowAria": "{name}: {wins}勝{losses}敗",
   "ticker.legend": "○ 白星・● 黒星・□ 不戦勝・■ 不戦敗・「・」は取組のない日。幕下以下は7番です。",
-  "ticker.absent": "休場"
+  "ticker.absent": "休場",
+  "help.toggle": "説明を出す・隠す",
+  "help.on": "？: 入",
+  "help.off": "？: 切"
 }

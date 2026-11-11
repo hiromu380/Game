@@ -22,6 +22,10 @@ export function App() {
 
   useEffect(() => saveGame(game), [game]);
   useEffect(() => saveSettings(settings), [settings]);
+  // 説明を出すか（CSS で注記・手引き・タブの案内を隠す）
+  useEffect(() => {
+    document.documentElement.dataset.help = settings.help ? 'on' : 'off';
+  }, [settings.help]);
   useEffect(() => {
     document.documentElement.lang = lang;
     document.title = i18n.t('app.title');

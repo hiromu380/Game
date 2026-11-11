@@ -270,6 +270,16 @@ body {
   font-size: 0.875rem;
 }
 
+/* 説明を出さない（既定）: 「？」で出す。docs/art-style.md */
+:root[data-help='off'] .note,
+:root[data-help='off'] .tabtip,
+:root[data-help='off'] .guide,
+:root[data-help='off'] .choice__help,
+:root[data-help='off'] .hurt__note,
+:root[data-help='off'] .newgame__picture figcaption {
+  display: none;
+}
+
 @media (max-width: 640px) {
   :root {
     --pad: 14px;

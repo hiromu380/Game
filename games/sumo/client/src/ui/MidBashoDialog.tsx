@@ -47,7 +47,7 @@ export function MidBashoDialog({
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="mid-title">
       <div className="modal__box mid">
         <h2 id="mid-title">{t('mid.title', { day: dayLabel(t, mid.day) })}</h2>
-        <p>{t('mid.lead')}</p>
+        <p className="note">{t('mid.lead')}</p>
         <p className="callout">
           {t('mid.leaders', {
             record: t('race.record', { wins: mid.leaders.wins, losses: mid.leaders.losses }),

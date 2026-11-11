@@ -1,7 +1,7 @@
 {
   "app.title": "Ichimon",
   "lang.toggle": "日本語",
-  "newGame.lead": "You are a retired wrestler turned stablemaster, and today you opened your own stable. A few disciples, a new signboard, a thin bank book. Raise them well and leave someone to inherit the stable before you retire at 65.",
+  "newGame.lead": "A retired wrestler, you opened your own stable today. Raise your disciples and leave an heir before you retire at 65.",
   "newGame.styleQuestion": "Choose your style",
   "newGame.style.oshi": "Thrust and push, always forward",
   "newGame.style.yotsu": "Grab the belt and drive out",
@@ -21,7 +21,7 @@
   "tab.banzuke": "Banzuke",
   "tab.ledger": "Ledger",
   "tab.lineage": "Lineage",
-  "action.hint": "Set training and recruits, then go to the tournament.",
+  "action.hint": "When you are ready, go to the tournament.",
   "action.hintRetire": "A disciple wants to retire. If you continue without answering, the retirement is accepted.",
   "action.lastReport": "Results",
   "action.year": "Advance a year",
@@ -1273,5 +1273,8 @@
   "ticker.toResult": "To the results",
   "ticker.rowAria": "{name}: {wins} wins, {losses} losses",
   "ticker.legend": "○ win, ● loss, □ win by default, ■ loss by default, · no bout that day. Makushita and below fight seven bouts.",
-  "ticker.absent": "Out"
+  "ticker.absent": "Out",
+  "help.toggle": "Show or hide explanations",
+  "help.on": "?: on",
+  "help.off": "?: off"
 }

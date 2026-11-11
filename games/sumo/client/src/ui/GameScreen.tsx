@@ -150,6 +150,15 @@ export function GameScreen({
           >
             {settings.sound ? t('sound.on') : t('sound.off')}
           </button>
+          <button
+            className="button button--ghost"
+            aria-pressed={settings.help}
+            aria-label={t('help.toggle')}
+            title={t('help.toggle')}
+            onClick={() => update({ help: !settings.help })}
+          >
+            {settings.help ? t('help.on') : t('help.off')}
+          </button>
           <button className="button button--ghost" onClick={() => setConfirmQuit(true)}>
             {t('top.quit')}
           </button>

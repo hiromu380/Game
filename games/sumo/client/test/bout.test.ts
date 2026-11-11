@@ -93,7 +93,7 @@ describe('取組の演出の台本', () => {
 });
 
 describe('ユーザー設定', () => {
-  it('版1・2は版3に（版1は効果音を入れる。案内ははじめから）。壊れていれば既定', () => {
+  it('古い版は今の版に（版1は効果音を入れる。案内ははじめから。説明は出さない）。壊れていれば既定', () => {
     expect(parseSettings(JSON.stringify({ version: 1, lang: 'en' }))).toEqual({
       ...DEFAULT_SETTINGS,
       lang: 'en',
@@ -102,6 +102,10 @@ describe('ユーザー設定', () => {
       false,
     );
     expect(parseSettings('{oops')).toEqual(DEFAULT_SETTINGS);
+    // 版3（説明の設定がない）は、説明を出さないで読む。版4は設定のとおり
+    expect(parseSettings(JSON.stringify({ version: 3, lang: 'ja', sound: true })).help).toBe(false);
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).help).toBe(true);
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).version).toBe(4);
     const v3 = {
       ...DEFAULT_SETTINGS,
       guide: { dismissed: true, done: ['bout', 9], tips: ['ledger'] },

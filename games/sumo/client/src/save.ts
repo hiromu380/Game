@@ -48,27 +48,30 @@ export function parseSaveFile(text: string): GameState | null {
   }
 }
 
-/** 1: 言語 / 2: 効果音の入り切り / 3: はじめての人向けの案内の進み具合 */
+/** 1: 言語 / 2: 効果音の入り切り / 3: はじめての人向けの案内の進み具合 / 4: 説明を出すか */
 export interface Settings {
-  version: 3;
+  version: 4;
   lang: 'ja' | 'en';
   sound: boolean;
   guide: GuideProgress;
+  /** 説明（注記・手引き・タブの案内）を出す。既定は出さない */
+  help: boolean;
 }
 
 export const DEFAULT_GUIDE: GuideProgress = { dismissed: false, done: [], tips: [] };
 
 export const DEFAULT_SETTINGS: Settings = {
-  version: 3,
+  version: 4,
   lang: 'ja',
   sound: true,
   guide: DEFAULT_GUIDE,
+  help: false,
 };
 
 const strings = (x: unknown): string[] =>
   Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : [];
 
-/** 保存した設定を読む（版1は効果音を入れ、版1・2は案内をはじめから。壊れていれば既定） */
+/** 保存した設定を読む（版1は効果音を入れ、版1・2は案内をはじめから、版3までは説明を出さない。壊れていれば既定） */
 export function parseSettings(text: string | null): Settings {
   try {
     const s = JSON.parse(text ?? 'null') as {
@@ -76,14 +79,16 @@ export function parseSettings(text: string | null): Settings {
       lang?: 'ja' | 'en';
       sound?: boolean;
       guide?: { dismissed?: boolean; done?: unknown; tips?: unknown };
+      help?: boolean;
     } | null;
-    if (!s || ![1, 2, 3].includes(s.version ?? 0)) return DEFAULT_SETTINGS;
+    if (!s || ![1, 2, 3, 4].includes(s.version ?? 0)) return DEFAULT_SETTINGS;
     return {
-      version: 3,
+      version: 4,
+      help: s.version === 4 && s.help === true,
       lang: s.lang === 'en' ? 'en' : 'ja',
       sound: s.version === 1 ? true : s.sound !== false,
       guide:
-        s.version === 3 && s.guide
+        (s.version === 3 || s.version === 4) && s.guide
           ? {
               dismissed: s.guide.dismissed === true,
               done: strings(s.guide.done) as GuideProgress['done'],
