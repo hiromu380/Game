@@ -214,6 +214,17 @@ export class EffectsLayer {
     this.popText(x, y, this.labels.income(amount), 0, durationMs * 2.5, BOARD_THEME.incomeText);
   }
 
+  /** 組み立て中: パーツを外したマスに、小さな土ぼこりを出す */
+  dust(x: number, y: number): void {
+    const p = EFFECTS_CONFIG.placement;
+    this.smoke(x, y, Math.round(p.dust * this.power), p.dustMs);
+  }
+
+  /** 演出の強さの倍率（強 1・中 0.5・弱 0） */
+  get strengthPower(): number {
+    return this.power;
+  }
+
   /** 発動回数がリセットされた */
   onReset(x: number, y: number, durationMs: number): void {
     this.ripple(x, y, durationMs);

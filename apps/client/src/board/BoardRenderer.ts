@@ -56,6 +56,7 @@ import type { SoundKey } from '../audio/manifest';
 import { EFFECTS_CONFIG } from '../config/effects';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
+import { ParticlePool } from './fx/particlePool';
 import { StatusOverlay } from './StatusOverlay';
 import {
   loadBoardTextures,
@@ -163,6 +164,9 @@ export class BoardRenderer {
   private readonly overlayLayer = new Container();
   /** 残り発動回数と、途切れた理由の表示 */
   private readonly status: StatusOverlay;
+  /** 信号の尾（信号より下に描く） */
+  private readonly trailLayer = new Container();
+  private readonly trails = new ParticlePool(this.trailLayer, EFFECTS_CONFIG.trail.maxAlive);
   private readonly signalLayer = new Container();
   /** 再生中の演出（発光・パーティクル・揺れ・スロー・連鎖カウンター・カットイン） */
   private readonly effects: EffectsLayer;
@@ -251,6 +255,7 @@ export class BoardRenderer {
       this.partLayer,
       this.status.pipLayer,
       this.overlayLayer,
+      this.trailLayer,
       this.signalLayer,
       this.effects.boardLayer,
       this.status.breakLayer,
@@ -466,6 +471,8 @@ export class BoardRenderer {
       this.partKeys.clear();
     }
     let changed = false;
+    /** 手応えの演出の候補（置いた・外した・回したマス） */
+    const touched: { kind: 'placed' | 'removed' | 'rotated'; x: number; y: number }[] = [];
     for (let y = 0; y < board.height; y++) {
       for (let x = 0; x < board.width; x++) {
         const index = y * board.width + x;
@@ -474,8 +481,18 @@ export class BoardRenderer {
         const key = part
           ? `${part.id}:${part.dir}:${badge ? `${badge.kind}${badge.value}` : ''}`
           : undefined;
-        if (key === this.partKeys.get(index)) continue;
+        const previous = this.partKeys.get(index);
+        if (key === previous) continue;
         changed = true;
+        if (!previous) touched.push({ kind: 'placed', x, y });
+        else if (!key) touched.push({ kind: 'removed', x, y });
+        else if (
+          part &&
+          previous.split(':')[0] === part.id &&
+          previous.split(':')[1] !== `${part.dir}`
+        ) {
+          touched.push({ kind: 'rotated', x, y });
+        }
         this.partViews.get(index)?.destroy({ children: true });
         this.partViews.delete(index);
         this.partKeys.delete(index);
@@ -492,6 +509,35 @@ export class BoardRenderer {
     this.partLayer.removeChildren();
     const indices = [...this.partViews.keys()].sort((a, b) => a - b);
     for (const index of indices) this.partLayer.addChild(this.partViews.get(index)!);
+
+    // 置く・外す・回すの手応え。盤面を丸ごと描いたとき（読み込み・片付け）と再生中は出さない
+    const p = EFFECTS_CONFIG.placement;
+    if (rebuildAll || this.timeline || touched.length > p.maxCells) return;
+    if (this.effects.strengthPower <= 0) return;
+    for (const cell of touched) {
+      if (cell.kind === 'removed') {
+        this.effects.dust(cell.x, cell.y);
+        continue;
+      }
+      const view = this.partViews.get(cell.y * board.width + cell.x);
+      if (!view) continue;
+      const placed = cell.kind === 'placed';
+      if (placed) view.scale.set(0.6);
+      this.tweens.add({
+        duration: placed ? p.popMs : p.nudgeMs,
+        onUpdate: (t) => {
+          if (view.destroyed) return;
+          // 置いたとき: 小さく出て、少し行き過ぎてから収まる。回したとき: 少しふくらんで戻る
+          const e = easeOutCubic(t);
+          view.scale.set(
+            placed ? 0.6 + 0.4 * e + 0.14 * Math.sin(Math.PI * t) : 1 + 0.12 * (1 - e),
+          );
+        },
+        onComplete: () => {
+          if (!view.destroyed) view.scale.set(1);
+        },
+      });
+    }
   }
 
   /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
@@ -700,6 +746,7 @@ export class BoardRenderer {
     this.callbacks = null;
     this.tweens.finishAll();
     this.effects.reset();
+    this.trails.releaseAll();
     for (const view of this.signalViews.values()) this.signals.release(view);
     for (const child of [...this.signalLayer.children]) {
       if (child instanceof SignalView) this.signals.release(child);
@@ -806,6 +853,8 @@ export class BoardRenderer {
   /** 1 tick 分のイベントを見た目に反映する。tickMs=0 なら即時 */
   private applyTick(events: SimEvent[], tickMs: number): void {
     const moveMs = tickMs * MOVE_RATIO;
+    // 信号の尾は、じっくり見せる tick でだけ出す
+    const trail = tickMs >= THIN_TICK_MS;
     const fxMs = Math.max(tickMs, 1) * 1.2;
     const instant = tickMs === 0;
     this.effects.setThin(tickMs < THIN_TICK_MS);
@@ -842,12 +891,12 @@ export class BoardRenderer {
           break;
         }
         case 'move':
-          this.moveSignal(event.signalId, event.x, event.y, moveMs);
+          this.moveSignal(event.signalId, event.x, event.y, moveMs, trail);
           break;
         case 'vanish': {
           // 盤面外への移動は move イベントがないため、ここで外へ動かす
           if (event.reason === 'outOfBoard')
-            this.moveSignal(event.signalId, event.x, event.y, moveMs);
+            this.moveSignal(event.signalId, event.x, event.y, moveMs, trail);
           const view = this.signalViews.get(event.signalId);
           this.signalViews.delete(event.signalId);
           if (view) {
@@ -936,7 +985,13 @@ export class BoardRenderer {
     if (view && view.generation === generation) this.signals.release(view);
   }
 
-  private moveSignal(signalId: number, x: number, y: number, durationMs: number): void {
+  private moveSignal(
+    signalId: number,
+    x: number,
+    y: number,
+    durationMs: number,
+    trail: boolean,
+  ): void {
     const view = this.signalViews.get(signalId);
     if (!view) return;
     const fromX = view.x;
@@ -951,6 +1006,45 @@ export class BoardRenderer {
         view.position.set(fromX + (px - fromX) * e, fromY + (py - fromY) * e);
       },
     });
+    if (trail && view.visible) this.leaveTrail(view.tier, fromX, fromY, px, py, durationMs);
+  }
+
+  /** 信号の尾: 通った道すじに、信号の色の小さな点を残して消す（数は演出の強さで減る） */
+  private leaveTrail(
+    tier: number,
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    durationMs: number,
+  ): void {
+    const c = EFFECTS_CONFIG.trail;
+    const count = Math.round(c.dots * this.effects.strengthPower);
+    const color = BOARD_THEME.signalTiers[tier] ?? BOARD_THEME.signalTiers[0]!;
+    for (let i = 0; i < count; i++) {
+      // 道すじに等間隔に置き、信号がその位置を通る時刻に出す（信号の減速カーブを逆算する）
+      const p = (i + 0.5) / (count + 0.5);
+      const f = 1 - Math.cbrt(1 - p);
+      const x = fromX + (toX - fromX) * p;
+      const y = fromY + (toY - fromY) * p;
+      let dot: ReturnType<ParticlePool['acquire']> = null;
+      this.tweens.add({
+        delay: durationMs * f,
+        duration: Math.max(c.fadeMs, durationMs * 1.5),
+        onStart: () => {
+          dot = this.trails.acquire('dot', color);
+          dot?.position.set(x, y);
+        },
+        onUpdate: (t) => {
+          if (!dot) return;
+          dot.alpha = c.alpha * (1 - t);
+          dot.scale.set(c.startScale + (c.endScale - c.startScale) * t);
+        },
+        onComplete: () => {
+          if (dot) this.trails.release(dot);
+        },
+      });
+    }
   }
 }
 
