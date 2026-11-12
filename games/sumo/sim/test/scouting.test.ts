@@ -54,7 +54,7 @@ describe('スカウト回り', () => {
     v.version = 15;
     delete v.player.scoutedAt;
     const m = migrateSave(v)!;
-    expect(m.version).toBe(17);
+    expect(m.version).toBe(18);
     expect(m.player.scoutedAt).toBeNull();
   });
 });

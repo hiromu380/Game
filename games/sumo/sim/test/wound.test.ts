@@ -94,7 +94,7 @@ describe('けがの部位・治療・古傷', () => {
     v.version = 16;
     delete v.pending.treatment;
     const m = migrateSave(v)!;
-    expect(m.version).toBe(17);
+    expect(m.version).toBe(18);
     expect(m.pending.treatment).toEqual([]);
   });
 });

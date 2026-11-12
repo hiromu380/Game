@@ -49,3 +49,5 @@ export { officeAtLeast, isBoardMember } from './world/office';
 export { canVisit, giftOf } from './stable/koenkai';
 export { danpatsuPlan, danpatsuTier, hasamiCount, type DanpatsuPlan } from './stable/danpatsu';
 export { canScout } from './game/recruit';
+export { PREP } from './balance/prep';
+export { canPrep, doPrep, prepLeft } from './game/prep';

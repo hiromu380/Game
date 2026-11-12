@@ -102,6 +102,42 @@ export interface MidBasho {
   leaders: { wins: number; losses: number; ids: number[] };
 }
 
+/** 自分の部屋の稽古の条件（設備・部屋の人・家訓・役職）。関取と、若者頭が見る幕下以下 */
+export function playerGrowth(state: GameState): {
+  playerCtx: GrowthContext;
+  lowerCtx: GrowthContext;
+} {
+  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
+  const coaches = state.oyakata.filter(
+    (o) => o.stableId === state.player.stableId && o.role === 'heyatsuki',
+  ).length;
+  const staff = staffGrowth(state);
+  const playerCtx: GrowthContext = applyKakun(
+    {
+      ...NEUTRAL_GROWTH,
+      oyakataStyle: master.style,
+      coaches,
+      growthMultiplier: 1 + state.player.facilities.dojo * FACILITY_EFFECTS.dojoGrowthPerLevel,
+      injuryMultiplier:
+        1 - state.player.facilities.trainer * FACILITY_EFFECTS.trainerInjuryCutPerLevel,
+      extraRecovery:
+        state.player.facilities.trainer * FACILITY_EFFECTS.trainerRecoveryPerLevel + staff.recovery,
+      dietGainKg: staff.gainKg,
+    },
+    state.player.kakun,
+  );
+  playerCtx.injuryMultiplier *= staff.injury;
+  // 理事などは協会の仕事で忙しく、部屋付きの親方がいなければ稽古の伸びが少し落ちる
+  if (isBoardMember(state.player.office.rank) && coaches === 0)
+    playerCtx.growthMultiplier *= OFFICE.busyGrowth;
+  // 若者頭は幕下以下の弟子を見る
+  const lowerCtx: GrowthContext = {
+    ...playerCtx,
+    growthMultiplier: playerCtx.growthMultiplier * staff.lowerGrowth,
+  };
+  return { playerCtx, lowerCtx };
+}
+
 /**
  * 本場所の前半（中日まで）を見る。advanceBasho と同じ準備・同じ乱数なので、前半はこのとおりになる。
  * 判断の要る場面がある（止まっている）ときは null
@@ -447,34 +483,7 @@ export function advanceBasho(
 
   // 5. 稽古
   const growthRng = createPrng(deriveSeed(state.seed, SEED.growth, state.bashoIndex));
-  const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
-  const coaches = state.oyakata.filter(
-    (o) => o.stableId === state.player.stableId && o.role === 'heyatsuki',
-  ).length;
-  const staff = staffGrowth(state);
-  const playerCtx: GrowthContext = applyKakun(
-    {
-      ...NEUTRAL_GROWTH,
-      oyakataStyle: master.style,
-      coaches,
-      growthMultiplier: 1 + state.player.facilities.dojo * FACILITY_EFFECTS.dojoGrowthPerLevel,
-      injuryMultiplier:
-        1 - state.player.facilities.trainer * FACILITY_EFFECTS.trainerInjuryCutPerLevel,
-      extraRecovery:
-        state.player.facilities.trainer * FACILITY_EFFECTS.trainerRecoveryPerLevel + staff.recovery,
-      dietGainKg: staff.gainKg,
-    },
-    state.player.kakun,
-  );
-  playerCtx.injuryMultiplier *= staff.injury;
-  // 理事などは協会の仕事で忙しく、部屋付きの親方がいなければ稽古の伸びが少し落ちる
-  if (isBoardMember(state.player.office.rank) && coaches === 0)
-    playerCtx.growthMultiplier *= OFFICE.busyGrowth;
-  // 若者頭は幕下以下の弟子を見る
-  const lowerCtx: GrowthContext = {
-    ...playerCtx,
-    growthMultiplier: playerCtx.growthMultiplier * staff.lowerGrowth,
-  };
+  const { playerCtx, lowerCtx } = playerGrowth(state);
   report.training = [];
   for (const r of state.rikishi) {
     const rank = newRanks.get(r.id);
@@ -522,6 +531,8 @@ export function advanceBasho(
     scheduleElection(state);
   }
   state.lastReport = report;
+  // 次の場所前の4週間は、はじめから
+  state.prep = { week: 0, log: [] };
   return state;
 }
 

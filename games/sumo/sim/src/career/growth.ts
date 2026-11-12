@@ -38,6 +38,31 @@ export const NEUTRAL_GROWTH: GrowthContext = {
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
+/**
+ * 追加の稽古（場所前の週の行動）: 1つの能力を、素質までの残り × rate だけ伸ばす。伸びた量を返す。
+ * ふだんの稽古と同じ条件（年齢・個性・設備・親方の型）が効く。ばらつきと稽古の量は入れない
+ */
+export function extraTraining(r: Rikishi, ctx: GrowthContext, key: Style, rate: number): number {
+  const ageFactor =
+    r.age <= GROWTH.youthBonusUntil ? GROWTH.youthBonus : r.age <= r.peakAge ? 1 : 0;
+  const a = r.abilities[key];
+  if (a >= r.talent || ageFactor === 0 || r.injury > 0) return 0;
+  const traits = traitsOf(r);
+  const mult =
+    (traits.includes('diligent') ? TRAITS.diligent.growth : 1) *
+    (traits.includes('lazy') ? TRAITS.lazy.growth : 1) *
+    (traits.includes('practiceChamp') ? TRAITS.practiceChamp.growth : 1) *
+    r.boost *
+    (1 + Math.min(GROWTH.coachBonusMax, ctx.coaches * GROWTH.coachBonusPer)) *
+    ctx.growthMultiplier *
+    (ctx.oyakataStyle === key ? GROWTH.oyakataStyleBonus : 1) *
+    ctx.styleMultiplier[key] *
+    (key === 'waza' && traits.includes('studious') ? TRAITS.studious.waza : 1);
+  const next = round1(Math.min(r.talent, a + (r.talent - a) * rate * ageFactor * mult));
+  r.abilities[key] = next;
+  return round1(next - a);
+}
+
 /** 1場所ぶんの稽古。けがをしたら true */
 export function train(r: Rikishi, ctx: GrowthContext, rng: Prng): boolean {
   if (r.injury > 0) {

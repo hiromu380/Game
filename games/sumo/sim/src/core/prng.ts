@@ -68,4 +68,5 @@ export const SEED = {
   office: 14,
   koenkai: 15,
   wound: 16,
+  prep: 17,
 } as const;

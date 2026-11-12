@@ -439,6 +439,43 @@ export interface StaffMember {
   since: number;
 }
 
+/** 場所前の週の行動（親方が毎週1つ選ぶ） */
+export type PrepAction =
+  /** 個別指導: 弟子1人に、稽古の方針の能力をつける */
+  | { kind: 'coach'; id: number }
+  /** 申し合い: 弟子2人に取らせる。格上と当たった方がよく伸びる。けがの危なさがある */
+  | { kind: 'spar'; a: number; b: number }
+  /** 出稽古: よその部屋へ。けがのない全員が少しずつ伸びる（部屋の口座から） */
+  | { kind: 'degeiko' }
+  /** 休ませる: 全員の疲れが抜ける */
+  | { kind: 'rest' }
+  /** 挨拶回り: タニマチ1人との関係が上がる（親方の貯金から） */
+  | { kind: 'visit'; patronId: number }
+  /** スカウト回り（部屋の口座から。1つの場所に1回） */
+  | { kind: 'scout'; trip: ScoutTripId }
+  /** いつも通り（特別なことはしない） */
+  | { kind: 'usual' };
+
+/** 週の行動の結果（画面に出す） */
+export interface WeekResult {
+  /** 何週目か（1 始まり） */
+  week: number;
+  action: PrepAction;
+  /** 動いた能力・疲れ（弟子ごと） */
+  gains: {
+    id: number;
+    oshi: number;
+    yotsu: number;
+    waza: number;
+    weight: number;
+    fatigue: number;
+  }[];
+  /** この週にけがをした弟子 */
+  injured: number[];
+  /** スカウトで会えた人数 */
+  met?: number;
+}
+
 export interface GameState {
   version: number;
   seed: number;
@@ -461,6 +498,8 @@ export interface GameState {
   gameOver: GameOverReason | null;
   /** 直近の場所の結果（画面に出す） */
   lastReport: BashoReport | null;
+  /** 場所前の4週間: 済んだ週の数と、その結果 */
+  prep: { week: number; log: WeekResult[] };
   /** 部屋の日誌（古い順） */
   journal: JournalEntry[];
   /** ライバルの部屋（いなければ null） */

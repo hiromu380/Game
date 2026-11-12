@@ -31,7 +31,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 14) s = v14to15(s);
   if (s.version === 15) s = v15to16(s);
   if (s.version === 16) s = v16to17(s);
+  if (s.version === 17) s = v17to18(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 17 → 18: 場所前の4週間（まだ何もしていない）
+ */
+function v17to18(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.prep = { week: 0, log: [] };
+  s.version = 18;
+  return s as unknown as Raw;
 }
 
 /**
