@@ -42,6 +42,7 @@ import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
 import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
+import { setLiveScore } from './state/liveScore';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
@@ -122,8 +123,6 @@ export function App({ start, onTitle }: Props) {
   /** 狭い画面で表示中のタブ */
   const [tab, setTab] = useState<'shop' | 'inventory'>('shop');
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
-  /** 再生中の出荷量の途中経過 */
-  const [liveScore, setLiveScore] = useState<string | null>(null);
   /** デバッグ表示の開閉 */
   const [debugOpen, setDebugOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -271,6 +270,9 @@ export function App({ start, onTitle }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // 画面を離れるときに、出荷量の途中経過を消す（次に開いたときに前の値が残らないように）
+  useEffect(() => () => setLiveScore(null), []);
 
   // 盤面に渡す表示状態（選択中のマス・配置しようとしているパーツ）
   const boardView = useMemo<BoardViewState>(
@@ -531,7 +533,7 @@ export function App({ start, onTitle }: Props) {
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
   const runInfo = (
     <>
-      <Hud run={run} liveScore={liveScore} />
+      <Hud run={run} />
       {tutorialOn ? (
         <TutorialGuide
           tutorial={tutorial}

@@ -8,7 +8,7 @@
  * パーティクルは使い回す（particlePool.ts）。
  */
 import type { FloorTileId, PartId, Score } from '@chain-factory/sim';
-import { Container, Graphics, Sprite, Text, type Texture } from 'pixi.js';
+import { Container, Graphics, GraphicsContext, Sprite, Text, type Texture } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
 import { FX_COLORS, hex } from '../../assets/palette';
 import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
@@ -64,6 +64,10 @@ export class EffectsLayer {
   private cutInShownDigits = 0;
   private chainCount = 0;
   private readonly counter: Text;
+  /** パーツの発光の形（白い円。色は tint で付ける）。発動のたびに作らず、共有して使い回す */
+  private readonly glowShape = new GraphicsContext().circle(0, 0, CELL_SIZE * 0.55).fill(0xffffff);
+  private readonly glowFree: Graphics[] = [];
+  private readonly glowsInUse = new Set<Graphics>();
 
   constructor(
     private readonly tweens: TweenManager,
@@ -103,6 +107,7 @@ export class EffectsLayer {
     this.thin = false;
     this.counter.visible = false;
     this.particles.releaseAll();
+    for (const glow of [...this.glowsInUse]) this.releaseGlow(glow);
     this.boardLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.screenLayer.children
       .filter((c) => c !== this.counter)
@@ -118,6 +123,18 @@ export class EffectsLayer {
   restoreChain(count: number): void {
     this.chainCount = count;
     this.updateCounter();
+  }
+
+  /** 揺れている最中か（描く側が、描画を続けるかどうかを決めるのに使う） */
+  get isShaking(): boolean {
+    return this.shakePower > 0;
+  }
+
+  /** 使い回している表示と共有している形を捨てる（盤面の表示を片付けるとき） */
+  destroy(): void {
+    for (const glow of this.glowFree) glow.destroy();
+    this.glowFree.length = 0;
+    this.glowShape.destroy();
   }
 
   /** 細かい演出を間引くか（描く側が tick の長さから決める） */
@@ -400,9 +417,12 @@ export class EffectsLayer {
   /** パーツをテーマ色で光らせ、弾ませる */
   private flashPart(x: number, y: number, partId: PartId, durationMs: number): void {
     const { px, py } = cellCenter(x, y);
-    const glow = new Graphics()
-      .circle(0, 0, CELL_SIZE * 0.55)
-      .fill({ color: PART_ASSETS[partId].color, alpha: this.settings.reduceFlashes ? 0.25 : 0.55 });
+    const baseAlpha = this.settings.reduceFlashes ? 0.25 : 0.55;
+    const glow = this.glowFree.pop() ?? new Graphics(this.glowShape);
+    this.glowsInUse.add(glow);
+    glow.tint = PART_ASSETS[partId].color;
+    glow.alpha = baseAlpha;
+    glow.scale.set(0.6);
     glow.position.set(px, py);
     this.boardLayer.addChild(glow);
 
@@ -410,15 +430,25 @@ export class EffectsLayer {
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
-        glow.alpha = 1 - t;
-        glow.scale.set(0.6 + 0.6 * t);
-        part?.scale.set(1 + 0.25 * (1 - t));
+        // 盤面が描き直されてパーツの表示が捨てられていたら触らない
+        const alive = part && !part.destroyed;
+        if (this.glowsInUse.has(glow)) {
+          glow.alpha = baseAlpha * (1 - t);
+          glow.scale.set(0.6 + 0.6 * t);
+        }
+        if (alive) part.scale.set(1 + 0.25 * (1 - t));
       },
       onComplete: () => {
-        glow.destroy();
-        part?.scale.set(1);
+        this.releaseGlow(glow);
+        if (part && !part.destroyed) part.scale.set(1);
       },
     });
+  }
+
+  private releaseGlow(glow: Graphics): void {
+    if (!this.glowsInUse.delete(glow)) return;
+    glow.removeFromParent();
+    this.glowFree.push(glow);
   }
 
   /** 火花（小さな粒が放射状に飛び散る） */

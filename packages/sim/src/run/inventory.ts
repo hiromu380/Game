@@ -10,8 +10,18 @@ export function addInventory(
   delta: number,
 ): RunState['inventory'] {
   const count = (inventory[partId] ?? 0) + delta;
-  const next = { ...inventory };
-  if (count > 0) next[partId] = count;
-  else delete next[partId];
+  // 並び順（キーの順）は元のまま、partId だけを書き換える。
+  // 0 個になったキーは最初から入れない（delete を使うとオブジェクトが遅い形になるため）
+  const next: RunState['inventory'] = {};
+  let found = false;
+  for (const key of Object.keys(inventory) as PartId[]) {
+    if (key === partId) {
+      found = true;
+      if (count > 0) next[key] = count;
+    } else {
+      next[key] = inventory[key];
+    }
+  }
+  if (!found && count > 0) next[partId] = count;
   return next;
 }

@@ -15,8 +15,44 @@ import type { BonusFloorState, RunState } from './types';
 const dayOf = (state: RunState, shiftIndex: number) =>
   Math.floor(shiftIndex / state.config.shiftsPerDay);
 
+/**
+ * 直前に求めた床（RunConfig ごと）。床は「ラン設定・シフト・今日の出来事・ボーナス床」だけで決まり、
+ * 配置や購入では変わらないので、同じ条件の間は作り直さない
+ * （置けるかどうかの判定・試運転・ボットの評価のたびに配列を何度もコピーしないため）。
+ * 返した床は書き換えないこと（変えるときは setFloorCell で新しい床を作る）
+ */
+const floorCache = new WeakMap<
+  RunState['config'],
+  {
+    shiftIndex: number;
+    dayEvent: RunState['dayEvent'];
+    bonusFloor: RunState['bonusFloor'];
+    floor: FloorLayer;
+  }
+>();
+
 /** そのシフトの床 */
 export function getCurrentFloor(state: RunState, shiftIndex = state.shiftIndex): FloorLayer {
+  const cached = floorCache.get(state.config);
+  if (
+    cached &&
+    cached.shiftIndex === shiftIndex &&
+    cached.dayEvent === state.dayEvent &&
+    cached.bonusFloor === state.bonusFloor
+  ) {
+    return cached.floor;
+  }
+  const floor = buildCurrentFloor(state, shiftIndex);
+  floorCache.set(state.config, {
+    shiftIndex,
+    dayEvent: state.dayEvent,
+    bonusFloor: state.bonusFloor,
+    floor,
+  });
+  return floor;
+}
+
+function buildCurrentFloor(state: RunState, shiftIndex: number): FloorLayer {
   let floor = getShiftFloor(state.config, shiftIndex);
   const event = state.dayEvent;
   if (event?.floorChanges && event.day === dayOf(state, shiftIndex)) {

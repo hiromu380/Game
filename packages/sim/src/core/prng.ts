@@ -12,22 +12,33 @@ export interface Prng {
   nextInt(max: number): number;
 }
 
-export function createPrng(seed: number): Prng {
-  let state = seed >>> 0;
+/**
+ * mulberry32 本体。シミュレーションのたびに作られるので、関数を毎回作らないようクラスにしている
+ * （計算は 32bit 整数演算だけ。出す列は変えない）
+ */
+class Mulberry32 implements Prng {
+  private state: number;
 
-  const nextUint32 = (): number => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
+  constructor(seed: number) {
+    this.state = seed >>> 0;
+  }
+
+  nextUint32(): number {
+    this.state = (this.state + 0x6d2b79f5) >>> 0;
+    let t = this.state;
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return (t ^ (t >>> 14)) >>> 0;
-  };
+  }
 
-  return {
-    nextUint32,
-    // 剰余による偏りは max が小さいため無視できる（決定論性には影響しない）
-    nextInt: (max) => nextUint32() % max,
-  };
+  // 剰余による偏りは max が小さいため無視できる（決定論性には影響しない）
+  nextInt(max: number): number {
+    return this.nextUint32() % max;
+  }
+}
+
+export function createPrng(seed: number): Prng {
+  return new Mulberry32(seed);
 }
 
 /**

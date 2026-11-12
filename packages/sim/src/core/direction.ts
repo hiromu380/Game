@@ -15,6 +15,10 @@ const DIR8_DELTAS: readonly (readonly [number, number])[] = [
   [-1, -1], // 7: 左上
 ];
 
+/** 8方向の移動量を x・y に分けたもの（信号1本ごとに引くので、配列を作らずに読めるようにする） */
+export const DIR8_DX: readonly number[] = DIR8_DELTAS.map((d) => d[0]);
+export const DIR8_DY: readonly number[] = DIR8_DELTAS.map((d) => d[1]);
+
 export const ALL_DIR8: readonly Dir8[] = [0, 1, 2, 3, 4, 5, 6, 7];
 export const ALL_DIR4: readonly Dir4[] = [0, 1, 2, 3];
 

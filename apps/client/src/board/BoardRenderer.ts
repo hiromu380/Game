@@ -69,8 +69,9 @@ import {
   createFloor,
   createFloorTile,
   createPartView,
-  createSignalView,
   PART_DISPLAY_SIZE,
+  SignalView,
+  SignalViewPool,
 } from './views';
 
 /** 盤面の表示状態（React 側から渡される） */
@@ -170,8 +171,27 @@ export class BoardRenderer {
 
   /** マス index → パーツの表示オブジェクト（発光演出で使う） */
   private partViews = new Map<number, Container>();
+  /** マス index → いま描いてあるパーツの中身（種類・向き・バッジ）。変わったマスだけ作り直す */
+  private partKeys = new Map<number, string>();
+  /** いま描いてある床タイル・使用不可・予告の中身（変わったときだけ作り直す） */
+  private floorKey = '';
   /** 信号 id → 表示オブジェクト */
-  private signalViews = new Map<number, Container>();
+  private signalViews = new Map<number, SignalView>();
+  /** 信号の表示の使い回し */
+  private readonly signals: SignalViewPool;
+  /** 選択枠・ホバー枠（1つの Graphics に描き直す） */
+  private readonly frames = new Graphics();
+  /** 配置の見本（同じパーツ・向きの間は使い回す） */
+  private ghost: { key: string; view: Container } | null = null;
+  private readonly tooltipBg = new Graphics();
+  private readonly tooltipLabel = new Text({
+    text: '',
+    style: { fill: BOARD_THEME.tooltipText, fontSize: 14, fontWeight: 'bold' },
+  });
+  /** いま出しているラベルの中身（同じなら描き直さない） */
+  private tooltipKey = '';
+  /** 次のフレームで描画が必要か（何も動いていないときは描画を止めて、CPU・GPU・電池を使わない） */
+  private needsRender = true;
 
   private state: BoardViewState | null = null;
   private hovered: { x: number; y: number } | null = null;
@@ -204,6 +224,12 @@ export class BoardRenderer {
     this.boardTextures = boardTextures;
     this.options = options;
     this.status = new StatusOverlay(options.getBreakLabel);
+    this.signals = new SignalViewPool((value) => options.formatCompact(value));
+    this.tooltipLabel.anchor.set(0.5);
+    this.tooltipBg.visible = false;
+    this.tooltipLabel.visible = false;
+    this.overlayLayer.addChild(this.frames);
+    this.tooltipLayer.addChild(this.tooltipBg, this.tooltipLabel);
     this.effects = new EffectsLayer(
       this.tweens,
       textures.junkbot,
@@ -235,6 +261,9 @@ export class BoardRenderer {
     // マウス・タッチ操作
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
+    // 入力は盤面全体（stage）で受けてマスに変換するので、中の表示オブジェクトは当たり判定の対象から外す
+    // （マウスを動かすたびに全部のパーツ・演出をたどらずに済む）
+    app.stage.interactiveChildren = false;
     // 長押しの判定: 押してから一定時間離さなければ長押し。そのときは直後のタップを無視する
     let pressTimer: ReturnType<typeof setTimeout> | null = null;
     /** 長押し・ドラッグをしたら、そのあとのタップ（クリック）を無視する */
@@ -301,7 +330,24 @@ export class BoardRenderer {
     app.stage.on('pointerleave', cancelPress);
     app.stage.on('pointerleave', () => this.setHovered(null));
 
+    // 描画は必要なときだけ自分で行う（PixiJS の「毎フレーム必ず描く」処理は外す）
+    app.ticker.remove(app.render, app);
     app.ticker.add((ticker) => this.update(ticker.deltaMS));
+    // 描画先が作り直されたら（GPU の切り替えなど）描き直す
+    app.canvas.addEventListener('webglcontextrestored', () => this.requestRender());
+  }
+
+  /** 次のフレームで描く（止めていた描画のループを起こす） */
+  private requestRender(): void {
+    this.needsRender = true;
+    if (!this.app.ticker.started) this.app.ticker.start();
+  }
+
+  /** 再生・演出・揺れのどれかが動いているか（動いている間は毎フレーム描く） */
+  private get isAnimating(): boolean {
+    return (
+      this.timeline !== null || !this.tweens.isIdle || this.freezeMs > 0 || this.effects.isShaking
+    );
   }
 
   /** PixiJS の初期化と画像の読み込みは非同期のため、生成はこの関数で行う */
@@ -326,6 +372,10 @@ export class BoardRenderer {
 
   destroy(): void {
     this.app.destroy(true, { children: true });
+    // 使い回し用に取っておいた表示と、共有している形を捨てる
+    this.signals.destroy();
+    this.status.destroy();
+    this.effects.destroy();
   }
 
   private toCell(px: number, py: number) {
@@ -358,6 +408,27 @@ export class BoardRenderer {
       );
     }
 
+    this.drawFloorTiles(state);
+    this.drawParts(state, sizeChanged);
+    this.drawOverlay();
+  }
+
+  /** 床タイル・使用不可マス・夜の予告を描く（中身が前と同じなら何もしない） */
+  private drawFloorTiles(state: BoardViewState): void {
+    const labels: string[] = [];
+    let key = `${state.board.width}x${state.board.height}|${state.upcomingBlocked.join(',')}|`;
+    for (let cell = 0; cell < state.floor.length; cell++) {
+      const floorCell = state.floor[cell];
+      if (!floorCell) continue;
+      const label = isBlockedCell(state.floor, cell)
+        ? ''
+        : this.options.getFloorShort(floorCell.tile, state.rules.floorParams);
+      labels[cell] = label;
+      key += `${cell}:${floorCell.tile}:${floorCell.source}:${label};`;
+    }
+    if (key === this.floorKey) return;
+    this.floorKey = key;
+
     this.blockLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     // 床タイル（盤面の下層。パーツより下に、控えめに描く）
     for (let cell = 0; cell < state.floor.length; cell++) {
@@ -368,13 +439,7 @@ export class BoardRenderer {
       this.blockLayer.addChild(
         isBlockedCell(state.floor, cell)
           ? createBlockedCell(x, y, false, this.boardTextures)
-          : createFloorTile(
-              x,
-              y,
-              floorCell,
-              this.options.getFloorShort(floorCell.tile, state.rules.floorParams),
-              this.boardTextures,
-            ),
+          : createFloorTile(x, y, floorCell, labels[cell] ?? '', this.boardTextures),
       );
     }
     for (const cell of state.upcomingBlocked) {
@@ -387,22 +452,46 @@ export class BoardRenderer {
         ),
       );
     }
+  }
 
-    this.partLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    this.partViews.clear();
+  /**
+   * パーツを描く。種類・向き・バッジが前と変わったマスだけ作り直す
+   * （選択やホバーが変わるたびに、盤面全部を作り直さない）
+   */
+  private drawParts(state: BoardViewState, rebuildAll: boolean): void {
     const { board } = state;
+    if (rebuildAll) {
+      this.partLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+      this.partViews.clear();
+      this.partKeys.clear();
+    }
+    let changed = false;
     for (let y = 0; y < board.height; y++) {
       for (let x = 0; x < board.width; x++) {
+        const index = y * board.width + x;
         const part = getPart(board, x, y);
-        if (!part) continue;
-        const view = createPartView(part, this.textures, this.badgeOf(part, x, y));
+        const badge = part ? this.badgeOf(part, x, y) : null;
+        const key = part
+          ? `${part.id}:${part.dir}:${badge ? `${badge.kind}${badge.value}` : ''}`
+          : undefined;
+        if (key === this.partKeys.get(index)) continue;
+        changed = true;
+        this.partViews.get(index)?.destroy({ children: true });
+        this.partViews.delete(index);
+        this.partKeys.delete(index);
+        if (!part || key === undefined) continue;
+        const view = createPartView(part, this.textures, badge);
         const { px, py } = cellCenter(x, y);
         view.position.set(px, py);
-        this.partLayer.addChild(view);
-        this.partViews.set(y * board.width + x, view);
+        this.partViews.set(index, view);
+        this.partKeys.set(index, key);
       }
     }
-    this.drawOverlay();
+    if (!changed) return;
+    // 重なりの順（マス番号の昇順）を保つ
+    this.partLayer.removeChildren();
+    const indices = [...this.partViews.keys()].sort((a, b) => a - b);
+    for (const index of indices) this.partLayer.addChild(this.partViews.get(index)!);
   }
 
   /** 効果量バッジ（計算は sim の getPartBadge と、ランが持つルールに任せる） */
@@ -427,69 +516,78 @@ export class BoardRenderer {
     this.drawOverlay();
   }
 
-  /** 選択枠・ホバー枠・配置プレビュー・名前ラベルを描く */
+  /** 選択枠・ホバー枠・配置プレビュー・名前ラベルを描く（表示オブジェクトは作り直さず、描き直す） */
   private drawOverlay(): void {
-    this.overlayLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    this.tooltipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
-    if (!this.state) return;
-    const { board, highlight, placing, guideCell } = this.state;
+    this.requestRender();
+    const frames = this.frames.clear();
+    let ghostShown = false;
+    let tooltip: { x: number; y: number; text: string } | null = null;
+    const state = this.state;
 
-    if (guideCell && !this.timeline) {
-      this.overlayLayer.addChild(cellFrame(guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5));
-    }
-
-    if (highlight)
-      this.overlayLayer.addChild(cellFrame(highlight.x, highlight.y, BOARD_THEME.selected, 4));
-    if (this.cursor && !this.timeline) {
-      this.overlayLayer.addChild(
-        cellFrame(this.cursor.x, this.cursor.y, BOARD_THEME.hazardYellow, 5),
-      );
-    }
-
-    // ドラッグ中: 動かす先の枠（空きマスなら緑、ふさがっていれば赤）と、指についてくるパーツ
-    const dragging = this.drag?.pointer ? this.drag : null;
-    if (dragging && !this.timeline) {
-      const moving = getPart(board, dragging.from.x, dragging.from.y);
-      const target = this.hovered;
-      if (target && (target.x !== dragging.from.x || target.y !== dragging.from.y)) {
-        const free = !getPart(board, target.x, target.y);
-        this.overlayLayer.addChild(
-          cellFrame(target.x, target.y, free ? BOARD_THEME.ghostOk : BOARD_THEME.blocked, 3),
-        );
+    if (state) {
+      const { board, highlight, placing, guideCell } = state;
+      if (guideCell && !this.timeline) {
+        cellFrame(frames, guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5);
       }
-      // 動かしているパーツの元のマスに枠（指についてくる絵は画面側で出す: 盤面の外まで動かせるように）
-      if (moving) {
-        this.overlayLayer.addChild(
-          cellFrame(dragging.from.x, dragging.from.y, BOARD_THEME.selected, 2),
-        );
+      if (highlight) cellFrame(frames, highlight.x, highlight.y, BOARD_THEME.selected, 4);
+      if (this.cursor && !this.timeline) {
+        cellFrame(frames, this.cursor.x, this.cursor.y, BOARD_THEME.hazardYellow, 5);
       }
-      return;
+
+      // ドラッグ中: 動かす先の枠（空きマスなら緑、ふさがっていれば赤）と、指についてくるパーツ
+      const dragging = this.drag?.pointer ? this.drag : null;
+      // 再生中はホバー表示を出さない（演出を見やすくするため）
+      const hovered = this.timeline ? null : this.hovered;
+      if (dragging && !this.timeline) {
+        const moving = getPart(board, dragging.from.x, dragging.from.y);
+        const target = this.hovered;
+        if (target && (target.x !== dragging.from.x || target.y !== dragging.from.y)) {
+          const free = !getPart(board, target.x, target.y);
+          cellFrame(
+            frames,
+            target.x,
+            target.y,
+            free ? BOARD_THEME.ghostOk : BOARD_THEME.blocked,
+            3,
+          );
+        }
+        // 動かしているパーツの元のマスに枠（指についてくる絵は画面側で出す: 盤面の外まで動かせるように）
+        if (moving) cellFrame(frames, dragging.from.x, dragging.from.y, BOARD_THEME.selected, 2);
+      } else if (hovered) {
+        const part = getPart(board, hovered.x, hovered.y);
+        if (placing && !part) {
+          // 配置プレビュー: 半透明のパーツと緑の枠
+          cellFrame(frames, hovered.x, hovered.y, BOARD_THEME.ghostOk, 3);
+          const ghost = this.ghostFor(placing.partId, placing.dir);
+          const { px, py } = cellCenter(hovered.x, hovered.y);
+          ghost.position.set(px, py);
+          ghostShown = true;
+          tooltip = { ...hovered, text: this.withFloor(hovered, placing.partId) };
+        } else if (part) {
+          cellFrame(frames, hovered.x, hovered.y, 0xffffff, 2);
+          tooltip = { ...hovered, text: this.withFloor(hovered, part.id) };
+        } else {
+          // 空きマスの床: 効果の説明
+          const text = this.withFloor(hovered, null);
+          if (text) tooltip = { ...hovered, text };
+        }
+      }
     }
 
-    // 再生中はホバー表示を出さない（演出を見やすくするため）
-    const hovered = this.timeline ? null : this.hovered;
-    if (!hovered) return;
-    const part = getPart(board, hovered.x, hovered.y);
+    if (this.ghost) this.ghost.view.visible = ghostShown;
+    this.showTooltip(tooltip);
+  }
 
-    if (placing && !part) {
-      // 配置プレビュー: 半透明のパーツと緑の枠
-      const ghostPart: Part = { id: placing.partId, dir: placing.dir };
-      const ghost = createPartView(ghostPart, this.textures, null);
-      const { px, py } = cellCenter(hovered.x, hovered.y);
-      ghost.position.set(px, py);
-      ghost.alpha = 0.55;
-      this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, BOARD_THEME.ghostOk, 3), ghost);
-      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, placing.partId));
-      return;
+  /** 配置の見本（半透明のパーツ）。同じパーツ・向きなら前に作ったものを使う */
+  private ghostFor(partId: PartId, dir: Dir4): Container {
+    const key = `${partId}:${dir}`;
+    if (this.ghost?.key !== key) {
+      const view = createPartView({ id: partId, dir }, this.textures, null);
+      view.alpha = 0.55;
+      this.overlayLayer.addChild(view);
+      this.ghost = { key, view };
     }
-    if (part) {
-      this.overlayLayer.addChild(cellFrame(hovered.x, hovered.y, 0xffffff, 2));
-      this.showTooltip(hovered.x, hovered.y, this.withFloor(hovered, part.id));
-      return;
-    }
-    // 空きマスの床: 効果の説明
-    const text = this.withFloor(hovered, null);
-    if (text) this.showTooltip(hovered.x, hovered.y, text);
+    return this.ghost.view;
   }
 
   /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */
@@ -503,24 +601,26 @@ export class BoardRenderer {
     return lines.join('\n');
   }
 
-  /** マスの上にパーツ名のラベルを出す */
-  private showTooltip(x: number, y: number, text: string): void {
-    const label = new Text({
-      text,
-      style: { fill: BOARD_THEME.tooltipText, fontSize: 14, fontWeight: 'bold' },
-    });
-    label.anchor.set(0.5);
+  /** マスの上にパーツ名のラベルを出す（null で消す） */
+  private showTooltip(tooltip: { x: number; y: number; text: string } | null): void {
+    const bg = this.tooltipBg;
+    const label = this.tooltipLabel;
+    bg.visible = tooltip !== null;
+    label.visible = tooltip !== null;
+    if (!tooltip) return;
+    const { x, y, text } = tooltip;
+    const key = `${x},${y},${this.app.screen.width}:${text}`;
+    if (key === this.tooltipKey) return;
+    this.tooltipKey = key;
+    if (label.text !== text) label.text = text;
     const w = label.width + 16;
     const h = Math.max(24, label.height + 8);
     const { px, py } = cellCenter(x, y);
     // 最上段では下に出す
     const top = y === 0 ? py + CELL_SIZE / 2 + 4 : py - CELL_SIZE / 2 - h - 4;
     const left = Math.min(Math.max(px - w / 2, 2), this.app.screen.width - w - 2);
-    const bg = new Graphics()
-      .roundRect(left, top, w, h, 6)
-      .fill({ color: BOARD_THEME.tooltipBg, alpha: 0.9 });
+    bg.clear().roundRect(left, top, w, h, 6).fill({ color: BOARD_THEME.tooltipBg, alpha: 0.9 });
     label.position.set(left + w / 2, top + h / 2);
-    this.tooltipLayer.addChild(bg, label);
   }
 
   // ---------------------------------------------------------------------------
@@ -552,6 +652,7 @@ export class BoardRenderer {
     this.callbacks = callbacks;
     this.speed = speed;
     this.drawOverlay();
+    this.requestRender();
     if (speed === 'skip') this.skip();
     else if (peakFirst) this.fastForwardToPeak(choreography);
   }
@@ -599,12 +700,17 @@ export class BoardRenderer {
     this.callbacks = null;
     this.tweens.finishAll();
     this.effects.reset();
-    this.signalLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
+    for (const view of this.signalViews.values()) this.signals.release(view);
+    for (const child of [...this.signalLayer.children]) {
+      if (child instanceof SignalView) this.signals.release(child);
+    }
     this.signalViews.clear();
     this.status.resetPips();
+    this.requestRender();
   }
 
   private update(deltaMs: number): void {
+    const wasAnimating = this.isAnimating;
     // ピークで止めている間は、再生も演出も進めない（揺れだけ続ける）
     let scaled = deltaMs;
     if (this.freezeMs > 0) {
@@ -627,6 +733,14 @@ export class BoardRenderer {
 
     // 全 tick を再生し終え、演出も落ち着いたら終了を通知
     if (this.timeline?.isFinished && this.tweens.isIdle) this.finishPlayback();
+
+    // 動きがあったフレームと、盤面が変わった直後のフレームだけ描く。何もなければループごと止める
+    if (wasAnimating || this.needsRender || this.isAnimating) {
+      this.needsRender = false;
+      this.app.render();
+    } else {
+      this.app.ticker.stop();
+    }
   }
 
   private finishPlayback(): void {
@@ -707,7 +821,8 @@ export class BoardRenderer {
       switch (event.type) {
         case 'emit': {
           // 信号は発射元のマスに出現し、次の tick で移動を始める
-          const view = createSignalView(event.value, this.options.formatCompact);
+          const view = this.signals.acquire(event.value);
+          const generation = view.generation;
           const { px, py } = cellCenter(event.x, event.y);
           view.position.set(px, py);
           view.visible = false;
@@ -716,9 +831,13 @@ export class BoardRenderer {
           this.tweens.add({
             delay: event.tick === 0 ? 0 : moveMs,
             duration: fxMs * 0.4,
-            onStart: () => (view.visible = true),
+            onStart: () => {
+              if (view.generation === generation) view.visible = true;
+            },
             // ポンと出てくる
-            onUpdate: (t) => view.scale.set(0.4 + 0.6 * easeOutCubic(t)),
+            onUpdate: (t) => {
+              if (view.generation === generation) view.scale.set(0.4 + 0.6 * easeOutCubic(t));
+            },
           });
           break;
         }
@@ -732,14 +851,16 @@ export class BoardRenderer {
           const view = this.signalViews.get(event.signalId);
           this.signalViews.delete(event.signalId);
           if (view) {
+            const generation = view.generation;
             this.tweens.add({
               delay: moveMs,
               duration: fxMs * 0.5,
               onUpdate: (t) => {
+                if (view.generation !== generation) return;
                 view.alpha = 1 - t;
                 view.scale.set(1 - 0.5 * t);
               },
-              onComplete: () => view.destroy({ children: true }),
+              onComplete: () => this.releaseSignal(view, generation),
             });
           }
           break;
@@ -748,11 +869,12 @@ export class BoardRenderer {
           // 受けた信号はパーツに吸収される
           const view = this.signalViews.get(event.signalId);
           this.signalViews.delete(event.signalId);
+          const generation = view?.generation ?? 0;
           this.tweens.add({
             delay: moveMs,
             duration: 0,
             onComplete: () => {
-              view?.destroy({ children: true });
+              this.releaseSignal(view, generation);
               this.status.onActivate(event.x, event.y);
               if (!instant) this.effects.onActivate(event.x, event.y, event.partId, fxMs);
               if (event.partId === 'barrel') sound('explode');
@@ -785,10 +907,11 @@ export class BoardRenderer {
           // 合流炉に取り込まれた信号は、到着したところで消える
           const view = this.signalViews.get(event.signalId);
           this.signalViews.delete(event.signalId);
+          const generation = view?.generation ?? 0;
           this.tweens.add({
             delay: moveMs,
             duration: 0,
-            onComplete: () => view?.destroy({ children: true }),
+            onComplete: () => this.releaseSignal(view, generation),
           });
           break;
         }
@@ -808,15 +931,22 @@ export class BoardRenderer {
     }
   }
 
+  /** 使い終わった信号の表示を返す（すでに返して別の信号に使われていたら何もしない） */
+  private releaseSignal(view: SignalView | undefined, generation: number): void {
+    if (view && view.generation === generation) this.signals.release(view);
+  }
+
   private moveSignal(signalId: number, x: number, y: number, durationMs: number): void {
     const view = this.signalViews.get(signalId);
     if (!view) return;
     const fromX = view.x;
     const fromY = view.y;
+    const generation = view.generation;
     const { px, py } = cellCenter(x, y);
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
+        if (view.generation !== generation) return;
         const e = easeOutCubic(t);
         view.position.set(fromX + (px - fromX) * e, fromY + (py - fromY) * e);
       },
@@ -824,11 +954,9 @@ export class BoardRenderer {
   }
 }
 
-/** マスを囲む枠 */
-function cellFrame(x: number, y: number, color: number, width: number): Graphics {
+/** マスを囲む枠を g に描き足す */
+function cellFrame(g: Graphics, x: number, y: number, color: number, width: number): void {
   const { px, py } = cellCenter(x, y);
   const half = CELL_SIZE / 2 - 3;
-  return new Graphics()
-    .roundRect(px - half, py - half, half * 2, half * 2, 8)
-    .stroke({ width, color });
+  g.roundRect(px - half, py - half, half * 2, half * 2, 8).stroke({ width, color });
 }

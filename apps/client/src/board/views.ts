@@ -5,7 +5,7 @@
  * 倍率などの数値は sim パッケージの関数・ルールから受け取って表示する。
  */
 import type { Dir4, FloorCell, Part, PartBadge, Score } from '@chain-factory/sim';
-import { Container, Graphics, Sprite, Text, TilingSprite } from 'pixi.js';
+import { Container, Graphics, GraphicsContext, Sprite, Text, TilingSprite } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../assets/manifest';
 import { BOARD_PADDING, CELL_SIZE } from './layout';
 import type { BoardTextures, PartTextures } from './textures';
@@ -105,27 +105,87 @@ export function valueTier(value: Score): number {
   return Math.min(value.toString().length - 1, BOARD_THEME.signalTiers.length - 1);
 }
 
-/** 信号（値つきの光る玉） */
-export function createSignalView(value: Score, formatCompact: (value: Score) => string): Container {
-  const tier = valueTier(value);
-  const color = BOARD_THEME.signalTiers[tier]!;
-  const radius = 13 + tier * 2.5;
+/**
+ * 信号（値つきの光る玉）
+ * 大きな連鎖では1 tick に何十個も出入りするので、作っては捨てずに使い回す（SignalViewPool）
+ */
+export class SignalView extends Container {
+  /**
+   * 使い回すたびに増える番号。前の持ち主に向けたトゥイーンが、使い回した後の表示を触らないよう、
+   * トゥイーン側は作ったときの番号と比べてから動かす
+   */
+  generation = 0;
+  /** 貸し出し中か（二重に返さないため） */
+  inUse = false;
+  readonly valueText: Text;
 
-  const view = new Container();
-  view.addChild(
-    new Graphics().circle(0, 0, radius + 7).fill({ color, alpha: 0.3 }), // 外側の光
-    new Graphics()
-      .circle(0, 0, radius)
-      .fill(color)
-      .stroke({ width: 2, color: 0xffffff, alpha: 0.8 }),
-  );
-  const label = new Text({
-    text: formatCompact(value),
-    style: { fill: BOARD_THEME.signalText, fontSize: 12 + tier, fontWeight: '900' },
-  });
-  label.anchor.set(0.5);
-  view.addChild(label);
-  return view;
+  constructor(
+    readonly tier: number,
+    glow: GraphicsContext,
+    core: GraphicsContext,
+  ) {
+    super();
+    this.valueText = new Text({
+      text: '',
+      style: { fill: BOARD_THEME.signalText, fontSize: 12 + tier, fontWeight: '900' },
+    });
+    this.valueText.anchor.set(0.5);
+    this.addChild(new Graphics(glow), new Graphics(core), this.valueText);
+  }
+}
+
+/**
+ * 信号の表示の使い回し。玉の形（外側の光・本体）は段階ごとに1つだけ作って全部の信号で共有し、
+ * 表示オブジェクトは返してもらって次の信号に使う
+ */
+export class SignalViewPool {
+  private readonly shapes: { glow: GraphicsContext; core: GraphicsContext }[];
+  private readonly free: SignalView[][];
+
+  constructor(private readonly formatCompact: (value: Score) => string) {
+    this.shapes = BOARD_THEME.signalTiers.map((color, tier) => {
+      const radius = 13 + tier * 2.5;
+      return {
+        // 外側の光
+        glow: new GraphicsContext().circle(0, 0, radius + 7).fill({ color, alpha: 0.3 }),
+        core: new GraphicsContext()
+          .circle(0, 0, radius)
+          .fill(color)
+          .stroke({ width: 2, color: 0xffffff, alpha: 0.8 }),
+      };
+    });
+    this.free = this.shapes.map(() => []);
+  }
+
+  /** 値に合った見た目の信号を1つ取り出す（位置・表示は呼び出し側で決める） */
+  acquire(value: Score): SignalView {
+    const tier = valueTier(value);
+    const shape = this.shapes[tier]!;
+    const view = this.free[tier]!.pop() ?? new SignalView(tier, shape.glow, shape.core);
+    view.inUse = true;
+    view.valueText.text = this.formatCompact(value);
+    view.alpha = 1;
+    view.scale.set(1);
+    view.visible = true;
+    return view;
+  }
+
+  /** 使い終わった信号を返す（返した後は、古いトゥイーンから触られない） */
+  release(view: SignalView): void {
+    if (!view.inUse) return;
+    view.inUse = false;
+    view.generation++;
+    view.removeFromParent();
+    this.free[view.tier]!.push(view);
+  }
+
+  destroy(): void {
+    for (const list of this.free) for (const view of list) view.destroy({ children: true });
+    for (const shape of this.shapes) {
+      shape.glow.destroy();
+      shape.core.destroy();
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------

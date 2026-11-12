@@ -12,7 +12,7 @@ import {
   type RuleSet,
   type VanishReason,
 } from '@chain-factory/sim';
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, GraphicsContext, Text } from 'pixi.js';
 import { BOARD_THEME } from '../assets/manifest';
 import type { BreakSummary } from '../playback/breaks';
 import { CELL_SIZE, cellCenter } from './layout';
@@ -21,33 +21,75 @@ import { hex, VANISH_COLORS } from '../assets/palette';
 /** ピップを並べる最大数（これを超える上限は数字で表示）。向きの矢印と重ならない数にしている */
 const MAX_PIPS = 3;
 
+/** 1マス分のピップの表示（発動のたびに作り直さず、中身だけ書き換える） */
+interface PipView {
+  view: Container;
+  /** この表示を作ったときの上限（変わったら作り直す） */
+  limit: number | null;
+  /** ●○ の並び（上限が MAX_PIPS 以下のとき） */
+  dots: Graphics[];
+  /** 「2/5」の数字（上限が MAX_PIPS を超えるとき） */
+  text: Text | null;
+}
+
 export class StatusOverlay {
   readonly pipLayer = new Container();
   readonly breakLayer = new Container();
 
   private board: Board | null = null;
-  private rulesKey = '';
+  private rules: RuleSet | null = null;
+  /** rules を文字列にしたもの（参照が変わったときだけ、中身が同じかを比べるのに使う） */
+  private rulesKey: string | null = null;
   private limits: (number | null)[] = [];
   private remaining: (number | null)[] = [];
-  /** マス index → ピップの表示（部分的に描き直すため） */
-  private pipViews = new Map<number, Container>();
+  /** マス index → ピップの表示（部分的に書き換えるため） */
+  private pipViews = new Map<number, PipView>();
+  /** ピップの形（●=残り ○=使用済み）。全部のマスで共有する */
+  private readonly dotFilled = new GraphicsContext()
+    .circle(0, 0, 3.3)
+    .fill(BOARD_THEME.pipFilled)
+    .stroke({ width: 1.5, color: 0x000000, alpha: 0.6 });
+  private readonly dotEmpty = new GraphicsContext()
+    .circle(0, 0, 3.3)
+    .stroke({ width: 1.5, color: BOARD_THEME.pipEmpty });
 
   constructor(private readonly getBreakLabel: (reason: VanishReason) => string) {}
 
   /** 盤面が変わったら上限を計算し直してピップを描く。盤面自体が変わったら途切れ表示を消す */
   setBoard(board: Board, rules: RuleSet): void {
-    // 盤面もルールも変わっていなければ何もしない（再生後の残り回数表示を保つため）
-    const rulesKey = JSON.stringify(rules);
-    if (board === this.board && rulesKey === this.rulesKey) return;
-    if (board !== this.board) this.clearBreaks();
+    // 盤面もルールも変わっていなければ何もしない（再生後の残り回数表示を保つため）。
+    // ルールは参照が同じならそのまま、違うときだけ中身を比べる
+    if (board === this.board) {
+      if (rules === this.rules) return;
+      this.rulesKey ??= JSON.stringify(this.rules);
+      const key = JSON.stringify(rules);
+      if (key === this.rulesKey) {
+        this.rules = rules;
+        return;
+      }
+      this.rulesKey = key;
+    } else {
+      this.clearBreaks();
+      this.rulesKey = null;
+    }
     this.board = board;
-    this.rulesKey = rulesKey;
+    this.rules = rules;
     this.limits = computeActivationLimits(board, rules);
-    this.resetPips();
+    this.rebuildPips();
   }
 
-  /** 残り発動回数を満タンに戻す（再生開始時・再生終了後） */
+  /** 残り発動回数を満タンに戻す（再生開始時・再生終了後）。減っていたマスだけ書き換える */
   resetPips(): void {
+    for (let index = 0; index < this.limits.length; index++) {
+      const limit = this.limits[index] ?? null;
+      if (this.remaining[index] === limit) continue;
+      this.remaining[index] = limit;
+      this.drawPips(index);
+    }
+  }
+
+  /** 盤面・上限が変わったときに、ピップをすべて作り直す */
+  private rebuildPips(): void {
     this.remaining = [...this.limits];
     this.pipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.pipViews.clear();
@@ -95,18 +137,59 @@ export class StatusOverlay {
     return y * (this.board?.width ?? 0) + x;
   }
 
+  /** index のマスのピップを、今の残り回数に合わせる（表示があれば中身だけ書き換える） */
   private drawPips(index: number): void {
-    this.pipViews.get(index)?.destroy({ children: true });
-    this.pipViews.delete(index);
-    if (!this.board || !this.board.cells[index]) return;
-
+    if (!this.board) return;
+    const part = this.board.cells[index];
+    if (!part || part.id === 'switch') return;
     const limit = this.limits[index];
     if (limit === 0 || limit === undefined) return; // 信号に反応しないパーツ（潤滑油タンクなど）
-    const view = createPips(limit, this.remaining[index] ?? null);
-    const { px, py } = cellCenter(index % this.board.width, Math.floor(index / this.board.width));
-    view.position.set(px + CELL_SIZE * 0.42, py - CELL_SIZE * 0.42);
-    this.pipLayer.addChild(view);
-    this.pipViews.set(index, view);
+    const remaining = this.remaining[index] ?? null;
+
+    let pips = this.pipViews.get(index);
+    if (!pips) {
+      pips = this.createPips(limit);
+      const { px, py } = cellCenter(index % this.board.width, Math.floor(index / this.board.width));
+      pips.view.position.set(px + CELL_SIZE * 0.42, py - CELL_SIZE * 0.42);
+      this.pipLayer.addChild(pips.view);
+      this.pipViews.set(index, pips);
+    }
+    if (limit === null) return; // ∞ は変わらない
+    if (pips.text) {
+      const text = `${remaining ?? limit}/${limit}`;
+      if (pips.text.text !== text) pips.text.text = text;
+      return;
+    }
+    pips.dots.forEach((dot, i) => {
+      const context = i < (remaining ?? limit) ? this.dotFilled : this.dotEmpty;
+      if (dot.context !== context) dot.context = context;
+    });
+  }
+
+  /** 残り発動回数のピップ（右上の角から下へ縦に並べる）。中身は drawPips で入れる */
+  private createPips(limit: number | null): PipView {
+    const view = new Container();
+    const pips: PipView = { view, limit, dots: [], text: null };
+    if (limit === null) {
+      view.addChild(pipText('∞'));
+    } else if (limit > MAX_PIPS) {
+      pips.text = pipText('');
+      view.addChild(pips.text);
+    } else {
+      for (let i = 0; i < limit; i++) {
+        const dot = new Graphics(this.dotFilled);
+        dot.position.set(-4, 4 + i * 8);
+        pips.dots.push(dot);
+        view.addChild(dot);
+      }
+    }
+    return pips;
+  }
+
+  /** 共有している形を捨てる（盤面の表示を片付けるとき） */
+  destroy(): void {
+    this.dotFilled.destroy();
+    this.dotEmpty.destroy();
   }
 }
 
@@ -118,27 +201,6 @@ const BREAK_COLORS: Record<VanishReason, number> = {
   blocked: hex(VANISH_COLORS.blocked),
   inert: hex(VANISH_COLORS.inert),
 };
-
-/** 残り発動回数のピップ（右上の角から下へ縦に並べる） */
-function createPips(limit: number | null, remaining: number | null): Container {
-  const view = new Container();
-  if (limit === null) {
-    view.addChild(pipText('∞'));
-    return view;
-  }
-  if (limit > MAX_PIPS) {
-    view.addChild(pipText(`${remaining ?? limit}/${limit}`));
-    return view;
-  }
-  for (let i = 0; i < limit; i++) {
-    const filled = i < (remaining ?? limit);
-    const dot = new Graphics().circle(-4, 4 + i * 8, 3.3);
-    if (filled) dot.fill(BOARD_THEME.pipFilled).stroke({ width: 1.5, color: 0x000000, alpha: 0.6 });
-    else dot.stroke({ width: 1.5, color: BOARD_THEME.pipEmpty });
-    view.addChild(dot);
-  }
-  return view;
-}
 
 function pipText(text: string): Text {
   const label = new Text({

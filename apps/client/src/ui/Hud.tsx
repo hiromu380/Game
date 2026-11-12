@@ -3,17 +3,18 @@
  */
 import { getCurrentShift, getDayAndPeriod, getShiftCount, type RunState } from '@chain-factory/sim';
 import { useI18n } from '../i18n';
+import { useLiveScore } from '../state/liveScore';
 import { RocketProgress } from './RocketProgress';
 import { useCountUp } from './useCountUp';
 
 interface Props {
   run: RunState;
-  /** 表示する出荷量（再生中は途中経過、それ以外は null で非表示） */
-  liveScore: string | null;
 }
 
-export function Hud({ run, liveScore: target }: Props) {
+export function Hud({ run }: Props) {
   const { t, formatScore } = useI18n();
+  // 表示する出荷量（再生中は途中経過、それ以外は null で非表示。state/liveScore.ts）
+  const target = useLiveScore();
   // 出荷のたびに、前の値から勢いよく増えてピタッと止まる
   const liveScore = useCountUp(target);
   const quota = getCurrentShift(run).quota;
