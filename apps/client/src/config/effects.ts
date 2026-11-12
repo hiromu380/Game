@@ -52,6 +52,17 @@ export const EFFECTS_CONFIG = {
     maxCells: 2,
   },
 
+  /** 再生後に残す「信号が通った道すじ」（線の太さは通った本数で増える） */
+  trace: {
+    alpha: 0.5,
+    baseWidth: 3,
+    /** 1本増えるごとの太さと、太さの上限 */
+    widthPerSignal: 1.2,
+    maxWidth: 9,
+    /** 向きを示す矢じりの大きさ（px） */
+    arrowSize: 7,
+  },
+
   /** 信号の尾（動いた跡に残る小さな点）。tick が短いとき・演出の強さ「弱」では出さない */
   trail: {
     /** 1マス動くあいだに残す点の数 */

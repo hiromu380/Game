@@ -52,6 +52,8 @@ import {
   pixelToCell,
 } from './layout';
 import { summarizeBreaks } from '../playback/breaks';
+import { summarizeTrace } from '../playback/trace';
+import { bestPlacementCells, type PlacementHints } from './hints';
 import type { SoundKey } from '../audio/manifest';
 import { EFFECTS_CONFIG } from '../config/effects';
 import { INPUT_CONFIG } from '../config/input';
@@ -192,6 +194,12 @@ export class BoardRenderer {
     text: '',
     style: { fill: BOARD_THEME.tooltipText, fontSize: 14, fontWeight: 'bold' },
   });
+  /** 配置の手がかり（盤面・選んだパーツが同じ間は求め直さない） */
+  private hintCache: {
+    state: BoardViewState;
+    partId: PartId;
+    hints: PlacementHints | null;
+  } | null = null;
   /** いま出しているラベルの中身（同じなら描き直さない） */
   private tooltipKey = '';
   /** 次のフレームで描画が必要か（何も動いていないときは描画を止めて、CPU・GPU・電池を使わない） */
@@ -253,6 +261,7 @@ export class BoardRenderer {
       this.floorLayer,
       this.blockLayer,
       this.partLayer,
+      this.status.traceLayer,
       this.status.pipLayer,
       this.overlayLayer,
       this.trailLayer,
@@ -572,6 +581,17 @@ export class BoardRenderer {
 
     if (state) {
       const { board, highlight, placing, guideCell } = state;
+      // 配置の手がかり: 選んだパーツの効果がいちばん大きい空きマスの四隅に印を付ける
+      // （初回ガイドで置くマスを案内している間と、再生中は出さない）
+      if (placing && !guideCell && !this.timeline) {
+        const hints = this.hintsFor(state, placing.partId);
+        if (hints) {
+          for (const index of hints.cells) {
+            cornerMarks(frames, index % board.width, Math.floor(index / board.width));
+          }
+          frames.stroke({ width: 3, color: BOARD_THEME.ghostOk, alpha: 0.8, cap: 'round' });
+        }
+      }
       if (guideCell && !this.timeline) {
         cellFrame(frames, guideCell.x, guideCell.y, BOARD_THEME.ghostOk, 5);
       }
@@ -604,7 +624,18 @@ export class BoardRenderer {
         if (placing && !part) {
           // 配置プレビュー: 半透明のパーツと緑の枠
           cellFrame(frames, hovered.x, hovered.y, BOARD_THEME.ghostOk, 3);
-          const ghost = this.ghostFor(placing.partId, placing.dir);
+          // 見本には、そのマスに置いたときの効果量（×3・+4）も出す
+          const ghost = this.ghostFor(
+            placing.partId,
+            placing.dir,
+            getPartBadge(
+              { id: placing.partId, dir: placing.dir },
+              board,
+              hovered.x,
+              hovered.y,
+              state.rules,
+            ),
+          );
           const { px, py } = cellCenter(hovered.x, hovered.y);
           ghost.position.set(px, py);
           ghostShown = true;
@@ -625,15 +656,28 @@ export class BoardRenderer {
   }
 
   /** 配置の見本（半透明のパーツ）。同じパーツ・向きなら前に作ったものを使う */
-  private ghostFor(partId: PartId, dir: Dir4): Container {
-    const key = `${partId}:${dir}`;
+  private ghostFor(partId: PartId, dir: Dir4, badge: PartBadge | null): Container {
+    const key = `${partId}:${dir}:${badge ? `${badge.kind}${badge.value}` : ''}`;
     if (this.ghost?.key !== key) {
-      const view = createPartView({ id: partId, dir }, this.textures, null);
+      const old = this.ghost?.view;
+      if (old) {
+        this.overlayLayer.removeChild(old);
+        old.destroy({ children: true });
+      }
+      const view = createPartView({ id: partId, dir }, this.textures, badge);
       view.alpha = 0.55;
       this.overlayLayer.addChild(view);
       this.ghost = { key, view };
     }
     return this.ghost.view;
+  }
+
+  private hintsFor(state: BoardViewState, partId: PartId): PlacementHints | null {
+    const cache = this.hintCache;
+    if (cache && cache.state === state && cache.partId === partId) return cache.hints;
+    const hints = bestPlacementCells(state.board, state.floor, state.rules, partId);
+    this.hintCache = { state, partId, hints };
+    return hints;
   }
 
   /** ホバーの文言: パーツ名と、そのマスの床の説明（床がなければパーツ名だけ） */
@@ -796,6 +840,7 @@ export class BoardRenderer {
     this.callbacks = null;
     if (this.lastResult && this.state) {
       this.status.showBreaks(summarizeBreaks(this.lastResult.events, this.state.board));
+      this.status.showTrace(summarizeTrace(this.lastResult.events));
     }
     this.drawOverlay();
     callbacks?.onFinish();
@@ -1044,6 +1089,22 @@ export class BoardRenderer {
           if (dot) this.trails.release(dot);
         },
       });
+    }
+  }
+}
+
+/** マスの四隅のかぎ形の印を g の線に足す（色・太さは呼び出し側で stroke する） */
+function cornerMarks(g: Graphics, x: number, y: number): void {
+  const { px, py } = cellCenter(x, y);
+  const half = CELL_SIZE / 2 - 7;
+  const len = 10;
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      const cx = px + sx * half;
+      const cy = py + sy * half;
+      g.moveTo(cx - sx * len, cy)
+        .lineTo(cx, cy)
+        .lineTo(cx, cy - sy * len);
     }
   }
 }

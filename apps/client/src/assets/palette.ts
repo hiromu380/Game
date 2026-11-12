@@ -171,6 +171,8 @@ export const VANISH_COLORS = {
 /** 連鎖演出の光（ピーク・ノルマ超え・桁上がりだけ。範囲と明るさの上限は docs/art-style.md） */
 export const FX_COLORS = {
   flash: '#fff3c4',
+  /** 再生後に盤面へ残す「信号が通った道すじ」 */
+  trace: '#e3f2fd',
 } as const;
 
 /** '#rrggbb' → 0xRRGGBB（PixiJS 用） */

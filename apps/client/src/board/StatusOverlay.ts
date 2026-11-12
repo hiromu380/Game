@@ -15,8 +15,10 @@ import {
 import { Container, Graphics, GraphicsContext, Text } from 'pixi.js';
 import { BOARD_THEME } from '../assets/manifest';
 import type { BreakSummary } from '../playback/breaks';
+import type { TraceSegment } from '../playback/trace';
+import { EFFECTS_CONFIG } from '../config/effects';
 import { CELL_SIZE, cellCenter } from './layout';
-import { hex, VANISH_COLORS } from '../assets/palette';
+import { FX_COLORS, hex, VANISH_COLORS } from '../assets/palette';
 
 /** ピップを並べる最大数（これを超える上限は数字で表示）。向きの矢印と重ならない数にしている */
 const MAX_PIPS = 3;
@@ -35,6 +37,8 @@ interface PipView {
 export class StatusOverlay {
   readonly pipLayer = new Container();
   readonly breakLayer = new Container();
+  /** 再生後に残す「信号が通った道すじ」（パーツの上・ピップの下に薄く描く） */
+  readonly traceLayer = new Graphics();
 
   private board: Board | null = null;
   private rules: RuleSet | null = null;
@@ -129,7 +133,50 @@ export class StatusOverlay {
     }
   }
 
+  /**
+   * 信号が通った道すじを残す（途切れた場所と同じく、盤面を変えるか次の再生まで出しておく）。
+   * 線は通った本数が多いほど太く、真ん中の矢じりで向きを示す
+   */
+  showTrace(segments: TraceSegment[]): void {
+    const c = EFFECTS_CONFIG.trace;
+    const g = this.traceLayer.clear();
+    const color = hex(FX_COLORS.trace);
+    for (const s of segments) {
+      const from = cellCenter(s.fromX, s.fromY);
+      const end = cellCenter(s.toX, s.toY);
+      // 盤面の外へ出た信号は、マスの境目あたりまでで止める
+      const outside =
+        !this.board ||
+        s.toX < 0 ||
+        s.toY < 0 ||
+        s.toX >= this.board.width ||
+        s.toY >= this.board.height;
+      const reach = outside ? 0.55 : 1;
+      const toX = from.px + (end.px - from.px) * reach;
+      const toY = from.py + (end.py - from.py) * reach;
+      const width = Math.min(c.maxWidth, c.baseWidth + (s.count - 1) * c.widthPerSignal);
+      g.moveTo(from.px, from.py).lineTo(toX, toY).stroke({ width, color, cap: 'round' });
+      // 矢じり（区間の真ん中に、進む向きの三角）
+      const length = Math.hypot(toX - from.px, toY - from.py) || 1;
+      const ux = (toX - from.px) / length;
+      const uy = (toY - from.py) / length;
+      const mx = (from.px + toX) / 2;
+      const my = (from.py + toY) / 2;
+      const a = c.arrowSize + width / 2;
+      g.poly([
+        mx + ux * a,
+        my + uy * a,
+        mx - ux * a * 0.6 - uy * a * 0.8,
+        my - uy * a * 0.6 + ux * a * 0.8,
+        mx - ux * a * 0.6 + uy * a * 0.8,
+        my - uy * a * 0.6 - ux * a * 0.8,
+      ]).fill(color);
+    }
+    this.traceLayer.alpha = c.alpha;
+  }
+
   clearBreaks(): void {
+    this.traceLayer.clear();
     this.breakLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
   }
 
