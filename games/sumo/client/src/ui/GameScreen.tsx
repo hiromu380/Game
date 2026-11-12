@@ -3,6 +3,7 @@ import type { SceneAction } from '../art/hakoniwa/grid';
 import {
   advanceBasho,
   isBlocked,
+  prepLeft,
   previewBasho,
   ranksOf,
   type GameState,
@@ -37,7 +38,7 @@ const SCENE_TARGET: Record<SceneAction, [Tab, string | null]> = {
   staff: ['ledger', 'staff-panel'],
   stable: ['stable', 'mine-title'],
   policy: ['stable', 'mine-title'],
-  scout: ['stable', 'scout-panel'],
+  scout: ['stable', 'prep-panel'],
   banzuke: ['banzuke', null],
 };
 const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
@@ -83,6 +84,8 @@ export function GameScreen({
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
+  // 場所前の4週間を終えるまで、本場所へは進めない（1年の早送りはできる）
+  const weeksLeft = prepLeft(game);
 
   if (game.gameOver) return <GameOver game={game} onNewGame={() => setGame(null)} />;
 
@@ -193,7 +196,11 @@ export function GameScreen({
 
       <footer className="actionbar">
         <span className="actionbar__hint">
-          {game.pending.retireRequests.length > 0 ? t('action.hintRetire') : t('action.hint')}
+          {game.pending.retireRequests.length > 0
+            ? t('action.hintRetire')
+            : weeksLeft > 0
+              ? t('action.hintPrep', { n: weeksLeft })
+              : t('action.hint')}
         </span>
         {game.lastReport && (
           <button className="button" onClick={() => setShowReport(true)}>
@@ -205,7 +212,7 @@ export function GameScreen({
         </button>
         <button
           className="button button--primary"
-          disabled={blocked}
+          disabled={blocked || weeksLeft > 0}
           onClick={() => {
             const m = previewBasho(game);
             if (m) setTicker({ half: 'first', mid: m });

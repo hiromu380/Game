@@ -31,7 +31,7 @@ import { useState } from 'react';
 import { IndependencePanel } from './IndependencePanel';
 import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
-import { ScoutPanel } from './ScoutPanel';
+import { PrepPanel } from './PrepPanel';
 import { GuideCard } from './Guide';
 import { NextGoalCard } from './GoalsPanel';
 import { withStep } from '../guide';
@@ -77,6 +77,7 @@ export function StableTab({
         onAction={onSceneAction}
         onDetail={setDetail}
       />
+      <PrepPanel game={game} ranks={ranks} setGame={setGame} />
       {detailRikishi && (
         <RikishiDetail
           subject={{
@@ -129,8 +130,6 @@ export function StableTab({
       <HappeningPanel game={game} setGame={setGame} />
 
       <ElectionPanel game={game} setGame={setGame} />
-
-      <ScoutPanel game={game} setGame={setGame} />
 
       {game.pending.independence !== null && (
         <IndependencePanel game={game} ranks={ranks} setGame={setGame} />

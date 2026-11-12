@@ -3,7 +3,8 @@ import {
   giftOf,
   KOENKAI,
   setParty,
-  visitPatron,
+  canPrep,
+  doPrep,
   type GameState,
   type PartyLevel,
 } from '@ichimon/sim';
@@ -84,10 +85,8 @@ export function KoenkaiPanel({
             <div className="row__actions">
               <button
                 className="button"
-                disabled={
-                  !canVisit(p, game.bashoIndex) || game.player.personalMoney < KOENKAI.visitCost
-                }
-                onClick={() => setGame(visitPatron(game, p.id))}
+                disabled={!canPrep(game, { kind: 'visit', patronId: p.id })}
+                onClick={() => setGame(doPrep(game, { kind: 'visit', patronId: p.id }))}
               >
                 {canVisit(p, game.bashoIndex)
                   ? t('koenkai.visit', { cost: money(t, KOENKAI.visitCost, lang) })
