@@ -11,7 +11,7 @@ import type { FloorTileId, PartId, Score } from '@chain-factory/sim';
 import { Container, Graphics, GraphicsContext, Sprite, Text, type Texture } from 'pixi.js';
 import { BOARD_THEME, PART_ASSETS } from '../../assets/manifest';
 import { FX_COLORS, hex } from '../../assets/palette';
-import { EFFECTS_CONFIG, type EffectStrength } from '../../config/effects';
+import { EFFECTS_CONFIG, type EffectStrength, type PartMotion } from '../../config/effects';
 import { CELL_SIZE, cellCenter } from '../layout';
 
 /** 床の種類ごとの演出の色（使用不可は効果がないので使わない） */
@@ -68,6 +68,8 @@ export class EffectsLayer {
   private readonly glowShape = new GraphicsContext().circle(0, 0, CELL_SIZE * 0.55).fill(0xffffff);
   private readonly glowFree: Graphics[] = [];
   private readonly glowsInUse = new Set<Graphics>();
+  /** 回る動きの元の向き（絵ごと。動きの途中で次の発動が来ても、ずれていかないように） */
+  private readonly spriteRotations = new WeakMap<Container, number>();
 
   constructor(
     private readonly tweens: TweenManager,
@@ -438,22 +440,64 @@ export class EffectsLayer {
     this.boardLayer.addChild(glow);
 
     const part = this.getPartView(x, y);
+    const motion = EFFECTS_CONFIG.partMotion[partId] ?? 'pulse';
     this.tweens.add({
       duration: durationMs,
       onUpdate: (t) => {
-        // 盤面が描き直されてパーツの表示が捨てられていたら触らない
-        const alive = part && !part.destroyed;
         if (this.glowsInUse.has(glow)) {
           glow.alpha = baseAlpha * (1 - t);
           glow.scale.set(0.6 + 0.6 * t);
         }
-        if (alive) part.scale.set(1 + 0.25 * (1 - t));
+        // 盤面が描き直されてパーツの表示が捨てられていたら触らない
+        if (part && !part.destroyed) this.poseOf(part, motion, t, px, py);
       },
       onComplete: () => {
         this.releaseGlow(glow);
-        if (part && !part.destroyed) part.scale.set(1);
+        if (part && !part.destroyed) this.poseOf(part, motion, 1, px, py);
       },
     });
+  }
+
+  /**
+   * 発動の動きの途中（t: 0〜1）の姿勢にする。t=1 で必ず元の姿勢に戻る
+   * （元の位置はマスの中心、絵の元の向きは最初に触ったときに覚えておく）
+   */
+  private poseOf(part: Container, motion: PartMotion, t: number, px: number, py: number): void {
+    const rest = 1 - t;
+    const sprite = part.children[0];
+    switch (motion) {
+      case 'spin': {
+        part.scale.set(1 + 0.15 * rest);
+        if (!sprite) break;
+        let base = this.spriteRotations.get(sprite);
+        if (base === undefined) {
+          base = sprite.rotation;
+          this.spriteRotations.set(sprite, base);
+        }
+        sprite.rotation = base + Math.PI * 2 * easeOutCubic(t);
+        break;
+      }
+      case 'squash': {
+        // 押しつぶされて横に広がり、戻る
+        const press = Math.sin(Math.PI * Math.min(1, t * 1.4));
+        part.scale.set(1 + 0.22 * press, 1 - 0.3 * press);
+        break;
+      }
+      case 'bulge':
+        part.scale.set(1 + 0.5 * rest);
+        break;
+      case 'hop':
+        part.scale.set(1 + 0.12 * rest);
+        part.position.set(px, py - 12 * Math.sin(Math.PI * t));
+        break;
+      case 'wiggle':
+        part.scale.set(1 + 0.15 * rest);
+        part.rotation = 0.24 * Math.sin(t * Math.PI * 4) * rest;
+        break;
+      case 'pulse':
+        part.scale.set(1 + 0.25 * rest);
+        break;
+    }
   }
 
   private releaseGlow(glow: Graphics): void {

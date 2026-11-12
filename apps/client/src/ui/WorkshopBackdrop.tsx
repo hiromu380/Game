@@ -5,6 +5,7 @@
 import { activeEvent, getDayAndPeriod, type MetaProgress, type RunState } from '@chain-factory/sim';
 import { MASCOT_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
+import { useBoltMood } from '../state/playbackMoments';
 import { getRocketProgress } from '../state/rocket';
 
 interface Props {
@@ -12,9 +13,21 @@ interface Props {
   meta: MetaProgress;
   playing: boolean;
   alert: boolean;
+  /** 本番の結果が出た直後（ノルマ達成なら喜び、未達なら失敗の表情）。それ以外は null */
+  outcome?: 'met' | 'missed' | null;
 }
 
-export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
+export function WorkshopBackdrop({ run, meta, playing, alert, outcome = null }: Props) {
+  // 再生中の見せ場（連鎖の節目・桁上がり・ピーク）で表情が変わり、そのたびに小さく跳ねる
+  const { mood, beat } = useBoltMood();
+  const expression =
+    outcome === 'met'
+      ? 'happy'
+      : outcome === 'missed'
+        ? 'fail'
+        : playing
+          ? (mood ?? 'idle')
+          : 'idle';
   const { t } = useI18n();
   const { period } = getDayAndPeriod(run);
   const { parts } = getRocketProgress(run);
@@ -69,8 +82,9 @@ export function WorkshopBackdrop({ run, meta, playing, alert }: Props) {
       )}
       <span className="workshop__beacon" />
       <img
-        className={`workshop__bolt ${playing ? 'is-watching' : ''}`}
-        src={playing ? MASCOT_ASSETS.surprised : MASCOT_ASSETS.idle}
+        key={playing && mood ? beat : 'rest'}
+        className={`workshop__bolt ${playing ? 'is-watching' : ''} ${playing && mood ? 'is-reacting' : ''}`}
+        src={MASCOT_ASSETS[expression]}
         alt=""
       />
     </div>

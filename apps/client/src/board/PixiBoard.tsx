@@ -7,6 +7,7 @@
 import type { Score, SimResult } from '@chain-factory/sim';
 import { useEffect, useRef, useState } from 'react';
 import { audio } from '../audio/AudioEngine';
+import { emitShipFlight, notifyMoment, resetMoments } from '../state/playbackMoments';
 import type { PlaybackSpeed } from '../playback/timeline';
 import {
   BoardRenderer,
@@ -77,6 +78,8 @@ export function PixiBoard(props: Props) {
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),
       playSound: (key, semitones) => audio.play(key, semitones),
+      onMoment: notifyMoment,
+      onShipFlight: (clientX, clientY) => emitShipFlight({ clientX, clientY }),
     }).then((r) => {
       if (disposed) {
         r.destroy();
@@ -117,6 +120,8 @@ export function PixiBoard(props: Props) {
 
   useEffect(() => {
     if (!renderer) return;
+    // 再生の始まり・片付けで、ボルトの気分を既定に戻す
+    resetMoments();
     if (!playbackResult) {
       renderer.clearPlayback();
       return;

@@ -2149,6 +2149,49 @@ a.button.button--primary {
 .workshop__bolt.is-watching {
   transform: rotate(4deg) translateY(-8px);
 }
+/* 連鎖の見せ場で小さく跳ねる（state/playbackMoments.ts） */
+.workshop__bolt.is-reacting {
+  animation: bolt-react 0.36s ease-out;
+}
+@keyframes bolt-react {
+  0% {
+    transform: rotate(4deg) translateY(-8px) scale(1);
+  }
+  40% {
+    transform: rotate(-6deg) translateY(-24px) scale(1.12);
+  }
+  100% {
+    transform: rotate(4deg) translateY(-8px) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workshop__bolt.is-reacting {
+    animation: none;
+  }
+}
+
+/* ---- 出荷の箱（ui/ShipFlights.tsx）: 出荷口から画面上部の出荷量へ飛ぶ ---- */
+.ship-flights {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ship-flight {
+  position: absolute;
+  width: 18px;
+  height: 16px;
+  border: 3px solid var(--ink-outline);
+  border-radius: 3px;
+  background: var(--ship-box);
+  /* 箱のテープ（上から下へ1本） */
+  background-image: linear-gradient(var(--ship-box-tape), var(--ship-box-tape));
+  background-size: 4px 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
 .workshop__approval {
   position: relative;
   display: inline-grid;

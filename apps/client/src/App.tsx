@@ -52,6 +52,7 @@ import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
 import { CommitConfirm } from './ui/CommitConfirm';
 import { SellZone } from './ui/SellZone';
+import { ShipFlights } from './ui/ShipFlights';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
 import { RocketGoal } from './ui/RocketProgress';
 import { TutorialGuide } from './ui/TutorialGuide';
@@ -583,6 +584,7 @@ export function App({ start, onTitle }: Props) {
       style={{ '--board-max': `${LAYOUT.boardMaxPx}px` } as CSSProperties}
     >
       {dragging && <DragGhost partId={dragging} />}
+      <ShipFlights />
       {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
       {/* 2日目以降の朝: 今日の出来事を選ぶまでは組み立てられない */}
       {isEventPending(run) && !playing && run.phase === 'building' && (
@@ -628,7 +630,19 @@ export function App({ start, onTitle }: Props) {
         </div>
       )}
       {header}
-      <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
+      <WorkshopBackdrop
+        run={run}
+        meta={state.meta}
+        playing={playing}
+        alert={bossActive}
+        outcome={
+          playback?.mode === 'commit' && playback.finished
+            ? playback.nextRun.phase === 'failed'
+              ? 'missed'
+              : 'met'
+            : null
+        }
+      />
       {!fit && runInfo}
       <main className="layout">
         <div className="layout__board">

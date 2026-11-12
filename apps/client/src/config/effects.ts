@@ -4,7 +4,15 @@
  * 「桁数」は出荷した値の桁数（例: 12,345 は 5 桁）。値が大きいほど、連鎖が長いほど派手になる。
  * 時間の流れ（溜め・加速・ピークの止め・上限時間・光の回数）は choreography にまとめる。
  */
+import type { PartId } from '@chain-factory/sim';
 import { hex, INK, SIGNAL_TIERS } from '../assets/palette';
+
+/**
+ * パーツが発動したときの動き
+ * pulse: ふくらんで戻る（既定） / spin: 1回転する / squash: 上から押しつぶされる / bulge: 大きくふくらむ /
+ * hop: 跳ねる / wiggle: 左右に揺れる
+ */
+export type PartMotion = 'pulse' | 'spin' | 'squash' | 'bulge' | 'hop' | 'wiggle';
 
 export const EFFECTS_CONFIG = {
   /** カットイン: 特に大きな出荷のときに、画面を横切る帯を出す */
@@ -50,6 +58,35 @@ export const EFFECTS_CONFIG = {
     dustMs: 380,
     /** 一度にこれより多くのマスが変わったとき（片付け・読み込み）は、手応えの演出をしない */
     maxCells: 2,
+  },
+
+  /** パーツごとの発動の動き（書いていないパーツは pulse）。tick が短いときは出さない */
+  partMotion: {
+    gear: 'spin',
+    chainMeter: 'spin',
+    turntable: 'spin',
+    press: 'squash',
+    merger: 'squash',
+    barrel: 'bulge',
+    piggyBank: 'hop',
+    junkbot: 'hop',
+    dock: 'hop',
+    reflector: 'wiggle',
+    rebooter: 'wiggle',
+    coil: 'wiggle',
+  } as Partial<Record<PartId, PartMotion>>,
+
+  /** 出荷の箱（出荷口から画面上部の出荷量へ飛ぶ。ui/ShipFlights.tsx） */
+  shipFlight: {
+    durationMs: 620,
+    /** 飛ぶ前に持ち上がる高さ（px） */
+    liftPx: 26,
+    /** 着いたときに出荷量の数字が弾む長さ */
+    bumpMs: 180,
+    /** 同時に飛ばす数の上限（演出「中」は半分） */
+    maxAlive: 10,
+    /** 1 tick に飛ばす数の上限（同じ tick に多くの出荷口が動いても、箱だらけにしない） */
+    maxPerTick: 4,
   },
 
   /** 再生後に残す「信号が通った道すじ」（線の太さは通った本数で増える） */

@@ -55,6 +55,7 @@ import { summarizeBreaks } from '../playback/breaks';
 import { summarizeTrace } from '../playback/trace';
 import { bestPlacementCells, type PlacementHints } from './hints';
 import type { SoundKey } from '../audio/manifest';
+import type { PlaybackMoment } from '../state/playbackMoments';
 import { EFFECTS_CONFIG } from '../config/effects';
 import { INPUT_CONFIG } from '../config/input';
 import { EffectsLayer, type EffectSettings } from './fx/EffectsLayer';
@@ -137,6 +138,10 @@ export interface BoardRendererOptions extends BoardLabels {
     target: { x: number; y: number } | null,
     client: { x: number; y: number },
   ) => void;
+  /** 再生中の見せ場（連鎖の節目・桁上がり・ノルマ超え・ピーク）。画面側のボルトが反応する */
+  onMoment?: (moment: PlaybackMoment) => void;
+  /** 出荷した（画面上の位置。画面側で、出荷量へ飛ぶ箱を出す） */
+  onShipFlight?: (clientX: number, clientY: number) => void;
   /** 効果音を鳴らす（semitones: 上げる音程。連鎖が続くほど高くする） */
   playSound: (key: SoundKey, semitones: number) => void;
 }
@@ -147,6 +152,9 @@ export interface PlaybackCallbacks {
   /** 再生がすべて終わった */
   onFinish: () => void;
 }
+
+/** ボルトが喜ぶ連鎖数の節目（連鎖数カウンターの節目と同じ） */
+const MILESTONES: readonly number[] = EFFECTS_CONFIG.chainCounter.milestones;
 
 /** tick がこれより短いときは、細かい演出（パーツの発光・コインの数）を間引く */
 const THIN_TICK_MS = 70;
@@ -875,10 +883,12 @@ export class BoardRenderer {
       case 'digitUp':
         this.options.playSound('digitUp', 0);
         this.effects.digitUp(cue.total);
+        this.options.onMoment?.('digitUp');
         break;
       case 'quotaCross':
         this.options.playSound('quotaCross', 0);
         this.effects.quotaCross();
+        this.options.onMoment?.('quotaCross');
         break;
       case 'flash':
         this.effects.flash(cue.alpha, cue.durationMs / rate);
@@ -887,6 +897,7 @@ export class BoardRenderer {
         this.freezeMs = cue.hitstopMs / rate;
         this.options.playSound('peak', 0);
         this.effects.peak();
+        this.options.onMoment?.('peak');
         break;
       case 'stamp':
         this.options.playSound('stamp', 0);
@@ -898,8 +909,9 @@ export class BoardRenderer {
   /** 1 tick 分のイベントを見た目に反映する。tickMs=0 なら即時 */
   private applyTick(events: SimEvent[], tickMs: number): void {
     const moveMs = tickMs * MOVE_RATIO;
-    // 信号の尾は、じっくり見せる tick でだけ出す
+    // 信号の尾・出荷の箱は、じっくり見せる tick でだけ出す
     const trail = tickMs >= THIN_TICK_MS;
+    let shipFlights = 0;
     const fxMs = Math.max(tickMs, 1) * 1.2;
     const instant = tickMs === 0;
     this.effects.setThin(tickMs < THIN_TICK_MS);
@@ -970,7 +982,12 @@ export class BoardRenderer {
             onComplete: () => {
               this.releaseSignal(view, generation);
               this.status.onActivate(event.x, event.y);
-              if (!instant) this.effects.onActivate(event.x, event.y, event.partId, fxMs);
+              if (!instant) {
+                this.effects.onActivate(event.x, event.y, event.partId, fxMs);
+                if (MILESTONES.includes(this.effects.chain)) {
+                  this.options.onMoment?.('chainMilestone');
+                }
+              }
               if (event.partId === 'barrel') sound('explode');
             },
           });
@@ -982,7 +999,12 @@ export class BoardRenderer {
             duration: 0,
             onComplete: () => {
               this.callbacks?.onShip(event.total);
-              if (!instant) this.effects.onShip(event.x, event.y, event.value, fxMs);
+              if (!instant) {
+                this.effects.onShip(event.x, event.y, event.value, fxMs);
+                if (trail && shipFlights++ < EFFECTS_CONFIG.shipFlight.maxPerTick) {
+                  this.emitShipFlight(event.x, event.y);
+                }
+              }
               sound('ship');
             },
           });
@@ -1023,6 +1045,18 @@ export class BoardRenderer {
           break;
       }
     }
+  }
+
+  /** 出荷口のマスの画面上の位置を求めて、出荷の箱を飛ばしてもらう（盤面は CSS で縮小表示されることがある） */
+  private emitShipFlight(x: number, y: number): void {
+    if (!this.options.onShipFlight) return;
+    const rect = this.app.canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const { px, py } = cellCenter(x, y);
+    this.options.onShipFlight(
+      rect.left + (px / this.app.screen.width) * rect.width,
+      rect.top + (py / this.app.screen.height) * rect.height,
+    );
   }
 
   /** 使い終わった信号の表示を返す（すでに返して別の信号に使われていたら何もしない） */
