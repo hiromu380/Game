@@ -1335,6 +1335,39 @@ a.button.button--primary {
   padding-top: 4px;
   padding-bottom: 4px;
 }
+/*
+ * 高さの低い PC 画面（1366×768・1280×800 など）: ショップ・手持ちの一覧に高さを回す
+ * - 遠景（飾り）を低くする（ボルトの反応は残す）
+ * - 予告の物語文と、操作ボタンの下の説明文を出さない（本番の確認の画面でも同じことを伝えている）
+ * - 売却エリアはドラッグ中だけ、右の列の下に重ねて出す（ふだんは一覧を覆わない）
+ */
+.app--short .workshop {
+  height: 84px;
+  margin: 4px 0 6px;
+}
+.app--short .workshop__gantry {
+  transform: scale(0.55);
+  transform-origin: bottom;
+}
+.app--short .workshop__status,
+.app--short .workshop__event-prop,
+.app--short .boss-notice__story,
+.app--short .controls .panel__hint {
+  display: none;
+}
+.app--short .workshop__bolt {
+  width: 44px;
+}
+.app--short .sell-zone:not(.is-active) {
+  display: none;
+}
+.app--short .sell-zone.is-active {
+  position: fixed;
+  right: 12px;
+  bottom: 8px;
+  width: min(520px, 45vw);
+  z-index: 30;
+}
 
 /* ---- 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） ---- */
 .capture {
