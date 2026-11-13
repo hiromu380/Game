@@ -1275,8 +1275,8 @@
   "ticker.legend": "○ win, ● loss, □ win by default, ■ loss by default, · no bout that day. Makushita and below fight seven bouts.",
   "ticker.absent": "Out",
   "help.toggle": "Show or hide explanations",
-  "help.on": "?: on",
-  "help.off": "?: off",
+  "help.on": "Help: on",
+  "help.off": "Help: off",
   "prep.title": "Before the tournament",
   "prep.week": "Week {n}",
   "prep.left": "{n} weeks left",
@@ -1303,5 +1303,11 @@
   "prep.log.scoutNone": "{trip}: met no one",
   "prep.log.usual": "",
   "prep.log.injured": "{name} is hurt!",
-  "action.hintPrep": "{n} weeks left. Choose this week's action."
+  "action.hintPrep": "Choose this week's action.",
+  "menu.open": "Menu",
+  "action.toPrep": "{n} wks left",
+  "prep.hurt": "Injured",
+  "prep.pick.sparSecond": "Opponent for {name}?",
+  "report.fullAbsence": "Sat out",
+  "prep.roster": "Fatigue"
 }

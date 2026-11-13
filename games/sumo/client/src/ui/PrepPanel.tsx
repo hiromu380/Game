@@ -117,8 +117,9 @@ export function PrepPanel({
       <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
       <span className="prep__name">{r.name}</span>
       <span className="prep__sub">
-        {t(`policy.${r.policy}`)}・{t('talk.fatigue')}
-        {Math.round(r.fatigue)}
+        {r.injury > 0
+          ? t('prep.hurt')
+          : `${t(`policy.${r.policy}`)}・${t('talk.fatigue')}${Math.round(r.fatigue)}`}
       </span>
     </>
   );
@@ -162,9 +163,43 @@ export function PrepPanel({
               </button>
             ))}
           </div>
+          {!menu && (
+            <div className="prep__pick prep__roster" aria-label={t('prep.roster')}>
+              <p className="prep__week">{t('prep.roster')}</p>
+              <ul>
+                {mine.map((r) => (
+                  <li key={r.id}>
+                    <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
+                    <span className="prep__name">{r.name}</span>
+                    {r.injury > 0 ? (
+                      <span className="tag tag--warn">{t('prep.hurt')}</span>
+                    ) : (
+                      <span
+                        className="prep__fatigue"
+                        aria-label={`${t('talk.fatigue')} ${Math.round(r.fatigue)}`}
+                      >
+                        <span className="bar" aria-hidden="true">
+                          <span
+                            className={`bar__fill ${r.fatigue >= 70 ? 'bar__fill--warn' : ''}`}
+                            style={{ width: `${Math.min(100, r.fatigue)}%` }}
+                          />
+                        </span>
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {menu && (
             <div className="prep__pick" role="group" aria-label={t(`prep.cmd.${menu}`)}>
-              <p className="prep__week">{t(`prep.pick.${menu}` as MessageKey)}</p>
+              <p className="prep__week">
+                {menu === 'spar' && first !== null
+                  ? t('prep.pick.sparSecond', {
+                      name: mine.find((r) => r.id === first)?.name ?? '',
+                    })
+                  : t(`prep.pick.${menu}` as MessageKey)}
+              </p>
               {menu === 'coach' &&
                 mine.map((r) => (
                   <button

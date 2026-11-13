@@ -1275,8 +1275,8 @@
   "ticker.legend": "○ 白星・● 黒星・□ 不戦勝・■ 不戦敗・「・」は取組のない日。幕下以下は7番です。",
   "ticker.absent": "休場",
   "help.toggle": "説明を出す・隠す",
-  "help.on": "？: 入",
-  "help.off": "？: 切",
+  "help.on": "説明: 入",
+  "help.off": "説明: 切",
   "prep.title": "場所前",
   "prep.week": "第{n}週",
   "prep.left": "あと{n}週",
@@ -1303,5 +1303,11 @@
   "prep.log.scoutNone": "{trip} 会えなかった",
   "prep.log.usual": "",
   "prep.log.injured": "{name}がけが！",
-  "action.hintPrep": "場所前 あと{n}週。今週の行動を選ぶ。"
+  "action.hintPrep": "今週の行動を選ぶ。",
+  "menu.open": "メニュー",
+  "action.toPrep": "あと{n}週",
+  "prep.hurt": "けが",
+  "prep.pick.sparSecond": "{name}の相手は",
+  "report.fullAbsence": "全休",
+  "prep.roster": "弟子の疲れ"
 }

@@ -169,15 +169,21 @@ export function ReportDialog({
                           </button>
                         );
                       })}
-                      {Array.from({ length: m.record.absences }, (_, i) => (
-                        <span
-                          key={`a${i}`}
-                          className="star star--absent"
-                          aria-label={t('report.absent')}
-                        >
-                          ■
-                        </span>
-                      ))}
+                      {m.bouts.length === 0 && m.record.absences > 0 && (
+                        <span className="tag tag--warn">{t('report.fullAbsence')}</span>
+                      )}
+                      {Array.from(
+                        { length: m.bouts.length === 0 ? 0 : m.record.absences },
+                        (_, i) => (
+                          <span
+                            key={`a${i}`}
+                            className="star star--absent"
+                            aria-label={t('report.absent')}
+                          >
+                            ■
+                          </span>
+                        ),
+                      )}
                     </div>
                   </li>
                 );

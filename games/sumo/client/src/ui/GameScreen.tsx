@@ -27,6 +27,7 @@ import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
 import { MidBashoDialog } from './MidBashoDialog';
+import { TopMenu } from './TopMenu';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 
@@ -142,30 +143,7 @@ export function GameScreen({
             <dd>{Math.round(game.player.prestige)}</dd>
           </div>
         </dl>
-        <div className="topbar__tools">
-          <button className="button button--ghost" onClick={onToggleLang}>
-            {t('lang.toggle')}
-          </button>
-          <button
-            className="button button--ghost"
-            aria-pressed={settings.sound}
-            onClick={() => update({ sound: !settings.sound })}
-          >
-            {settings.sound ? t('sound.on') : t('sound.off')}
-          </button>
-          <button
-            className="button button--ghost"
-            aria-pressed={settings.help}
-            aria-label={t('help.toggle')}
-            title={t('help.toggle')}
-            onClick={() => update({ help: !settings.help })}
-          >
-            {settings.help ? t('help.on') : t('help.off')}
-          </button>
-          <button className="button button--ghost" onClick={() => setConfirmQuit(true)}>
-            {t('top.quit')}
-          </button>
-        </div>
+        <TopMenu onToggleLang={onToggleLang} onQuit={() => setConfirmQuit(true)} />
       </header>
 
       <nav className="tabs" role="tablist">
@@ -212,14 +190,26 @@ export function GameScreen({
         </button>
         <button
           className="button button--primary"
-          disabled={blocked || weeksLeft > 0}
+          disabled={blocked}
           onClick={() => {
+            // 場所前の週が残っていれば、場所前のウィンドウへ
+            if (weeksLeft > 0) {
+              setTab('stable');
+              setTimeout(() => {
+                const panel = document.getElementById('prep-panel');
+                panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                panel?.querySelector<HTMLElement>('.prep__cmd:not(:disabled)')?.focus({
+                  preventScroll: true,
+                });
+              }, 60);
+              return;
+            }
             const m = previewBasho(game);
             if (m) setTicker({ half: 'first', mid: m });
             else go(advanceBasho(game));
           }}
         >
-          {t('action.basho')}
+          {weeksLeft > 0 ? t('action.toPrep', { n: weeksLeft }) : t('action.basho')}
         </button>
       </footer>
 
@@ -299,7 +289,7 @@ export function GameScreen({
             <h2 id="quit-title">{t('quit.title')}</h2>
             <p>{t('quit.body')}</p>
             <div className="modal__actions">
-              <button className="button" onClick={() => setConfirmQuit(false)}>
+              <button className="button" data-dismiss onClick={() => setConfirmQuit(false)}>
                 {t('common.cancel')}
               </button>
               <button className="button button--danger" onClick={onQuit}>

@@ -70,6 +70,7 @@ export function StableTab({
     <div className="stack">
       <GuideCard game={game} />
       <NextGoalCard game={game} />
+      <PrepPanel game={game} ranks={ranks} setGame={setGame} />
       <KeikobaScene
         game={game}
         ranks={ranks}
@@ -77,7 +78,6 @@ export function StableTab({
         onAction={onSceneAction}
         onDetail={setDetail}
       />
-      <PrepPanel game={game} ranks={ranks} setGame={setGame} />
       {detailRikishi && (
         <RikishiDetail
           subject={{
