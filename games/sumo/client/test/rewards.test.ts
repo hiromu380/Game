@@ -23,6 +23,7 @@ describe('報酬と罰', () => {
   it('ひいきの力士が負け越すとタニマチの関係が下がり、そのわけが付く', () => {
     let found = false;
     for (const seed of [5, 6, 7]) {
+      if (found) break;
       let g = play(seed, 30);
       for (let i = 0; i < 8 && !found; i++) {
         const n = advanceBasho(g);
