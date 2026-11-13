@@ -794,3 +794,12 @@ body.has-modal {
   margin: 0 0 8px;
   color: var(--muted);
 }
+
+/* 大一番の作戦: 相手と型を1行、作戦の4つの札を1行 */
+.tactic__vs {
+  flex-basis: 100%;
+  color: var(--ink-2);
+}
+.tactic__row .mid__stance {
+  flex-basis: 100%;
+}

@@ -41,6 +41,19 @@ describe('報酬と罰', () => {
     expect(found).toBe(true);
   });
 
+  it('変化で勝った弟子は罰に出る', () => {
+    const g = play(5, 2);
+    const n = advanceBasho(g);
+    const id = n.lastReport!.mine[0]!.id;
+    const withHenka = { ...n, lastReport: { ...n.lastReport!, henka: [id] } };
+    const line = rewardsOf(g, withHenka).find((x) => x.kind === 'henka');
+    expect(line).toEqual({
+      tone: 'bad',
+      kind: 'henka',
+      name: n.rikishi.find((r) => r.id === id)!.name,
+    });
+  });
+
   it('新しくけがをした弟子だけを罰に出す（休場が続くだけの弟子は出さない）', () => {
     const g = play(5, 40);
     const n = advanceBasho(g);

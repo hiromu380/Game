@@ -26,6 +26,8 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
         return t(`rewards.${x.kind}`, { name: x.name, yen: yen(x.perBasho) });
       case 'injury':
         return t('rewards.injury', { name: x.name, basho: x.basho });
+      case 'henka':
+        return t('rewards.henka', { name: x.name });
       case 'vsOutlook':
         return t('rewards.vsOutlook', { yen: yen(x.delta) });
     }

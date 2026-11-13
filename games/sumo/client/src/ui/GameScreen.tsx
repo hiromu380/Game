@@ -8,6 +8,7 @@ import {
   ranksOf,
   type GameState,
   type MidBasho,
+  type Stance,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
@@ -21,7 +22,8 @@ import { AssociationTab } from './AssociationTab';
 import { TabTip } from './Guide';
 import { withStep } from '../guide';
 import { HighlightDialog } from './HighlightDialog';
-import { highlightsOf, type Highlight } from '../highlights';
+import { bigBouts, highlightsOf, type Highlight } from '../highlights';
+import { TacticDialog } from './TacticDialog';
 import { JournalTab } from './JournalTab';
 import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
@@ -78,9 +80,19 @@ export function GameScreen({
   // 直前の場所の報酬と罰（場所を進めた直後に作る）
   const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
+  // 後半に大一番がある弟子がいれば、その前の日で止めて作戦を聞く（plan に中日の判断を持つ）
+  type Plan = {
+    reenter: number[];
+    stance: Record<number, Stance>;
+    bouts: Extract<Highlight, { kind: 'bigBout' }>[];
+  };
   const [ticker, setTicker] = useState<
-    { half: 'first'; mid: MidBasho } | { half: 'second'; next: GameState; from: number } | null
+    | { half: 'first'; mid: MidBasho }
+    | { half: 'second'; next: GameState; from: number; to: number; plan?: Plan }
+    | null
   >(null);
+  // 大一番の作戦を聞いている（plan と、作戦を決めた後に後半を続ける日）
+  const [tactic, setTactic] = useState<{ plan: Plan; from: number } | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
@@ -275,9 +287,16 @@ export function GameScreen({
             setMid(null);
             const next = advanceBasho(game, { reenter, stance });
             // 後半を見せてから結果へ（終わってしまった・結果がないときは、すぐ結果へ）
-            if (next.lastReport && !next.gameOver)
-              setTicker({ half: 'second', next, from: mid.day + 1 });
-            else go(next);
+            if (!next.lastReport || next.gameOver) return go(next);
+            const from = mid.day + 1;
+            const bouts = bigBouts(next.lastReport).filter((h) => h.bout.day >= from);
+            if (bouts.length === 0)
+              return setTicker({ half: 'second', next, from, to: BASHO_DAYS });
+            // 大一番の前の日まで見せて、作戦を聞く（作戦はその一番だけに効くので、そこまでの星は同じ）
+            const day = Math.min(...bouts.map((h) => h.bout.day));
+            const plan = { reenter, stance, bouts };
+            if (day - 1 >= from) setTicker({ half: 'second', next, from, to: day - 1, plan });
+            else setTactic({ plan, from });
           }}
         />
       )}
@@ -298,12 +317,31 @@ export function GameScreen({
               m.record.absences > 0 ? Math.max(0, ...m.bouts.map((b) => b.day)) : undefined,
           }))}
           from={ticker.from}
-          to={BASHO_DAYS}
-          doneLabel={t('ticker.toResult')}
+          to={ticker.to}
+          doneLabel={ticker.plan ? t('ticker.toTactic') : t('ticker.toResult')}
           onDone={() => {
-            const next = ticker.next;
+            const { next, plan, to } = ticker;
             setTicker(null);
-            go(next);
+            if (plan) setTactic({ plan, from: to + 1 });
+            else go(next);
+          }}
+        />
+      )}
+      {tactic && (
+        <TacticDialog
+          game={game}
+          bouts={tactic.plan.bouts}
+          onGo={(chosen) => {
+            const { plan, from } = tactic;
+            setTactic(null);
+            const next = advanceBasho(game, {
+              reenter: plan.reenter,
+              stance: plan.stance,
+              tactic: chosen,
+            });
+            if (next.lastReport && !next.gameOver)
+              setTicker({ half: 'second', next, from, to: BASHO_DAYS });
+            else go(next);
           }}
         />
       )}

@@ -69,6 +69,9 @@ export function BigBoutCard({
               losses: h.losses,
               day: dayLabel(t, h.bout.day),
             })}
+            {h.bout.tactic && h.bout.tacticBy === h.id && (
+              <>{t('bigBout.tactic', { tactic: t(`tactic.${h.bout.tactic}`) })}</>
+            )}
           </p>
         ) : (
           <p className="highlight__body" role="status">

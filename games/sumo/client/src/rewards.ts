@@ -30,6 +30,8 @@ export type RewardLine =
     }
   | { tone: 'good' | 'bad'; kind: 'sekitoriUp' | 'sekitoriDown'; name: string; perBasho: number }
   | { tone: 'bad'; kind: 'injury'; name: string; basho: number }
+  /** 変化で勝った（名声とタニマチの心証が下がった） */
+  | { tone: 'bad'; kind: 'henka'; name: string }
   | { tone: 'good' | 'bad'; kind: 'vsOutlook'; delta: number };
 
 /** 関係の動きを知らせる下限 */
@@ -131,6 +133,9 @@ export function rewardsOf(prev: GameState, next: GameState): RewardLine[] {
     if (old && old.injury > 0) continue;
     out.push({ tone: 'bad', kind: 'injury', name: r.name, basho: r.injury });
   }
+
+  // 変化で勝った弟子
+  for (const id of report.henka ?? []) out.push({ tone: 'bad', kind: 'henka', name: name(id) });
 
   // 見込みとの差（成績で動いたお金）
   const outlook = projectLedger(prev).stableNet;
