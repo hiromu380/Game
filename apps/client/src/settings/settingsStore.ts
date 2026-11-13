@@ -8,13 +8,13 @@ import type { EffectStrength } from '../config/effects';
 import type { Lang } from '../i18n';
 import { appStorage } from '../storage';
 
-export const SETTINGS_VERSION = 3;
+export const SETTINGS_VERSION = 4;
 export const SETTINGS_STORAGE_KEY = 'chain-factory:settings';
 /** 設定を導入する前に言語だけを保存していたキー（読み込み時に引き継ぐ） */
 const LEGACY_LANG_KEY = 'chain-factory:lang';
 
 export interface UserSettings {
-  version: 3;
+  version: 4;
   lang: Lang;
   /** 演出の強さ */
   effects: EffectStrength;
@@ -29,10 +29,15 @@ export interface UserSettings {
   muted: boolean;
   /** 初回ガイドを終えた（または閉じた）か。false なら次の新しいランでガイドを出す */
   tutorialDone: boolean;
+  /**
+   * 本番の前の確認を、危ない理由（スイッチ・出荷口がない・試運転していない・試運転がノルマ未満）が
+   * あるときだけ出す。false なら毎回出す（state/commitCheck.ts）
+   */
+  confirmOnlyWhenRisky: boolean;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  version: 3,
+  version: 4,
   lang: 'ja',
   effects: 'full',
   shake: true,
@@ -42,6 +47,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   bgmVolume: 60,
   muted: false,
   tutorialDone: false,
+  confirmOnlyWhenRisky: false,
 };
 
 type SimpleStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -55,12 +61,13 @@ function defaultStorage(): SimpleStorage | null {
  * 読み込んだ値を最新形式にする（足りない項目は既定値で補う）
  * - v1 → v2: 初回ガイド（tutorialDone）を追加。v1 のころから遊んでいた人にもガイドを1回出す
  * - v2 → v3: 点滅を減らす（reduceFlashes）を追加。既定はオフ（演出の強さ・揺れの設定はそのまま）
+ * - v3 → v4: 本番の確認を危ないときだけ出す（confirmOnlyWhenRisky）を追加。既定はオフ（毎回確認する。今までどおり）
  */
 export function migrateSettings(raw: unknown): UserSettings {
   if (typeof raw !== 'object' || raw === null) return DEFAULT_SETTINGS;
   const value = raw as Record<string, unknown>;
-  if (value.version !== 1 && value.version !== 2 && value.version !== 3) return DEFAULT_SETTINGS;
-  return { ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 3 };
+  if (![1, 2, 3, 4].includes(value.version as number)) return DEFAULT_SETTINGS;
+  return { ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 4 };
 }
 
 export function loadSettings(storage = defaultStorage()): UserSettings {

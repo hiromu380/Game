@@ -377,6 +377,16 @@ export function App({ start, onTitle }: Props) {
   };
   /** 本番の確認ダイアログ（押し間違い防止） */
   const [commitConfirm, setCommitConfirm] = useState(false);
+  /**
+   * 本番を押した: 確認を出す。設定で「危ないときだけ確認」にしていて、危ない理由がなければ確認せずに始める
+   */
+  const requestCommit = () => {
+    if (settings.confirmOnlyWhenRisky && commitWarnings(run, state.lastTrial).length === 0) {
+      startPlayback('startCommit');
+    } else {
+      setCommitConfirm(true);
+    }
+  };
   const closePlayback = () => {
     setLiveScore(null);
     dispatch({ type: 'closePlayback' });
@@ -399,7 +409,7 @@ export function App({ start, onTitle }: Props) {
     onDeselect: () => dispatch({ type: 'deselect' }),
     onRotate: () => dispatch({ type: 'rotate' }),
     onTrial: () => startPlayback('startTrial'),
-    onCommit: () => setCommitConfirm(true),
+    onCommit: () => requestCommit(),
     onClosePlayback: closePlayback,
     onShowPanel: setTab,
   });
@@ -676,7 +686,7 @@ export function App({ start, onTitle }: Props) {
             inputMode={inputMode}
             speed={speed}
             onTrial={() => startPlayback('startTrial')}
-            onCommit={() => setCommitConfirm(true)}
+            onCommit={() => requestCommit()}
             onSpeedChange={setSpeed}
             guide={
               guideStep === 'trial' || guideStep === 'trialAgain'

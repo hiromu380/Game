@@ -20,7 +20,7 @@ describe('ユーザー設定', () => {
   it('バージョン付きで保存・読み込みできる', () => {
     const storage = memoryStorage();
     saveSettings({ ...DEFAULT_SETTINGS, effects: 'minimal', shake: false }, storage);
-    expect(JSON.parse(storage.data.get(SETTINGS_STORAGE_KEY)!).version).toBe(3);
+    expect(JSON.parse(storage.data.get(SETTINGS_STORAGE_KEY)!).version).toBe(4);
     expect(loadSettings(storage)).toMatchObject({ effects: 'minimal', shake: false });
   });
 
@@ -31,7 +31,7 @@ describe('ユーザー設定', () => {
   });
 
   it('足りない項目は既定値で補い、未知のバージョンは既定値に戻す', () => {
-    expect(migrateSettings({ version: 3, lang: 'en' })).toEqual({
+    expect(migrateSettings({ version: 4, lang: 'en' })).toEqual({
       ...DEFAULT_SETTINGS,
       lang: 'en',
     });
@@ -46,7 +46,7 @@ describe('ユーザー設定', () => {
       effects: 'reduced',
       shake: false,
       masterVolume: 30,
-      version: 3,
+      version: 4,
       tutorialDone: false,
       reduceFlashes: false,
     });
@@ -59,8 +59,25 @@ describe('ユーザー設定', () => {
       effects: 'minimal',
       shake: false,
       tutorialDone: true,
-      version: 3,
+      version: 4,
       reduceFlashes: false,
+    });
+  });
+
+  it('v3 → v4: 本番の確認は今までどおり毎回出す（ほかの設定はそのまま）', () => {
+    const v3 = {
+      ...DEFAULT_SETTINGS,
+      version: 3,
+      effects: 'reduced',
+      reduceFlashes: true,
+    } as const;
+    const { confirmOnlyWhenRisky: _omit, ...withoutNewKey } = v3;
+    void _omit;
+    expect(migrateSettings(withoutNewKey)).toEqual({
+      ...DEFAULT_SETTINGS,
+      effects: 'reduced',
+      reduceFlashes: true,
+      confirmOnlyWhenRisky: false,
     });
   });
 });

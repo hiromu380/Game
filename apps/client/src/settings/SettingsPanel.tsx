@@ -68,6 +68,16 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         <p className="panel__hint">{t('settings.reduceFlashesHint')}</p>
 
+        <label className="settings__row">
+          <span>{t('settings.confirmOnlyWhenRisky')}</span>
+          <input
+            type="checkbox"
+            checked={settings.confirmOnlyWhenRisky}
+            onChange={(e) => updateSettings({ confirmOnlyWhenRisky: e.target.checked })}
+          />
+        </label>
+        <p className="panel__hint">{t('settings.confirmOnlyWhenRiskyHint')}</p>
+
         {VOLUMES.map((key) => (
           <label key={key} className="settings__row">
             <span>{t(`settings.${key}`)}</span>

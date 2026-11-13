@@ -574,5 +574,7 @@
   "floor.period.bonus": " (bonus floor: this shift only)",
   "floor.period.event": " (today's event: today only)",
   "settings.reduceFlashes": "Reduce flashing",
-  "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows"
+  "settings.reduceFlashesHint": "Turn this on if flashing lights bother you. Stops the board flashes and dims part glows",
+  "settings.confirmOnlyWhenRisky": "Confirm commit only when risky",
+  "settings.confirmOnlyWhenRiskyHint": "Ask before committing only when there is no Switch or Shipping Dock, the layout has not been test-run, or the last test run missed the quota. When off, always ask"
 }
