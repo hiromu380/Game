@@ -9,6 +9,7 @@ import { DIETS } from '../balance/staff';
 import { ranksOf } from '../banzuke/rank';
 import type { GameState, Rank } from '../model/types';
 import { giftOf } from '../stable/koenkai';
+import { stableCapacity } from './facilities';
 import { settleBasho, sum, type Ledger } from './ledger';
 
 export interface Projection extends Ledger {
@@ -22,15 +23,25 @@ export interface Projection extends Ledger {
   runway: number | null;
 }
 
-/** override: 地位を差し替える弟子（「十両に上がったら」の見積もり） */
+/** 弟子を増やしたときの見積もりに使う地位（序ノ口。養成費の出る幕下以下） */
+const NEW_DESHI: Rank = { division: 'jonokuchi', title: null, number: 1, side: 'E' };
+
+/**
+ * override: 地位を差し替える弟子（「十両に上がったら」の見積もり）。
+ * extra: 幕下以下の弟子をこの人数だけ増やしたら（「黒字まであと何人」の見積もり）
+ */
 export function projectLedger(
   state: GameState,
   override: ReadonlyMap<number, Rank> = new Map(),
+  extra = 0,
 ): Projection {
   const ranks = ranksOf(state.banzuke, state.titles);
-  const mine = state.rikishi
-    .filter((r) => r.stableId === state.player.stableId)
-    .map((r) => override.get(r.id) ?? ranks.get(r.id) ?? null);
+  const mine = [
+    ...state.rikishi
+      .filter((r) => r.stableId === state.player.stableId)
+      .map((r) => override.get(r.id) ?? ranks.get(r.id) ?? null),
+    ...Array.from({ length: extra }, () => NEW_DESHI),
+  ];
   const k = state.player.koenkai;
   const ledger = settleBasho(
     mine,
@@ -72,4 +83,25 @@ export function sekitoriGain(state: GameState, id: number): number {
       6,
   );
   return projectLedger(state, new Map([[id, juryo]])).stableNet - base + supporters;
+}
+
+/** 幕下以下の弟子が1人増えたら、部屋の口座の動きが1場所あたりいくら変わるか（養成費・維持費 − 食費・雑費） */
+export function headGain(state: GameState): number {
+  return projectLedger(state, new Map(), 1).stableNet - projectLedger(state).stableNet;
+}
+
+/**
+ * 部屋の口座が黒字になるまで、幕下以下の弟子があと何人要るか。
+ * 黒字なら 0。1人増えても口座が増えない（食費が高すぎる）か、部屋の定員を超えるなら null
+ */
+export function breakEvenHeads(state: GameState): number | null {
+  const net = projectLedger(state).stableNet;
+  if (net >= 0) return 0;
+  const per = headGain(state);
+  if (per <= 0) return null;
+  const n = Math.ceil(-net / per);
+  const room =
+    stableCapacity(state) -
+    state.rikishi.filter((r) => r.stableId === state.player.stableId).length;
+  return n <= room ? n : null;
 }
