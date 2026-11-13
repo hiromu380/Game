@@ -19,6 +19,7 @@ import { useI18n, type MessageKey, type TranslateFn } from '../i18n';
 import { money, rankLabel } from '../format';
 import { signed } from './TrainingSection';
 import { signedPoints } from '../points';
+import { MoneyOutlook } from './MoneyOutlook';
 
 type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -177,6 +178,7 @@ export function PrepPanel({
           ))}
         </span>
       </h2>
+      <MoneyOutlook game={game} />
       {left === 0 ? (
         <p className="prep__done">{t('prep.done')}</p>
       ) : (

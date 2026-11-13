@@ -712,3 +712,55 @@ body.has-modal {
     flex: 1 1 0;
   }
 }
+
+/* 経営: この場所の見込み */
+.outlook {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  align-items: baseline;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.outlook__label {
+  color: var(--ai);
+}
+.outlook__runway {
+  margin-left: 0;
+}
+.target__yen {
+  color: var(--good);
+}
+
+/* 経営: 報酬と罰 */
+.rewards {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.rewards__line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 8px;
+  border-left: 6px solid var(--good);
+  background: var(--paper);
+}
+.rewards__line.is-bad {
+  border-left-color: var(--shu);
+}
+.rewards__mark {
+  color: var(--good);
+}
+.rewards__line.is-bad .rewards__mark {
+  color: var(--shu);
+}
+.rewards__none {
+  margin: 0 0 8px;
+  color: var(--muted);
+}

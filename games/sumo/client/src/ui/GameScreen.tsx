@@ -30,6 +30,7 @@ import { MidBashoDialog } from './MidBashoDialog';
 import { TopMenu } from './TopMenu';
 import { DelegateDialog } from './DelegateDialog';
 import { delegate, type DelegateResult } from '../delegate';
+import { rewardsOf, type RewardLine } from '../rewards';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 import { targetOf } from '../targets';
@@ -74,6 +75,8 @@ export function GameScreen({
   // 任せる（早送り）: 開いているか・任せた結果
   const [delegateOpen, setDelegateOpen] = useState(false);
   const [delegated, setDelegated] = useState<DelegateResult | null>(null);
+  // 直前の場所の報酬と罰（場所を進めた直後に作る）
+  const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
   const [ticker, setTicker] = useState<
     { half: 'first'; mid: MidBasho } | { half: 'second'; next: GameState; from: number } | null
@@ -99,6 +102,8 @@ export function GameScreen({
 
   const go = (next: GameState) => {
     setGame(next);
+    if (next.lastReport)
+      setRewards({ bashoIndex: next.lastReport.bashoIndex, lines: rewardsOf(game, next) });
     const hl = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
     setHighlights(hl.length > 0 ? hl : null);
     setShowReport(true);
@@ -312,7 +317,12 @@ export function GameScreen({
         />
       )}
       {!highlights && showReport && game.lastReport && !blocked && (
-        <ReportDialog game={game} report={game.lastReport} onClose={() => setShowReport(false)} />
+        <ReportDialog
+          game={game}
+          report={game.lastReport}
+          rewards={rewards?.bashoIndex === game.lastReport.bashoIndex ? rewards.lines : null}
+          onClose={() => setShowReport(false)}
+        />
       )}
       {game.pending.successor && <SuccessorDialog game={game} setGame={setGame} />}
       {game.pending.takeOver && <TakeOverDialog game={game} setGame={setGame} />}

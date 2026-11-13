@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { boxDrawn } from './KeikobaScene';
 import { TrainingSection } from './TrainingSection';
+import { RewardsSection } from './RewardsSection';
+import type { RewardLine } from '../rewards';
 import { Hakoniwa } from './Hakoniwa';
 import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
@@ -36,10 +38,13 @@ function rankValue(r: Rank): number {
 export function ReportDialog({
   game,
   report,
+  rewards,
   onClose,
 }: {
   game: GameState;
   report: BashoReport;
+  /** 報酬と罰（場所を進めた直後だけ。前の結果を開き直したときは出さない） */
+  rewards?: RewardLine[] | null;
   onClose: () => void;
 }) {
   const { t, lang } = useI18n();
@@ -103,6 +108,8 @@ export function ReportDialog({
             <dd className={net < 0 ? 'is-minus' : ''}>{money(t, net, lang)}</dd>
           </div>
         </dl>
+
+        {rewards && <RewardsSection lines={rewards} />}
 
         {report.rival && (
           <p className="callout callout--rival">

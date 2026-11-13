@@ -3,6 +3,7 @@ import {
   answerRetirement,
   declineCandidate,
   setIntensity,
+  sekitoriGain,
   setPlayHurt,
   chooseTreatment,
   type Treatment,
@@ -64,6 +65,12 @@ export function StableTab({
     .filter((r) => r.stableId === game.player.stableId)
     .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   const cap = stableCapacity(game);
+  // 十両が目標の弟子は、関取になったら部屋の口座がいくら変わるかを添える
+  const juryoGain = (id: number): number | null => {
+    const r = game.rikishi.find((x) => x.id === id);
+    const info = r ? targetOf(game, r, ranks) : null;
+    return info?.target.kind === 'up' && info.target.to === 'juryo' ? sekitoriGain(game, id) : null;
+  };
   const full = mine.length >= cap;
   const requests = game.pending.retireRequests
     .map((id) => game.rikishi.find((r) => r.id === id))
@@ -167,6 +174,7 @@ export function StableTab({
               r={r}
               rank={ranks.get(r.id) ?? null}
               target={targetOf(game, r, ranks)}
+              sekitoriYen={juryoGain(r.id)}
               onPolicy={(p) => {
                 setGame(setPolicy(game, r.id, p));
                 update({ guide: withStep(settings.guide, 'policy') });
@@ -240,6 +248,7 @@ function RikishiCard({
   r,
   rank,
   target,
+  sekitoriYen,
   onPolicy,
   onIntensity,
   onPlayHurt,
@@ -250,6 +259,7 @@ function RikishiCard({
   r: Rikishi;
   rank: Rank | null;
   target: TargetInfo | null;
+  sekitoriYen: number | null;
   onPolicy: (p: Policy) => void;
   onIntensity: (i: Intensity) => void;
   onPlayHurt: (play: boolean) => void;
@@ -274,7 +284,7 @@ function RikishiCard({
         <span className="card__meta">
           {t('rikishi.meta', { age: r.age, height: r.height, weight: Math.round(r.weight) })}
         </span>
-        <TargetLine info={target} />
+        <TargetLine info={target} sekitoriYen={sekitoriYen} />
       </div>
       <div className="card__body">
         <dl className="abilities">
