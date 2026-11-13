@@ -28,6 +28,8 @@ import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
 import { GameOver } from './GameOver';
 import { MidBashoDialog } from './MidBashoDialog';
 import { TopMenu } from './TopMenu';
+import { DelegateDialog } from './DelegateDialog';
+import { delegate, type DelegateResult } from '../delegate';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 import { targetOf } from '../targets';
@@ -44,16 +46,6 @@ const SCENE_TARGET: Record<SceneAction, [Tab, string | null]> = {
   banzuke: ['banzuke', null],
 };
 const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
-
-/** 早送り（1年）は、判断が要ることが起きたら止まる */
-function advanceYear(start: GameState): GameState {
-  let s = start;
-  for (let i = 0; i < 6; i++) {
-    s = advanceBasho(s);
-    if (s.gameOver || isBlocked(s) || s.pending.retireRequests.length > 0) break;
-  }
-  return s;
-}
 
 export function GameScreen({
   game,
@@ -79,6 +71,9 @@ export function GameScreen({
   const [confirmQuit, setConfirmQuit] = useState(false);
   // 中日（8日目）で止まっている場所（前半の様子）
   const [mid, setMid] = useState<MidBasho | null>(null);
+  // 任せる（早送り）: 開いているか・任せた結果
+  const [delegateOpen, setDelegateOpen] = useState(false);
+  const [delegated, setDelegated] = useState<DelegateResult | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
   const [ticker, setTicker] = useState<
     { half: 'first'; mid: MidBasho } | { half: 'second'; next: GameState; from: number } | null
@@ -186,9 +181,36 @@ export function GameScreen({
             {t('action.lastReport')}
           </button>
         )}
-        <button className="button" disabled={blocked} onClick={() => go(advanceYear(game))}>
-          {t('action.year')}
-        </button>
+        <div className="delegate-menu">
+          <button
+            className="button"
+            disabled={blocked}
+            aria-haspopup="menu"
+            aria-expanded={delegateOpen}
+            onClick={() => setDelegateOpen(!delegateOpen)}
+          >
+            {t('action.delegate')}
+          </button>
+          {delegateOpen && (
+            <div className="topmenu__list delegate-menu__list" role="menu">
+              {([1, 6] as const).map((n) => (
+                <button
+                  key={n}
+                  className="topmenu__item"
+                  role="menuitem"
+                  onClick={() => {
+                    setDelegateOpen(false);
+                    const r = delegate(game, n);
+                    setGame(r.game);
+                    setDelegated(r);
+                  }}
+                >
+                  {t(n === 1 ? 'action.delegate1' : 'action.delegate6')}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           className="button button--primary"
           disabled={blocked}
@@ -214,6 +236,9 @@ export function GameScreen({
         </button>
       </footer>
 
+      {delegated && (
+        <DelegateDialog game={game} result={delegated} onClose={() => setDelegated(null)} />
+      )}
       {ticker?.half === 'first' && (
         <BashoTicker
           title={t('ticker.first')}
