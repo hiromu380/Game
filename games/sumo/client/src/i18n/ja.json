@@ -1030,7 +1030,7 @@
   "guide.doneAria": "（済み）",
   "guide.dismiss": "手引きを閉じる",
   "guide.tipOk": "わかった",
-  "guide.tip.stable": "部屋: 弟子の稽古の方針を決め、入門希望者や出来事に答えます。準備ができたら下の「本場所へ」。",
+  "guide.tip.stable": "部屋: 場所前の4週、毎週コマンドを1つ選びます。弟子を押すと話しかけられます。準備ができたら下の「本場所へ」。",
   "guide.tip.banzuke": "番付: 全部の力士の地位です。自分の部屋の力士は ◆ で示します。段を切り替えて見られます。",
   "guide.tip.ledger": "帳簿: 前の場所のお金の出入り。後援会・部屋の人・ちゃんこ・設備もここで決めます。赤字は親方の貯金で埋まります。",
   "guide.tip.lineage": "一門: 歴代の親方と系譜図。部屋付きの親方が育つと、跡継ぎや分家になります。",
@@ -1375,7 +1375,7 @@
   "outlook.title": "この場所の見込み",
   "outlook.stable": "口座 {yen}",
   "outlook.personal": "貯金 {yen}",
-  "outlook.runway": "このままだと あと{n}場所でお金が尽きる",
+  "outlook.runway": "あと{n}場所で資金切れ",
   "target.sekitoriYen": "関取なら口座 {yen}/場所",
   "prep.wall": "壁",
   "prep.wallDesc": "素質の壁に当たっている。負荷の大きい稽古で素質が上がる",
@@ -1410,5 +1410,14 @@
   "prep.confirm.pair": "{a}と{b}",
   "prep.confirm.fill": "残りの{n}週をいつも通りにする",
   "prep.decide": "決定",
-  "prep.back": "やめる"
+  "prep.back": "やめる",
+  "tab.deshi": "弟子",
+  "deshi.open": "{name}のカードを開く",
+  "deshi.ask": "治療の方針",
+  "deshi.close": "閉じる",
+  "event.title": "出来事",
+  "event.ok": "わかった",
+  "event.more": "（{n}人）",
+  "guide.tip.deshi": "弟子: 1人を押すと、稽古の方針と量を変えられます。",
+  "prep.return": "もどる"
 }

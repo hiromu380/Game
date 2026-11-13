@@ -50,7 +50,12 @@ export function KeikobaScene({
   onDetail?: (id: number) => void;
 }) {
   const { t } = useI18n();
-  const [view, setView] = useState<View>('exterior');
+  // 狭い画面では稽古場から（背が低く、週の稽古の様子が見える）。広い画面では外観から
+  const [view, setView] = useState<View>(() =>
+    typeof window !== 'undefined' && window.matchMedia?.('(max-width: 640px)').matches
+      ? 'keikoba'
+      : 'exterior',
+  );
   const [picked, setPicked] = useState<number | null>(null);
   const names = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r.name])), [game.rikishi]);
   const titled = (cast: Actor[]): SceneActor[] =>

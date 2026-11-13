@@ -10,7 +10,8 @@ import type { GameState } from '@ichimon/sim';
 export type GuideStep = 'accept' | 'policy' | 'basho' | 'bout' | 'ledger';
 // 入門希望者は場所を進めると来るので、受け入れるのは後のほう
 export const GUIDE_STEPS: readonly GuideStep[] = ['policy', 'basho', 'bout', 'accept', 'ledger'];
-export type TipTab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
+export type TipTab =
+  'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 
 export interface GuideProgress {
   dismissed: boolean;

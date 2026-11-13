@@ -159,21 +159,7 @@ export function PrepPanel({
         return t('prep.confirm.cmd', { cmd: t(`prep.cmd.${d.kind}`) });
     }
   };
-  // 先週の行動で動いた量（弟子の疲れの横に出す）
   const lastWeek = game.prep.log[game.prep.log.length - 1];
-  const gainOf = (id: number): { text: string; tone: 'up' | 'hurt' | 'wall' } | null => {
-    if (!lastWeek) return null;
-    if (lastWeek.injured.includes(id)) return { text: t('prep.hurt'), tone: 'hurt' };
-    if (lastWeek.walls?.some((x) => x.id === id)) return { text: t('prep.broke'), tone: 'wall' };
-    const g = lastWeek.gains.find((x) => x.id === id);
-    if (!g) return null;
-    const best = (['oshi', 'yotsu', 'waza'] as const)
-      .filter((k) => g[k] > 0)
-      .sort((a, b) => g[b] - g[a])[0];
-    if (best) return { text: `${t(`style.${best}`)}${signedPoints(g[best])}`, tone: 'up' };
-    if (g.fatigue < 0) return { text: `${t('talk.fatigue')}${signedInt(g.fatigue)}`, tone: 'up' };
-    return null;
-  };
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
   const mine = game.rikishi
     .filter((r) => r.stableId === game.player.stableId)
@@ -223,10 +209,37 @@ export function PrepPanel({
     </>
   );
 
+  // 1行の知らせ: 指しているコマンドの効果。指していなければ、先週の結果
+  const say = pointed ?? (draft ? null : menu);
+  const message = say
+    ? t(`prep.desc.${say}` as MessageKey)
+    : lastWeek
+      ? `${t('prep.week', { n: lastWeek.week })} ${t(`prep.cmd.${lastWeek.action.kind}`)} ${weekLine(t, game, lastWeek)}`
+      : t('prep.desc.none');
+  const back = () => {
+    if (draft) setDraft(null);
+    else if (first !== null) setFirst(null);
+    else setMenu(null);
+  };
+  const picking = menu !== null && PICKS.has(menu) && !draft;
+
   return (
     <section className="panel prep" id="prep-panel" aria-labelledby="prep-title">
       <h2 id="prep-title">
         {t('prep.title')}
+        {left > 0 && <span className="prep__weeknow">{t('prep.week', { n: week })}</span>}
+        {left > 0 && !draft && (
+          <button
+            className="prep__fillbtn"
+            onClick={() => {
+              setMenu(null);
+              setFirst(null);
+              setDraft({ kind: 'fill' });
+            }}
+          >
+            {t('prep.fill')}
+          </button>
+        )}
         <span className="prep__weeks" aria-label={t('prep.left', { n: left })}>
           {Array.from({ length: PREP.weeks }, (_, i) => (
             <span
@@ -241,109 +254,46 @@ export function PrepPanel({
       {left === 0 ? (
         <p className="prep__done">{t('prep.done')}</p>
       ) : (
-        <div className="prep__body">
-          <div className="prep__menu" role="group" aria-label={t('prep.week', { n: week })}>
-            <p className="prep__week">{t('prep.week', { n: week })}</p>
-            {MENUS.map((m) => (
-              <button
-                key={m}
-                className={`prep__cmd ${menu === m ? 'is-selected' : ''}`}
-                aria-pressed={PICKS.has(m) ? menu === m : undefined}
-                disabled={!usable(m)}
-                onPointerEnter={() => setPointed(m)}
-                onFocus={() => setPointed(m)}
-                onClick={() => {
-                  setFirst(null);
-                  if (PICKS.has(m)) {
-                    setMenu(menu === m ? null : m);
-                    setDraft(null);
-                  } else {
-                    setMenu(m);
-                    setDraft({ kind: m } as PrepAction);
-                  }
-                }}
-              >
-                <span>{t(`prep.cmd.${m}`)}</span>
-                {cost[m] !== undefined && (
-                  <span className="prep__cost">{money(t, cost[m]!, lang)}</span>
-                )}
-              </button>
-            ))}
-            <p className="prep__help" aria-live="polite">
-              {t(`prep.desc.${pointed ?? menu ?? 'none'}` as MessageKey)}
-              {RISK[pointed ?? menu ?? 'usual'] !== undefined && (
-                <span className="prep__risk">
-                  {t('prep.risk', { n: RISK[(pointed ?? menu)!]! })}
-                </span>
-              )}
-            </p>
-          </div>
-          {draft && (
-            <div className="prep__pick prep__confirm" role="group" aria-label={t('prep.decide')}>
-              <p className="prep__week">{t('prep.confirm.title')}</p>
-              <p className="prep__confirmtext" aria-live="polite">
-                {draftText(draft)}
-              </p>
-              <div className="prep__confirmbtns">
-                <button className="button" onClick={() => setDraft(null)}>
-                  {t('prep.back')}
-                </button>
+        <>
+          <p
+            className={`prep__help ${lastWeek && !say && lastWeek.injured.length > 0 ? 'is-hurt' : ''}`}
+            aria-live="polite"
+          >
+            {message}
+            {say && RISK[say] !== undefined && (
+              <span className="prep__risk">{t('prep.risk', { n: RISK[say]! })}</span>
+            )}
+          </p>
+          {!picking && !draft && (
+            <div className="prep__menu" role="group" aria-label={t('prep.week', { n: week })}>
+              {MENUS.map((m) => (
                 <button
-                  className="button button--primary"
-                  // 開いたら決定へフォーカスを移す（もう一度 Enter で行う）
-                  autoFocus
-                  onClick={() => (draft.kind === 'fill' ? fill() : act(draft))}
+                  key={m}
+                  className="prep__cmd"
+                  disabled={!usable(m)}
+                  onPointerEnter={() => setPointed(m)}
+                  onPointerLeave={() => setPointed(null)}
+                  onFocus={() => setPointed(m)}
+                  onBlur={() => setPointed(null)}
+                  onClick={() => {
+                    setFirst(null);
+                    setPointed(null);
+                    setMenu(m);
+                    setDraft(PICKS.has(m) ? null : ({ kind: m } as PrepAction));
+                  }}
                 >
-                  {t('prep.decide')}
+                  <span>{t(`prep.cmd.${m}`)}</span>
+                  {cost[m] !== undefined && (
+                    <span className="prep__cost">{money(t, cost[m]!, lang)}</span>
+                  )}
                 </button>
-              </div>
+              ))}
             </div>
           )}
-          {!menu && !draft && (
-            <div className="prep__pick prep__roster" aria-label={t('prep.roster')}>
-              <p className="prep__week">{t('prep.roster')}</p>
-              <ul>
-                {mine.map((r) => (
-                  <li key={r.id}>
-                    <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
-                    <span className="prep__name">
-                      {r.name}
-                      {wallTag(r)}
-                    </span>
-                    {(() => {
-                      const g = gainOf(r.id);
-                      return (
-                        <span
-                          key={`${game.bashoIndex}:${game.prep.week}`}
-                          className={`prep__gain ${g ? `is-new is-${g.tone}` : ''}`}
-                        >
-                          {g?.text ?? ''}
-                        </span>
-                      );
-                    })()}
-                    {r.injury > 0 ? (
-                      <span className="tag tag--warn">{t('prep.hurt')}</span>
-                    ) : (
-                      <span
-                        className="prep__fatigue"
-                        aria-label={`${t('talk.fatigue')} ${Math.round(r.fatigue)}`}
-                      >
-                        <span className="bar" aria-hidden="true">
-                          <span
-                            className={`bar__fill ${r.fatigue >= 70 ? 'bar__fill--warn' : ''}`}
-                            style={{ width: `${Math.min(100, r.fatigue)}%` }}
-                          />
-                        </span>
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {menu && !draft && PICKS.has(menu) && (
+          {picking && (
             <div className="prep__pick" role="group" aria-label={t(`prep.cmd.${menu}`)}>
               <p className="prep__week">
+                {t(`prep.cmd.${menu}`)}:{' '}
                 {menu === 'spar' && first !== null
                   ? t('prep.pick.sparSecond', {
                       name: mine.find((r) => r.id === first)?.name ?? '',
@@ -406,33 +356,33 @@ export function PrepPanel({
                     <span className="prep__sub">{t(`scout.${id}.desc` as MessageKey)}</span>
                   </button>
                 ))}
+              <div className="prep__confirmbtns">
+                <button className="button" onClick={back}>
+                  {t('prep.return')}
+                </button>
+              </div>
             </div>
           )}
-        </div>
-      )}
-      {game.prep.log.length > 0 && (
-        <ol className="prep__log" aria-label={t('prep.logAria')}>
-          {game.prep.log.map((w) => (
-            <li key={w.week} className={w.injured.length > 0 ? 'is-hurt' : undefined}>
-              <span className="prep__logweek">{t('prep.week', { n: w.week })}</span>
-              {t(`prep.cmd.${w.action.kind}`)}
-              <span className="prep__logtext">{weekLine(t, game, w)}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-      {left > 0 && (
-        <div className="prep__foot">
-          <button
-            className="button"
-            onClick={() => {
-              setMenu(null);
-              setDraft({ kind: 'fill' });
-            }}
-          >
-            {t('prep.fill')}
-          </button>
-        </div>
+          {draft && (
+            <div className="prep__pick prep__confirm" role="group" aria-label={t('prep.decide')}>
+              <p className="prep__week">{t('prep.confirm.title')}</p>
+              <p className="prep__confirmtext">{draftText(draft)}</p>
+              <div className="prep__confirmbtns">
+                <button className="button" onClick={back}>
+                  {t('prep.back')}
+                </button>
+                <button
+                  className="button button--primary"
+                  // 開いたら決定へフォーカスを移す（もう一度 Enter で行う）
+                  autoFocus
+                  onClick={() => (draft.kind === 'fill' ? fill() : act(draft))}
+                >
+                  {t('prep.decide')}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

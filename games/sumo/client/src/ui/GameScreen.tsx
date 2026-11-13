@@ -15,6 +15,8 @@ import { OyakataPortrait } from '../art/Portraits';
 import { useSettings } from '../settings';
 import { bashoName, money } from '../format';
 import { StableTab } from './StableTab';
+import { DeshiTab } from './DeshiTab';
+import { EventDialogs } from './EventDialogs';
 import { BanzukeTab } from './BanzukeTab';
 import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
@@ -38,18 +40,18 @@ import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 import { targetOf } from '../targets';
 
-type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
+type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 
 /** 部屋の絵で押した所 → 開くタブと、その中の欄 */
 const SCENE_TARGET: Record<SceneAction, [Tab, string | null]> = {
   ledger: ['ledger', null],
   staff: ['ledger', 'staff-panel'],
-  stable: ['stable', 'mine-title'],
-  policy: ['stable', 'mine-title'],
+  stable: ['deshi', null],
+  policy: ['deshi', null],
   scout: ['stable', 'prep-panel'],
   banzuke: ['banzuke', null],
 };
-const TABS: Tab[] = ['stable', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
+const TABS: Tab[] = ['stable', 'deshi', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
 
 export function GameScreen({
   game,
@@ -222,6 +224,7 @@ export function GameScreen({
         {tab === 'stable' && (
           <StableTab game={game} ranks={ranks} setGame={setGame} onSceneAction={goTo} />
         )}
+        {tab === 'deshi' && <DeshiTab game={game} ranks={ranks} setGame={setGame} />}
         {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
         {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}
         {tab === 'lineage' && <LineageTab game={game} />}
@@ -426,6 +429,16 @@ export function GameScreen({
             />
           );
         })()}
+      {/* 返事が要るもの: ほかの窓が閉じているときに1件ずつ */}
+      {!ticker &&
+        !mid &&
+        !tactic &&
+        !live &&
+        !highlights &&
+        !(showReport && game.lastReport) &&
+        !delegated &&
+        !delegateOpen &&
+        !blocked && <EventDialogs game={game} ranks={ranks} setGame={setGame} />}
       {highlights && game.lastReport && !blocked && (
         <HighlightDialog
           game={game}

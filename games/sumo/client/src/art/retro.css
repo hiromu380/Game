@@ -818,3 +818,367 @@ body.has-modal {
   min-height: 44px;
   min-width: 6em;
 }
+
+/* 部屋: 箱庭とコマンド窓。広い画面では横に並べ、狭い画面では縦に（1画面に収める） */
+.room__main {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .room__main {
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  }
+}
+.room__main > .panel {
+  margin: 0;
+}
+
+/* コマンド窓: コマンドは2列。相手選び・確かめは、コマンドの代わりに同じ場所へ出す */
+.prep__menu {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.prep__pick {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.prep__weeknow {
+  margin-left: 12px;
+  font-size: 0.875rem;
+}
+/* 1行の知らせ（昔のゲームのメッセージ窓） */
+.prep__help {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--odo-light);
+  min-height: 3em;
+}
+.prep__help.is-hurt {
+  color: var(--shu-light);
+}
+.prep__help .prep__risk {
+  color: var(--shu-light);
+  border-color: var(--shu-light);
+}
+.prep__foot {
+  margin-top: 8px;
+}
+.prep__pick .prep__confirmbtns {
+  margin-top: 6px;
+}
+
+/* 弟子: 1人1行の一覧（押すとカード） */
+.deshi__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.deshi__row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 8em minmax(0, 1fr) 96px;
+  grid-template-areas:
+    'rank name fat'
+    'rank sub goal';
+  gap: 2px 10px;
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 10px 6px 26px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+.deshi__row:hover,
+.deshi__row:focus-visible {
+  background: var(--odo-light);
+}
+.deshi__row:hover::before,
+.deshi__row:focus-visible::before {
+  content: '▶';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--shu);
+}
+.deshi__rank {
+  grid-area: rank;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.deshi__name {
+  grid-area: name;
+}
+.deshi__name .tag {
+  margin-left: 6px;
+}
+.deshi__sub {
+  grid-area: sub;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.deshi__goal {
+  grid-area: goal;
+  font-size: 0.8125rem;
+  color: var(--ai);
+  text-align: right;
+}
+.deshi__fatigue {
+  grid-area: fat;
+}
+.deshi__fatigue .bar {
+  display: block;
+}
+@media (max-width: 640px) {
+  .deshi__row {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-areas:
+      'rank fat'
+      'name name'
+      'sub goal';
+  }
+}
+.deshi__sheet {
+  max-width: 640px;
+}
+.deshi__sheet .rikishi-list {
+  margin: 0;
+}
+
+/* 返事が要るものの窓 */
+.event-box > .panel {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.event-box__count {
+  margin-left: 8px;
+  font-size: 0.875rem;
+}
+
+/* 狭い画面: 部屋タブを1画面に収める（上の帯・タブ・下の帯を詰め、目標は1行、絵の切り替えは絵に重ねる） */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-block: 6px;
+  }
+  .topbar__portrait {
+    display: none;
+  }
+  .topbar__basho {
+    font-size: 0.75rem;
+  }
+  .topbar__stable {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .topbar__sub {
+    display: none;
+  }
+  .topbar__stats {
+    order: 0;
+    gap: 10px;
+  }
+  .topbar__stats dt {
+    font-size: 0.6875rem;
+  }
+  .topbar__stats dd {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .topbar__stats > div:last-child {
+    display: none;
+  }
+  .topmenu {
+    order: 0;
+  }
+  .topmenu > .button {
+    min-width: 44px;
+    padding-inline: 8px;
+  }
+  .tabs__tab {
+    padding: 0 9px;
+    min-height: 40px;
+  }
+  .actionbar {
+    padding-top: 8px;
+  }
+  .actionbar__hint {
+    display: none;
+  }
+  .goals-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 6px 10px;
+  }
+  .goals-card__label {
+    display: none;
+  }
+  .goals-card__head {
+    order: 2;
+  }
+  .goals-card__name {
+    font-size: 1rem;
+  }
+  .goals-card .note {
+    grid-column: 1 / -1;
+  }
+  .scene-box {
+    position: relative;
+    gap: 4px;
+  }
+  .scene-box__tabs {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 4;
+  }
+  .hakoniwa__actions {
+    display: none;
+  }
+  .prep .outlook {
+    gap: 0 10px;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+  }
+  .prep .outlook__label {
+    display: none;
+  }
+  .prep__menu {
+    padding: 4px;
+    gap: 0;
+  }
+  .stack.room {
+    gap: 10px;
+  }
+}
+@media (max-width: 640px) {
+  .topbar__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .topbar__stable {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar__stats {
+    flex: 0 0 auto;
+  }
+  /* メニューは「≡」だけ（名前は読み上げに残る） */
+  .topmenu__toggle {
+    font-size: 0;
+    min-height: 40px;
+  }
+  .topmenu__toggle::before {
+    font-size: 1.25rem;
+    margin-right: 0;
+  }
+  /* 箱庭（稽古場）は少し小さく、真ん中に */
+  .scene-box .hakoniwa {
+    max-width: 300px;
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+/* 狭い画面の上の帯: 1行目に場所と部屋・メニュー、2行目にお金（字は小さく横に） */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .topbar__main {
+    flex: 1 1 0;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .topmenu {
+    order: 1;
+  }
+  .topbar__stats {
+    order: 2;
+    flex: 1 0 100%;
+    gap: 14px;
+  }
+  .topbar__stats > div {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .topbar__stats > div:last-child {
+    display: flex;
+  }
+}
+/* コマンド窓の題字の帯: 「残りはいつも通り」 */
+.prep__fillbtn {
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 2px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.prep__fillbtn:hover,
+.prep__fillbtn:focus-visible {
+  background: var(--white);
+  color: var(--ai);
+}
+.panel > h2 .prep__fillbtn + .prep__weeks {
+  margin-left: 10px;
+}
+@media (max-width: 640px) {
+  .prep__weeknow {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .prep__menu .prep__cmd {
+    min-height: 44px;
+    padding-block: 2px;
+  }
+  .panel.prep > h2 {
+    padding-block: 4px;
+  }
+  .actionbar {
+    padding-bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) + 6px));
+  }
+}
+@media (max-width: 640px) {
+  .prep__menu .prep__cmd {
+    padding-left: 22px;
+    padding-right: 4px;
+    gap: 4px;
+    justify-content: space-between;
+  }
+  .prep__menu .prep__cmd > span:first-child {
+    white-space: nowrap;
+  }
+  .prep__menu .prep__cost {
+    font-size: 0.6875rem;
+  }
+  .content {
+    padding-top: 10px;
+  }
+}
+/* コマンドの名前と費用は1行に */
+.prep__menu .prep__cmd {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.prep__menu .prep__cmd > span:first-child {
+  white-space: nowrap;
+}
