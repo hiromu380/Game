@@ -1,5 +1,6 @@
 import type { TrainingResult } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { signedPoints } from '../points';
 
 /** 符号つきの数（小数1桁。動いていなければ ±0） */
 export function signed(n: number): string {
@@ -51,7 +52,7 @@ export function TrainingSection({
                 </th>
                 {([r.oshi, r.yotsu, r.waza] as const).map((v, i) => (
                   <td key={i} className={v > 0.05 ? 'up' : v < -0.05 ? 'down' : ''}>
-                    {signed(v)}
+                    {signedPoints(v)}
                   </td>
                 ))}
                 <td>{signed(r.weight)}</td>

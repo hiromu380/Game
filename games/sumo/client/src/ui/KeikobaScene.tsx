@@ -8,6 +8,7 @@ import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound
 import { drawGround } from '../art/hakoniwa/ground';
 import { amongPieces, compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
 import { Hakoniwa, type Drawn, type Pop, type SceneActor } from './Hakoniwa';
+import { signedPoints } from '../points';
 import { RikishiTalk } from './RikishiTalk';
 
 /** 枠の下の中央で置く絵（稽古場・巡業）を、箱庭の描く物にする */
@@ -67,7 +68,13 @@ export function KeikobaScene({
             .filter((k) => g[k] > 0)
             .sort((a, b) => g[b] - g[a])[0];
           return best
-            ? [{ rikishiId: g.id, text: `${t(`style.${best}`)}+${g[best].toFixed(1)}`, tone: 'up' }]
+            ? [
+                {
+                  rikishiId: g.id,
+                  text: `${t(`style.${best}`)}${signedPoints(g[best])}`,
+                  tone: 'up',
+                },
+              ]
             : [];
         }),
         ...week.injured.map((id): Pop => ({ rikishiId: id, text: t('prep.hurt'), tone: 'hurt' })),

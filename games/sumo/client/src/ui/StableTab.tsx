@@ -32,6 +32,7 @@ import { IndependencePanel } from './IndependencePanel';
 import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { PrepPanel } from './PrepPanel';
+import { points } from '../points';
 import { TargetLine } from './TargetLine';
 import { targetOf, type TargetInfo } from '../targets';
 import { GuideCard } from './Guide';
@@ -287,7 +288,7 @@ function RikishiCard({
                     style={{ width: `${Math.min(100, r.abilities[k])}%` }}
                   />
                 </span>
-                <span className="abilities__num">{Math.round(r.abilities[k])}</span>
+                <span className="abilities__num">{points(r.abilities[k])}</span>
               </dd>
             </div>
           ))}

@@ -18,6 +18,7 @@ import {
 import { useI18n, type MessageKey, type TranslateFn } from '../i18n';
 import { money, rankLabel } from '../format';
 import { signed } from './TrainingSection';
+import { signedPoints } from '../points';
 
 type Menu = 'coach' | 'spar' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -33,7 +34,7 @@ export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string
     .map((g) => {
       const parts = (['oshi', 'yotsu', 'waza'] as const)
         .filter((k) => g[k] !== 0)
-        .map((k) => `${t(`style.${k}`)}${signed(g[k])}`);
+        .map((k) => `${t(`style.${k}`)}${signedPoints(g[k])}`);
       if (g.weight !== 0) parts.push(`${t('report.training.weight')}${signed(g.weight)}`);
       if (g.fatigue !== 0) parts.push(`${t('talk.fatigue')}${signed(g.fatigue)}`);
       return `${name(g.id)} ${parts.join(' ')}`.trim();
@@ -110,7 +111,7 @@ export function PrepPanel({
     const best = (['oshi', 'yotsu', 'waza'] as const)
       .filter((k) => g[k] > 0)
       .sort((a, b) => g[b] - g[a])[0];
-    if (best) return { text: `${t(`style.${best}`)}+${g[best].toFixed(1)}`, hurt: false };
+    if (best) return { text: `${t(`style.${best}`)}${signedPoints(g[best])}`, hurt: false };
     if (g.fatigue < 0) return { text: `${t('talk.fatigue')}${signed(g.fatigue)}`, hurt: false };
     return null;
   };

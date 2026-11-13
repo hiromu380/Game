@@ -12,6 +12,7 @@ import { money, rankLabel } from '../format';
 import { PixelPortrait } from '../art/PixelPortrait';
 import type { Look } from '../art/look';
 import { RankChart } from './RankChart';
+import { points } from '../points';
 
 export interface DetailSubject {
   name: string;
@@ -155,9 +156,9 @@ export function RikishiDetail({
         {s.abilities && (
           <p className="detail__abilities">
             {t('detail.abilities', {
-              oshi: Math.round(s.abilities.oshi),
-              yotsu: Math.round(s.abilities.yotsu),
-              waza: Math.round(s.abilities.waza),
+              oshi: points(s.abilities.oshi),
+              yotsu: points(s.abilities.yotsu),
+              waza: points(s.abilities.waza),
             })}
           </p>
         )}
