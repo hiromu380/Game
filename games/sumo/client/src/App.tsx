@@ -5,11 +5,13 @@ import { loadGame, loadSettings, saveGame, saveSettings, type Settings } from '.
 import { NewGame } from './ui/NewGame';
 import { GameScreen } from './ui/GameScreen';
 import { SettingsContext } from './settings';
+import { useDialogs } from './dialogs';
 
 export function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [game, setGame] = useState<GameState | null>(() => loadGame());
   const { lang } = settings;
+  useDialogs();
   const i18n = useMemo(() => ({ lang, t: makeT(lang) }), [lang]);
   const settingsValue = useMemo(
     () => ({

@@ -164,7 +164,7 @@ export function RikishiDetail({
         <h3>{t('detail.chart')}</h3>
         <RankChart track={s.track} />
         <div className="modal__actions">
-          <button className="button button--primary" onClick={onClose} autoFocus>
+          <button className="button button--primary" data-dismiss onClick={onClose} autoFocus>
             {t('common.close')}
           </button>
         </div>

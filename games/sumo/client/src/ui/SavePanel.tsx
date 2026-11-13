@@ -78,7 +78,7 @@ export function SavePanel({ game, setGame }: { game: GameState; setGame: (g: Gam
               })}
             </p>
             <div className="modal__actions">
-              <button className="button" onClick={() => setLoaded(null)}>
+              <button data-dismiss className="button" onClick={() => setLoaded(null)}>
                 {t('common.cancel')}
               </button>
               <button

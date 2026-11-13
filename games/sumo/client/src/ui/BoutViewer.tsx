@@ -122,7 +122,7 @@ export function BoutViewer({
             })}
           </p>
           <div className="modal__actions">
-            <button className="button button--primary" onClick={onClose}>
+            <button className="button button--primary" data-dismiss onClick={onClose}>
               {t('common.close')}
             </button>
           </div>
@@ -216,7 +216,7 @@ export function BoutViewer({
               {t('bout.skip')}
             </button>
           )}
-          <button className="button button--primary" onClick={onClose}>
+          <button className="button button--primary" data-dismiss onClick={onClose}>
             {t('common.close')}
           </button>
         </div>

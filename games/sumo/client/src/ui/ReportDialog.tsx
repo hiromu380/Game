@@ -306,7 +306,7 @@ export function ReportDialog({
 
         <p className="ledger__net">{t('report.money', { value: money(t, net, lang) })}</p>
         <div className="modal__actions">
-          <button className="button button--primary" onClick={onClose}>
+          <button className="button button--primary" data-dismiss onClick={onClose}>
             {t('common.close')}
           </button>
         </div>

@@ -131,7 +131,7 @@ export function StaffPanel({
               ))}
             </ul>
             <div className="modal__actions">
-              <button className="button" onClick={() => setChoosing(null)}>
+              <button data-dismiss className="button" onClick={() => setChoosing(null)}>
                 {t('common.cancel')}
               </button>
             </div>
