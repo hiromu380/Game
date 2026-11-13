@@ -27,6 +27,12 @@ export const PARTS: Balance['parts'] = {
   solar: { price: 2, maxActivations: 1, rarity: 'common' },
   inspector: { price: 4, maxActivations: 1, rarity: 'uncommon' },
   piggyBank: { price: 3, maxActivations: 3, rarity: 'uncommon' },
+  // フェーズ4で追加（数値の根拠は docs/balance-log.md）
+  coinSorter: { price: 4, maxActivations: 2, rarity: 'uncommon' },
+  relay: { price: 2, maxActivations: 2, rarity: 'uncommon' },
+  // 2回受けて初めて送るので、発動回数は 2
+  battery: { price: 5, maxActivations: 2, rarity: 'rare' },
+  sorter: { price: 2, maxActivations: 2, rarity: 'uncommon' },
 };
 
 export const PART_PARAMS: Balance['partParams'] = {
@@ -40,6 +46,10 @@ export const PART_PARAMS: Balance['partParams'] = {
   solarPerEmpty: 1,
   inspectorMultiplier: 3,
   piggyBankIncome: 1,
+  coinSorterThreshold: 100,
+  coinSorterIncome: 2,
+  relayJump: 1,
+  batteryMultiplier: 2,
   junkbotMinSteps: 1,
   junkbotMaxSteps: 6,
   junkbotStepDivisor: 2,

@@ -1,5 +1,5 @@
 /**
- * パーツ20種の画像（64×64・モチーフは中央の約 70% に収める: docs/art-style.md「形と線」）
+ * パーツ24種の画像（64×64・モチーフは中央の約 70% に収める: docs/art-style.md「形と線」）
  *
  * 色は系統色（FAMILY_COLORS）が主。回転して向きを表すパーツ（コンベア・分岐器・散布機）は上向きに描く。
  * モチーフの案は docs/plans/phase4-plan.md §9「パーツのモチーフ案」。
@@ -301,6 +301,51 @@ const PARTS: Record<PartId, () => string[]> = {
     path('M18 52 v4 M40 52 v4', line(O, 5)),
     circle(24, 40, 4.5, outlined(INK.steelLight, 1.5)),
     path('M22 38 l4 4 M26 38 l-4 4', line(O, 1.5)),
+  ],
+
+  // コイン選別機: 投入口に入る硬貨と、のぞき窓に並ぶ大小の硬貨（大きいほうだけが受け皿へ）
+  coinSorter: () => [
+    circle(32, 9, 5, outlined(M.coin, THIN)),
+    rect(22, 14, 20, 6, outlined(INK.steelDark, THIN), 2),
+    rect(11, 19, 42, 29, outlined(F.economy.main), 5),
+    rect(11, 37, 42, 11, { fill: shade(F.economy.main) }),
+    rect(11, 19, 42, 29, line(O, 4), 5),
+    rect(16, 24, 32, 13, outlined(INK.steelDark, THIN), 3),
+    circle(25, 30.5, 5, outlined(M.coin, 1.5)),
+    circle(40, 31.5, 3, outlined(INK.steelLight, 1.5)),
+    path('M22 42 h20', line(F.economy.light, 2.5)),
+    rect(17, 48, 30, 7, outlined(INK.steel, THIN), 2),
+  ],
+
+  // 中継タワー: 鉄骨のアンテナ塔と、左右へ飛ぶ電波
+  relay: () => [
+    path('M32 15 L20 53 M32 15 L44 53 M25 39 H39 M28 28 H36', line(O, 7)),
+    path('M32 15 L20 53 M32 15 L44 53 M25 39 H39 M28 28 H36', line(F.placement.main, 3.5)),
+    rect(15, 51, 34, 6, outlined(INK.steel, THIN), 2),
+    path('M42 6 a9 9 0 0 1 0 13 M48 2 a15 15 0 0 1 0 21', line(F.placement.light, 2.5)),
+    path('M22 6 a9 9 0 0 0 0 13 M16 2 a15 15 0 0 0 0 21', line(F.placement.light, 2.5)),
+    circle(32, 12, 5, outlined(F.hazard.main, THIN)),
+  ],
+
+  // 蓄電池: 端子つきの大きな電池と稲妻
+  battery: () => [
+    rect(26, 5, 12, 8, outlined(INK.steel, THIN), 2),
+    rect(14, 12, 36, 44, outlined(F.multiplier.main), 6),
+    rect(14, 42, 36, 14, { fill: shade(F.multiplier.main) }),
+    rect(14, 12, 36, 44, line(O, 4), 6),
+    path('M20 19 q3 -3 8 -3', line(F.multiplier.light, 2.5)),
+    polygon('35,18 23,36 31,36 28,50 42,30 34,30', outlined(F.hazard.main, THIN)),
+  ],
+
+  // 仕分け機: 丁字のレールと、左右に振れる切り替えレバー（上向き基準。今は左、次は右）
+  sorter: () => [
+    path('M32 57 V30 M11 26 H53', line(O, 12)),
+    path('M32 57 V30 M11 26 H53', line(F.branch.main, 7)),
+    polygon('5,26 14,18 14,34', outlined(F.branch.light, THIN)),
+    polygon('59,26 50,18 50,34', outlined(INK.steelLight, THIN)),
+    path('M32 38 L21 24', line(O, 7.5)),
+    path('M32 38 L21 24', line(F.hazard.main, 3.5)),
+    circle(32, 38, 4.5, { fill: INK.steelLight, stroke: O, 'stroke-width': THIN }),
   ],
 };
 

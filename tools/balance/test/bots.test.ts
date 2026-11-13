@@ -20,8 +20,9 @@ describe('ボット', () => {
   });
 
   it('貪欲ボットは最初のシフトをクリアでき、同じシードなら同じ結果になる', () => {
-    const a = playRun(42, 'greedy', OPTIONS);
-    const b = playRun(42, 'greedy', OPTIONS);
+    // SIM_VERSION 7（パーツ4種の追加）でシード42 → 43 に変更（ショップの品揃えが変わり、42 はポンコツロボの乱数で外れるため）
+    const a = playRun(43, 'greedy', OPTIONS);
+    const b = playRun(43, 'greedy', OPTIONS);
     expect(a.shifts[0]?.cleared).toBe(true);
     expect(b.shifts).toEqual(a.shifts);
   });
@@ -46,7 +47,9 @@ describe('ボット', () => {
     // SIM_VERSION 3（日ごとの片付け）でシード3 → 6 に変更（難易度の調整は後で行う）
     // SIM_VERSION 5（床タイル・日ごとのステージ・ボーナス床）でシード6 → 24 に変更（床で購入や配置の判断が変わり、
     // ボットが床を見てスイッチを置くようにしたため）
-    const log = playRun(24, 'greedy', {
+    // SIM_VERSION 7（コイン選別機・中継タワー・蓄電池・仕分け機の追加）でシード24 → 14 に変更
+    // （全パーツ解放ではショップの品揃えが変わるため。1〜27 のうちクリアできたのは 14・19・27）
+    const log = playRun(14, 'greedy', {
       unlock: 'all',
       samples: 3,
       evalMode: 'mean',

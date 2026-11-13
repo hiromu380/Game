@@ -11,7 +11,7 @@ Steam のストアページ（Steamworks の「コンテンツに関するアン
 | ----------------- | --------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------- |
 | マスコット        | `apps/client/src/assets/mascot/bolt-*.svg`（4種）               | AI が描画コード（`apps/client/art/mascot.ts`）を書き、SVG を生成 | AI 生成             |
 | アプリアイコン    | `apps/client/public/icon.svg`・`icon-180.png`・`icon-512.png`   | 同上（ボルトの待機の顔。PNG は SVG から変換）                    | AI 生成             |
-| パーツ            | `apps/client/src/assets/parts/*.svg`（20種）                    | AI が描画コード（`art/parts.ts`）を書き、SVG を生成              | AI 生成             |
+| パーツ            | `apps/client/src/assets/parts/*.svg`（24種）                    | AI が描画コード（`art/parts.ts`）を書き、SVG を生成              | AI 生成             |
 | 盤面              | `apps/client/src/assets/board/*.svg`（床・枠・背景など7種）     | AI が描画コード（`art/board.ts`）                                | AI 生成             |
 | ボス・UI アイコン | `apps/client/src/assets/boss/*.svg`・`ui/*.svg`                 | AI が描画コード（`art/icons.ts`）                                | AI 生成             |
 | ロゴ              | `apps/client/src/assets/logo/*.svg`                             | AI が描画コード（`art/logo.ts`・文字も線で描いた独自の字形）     | AI 生成             |

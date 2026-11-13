@@ -53,6 +53,8 @@ export function simulate(input: SimInput): SimResult {
   const limits = computeActivationLimits(board, rules);
   const used = new Array<number>(board.cells.length).fill(0);
   const partState = new Array<number>(board.cells.length).fill(0);
+  /** パーツが溜めている値（蓄電池）。使うパーツがあるときだけ作る */
+  let partStored: Score[] | null = null;
   /** 一度でも発動したマスか（発動したパーツの数を数える） */
   const activated = new Array<boolean>(board.cells.length).fill(false);
   let activatedParts = 0;
@@ -110,6 +112,7 @@ export function simulate(input: SimInput): SimResult {
   /** 信号を1つ生成し、emit イベントを記録する */
   const emit = (tick: number, x: number, y: number, e: Emission): Signal => {
     const signal: Signal = { id: nextSignalId++, x, y, dir: e.dir, value: e.value };
+    if (e.jump) signal.reach = 1 + e.jump;
     maxValue = scoreMax(maxValue, e.value);
     events.push({ tick, type: 'emit', signalId: signal.id, x, y, dir: e.dir, value: e.value });
     return signal;
@@ -145,6 +148,10 @@ export function simulate(input: SimInput): SimResult {
       }
     }
     if (reaction.nextState !== undefined) partState[y * width + x] = reaction.nextState;
+    if (reaction.nextStored !== undefined) {
+      partStored ??= new Array<Score>(cellCount).fill(SCORE_ZERO);
+      partStored[y * width + x] = reaction.nextStored;
+    }
     if (emits) {
       for (let i = 0; i < emits.length; i++) {
         const emission = emits[i]!;
@@ -189,8 +196,9 @@ export function simulate(input: SimInput): SimResult {
     // signals は生成順（= id 昇順）に並んでいる
     for (let s = 0; s < signals.length; s++) {
       const signal = signals[s]!;
-      const x = signal.x + DIR8_DX[signal.dir]!;
-      const y = signal.y + DIR8_DY[signal.dir]!;
+      const reach = signal.reach ?? 1;
+      const x = signal.x + DIR8_DX[signal.dir]! * reach;
+      const y = signal.y + DIR8_DY[signal.dir]! * reach;
 
       if (x < 0 || y < 0 || x >= width || y >= height) {
         events.push({ tick, type: 'vanish', signalId: signal.id, x, y, reason: 'outOfBoard' });
@@ -254,6 +262,7 @@ export function simulate(input: SimInput): SimResult {
         rng,
         chainCount,
         state: partState[index] ?? 0,
+        stored: partStored?.[index] ?? SCORE_ZERO,
       });
       markActivated(index);
       chainCount++;

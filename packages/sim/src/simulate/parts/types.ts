@@ -32,6 +32,11 @@ export interface ReactionContext extends BaseContext {
   value: Score;
   /** 受けた信号の進行方向 */
   inDir: Dir8;
+  /**
+   * このマスのパーツが溜めている値（初期値 0）。蓄電池が、受けた値を次の発動まで持っておくのに使う。
+   * Reaction.nextStored で更新する（state と同じく、シミュレーション中だけの状態）
+   */
+  stored: Score;
 }
 
 /** tick の終わりにまとめて処理するパーツ（合流炉）に渡される情報 */
@@ -46,6 +51,11 @@ export interface Emission {
   value: Score;
   /** 何 tick 遅れて発射するか（省略時 0 = すぐ） */
   delay?: number;
+  /**
+   * 何マス飛び越えるか（省略時 0）。1 なら隣のマスを飛び越えて、2マス先に届く。
+   * 飛び越えたマスのパーツ・床・使用不可には触れない
+   */
+  jump?: number;
 }
 
 /** パーツの反応結果 */
@@ -60,6 +70,8 @@ export interface Reaction {
   income?: number;
   /** このマスの状態を更新する */
   nextState?: number;
+  /** このマスが溜めている値を更新する */
+  nextStored?: Score;
 }
 
 /** 常時効果（潤滑油タンクなど）: シミュレーション開始時に1度だけ評価する */

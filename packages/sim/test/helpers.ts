@@ -41,6 +41,10 @@ const PART_CODES: Record<string, PartId> = {
   A: 'solar',
   I: 'inspector',
   $: 'piggyBank',
+  '#': 'coinSorter',
+  W: 'relay',
+  V: 'battery',
+  Z: 'sorter',
 };
 const DIR_CODES: Record<string, Dir4> = { '^': 0, '>': 1, v: 2, '<': 3 };
 

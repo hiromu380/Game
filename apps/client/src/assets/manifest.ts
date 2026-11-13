@@ -30,7 +30,11 @@ import copierSrc from './parts/copier.svg';
 import inspectorSrc from './parts/inspector.svg';
 import mergerSrc from './parts/merger.svg';
 import oilerSrc from './parts/oiler.svg';
+import batterySrc from './parts/battery.svg';
+import coinSorterSrc from './parts/coinSorter.svg';
 import piggyBankSrc from './parts/piggyBank.svg';
+import relaySrc from './parts/relay.svg';
+import sorterSrc from './parts/sorter.svg';
 import reflectorSrc from './parts/reflector.svg';
 import solarSrc from './parts/solar.svg';
 import spreaderSrc from './parts/spreader.svg';
@@ -70,10 +74,14 @@ const PART_SOURCES: Record<PartId, string> = {
   solar: solarSrc,
   inspector: inspectorSrc,
   piggyBank: piggyBankSrc,
+  coinSorter: coinSorterSrc,
+  relay: relaySrc,
+  battery: batterySrc,
+  sorter: sorterSrc,
 };
 
 /** 画像が上向きに描かれていて、向きに合わせて回転表示するパーツ */
-const ROTATING_PARTS: readonly PartId[] = ['conveyor', 'splitter', 'spreader'];
+const ROTATING_PARTS: readonly PartId[] = ['conveyor', 'splitter', 'spreader', 'sorter'];
 
 /** パーツの見た目（テーマ色は系統色: docs/art-style.md） */
 export const PART_ASSETS: Record<PartId, PartAsset> = Object.fromEntries(

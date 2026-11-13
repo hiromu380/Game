@@ -24,6 +24,11 @@ import { reflectorBehavior } from './reflector';
 import { solarBehavior } from './solar';
 import { spreaderBehavior } from './spreader';
 import { turntableBehavior } from './turntable';
+// フェーズ4で追加
+import { batteryBehavior } from './battery';
+import { coinSorterBehavior } from './coinSorter';
+import { relayBehavior } from './relay';
+import { sorterBehavior } from './sorter';
 
 export const PART_BEHAVIORS: Record<PartId, PartBehavior> = {
   switch: switchBehavior,
@@ -46,4 +51,8 @@ export const PART_BEHAVIORS: Record<PartId, PartBehavior> = {
   solar: solarBehavior,
   inspector: inspectorBehavior,
   piggyBank: piggyBankBehavior,
+  coinSorter: coinSorterBehavior,
+  relay: relayBehavior,
+  battery: batteryBehavior,
+  sorter: sorterBehavior,
 };

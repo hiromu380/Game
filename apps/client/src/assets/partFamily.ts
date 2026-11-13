@@ -26,4 +26,8 @@ export const PART_FAMILY: Record<PartId, Family> = {
   solar: 'placement',
   inspector: 'placement',
   piggyBank: 'economy',
+  coinSorter: 'economy',
+  relay: 'placement',
+  battery: 'multiplier',
+  sorter: 'branch',
 };

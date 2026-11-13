@@ -28,6 +28,11 @@ export const PART_IDS = [
   'solar',
   'inspector',
   'piggyBank',
+  // フェーズ4で追加（SIM_VERSION 7）
+  'coinSorter',
+  'relay',
+  'battery',
+  'sorter',
 ] as const;
 export type PartId = (typeof PART_IDS)[number];
 
@@ -60,6 +65,8 @@ export interface Signal {
   y: number;
   dir: Dir8;
   value: Score;
+  /** 次の移動で何マス進むか（省略時 1。中継タワーが出した信号は、間のマスを飛び越える） */
+  reach?: number;
 }
 
 /**

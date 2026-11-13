@@ -74,6 +74,10 @@ export const EFFECTS_CONFIG = {
     reflector: 'wiggle',
     rebooter: 'wiggle',
     coil: 'wiggle',
+    coinSorter: 'hop',
+    relay: 'wiggle',
+    battery: 'bulge',
+    sorter: 'wiggle',
   } as Partial<Record<PartId, PartMotion>>,
 
   /** 出荷の箱（出荷口から画面上部の出荷量へ飛ぶ。ui/ShipFlights.tsx） */

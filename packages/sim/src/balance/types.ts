@@ -40,6 +40,13 @@ export interface PartParams {
   inspectorMultiplier: number;
   /** 貯金箱: 1回の発動で生む予算 */
   piggyBankIncome: number;
+  /** コイン選別機: 受けた値がこの値以上なら、coinSorterIncome の予算を生む（未満なら生まない） */
+  coinSorterThreshold: number;
+  coinSorterIncome: number;
+  /** 中継タワー: 飛び越えるマス数（1 = 2マス先へ届く） */
+  relayJump: number;
+  /** 蓄電池: 溜めた値と次に受けた値の合計に掛ける倍率 */
+  batteryMultiplier: number;
   /**
    * ポンコツロボ: 値に掛ける倍率 = （junkbotMinSteps〜junkbotMaxSteps の乱数）÷ junkbotStepDivisor（切り捨て）。
    * シミュレーションでは小数を使わないため、倍率を「整数 ÷ 整数」で表す（既定: 1〜6 ÷ 2 = ×0.5〜×3、0.5 刻み）

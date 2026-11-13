@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: coinSorter（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="9" r="5" fill="#ffd54f" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="22" y="14" width="20" height="6" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="11" y="19" width="42" height="29" rx="5" fill="#ec407a" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="11" y="37" width="42" height="11" fill="#c93668"/>
+  <rect x="11" y="19" width="42" height="29" rx="5" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="16" y="24" width="32" height="13" rx="3" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="25" cy="30.5" r="5" fill="#ffd54f" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="40" cy="31.5" r="3" fill="#cfd8dc" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 42 h20" fill="none" stroke="#f8bbd0" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="17" y="48" width="30" height="7" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -28,6 +28,11 @@ export const META: Balance['meta'] = {
     { partId: 'oiler', condition: { kind: 'clears', value: 1 } },
     { partId: 'copier', condition: { kind: 'totalShipped', value: 5_000_000 } },
     { partId: 'chainMeter', condition: { kind: 'bestChain', value: 80 } },
+    // フェーズ4で追加した4種
+    { partId: 'sorter', condition: { kind: 'runsPlayed', value: 2 } },
+    { partId: 'relay', condition: { kind: 'reachShift', value: 5 } },
+    { partId: 'coinSorter', condition: { kind: 'runsPlayed', value: 5 } },
+    { partId: 'battery', condition: { kind: 'clears', value: 2 } },
   ],
   boardExpansions: [
     { kind: 'clears', value: 2 },
