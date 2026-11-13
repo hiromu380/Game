@@ -61,25 +61,25 @@ function mine(game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>
 /** 稽古場の立ち位置（舞台 320×200 のドット。土俵・鉄砲柱・座敷の絵に合わせる） */
 export const KEIKOBA_SPOTS = {
   ring: [
-    { x: 165, y: 121, flip: true },
-    { x: 186, y: 117, flip: false },
+    { x: 180, y: 117, flip: true },
+    { x: 201, y: 113, flip: false },
   ],
-  teppo: [{ x: 239, y: 127, flip: true }],
+  teppo: [{ x: 241, y: 128, flip: true }],
   suriashi: [
-    { x: 104, y: 158, to: { x: 136, y: 174 } },
-    { x: 150, y: 184, to: { x: 122, y: 170 } },
+    { x: 100, y: 150, to: { x: 128, y: 164 } },
+    { x: 156, y: 176, to: { x: 130, y: 163 } },
   ],
   shiko: [
-    { x: 204, y: 172 },
-    { x: 226, y: 160 },
-    { x: 180, y: 184 },
-    { x: 246, y: 149 },
+    { x: 122, y: 148 },
+    { x: 146, y: 160 },
+    { x: 170, y: 176 },
+    { x: 98, y: 140 },
   ],
   sit: [
-    { x: 72, y: 143 },
-    { x: 88, y: 151 },
+    { x: 74, y: 140 },
+    { x: 88, y: 147 },
   ],
-  oyakata: { x: 100, y: 96 },
+  oyakata: { x: 98, y: 94 },
 } as const;
 
 export type Training = 'ring' | 'teppo' | 'suriashi' | 'shiko' | 'sit';

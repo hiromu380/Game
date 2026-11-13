@@ -40,11 +40,11 @@ export function keikobaLayout(game: Pick<GameState, 'player'>): Placed[] {
   }
   const out: Placed[] = [
     { sprite: 'keikoba_back', x: 160, y: 190 },
-    { sprite: 'zashiki', x: 100, y: 128 },
+    { sprite: 'zashiki', x: 98, y: 126 },
     { sprite: 'teppo', x: 250, y: 120, action: 'policy' },
-    { sprite: 'dohyo', x: 175, y: 170, action: 'policy' },
+    { sprite: 'dohyo', x: 190, y: 162, action: 'policy' },
   ];
-  if (dojo >= WEIGHTS_FROM_DOJO) out.push({ sprite: 'weights', x: 232, y: 176 });
+  if (dojo >= WEIGHTS_FROM_DOJO) out.push({ sprite: 'weights', x: 136, y: 170 });
   return out;
 }
 
