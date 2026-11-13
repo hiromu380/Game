@@ -560,8 +560,13 @@ export function App({ start, onTitle }: Props) {
       ) : (
         <RocketGoal run={run} />
       )}
-      <DayEventNotice run={run} />
-      <BossNotice run={run} />
+      {/* 狭い画面でガイドを出している間は、今日の出来事・夜の予告を出さない（盤面を画面に収めるため。ガイドを終えれば出る） */}
+      {!(compact && tutorialOn) && (
+        <>
+          <DayEventNotice run={run} />
+          <BossNotice run={run} />
+        </>
+      )}
     </>
   );
 

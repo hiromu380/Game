@@ -1183,6 +1183,60 @@ a.button.button--primary {
     width: min(100%, calc(100dvh - 330px));
   }
 }
+/* 狭い画面では、飾りの遠景と予告の物語文を出さない（盤面・操作ボタン・手持ちを1画面に収めるため） */
+.app--compact .workshop,
+.app--compact .boss-notice__story {
+  display: none;
+}
+.app--compact .boss-notice__icon {
+  width: 20px;
+  height: 20px;
+}
+/*
+ * 盤面の一辺 = 上の情報（HUD・ガイド・予告）を除いた残りの高さから、下の操作（ボタン・タブ・一覧の最低限）の
+ * 分（200px。一覧が1〜2行見える高さ）を引いた大きさ。上の情報が増減しても盤面が画面外に出ない。
+ * それでも収まらない小さな画面では、画面全体をスクロールできるようにする（操作に届かなくなるのを防ぐ）
+ */
+.app--compact {
+  overflow-y: auto;
+}
+.app--compact .layout {
+  container-type: size;
+}
+/* HUD の管理プレート（飾り）も狭い画面では出さず、その分 HUD を低くする */
+.app--compact .control-console__plate {
+  display: none;
+}
+.app--compact .control-console {
+  padding-top: 6px;
+}
+/* 試運転・本番のボタンを横1列・1行に収める（折り返すと盤面に使える高さが減る） */
+.app--compact .controls .button-row {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.app--compact .controls .button-row > button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.app--compact .controls button {
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+/* 最初のシフトの「目標」の説明は、狭い画面では出さない（HUD のロケット 0/9 と、はじめてのガイドで伝わる） */
+.app--compact .rocket-goal--intro {
+  display: none;
+}
+/*
+ * 盤面の最小は 260px（1マス約 34px。指で押せる大きさ）。上の情報が多くて収まらないときは、
+ * 盤面を小さくしすぎず、画面全体をスクロールさせる
+ */
+.app--compact .layout__board {
+  flex-shrink: 0;
+  width: max(260px, min(100cqw, 100cqh - 200px));
+  min-width: 0;
+  margin: 0 auto;
+}
 .daily__actions > button {
   flex: 1 1 30%;
   white-space: nowrap;
@@ -1625,6 +1679,25 @@ a.button.button--primary {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+/* 狭い画面: ガイドを低くする（ボルトの顔は小さく、文字は詰め、ボタンは右に縦並びのまま） */
+.app--compact .tutorial {
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 6px 8px;
+}
+.app--compact .tutorial__mascot {
+  width: 28px;
+  height: 28px;
+  align-self: flex-start;
+}
+.app--compact .tutorial__message {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.app--compact .tutorial__actions .button--small {
+  padding: 4px 8px;
+  font-size: 0.75rem;
 }
 /* ガイドで「ここを押す」ボタン・一覧の項目を光らせる */
 .is-guided {
@@ -2359,6 +2432,18 @@ a.button.button--primary {
   border-color: var(--panel-border);
   background: var(--bg);
   color: var(--muted);
+}
+/* 狭い画面: ふだんは出さず（一覧を覆わないように）、パーツをドラッグしている間だけ画面の下に重ねて出す。
+   売却は選んだパーツの「売却」ボタンでもできる */
+.app--compact .sell-zone:not(.is-active) {
+  display: none;
+}
+.app--compact .sell-zone.is-active {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 30;
 }
 
 /* ---- 共有カード（ui/share/ShareCardPanel.tsx） ---- */

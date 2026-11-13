@@ -46,7 +46,7 @@ export function RocketGoal({ run }: { run: RunState }) {
   }
   if (run.shiftIndex !== 0 || run.history.length > 0) return null;
   return (
-    <div className="boss-notice rocket-goal">
+    <div className="boss-notice rocket-goal rocket-goal--intro">
       <img className="boss-notice__icon" src={ROCKET_ASSETS.stages[ROCKET_PARTS]} alt="" />
       <span className="boss-notice__label">{t('rocket.goalLabel')}</span>
       <span className="boss-notice__desc">
