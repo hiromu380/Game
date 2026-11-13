@@ -1420,5 +1420,14 @@
   "event.more": "（{n}人）",
   "guide.tip.deshi": "弟子: 1人を押すと、稽古の方針と量を変えられます。",
   "prep.return": "もどる",
-  "pay.fromSavings": "口座で足りない{yen}は、親方の貯金から"
+  "pay.fromSavings": "口座で足りない{yen}は、親方の貯金から",
+  "scene.tab.rooms": "部屋の中",
+  "scene.roomPrev": "前の部屋",
+  "scene.roomNext": "次の部屋",
+  "scene.room.room_ima": "居間",
+  "scene.room.room_oobeya": "大部屋",
+  "scene.room.room_kitchen": "厨房",
+  "scene.room.room_furo": "風呂と洗濯場",
+  "scene.room.room_genkan": "玄関と事務室",
+  "scene.room.room_niwa": "中庭"
 }

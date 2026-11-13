@@ -17,6 +17,9 @@ import { CandidatePortrait, RikishiPortrait } from '../art/Portraits';
 import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { IndependencePanel } from './IndependencePanel';
+import { sprite } from '../art/sprites';
+import { keikobaLayout } from '../art/sprites/keikoba';
+import { happeningPicture, OTHER_PICTURE, type EventPicture } from '../eventScene';
 
 /**
  * 返事が要るものを1件ずつ窓で出す（部屋の画面には並べない）。順に: 引退の申し出 → けがの治療の方針 → 場所の間の出来事 →
@@ -35,9 +38,19 @@ export function EventDialogs({
   // 選挙の返事を見終えた場所・出来事の結果を見終えた日誌の長さ（返事の後も残るものを閉じる）
   const [electionSeen, setElectionSeen] = useState<number | null>(null);
   const [resultSeen, setResultSeen] = useState<number>(-1);
-  const box = (label: string, body: React.ReactNode) => (
+  /** 挿絵（話に合う部屋の中の絵。取り込んでいなければ出さない） */
+  const picture = (pic: EventPicture | null) => {
+    if (!pic) return null;
+    const id = pic === 'keikoba' ? keikobaLayout(game, (x) => sprite(x) !== null)[0]!.sprite : pic;
+    const s = sprite(id);
+    return s ? <img className="event-box__pic" src={s.url} alt="" aria-hidden="true" /> : null;
+  };
+  const box = (label: string, body: React.ReactNode, pic: EventPicture | null = null) => (
     <div className="modal" role="dialog" aria-modal="true" aria-label={label}>
-      <div className="modal__box event-box">{body}</div>
+      <div className="modal__box event-box">
+        {picture(pic)}
+        {body}
+      </div>
     </div>
   );
   const byId = (id: number) => game.rikishi.find((r) => r.id === id);
@@ -76,6 +89,7 @@ export function EventDialogs({
           </button>
         </div>
       </>,
+      OTHER_PICTURE.retire,
     );
 
   // けがの治療の方針
@@ -109,6 +123,7 @@ export function EventDialogs({
           </button>
         </div>
       </>,
+      OTHER_PICTURE.treatment,
     );
 
   // 場所の間の出来事（答えた後、確率で決まった結果があれば見せてから閉じる）
@@ -135,6 +150,11 @@ export function EventDialogs({
           </div>
         )}
       </>,
+      game.pending.happening
+        ? happeningPicture(game.pending.happening.id)
+        : last?.kind === 'happening'
+          ? happeningPicture(last.id)
+          : null,
     );
 
   // 理事選挙（返事を選んで「決めた」で閉じる）
@@ -153,6 +173,7 @@ export function EventDialogs({
           </button>
         </div>
       </>,
+      OTHER_PICTURE.election,
     );
   }
 
@@ -161,6 +182,7 @@ export function EventDialogs({
     return box(
       t('independence.title'),
       <IndependencePanel game={game} ranks={ranks} setGame={setGame} />,
+      OTHER_PICTURE.independence,
     );
 
   // 入門希望者（1人ずつ）
@@ -190,6 +212,7 @@ export function EventDialogs({
           onDecline={() => setGame(declineCandidate(game, c.id))}
         />
       </>,
+      OTHER_PICTURE.candidate,
     );
   }
   return null;

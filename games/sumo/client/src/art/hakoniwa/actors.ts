@@ -297,3 +297,108 @@ export function compoundCast(
   });
   return out;
 }
+
+/** 部屋の中の絵（384×216。舞台 400×228 の下の中央 (200, 224) に置く） */
+export const ROOMS = [
+  'room_ima',
+  'room_oobeya',
+  'room_kitchen',
+  'room_furo',
+  'room_genkan',
+  'room_niwa',
+] as const;
+export type RoomId = (typeof ROOMS)[number];
+
+type Spot = { x: number; y: number; flip?: boolean; to?: { x: number; y: number } };
+
+/**
+ * 部屋の中の立ち位置（舞台 400×228 のドット。絵に合わせる）。
+ * 居間: 休養の弟子が座卓で座る／大部屋: けが人が布団で横になる／厨房: ちゃんこ番／中庭: 掃除番／玄関と事務室: 親方が囲炉裏の前に座る／風呂: 人は置かない
+ */
+export const ROOM_SPOTS: Record<
+  RoomId,
+  { rest?: Spot[]; lie?: Spot[]; chanko?: Spot[]; sweep?: Spot[]; oyakata?: Spot }
+> = {
+  room_ima: {
+    rest: [
+      { x: 220, y: 134 },
+      { x: 238, y: 144 },
+      { x: 260, y: 153 },
+      { x: 279, y: 163 },
+    ],
+  },
+  room_oobeya: {
+    lie: [
+      { x: 77, y: 140 },
+      { x: 113, y: 129 },
+      { x: 152, y: 117 },
+    ],
+  },
+  room_kitchen: {
+    chanko: [
+      { x: 140, y: 148 },
+      { x: 236, y: 176 },
+    ],
+  },
+  room_furo: {},
+  room_genkan: { oyakata: { x: 266, y: 134 } },
+  room_niwa: {
+    sweep: [
+      { x: 141, y: 169, to: { x: 163, y: 180 } },
+      { x: 229, y: 162, to: { x: 207, y: 173 } },
+    ],
+  },
+};
+
+/**
+ * 部屋の中にいる人（外観と同じ割り振り: けが人・休養・番付の下から掃除2人とちゃんこ番1人。親方）。乱数を使わない
+ */
+export function roomCast(
+  game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
+  room: RoomId,
+): Actor[] {
+  const all = mine(game);
+  const spots = ROOM_SPOTS[room];
+  const out: Actor[] = [];
+  const put = (r: Rikishi, sekitori: boolean, pose: Pose, s: Spot) =>
+    out.push({
+      key: `r${r.id}`,
+      rikishiId: r.id,
+      look: lookOf(r, sekitori, pose, s.flip ?? false),
+      x: s.x,
+      y: s.y,
+      z: 100 + s.y,
+      to: s.to,
+      phase: r.id % 4,
+    });
+  const injured = all.filter((x) => x.r.injury > 0);
+  const rest = all.filter((x) => x.r.injury === 0 && x.r.policy === 'rest');
+  const juniors = [...all]
+    .reverse()
+    .filter((x) => !x.sekitori && x.r.injury === 0 && x.r.policy !== 'rest');
+  const sweep = juniors.slice(0, 2);
+  const chanko = juniors.slice(2, 3);
+  injured
+    .slice(0, spots.lie?.length ?? 0)
+    .forEach(({ r, sekitori }, i) => put(r, sekitori, 'lie', spots.lie![i]!));
+  rest
+    .slice(0, spots.rest?.length ?? 0)
+    .forEach(({ r, sekitori }, i) => put(r, sekitori, 'sit', spots.rest![i]!));
+  sweep
+    .slice(0, spots.sweep?.length ?? 0)
+    .forEach(({ r }, i) => put(r, false, 'sweep', spots.sweep![i]!));
+  chanko
+    .slice(0, spots.chanko?.length ?? 0)
+    .forEach(({ r }, i) => put(r, false, 'idle', spots.chanko![i]!));
+  if (spots.oyakata)
+    out.push({
+      key: 'oyakata',
+      rikishiId: null,
+      look: OYAKATA_LOOK('oyakataSit'),
+      x: spots.oyakata.x,
+      y: spots.oyakata.y,
+      z: 100 + spots.oyakata.y,
+      phase: 0,
+    });
+  return out;
+}

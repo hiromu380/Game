@@ -1194,3 +1194,47 @@ body.has-modal {
   margin: 2px 0 0;
   color: inherit;
 }
+
+/* 部屋の中: 部屋の名前と ◀ ▶（絵の右上に重ねる） */
+.scene-box {
+  position: relative;
+}
+.scene-box__room {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 4;
+  display: flex;
+  align-items: stretch;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.scene-box__room .segmented__btn {
+  min-width: 44px;
+  min-height: 40px;
+  border: 0;
+}
+.scene-box__roomname {
+  display: grid;
+  place-items: center;
+  min-width: 7em;
+  padding: 0 6px;
+  font-size: 0.875rem;
+}
+
+/* 返事が要るものの窓の挿絵（部屋の中の絵） */
+.event-box__pic {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 8px;
+  image-rendering: pixelated;
+  background: var(--night);
+  border: 2px solid var(--ink);
+}
+@media (max-width: 640px) {
+  .event-box__pic {
+    max-height: 160px;
+    object-fit: cover;
+  }
+}

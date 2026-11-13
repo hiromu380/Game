@@ -9,6 +9,8 @@ import { drawGround } from '../art/hakoniwa/ground';
 import {
   amongPieces,
   CLASSIC_SPOTS,
+  ROOMS,
+  roomCast,
   compoundCast,
   keikobaCast,
   type Actor,
@@ -38,7 +40,7 @@ const CHANKO_SMOKE = (() => {
 /** スマホでも人が見分けられる幅（はみ出る分は横に動かして見る） */
 const EXTERIOR_MIN_WIDTH = 640;
 
-type View = 'exterior' | 'keikoba';
+type View = 'exterior' | 'keikoba' | 'rooms';
 
 /** 部屋の絵: 外観（敷地の箱庭）と稽古場を切り替える。押した建物・物の画面へ行ける */
 export function KeikobaScene({
@@ -62,6 +64,8 @@ export function KeikobaScene({
       ? 'keikoba'
       : 'exterior',
   );
+  // 部屋の中で見ている部屋（ROOMS の順）
+  const [roomIndex, setRoomIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const names = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r.name])), [game.rikishi]);
   const titled = (cast: Actor[]): SceneActor[] =>
@@ -104,8 +108,11 @@ export function KeikobaScene({
   const keikoba = keikobaLayout(game, (id) => sprite(id) !== null);
   const stage = keikobaStage(keikoba);
   const spots = stage === ROOM_STAGE ? CLASSIC_SPOTS : undefined;
-  const views: View[] = (['exterior', 'keikoba'] as const).filter((v) =>
-    sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),
+  // 部屋の中: 取り込んである絵だけ
+  const rooms = ROOMS.filter((id) => sprite(id) !== null);
+  const room = rooms[((roomIndex % rooms.length) + rooms.length) % rooms.length];
+  const views: View[] = (['exterior', 'keikoba', 'rooms'] as const).filter((v) =>
+    v === 'rooms' ? rooms.length > 0 : sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),
   );
   if (views.length === 0) return null;
   const current = views.includes(view) ? view : views[0]!;
@@ -155,6 +162,42 @@ export function KeikobaScene({
           pops={pops}
           popKey={popKey}
         />
+      ) : current === 'rooms' && room ? (
+        <>
+          <Hakoniwa
+            key={room}
+            items={boxDrawn([{ sprite: room, x: 200, y: 224 }])}
+            base={room}
+            view={{ x0: 0, y0: 0, x1: ROOM_STAGE.width, y1: ROOM_STAGE.height }}
+            label={t(`scene.room.${room}`)}
+            onAction={onAction}
+            actors={titled(roomCast(game, room))}
+            onPick={onPick}
+            selected={talkTo?.id ?? null}
+            maxWidth={ROOM_STAGE.width * 2}
+            pops={pops}
+            popKey={popKey}
+          />
+          <div className="scene-box__room" role="group" aria-label={t('scene.tab.rooms')}>
+            <button
+              className="segmented__btn"
+              aria-label={t('scene.roomPrev')}
+              onClick={() => setRoomIndex((i) => i - 1)}
+            >
+              ◀
+            </button>
+            <span className="scene-box__roomname" aria-live="polite">
+              {t(`scene.room.${room}`)}
+            </span>
+            <button
+              className="segmented__btn"
+              aria-label={t('scene.roomNext')}
+              onClick={() => setRoomIndex((i) => i + 1)}
+            >
+              ▶
+            </button>
+          </div>
+        </>
       ) : (
         <Hakoniwa
           items={boxDrawn(keikoba)}

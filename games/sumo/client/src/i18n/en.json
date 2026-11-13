@@ -1420,5 +1420,14 @@
   "event.more": " ({n})",
   "guide.tip.deshi": "Wrestlers: tap one to change his training focus and workload.",
   "prep.return": "Back",
-  "pay.fromSavings": "{yen} not covered by the stable account comes from your savings"
+  "pay.fromSavings": "{yen} not covered by the stable account comes from your savings",
+  "scene.tab.rooms": "Inside",
+  "scene.roomPrev": "Previous room",
+  "scene.roomNext": "Next room",
+  "scene.room.room_ima": "Living room",
+  "scene.room.room_oobeya": "Big room",
+  "scene.room.room_kitchen": "Kitchen",
+  "scene.room.room_furo": "Bath and laundry",
+  "scene.room.room_genkan": "Entrance and office",
+  "scene.room.room_niwa": "Courtyard"
 }
