@@ -34,9 +34,23 @@ describe('弟子の近い目標', () => {
     const top = at(g, (k) => k.division === 'makushita' && k.number === 1);
     const tt = targetOf(g, top.r, top.ranks)!.target;
     expect(tt).toEqual({ kind: 'up', to: 'juryo', wins: BOUTS.lower / 2 + 0.5 });
-    const low = at(g, (k) => k.division === 'makushita' && k.number === 30);
+    const low = at(g, (k) => k.division === 'sandanme' && k.number === 30);
     const lt = targetOf(g, low.r, low.ranks)!.target;
-    expect(targetWins(lt)!).toBeGreaterThan(targetWins(tt)!);
+    const head = at(g, (k) => k.division === 'sandanme' && k.number === 1);
+    const ht = targetOf(g, head.r, head.ranks)!.target;
+    expect(targetWins(lt)!).toBeGreaterThan(targetWins(ht)!);
+  });
+
+  it('幕下から十両へは昇進の目安どおり: 5枚目以内は勝ち越し、15枚目以内は全勝、16枚目より下は届かない', () => {
+    const g = play(3, 30);
+    const of = (n: number) => {
+      const x = at(g, (k) => k.division === 'makushita' && k.number === n);
+      return targetOf(g, x.r, x.ranks)!.target;
+    };
+    expect(of(5)).toEqual({ kind: 'up', to: 'juryo', wins: 4 });
+    expect(of(10)).toEqual({ kind: 'up', to: 'juryo', wins: BOUTS.lower });
+    expect(of(27)).toEqual({ kind: 'far', to: 'juryo', mai: 12 });
+    expect(targetText(t, of(10))).toBe('7勝で十両');
   });
 
   it('序ノ口は勝ち越せば序二段（文言にもなる）', () => {

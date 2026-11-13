@@ -1,5 +1,6 @@
 /**
  * 弟子ごとの近い目標（この場所で何勝すれば、何に届くか）。番付編成の規則（sim/src/banzuke/make.ts）から見積もる純粋関数。
+ * 幕下から十両へは十両昇進の目安（幕下5枚目以内は勝ち越し、15枚目以内は全勝。16枚目より下は届かない）
  * 番付編成は「前の位置 − 勝ち越しの数 × 段ごとの枚数」で並べ直すので、上の段の境目を越えるのに要る勝ち越しの数が分かる。
  * ほかの力士の成績でずれるので目安（三役・関取の枠は空きにもよる）
  */
@@ -124,6 +125,17 @@ export function targetOf(
         ? firstWhere((k) => k.division === 'makuuchi' && (k.title ?? 'M') === 'M')
         : firstWhere((k) => k.division === rank.division);
     if (!up || boundary < 0) return { target: { kind: 'yusho' }, danger };
+    // 幕下から十両へは、番付編成の目安（幕下15枚目以内の全勝・5枚目以内の勝ち越し）で決まる
+    if (rank.division === 'makushita') {
+      const winsUp = winsFor(bouts, 1);
+      target =
+        rank.number <= PROMOTION.juryoKachikoshiWithin
+          ? { kind: 'up', to: 'juryo', wins: winsUp }
+          : rank.number <= PROMOTION.juryoZenshoWithin
+            ? { kind: 'up', to: 'juryo', wins: bouts }
+            : { kind: 'far', to: 'juryo', mai: rank.number - PROMOTION.juryoZenshoWithin };
+      return { target, danger };
+    }
     const net = netToPass(index, boundary, MOVE_PER_NET[rank.division]);
     const wins = winsFor(bouts, net);
     target =
