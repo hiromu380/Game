@@ -6,6 +6,7 @@
 import { isSekitori, ranksOf, type GameState, type Rikishi } from '@ichimon/sim';
 import type { PersonLook, Pose } from './people';
 import { depthAmong, toScreen, type Piece } from './grid';
+import { WEIGHTS_FROM_DOJO } from '../sprites/keikoba';
 
 export interface Actor {
   /** 描き分けの鍵（弟子の ID か、親方） */
@@ -304,8 +305,13 @@ export const ROOMS = [
   'room_oobeya',
   'room_kitchen',
   'room_furo',
+  'room_hoshiba',
   'room_genkan',
+  'room_ousetsu',
+  'room_clinic',
+  'room_gym',
   'room_niwa',
+  'room_parking',
 ] as const;
 export type RoomId = (typeof ROOMS)[number];
 
@@ -341,7 +347,18 @@ export const ROOM_SPOTS: Record<
     ],
   },
   room_furo: {},
+  room_hoshiba: {},
   room_genkan: { oyakata: { x: 266, y: 134 } },
+  room_ousetsu: {},
+  // 治療室の施術台（けが人はまずここで横になる）
+  room_clinic: {
+    lie: [
+      { x: 256, y: 104 },
+      { x: 298, y: 137 },
+    ],
+  },
+  room_gym: {},
+  room_parking: {},
   room_niwa: {
     sweep: [
       { x: 141, y: 169, to: { x: 163, y: 180 } },
@@ -349,6 +366,14 @@ export const ROOM_SPOTS: Record<
     ],
   },
 };
+
+/** その部屋が部屋にあるか: トレーニング室は稽古場の改修2段目から、治療室はトレーナーの契約があるとき */
+export function hasRoom(game: Pick<GameState, 'player'>, room: RoomId): boolean {
+  const f = game.player.facilities;
+  if (room === 'room_gym') return f.dojo >= WEIGHTS_FROM_DOJO;
+  if (room === 'room_clinic') return f.trainer >= 1;
+  return true;
+}
 
 /**
  * 部屋の中にいる人（外観と同じ割り振り: けが人・休養・番付の下から掃除2人とちゃんこ番1人。親方）。乱数を使わない
@@ -371,7 +396,10 @@ export function roomCast(
       to: s.to,
       phase: r.id % 4,
     });
-  const injured = all.filter((x) => x.r.injury > 0);
+  // けが人: 治療室があればまず施術台、残りは大部屋の布団
+  const hurt = all.filter((x) => x.r.injury > 0);
+  const beds = hasRoom(game, 'room_clinic') ? (ROOM_SPOTS.room_clinic.lie?.length ?? 0) : 0;
+  const injured = room === 'room_clinic' ? hurt.slice(0, beds) : hurt.slice(beds);
   const rest = all.filter((x) => x.r.injury === 0 && x.r.policy === 'rest');
   const juniors = [...all]
     .reverse()

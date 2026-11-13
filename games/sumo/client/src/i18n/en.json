@@ -1429,5 +1429,10 @@
   "scene.room.room_kitchen": "Kitchen",
   "scene.room.room_furo": "Bath and laundry",
   "scene.room.room_genkan": "Entrance and office",
-  "scene.room.room_niwa": "Courtyard"
+  "scene.room.room_niwa": "Courtyard",
+  "scene.room.room_hoshiba": "Drying yard",
+  "scene.room.room_ousetsu": "Reception room",
+  "scene.room.room_clinic": "Treatment room",
+  "scene.room.room_gym": "Gym",
+  "scene.room.room_parking": "Parking and shed"
 }

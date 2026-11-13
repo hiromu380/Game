@@ -214,6 +214,11 @@
     "size": [48, 44],
     "anchor": [24, 43]
   },
+  "room_clinic": {
+    "files": ["room_clinic.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
   "room_furo": {
     "files": ["room_furo.png"],
     "size": [384, 216],
@@ -221,6 +226,16 @@
   },
   "room_genkan": {
     "files": ["room_genkan.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_gym": {
+    "files": ["room_gym.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_hoshiba": {
+    "files": ["room_hoshiba.png"],
     "size": [384, 216],
     "anchor": [192, 215]
   },
@@ -241,6 +256,16 @@
   },
   "room_oobeya": {
     "files": ["room_oobeya.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_ousetsu": {
+    "files": ["room_ousetsu.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_parking": {
+    "files": ["room_parking.png"],
     "size": [384, 216],
     "anchor": [192, 215]
   },

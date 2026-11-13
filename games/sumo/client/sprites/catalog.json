@@ -652,6 +652,46 @@
           "frames": 1,
           "priority": "B",
           "outline": false
+        },
+        {
+          "id": "room_gym",
+          "name": "トレーニング室（稽古場の改修2段目から。ラック・ダンベル・ランニングマシン・鉄砲柱）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_hoshiba",
+          "name": "洗濯と物干し場（洗濯機・流し・籠／まわしと浴衣の物干し・樽・板塀）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_ousetsu",
+          "name": "応接間（床の間・飾り棚／ソファー・座卓・テレビ。来客を迎える）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_clinic",
+          "name": "治療室（トレーナー契約から。診察の机・薬棚・カーテン／施術台・赤外線灯）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_parking",
+          "name": "駐車場と物置（車・バイク・自転車・物置・ごみ置き場）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
         }
       ]
     }

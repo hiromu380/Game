@@ -9,6 +9,7 @@ import { drawGround } from '../art/hakoniwa/ground';
 import {
   amongPieces,
   CLASSIC_SPOTS,
+  hasRoom,
   ROOMS,
   roomCast,
   compoundCast,
@@ -109,7 +110,7 @@ export function KeikobaScene({
   const stage = keikobaStage(keikoba);
   const spots = stage === ROOM_STAGE ? CLASSIC_SPOTS : undefined;
   // 部屋の中: 取り込んである絵だけ
-  const rooms = ROOMS.filter((id) => sprite(id) !== null);
+  const rooms = ROOMS.filter((id) => sprite(id) !== null && hasRoom(game, id));
   const room = rooms[((roomIndex % rooms.length) + rooms.length) % rooms.length];
   const views: View[] = (['exterior', 'keikoba', 'rooms'] as const).filter((v) =>
     v === 'rooms' ? rooms.length > 0 : sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),

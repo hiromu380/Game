@@ -591,3 +591,33 @@ Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the is
 ```
 Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left side: a small Shinto shrine (hokora) on a stone base with a red torii gate and two fox statues, a pine tree and shrubs. Right side: a wooden fence, a covered water basin (temizuya) with ladles, an ema board, a mossy stone lantern, a stone path, and a pine and a cherry tree in bloom behind the fence. No people.
 ```
+
+### `room_gym` — トレーニング室（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a weight-training corner on a rubber floor with a power rack and barbell, benches, plate stacks, a dumbbell rack, kettlebells and resistance bands. Right room: a wooden floor with treadmills, an exercise bike, a fan, a whiteboard, a shelf with drinks and towels, a teppo pillar, a tire and a rope. No people.
+```
+
+### `room_hoshiba` — 洗濯と物干し場（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left: a laundry corner under a small tiled roof with washing machines and a dryer, a sink, laundry baskets and a hose reel. Right: an earthen drying yard behind a wooden fence with long poles of hanging mawashi and yukata, baskets on wheels, barrels, a stepladder and brooms. No people.
+```
+
+### `room_ousetsu` — 応接間（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a tatami reception room with a tokonoma alcove, a hanging scroll, flowers and a display cabinet with fans and cups. Right room: armchairs around a low table with tea, a TV, a heater, a cabinet with dishes, a wall clock, framed photos of wrestlers. No people.
+```
+
+### `room_clinic` — 治療室（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a small clinic with a desk and laptop, a medicine cabinet, a sink, a curtain on a rail, stools and a height scale. Right room: two treatment beds with pillows, an infrared lamp, a trolley with bottles, folding chairs and an ice machine. No people.
+```
+
+### `room_parking` — 駐車場と物置（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+An outdoor yard next to the stable building: a carport with a small car and scooters under a tiled roof, bicycles in a rack, a storage shed, wooden crates, garbage bins, a hose reel and a ladder, behind a wooden fence with pine trees. No people.
+```

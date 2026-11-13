@@ -1429,5 +1429,10 @@
   "scene.room.room_kitchen": "厨房",
   "scene.room.room_furo": "風呂と洗濯場",
   "scene.room.room_genkan": "玄関と事務室",
-  "scene.room.room_niwa": "中庭"
+  "scene.room.room_niwa": "中庭",
+  "scene.room.room_hoshiba": "物干し場",
+  "scene.room.room_ousetsu": "応接間",
+  "scene.room.room_clinic": "治療室",
+  "scene.room.room_gym": "トレーニング室",
+  "scene.room.room_parking": "駐車場と物置"
 }
