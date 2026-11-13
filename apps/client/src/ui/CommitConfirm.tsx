@@ -30,7 +30,9 @@ export function CommitConfirm({ warnings, onConfirm, onCancel }: Props) {
                       score: formatScore(w.score),
                       quota: formatScore(String(w.quota)),
                     })
-                  : t(`commitConfirm.warn.${w.kind}`)}
+                  : w.kind === 'luck'
+                    ? t('commitConfirm.warn.luck', { samples: w.samples, met: w.met })
+                    : t(`commitConfirm.warn.${w.kind}`)}
               </li>
             ))}
           </ul>

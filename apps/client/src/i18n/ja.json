@@ -349,6 +349,7 @@
   "commitConfirm.warn.noDock": "盤面に出荷口がないよ。このまま押すと出荷量は 0 で、ランが終わってしまう",
   "commitConfirm.warn.untested": "この並びでは、まだ試運転していないよ。先に「試運転」で確かめよう",
   "commitConfirm.warn.short": "直前の試運転は {score}。ノルマの {quota} に届いていないよ",
+  "commitConfirm.warn.luck": "ポンコツロボが動くので、結果は毎回変わるよ。{samples} 回試すと、ノルマに届いたのは {met} 回",
   "runEnd.shortBy": "ノルマまで、あと {amount} だった！",
   "runEnd.nextGoal": "次の目標",
   "giveUp.button": "諦める",

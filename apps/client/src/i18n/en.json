@@ -349,6 +349,7 @@
   "commitConfirm.warn.noDock": "There is no Shipping Dock on the floor. Pressing now ships 0 and ends the run",
   "commitConfirm.warn.untested": "You have not test-run this layout yet. Try a test run first",
   "commitConfirm.warn.short": "Your last test run shipped {score}, short of the {quota} quota",
+  "commitConfirm.warn.luck": "The Junkbot makes results vary. In {samples} tries, the quota was met {met} times",
   "runEnd.shortBy": "Only {amount} short of the quota!",
   "runEnd.nextGoal": "Next goal",
   "giveUp.button": "Give up",
