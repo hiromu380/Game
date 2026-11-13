@@ -4,6 +4,7 @@ import { playSound } from '../sound';
 import {
   atWall,
   canPrep,
+  fromSavings,
   doPrep,
   KOENKAI,
   PREP,
@@ -367,6 +368,21 @@ export function PrepPanel({
             <div className="prep__pick prep__confirm" role="group" aria-label={t('prep.decide')}>
               <p className="prep__week">{t('prep.confirm.title')}</p>
               <p className="prep__confirmtext">{draftText(draft)}</p>
+              {(() => {
+                // 口座で足りない分は、親方の貯金から出る
+                const yen =
+                  draft.kind === 'mune' || draft.kind === 'degeiko'
+                    ? PREP[draft.kind].cost
+                    : draft.kind === 'scout'
+                      ? SCOUT_TRIPS[draft.trip].cost
+                      : 0;
+                const savings = yen > 0 ? fromSavings(game, yen) : 0;
+                return savings > 0 ? (
+                  <p className="prep__savings">
+                    {t('pay.fromSavings', { yen: money(t, savings, lang) })}
+                  </p>
+                ) : null;
+              })()}
               <div className="prep__confirmbtns">
                 <button className="button" onClick={back}>
                   {t('prep.back')}

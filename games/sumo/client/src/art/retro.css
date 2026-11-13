@@ -1182,3 +1182,15 @@ body.has-modal {
 .prep__menu .prep__cmd > span:first-child {
   white-space: nowrap;
 }
+/* 口座で足りない分は貯金から（確かめのときに添える） */
+.prep__savings,
+.button__sub {
+  margin: -6px 0 10px;
+  font-size: 0.8125rem;
+  color: var(--ai);
+}
+.button__sub {
+  display: block;
+  margin: 2px 0 0;
+  color: inherit;
+}

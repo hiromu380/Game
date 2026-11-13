@@ -1419,5 +1419,6 @@
   "event.ok": "わかった",
   "event.more": "（{n}人）",
   "guide.tip.deshi": "弟子: 1人を押すと、稽古の方針と量を変えられます。",
-  "prep.return": "もどる"
+  "prep.return": "もどる",
+  "pay.fromSavings": "口座で足りない{yen}は、親方の貯金から"
 }

@@ -1419,5 +1419,6 @@
   "event.ok": "OK",
   "event.more": " ({n})",
   "guide.tip.deshi": "Wrestlers: tap one to change his training focus and workload.",
-  "prep.return": "Back"
+  "prep.return": "Back",
+  "pay.fromSavings": "{yen} not covered by the stable account comes from your savings"
 }

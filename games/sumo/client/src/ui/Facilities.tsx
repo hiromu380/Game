@@ -1,4 +1,6 @@
 import {
+  canAfford,
+  fromSavings,
   buildFacility,
   FACILITIES,
   FACILITY_IDS,
@@ -82,10 +84,15 @@ function BuildButton({
   return (
     <button
       className="button button--primary"
-      disabled={game.player.stableMoney < cost}
+      disabled={!canAfford(game, cost)}
       onClick={() => setGame(buildFacility(game, id))}
     >
       {t('facility.build', { cost: money(t, cost, lang) })}
+      {fromSavings(game, cost) > 0 && canAfford(game, cost) && (
+        <span className="button__sub">
+          {t('pay.fromSavings', { yen: money(t, fromSavings(game, cost), lang) })}
+        </span>
+      )}
     </button>
   );
 }
