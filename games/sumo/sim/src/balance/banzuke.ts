@@ -45,4 +45,11 @@ export const PROMOTION = {
   /** 横綱: 大関で2場所続けて優勝、または片方優勝でもう片方が準ずる成績（下の勝ち星以上）。合計の勝ち星も見る */
   yokozunaWins2: 26,
   yokozunaOtherMin: 12,
+  /**
+   * 幕下から十両へ（docs/realism.md「十両昇進の目安」）: 幕下15枚目以内の全勝は必ず上がる。
+   * それ以外は幕下の筆頭〜5枚目の勝ち越しだけが候補（空いた枠の数まで、成績のよい順）。16枚目より下は全勝でも上がらない。
+   * 候補が足りなければ、負け越した十両が残る
+   */
+  juryoZenshoWithin: 15,
+  juryoKachikoshiWithin: 5,
 };

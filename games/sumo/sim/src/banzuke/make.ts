@@ -7,8 +7,9 @@
  * - 関脇で、三役の直近3場所の勝ち星の合計が基準以上（最後の場所も基準以上）なら大関へ
  * - 関脇・小結は勝ち越せば残る。足りない分は成績のよい者から埋める（それぞれ最低2人）
  * - それ以外は「前の位置 − 勝ち越しの数 × 段ごとの枚数」で並べ直す。勝ち越して下がる・負け越して上がることはない
+ * - 幕下から十両へは、幕下15枚目以内の全勝（必ず）と、幕下5枚目以内の勝ち越し（空いた枠まで）だけ。候補が足りなければ十両が残る
  */
-import { BOUTS, MIN_SANYAKU, MOVE_PER_NET, PROMOTION } from '../balance/banzuke';
+import { BOUTS, DIVISION_SIZE, MIN_SANYAKU, MOVE_PER_NET, PROMOTION } from '../balance/banzuke';
 import type { BashoRecord, Rank, Title } from '../model/types';
 import type { Record3 } from '../basho/run';
 
@@ -173,7 +174,12 @@ export function makeBanzuke(input: BanzukeInput): BanzukeOutput {
   sekiwake.sort(byScore);
   komusubi.sort(byScore);
   const topSet = new Set([...yokozuna, ...ozeki, ...sekiwake, ...komusubi]);
-  const others = live.filter((id) => !topSet.has(id)).sort(byScore);
+  const sorted = live.filter((id) => !topSet.has(id)).sort(byScore);
+  const others = juryoLine(sorted, DIVISION_SIZE.makuuchi + DIVISION_SIZE.juryo - topSet.size, {
+    ranks,
+    records,
+    byScore,
+  });
   const next = [
     ...sortTitled(yokozuna, order),
     ...sortTitled(ozeki, order),
@@ -194,4 +200,64 @@ export function makeBanzuke(input: BanzukeInput): BanzukeOutput {
 /** 横綱・大関の中の並び: 前の番付の順（新しく上がった者は後ろ） */
 function sortTitled(ids: number[], order: ReadonlyMap<number, number>): number[] {
   return [...ids].sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0));
+}
+
+/**
+ * 十両と幕下の境目を、十両昇進の目安に合わせて直す。sorted は三役より下を成績で並べたもの、seats はその中の関取（前頭と十両）の数。
+ * - 幕下から関取の側へ入れるのは、幕下15枚目以内の全勝（必ず）と、幕下5枚目以内の勝ち越し
+ * - 入れない幕下は幕下の側へ戻し、空いた枠は、成績のよい候補 → 落ちるはずだった関取 の順で埋める
+ * - 上がった幕下は十両の下に置く（全勝が先）
+ */
+export function juryoLine(
+  sorted: readonly number[],
+  seats: number,
+  ctx: {
+    ranks: ReadonlyMap<number, Rank>;
+    records: ReadonlyMap<number, Record3>;
+    byScore: (a: number, b: number) => number;
+  },
+): number[] {
+  const { ranks, records, byScore } = ctx;
+  const fromMakushita = (id: number) => ranks.get(id)!.division === 'makushita';
+  const sekitori = (id: number) => {
+    const d = ranks.get(id)!.division;
+    return d === 'makuuchi' || d === 'juryo';
+  };
+  const wins = (id: number) => records.get(id)!.wins;
+  const n = (id: number) => ranks.get(id)!.number;
+  const must = (id: number) =>
+    fromMakushita(id) && n(id) <= PROMOTION.juryoZenshoWithin && wins(id) >= BOUTS.lower;
+  const eligible = (id: number) =>
+    must(id) ||
+    (fromMakushita(id) && n(id) <= PROMOTION.juryoKachikoshiWithin && kachikoshi(records.get(id)!));
+  if (seats <= 0) return [...sorted];
+  const up = new Set(sorted.slice(0, seats).filter((id) => !fromMakushita(id) || eligible(id)));
+  for (const id of sorted) if (must(id)) up.add(id);
+  // 足りなければ: 候補（幕下5枚目以内の勝ち越し）→ 関取だった者（成績のよい順）
+  const fill = (pick: (id: number) => boolean) => {
+    for (const id of sorted) {
+      if (up.size >= seats) return;
+      if (!up.has(id) && pick(id)) up.add(id);
+    }
+  };
+  fill(eligible);
+  fill(sekitori);
+  fill(() => true);
+  // 多ければ: 必ず上がる者以外の、成績の悪い者から外す
+  const inUp = [...up].sort(byScore);
+  while (inUp.length > seats) {
+    const i = inUp.map((id) => !must(id)).lastIndexOf(true);
+    if (i < 0) break;
+    up.delete(inUp[i]!);
+    inUp.splice(i, 1);
+  }
+  // 幕下から上がった者は十両の下に（幕下の枚数で並べると、幕内まで飛んでしまう）。全勝が先、あとは成績の順
+  const promoted = inUp
+    .filter(fromMakushita)
+    .sort((a, b) => Number(must(b)) - Number(must(a)) || byScore(a, b));
+  return [
+    ...inUp.filter((id) => !fromMakushita(id)),
+    ...promoted,
+    ...sorted.filter((id) => !up.has(id)),
+  ];
 }

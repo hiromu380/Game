@@ -106,7 +106,7 @@ describe('大一番の作戦', () => {
   }, 60_000);
 
   it('変化で勝つと、決まり手ははたき込み。名声が下がり、タニマチが渋い顔をする', () => {
-    for (const seed of [1, 2, 3, 4, 5, 6]) {
+    for (let seed = 1; seed <= 30; seed++) {
       const { g, id } = withBigBout(seed);
       // 名声は 0 より下がらないので、名声のある部屋で見る
       g.player.prestige = 10;
