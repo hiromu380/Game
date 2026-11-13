@@ -28,8 +28,17 @@ export const NOBORI_TAG = { x: 31, y: 54, width: 10, height: 38 } as const;
 export const WEIGHTS_FROM_DOJO = 2;
 export const MODERN_FROM_DOJO = 3;
 
+/** 土俵・上がり座敷・鉄砲柱を描き込んだ1枚絵（器具なし・器具つき） */
+export const CLASSIC = { plain: 'keikoba_classic__plain', gym: 'keikoba_classic__gym' } as const;
+
 /** 稽古場（先頭が床と壁。ほかはその上に置く） */
-export function keikobaLayout(game: Pick<GameState, 'player'>): Placed[] {
+/**
+ * has: その絵を取り込んであるか。土俵・座敷を描き込んだ1枚絵（keikoba_classic）があれば、部品を重ねる代わりにそれを使う
+ */
+export function keikobaLayout(
+  game: Pick<GameState, 'player'>,
+  has: (sprite: string) => boolean = () => false,
+): Placed[] {
   const dojo = game.player.facilities.dojo;
   // 今どきの稽古場は、土俵と器具が描き込まれている
   if (dojo >= MODERN_FROM_DOJO) {
@@ -37,6 +46,10 @@ export function keikobaLayout(game: Pick<GameState, 'player'>): Placed[] {
       { sprite: 'keikoba_modern', x: 160, y: 190, action: 'policy' },
       { sprite: 'teppo', x: 70, y: 120, action: 'policy' },
     ];
+  }
+  if (dojo < MODERN_FROM_DOJO && has(CLASSIC.plain)) {
+    const gym = dojo >= WEIGHTS_FROM_DOJO && has(CLASSIC.gym);
+    return [{ sprite: gym ? CLASSIC.gym : CLASSIC.plain, x: 160, y: 190, action: 'policy' }];
   }
   const out: Placed[] = [
     { sprite: 'keikoba_back', x: 160, y: 190 },

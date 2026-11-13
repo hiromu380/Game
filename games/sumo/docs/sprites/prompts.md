@@ -42,6 +42,28 @@ Draw a small style sheet with three separate items side by side with wide gaps: 
 
 ## 1. 稽古場
 
+### `keikoba_classic__plain` — 稽古場の1枚絵（土俵・上がり座敷・鉄砲柱つき）（優先 A・比率 4:3・1コマ）
+
+部品（`keikoba_back`・`dohyo`・`zashiki`・`teppo`）を重ねると、土俵が大きすぎて座敷に重なり、床からはみ出す。1枚で描いた絵を取り込むと、ゲームは自動でそちらに切り替わる（稽古場の改修2段目までの絵）。
+
+```
+Draw a cutaway diorama of a traditional sumo stable practice hall (keikoba): only the back wall and the left side wall remain, the roof and the front walls are removed so we can see inside. White plaster walls with dark wooden pillars and beams, a small Shinto shrine shelf (kamidana) high on the back wall. The floor is packed earth on a low wooden base.
+Inside, arranged so nothing overlaps:
+- a raised tatami platform (agari-zashiki) with a red floor cushion, standing against the LEFT wall near the back, about one third of the room's depth;
+- a square practice sumo ring (keiko-dohyo) of ochre packed clay with a circle of straw rice-bale tawara on top, in the RIGHT half of the room, fully on the floor, its edges clearly inside the floor (a margin of bare floor all around it);
+- a thick round wooden teppo pillar standing in the back-right corner, behind the ring;
+- leave a wide strip of empty bare floor in the FRONT-LEFT part of the room, between the tatami platform and the ring, where wrestlers will be placed later.
+No people. Keep the whole room inside the image with some magenta margin.
+```
+
+### `keikoba_classic__gym` — 稽古場の1枚絵（器具つき。稽古場の改修2段目）（優先 B・比率 4:3・1コマ）
+
+`keikoba_classic__plain` の仕上がりを添付して頼むと、部屋の形がそろう。
+
+```
+Same room as the attached image, same angle, same size, same positions of the walls, tatami platform, ring and pillar. Add a small weight-training corner on the empty floor at the front-right corner next to the ring: a flat bench, a barbell on a low rack and a few dumbbells on a rubber mat. Keep the front-left floor strip empty. No people.
+```
+
 ### `keikoba_back` — 稽古場の奥の壁と床（断面）（優先 A・比率 4:3・1コマ）
 
 ```

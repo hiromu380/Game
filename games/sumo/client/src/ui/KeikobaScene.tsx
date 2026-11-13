@@ -90,7 +90,7 @@ export function KeikobaScene({
     (ctx: CanvasRenderingContext2D) => drawGround(ctx, season),
     [season],
   );
-  const keikoba = keikobaLayout(game);
+  const keikoba = keikobaLayout(game, (id) => sprite(id) !== null);
   const views: View[] = (['exterior', 'keikoba'] as const).filter((v) =>
     sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),
   );

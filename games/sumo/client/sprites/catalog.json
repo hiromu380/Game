@@ -7,6 +7,15 @@
       "title": "稽古場",
       "items": [
         {
+          "id": "keikoba_classic",
+          "name": "稽古場（改修2段目まで。土俵・上がり座敷・鉄砲柱を描き込んだ1枚。gym は器具つき）",
+          "size": [288, 176],
+          "frames": 1,
+          "priority": "A",
+          "outline": false,
+          "variants": ["plain", "gym"]
+        },
+        {
           "id": "keikoba_back",
           "name": "稽古場の奥の壁と床（断面）",
           "size": [288, 176],
