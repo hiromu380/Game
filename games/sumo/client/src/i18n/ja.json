@@ -1317,5 +1317,20 @@
   "prep.desc.rest": "全員の疲れを抜く",
   "prep.desc.visit": "タニマチ1人に会う。関係が上がる",
   "prep.desc.scout": "新弟子を探しに行く。場所に1回",
-  "prep.desc.usual": "特別なことはしない"
+  "prep.desc.usual": "特別なことはしない",
+  "target.label": "目標",
+  "target.up": "{wins}勝で{to}",
+  "target.kadoban": "カド番 {wins}勝で大関に残る",
+  "target.kachikoshi": "{wins}勝で勝ち越し",
+  "target.far": "{to}まであと{mai}枚",
+  "target.yusho": "優勝を目指す",
+  "target.danger": "負け越すと{to}",
+  "target.reached": "{to}へ！",
+  "target.reachedKadoban": "大関に残った！",
+  "target.reachedKk": "勝ち越し！",
+  "target.left": "あと{n}勝で{to}",
+  "target.to.sanyaku": "三役",
+  "target.to.sekiwake": "関脇",
+  "target.to.ozeki": "大関",
+  "target.to.yokozuna": "横綱"
 }

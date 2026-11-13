@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { isSekitori, ranksOf, type GameState, type MidBasho, type Stance } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { dayLabel, rankLabel } from '../format';
+import { reachedText, targetName, targetOf, targetWins } from '../targets';
 import { woundName } from '../injury';
 
 type StanceChoice = Stance | 'normal';
@@ -26,8 +27,23 @@ export function MidBashoDialog({
     else next[id] = s;
     setStance(next);
   };
-  /** 勝ち越しまでの残り（関取は15番で8勝、幕下以下は7番で4勝） */
+  /** 目標までの残り（後半で届くなら）。届かない・目標がなければ勝ち越しまでの残り */
   const need = (m: MidBasho['mine'][number]): string => {
+    const r = byId.get(m.id);
+    const info = r ? targetOf(game, r, ranks) : null;
+    const goal = info ? targetWins(info.target) : null;
+    if (info && goal !== null && info.target.kind === 'up') {
+      const rank = ranks.get(m.id);
+      const bouts = rank && isSekitori(rank) ? 15 : 7;
+      const left = bouts - m.wins - m.losses;
+      if (m.wins >= goal) return reachedText(t, info.target);
+      if (goal - m.wins <= left)
+        return t('target.left', { n: goal - m.wins, to: targetName(t, info.target.to) });
+    }
+    return kkNeed(m);
+  };
+  /** 勝ち越しまでの残り（関取は15番で8勝、幕下以下は7番で4勝） */
+  const kkNeed = (m: MidBasho['mine'][number]): string => {
     const rank = ranks.get(m.id);
     const kachi = rank && isSekitori(rank) ? 8 : 4;
     if (m.wins >= kachi) return t('mid.need.done');

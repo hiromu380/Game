@@ -5,6 +5,7 @@ import { dayLabel, rankLabel } from '../format';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import { BASHO_DAYS, decidedUntil, tallyUntil, type Mark, type TickerRow } from '../ticker';
+import { reached, reachedText, targetText, targetWins, type Target } from '../targets';
 
 /** 1日を見せる間隔（ミリ秒） */
 const DAY_MS = 520;
@@ -23,6 +24,8 @@ export interface TickerEntry extends TickerRow {
   rank: Rank | null;
   /** 休場している弟子: 休み始めた日（初日からなら 0）。出ていれば省く */
   absentFrom?: number;
+  /** この場所の近い目標 */
+  target?: Target;
 }
 
 /**
@@ -68,6 +71,18 @@ export function BashoTicker({
       decidedUntil(r, day - 1, sekitori) !== 'kachikoshi'
     );
   });
+  // 目標に届いた日（勝ち越しと同じく褒める）
+  for (const r of rows) {
+    if (
+      r.target &&
+      r.target.kind !== 'kachikoshi' &&
+      day >= from &&
+      reached(r.target, tallyUntil(r, day).wins) &&
+      !reached(r.target, tallyUntil(r, day - 1).wins) &&
+      !kkToday.includes(r)
+    )
+      kkToday.push(r);
+  }
   const kkIds = new Set(kkToday.map((r) => r.id));
   useEffect(() => {
     if (!settings.sound || reduced) return;
@@ -110,6 +125,18 @@ export function BashoTicker({
                     {r.absentFrom !== undefined && day >= Math.max(from, r.absentFrom) && (
                       <span className="tag tag--warn">{t('ticker.absent')}</span>
                     )}
+                    {r.target &&
+                      r.absentFrom !== 0 &&
+                      (reached(r.target, tally.wins)
+                        ? // 勝ち越しは下の札で出すので、上の段・大関の目標だけ
+                          r.target.kind !== 'kachikoshi' && (
+                            <span className="tag tag--gold">{reachedText(t, r.target)}</span>
+                          )
+                        : targetWins(r.target) !== null &&
+                          // 勝ち越しが決まった後も、上の段の目標は残す
+                          !(decided && r.target.kind === 'kachikoshi') && (
+                            <span className="ticker__goal">{targetText(t, r.target)}</span>
+                          ))}
                     {decided && (
                       <span className={`tag ${decided === 'kachikoshi' ? 'tag--good' : ''}`}>
                         {t(decided === 'kachikoshi' ? 'report.kachikoshi' : 'report.makekoshi')}

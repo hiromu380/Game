@@ -30,6 +30,7 @@ import { MidBashoDialog } from './MidBashoDialog';
 import { TopMenu } from './TopMenu';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
+import { targetOf } from '../targets';
 
 type Tab = 'stable' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 
@@ -221,6 +222,11 @@ export function GameScreen({
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: ranks.get(m.id) ?? null,
             absentFrom: m.out ? (m.injuredDay ?? 0) : undefined,
+            target: targetOf(
+              game,
+              game.rikishi.find((r) => r.id === m.id)!,
+              ranks,
+            )?.target,
           }))}
           from={1}
           to={ticker.mid.day}
@@ -252,6 +258,11 @@ export function GameScreen({
             ...tickerRow(m.id, m.bouts),
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: m.record.rank,
+            // 目標は場所前の番付で見積もる（ここの game はまだ場所前）
+            target: (() => {
+              const r = game.rikishi.find((x) => x.id === m.id);
+              return r ? targetOf(game, r, ranks)?.target : undefined;
+            })(),
             // 休みのある弟子は、最後の取組の後から休場の札を出す
             absentFrom:
               m.record.absences > 0 ? Math.max(0, ...m.bouts.map((b) => b.day)) : undefined,

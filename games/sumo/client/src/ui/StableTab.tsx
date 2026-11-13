@@ -32,6 +32,8 @@ import { IndependencePanel } from './IndependencePanel';
 import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { PrepPanel } from './PrepPanel';
+import { TargetLine } from './TargetLine';
+import { targetOf, type TargetInfo } from '../targets';
 import { GuideCard } from './Guide';
 import { NextGoalCard } from './GoalsPanel';
 import { withStep } from '../guide';
@@ -163,6 +165,7 @@ export function StableTab({
               key={r.id}
               r={r}
               rank={ranks.get(r.id) ?? null}
+              target={targetOf(game, r, ranks)}
               onPolicy={(p) => {
                 setGame(setPolicy(game, r.id, p));
                 update({ guide: withStep(settings.guide, 'policy') });
@@ -235,6 +238,7 @@ function CandidateRow({
 function RikishiCard({
   r,
   rank,
+  target,
   onPolicy,
   onIntensity,
   onPlayHurt,
@@ -244,6 +248,7 @@ function RikishiCard({
 }: {
   r: Rikishi;
   rank: Rank | null;
+  target: TargetInfo | null;
   onPolicy: (p: Policy) => void;
   onIntensity: (i: Intensity) => void;
   onPlayHurt: (play: boolean) => void;
@@ -268,6 +273,7 @@ function RikishiCard({
         <span className="card__meta">
           {t('rikishi.meta', { age: r.age, height: r.height, weight: Math.round(r.weight) })}
         </span>
+        <TargetLine info={target} />
       </div>
       <div className="card__body">
         <dl className="abilities">

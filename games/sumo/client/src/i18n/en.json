@@ -1317,5 +1317,20 @@
   "prep.desc.rest": "Everyone recovers from fatigue.",
   "prep.desc.visit": "Meet one patron. Your relationship improves.",
   "prep.desc.scout": "Look for recruits. Once per tournament.",
-  "prep.desc.usual": "Nothing special."
+  "prep.desc.usual": "Nothing special.",
+  "target.label": "Goal",
+  "target.up": "{wins} wins: {to}",
+  "target.kadoban": "Kadoban: {wins} wins to stay ozeki",
+  "target.kachikoshi": "{wins} wins: winning record",
+  "target.far": "{mai} ranks to {to}",
+  "target.yusho": "Aim for the title",
+  "target.danger": "A losing record drops him to {to}",
+  "target.reached": "Up to {to}!",
+  "target.reachedKadoban": "Stays ozeki!",
+  "target.reachedKk": "Winning record!",
+  "target.left": "{n} more wins: {to}",
+  "target.to.sanyaku": "sanyaku",
+  "target.to.sekiwake": "sekiwake",
+  "target.to.ozeki": "ozeki",
+  "target.to.yokozuna": "yokozuna"
 }

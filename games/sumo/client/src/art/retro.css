@@ -635,3 +635,27 @@ body.has-modal {
     animation: none;
   }
 }
+
+/* 弟子の近い目標 */
+.target {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+.target__label {
+  padding: 0 4px;
+  background: var(--ai);
+  color: var(--white);
+}
+.target__text {
+  color: var(--ink);
+}
+.target__danger {
+  margin-left: 0;
+}
+.ticker__goal {
+  font-size: 0.875rem;
+  color: var(--ai);
+}

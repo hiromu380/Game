@@ -12,6 +12,8 @@ import { rankLabel } from '../format';
 import { RikishiPortrait } from '../art/Portraits';
 import { woundName } from '../injury';
 import { voiceOf } from '../voice';
+import { targetOf } from '../targets';
+import { TargetLine } from './TargetLine';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
 const INTENSITIES: Intensity[] = ['light', 'normal', 'hard'];
@@ -68,6 +70,7 @@ export function RikishiTalk({
               {t('rikishi.meta', { age: r.age, height: r.height, weight: Math.round(r.weight) })}
             </span>
           </div>
+          <TargetLine info={targetOf(game, r)} />
           <blockquote className="talk__voice">{t(voiceOf(game, r, rank) as MessageKey)}</blockquote>
         </div>
       </div>
