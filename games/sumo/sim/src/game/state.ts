@@ -39,6 +39,7 @@ import { canScout, goScouting } from './recruit';
 import { alumnusAge, staffCandidates, staffSkill } from '../stable/staff';
 import { applyTreatment, tagInjuries } from '../career/injury';
 import type { Treatment } from '../balance/injury';
+import { canAfford, pay } from '../money/pay';
 
 const clone = (s: GameState): GameState => JSON.parse(JSON.stringify(s));
 
@@ -320,12 +321,12 @@ export function answerIndependence(
   return state;
 }
 
-/** 建物を1段上げる（部屋の口座から払う。足りなければ何もしない） */
+/** 建物を1段上げる（部屋の口座から払い、足りない分は親方の貯金から。両方でも足りなければ何もしない） */
 export function buildFacility(input: GameState, id: FacilityId): GameState {
   const cost = nextBuildCost(input.player.facilities, id);
-  if (cost === null || input.player.stableMoney < cost) return input;
+  if (cost === null || !canAfford(input, cost)) return input;
   const state = clone(input);
-  state.player.stableMoney -= cost;
+  pay(state, cost);
   state.player.facilities[id]++;
   note(state, { kind: 'facility', id, level: state.player.facilities[id] });
   return state;

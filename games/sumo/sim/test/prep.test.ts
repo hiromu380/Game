@@ -117,7 +117,7 @@ describe('場所前の4週間', () => {
     expect(gain).toBeGreaterThan(coach);
     expect(out.player.stableMoney).toBe(s.player.stableMoney - PREP.mune.cost);
     expect(of(out, r.id).fatigue).toBe(Math.min(100, r.fatigue + PREP.mune.fatigue));
-    const poor = { ...s, player: { ...s.player, stableMoney: 0 } };
+    const poor = { ...s, player: { ...s.player, stableMoney: 0, personalMoney: 0 } };
     expect(canPrep(poor, { kind: 'mune', id: r.id })).toBe(false);
     let hurt = 0;
     for (let seed = 1; seed <= 80; seed++) {
@@ -139,7 +139,7 @@ describe('場所前の4週間', () => {
     expect(of(out, mine[1]!.id).fatigue).toBe(50 + PREP.degeiko.fatigue);
     const rest = doPrep(s, { kind: 'rest' });
     for (const r of mine) expect(of(rest, r.id).fatigue).toBe(50 + PREP.rest.fatigue);
-    const poor = { ...s, player: { ...s.player, stableMoney: 0 } };
+    const poor = { ...s, player: { ...s.player, stableMoney: 0, personalMoney: 0 } };
     expect(canPrep(poor, { kind: 'degeiko' })).toBe(false);
   });
 

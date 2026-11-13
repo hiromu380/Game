@@ -20,6 +20,7 @@ import { playerGrowth } from './advance';
 import { note } from './journal';
 import { canScout, goScouting } from './recruit';
 import { isBlocked } from './state';
+import { canAfford, pay } from '../money/pay';
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
@@ -46,11 +47,11 @@ export function canPrep(state: GameState, action: PrepAction): boolean {
       return (
         fit(mine(state, action.id)) &&
         mine(state, action.id)!.policy !== 'rest' &&
-        state.player.stableMoney >= PREP.mune.cost
+        canAfford(state, PREP.mune.cost)
       );
     case 'degeiko':
       return (
-        state.player.stableMoney >= PREP.degeiko.cost &&
+        canAfford(state, PREP.degeiko.cost) &&
         state.rikishi.some((r) => r.stableId === state.player.stableId && r.injury === 0)
       );
     case 'visit': {
@@ -154,7 +155,7 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
     }
     case 'mune': {
       const r = mine(state, action.id)!;
-      state.player.stableMoney -= PREP.mune.cost;
+      pay(state, PREP.mune.cost);
       const key: Style = r.policy === 'body' || r.policy === 'rest' ? 'yotsu' : r.policy;
       work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.gain), PREP.mune.fatigue);
       wall(r, WALL.mune);
@@ -166,7 +167,7 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
       break;
     }
     case 'degeiko':
-      state.player.stableMoney -= PREP.degeiko.cost;
+      pay(state, PREP.degeiko.cost);
       for (const r of all) {
         if (r.injury > 0) continue;
         work(

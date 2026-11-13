@@ -40,10 +40,19 @@ describe('スカウト回り', () => {
     expect(canScout(t, 'overseas')).toBe(false);
   });
 
-  it('お金が足りなければ行けない。同じ状態なら同じ子に会う', () => {
+  it('口座と貯金を合わせても足りなければ行けない。同じ状態なら同じ子に会う', () => {
     const s = at(4);
     s.player.stableMoney = 100_000;
+    s.player.personalMoney = 0;
     expect(canScout(s, 'interHigh')).toBe(false);
+    // 口座が空でも、貯金があれば行ける（足りない分は貯金から）
+    const t = at(4);
+    t.player.stableMoney = 100_000;
+    t.player.personalMoney = 1_000_000;
+    expect(canScout(t, 'interHigh')).toBe(true);
+    const went = scoutTrip(t, 'interHigh');
+    expect(went.player.stableMoney).toBe(0);
+    expect(went.player.personalMoney).toBe(1_000_000 - 300_000);
     expect(scoutTrip(at(4, 3), 'juniorHighMeet').pending.candidates).toEqual(
       scoutTrip(at(4, 3), 'juniorHighMeet').pending.candidates,
     );

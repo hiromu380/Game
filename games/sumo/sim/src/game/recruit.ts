@@ -10,6 +10,7 @@ import { makeCandidate, rikishiFromCandidate, rollTalent, styleOf } from '../car
 import { lineageCharOf, makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { Candidate, GameState, Rikishi, ScoutTripId } from '../model/types';
+import { canAfford, pay } from '../money/pay';
 
 const usedNames = (state: GameState) => new Set(state.rikishi.map((r) => r.name));
 
@@ -92,7 +93,7 @@ export function canScout(state: GameState, id: ScoutTripId): boolean {
   const def = SCOUT_TRIPS[id];
   if (state.player.scoutedAt === state.bashoIndex) return false;
   if (def.months && !def.months.includes(state.bashoIndex % 6)) return false;
-  if (state.player.stableMoney < def.cost) return false;
+  if (!canAfford(state, def.cost)) return false;
   if (def.foreign) {
     const mine = state.rikishi.some((r) => r.stableId === state.player.stableId && r.foreign);
     if (mine || state.pending.candidates.some((c) => c.foreign)) return false;
@@ -112,7 +113,7 @@ export function goScouting(state: GameState, id: ScoutTripId): number {
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   const used = usedNames(state);
   for (const c of state.pending.candidates) used.add(c.name);
-  state.player.stableMoney -= def.cost;
+  pay(state, def.cost);
   state.player.scoutedAt = state.bashoIndex;
   for (let i = 0; i < n; i++) {
     const name = makeShikona(

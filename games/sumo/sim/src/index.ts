@@ -51,6 +51,7 @@ export { danpatsuPlan, danpatsuTier, hasamiCount, type DanpatsuPlan } from './st
 export { canScout } from './game/recruit';
 export { PREP } from './balance/prep';
 export { canPrep, doPrep, prepLeft } from './game/prep';
+export { canAfford, fromSavings, pay } from './money/pay';
 export {
   breakEvenHeads,
   headGain,
