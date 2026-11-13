@@ -33,9 +33,9 @@ describe('収支の見込み', () => {
     if (q.stableNet + q.personalNet < 0) expect(q.runway).toBe(0);
   });
 
-  it('十両に上がると、部屋の口座の動きが変わる（養成奨励金が入り、関取の費用が出る）', () => {
+  it('関取を出すと、部屋の口座は増える（養成奨励金と後援会が、関取の費用と減る養成費を上回る）', () => {
     const s = createGame({ seed: 3 });
-    const r = s.rikishi.find((x) => x.stableId === s.player.stableId)!;
-    expect(sekitoriGain(s, r.id)).not.toBe(0);
+    for (const r of s.rikishi.filter((x) => x.stableId === s.player.stableId))
+      expect(sekitoriGain(s, r.id)).toBeGreaterThan(100_000);
   });
 });

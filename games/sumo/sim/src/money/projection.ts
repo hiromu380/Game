@@ -59,9 +59,17 @@ export function projectLedger(
   };
 }
 
-/** 弟子1人が十両（関取）に上がったら、部屋の口座の動きが1場所あたりいくら変わるか */
+/**
+ * 弟子1人が十両（関取）に上がったら、部屋の口座の動きが1場所あたりいくら変わるか。
+ * 養成奨励金・養成費・関取の費用に加え、関取で増える後援会の会員と法人会員（目安に近づいた後）の会費を入れる
+ */
 export function sekitoriGain(state: GameState, id: number): number {
   const base = projectLedger(state).stableNet;
   const juryo: Rank = { division: 'juryo', title: null, number: 14, side: 'W' };
-  return projectLedger(state, new Map([[id, juryo]])).stableNet - base;
+  const supporters = Math.round(
+    (KOENKAI.memberPerSekitori * KOENKAI.memberDuesPerYear +
+      KOENKAI.corporatePerSekitori * KOENKAI.corporateDuesPerYear) /
+      6,
+  );
+  return projectLedger(state, new Map([[id, juryo]])).stableNet - base + supporters;
 }

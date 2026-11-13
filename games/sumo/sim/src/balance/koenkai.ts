@@ -11,13 +11,14 @@ export const KOENKAI = {
   /** 会員数の目安 = 基本 + 名声 × a + 関取 × b + 三役 × c。毎場所この目安へ2割ずつ近づく */
   memberBase: 80,
   memberPerPrestige: 2,
-  memberPerSekitori: 120,
+  /** 関取1人で増える会員（2026-11-13: 120 → 250。関取を出すと部屋の口座が増える向きにする。docs/balance-log.md） */
+  memberPerSekitori: 250,
   memberPerSanyaku: 200,
   memberMove: 0.2,
   /** 個人会員の年会費（円） */
   memberDuesPerYear: 8_000,
   /** 法人会員の目安 = 関取 × a + 名声 × b */
-  corporatePerSekitori: 2,
+  corporatePerSekitori: 3,
   corporatePerPrestige: 1 / 50,
   corporateDuesPerYear: 150_000,
   /** タニマチの上限・来る確率（場所ごと） */
