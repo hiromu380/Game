@@ -40,6 +40,12 @@ export function canPrep(state: GameState, action: PrepAction): boolean {
       return fit(mine(state, action.id)) && mine(state, action.id)!.policy !== 'rest';
     case 'spar':
       return action.a !== action.b && fit(mine(state, action.a)) && fit(mine(state, action.b));
+    case 'mune':
+      return (
+        fit(mine(state, action.id)) &&
+        mine(state, action.id)!.policy !== 'rest' &&
+        state.player.stableMoney >= PREP.mune.cost
+      );
     case 'degeiko':
       return (
         state.player.stableMoney >= PREP.degeiko.cost &&
@@ -135,6 +141,18 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
         }
       }
       tagInjuries(state);
+      break;
+    }
+    case 'mune': {
+      const r = mine(state, action.id)!;
+      state.player.stableMoney -= PREP.mune.cost;
+      const key: Style = r.policy === 'body' || r.policy === 'rest' ? 'yotsu' : r.policy;
+      work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.rate), PREP.mune.fatigue);
+      if (rng.chance(PREP.mune.injury * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
+        r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
+        result.injured.push(r.id);
+        tagInjuries(state);
+      }
       break;
     }
     case 'degeiko':

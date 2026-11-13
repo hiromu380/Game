@@ -9,16 +9,26 @@ describe('場所前の4週間（画面の文言）', () => {
   const t = makeT('ja');
 
   it('コマンドと、相手を選ぶ見出しが日本語・英語にある', () => {
-    for (const k of ['coach', 'spar', 'degeiko', 'rest', 'visit', 'scout', 'usual']) {
+    for (const k of ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual']) {
       expect(ja).toHaveProperty([`prep.cmd.${k}`]);
       expect(en).toHaveProperty([`prep.cmd.${k}`]);
     }
     // 指しているコマンドの1行の説明（説明を隠していても出す）
-    for (const k of ['none', 'coach', 'spar', 'degeiko', 'rest', 'visit', 'scout', 'usual']) {
+    for (const k of [
+      'none',
+      'coach',
+      'spar',
+      'mune',
+      'degeiko',
+      'rest',
+      'visit',
+      'scout',
+      'usual',
+    ]) {
       expect(ja).toHaveProperty([`prep.desc.${k}`]);
       expect(en).toHaveProperty([`prep.desc.${k}`]);
     }
-    for (const k of ['coach', 'spar', 'visit', 'scout']) {
+    for (const k of ['coach', 'spar', 'mune', 'visit', 'scout']) {
       expect(ja).toHaveProperty([`prep.pick.${k}`]);
       expect(en).toHaveProperty([`prep.pick.${k}`]);
     }

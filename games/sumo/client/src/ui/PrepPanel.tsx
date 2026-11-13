@@ -20,10 +20,15 @@ import { money, rankLabel } from '../format';
 import { signed } from './TrainingSection';
 import { signedPoints } from '../points';
 
-type Menu = 'coach' | 'spar' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
-const MENUS: Menu[] = ['coach', 'spar', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
+type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
+const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
 /** 相手を選ぶ行動（押すと右に一覧が出る）。ほかは押すとすぐ行う */
-const PICKS: ReadonlySet<Menu> = new Set(['coach', 'spar', 'visit', 'scout']);
+const PICKS: ReadonlySet<Menu> = new Set(['coach', 'spar', 'mune', 'visit', 'scout']);
+/** 1行の説明に添える、けがの確率（%） */
+const RISK: Partial<Record<Menu, number>> = {
+  spar: Math.round(PREP.spar.injury * 100),
+  mune: Math.round(PREP.mune.injury * 100),
+};
 
 /** 週の結果を1行に */
 export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string {
@@ -48,6 +53,9 @@ export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string
       break;
     case 'spar':
       head = t('prep.log.spar');
+      break;
+    case 'mune':
+      head = t('prep.log.mune');
       break;
     case 'degeiko':
       return t('prep.log.degeiko', { n: w.gains.length });
@@ -94,7 +102,8 @@ export function PrepPanel({
     if (settings.sound && next !== game) {
       const hurt = (next.prep.log[next.prep.log.length - 1]?.injured.length ?? 0) > 0;
       if (hurt) playSound('fall');
-      else if (a.kind === 'coach' || a.kind === 'spar' || a.kind === 'degeiko') playSound('hit');
+      else if (a.kind === 'coach' || a.kind === 'spar' || a.kind === 'mune' || a.kind === 'degeiko')
+        playSound('hit');
       else playSound('tick');
     }
     setGame(next);
@@ -120,6 +129,7 @@ export function PrepPanel({
     .filter((r) => r.stableId === game.player.stableId)
     .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   const cost: Partial<Record<Menu, number>> = {
+    mune: PREP.mune.cost,
     degeiko: PREP.degeiko.cost,
     visit: KOENKAI.visitCost,
   };
@@ -127,7 +137,8 @@ export function PrepPanel({
   const usable = (m: Menu): boolean => {
     switch (m) {
       case 'coach':
-        return mine.some((r) => canPrep(game, { kind: 'coach', id: r.id }));
+      case 'mune':
+        return mine.some((r) => canPrep(game, { kind: m, id: r.id }));
       case 'spar':
         return mine.filter((r) => r.injury === 0).length >= 2 && canPrep(game, { kind: 'usual' });
       case 'visit':
@@ -194,6 +205,11 @@ export function PrepPanel({
             ))}
             <p className="prep__help" aria-live="polite">
               {t(`prep.desc.${pointed ?? menu ?? 'none'}` as MessageKey)}
+              {RISK[pointed ?? menu ?? 'usual'] !== undefined && (
+                <span className="prep__risk">
+                  {t('prep.risk', { n: RISK[(pointed ?? menu)!]! })}
+                </span>
+              )}
             </p>
           </div>
           {!menu && (
@@ -244,13 +260,13 @@ export function PrepPanel({
                     })
                   : t(`prep.pick.${menu}` as MessageKey)}
               </p>
-              {menu === 'coach' &&
+              {(menu === 'coach' || menu === 'mune') &&
                 mine.map((r) => (
                   <button
                     key={r.id}
                     className="prep__cmd"
-                    disabled={!canPrep(game, { kind: 'coach', id: r.id })}
-                    onClick={() => act({ kind: 'coach', id: r.id })}
+                    disabled={!canPrep(game, { kind: menu, id: r.id })}
+                    onClick={() => act({ kind: menu, id: r.id })}
                   >
                     {who(r)}
                   </button>

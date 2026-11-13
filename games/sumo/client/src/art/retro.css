@@ -659,3 +659,12 @@ body.has-modal {
   font-size: 0.875rem;
   color: var(--ai);
 }
+
+/* 場所前: けがの確率（危ない行動の印） */
+.prep__risk {
+  margin-left: 8px;
+  padding: 0 4px;
+  border: 2px solid var(--shu);
+  color: var(--shu);
+  white-space: nowrap;
+}

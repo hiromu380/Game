@@ -1312,7 +1312,7 @@
   "prep.roster": "弟子の疲れ",
   "prep.desc.none": "コマンドを選ぶ",
   "prep.desc.coach": "1人に稽古をつける。方針の力が伸び、疲れる",
-  "prep.desc.spar": "2人に取らせる。格上と当たった方がよく伸びる。けがをすることも",
+  "prep.desc.spar": "2人に取らせる。格上と当たった方がよく伸びる",
   "prep.desc.degeiko": "よその部屋へ。けがのない全員が少し伸びる",
   "prep.desc.rest": "全員の疲れを抜く",
   "prep.desc.visit": "タニマチ1人に会う。関係が上がる",
@@ -1332,5 +1332,10 @@
   "target.to.sanyaku": "三役",
   "target.to.sekiwake": "関脇",
   "target.to.ozeki": "大関",
-  "target.to.yokozuna": "横綱"
+  "target.to.yokozuna": "横綱",
+  "prep.cmd.mune": "胸を借りる",
+  "prep.pick.mune": "だれを",
+  "prep.log.mune": "",
+  "prep.desc.mune": "1人を関取衆の稽古へ。個別指導の倍伸びるが、ひどく疲れる",
+  "prep.risk": "けが {n}%"
 }

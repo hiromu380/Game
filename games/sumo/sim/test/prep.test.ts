@@ -107,6 +107,28 @@ describe('場所前の4週間', () => {
     expect(hurt).toBeLessThan(30);
   });
 
+  it('胸を借りる: 個別指導より大きく伸び、お金と疲れがかかる。けがはときどき（申し合いより多い）', () => {
+    const { s, mine } = start();
+    const r = mine[0]!;
+    const coach =
+      of(doPrep(s, { kind: 'coach', id: r.id }), r.id).abilities.oshi - r.abilities.oshi;
+    const out = doPrep(s, { kind: 'mune', id: r.id });
+    const gain = of(out, r.id).abilities.oshi - r.abilities.oshi;
+    expect(gain).toBeGreaterThan(coach);
+    expect(out.player.stableMoney).toBe(s.player.stableMoney - PREP.mune.cost);
+    expect(of(out, r.id).fatigue).toBe(Math.min(100, r.fatigue + PREP.mune.fatigue));
+    const poor = { ...s, player: { ...s.player, stableMoney: 0 } };
+    expect(canPrep(poor, { kind: 'mune', id: r.id })).toBe(false);
+    let hurt = 0;
+    for (let seed = 1; seed <= 80; seed++) {
+      const x = start(seed);
+      const next = doPrep(x.s, { kind: 'mune', id: x.mine[0]!.id });
+      hurt += next.prep.log[0]!.injured.length;
+    }
+    expect(hurt).toBeGreaterThan(2);
+    expect(hurt).toBeLessThan(40);
+  });
+
   it('出稽古はお金がかかり、けがのない全員が伸びる。休ませると全員の疲れが抜ける', () => {
     const { s, mine } = start();
     mine[0]!.injury = 1;

@@ -1312,7 +1312,7 @@
   "prep.roster": "Fatigue",
   "prep.desc.none": "Choose a command",
   "prep.desc.coach": "Coach one wrestler. His focus grows; he tires.",
-  "prep.desc.spar": "Two wrestlers spar. The one facing a stronger man grows more. Injuries happen.",
+  "prep.desc.spar": "Two wrestlers spar. The one facing a stronger man grows more.",
   "prep.desc.degeiko": "Train at another stable. Everyone healthy grows a little.",
   "prep.desc.rest": "Everyone recovers from fatigue.",
   "prep.desc.visit": "Meet one patron. Your relationship improves.",
@@ -1332,5 +1332,10 @@
   "target.to.sanyaku": "sanyaku",
   "target.to.sekiwake": "sekiwake",
   "target.to.ozeki": "ozeki",
-  "target.to.yokozuna": "yokozuna"
+  "target.to.yokozuna": "yokozuna",
+  "prep.cmd.mune": "Spar sekitori",
+  "prep.pick.mune": "Who?",
+  "prep.log.mune": "",
+  "prep.desc.mune": "Send one to train with sekitori. Twice the growth of coaching, but exhausting.",
+  "prep.risk": "Injury {n}%"
 }
