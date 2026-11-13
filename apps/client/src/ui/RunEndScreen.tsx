@@ -15,7 +15,8 @@ import { useI18n } from '../i18n';
 import type { PlayMode } from '../state/gameReducer';
 import { EDITION_CONFIG } from '../config/edition';
 import { AchievementList } from './AchievementList';
-import { MetaPanel } from './MetaPanel';
+import { boardSizeAt, describeCondition, MetaPanel, nearestGoal } from './MetaPanel';
+import { PartIcon } from './PartIcon';
 import { RocketScene } from './RocketScene';
 import { DailyShare } from './share/DailyShare';
 import { RunShare } from './share/RunShare';
@@ -44,6 +45,12 @@ export function RunEndScreen(props: Props) {
   const canOvertime = run.phase === 'cleared' && !run.overtime && run.config.overtimeAllowed;
   const total = run.history.reduce((sum, r) => scoreAdd(sum, scoreFromString(r.score)), SCORE_ZERO);
   const clearedCount = run.history.filter((r) => r.cleared).length;
+  // 落ちたシフトで、ノルマまであといくつだったか（惜しかったことを伝え、もう一度に向かわせる）
+  const missed = run.phase === 'failed' ? run.history.at(-1) : undefined;
+  const shortBy =
+    missed && !missed.cleared ? (BigInt(missed.quota) - BigInt(missed.score)).toString() : null;
+  // 次の目標は「もう一度」の手前に1つだけ吊るす（一覧は下にある）
+  const goal = mode.kind === 'normal' && EDITION_CONFIG.metaProgression ? nearestGoal(meta) : null;
 
   return (
     <div className="run-end">
@@ -80,6 +87,33 @@ export function RunEndScreen(props: Props) {
           </li>
         ))}
       </ul>
+      {shortBy && (
+        <p className="run-end__short">{t('runEnd.shortBy', { amount: formatScore(shortBy) })}</p>
+      )}
+      {goal && (
+        <div className="run-end__goal">
+          {goal.kind === 'part' ? (
+            <PartIcon partId={goal.partId} size={36} />
+          ) : (
+            <UiIcon name="expand" size={36} />
+          )}
+          <div className="run-end__goal-text">
+            <span className="run-end__goal-label">{t('runEnd.nextGoal')}</span>
+            <strong>
+              {goal.kind === 'part'
+                ? t(`part.${goal.partId}.name`)
+                : t('meta.boardGoal', { size: boardSizeAt(goal.level) })}
+            </strong>
+            <span>{describeCondition(t, formatScore, goal.condition)}</span>
+            <span className="meta__bar">
+              <span
+                className="meta__bar-fill"
+                style={{ width: `${Math.round(goal.progress * 100)}%` }}
+              />
+            </span>
+          </div>
+        </div>
+      )}
       {mode.kind === 'normal' ? (
         <div className="button-row run-end__actions">
           {canOvertime && (

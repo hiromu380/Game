@@ -51,6 +51,23 @@ const kinds = (cues: Cue[]) => cues.map((c) => c.kind);
 const flashTimes = (cues: Cue[]) => cues.filter((c) => c.kind === 'flash').map((c) => c.atMs);
 
 describe('連鎖の演出の流れ', () => {
+  it('信号が1本も出ない盤面（スイッチなし・空の盤面）でも落ちず、溜めと「ドン」だけになる', () => {
+    const empty = simulate({
+      board: { width: 2, height: 1, cells: [null, { id: 'dock', dir: 1 }] },
+      seed: 1,
+      rules: DEFAULT_RULES,
+    });
+    expect(empty.events).toEqual([]);
+    const c = buildChoreography(empty.events, strong);
+    expect(c.ticks).toEqual([]);
+    expect(kinds(c.cues)).toEqual(['windup', 'stamp']);
+    expect(c.totalMs).toBe(C.windupMs.full + C.stampMs);
+    // 溜めのない設定でも落ちない
+    expect(kinds(buildChoreography([], { ...strong, strength: 'minimal' }).cues)).toEqual([
+      'stamp',
+    ]);
+  });
+
   it('同じ events と設定からは同じ命令列になる（決定論）', () => {
     expect(buildChoreography(medium.events, strong)).toEqual(
       buildChoreography(medium.events, strong),

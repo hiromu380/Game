@@ -32,8 +32,10 @@ import {
   type ShiftOutcome,
   type SimResult,
   type Unlock,
+  scoreToString,
 } from '@chain-factory/sim';
 import { achievementsAfterCommit, achievementsAfterRanking } from './achievements';
+import type { TrialRecord } from './commitCheck';
 
 /** 選択状態: 手持ちのパーツ（配置待ち） or 盤面のマス */
 export type Selection =
@@ -78,6 +80,8 @@ export interface GameState {
   error: GameError | null;
   /** 直近に再生した結果（デバッグ表示用。再生を閉じても残す） */
   lastResult: SimResult | null;
+  /** 直前の試運転の盤面と出荷量（本番の確認で「この並びで試したか」を見る。state/commitCheck.ts） */
+  lastTrial: TrialRecord | null;
   /** メタ進行（ランをまたいで残る） */
   meta: MetaProgress;
   /** 直前に終わったランで新しく解放されたもの（結果画面で表示） */
@@ -152,6 +156,7 @@ export function createGameState(
     playback: null,
     error: null,
     lastResult: null,
+    lastTrial: null,
     meta,
     unlocks: [],
     achievements,
@@ -410,6 +415,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         run: trial.state,
         playback: { mode: 'trial', result: trial.result, finished: false },
         lastResult: trial.result,
+        lastTrial: {
+          board: state.run.board,
+          shiftIndex: state.run.shiftIndex,
+          score: scoreToString(trial.result.score),
+        },
         error: null,
       };
     }

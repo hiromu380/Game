@@ -211,9 +211,11 @@ export function buildChoreography(events: SimEvent[], options: ChoreographyOptio
   });
 
   // 4. ピーク（最後の出荷）と「ドン」
-  const peakTick = lastShipTick >= 0 ? lastShipTick : ticks.length - 1;
-  const peakAt = Math.round(ticks[peakTick]!.atMs + ticks[peakTick]!.durationMs * MOVE_RATIO);
+  // 盤面にスイッチがないなど、信号が1本も出なかったときは tick がない（そのときは溜めと「ドン」だけ）
   if (lastShipTick >= 0) {
+    const peakAt = Math.round(
+      ticks[lastShipTick]!.atMs + ticks[lastShipTick]!.durationMs * MOVE_RATIO,
+    );
     cues.push({ atMs: peakAt, kind: 'peak', hitstopMs });
     flash(peakAt);
     // ピークで止めた分、それより後の tick・命令を後ろへずらす（描く側は止めている間、何も進めない）

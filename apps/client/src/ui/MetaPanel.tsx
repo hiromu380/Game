@@ -9,6 +9,7 @@ import {
   isConditionMet,
   type MetaCondition,
   type MetaProgress,
+  type PartId,
   type Unlock,
 } from '@chain-factory/sim';
 import { useI18n, type ScoreFormatter, type TranslateFn } from '../i18n';
@@ -34,8 +35,50 @@ export function describeCondition(
   return t(`meta.condition.${condition.kind}`, { value });
 }
 
+/**
+ * いちばん近い解放の目標（まだ解放していないもののうち、達成度がいちばん高いもの。同じなら一覧の先の方）。
+ * すべて解放済みなら null
+ */
+export function nearestGoal(meta: MetaProgress):
+  | { kind: 'part'; partId: PartId; condition: MetaCondition; progress: number }
+  | {
+      kind: 'board';
+      level: number;
+      condition: MetaCondition;
+      progress: number;
+    }
+  | null {
+  type Goal = NonNullable<ReturnType<typeof nearestGoal>>;
+  const goals: Goal[] = [
+    ...BALANCE.meta.partUnlocks
+      .filter(({ partId }) => !meta.unlockedParts.includes(partId))
+      .map(({ partId, condition }) => ({
+        kind: 'part' as const,
+        partId,
+        condition,
+        progress: conditionProgress(meta.records, condition),
+      })),
+    ...BALANCE.meta.boardExpansions.flatMap((condition, i) =>
+      meta.boardLevel > i || isConditionMet(meta.records, condition)
+        ? []
+        : [
+            {
+              kind: 'board' as const,
+              level: i + 1,
+              condition,
+              progress: conditionProgress(meta.records, condition),
+            },
+          ],
+    ),
+  ];
+  return goals.reduce<Goal | null>(
+    (best, g) => (!best || g.progress > best.progress ? g : best),
+    null,
+  );
+}
+
 /** 盤面の一辺の長さ（工場拡張の段階から） */
-const boardSizeAt = (level: number) => BALANCE.board.width + level;
+export const boardSizeAt = (level: number) => BALANCE.board.width + level;
 
 export function MetaPanel({ meta, unlocks }: Props) {
   const { t, formatScore } = useI18n();
