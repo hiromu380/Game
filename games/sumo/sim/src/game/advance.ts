@@ -26,6 +26,8 @@ import { applyKakun } from '../lineage/kakun';
 import { settleBasho, sum } from '../money/ledger';
 import type { BashoRecord, BashoReport, BoutResult, GameState, Rank, Stance } from '../model/types';
 import { round1 } from '../core/math';
+import { WALL } from '../balance/wall';
+import { breakWall } from '../career/wall';
 import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, retireRikishi } from './state';
@@ -495,6 +497,9 @@ export function advanceBasho(
       : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
     const before = own ? { ...r.abilities, weight: r.weight, fatigue: r.fatigue } : null;
     const injured = train(r, ctx, growthRng);
+    // 猛稽古で壁に当たっていた自分の弟子は、壁を破る（素質が上がる）
+    const wall =
+      own && !injured && (r.intensity ?? 'normal') === 'hard' ? breakWall(r, WALL.hard) : 0;
     // 稽古の成果（自分の弟子）: 動いた量を結果に残す
     if (before)
       report.training.push({
@@ -506,6 +511,7 @@ export function advanceBasho(
         fatigue: Math.round(r.fatigue - before.fatigue),
         intensity: r.intensity ?? 'normal',
         injured,
+        ...(wall > 0 ? { wall } : {}),
       });
   }
 

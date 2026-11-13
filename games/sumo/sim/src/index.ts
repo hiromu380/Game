@@ -52,3 +52,5 @@ export { canScout } from './game/recruit';
 export { PREP } from './balance/prep';
 export { canPrep, doPrep, prepLeft } from './game/prep';
 export { projectLedger, sekitoriGain, type Projection } from './money/projection';
+export { WALL } from './balance/wall';
+export { atWall, breakWall, focusOf } from './career/wall';

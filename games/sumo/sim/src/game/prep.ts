@@ -10,6 +10,8 @@ import { isSekitori, ranksOf } from '../banzuke/rank';
 import { extraTraining } from '../career/growth';
 import { tagInjuries } from '../career/injury';
 import { fragilityOf } from '../career/traits';
+import { WALL } from '../balance/wall';
+import { breakWall } from '../career/wall';
 import { clamp, round1 } from '../core/math';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import type { GameState, PrepAction, Rikishi, Style, WeekResult } from '../model/types';
@@ -95,6 +97,11 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
     });
   };
   const all = state.rikishi.filter((r) => r.stableId === state.player.stableId);
+  /** 壁に当たった弟子に負荷をかけると、素質が上がる（稽古の後・けがの前に見る） */
+  const wall = (r: Rikishi, amount: number) => {
+    const inc = breakWall(r, amount);
+    if (inc > 0) result.walls = [...(result.walls ?? []), { id: r.id, inc }];
+  };
   switch (action.kind) {
     case 'coach': {
       const r = mine(state, action.id)!;
@@ -104,13 +111,14 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
           if (r.policy === 'body') {
             const cap = r.height - GROWTH.weightCapOffset;
             if (r.age < 32) r.weight = round1(Math.min(cap, r.weight + PREP.coach.bodyKg));
-            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.coach.bodyRate);
+            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.coach.bodyGain);
           } else if (r.policy !== 'rest') {
-            extraTraining(r, ctxOf(r), r.policy, PREP.coach.rate);
+            extraTraining(r, ctxOf(r), r.policy, PREP.coach.gain);
           }
         },
         PREP.coach.fatigue,
       );
+      wall(r, WALL.coach);
       break;
     }
     case 'spar': {
@@ -130,10 +138,11 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
               r,
               ctxOf(r),
               key,
-              PREP.spar.rate * (stronger ? PREP.spar.strongerBonus : 1),
+              PREP.spar.gain * (stronger ? PREP.spar.strongerBonus : 1),
             ),
           PREP.spar.fatigue,
         );
+        wall(r, WALL.spar);
         // 申し合いのけが
         if (rng.chance(PREP.spar.injury * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
           r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
@@ -147,7 +156,8 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
       const r = mine(state, action.id)!;
       state.player.stableMoney -= PREP.mune.cost;
       const key: Style = r.policy === 'body' || r.policy === 'rest' ? 'yotsu' : r.policy;
-      work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.rate), PREP.mune.fatigue);
+      work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.gain), PREP.mune.fatigue);
+      wall(r, WALL.mune);
       if (rng.chance(PREP.mune.injury * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
         r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
         result.injured.push(r.id);
@@ -162,7 +172,7 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
         work(
           r,
           () => {
-            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.degeiko.rate);
+            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.degeiko.gain);
           },
           PREP.degeiko.fatigue,
         );

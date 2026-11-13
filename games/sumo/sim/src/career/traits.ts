@@ -15,11 +15,15 @@ function unit(n: number, salt: number): number {
 
 const cache = new Map<string, readonly TraitId[]>();
 
-export function traitsOf(r: Pick<Rikishi, 'id' | 'talent' | 'height'>): readonly TraitId[] {
-  const key = `${r.id}:${r.talent}:${r.height}`;
+export function traitsOf(
+  r: Pick<Rikishi, 'id' | 'talent' | 'height'> & { breakthrough?: number },
+): readonly TraitId[] {
+  // 個性は生まれ持った素質で決まる（壁を破って上がった分は数えない）
+  const talent = r.talent - (r.breakthrough ?? 0);
+  const key = `${r.id}:${talent}:${r.height}`;
   const hit = cache.get(key);
   if (hit) return hit;
-  const seed = (r.id * 7919 + Math.round(r.talent * 13) * 104729 + r.height * 31) | 0;
+  const seed = (r.id * 7919 + Math.round(talent * 13) * 104729 + r.height * 31) | 0;
   const roll = unit(seed, 1);
   const count = roll < TRAITS.none ? 0 : roll < TRAITS.none + TRAITS.one ? 1 : 2;
   const out: TraitId[] = [];
@@ -37,8 +41,10 @@ export function traitsOf(r: Pick<Rikishi, 'id' | 'talent' | 'height'>): readonly
   return out;
 }
 
-export const hasTrait = (r: Pick<Rikishi, 'id' | 'talent' | 'height'>, t: TraitId) =>
-  traitsOf(r).includes(t);
+export const hasTrait = (
+  r: Pick<Rikishi, 'id' | 'talent' | 'height'> & { breakthrough?: number },
+  t: TraitId,
+) => traitsOf(r).includes(t);
 
 /** けがのしやすさ（体質を含む） */
 export function fragilityOf(r: Rikishi): number {

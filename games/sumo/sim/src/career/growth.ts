@@ -42,7 +42,7 @@ const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
  * 追加の稽古（場所前の週の行動）: 1つの能力を、素質までの残り × rate だけ伸ばす。伸びた量を返す。
  * ふだんの稽古と同じ条件（年齢・個性・設備・親方の型）が効く。ばらつきと稽古の量は入れない
  */
-export function extraTraining(r: Rikishi, ctx: GrowthContext, key: Style, rate: number): number {
+export function extraTraining(r: Rikishi, ctx: GrowthContext, key: Style, amount: number): number {
   const ageFactor =
     r.age <= GROWTH.youthBonusUntil ? GROWTH.youthBonus : r.age <= r.peakAge ? 1 : 0;
   const a = r.abilities[key];
@@ -58,7 +58,7 @@ export function extraTraining(r: Rikishi, ctx: GrowthContext, key: Style, rate: 
     (ctx.oyakataStyle === key ? GROWTH.oyakataStyleBonus : 1) *
     ctx.styleMultiplier[key] *
     (key === 'waza' && traits.includes('studious') ? TRAITS.studious.waza : 1);
-  const next = round1(Math.min(r.talent, a + (r.talent - a) * rate * ageFactor * mult));
+  const next = round1(Math.min(r.talent, a + amount * ageFactor * mult));
   r.abilities[key] = next;
   return round1(next - a);
 }

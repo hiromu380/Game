@@ -85,8 +85,10 @@ export interface Rikishi {
   height: number;
   weight: number;
   abilities: Abilities;
-  /** 伸びの上限（隠れた値） */
+  /** 伸びの上限（隠れた値）。壁を破ると上がる */
   talent: number;
+  /** 壁を破って上がった素質の合計（自分の弟子だけ。なければ 0） */
+  breakthrough?: number;
   peakAge: number;
   /** けがのしやすさ 0〜1（隠れた値） */
   fragility: number;
@@ -474,6 +476,8 @@ export interface WeekResult {
   }[];
   /** この週にけがをした弟子 */
   injured: number[];
+  /** 壁を破った弟子と、上がった素質 */
+  walls?: { id: number; inc: number }[];
   /** スカウトで会えた人数 */
   met?: number;
 }
@@ -586,6 +590,8 @@ export interface TrainingResult {
   fatigue: number;
   intensity: Intensity;
   injured: boolean;
+  /** 猛稽古で壁を破って上がった素質（なければ省く） */
+  wall?: number;
 }
 
 /** 幕内の優勝争い（場所の流れ） */
