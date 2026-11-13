@@ -1211,7 +1211,7 @@
   "intensity.hard": "猛稽古",
   "intensity.desc.light": "伸びは小さいが、疲れがたまりにくく、けがもしにくい。",
   "intensity.desc.normal": "いつもの稽古。",
-  "intensity.desc.hard": "よく伸びるが、疲れがたまり、けがをしやすい。",
+  "intensity.desc.hard": "よく伸びるが、疲れがたまり、けがをしやすい。壁の弟子は素質が上がる。",
   "scene.go.talk": "話しかける",
   "scene.oyakata": "親方",
   "mid.stance": "{name}の後半の取り口",
@@ -1310,7 +1310,7 @@
   "report.fullAbsence": "全休",
   "prep.roster": "弟子の疲れ",
   "prep.desc.none": "コマンドを選ぶ",
-  "prep.desc.coach": "1人に稽古をつける。方針の力が伸び、疲れる",
+  "prep.desc.coach": "1人に稽古をつける。方針の力が伸びる。壁の弟子は素質が上がる",
   "prep.desc.spar": "2人に取らせる。格上と当たった方がよく伸びる",
   "prep.desc.degeiko": "よその部屋へ。けがのない全員が少し伸びる",
   "prep.desc.rest": "全員の疲れを抜く",
@@ -1335,7 +1335,7 @@
   "prep.cmd.mune": "胸を借りる",
   "prep.pick.mune": "だれを",
   "prep.log.mune": "",
-  "prep.desc.mune": "1人を関取衆の稽古へ。個別指導の倍伸びるが、ひどく疲れる",
+  "prep.desc.mune": "1人を関取衆の稽古へ。大きく伸び、壁を破りやすい。ひどく疲れる",
   "prep.risk": "けが {n}%",
   "action.delegate": "任せる",
   "action.delegate1": "1場所任せる",
@@ -1376,5 +1376,10 @@
   "outlook.stable": "口座 {yen}",
   "outlook.personal": "貯金 {yen}",
   "outlook.runway": "このままだと あと{n}場所でお金が尽きる",
-  "target.sekitoriYen": "関取なら口座 {yen}/場所"
+  "target.sekitoriYen": "関取なら口座 {yen}/場所",
+  "prep.wall": "壁",
+  "prep.wallDesc": "素質の壁に当たっている。負荷の大きい稽古で素質が上がる",
+  "prep.broke": "壁を破った！",
+  "prep.log.broke": "{name}が壁を破った！",
+  "report.training.broke": "壁を破った"
 }

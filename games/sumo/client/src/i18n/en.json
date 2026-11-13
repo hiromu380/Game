@@ -1211,7 +1211,7 @@
   "intensity.hard": "Hard",
   "intensity.desc.light": "Smaller gains, but less fatigue and fewer injuries.",
   "intensity.desc.normal": "The usual practice.",
-  "intensity.desc.hard": "Bigger gains, but fatigue builds and injuries are likelier.",
+  "intensity.desc.hard": "Bigger gains, but fatigue builds and injuries are likelier. A wrestler at the wall gains talent.",
   "scene.go.talk": "Talk",
   "scene.oyakata": "Master",
   "mid.stance": "{name}'s second-half stance",
@@ -1310,7 +1310,7 @@
   "report.fullAbsence": "Sat out",
   "prep.roster": "Fatigue",
   "prep.desc.none": "Choose a command",
-  "prep.desc.coach": "Coach one wrestler. His focus grows; he tires.",
+  "prep.desc.coach": "Coach one wrestler. His focus grows. A wrestler at the wall gains talent.",
   "prep.desc.spar": "Two wrestlers spar. The one facing a stronger man grows more.",
   "prep.desc.degeiko": "Train at another stable. Everyone healthy grows a little.",
   "prep.desc.rest": "Everyone recovers from fatigue.",
@@ -1335,7 +1335,7 @@
   "prep.cmd.mune": "Spar sekitori",
   "prep.pick.mune": "Who?",
   "prep.log.mune": "",
-  "prep.desc.mune": "Send one to train with sekitori. Twice the growth of coaching, but exhausting.",
+  "prep.desc.mune": "Send one to train with sekitori. Big gains and breaks walls, but exhausting.",
   "prep.risk": "Injury {n}%",
   "action.delegate": "Delegate",
   "action.delegate1": "One tournament",
@@ -1376,5 +1376,10 @@
   "outlook.stable": "Stable {yen}",
   "outlook.personal": "Savings {yen}",
   "outlook.runway": "At this pace, money runs out in {n} tournaments",
-  "target.sekitoriYen": "As sekitori: stable {yen}/tournament"
+  "target.sekitoriYen": "As sekitori: stable {yen}/tournament",
+  "prep.wall": "Wall",
+  "prep.wallDesc": "Has hit the wall of his talent. Hard training raises the talent itself.",
+  "prep.broke": "Broke through!",
+  "prep.log.broke": "{name} broke through!",
+  "report.training.broke": "Broke through"
 }

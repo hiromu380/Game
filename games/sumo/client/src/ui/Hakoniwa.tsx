@@ -27,7 +27,7 @@ export type SceneActor = Actor & { title?: string };
 export interface Pop {
   rikishiId: number;
   text: string;
-  tone: 'up' | 'hurt';
+  tone: 'up' | 'hurt' | 'wall';
 }
 
 /** 舞台の見える範囲（ドット） */

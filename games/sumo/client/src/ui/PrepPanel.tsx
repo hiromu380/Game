@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import {
+  atWall,
   canPrep,
   doPrep,
   KOENKAI,
@@ -31,6 +32,9 @@ const RISK: Partial<Record<Menu, number>> = {
   mune: Math.round(PREP.mune.injury * 100),
 };
 
+/** 疲れは整数で持つので、小数をつけずに出す */
+const signedInt = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '±0');
+
 /** 週の結果を1行に */
 export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string {
   const name = (id: number) => game.rikishi.find((r) => r.id === id)?.name ?? '?';
@@ -42,11 +46,12 @@ export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string
         .filter((k) => g[k] !== 0)
         .map((k) => `${t(`style.${k}`)}${signedPoints(g[k])}`);
       if (g.weight !== 0) parts.push(`${t('report.training.weight')}${signed(g.weight)}`);
-      if (g.fatigue !== 0) parts.push(`${t('talk.fatigue')}${signed(g.fatigue)}`);
+      if (g.fatigue !== 0) parts.push(`${t('talk.fatigue')}${signedInt(g.fatigue)}`);
       return `${name(g.id)} ${parts.join(' ')}`.trim();
     })
     .join(' / ');
   const hurt = w.injured.map((id) => t('prep.log.injured', { name: name(id) })).join(' ');
+  const broke = (w.walls ?? []).map((x) => t('prep.log.broke', { name: name(x.id) })).join(' ');
   let head: string;
   switch (a.kind) {
     case 'coach':
@@ -76,7 +81,7 @@ export function weekLine(t: TranslateFn, game: GameState, w: WeekResult): string
     case 'usual':
       return t('prep.log.usual');
   }
-  return [head, gains, hurt].filter(Boolean).join(' ');
+  return [head, gains, broke, hurt].filter(Boolean).join(' ');
 }
 
 /** 場所前の4週間: 毎週1つ、親方の行動をコマンドで選ぶ */
@@ -99,10 +104,11 @@ export function PrepPanel({
   const week = game.prep.week + 1;
   const act = (a: PrepAction) => {
     const next = doPrep(game, a);
-    // 稽古は当たる音、けがは落ちる音
+    // 稽古は当たる音、壁を破ったら太鼓、けがは落ちる音
     if (settings.sound && next !== game) {
-      const hurt = (next.prep.log[next.prep.log.length - 1]?.injured.length ?? 0) > 0;
-      if (hurt) playSound('fall');
+      const done = next.prep.log[next.prep.log.length - 1];
+      if ((done?.injured.length ?? 0) > 0) playSound('fall');
+      else if ((done?.walls?.length ?? 0) > 0) playSound('drum');
       else if (a.kind === 'coach' || a.kind === 'spar' || a.kind === 'mune' || a.kind === 'degeiko')
         playSound('hit');
       else playSound('tick');
@@ -113,16 +119,17 @@ export function PrepPanel({
   };
   // 先週の行動で動いた量（弟子の疲れの横に出す）
   const lastWeek = game.prep.log[game.prep.log.length - 1];
-  const gainOf = (id: number): { text: string; hurt: boolean } | null => {
+  const gainOf = (id: number): { text: string; tone: 'up' | 'hurt' | 'wall' } | null => {
     if (!lastWeek) return null;
-    if (lastWeek.injured.includes(id)) return { text: t('prep.hurt'), hurt: true };
+    if (lastWeek.injured.includes(id)) return { text: t('prep.hurt'), tone: 'hurt' };
+    if (lastWeek.walls?.some((x) => x.id === id)) return { text: t('prep.broke'), tone: 'wall' };
     const g = lastWeek.gains.find((x) => x.id === id);
     if (!g) return null;
     const best = (['oshi', 'yotsu', 'waza'] as const)
       .filter((k) => g[k] > 0)
       .sort((a, b) => g[b] - g[a])[0];
-    if (best) return { text: `${t(`style.${best}`)}${signedPoints(g[best])}`, hurt: false };
-    if (g.fatigue < 0) return { text: `${t('talk.fatigue')}${signed(g.fatigue)}`, hurt: false };
+    if (best) return { text: `${t(`style.${best}`)}${signedPoints(g[best])}`, tone: 'up' };
+    if (g.fatigue < 0) return { text: `${t('talk.fatigue')}${signedInt(g.fatigue)}`, tone: 'up' };
     return null;
   };
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
@@ -152,10 +159,20 @@ export function PrepPanel({
         return canPrep(game, { kind: m });
     }
   };
+  /** 素質の壁に当たっている印（負荷をかけると素質が上がる） */
+  const wallTag = (r: Rikishi) =>
+    atWall(r) && (
+      <span className="tag tag--wall" title={t('prep.wallDesc')}>
+        {t('prep.wall')}
+      </span>
+    );
   const who = (r: Rikishi) => (
     <>
       <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
-      <span className="prep__name">{r.name}</span>
+      <span className="prep__name">
+        {r.name}
+        {wallTag(r)}
+      </span>
       <span className="prep__sub">
         {r.injury > 0
           ? t('prep.hurt')
@@ -221,13 +238,16 @@ export function PrepPanel({
                 {mine.map((r) => (
                   <li key={r.id}>
                     <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
-                    <span className="prep__name">{r.name}</span>
+                    <span className="prep__name">
+                      {r.name}
+                      {wallTag(r)}
+                    </span>
                     {(() => {
                       const g = gainOf(r.id);
                       return (
                         <span
                           key={`${game.bashoIndex}:${game.prep.week}`}
-                          className={`prep__gain ${g ? 'is-new' : ''} ${g?.hurt ? 'is-hurt' : ''}`}
+                          className={`prep__gain ${g ? `is-new is-${g.tone}` : ''}`}
                         >
                           {g?.text ?? ''}
                         </span>

@@ -46,6 +46,9 @@ export function TrainingSection({
                       {t(`intensity.${r.intensity}`)}
                     </span>
                   )}
+                  {(r.wall ?? 0) > 0 && (
+                    <span className="tag tag--wall">{t('report.training.broke')}</span>
+                  )}
                   {r.injured && (
                     <span className="tag tag--warn">{t('report.training.injured')}</span>
                   )}

@@ -53,4 +53,18 @@ describe('場所前の4週間（画面の文言）', () => {
     expect(both).toContain(mine[0]!.name);
     expect(both).toContain(mine[1]!.name);
   });
+
+  it('壁を破ったら、週の結果に出る（印と文言は日本語・英語にある）', () => {
+    const s = createGame({ seed: 5 });
+    const r = s.rikishi.find((x) => x.stableId === s.player.stableId)!;
+    Object.assign(r, { injury: 0, policy: 'oshi', age: 22, peakAge: 28, talent: 60 });
+    r.abilities = { oshi: 59, yotsu: 30, waza: 30 };
+    const out = doPrep(s, { kind: 'mune', id: r.id });
+    expect(out.prep.log[0]!.walls?.length).toBe(1);
+    expect(weekLine(t, out, out.prep.log[0]!)).toContain(t('prep.log.broke', { name: r.name }));
+    for (const k of ['prep.wall', 'prep.wallDesc', 'prep.broke', 'prep.log.broke']) {
+      expect(ja).toHaveProperty([k]);
+      expect(en).toHaveProperty([k]);
+    }
+  });
 });

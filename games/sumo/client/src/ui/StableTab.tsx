@@ -1,5 +1,6 @@
 import {
   acceptCandidate,
+  atWall,
   answerRetirement,
   declineCandidate,
   setIntensity,
@@ -306,6 +307,11 @@ function RikishiCard({
         <div className="card__status">
           <span>{t('rikishi.style', { style: t(`style.${styleOf(r.abilities)}`) })}</span>
           <span>{t('rikishi.fatigue', { value: Math.round(r.fatigue) })}</span>
+          {atWall(r) && (
+            <span className="tag tag--wall" title={t('prep.wallDesc')}>
+              {t('prep.wall')}
+            </span>
+          )}
           {r.injury > 0 && (
             <span className="tag tag--warn">
               {r.wound

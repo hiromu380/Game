@@ -502,6 +502,9 @@ body.has-modal {
   justify-self: start;
   margin: 0;
 }
+.prep__roster .prep__name .tag {
+  margin-left: 6px;
+}
 .prep__fatigue .bar {
   display: block;
 }
@@ -560,6 +563,13 @@ body.has-modal {
   background: var(--shu);
   color: var(--white);
 }
+/* 壁を破った: 金の地に墨の字。長めに残す */
+.hakoniwa__pop.is-wall {
+  background: var(--gold-bg);
+  color: var(--ink);
+  border: 2px solid var(--gold);
+  animation-duration: 2.4s;
+}
 @keyframes pop-rise {
   0% {
     opacity: 1;
@@ -616,6 +626,16 @@ body.has-modal {
 }
 .prep__gain.is-hurt {
   color: var(--shu);
+}
+.prep__gain.is-wall {
+  color: var(--ink);
+  background: var(--gold-bg);
+}
+/* 素質の壁に当たっている印 */
+.tag--wall {
+  border-color: var(--gold);
+  background: var(--gold-bg);
+  color: var(--ink);
 }
 .prep__gain.is-new {
   animation: gain-in 0.6s steps(3) 1;

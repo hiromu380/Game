@@ -64,6 +64,9 @@ export function KeikobaScene({
   const pops: Pop[] = week
     ? [
         ...week.gains.flatMap((g): Pop[] => {
+          // 壁を破った弟子は、伸びた量の代わりにそれを出す
+          if (week.walls?.some((x) => x.id === g.id))
+            return [{ rikishiId: g.id, text: t('prep.broke'), tone: 'wall' }];
           const best = (['oshi', 'yotsu', 'waza'] as const)
             .filter((k) => g[k] > 0)
             .sort((a, b) => g[b] - g[a])[0];
