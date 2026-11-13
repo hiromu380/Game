@@ -8,17 +8,26 @@
       "items": [
         {
           "id": "keikoba_classic",
-          "name": "稽古場（改修2段目まで。土俵・上がり座敷・鉄砲柱を描き込んだ1枚。gym は器具つき）",
-          "size": [288, 176],
+          "name": "稽古場（改修2段目まで。上がり座敷・土俵・鉄砲柱を描き込んだ1枚。gym は器具つき）",
+          "size": [
+            384,
+            216
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false,
-          "variants": ["plain", "gym"]
+          "variants": [
+            "plain",
+            "gym"
+          ]
         },
         {
           "id": "keikoba_back",
           "name": "稽古場の奥の壁と床（断面）",
-          "size": [288, 176],
+          "size": [
+            288,
+            176
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -26,7 +35,10 @@
         {
           "id": "dohyo",
           "name": "稽古土俵",
-          "size": [160, 96],
+          "size": [
+            160,
+            96
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -34,7 +46,10 @@
         {
           "id": "teppo",
           "name": "鉄砲柱",
-          "size": [16, 56],
+          "size": [
+            16,
+            56
+          ],
           "frames": 1,
           "priority": "A",
           "outline": true
@@ -42,7 +57,10 @@
         {
           "id": "zashiki",
           "name": "上がり座敷",
-          "size": [96, 64],
+          "size": [
+            96,
+            64
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -50,7 +68,10 @@
         {
           "id": "weights",
           "name": "筋トレの器具（稽古場の改修2段目から）",
-          "size": [48, 40],
+          "size": [
+            48,
+            40
+          ],
           "frames": 1,
           "priority": "B",
           "outline": true
@@ -58,7 +79,10 @@
         {
           "id": "keikoba_modern",
           "name": "稽古場（改修3段目・今どきの稽古場）",
-          "size": [288, 176],
+          "size": [
+            288,
+            176
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -72,7 +96,10 @@
         {
           "id": "omoya",
           "name": "母屋（二階建て・縁側・暖簾）",
-          "size": [224, 192],
+          "size": [
+            224,
+            192
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -80,7 +107,10 @@
         {
           "id": "dorm_0",
           "name": "寮（増築なし）",
-          "size": [176, 176],
+          "size": [
+            176,
+            176
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -88,7 +118,10 @@
         {
           "id": "dorm_1",
           "name": "寮（増築1段目）",
-          "size": [208, 192],
+          "size": [
+            208,
+            192
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -96,7 +129,10 @@
         {
           "id": "dorm_2",
           "name": "寮（増築2段目・三階建て）",
-          "size": [208, 224],
+          "size": [
+            208,
+            224
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -104,7 +140,10 @@
         {
           "id": "chanko",
           "name": "ちゃんこ場（屋根つきの炊事場）",
-          "size": [144, 128],
+          "size": [
+            144,
+            128
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -112,7 +151,10 @@
         {
           "id": "gate",
           "name": "門（看板は無地）",
-          "size": [128, 112],
+          "size": [
+            128,
+            112
+          ],
           "frames": 1,
           "priority": "A",
           "outline": false
@@ -120,7 +162,10 @@
         {
           "id": "clinic",
           "name": "治療院（トレーナー契約のとき）",
-          "size": [112, 96],
+          "size": [
+            112,
+            96
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -134,7 +179,10 @@
         {
           "id": "fence",
           "name": "板塀（左下がり・右下がりの2本）",
-          "size": [64, 48],
+          "size": [
+            64,
+            48
+          ],
           "frames": 2,
           "priority": "A",
           "outline": false
@@ -142,7 +190,10 @@
         {
           "id": "fence_corner",
           "name": "板塀の角（瓦をのせた、コの字の塀）",
-          "size": [112, 112],
+          "size": [
+            112,
+            112
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -150,7 +201,10 @@
         {
           "id": "pine",
           "name": "松",
-          "size": [80, 112],
+          "size": [
+            80,
+            112
+          ],
           "frames": 1,
           "priority": "A",
           "outline": true
@@ -158,16 +212,27 @@
         {
           "id": "tree_season",
           "name": "季節の木（春の桜・夏の青葉・秋の紅葉・冬の枯れ木と雪。季節ごとに別の画像）",
-          "size": [80, 112],
+          "size": [
+            80,
+            112
+          ],
           "frames": 1,
           "priority": "A",
           "outline": true,
-          "variants": ["spring", "summer", "autumn", "winter"]
+          "variants": [
+            "spring",
+            "summer",
+            "autumn",
+            "winter"
+          ]
         },
         {
           "id": "lantern",
           "name": "石灯籠",
-          "size": [24, 40],
+          "size": [
+            24,
+            40
+          ],
           "frames": 1,
           "priority": "A",
           "outline": true
@@ -175,7 +240,10 @@
         {
           "id": "rock",
           "name": "庭石（苔むした大きな石）",
-          "size": [48, 44],
+          "size": [
+            48,
+            44
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -183,7 +251,10 @@
         {
           "id": "tsukubai",
           "name": "つくばい（竹の筧と石の手水鉢）",
-          "size": [56, 48],
+          "size": [
+            56,
+            48
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -191,7 +262,10 @@
         {
           "id": "nafuda",
           "name": "名札掛け（瓦屋根の板に木の名札。字は書かない）",
-          "size": [72, 64],
+          "size": [
+            72,
+            64
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -199,7 +273,10 @@
         {
           "id": "chochin",
           "name": "提灯（柱から下がる赤い提灯）",
-          "size": [36, 64],
+          "size": [
+            36,
+            64
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -207,7 +284,10 @@
         {
           "id": "well",
           "name": "井戸",
-          "size": [64, 64],
+          "size": [
+            64,
+            64
+          ],
           "frames": 1,
           "priority": "B",
           "outline": true
@@ -215,7 +295,10 @@
         {
           "id": "nobori",
           "name": "幟（無地の紅白。関取の四股名はゲームが重ねて書く）",
-          "size": [72, 128],
+          "size": [
+            72,
+            128
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -223,7 +306,10 @@
         {
           "id": "laundry",
           "name": "物干し（まわしと浴衣）",
-          "size": [80, 48],
+          "size": [
+            80,
+            48
+          ],
           "frames": 1,
           "priority": "B",
           "outline": true
@@ -231,7 +317,10 @@
         {
           "id": "pot",
           "name": "ちゃんこの大鍋（湯気2コマ）",
-          "size": [40, 40],
+          "size": [
+            40,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true
@@ -239,7 +328,10 @@
         {
           "id": "tawara",
           "name": "米俵の山",
-          "size": [40, 28],
+          "size": [
+            40,
+            28
+          ],
           "frames": 1,
           "priority": "B",
           "outline": true
@@ -253,70 +345,115 @@
         {
           "id": "rikishi_idle",
           "name": "力士・立つ（ふつう／息を吸う）",
-          "size": [32, 40],
+          "size": [
+            32,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "rikishi_shiko",
           "name": "力士・四股（足を上げる／踏む）",
-          "size": [32, 40],
+          "size": [
+            32,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "rikishi_teppo",
           "name": "力士・鉄砲（右手／左手で突く）",
-          "size": [32, 40],
+          "size": [
+            32,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "rikishi_suriashi",
           "name": "力士・すり足（右足／左足）",
-          "size": [32, 40],
+          "size": [
+            32,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "rikishi_sit",
           "name": "力士・あぐらで座る／ちゃんこを食べる",
-          "size": [32, 32],
+          "size": [
+            32,
+            32
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "rikishi_lie",
           "name": "力士・布団で横になる（けが・包帯）",
-          "size": [40, 24],
+          "size": [
+            40,
+            24
+          ],
           "frames": 1,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "moushiai",
           "name": "申し合い（2人が組む・押し込む）",
-          "size": [48, 40],
+          "size": [
+            48,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true,
-          "variants": ["kuro", "shiro"]
+          "variants": [
+            "kuro",
+            "shiro"
+          ]
         },
         {
           "id": "oyakata",
           "name": "親方（着物・正座で見る／立つ）",
-          "size": [24, 40],
+          "size": [
+            24,
+            40
+          ],
           "frames": 2,
           "priority": "A",
           "outline": true
@@ -324,7 +461,10 @@
         {
           "id": "okami",
           "name": "おかみさん（着物・立つ／盆を運ぶ）",
-          "size": [24, 40],
+          "size": [
+            24,
+            40
+          ],
           "frames": 2,
           "priority": "B",
           "outline": true
@@ -338,16 +478,25 @@
         {
           "id": "dorm_modern",
           "name": "現代風の寮（鉄筋の二階建て。使い方は未定）",
-          "size": [176, 176],
+          "size": [
+            176,
+            176
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false,
-          "variants": ["a", "b"]
+          "variants": [
+            "a",
+            "b"
+          ]
         },
         {
           "id": "dorm_modern_3f",
           "name": "現代風の寮（鉄筋の三階建て・外階段）",
-          "size": [176, 232],
+          "size": [
+            176,
+            232
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -355,16 +504,25 @@
         {
           "id": "chanko_modern",
           "name": "現代風のちゃんこ場（業務用の厨房の断面）",
-          "size": [240, 176],
+          "size": [
+            240,
+            176
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false,
-          "variants": ["a", "b"]
+          "variants": [
+            "a",
+            "b"
+          ]
         },
         {
           "id": "gate_modern",
           "name": "現代風の門（鉄の門扉・防犯カメラ・看板は無地）",
-          "size": [128, 128],
+          "size": [
+            128,
+            128
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -372,7 +530,10 @@
         {
           "id": "clinic_modern",
           "name": "現代風の治療室（施術台・器具の断面）",
-          "size": [240, 176],
+          "size": [
+            240,
+            176
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -380,7 +541,10 @@
         {
           "id": "washbasin",
           "name": "洗い場（コンクリートの流し・蛇口・ホース・バケツ）",
-          "size": [64, 60],
+          "size": [
+            64,
+            60
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -388,7 +552,10 @@
         {
           "id": "vending",
           "name": "自動販売機とごみ箱",
-          "size": [56, 64],
+          "size": [
+            56,
+            64
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -396,7 +563,10 @@
         {
           "id": "phonebox",
           "name": "公衆電話の箱とごみ箱",
-          "size": [56, 72],
+          "size": [
+            56,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -404,7 +574,10 @@
         {
           "id": "transformer",
           "name": "変電設備の箱（地上の変圧器）",
-          "size": [56, 64],
+          "size": [
+            56,
+            64
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -412,7 +585,10 @@
         {
           "id": "parking_gate",
           "name": "駐車場の出入口（遮断機と精算機）",
-          "size": [64, 64],
+          "size": [
+            64,
+            64
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -420,7 +596,10 @@
         {
           "id": "signal",
           "name": "歩行者用の信号機の柱",
-          "size": [56, 80],
+          "size": [
+            56,
+            80
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -428,7 +607,10 @@
         {
           "id": "roadwork",
           "name": "道路工事の囲い（カラーコーン・バリケード）",
-          "size": [64, 56],
+          "size": [
+            64,
+            56
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -436,7 +618,10 @@
         {
           "id": "bicycles",
           "name": "駐輪場（自転車2台・「自転車駐車場」の看板）",
-          "size": [72, 64],
+          "size": [
+            72,
+            64
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -444,7 +629,10 @@
         {
           "id": "postbox",
           "name": "郵便ポストとごみ箱",
-          "size": [56, 64],
+          "size": [
+            56,
+            64
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -452,7 +640,10 @@
         {
           "id": "laundry_shed",
           "name": "洗濯場（波板の屋根・洗濯機・流し）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -460,7 +651,10 @@
         {
           "id": "storage",
           "name": "物置（波板の屋根・スチールの物置・ロッカー）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -468,7 +662,10 @@
         {
           "id": "garbage",
           "name": "ごみ置き場（網の囲い・分別のごみ箱）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -476,7 +673,10 @@
         {
           "id": "gym_shed",
           "name": "屋外の筋トレ場（波板の屋根・タイヤ・サンドバッグ・ベンチ）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -484,7 +684,10 @@
         {
           "id": "bicycle_shed",
           "name": "屋根つきの自転車置き場（波板の屋根）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -492,7 +695,10 @@
         {
           "id": "smoking",
           "name": "喫煙所（波板の屋根・灰皿・ベンチ・看板）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -500,7 +706,10 @@
         {
           "id": "drying_shed",
           "name": "物干し場（波板の屋根・浴衣・手ぬぐい・Tシャツ）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -508,7 +717,10 @@
         {
           "id": "garden_shed",
           "name": "園芸の一角（波板の屋根・小さな温室・植木鉢）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -516,7 +728,10 @@
         {
           "id": "laundry_open",
           "name": "洗濯場（屋根なし・洗濯機2台・流し）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -524,7 +739,10 @@
         {
           "id": "garbage_open",
           "name": "ごみ置き場（屋根なし・網の囲い・分別のごみ箱）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -532,7 +750,10 @@
         {
           "id": "drying_open",
           "name": "物干し場（屋根なし・浴衣・手ぬぐい・Tシャツ）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -540,7 +761,10 @@
         {
           "id": "garden_open",
           "name": "園芸の一角（屋根なし・小さな温室・植木鉢）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -548,7 +772,10 @@
         {
           "id": "gym_open",
           "name": "屋外の筋トレ場（屋根なし・タイヤ・サンドバッグ・ベンチ）",
-          "size": [72, 72],
+          "size": [
+            72,
+            72
+          ],
           "frames": 1,
           "priority": "C",
           "outline": false
@@ -562,7 +789,10 @@
         {
           "id": "dohyo_honbasho",
           "name": "本場所の土俵（四角い土台・俵・上がり段。外に置く）",
-          "size": [200, 160],
+          "size": [
+            200,
+            160
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -570,7 +800,10 @@
         {
           "id": "tsuriyane",
           "name": "吊り屋根（房つき）",
-          "size": [176, 144],
+          "size": [
+            176,
+            144
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -578,7 +811,10 @@
         {
           "id": "kohaku_maku",
           "name": "紅白幕の囲い",
-          "size": [176, 160],
+          "size": [
+            176,
+            160
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -586,7 +822,10 @@
         {
           "id": "tent",
           "name": "赤いテント",
-          "size": [144, 128],
+          "size": [
+            144,
+            128
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false
@@ -594,7 +833,82 @@
         {
           "id": "tent_ai",
           "name": "藍と白のテント",
-          "size": [144, 128],
+          "size": [
+            144,
+            128
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        }
+      ]
+    },
+    {
+      "group": "rooms",
+      "title": "部屋の中",
+      "items": [
+        {
+          "id": "room_ima",
+          "name": "居間（囲炉裏の上がり座敷と、ちゃんこの座卓・テレビ・布団の押し入れ）",
+          "size": [
+            384,
+            216
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_furo",
+          "name": "風呂と洗濯場（岩風呂・洗い場・脱衣の棚／洗濯機・物干し）",
+          "size": [
+            384,
+            216
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_genkan",
+          "name": "玄関と事務室（下駄箱・優勝杯・写真／机・電話・帳簿・囲炉裏）",
+          "size": [
+            384,
+            216
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_oobeya",
+          "name": "大部屋（若い衆の布団・荷物・番付表／座卓・テレビ・扇風機）",
+          "size": [
+            384,
+            216
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_kitchen",
+          "name": "ちゃんこ場の厨房（ガスの釜・寸胴鍋・炊飯器／調理台・冷蔵庫・野菜）",
+          "size": [
+            384,
+            216
+          ],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "room_niwa",
+          "name": "中庭の祠（鳥居・狐・手水舎・灯籠・松と桜）",
+          "size": [
+            384,
+            216
+          ],
           "frames": 1,
           "priority": "B",
           "outline": false

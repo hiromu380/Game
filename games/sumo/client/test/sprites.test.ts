@@ -59,6 +59,28 @@ describe('稽古場の絵の並べ方', () => {
     expect(keikobaLayout(g)[0]!.sprite).toBe('keikoba_modern');
   });
 
+  it('1枚絵の稽古場を取り込んであれば、改修2段目までそちらを使う（器具つきの絵がなければ器具なし）。広い舞台に人が収まる', async () => {
+    const k = await import('../src/art/sprites/keikoba');
+    const { CLASSIC_SPOTS } = await import('../src/art/hakoniwa/actors');
+    const g = (dojo: number) => ({ player: { facilities: { dojo } } }) as never;
+    const plainOnly = (id: string) => id === k.CLASSIC.plain;
+    expect(k.keikobaLayout(g(0), plainOnly).map((p) => p.sprite)).toEqual([k.CLASSIC.plain]);
+    expect(k.keikobaLayout(g(k.WEIGHTS_FROM_DOJO), plainOnly)[0]!.sprite).toBe(k.CLASSIC.plain);
+    expect(k.keikobaLayout(g(k.WEIGHTS_FROM_DOJO), () => true)[0]!.sprite).toBe(k.CLASSIC.gym);
+    expect(k.keikobaLayout(g(k.MODERN_FROM_DOJO), () => true)[0]!.sprite).toBe('keikoba_modern');
+    expect(k.keikobaStage(k.keikobaLayout(g(0), plainOnly))).toBe(k.ROOM_STAGE);
+    expect(k.keikobaStage(k.keikobaLayout(g(0)))).toBe(k.KEIKOBA_STAGE);
+    const all = Object.values(CLASSIC_SPOTS).flatMap((v) => (Array.isArray(v) ? v : [v])) as {
+      x: number;
+      y: number;
+    }[];
+    for (const p of all) {
+      expect(p.x).toBeGreaterThan(0);
+      expect(p.x).toBeLessThan(k.ROOM_STAGE.width);
+      expect(p.y).toBeLessThan(k.ROOM_STAGE.height);
+    }
+  });
+
   it('巡業のテントは春と秋が赤、夏と冬が藍白', async () => {
     const { jungyoLayout } = await import('../src/art/sprites/keikoba');
     const tents = (s: 'spring' | 'summer' | 'autumn' | 'winter') =>

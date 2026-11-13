@@ -11,6 +11,13 @@ export interface Stage {
 }
 
 export const KEIKOBA_STAGE: Stage = { width: 320, height: 200 };
+/** 1枚絵の稽古場・部屋の中の舞台（絵は 384×216） */
+export const ROOM_STAGE: Stage = { width: 400, height: 228 };
+
+/** その並べ方の舞台（1枚絵の稽古場なら広い舞台） */
+export function keikobaStage(items: readonly Placed[]): Stage {
+  return items[0]?.sprite.startsWith('keikoba_classic') ? ROOM_STAGE : KEIKOBA_STAGE;
+}
 
 export interface Placed {
   sprite: string;
@@ -49,7 +56,7 @@ export function keikobaLayout(
   }
   if (dojo < MODERN_FROM_DOJO && has(CLASSIC.plain)) {
     const gym = dojo >= WEIGHTS_FROM_DOJO && has(CLASSIC.gym);
-    return [{ sprite: gym ? CLASSIC.gym : CLASSIC.plain, x: 160, y: 190, action: 'policy' }];
+    return [{ sprite: gym ? CLASSIC.gym : CLASSIC.plain, x: 200, y: 224, action: 'policy' }];
   }
   const out: Placed[] = [
     { sprite: 'keikoba_back', x: 160, y: 190 },

@@ -82,6 +82,32 @@ export const KEIKOBA_SPOTS = {
   oyakata: { x: 98, y: 94 },
 } as const;
 
+/**
+ * 1枚絵の稽古場（keikoba_classic。舞台 400×228）の立ち位置: 左の上がり座敷に親方と休む弟子、右の土俵で申し合い、奥の鉄砲柱、手前の空いた床で四股・すり足
+ */
+export const CLASSIC_SPOTS: typeof KEIKOBA_SPOTS = {
+  ring: [
+    { x: 258, y: 139, flip: true },
+    { x: 279, y: 135, flip: false },
+  ],
+  teppo: [{ x: 326, y: 141, flip: true }],
+  suriashi: [
+    { x: 132, y: 172, to: { x: 162, y: 186 } },
+    { x: 232, y: 198, to: { x: 204, y: 184 } },
+  ],
+  shiko: [
+    { x: 162, y: 166 },
+    { x: 192, y: 182 },
+    { x: 222, y: 180 },
+    { x: 200, y: 154 },
+  ],
+  sit: [
+    { x: 92, y: 128 },
+    { x: 150, y: 116 },
+  ],
+  oyakata: { x: 116, y: 116 },
+} as unknown as typeof KEIKOBA_SPOTS;
+
 export type Training = 'ring' | 'teppo' | 'suriashi' | 'shiko' | 'sit';
 
 /** 稽古の方針 → 稽古場ですること（順に空きを探す） */
@@ -110,18 +136,19 @@ export interface Cast {
 /** 稽古場の人（けが人は出ない）。番付の上の弟子から場所を取る */
 export function keikobaCast(
   game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
+  spots: typeof KEIKOBA_SPOTS = KEIKOBA_SPOTS,
 ): Cast {
   const used: Record<Training, number> = { ring: 0, teppo: 0, suriashi: 0, shiko: 0, sit: 0 };
   const keikoba: Actor[] = [];
   const overflow: Rikishi[] = [];
   for (const { r, sekitori } of mine(game)) {
     if (r.injury > 0) continue;
-    const what = WANTS[r.policy].find((w) => used[w] < KEIKOBA_SPOTS[w].length);
+    const what = WANTS[r.policy].find((w) => used[w] < spots[w].length);
     if (!what) {
       overflow.push(r);
       continue;
     }
-    const spot = KEIKOBA_SPOTS[what][used[what]++]! as {
+    const spot = spots[what][used[what]++]! as {
       x: number;
       y: number;
       flip?: boolean;
@@ -145,9 +172,9 @@ export function keikobaCast(
     key: 'oyakata',
     rikishiId: null,
     look: OYAKATA_LOOK('oyakataSit'),
-    x: KEIKOBA_SPOTS.oyakata.x,
-    y: KEIKOBA_SPOTS.oyakata.y,
-    z: 100 + KEIKOBA_SPOTS.oyakata.y,
+    x: spots.oyakata.x,
+    y: spots.oyakata.y,
+    z: 100 + spots.oyakata.y,
     phase: 0,
   });
   return { keikoba, overflow };

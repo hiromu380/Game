@@ -2,11 +2,17 @@ import { useCallback, useMemo, useState } from 'react';
 import type { GameState, Rank } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { sprite } from '../art/sprites';
-import { KEIKOBA_STAGE, keikobaLayout, type Placed } from '../art/sprites/keikoba';
+import { keikobaLayout, keikobaStage, ROOM_STAGE, type Placed } from '../art/sprites/keikoba';
 import { depthOrder, frontCorner, toScreen, type SceneAction } from '../art/hakoniwa/grid';
 import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound';
 import { drawGround } from '../art/hakoniwa/ground';
-import { amongPieces, compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
+import {
+  amongPieces,
+  CLASSIC_SPOTS,
+  compoundCast,
+  keikobaCast,
+  type Actor,
+} from '../art/hakoniwa/actors';
 import { Hakoniwa, type Drawn, type Pop, type SceneActor } from './Hakoniwa';
 import { signedPoints } from '../points';
 import { RikishiTalk } from './RikishiTalk';
@@ -96,6 +102,8 @@ export function KeikobaScene({
     [season],
   );
   const keikoba = keikobaLayout(game, (id) => sprite(id) !== null);
+  const stage = keikobaStage(keikoba);
+  const spots = stage === ROOM_STAGE ? CLASSIC_SPOTS : undefined;
   const views: View[] = (['exterior', 'keikoba'] as const).filter((v) =>
     sprite(v === 'exterior' ? 'omoya' : keikoba[0]!.sprite),
   );
@@ -151,13 +159,13 @@ export function KeikobaScene({
         <Hakoniwa
           items={boxDrawn(keikoba)}
           base={keikoba[0]!.sprite}
-          view={{ x0: 0, y0: 0, x1: KEIKOBA_STAGE.width, y1: KEIKOBA_STAGE.height }}
+          view={{ x0: 0, y0: 0, x1: stage.width, y1: stage.height }}
           label={t('scene.keikoba')}
           onAction={onAction}
-          actors={titled(keikobaCast(game).keikoba)}
+          actors={titled(keikobaCast(game, spots).keikoba)}
           onPick={onPick}
           selected={talkTo?.id ?? null}
-          maxWidth={KEIKOBA_STAGE.width * 2}
+          maxWidth={stage.width * 2}
           pops={pops}
           popKey={popKey}
         />

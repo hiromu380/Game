@@ -42,7 +42,7 @@ Draw a small style sheet with three separate items side by side with wide gaps: 
 
 ## 1. 稽古場
 
-### `keikoba_classic__plain` — 稽古場の1枚絵（土俵・上がり座敷・鉄砲柱つき）（優先 A・比率 4:3・1コマ）
+### `keikoba_classic__plain` — 稽古場の1枚絵（土俵・上がり座敷・鉄砲柱つき）（優先 A・比率 16:9・1コマ）
 
 部品（`keikoba_back`・`dohyo`・`zashiki`・`teppo`）を重ねると、土俵が大きすぎて座敷に重なり、床からはみ出す。1枚で描いた絵を取り込むと、ゲームは自動でそちらに切り替わる（稽古場の改修2段目までの絵）。
 
@@ -550,4 +550,44 @@ Draw a square enclosure made of bamboo poles tied with rope, hung with red-and-w
 
 ```
 Draw a simple event tent with a red cloth roof and red side curtains tied back, on thin white poles, standing on a square patch of packed earth and grass.
+```
+
+## 部屋の中（2部屋の断面の1枚絵）
+
+依頼者が作った絵を取り込んだ（比率 16:9）。作り直すときの文。共通の文のあとに貼る。
+
+### `room_ima` — 居間（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a raised tatami platform with a sunken hearth (irori) and a big iron pot hanging over it, stacks of bowls, ladles, a water dispenser, shoji windows. Right room: tatami floor with two long low dining tables set with bowls and chopsticks, colorful floor cushions, a small old TV on a stand, a sliding-door closet with folded futons, a rice cooker on a cabinet. No people.
+```
+
+### `room_furo` — 風呂と洗濯場（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a large rock bath (iwaburo) with steam, a tiled washing area with small wooden stools and buckets, shelves with towels and baskets. Right room: an earthen laundry yard behind a wooden fence, washing machines under a small roof, a clothes rack with yukata, buckets, baskets and a hose reel. No people.
+```
+
+### `room_genkan` — 玄関と事務室（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: the entrance hall (genkan) with lattice sliding doors, a stone floor with stepping stones, a shoe shelf full of geta and sneakers, an umbrella stand, trophies, framed photos and a green banner on the wall. Right room: a wooden-floored office with a desk, a telephone, a laptop and papers, bookshelves with binders, a tall cabinet, a calendar, framed calligraphy without readable letters, and a small hearth with floor cushions. No people.
+```
+
+### `room_oobeya` — 大部屋（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: the young wrestlers' big tatami room with rows of futons, storage boxes, cardboard boxes, a bookshelf, posters and a banzuke chart on the wall. Right room: tatami floor with a low table with snacks and tea, floor cushions, a small TV, an electric fan, a heater, a wardrobe with folded futons and a rail of hanging yukata. No people.
+```
+
+### `room_kitchen` — ちゃんこ場の厨房（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left room: a big working kitchen for chanko with brick gas stoves, huge stock pots and woks, a rice cooker, gas cylinders, exhaust hoods and fans, hanging ladles. Right room: stainless prep tables with cutting boards and knives, baskets of vegetables (daikon, cabbage), crates, shelves with bowls, two big steel refrigerators, a deep sink. No people.
+```
+
+### `room_niwa` — 中庭の祠（2026-11-13 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain (white plaster with dark wooden pillars and beams), the front walls and the roof are removed so we can see inside. The left room and the right room share one long floor on a low wooden base. Left side: a small Shinto shrine (hokora) on a stone base with a red torii gate and two fox statues, a pine tree and shrubs. Right side: a wooden fence, a covered water basin (temizuya) with ladles, an ema board, a mossy stone lantern, a stone path, and a pine and a cherry tree in bloom behind the fence. No people.
 ```
