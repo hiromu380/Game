@@ -1315,7 +1315,7 @@
   "prep.desc.degeiko": "Train at another stable. Everyone healthy grows a little.",
   "prep.desc.rest": "Everyone recovers from fatigue.",
   "prep.desc.visit": "Meet one patron. Your relationship improves.",
-  "prep.desc.scout": "Look for recruits. Once per tournament.",
+  "prep.desc.scout": "Go looking for recruits. More wrestlers fill the stable account. Once per basho.",
   "prep.desc.usual": "Nothing special.",
   "target.label": "Goal",
   "target.up": "{wins} wins: {to}",
@@ -1381,5 +1381,8 @@
   "prep.wallDesc": "Has hit the wall of his talent. Hard training raises the talent itself.",
   "prep.broke": "Broke through!",
   "prep.log.broke": "{name} broke through!",
-  "report.training.broke": "Broke through"
+  "report.training.broke": "Broke through",
+  "outlook.heads": "{n} more wrestlers to break even",
+  "outlook.headsDesc": "Each lower-division wrestler: stable {yen}/basho",
+  "candidates.perHead": "Stable {yen}/basho"
 }

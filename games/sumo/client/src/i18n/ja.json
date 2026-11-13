@@ -1315,7 +1315,7 @@
   "prep.desc.degeiko": "よその部屋へ。けがのない全員が少し伸びる",
   "prep.desc.rest": "全員の疲れを抜く",
   "prep.desc.visit": "タニマチ1人に会う。関係が上がる",
-  "prep.desc.scout": "新弟子を探しに行く。場所に1回",
+  "prep.desc.scout": "新弟子を探しに行く。弟子が増えると口座が潤う。場所に1回",
   "prep.desc.usual": "特別なことはしない",
   "target.label": "目標",
   "target.up": "{wins}勝で{to}",
@@ -1381,5 +1381,8 @@
   "prep.wallDesc": "素質の壁に当たっている。負荷の大きい稽古で素質が上がる",
   "prep.broke": "壁を破った！",
   "prep.log.broke": "{name}が壁を破った！",
-  "report.training.broke": "壁を破った"
+  "report.training.broke": "壁を破った",
+  "outlook.heads": "黒字まで弟子あと{n}人",
+  "outlook.headsDesc": "幕下以下の弟子1人で 口座 {yen}/場所",
+  "candidates.perHead": "口座 {yen}/場所"
 }

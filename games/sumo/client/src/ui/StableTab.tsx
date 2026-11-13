@@ -1,6 +1,7 @@
 import {
   acceptCandidate,
   atWall,
+  headGain,
   answerRetirement,
   declineCandidate,
   setIntensity,
@@ -41,7 +42,7 @@ import { GuideCard } from './Guide';
 import { NextGoalCard } from './GoalsPanel';
 import { withStep } from '../guide';
 import { useSettings } from '../settings';
-import { rankLabel, recordLabel } from '../format';
+import { money, rankLabel, recordLabel } from '../format';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
 
@@ -73,6 +74,7 @@ export function StableTab({
     return info?.target.kind === 'up' && info.target.to === 'juryo' ? sekitoriGain(game, id) : null;
   };
   const full = mine.length >= cap;
+  const perHead = headGain(game);
   const requests = game.pending.retireRequests
     .map((id) => game.rikishi.find((r) => r.id === id))
     .filter((r): r is Rikishi => !!r);
@@ -154,6 +156,7 @@ export function StableTab({
             {game.pending.candidates.map((c) => (
               <CandidateRow
                 rivalName={game.stables.find((s) => s.id === game.rival?.stableId)?.name}
+                perHead={perHead}
                 key={c.id}
                 c={c}
                 disabled={full || (c.foreign && mine.some((r) => r.foreign))}
@@ -197,17 +200,20 @@ function CandidateRow({
   c,
   disabled,
   rivalName,
+  perHead,
   onAccept,
   onDecline,
 }: {
   c: Candidate;
   disabled: boolean;
+  /** 入門すると、部屋の口座が1場所あたりいくら動くか */
+  perHead: number;
   /** ライバルの部屋の名前（取り合いの札に出す） */
   rivalName: string | undefined;
   onAccept: () => void;
   onDecline: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   return (
     <div className="row">
       <CandidatePortrait c={c} />
@@ -230,6 +236,11 @@ function CandidateRow({
           <span className="grade" aria-label={t('candidates.gradeAria', { grade: c.scoutGrade })}>
             {'★'.repeat(c.scoutGrade)}
             <span className="grade__off">{'☆'.repeat(5 - c.scoutGrade)}</span>
+          </span>
+          <span className={`candidates__yen ${perHead < 0 ? 'down' : ''}`}>
+            {t('candidates.perHead', {
+              yen: (perHead >= 0 ? '+' : '−') + money(t, Math.abs(perHead), lang),
+            })}
           </span>
         </span>
       </div>

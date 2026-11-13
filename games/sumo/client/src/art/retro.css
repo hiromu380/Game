@@ -751,6 +751,16 @@ body.has-modal {
 .outlook__runway {
   margin-left: 0;
 }
+.outlook__heads {
+  color: var(--shu);
+}
+.candidates__yen {
+  margin-left: 12px;
+  color: var(--good);
+}
+.candidates__yen.down {
+  color: var(--shu);
+}
 .target__yen {
   color: var(--good);
 }

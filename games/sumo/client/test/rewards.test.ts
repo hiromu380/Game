@@ -68,6 +68,9 @@ describe('報酬と罰', () => {
       'rewards.injury',
       'rewards.vsOutlook',
       'outlook.runway',
+      'outlook.heads',
+      'outlook.headsDesc',
+      'candidates.perHead',
     ]) {
       expect(ja).toHaveProperty([k]);
       expect(en).toHaveProperty([k]);
