@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import type { SceneAction } from '../art/hakoniwa/grid';
 import {
   advanceBasho,
@@ -24,6 +24,7 @@ import { withStep } from '../guide';
 import { HighlightDialog } from './HighlightDialog';
 import { bigBouts, highlightsOf, type Highlight } from '../highlights';
 import { TacticDialog } from './TacticDialog';
+import { BigBoutCard } from './BigBoutCard';
 import { JournalTab } from './JournalTab';
 import { ReportDialog } from './ReportDialog';
 import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
@@ -80,19 +81,35 @@ export function GameScreen({
   // 直前の場所の報酬と罰（場所を進めた直後に作る）
   const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
-  // 後半に大一番がある弟子がいれば、その前の日で止めて作戦を聞く（plan に中日の判断を持つ）
+  // 後半に大一番（勝ち越しをかけた最後の一番）がある弟子がいれば、その前の日で星取りを止めて作戦を聞き、
+  // その日に大一番を見せてから（結果を知る前に）続きの星取りへ。stops は大一番のある日（早い順）
+  type BigBout = Extract<Highlight, { kind: 'bigBout' }>;
   type Plan = {
     reenter: number[];
     stance: Record<number, Stance>;
-    bouts: Extract<Highlight, { kind: 'bigBout' }>[];
+    bouts: BigBout[];
+    stops: number[];
   };
+  type After =
+    | { kind: 'tactic'; plan: Plan }
+    | { kind: 'bouts'; day: number; stops: number[] }
+    | { kind: 'result' };
   const [ticker, setTicker] = useState<
     | { half: 'first'; mid: MidBasho }
-    | { half: 'second'; next: GameState; from: number; to: number; plan?: Plan }
+    | { half: 'second'; next: GameState; from: number; to: number; after: After }
     | null
   >(null);
-  // 大一番の作戦を聞いている（plan と、作戦を決めた後に後半を続ける日）
-  const [tactic, setTactic] = useState<{ plan: Plan; from: number } | null>(null);
+  // 大一番の作戦を聞いている
+  const [tactic, setTactic] = useState<Plan | null>(null);
+  // 大一番をその場で見せている（その日の何番目か）
+  const [live, setLive] = useState<{
+    next: GameState;
+    day: number;
+    stops: number[];
+    index: number;
+  } | null>(null);
+  // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
+  const liveShown = useRef<number | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
@@ -116,9 +133,36 @@ export function GameScreen({
     setGame(next);
     if (next.lastReport)
       setRewards({ bashoIndex: next.lastReport.bashoIndex, lines: rewardsOf(game, next) });
-    const hl = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
+    const all = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
+    const hl =
+      liveShown.current === next.lastReport?.bashoIndex
+        ? all.filter((h) => h.kind !== 'bigBout')
+        : all;
     setHighlights(hl.length > 0 ? hl : null);
     setShowReport(true);
+  };
+
+  /** 後半の星取りの後にすること */
+  const afterTicker = (next: GameState, after: After) => {
+    if (after.kind === 'result') return go(next);
+    if (after.kind === 'tactic') return setTactic(after.plan);
+    setLive({ next, day: after.day, stops: after.stops, index: 0 });
+  };
+  /**
+   * 後半の星取りを from の日から見せ、次の大一番の日（stops の先頭）の前で止める。
+   * 大一番がもうなければ千秋楽まで見せて結果へ。plan があれば、止まったところで作戦を聞く
+   */
+  const showSecond = (next: GameState, from: number, stops: number[], plan?: Plan) => {
+    const day = stops[0];
+    const after: After =
+      day === undefined
+        ? { kind: 'result' }
+        : plan
+          ? { kind: 'tactic', plan }
+          : { kind: 'bouts', day, stops };
+    const to = day === undefined ? BASHO_DAYS : day - 1;
+    if (to >= from) setTicker({ half: 'second', next, from, to, after });
+    else afterTicker(next, after);
   };
 
   return (
@@ -290,13 +334,14 @@ export function GameScreen({
             if (!next.lastReport || next.gameOver) return go(next);
             const from = mid.day + 1;
             const bouts = bigBouts(next.lastReport).filter((h) => h.bout.day >= from);
-            if (bouts.length === 0)
-              return setTicker({ half: 'second', next, from, to: BASHO_DAYS });
-            // 大一番の前の日まで見せて、作戦を聞く（作戦はその一番だけに効くので、そこまでの星は同じ）
-            const day = Math.min(...bouts.map((h) => h.bout.day));
-            const plan = { reenter, stance, bouts };
-            if (day - 1 >= from) setTicker({ half: 'second', next, from, to: day - 1, plan });
-            else setTactic({ plan, from });
+            // 作戦はその一番だけに効くので、大一番の前の日までの星は作戦を選ぶ前と同じ
+            const stops = [...new Set(bouts.map((h) => h.bout.day))].sort((a, b) => a - b);
+            showSecond(
+              next,
+              from,
+              stops,
+              bouts.length > 0 ? { reenter, stance, bouts, stops } : undefined,
+            );
           }}
         />
       )}
@@ -318,33 +363,69 @@ export function GameScreen({
           }))}
           from={ticker.from}
           to={ticker.to}
-          doneLabel={ticker.plan ? t('ticker.toTactic') : t('ticker.toResult')}
+          doneLabel={ticker.after.kind === 'result' ? t('ticker.toResult') : t('ticker.toTactic')}
           onDone={() => {
-            const { next, plan, to } = ticker;
+            const { next, after } = ticker;
             setTicker(null);
-            if (plan) setTactic({ plan, from: to + 1 });
-            else go(next);
+            afterTicker(next, after);
           }}
         />
       )}
       {tactic && (
         <TacticDialog
           game={game}
-          bouts={tactic.plan.bouts}
+          bouts={tactic.bouts}
           onGo={(chosen) => {
-            const { plan, from } = tactic;
+            const plan = tactic;
             setTactic(null);
             const next = advanceBasho(game, {
               reenter: plan.reenter,
               stance: plan.stance,
               tactic: chosen,
             });
-            if (next.lastReport && !next.gameOver)
-              setTicker({ half: 'second', next, from, to: BASHO_DAYS });
-            else go(next);
+            if (!next.lastReport || next.gameOver) return go(next);
+            // 作戦で大一番の勝ち負けが変わると、その後の割も変わりうるので、大一番の日を数え直す
+            const first = plan.stops[0]!;
+            const stops = [
+              ...new Set(
+                bigBouts(next.lastReport)
+                  .map((h) => h.bout.day)
+                  .filter((d) => d >= first),
+              ),
+            ].sort((a, b) => a - b);
+            liveShown.current = next.lastReport.bashoIndex;
+            if (stops.length === 0) showSecond(next, first, []);
+            else setLive({ next, day: stops[0]!, stops, index: 0 });
           }}
         />
       )}
+      {live &&
+        live.next.lastReport &&
+        (() => {
+          const report = live.next.lastReport;
+          const today = bigBouts(report).filter((h) => h.bout.day === live.day);
+          const h = today[live.index];
+          // その日の大一番を見せ終えたら、次の大一番の前（なければ千秋楽）まで星取りを続ける
+          const done = () => {
+            if (live.index + 1 < today.length) return setLive({ ...live, index: live.index + 1 });
+            setLive(null);
+            showSecond(live.next, live.day, live.stops.slice(1));
+          };
+          // stops はこの結果から数えたので、その日の大一番は必ずある
+          if (!h) return null;
+          return (
+            <BigBoutCard
+              key={`${live.day}:${live.index}`}
+              game={game}
+              report={report}
+              h={h}
+              counter=""
+              last={false}
+              nextLabel={t('ticker.continue')}
+              onNext={done}
+            />
+          );
+        })()}
       {highlights && game.lastReport && !blocked && (
         <HighlightDialog
           game={game}

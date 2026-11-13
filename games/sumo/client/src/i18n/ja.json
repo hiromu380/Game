@@ -1402,5 +1402,13 @@
   "tactic.go": "この作戦で",
   "ticker.toTactic": "大一番へ",
   "bigBout.tactic": "作戦は「{tactic}」。",
-  "rewards.henka": "{name}の変化に、名声とタニマチの心証が下がった"
+  "rewards.henka": "{name}の変化に、名声とタニマチの心証が下がった",
+  "ticker.continue": "星取りの続きへ",
+  "prep.confirm.title": "これで決める？",
+  "prep.confirm.who": "{cmd}: {who}",
+  "prep.confirm.cmd": "{cmd}",
+  "prep.confirm.pair": "{a}と{b}",
+  "prep.confirm.fill": "残りの{n}週をいつも通りにする",
+  "prep.decide": "決定",
+  "prep.back": "やめる"
 }

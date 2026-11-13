@@ -16,6 +16,7 @@ export function BigBoutCard({
   h,
   counter,
   last,
+  nextLabel,
   onNext,
 }: {
   game: GameState;
@@ -23,6 +24,8 @@ export function BigBoutCard({
   h: Extract<Highlight, { kind: 'bigBout' }>;
   counter: string;
   last: boolean;
+  /** 「次へ」の代わりの字（本場所の途中で見せるとき） */
+  nextLabel?: string;
   onNext: () => void;
 }) {
   const { t } = useI18n();
@@ -97,7 +100,7 @@ export function BigBoutCard({
             </>
           ) : (
             <button className="button button--primary" onClick={onNext}>
-              {last ? t('highlight.toReport') : t('highlight.next')}
+              {nextLabel ?? (last ? t('highlight.toReport') : t('highlight.next'))}
             </button>
           )}
         </div>

@@ -803,3 +803,18 @@ body.has-modal {
 .tactic__row .mid__stance {
   flex-basis: 100%;
 }
+
+/* 場所前: 選んだ行動を「決定」で行う（押し間違えないように） */
+.prep__confirmtext {
+  margin: 4px 0 12px;
+  font-size: 1.125rem;
+}
+.prep__confirmbtns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.prep__confirmbtns .button {
+  min-height: 44px;
+  min-width: 6em;
+}

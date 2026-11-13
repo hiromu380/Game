@@ -1402,5 +1402,13 @@
   "tactic.go": "Go with this plan",
   "ticker.toTactic": "To the big bout",
   "bigBout.tactic": " The plan: \"{tactic}\".",
-  "rewards.henka": "{name}'s sidestep cost prestige and patron goodwill."
+  "rewards.henka": "{name}'s sidestep cost prestige and patron goodwill.",
+  "ticker.continue": "Back to the bouts",
+  "prep.confirm.title": "Go with this?",
+  "prep.confirm.who": "{cmd}: {who}",
+  "prep.confirm.cmd": "{cmd}",
+  "prep.confirm.pair": "{a} and {b}",
+  "prep.confirm.fill": "Spend the remaining {n} week(s) as usual",
+  "prep.decide": "Confirm",
+  "prep.back": "Cancel"
 }
