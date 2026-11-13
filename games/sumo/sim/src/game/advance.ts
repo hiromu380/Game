@@ -24,9 +24,18 @@ import { applyBasho, applyHighest, applyMochikyukinMinimum } from '../career/upd
 import { createPrng, deriveSeed, SEED } from '../core/prng';
 import { applyKakun } from '../lineage/kakun';
 import { settleBasho, sum } from '../money/ledger';
-import type { BashoRecord, BashoReport, BoutResult, GameState, Rank, Stance } from '../model/types';
+import type {
+  BashoRecord,
+  BashoReport,
+  BoutResult,
+  GameState,
+  Rank,
+  Stance,
+  Tactic,
+} from '../model/types';
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
+import { TACTIC } from '../balance/tactic';
 import { breakWall } from '../career/wall';
 import { makeCandidates, npcRecruits } from './recruit';
 import { applyHappening, rollHappening } from './happening';
@@ -183,10 +192,15 @@ export function previewBasho(input: GameState): MidBasho | null {
 /**
  * reenter: 中日の後から出す自分の弟子（休場している者。けがを押して出る）
  * stance: 自分の弟子の後半の構え（攻める・無理をしない。なければいつも通り）
+ * tactic: 大一番（勝ち越しをかけた最後の一番）の作戦。その一番の勝つ確率だけが動く
  */
 export function advanceBasho(
   input: GameState,
-  options: { reenter?: readonly number[]; stance?: Readonly<Record<number, Stance>> } = {},
+  options: {
+    reenter?: readonly number[];
+    stance?: Readonly<Record<number, Stance>>;
+    tactic?: Readonly<Record<number, Tactic>>;
+  } = {},
 ): GameState {
   if (input.gameOver || isBlocked(input)) return input;
   const state: GameState = JSON.parse(JSON.stringify(input));
@@ -205,10 +219,29 @@ export function advanceBasho(
       .map(([id, s]) => [Number(id), s] as const)
       .filter(([id]) => isMine(id)),
   );
+  const tactic = new Map(
+    Object.entries(options.tactic ?? {})
+      .map(([id, s]) => [Number(id), s] as const)
+      .filter(([id]) => isMine(id)),
+  );
   const outcome = runBasho(state.seed, state.bashoIndex, state.banzuke, state.titles, byId, {
     reenter,
     stance,
+    tactic,
   });
+  // 変化で勝った弟子: 勝ち越しても、名声が下がり、タニマチが渋い顔をする
+  const henka = outcome.bouts
+    .filter((b) => b.tactic === 'henka' && b.winnerId === b.tacticBy)
+    .map((b) => b.winnerId);
+  if (henka.length > 0) {
+    report.henka = henka;
+    state.player.prestige = Math.max(
+      0,
+      state.player.prestige - TACTIC.henkaPrestige * henka.length,
+    );
+    for (const p of state.player.koenkai.patrons)
+      p.favor = Math.max(0, p.favor - TACTIC.henkaFavor * henka.length);
+  }
   if (stance.size > 0) report.stance = Object.fromEntries(stance);
   // 攻めた弟子は、場所の後に疲れが残る
   for (const [id, s] of stance) {

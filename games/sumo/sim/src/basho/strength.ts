@@ -7,7 +7,8 @@ import type { Prng } from '../core/prng';
 import { TRAITS } from '../balance/traits';
 import { tokuiWaza } from '../career/traits';
 import { clamp, winProbability } from '../core/math';
-import type { Rikishi, Style } from '../model/types';
+import type { Rikishi, Style, Tactic } from '../model/types';
+import { TACTIC } from '../balance/tactic';
 import { styleOf } from '../career/create';
 
 /** 型の相性（三すくみ）: 押し > 技 > 四つ > 押し */
@@ -33,8 +34,10 @@ export function eastWinProbability(
   west: Rikishi,
   condEast: number,
   condWest: number,
+  /** 東から見た強さの足し（大一番の作戦） */
+  edge = 0,
 ): number {
-  let d = power(east, condEast) - power(west, condWest);
+  let d = power(east, condEast) - power(west, condWest) + edge;
   const se = styleOf(east.abilities);
   const sw = styleOf(west.abilities);
   if (BEATS[se] === sw) d += BOUT.styleEdge;
@@ -72,4 +75,13 @@ export function kimariteFor(
     if (roll < 0) return KIMARITE[i]!.id;
   }
   return KIMARITE[KIMARITE.length - 1]!.id;
+}
+
+/** 大一番の作戦で、自分（own）の強さに足す値。相手の型に効けば足し、自分の型に合わなければ減点 */
+export function tacticEdge(tactic: Tactic, own: Rikishi, opp: Rikishi): number {
+  const def = TACTIC[tactic];
+  const hits = styleOf(opp.abilities) === def.counters;
+  const fit = styleOf(own.abilities) === def.fits ? 0 : -TACTIC.offStyle;
+  if (tactic === 'henka') return fit + (hits ? TACTIC.henkaEdge : -TACTIC.henkaMiss);
+  return fit + (hits ? TACTIC.counterEdge : 0);
 }

@@ -10,6 +10,8 @@ export type Policy = Style | 'body' | 'rest';
 export type Intensity = 'light' | 'normal' | 'hard';
 /** 本場所の後半の構え（中日に決める） */
 export type Stance = 'push' | 'safe';
+/** 大一番の作戦（立ち合い）: 当たる・差す・変化 */
+export type Tactic = 'atari' | 'sashi' | 'henka';
 export type Division = 'makuuchi' | 'juryo' | 'makushita' | 'sandanme' | 'jonidan' | 'jonokuchi';
 /** 幕内の中の地位（横綱・大関・関脇・小結・前頭） */
 export type Title = 'Y' | 'O' | 'S' | 'K' | 'M';
@@ -617,6 +619,9 @@ export interface BoutResult {
   /** 懸賞の本数 */
   kensho: number;
   fusen: boolean;
+  /** 親方が授けた作戦（大一番だけ。東・西のどちらの弟子の作戦かは tacticBy） */
+  tactic?: Tactic;
+  tacticBy?: number;
 }
 
 export interface MoneyLine {
@@ -648,6 +653,8 @@ export interface BashoReport {
   training?: TrainingResult[];
   /** 中日に決めた後半の構え（自分の弟子） */
   stance?: Record<number, Stance>;
+  /** 変化で勝った弟子（名声が下がった） */
+  henka?: number[];
   /** 中日の後に再出場・途中出場した自分の弟子 */
   reentered?: number[];
   /** 幕内の優勝争い（古い結果にはない） */

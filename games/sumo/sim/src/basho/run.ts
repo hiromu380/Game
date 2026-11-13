@@ -13,9 +13,10 @@ import { GROWTH } from '../balance/growth';
 import { MID_BASHO } from '../balance/injury';
 import { KENSHO } from '../balance/money';
 import { createPrng, deriveSeed, SEED } from '../core/prng';
-import type { BoutResult, Division, Rank, Rikishi, Stance, Title } from '../model/types';
+import type { BoutResult, Division, Rank, Rikishi, Stance, Tactic, Title } from '../model/types';
 import { divisionCounts, ranksOf } from '../banzuke/rank';
-import { eastWinProbability, kimariteFor } from './strength';
+import { eastWinProbability, kimariteFor, tacticEdge } from './strength';
+import { TACTIC } from '../balance/tactic';
 import { TRAITS } from '../balance/traits';
 import { fragilityOf, hasTrait, traitsOf } from '../career/traits';
 
@@ -52,6 +53,8 @@ export interface BashoOptions {
   reenter?: ReadonlySet<number>;
   /** 後半の構え（中日の後の取組から効く） */
   stance?: ReadonlyMap<number, Stance>;
+  /** 大一番（勝ち越しをかけた最後の一番）の作戦。その一番の勝つ確率だけが動き、乱数の使い方は変わらない */
+  tactic?: ReadonlyMap<number, Tactic>;
   /** この日の後で止める（中日の様子を見るため。結果は途中のもの） */
   stopAfterDay?: number;
 }
@@ -113,6 +116,11 @@ export function runBasho(
     const r = records.get(id)!;
     return r.wins + r.losses;
   };
+  /** 勝ち越しをかけた最後の一番（7勝7敗・3勝3敗で迎えた番） */
+  const isBig = (id: number) => {
+    const r = records.get(id)!;
+    return r.wins === r.losses && r.wins * 2 === boutsOf(id) - 1;
+  };
 
   const counts = divisionCounts(banzuke.length);
   const groups: number[][] = [];
@@ -128,7 +136,16 @@ export function runBasho(
     const [east, west] = order.get(a)! < order.get(b)! ? [a, b] : [b, a];
     const re = byId.get(east)!;
     const rw = byId.get(west)!;
-    const p = eastWinProbability(re, rw, condition.get(east)!, condition.get(west)!);
+    // 大一番の作戦（その力士の最後の一番で、勝ち越しと負け越しの分かれ目のときだけ）
+    const used = [east, west].find((id) => options.tactic?.has(id) && isBig(id));
+    const tactic = used !== undefined ? options.tactic!.get(used)! : undefined;
+    const edge =
+      used === undefined
+        ? 0
+        : used === east
+          ? tacticEdge(tactic!, re, rw)
+          : -tacticEdge(tactic!, rw, re);
+    const p = eastWinProbability(re, rw, condition.get(east)!, condition.get(west)!, edge);
     const winner = rng.chance(p) ? east : west;
     const loser = winner === east ? west : east;
     records.get(winner)!.wins++;
@@ -151,14 +168,22 @@ export function runBasho(
     const rankLoser = winner === east ? rankW : rankE;
     if (rankWinner.title === 'M' && rankLoser.title === 'Y')
       kinboshi.set(winner, (kinboshi.get(winner) ?? 0) + 1);
+    // 決まり手は乱数を1回使う（変化が決まったら、決まり手だけ差し替える）
+    const kimarite = kimariteFor(
+      byId.get(winner)!,
+      byId.get(loser)!,
+      winner === east ? p : 1 - p,
+      rng,
+    );
     bouts.push({
       day,
       eastId: east,
       westId: west,
       winnerId: winner,
-      kimarite: kimariteFor(byId.get(winner)!, byId.get(loser)!, winner === east ? p : 1 - p, rng),
+      kimarite: tactic === 'henka' && winner === used ? TACTIC.henkaKimarite : kimarite,
       kensho,
       fusen: false,
+      ...(used !== undefined ? { tactic, tacticBy: used } : {}),
     });
     // 場所中のけが（負けた側が少しだけ多い）
     for (const id of [loser, winner]) {

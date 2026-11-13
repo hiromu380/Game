@@ -35,7 +35,7 @@ export { ranksOf, divisionCounts, isSekitori, isSanyaku } from './banzuke/rank';
 export { eligibleForToshiyori, toshiyoriProgress } from './lineage/toshiyori';
 export { KAKUN_IDS } from './lineage/kakun';
 export { styleOf } from './career/create';
-export { power } from './basho/strength';
+export { power, tacticEdge } from './basho/strength';
 export { sum as sumMoney } from './money/ledger';
 export { migrateSave } from './game/migrate';
 export { FACILITY_IDS, facilityUpkeep, nextBuildCost, stableCapacity } from './money/facilities';
@@ -59,4 +59,5 @@ export {
   type Projection,
 } from './money/projection';
 export { WALL } from './balance/wall';
+export { TACTIC, TACTICS } from './balance/tactic';
 export { atWall, breakWall, focusOf } from './career/wall';
