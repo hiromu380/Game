@@ -13,6 +13,11 @@ describe('場所前の4週間（画面の文言）', () => {
       expect(ja).toHaveProperty([`prep.cmd.${k}`]);
       expect(en).toHaveProperty([`prep.cmd.${k}`]);
     }
+    // 指しているコマンドの1行の説明（説明を隠していても出す）
+    for (const k of ['none', 'coach', 'spar', 'degeiko', 'rest', 'visit', 'scout', 'usual']) {
+      expect(ja).toHaveProperty([`prep.desc.${k}`]);
+      expect(en).toHaveProperty([`prep.desc.${k}`]);
+    }
     for (const k of ['coach', 'spar', 'visit', 'scout']) {
       expect(ja).toHaveProperty([`prep.pick.${k}`]);
       expect(en).toHaveProperty([`prep.pick.${k}`]);

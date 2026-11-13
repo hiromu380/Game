@@ -493,7 +493,7 @@ body.has-modal {
 }
 .prep__roster li {
   display: grid;
-  grid-template-columns: 8em minmax(0, 1fr) minmax(80px, 160px);
+  grid-template-columns: 8em minmax(0, 1fr) auto minmax(80px, 160px);
   gap: 8px;
   align-items: center;
   min-height: 32px;
@@ -529,5 +529,109 @@ body.has-modal {
   .prep__menu .prep__cost {
     font-size: 0.75rem;
     white-space: nowrap;
+  }
+}
+
+/* 場所前: 指しているコマンドの1行の説明 */
+.prep__help {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  min-height: 2.6em;
+}
+
+/* 箱庭: 週の行動で伸びた量が、頭の上に浮かんで消える */
+.hakoniwa__pop {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 0 4px;
+  background: var(--ink);
+  color: var(--odo-light);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+  animation: pop-rise 1.8s steps(9) forwards;
+}
+.hakoniwa__pop.is-hurt {
+  background: var(--shu);
+  color: var(--white);
+}
+@keyframes pop-rise {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -60%);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -160%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -180%);
+  }
+}
+
+/* 星取り: 勝ち越しが決まった行を光らせる */
+.ticker__row.is-kk {
+  animation: kk-flash 0.9s steps(3) 1;
+}
+@keyframes kk-flash {
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: var(--odo-light);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hakoniwa__pop {
+    animation: pop-fade 1.8s forwards;
+  }
+  .ticker__row.is-kk {
+    animation: none;
+    background: var(--odo-light);
+  }
+}
+@keyframes pop-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 場所前: 先週の行動で伸びた量（入った週だけ光る） */
+.prep__gain {
+  min-width: 5.5em;
+  text-align: right;
+  font-size: 0.875rem;
+  color: var(--good);
+}
+.prep__gain.is-hurt {
+  color: var(--shu);
+}
+.prep__gain.is-new {
+  animation: gain-in 0.6s steps(3) 1;
+}
+@keyframes gain-in {
+  0% {
+    background: var(--odo-light);
+    transform: translateY(-4px);
+  }
+  100% {
+    background: transparent;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prep__gain.is-new {
+    animation: none;
   }
 }

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSettings } from '../settings';
+import { playSound } from '../sound';
 import {
   canPrep,
   doPrep,
@@ -80,12 +82,37 @@ export function PrepPanel({
   const { t, lang } = useI18n();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [first, setFirst] = useState<number | null>(null);
+  // 指している（フォーカスのある）コマンド。1行の説明に出す
+  const [pointed, setPointed] = useState<Menu | null>(null);
+  const { settings } = useSettings();
   const left = prepLeft(game);
   const week = game.prep.week + 1;
   const act = (a: PrepAction) => {
-    setGame(doPrep(game, a));
+    const next = doPrep(game, a);
+    // 稽古は当たる音、けがは落ちる音
+    if (settings.sound && next !== game) {
+      const hurt = (next.prep.log[next.prep.log.length - 1]?.injured.length ?? 0) > 0;
+      if (hurt) playSound('fall');
+      else if (a.kind === 'coach' || a.kind === 'spar' || a.kind === 'degeiko') playSound('hit');
+      else playSound('tick');
+    }
+    setGame(next);
     setMenu(null);
     setFirst(null);
+  };
+  // 先週の行動で動いた量（弟子の疲れの横に出す）
+  const lastWeek = game.prep.log[game.prep.log.length - 1];
+  const gainOf = (id: number): { text: string; hurt: boolean } | null => {
+    if (!lastWeek) return null;
+    if (lastWeek.injured.includes(id)) return { text: t('prep.hurt'), hurt: true };
+    const g = lastWeek.gains.find((x) => x.id === id);
+    if (!g) return null;
+    const best = (['oshi', 'yotsu', 'waza'] as const)
+      .filter((k) => g[k] > 0)
+      .sort((a, b) => g[b] - g[a])[0];
+    if (best) return { text: `${t(`style.${best}`)}+${g[best].toFixed(1)}`, hurt: false };
+    if (g.fatigue < 0) return { text: `${t('talk.fatigue')}${signed(g.fatigue)}`, hurt: false };
+    return null;
   };
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
   const mine = game.rikishi
@@ -150,6 +177,8 @@ export function PrepPanel({
                 className={`prep__cmd ${menu === m ? 'is-selected' : ''}`}
                 aria-pressed={PICKS.has(m) ? menu === m : undefined}
                 disabled={!usable(m)}
+                onPointerEnter={() => setPointed(m)}
+                onFocus={() => setPointed(m)}
                 onClick={() => {
                   setFirst(null);
                   if (PICKS.has(m)) setMenu(menu === m ? null : m);
@@ -162,6 +191,9 @@ export function PrepPanel({
                 )}
               </button>
             ))}
+            <p className="prep__help" aria-live="polite">
+              {t(`prep.desc.${pointed ?? menu ?? 'none'}` as MessageKey)}
+            </p>
           </div>
           {!menu && (
             <div className="prep__pick prep__roster" aria-label={t('prep.roster')}>
@@ -171,6 +203,17 @@ export function PrepPanel({
                   <li key={r.id}>
                     <span className="prep__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
                     <span className="prep__name">{r.name}</span>
+                    {(() => {
+                      const g = gainOf(r.id);
+                      return (
+                        <span
+                          key={`${game.bashoIndex}:${game.prep.week}`}
+                          className={`prep__gain ${g ? 'is-new' : ''} ${g?.hurt ? 'is-hurt' : ''}`}
+                        >
+                          {g?.text ?? ''}
+                        </span>
+                      );
+                    })()}
                     {r.injury > 0 ? (
                       <span className="tag tag--warn">{t('prep.hurt')}</span>
                     ) : (

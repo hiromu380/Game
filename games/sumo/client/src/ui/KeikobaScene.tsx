@@ -7,7 +7,7 @@ import { depthOrder, frontCorner, toScreen, type SceneAction } from '../art/hako
 import { compoundPieces, PLOT, seasonOf, STREET } from '../art/hakoniwa/compound';
 import { drawGround } from '../art/hakoniwa/ground';
 import { amongPieces, compoundCast, keikobaCast, type Actor } from '../art/hakoniwa/actors';
-import { Hakoniwa, type Drawn, type SceneActor } from './Hakoniwa';
+import { Hakoniwa, type Drawn, type Pop, type SceneActor } from './Hakoniwa';
 import { RikishiTalk } from './RikishiTalk';
 
 /** 枠の下の中央で置く絵（稽古場・巡業）を、箱庭の描く物にする */
@@ -57,6 +57,22 @@ export function KeikobaScene({
       ...a,
       title: a.rikishiId === null ? t('scene.oyakata') : (names.get(a.rikishiId) ?? ''),
     }));
+  // 今週の行動で動いた量を、その弟子の頭の上に浮かべる
+  const week = game.prep.log[game.prep.log.length - 1];
+  const popKey = week ? `${game.bashoIndex}:${week.week}` : '';
+  const pops: Pop[] = week
+    ? [
+        ...week.gains.flatMap((g): Pop[] => {
+          const best = (['oshi', 'yotsu', 'waza'] as const)
+            .filter((k) => g[k] > 0)
+            .sort((a, b) => g[b] - g[a])[0];
+          return best
+            ? [{ rikishiId: g.id, text: `${t(`style.${best}`)}+${g[best].toFixed(1)}`, tone: 'up' }]
+            : [];
+        }),
+        ...week.injured.map((id): Pop => ({ rikishiId: id, text: t('prep.hurt'), tone: 'hurt' })),
+      ]
+    : [];
   const talkTo = game.rikishi.find((r) => r.id === picked && r.stableId === game.player.stableId);
   const onPick = setGame ? (id: number) => setPicked((now) => (now === id ? null : id)) : undefined;
   const season = seasonOf(game.bashoIndex);
@@ -113,6 +129,8 @@ export function KeikobaScene({
           smoke={CHANKO_SMOKE}
           minWidth={EXTERIOR_MIN_WIDTH}
           focus={0.42}
+          pops={pops}
+          popKey={popKey}
         />
       ) : (
         <Hakoniwa
@@ -125,6 +143,8 @@ export function KeikobaScene({
           onPick={onPick}
           selected={talkTo?.id ?? null}
           maxWidth={KEIKOBA_STAGE.width * 2}
+          pops={pops}
+          popKey={popKey}
         />
       )}
       {setGame &&

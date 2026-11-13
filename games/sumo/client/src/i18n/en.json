@@ -1309,5 +1309,13 @@
   "prep.hurt": "Injured",
   "prep.pick.sparSecond": "Opponent for {name}?",
   "report.fullAbsence": "Sat out",
-  "prep.roster": "Fatigue"
+  "prep.roster": "Fatigue",
+  "prep.desc.none": "Choose a command",
+  "prep.desc.coach": "Coach one wrestler. His focus grows; he tires.",
+  "prep.desc.spar": "Two wrestlers spar. The one facing a stronger man grows more. Injuries happen.",
+  "prep.desc.degeiko": "Train at another stable. Everyone healthy grows a little.",
+  "prep.desc.rest": "Everyone recovers from fatigue.",
+  "prep.desc.visit": "Meet one patron. Your relationship improves.",
+  "prep.desc.scout": "Look for recruits. Once per tournament.",
+  "prep.desc.usual": "Nothing special."
 }

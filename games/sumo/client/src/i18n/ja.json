@@ -1309,5 +1309,13 @@
   "prep.hurt": "けが",
   "prep.pick.sparSecond": "{name}の相手は",
   "report.fullAbsence": "全休",
-  "prep.roster": "弟子の疲れ"
+  "prep.roster": "弟子の疲れ",
+  "prep.desc.none": "コマンドを選ぶ",
+  "prep.desc.coach": "1人に稽古をつける。方針の力が伸び、疲れる",
+  "prep.desc.spar": "2人に取らせる。格上と当たった方がよく伸びる。けがをすることも",
+  "prep.desc.degeiko": "よその部屋へ。けがのない全員が少し伸びる",
+  "prep.desc.rest": "全員の疲れを抜く",
+  "prep.desc.visit": "タニマチ1人に会う。関係が上がる",
+  "prep.desc.scout": "新弟子を探しに行く。場所に1回",
+  "prep.desc.usual": "特別なことはしない"
 }

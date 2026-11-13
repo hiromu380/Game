@@ -23,6 +23,13 @@ export interface Drawn {
 /** 箱庭に立つ人。title は指したとき・選んだときに出す名前 */
 export type SceneActor = Actor & { title?: string };
 
+/** 人の頭の上に浮かべる字（週の行動で伸びた量・けが）。key が変わったときだけ1回浮かぶ */
+export interface Pop {
+  rikishiId: number;
+  text: string;
+  tone: 'up' | 'hurt';
+}
+
 /** 舞台の見える範囲（ドット） */
 export interface View {
   x0: number;
@@ -114,6 +121,9 @@ function personCanvas(look: Actor['look'], frame: 0 | 1, flip: boolean): HTMLCan
   return c;
 }
 
+/** もう浮かべた字の組（画面を開き直しても、同じ組は浮かべない） */
+const shownPops = new Set<string>();
+
 /** 人の動きの拍（ミリ秒）と、行き来の1往復の拍数 */
 const BEAT = 420;
 const WALK_BEATS = 8;
@@ -197,6 +207,8 @@ export function Hakoniwa({
   maxWidth = 960,
   minWidth = 0,
   focus = 0.5,
+  pops = [],
+  popKey = '',
 }: {
   items: Drawn[];
   actors?: SceneActor[];
@@ -220,6 +232,10 @@ export function Hakoniwa({
   minWidth?: number;
   /** はみ出るとき、はじめに見せる所（0: 左端 〜 1: 右端） */
   focus?: number;
+  /** 人の頭の上に浮かべる字 */
+  pops?: Pop[];
+  /** 浮かべる字の組の鍵（同じ鍵では、画面を開き直しても浮かべない） */
+  popKey?: string;
 }) {
   const { t } = useI18n();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -500,6 +516,26 @@ export function Hakoniwa({
                 </span>
               );
             })()}
+          {popKey &&
+            !shownPops.has(popKey) &&
+            pops.map((p) => {
+              const a = (actors ?? []).find((x) => x.rikishiId === p.rikishiId);
+              if (!a) return null;
+              return (
+                <span
+                  key={`${popKey}:${p.rikishiId}`}
+                  className={`hakoniwa__pop is-${p.tone}`}
+                  aria-hidden="true"
+                  style={{
+                    left: `${((a.x - box.x0) / W) * 100}%`,
+                    top: `${((a.y - PERSON.height - box.y0) / H) * 100}%`,
+                  }}
+                  onAnimationEnd={() => shownPops.add(popKey)}
+                >
+                  {p.text}
+                </span>
+              );
+            })}
         </div>
       </div>
       {onAction && actions.length > 0 && (
