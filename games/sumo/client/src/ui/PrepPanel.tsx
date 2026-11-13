@@ -97,6 +97,8 @@ export function PrepPanel({
   const { t, lang } = useI18n();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [first, setFirst] = useState<number | null>(null);
+  // 選んだが、まだ決めていない行動（押し間違えないよう、「決定」で行う）。fill は残りの週をいつも通りに
+  const [draft, setDraft] = useState<PrepAction | { kind: 'fill' } | null>(null);
   // 指している（フォーカスのある）コマンド。1行の説明に出す
   const [pointed, setPointed] = useState<Menu | null>(null);
   const { settings } = useSettings();
@@ -116,6 +118,46 @@ export function PrepPanel({
     setGame(next);
     setMenu(null);
     setFirst(null);
+    setDraft(null);
+  };
+  /** 残りの週をいつも通りにする */
+  const fill = () => {
+    let g = game;
+    while (prepLeft(g) > 0 && canPrep(g, { kind: 'usual' })) g = doPrep(g, { kind: 'usual' });
+    setGame(g);
+    setMenu(null);
+    setFirst(null);
+    setDraft(null);
+  };
+  /** 決める前の確かめの1行（何を・だれに） */
+  const draftText = (d: PrepAction | { kind: 'fill' }): string => {
+    const nameOf = (id: number) => game.rikishi.find((r) => r.id === id)?.name ?? '?';
+    switch (d.kind) {
+      case 'fill':
+        return t('prep.confirm.fill', { n: left });
+      case 'coach':
+      case 'mune':
+        return t('prep.confirm.who', { cmd: t(`prep.cmd.${d.kind}`), who: nameOf(d.id) });
+      case 'spar':
+        return t('prep.confirm.who', {
+          cmd: t('prep.cmd.spar'),
+          who: t('prep.confirm.pair', { a: nameOf(d.a), b: nameOf(d.b) }),
+        });
+      case 'visit': {
+        const p = game.player.koenkai.patrons.find((x) => x.id === d.patronId);
+        return t('prep.confirm.who', {
+          cmd: t('prep.cmd.visit'),
+          who: p ? t(`patron.kind.${p.kind}` as MessageKey, { surname: p.surname }) : '?',
+        });
+      }
+      case 'scout':
+        return t('prep.confirm.who', {
+          cmd: t('prep.cmd.scout'),
+          who: t(`scout.${d.trip}.name` as MessageKey),
+        });
+      default:
+        return t('prep.confirm.cmd', { cmd: t(`prep.cmd.${d.kind}`) });
+    }
   };
   // 先週の行動で動いた量（弟子の疲れの横に出す）
   const lastWeek = game.prep.log[game.prep.log.length - 1];
@@ -212,8 +254,13 @@ export function PrepPanel({
                 onFocus={() => setPointed(m)}
                 onClick={() => {
                   setFirst(null);
-                  if (PICKS.has(m)) setMenu(menu === m ? null : m);
-                  else act({ kind: m } as PrepAction);
+                  if (PICKS.has(m)) {
+                    setMenu(menu === m ? null : m);
+                    setDraft(null);
+                  } else {
+                    setMenu(m);
+                    setDraft({ kind: m } as PrepAction);
+                  }
                 }}
               >
                 <span>{t(`prep.cmd.${m}`)}</span>
@@ -231,7 +278,28 @@ export function PrepPanel({
               )}
             </p>
           </div>
-          {!menu && (
+          {draft && (
+            <div className="prep__pick prep__confirm" role="group" aria-label={t('prep.decide')}>
+              <p className="prep__week">{t('prep.confirm.title')}</p>
+              <p className="prep__confirmtext" aria-live="polite">
+                {draftText(draft)}
+              </p>
+              <div className="prep__confirmbtns">
+                <button className="button" onClick={() => setDraft(null)}>
+                  {t('prep.back')}
+                </button>
+                <button
+                  className="button button--primary"
+                  // 開いたら決定へフォーカスを移す（もう一度 Enter で行う）
+                  autoFocus
+                  onClick={() => (draft.kind === 'fill' ? fill() : act(draft))}
+                >
+                  {t('prep.decide')}
+                </button>
+              </div>
+            </div>
+          )}
+          {!menu && !draft && (
             <div className="prep__pick prep__roster" aria-label={t('prep.roster')}>
               <p className="prep__week">{t('prep.roster')}</p>
               <ul>
@@ -273,7 +341,7 @@ export function PrepPanel({
               </ul>
             </div>
           )}
-          {menu && (
+          {menu && !draft && PICKS.has(menu) && (
             <div className="prep__pick" role="group" aria-label={t(`prep.cmd.${menu}`)}>
               <p className="prep__week">
                 {menu === 'spar' && first !== null
@@ -288,7 +356,7 @@ export function PrepPanel({
                     key={r.id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: menu, id: r.id })}
-                    onClick={() => act({ kind: menu, id: r.id })}
+                    onClick={() => setDraft({ kind: menu, id: r.id })}
                   >
                     {who(r)}
                   </button>
@@ -303,7 +371,7 @@ export function PrepPanel({
                     onClick={() => {
                       if (first === null) setFirst(r.id);
                       else if (first === r.id) setFirst(null);
-                      else act({ kind: 'spar', a: first, b: r.id });
+                      else setDraft({ kind: 'spar', a: first, b: r.id });
                     }}
                   >
                     {who(r)}
@@ -315,7 +383,7 @@ export function PrepPanel({
                     key={p.id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: 'visit', patronId: p.id })}
-                    onClick={() => act({ kind: 'visit', patronId: p.id })}
+                    onClick={() => setDraft({ kind: 'visit', patronId: p.id })}
                   >
                     <span className="prep__name">
                       {t(`patron.kind.${p.kind}` as MessageKey, { surname: p.surname })}
@@ -331,7 +399,7 @@ export function PrepPanel({
                     key={id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: 'scout', trip: id })}
-                    onClick={() => act({ kind: 'scout', trip: id })}
+                    onClick={() => setDraft({ kind: 'scout', trip: id })}
                   >
                     <span className="prep__name">{t(`scout.${id}.name` as MessageKey)}</span>
                     <span className="prep__cost">{money(t, SCOUT_TRIPS[id].cost, lang)}</span>
@@ -358,11 +426,8 @@ export function PrepPanel({
           <button
             className="button"
             onClick={() => {
-              let g = game;
-              while (prepLeft(g) > 0 && canPrep(g, { kind: 'usual' }))
-                g = doPrep(g, { kind: 'usual' });
-              setGame(g);
               setMenu(null);
+              setDraft({ kind: 'fill' });
             }}
           >
             {t('prep.fill')}
