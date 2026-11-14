@@ -4,6 +4,7 @@ import { TrainingSection } from './TrainingSection';
 import { RewardsSection } from './RewardsSection';
 import type { RewardLine } from '../rewards';
 import { Hakoniwa } from './Hakoniwa';
+import { sprite } from '../art/sprites';
 import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
 import {
@@ -266,7 +267,7 @@ export function ReportDialog({
         {report.jungyo && (
           <div className="callout">
             <Hakoniwa
-              items={boxDrawn(jungyoLayout(report.jungyo))}
+              items={boxDrawn(jungyoLayout(report.jungyo, (id) => sprite(id) !== null))}
               base={JUNGYO_BASE}
               view={{ x0: 0, y0: 0, x1: JUNGYO_STAGE.width, y1: JUNGYO_STAGE.height }}
               label={t('scene.jungyo')}

@@ -1434,5 +1434,6 @@
   "scene.room.room_ousetsu": "Reception room",
   "scene.room.room_clinic": "Treatment room",
   "scene.room.room_gym": "Gym",
-  "scene.room.room_parking": "Parking and shed"
+  "scene.room.room_parking": "Parking and shed",
+  "scene.room.room_shokudo": "Kitchen and dining room"
 }

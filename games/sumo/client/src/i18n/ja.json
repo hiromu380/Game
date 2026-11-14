@@ -1434,5 +1434,6 @@
   "scene.room.room_ousetsu": "応接間",
   "scene.room.room_clinic": "治療室",
   "scene.room.room_gym": "トレーニング室",
-  "scene.room.room_parking": "駐車場と物置"
+  "scene.room.room_parking": "駐車場と物置",
+  "scene.room.room_shokudo": "ちゃんこ場と食堂"
 }

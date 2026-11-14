@@ -38,6 +38,13 @@ export const MODERN_FROM_DOJO = 3;
 /** 土俵・上がり座敷・鉄砲柱を描き込んだ1枚絵（器具なし・器具つき） */
 export const CLASSIC = { plain: 'keikoba_classic__plain', gym: 'keikoba_classic__gym' } as const;
 
+/** 1枚絵の稽古場に置く器具（土俵の右手前の床。舞台 400×228） */
+const GYM_PROPS: Placed[] = [
+  { sprite: 'gym_stone', x: 352, y: 150 },
+  { sprite: 'gym_tire', x: 330, y: 163 },
+  { sprite: 'gym_barbell', x: 296, y: 180 },
+];
+
 /** 稽古場（先頭が床と壁。ほかはその上に置く） */
 /**
  * has: その絵を取り込んであるか。土俵・座敷を描き込んだ1枚絵（keikoba_classic）があれば、部品を重ねる代わりにそれを使う
@@ -56,7 +63,13 @@ export function keikobaLayout(
   }
   if (dojo < MODERN_FROM_DOJO && has(CLASSIC.plain)) {
     const gym = dojo >= WEIGHTS_FROM_DOJO && has(CLASSIC.gym);
-    return [{ sprite: gym ? CLASSIC.gym : CLASSIC.plain, x: 200, y: 224, action: 'policy' }];
+    const out: Placed[] = [
+      { sprite: gym ? CLASSIC.gym : CLASSIC.plain, x: 200, y: 224, action: 'policy' },
+    ];
+    // 器具つきの1枚絵がなければ、改修2段目から土俵の手前の床に器具を置く
+    if (dojo >= WEIGHTS_FROM_DOJO && !gym)
+      for (const p of GYM_PROPS) if (has(p.sprite)) out.push(p);
+    return out;
   }
   const out: Placed[] = [
     { sprite: 'keikoba_back', x: 160, y: 190 },
@@ -72,14 +85,21 @@ export function keikobaLayout(
 export const JUNGYO_STAGE: Stage = { width: 440, height: 310 };
 export const JUNGYO_BASE = 'dohyo_honbasho';
 
-export function jungyoLayout(season: Season): Placed[] {
+export function jungyoLayout(
+  season: Season,
+  has: (sprite: string) => boolean = () => true,
+): Placed[] {
   const tent = season === 'summer' || season === 'winter' ? 'tent_ai' : 'tent';
   return [
+    // 櫓太鼓と屋台（取り込んだ絵があれば）
+    { sprite: 'yagura', x: 400, y: 170 },
     { sprite: 'kohaku_maku', x: 95, y: 230 },
     { sprite: tent, x: 360, y: 220 },
     { sprite: 'dohyo_honbasho', x: 220, y: 305 },
     { sprite: 'tsuriyane', x: 220, y: 150 },
     { sprite: 'nobori', x: 40, y: 290 },
     { sprite: 'nobori', x: 395, y: 302 },
-  ];
+    { sprite: 'yatai_red', x: 96, y: 308 },
+    { sprite: 'yatai_green', x: 344, y: 308 },
+  ].filter((p) => has(p.sprite));
 }

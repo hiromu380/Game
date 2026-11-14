@@ -686,3 +686,49 @@ A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tal
 ```
 A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 親方（腕を組んで立つ）. Each pose separate with wide magenta gaps.
 ```
+
+## 小物（取り込んだ絵）
+
+依頼者が作った小物の一覧の絵（2026-11-14 受領）から、使うものだけを切り出した。作り直すときは、共通の文のあとに次を貼る。
+
+### `gym_stone` — 力石（稽古場の改修2段目から）（優先 B・1コマ）
+
+```
+Draw a single 力石 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `gym_barbell` — バーベル（稽古場の改修2段目から）（優先 B・1コマ）
+
+```
+Draw a single バーベル as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `gym_tire` — タイヤ（稽古場の改修2段目から）（優先 B・1コマ）
+
+```
+Draw a single タイヤ as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `yagura` — 櫓太鼓（巡業の会場）（優先 B・1コマ）
+
+```
+Draw a single 櫓太鼓 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `yatai_red` — 屋台・赤白（巡業の会場）（優先 B・1コマ）
+
+```
+Draw a single 屋台・赤白 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `yatai_green` — 屋台・緑白（巡業の会場）（優先 B・1コマ）
+
+```
+Draw a single 屋台・緑白 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `room_shokudo` — ちゃんこ場と食堂（2026-11-14 受領）（優先 B・比率 16:9・1コマ）
+
+```
+Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain. Left: a chanko kitchen with clay stoves and steaming pots, prep tables with knives and vegetables, a refrigerator and shelves of bottles. Right: a tatami dining room with long low tables, stacked floor cushions, shelves of bowls, a heater and a fan. No people.
+```

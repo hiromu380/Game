@@ -692,6 +692,14 @@
           "frames": 1,
           "priority": "B",
           "outline": false
+        },
+        {
+          "id": "room_shokudo",
+          "name": "ちゃんこ場と食堂（かまど・調理台／座卓・座布団）",
+          "size": [384, 216],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
         }
       ]
     },
@@ -775,6 +783,60 @@
           "id": "person_oyakata",
           "name": "親方（腕を組んで立つ）",
           "size": [18, 44],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        }
+      ]
+    },
+    {
+      "group": "props_import",
+      "title": "小物（取り込んだ絵）",
+      "items": [
+        {
+          "id": "gym_stone",
+          "name": "力石（稽古場の改修2段目から）",
+          "size": [12, 15],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "gym_barbell",
+          "name": "バーベル（稽古場の改修2段目から）",
+          "size": [36, 14],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "gym_tire",
+          "name": "タイヤ（稽古場の改修2段目から）",
+          "size": [22, 16],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "yagura",
+          "name": "櫓太鼓（巡業の会場）",
+          "size": [92, 150],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "yatai_red",
+          "name": "屋台・赤白（巡業の会場）",
+          "size": [66, 70],
+          "frames": 1,
+          "priority": "B",
+          "outline": false
+        },
+        {
+          "id": "yatai_green",
+          "name": "屋台・緑白（巡業の会場）",
+          "size": [66, 74],
           "frames": 1,
           "priority": "B",
           "outline": false

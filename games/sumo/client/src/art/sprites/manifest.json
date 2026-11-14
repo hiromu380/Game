@@ -124,6 +124,11 @@
     "size": [128, 128],
     "anchor": [64, 127]
   },
+  "gym_barbell": {
+    "files": ["gym_barbell.png"],
+    "size": [36, 14],
+    "anchor": [18, 13]
+  },
   "gym_open": {
     "files": ["gym_open.png"],
     "size": [72, 72],
@@ -133,6 +138,16 @@
     "files": ["gym_shed.png"],
     "size": [72, 72],
     "anchor": [36, 71]
+  },
+  "gym_stone": {
+    "files": ["gym_stone.png"],
+    "size": [12, 15],
+    "anchor": [6, 14]
+  },
+  "gym_tire": {
+    "files": ["gym_tire.png"],
+    "size": [22, 16],
+    "anchor": [11, 15]
   },
   "keikoba_back": {
     "files": ["keikoba_back.png"],
@@ -319,6 +334,11 @@
     "size": [384, 216],
     "anchor": [192, 215]
   },
+  "room_shokudo": {
+    "files": ["room_shokudo.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
   "signal": {
     "files": ["signal.png"],
     "size": [56, 80],
@@ -388,6 +408,21 @@
     "files": ["well.png"],
     "size": [64, 64],
     "anchor": [32, 63]
+  },
+  "yagura": {
+    "files": ["yagura.png"],
+    "size": [92, 150],
+    "anchor": [46, 149]
+  },
+  "yatai_green": {
+    "files": ["yatai_green.png"],
+    "size": [66, 74],
+    "anchor": [33, 73]
+  },
+  "yatai_red": {
+    "files": ["yatai_red.png"],
+    "size": [66, 70],
+    "anchor": [33, 69]
   },
   "zashiki": {
     "files": ["zashiki.png"],
