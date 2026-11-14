@@ -1,4 +1,19 @@
 {
+  "bench": {
+    "files": ["bench.png"],
+    "size": [26, 18],
+    "anchor": [13, 17]
+  },
+  "bicycle_black": {
+    "files": ["bicycle_black.png"],
+    "size": [30, 24],
+    "anchor": [15, 23]
+  },
+  "bicycle_red": {
+    "files": ["bicycle_red.png"],
+    "size": [28, 22],
+    "anchor": [14, 21]
+  },
   "bicycle_shed": {
     "files": ["bicycle_shed.png"],
     "size": [72, 72],
@@ -388,6 +403,91 @@
     "files": ["tsuriyane.png"],
     "size": [176, 144],
     "anchor": [88, 143]
+  },
+  "ui_arrow_down": {
+    "files": ["ui_arrow_down.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_arrow_up": {
+    "files": ["ui_arrow_up.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_bandage": {
+    "files": ["ui_bandage.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_coin_bag": {
+    "files": ["ui_coin_bag.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_coins": {
+    "files": ["ui_coins.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_drum": {
+    "files": ["ui_drum.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_furoshiki": {
+    "files": ["ui_furoshiki.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_gunbai": {
+    "files": ["ui_gunbai.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_hand": {
+    "files": ["ui_hand.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_heart": {
+    "files": ["ui_heart.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_heart_broken": {
+    "files": ["ui_heart_broken.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_letter": {
+    "files": ["ui_letter.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_muscle": {
+    "files": ["ui_muscle.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_omamori": {
+    "files": ["ui_omamori.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_rosette": {
+    "files": ["ui_rosette.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_taru": {
+    "files": ["ui_taru.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_trophy": {
+    "files": ["ui_trophy.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
   },
   "vending": {
     "files": ["vending.png"],

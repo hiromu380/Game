@@ -21,8 +21,16 @@ import { HappeningPanel } from './HappeningPanel';
 import { ElectionPanel } from './ElectionPanel';
 import { IndependencePanel } from './IndependencePanel';
 import { sprite } from '../art/sprites';
+import { Icon } from '../art/Icon';
 import { keikobaLayout } from '../art/sprites/keikoba';
 import { happeningPicture, OTHER_PICTURE, type EventPicture } from '../eventScene';
+
+/** 約束の選択肢のアイコン */
+const PLEDGE_ICON = {
+  kachikoshi: 'ui_muscle',
+  division: 'ui_arrow_up',
+  sekitori: 'ui_trophy',
+} as const;
 
 /**
  * 返事が要るものを1件ずつ窓で出す（部屋の画面には並べない）。順に: 引退の申し出 → けがの治療の方針 → 場所の間の出来事 →
@@ -205,6 +213,7 @@ export function EventDialogs({
                 onClick={() => setGame(answerPledge(game, k))}
               >
                 <strong>
+                  <Icon id={PLEDGE_ICON[k]} />
                   {t(`pledge.${k}.name` as MessageKey, {
                     share: Math.round(KACHIKOSHI_SHARE * 100),
                   })}

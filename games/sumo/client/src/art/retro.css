@@ -1293,3 +1293,13 @@ body.has-modal {
 .prep__cost {
   white-space: nowrap;
 }
+/* 画面のアイコン（取り込んだ絵）。ドットをぼかさない */
+.ui-icon {
+  image-rendering: pixelated;
+  vertical-align: middle;
+  margin-right: 4px;
+  flex: none;
+}
+.rewards__line .ui-icon {
+  align-self: center;
+}

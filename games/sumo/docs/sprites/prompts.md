@@ -732,3 +732,127 @@ Draw a single 屋台・緑白 as a game prop, isometric, thick dark outline, fla
 ```
 Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the isometric angle: only the two back walls remain. Left: a chanko kitchen with clay stoves and steaming pots, prep tables with knives and vegetables, a refrigerator and shelves of bottles. Right: a tatami dining room with long low tables, stacked floor cushions, shelves of bowls, a heater and a fan. No people.
 ```
+
+## 画面のアイコンと小物（取り込んだ絵）
+
+依頼者が作った小物とアイコンの一覧の絵（2026-11-14 受領、5枚）から、使うものだけを切り出した。作り直すときは、共通の文のあとに次を貼る。
+
+### `bicycle_black` — 自転車・黒（門の脇）（優先 B・1コマ）
+
+```
+Draw a single 自転車・黒 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `bicycle_red` — 自転車・赤（門の脇）（優先 B・1コマ）
+
+```
+Draw a single 自転車・赤 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `bench` — 縁台（庭）（優先 B・1コマ）
+
+```
+Draw a single 縁台 as a game prop, isometric, thick dark outline, flat colors.
+```
+
+### `ui_heart` — ハート（タニマチの関係が上がった）（優先 B・1コマ）
+
+```
+Draw a single ハート as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_heart_broken` — 割れたハート（関係が下がった・離れた）（優先 B・1コマ）
+
+```
+Draw a single 割れたハート as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_muscle` — 力こぶ（稽古の伸び）（優先 B・1コマ）
+
+```
+Draw a single 力こぶ as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_arrow_up` — 上向きの矢印（昇進）（優先 B・1コマ）
+
+```
+Draw a single 上向きの矢印 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_arrow_down` — 下向きの矢印（陥落）（優先 B・1コマ）
+
+```
+Draw a single 下向きの矢印 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_hand` — 手（変化・はたき込み）（優先 B・1コマ）
+
+```
+Draw a single 手 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_drum` — 太鼓（優先 B・1コマ）
+
+```
+Draw a single 太鼓 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_trophy` — 優勝杯（約束: 新しい関取）（優先 B・1コマ）
+
+```
+Draw a single 優勝杯 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_coin_bag` — 銭袋（支度金を返した）（優先 B・1コマ）
+
+```
+Draw a single 銭袋 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_coins` — 小判（見込みとの差）（優先 B・1コマ）
+
+```
+Draw a single 小判 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_letter` — 封書（新しいタニマチ）（優先 B・1コマ）
+
+```
+Draw a single 封書 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_gunbai` — 軍配（優先 B・1コマ）
+
+```
+Draw a single 軍配 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_rosette` — 勲章（名声）（優先 B・1コマ）
+
+```
+Draw a single 勲章 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_furoshiki` — 風呂敷包み（優先 B・1コマ）
+
+```
+Draw a single 風呂敷包み as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_taru` — 菰樽（約束を果たした）（優先 B・1コマ）
+
+```
+Draw a single 菰樽 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_bandage` — 絆創膏（けが）（優先 B・1コマ）
+
+```
+Draw a single 絆創膏 as a small flat game icon, front view, thick dark outline, flat colors.
+```
+
+### `ui_omamori` — お守り（今週の好機）（優先 B・1コマ）
+
+```
+Draw a single お守り as a small flat game icon, front view, thick dark outline, flat colors.
+```

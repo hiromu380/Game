@@ -25,6 +25,7 @@ import { money, rankLabel } from '../format';
 import { signed } from './TrainingSection';
 import { signedPoints } from '../points';
 import { MoneyOutlook } from './MoneyOutlook';
+import { Icon } from '../art/Icon';
 
 type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -273,6 +274,7 @@ export function PrepPanel({
       </h2>
       {tideId && tide && (
         <p className={`prep__tide is-${tide.tone}`}>
+          {tide.tone === 'good' && <Icon id="ui_omamori" />}
           <span className={`tag ${tide.tone === 'good' ? 'tag--good' : 'tag--warn'}`}>
             {t(tide.tone === 'good' ? 'tide.good' : 'tide.bad')}
           </span>

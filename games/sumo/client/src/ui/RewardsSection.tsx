@@ -1,6 +1,33 @@
 import { useI18n, type MessageKey } from '../i18n';
 import { money } from '../format';
 import type { RewardLine } from '../rewards';
+import { Icon } from '../art/Icon';
+
+/** 報酬と罰の行のアイコン */
+function iconOf(x: RewardLine): string {
+  switch (x.kind) {
+    case 'prestige':
+      return 'ui_rosette';
+    case 'patrons':
+      return x.tone === 'good' ? 'ui_heart' : 'ui_heart_broken';
+    case 'patronJoin':
+      return 'ui_letter';
+    case 'patronLeave':
+      return 'ui_heart_broken';
+    case 'sekitoriUp':
+      return 'ui_arrow_up';
+    case 'sekitoriDown':
+      return 'ui_arrow_down';
+    case 'injury':
+      return 'ui_bandage';
+    case 'henka':
+      return 'ui_hand';
+    case 'vsOutlook':
+      return 'ui_coins';
+    case 'pledge':
+      return x.kept ? 'ui_taru' : 'ui_coin_bag';
+  }
+}
 
 /** 場所の結果の「報酬と罰」: 成績が経営に返ってきたものを、原因つきで1行ずつ */
 export function RewardsSection({ lines }: { lines: RewardLine[] }) {
@@ -48,6 +75,7 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
               <span className="rewards__mark" aria-hidden="true">
                 {x.tone === 'good' ? '▲' : '▼'}
               </span>
+              <Icon id={iconOf(x)} />
               <span className="visually-hidden">
                 {t(x.tone === 'good' ? 'rewards.good' : 'rewards.bad')}
               </span>

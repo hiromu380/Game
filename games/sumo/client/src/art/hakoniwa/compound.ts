@@ -55,7 +55,13 @@ export function compoundPieces(
     { sprite: 'rock', gx: 1.5, gy: 15.5, w: 1, d: 1 },
     { sprite: 'nafuda', gx: 12.5, gy: 13, w: 1, d: 1, action: 'banzuke' },
     { sprite: 'chochin', gx: 13.5, gy: 16.5, w: 1, d: 1 },
+    // 門の脇の自転車（弟子の使い走り）と、ちゃんこ場の前の縁台
+    { sprite: 'bicycle_black', gx: 6.6, gy: 17, w: 1, d: 0.6 },
+    { sprite: 'bench', gx: 20.5, gy: 16, w: 1.5, d: 1 },
   ];
+  // 弟子が多い部屋は自転車がもう1台
+  if (game.rikishi.filter((r) => r.stableId === game.player.stableId).length >= 6)
+    out.push({ sprite: 'bicycle_red', gx: 5.6, gy: 17, w: 1, d: 0.6 });
   if (f.trainer >= 1) out.push({ sprite: 'clinic', gx: 12, gy: 8, w: 3, d: 3, action: 'staff' });
   // 関取の幟（番付の上から）を、門の右の前庭に
   const ranks = ranksOf(game.banzuke, game.titles);
