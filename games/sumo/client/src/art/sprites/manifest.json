@@ -189,6 +189,56 @@
     "size": [64, 64],
     "anchor": [32, 63]
   },
+  "person_chanko": {
+    "files": ["person_chanko.png"],
+    "size": [23, 40],
+    "anchor": [11, 39]
+  },
+  "person_lie": {
+    "files": ["person_lie.png"],
+    "size": [38, 26],
+    "anchor": [19, 25]
+  },
+  "person_oyakata": {
+    "files": ["person_oyakata.png"],
+    "size": [18, 44],
+    "anchor": [9, 43]
+  },
+  "person_oyakata_sit": {
+    "files": ["person_oyakata_sit.png"],
+    "size": [42, 42],
+    "anchor": [21, 41]
+  },
+  "person_push": {
+    "files": ["person_push.png"],
+    "size": [42, 37],
+    "anchor": [21, 36]
+  },
+  "person_shiko": {
+    "files": ["person_shiko_0.png", "person_shiko_1.png"],
+    "size": [36, 43],
+    "anchor": [18, 42]
+  },
+  "person_sit": {
+    "files": ["person_sit.png"],
+    "size": [40, 34],
+    "anchor": [20, 33]
+  },
+  "person_suriashi": {
+    "files": ["person_suriashi_0.png", "person_suriashi_1.png"],
+    "size": [43, 31],
+    "anchor": [21, 30]
+  },
+  "person_sweep": {
+    "files": ["person_sweep_0.png", "person_sweep_1.png"],
+    "size": [30, 40],
+    "anchor": [15, 39]
+  },
+  "person_teppo": {
+    "files": ["person_teppo.png"],
+    "size": [24, 35],
+    "anchor": [12, 34]
+  },
   "phonebox": {
     "files": ["phonebox.png"],
     "size": [56, 72],

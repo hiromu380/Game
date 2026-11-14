@@ -50,10 +50,11 @@ interface Loaded {
 const cache = new Map<string, Promise<Loaded | null>>();
 
 /** 絵を読み、足元の点と当たり判定用の不透明さを調べる（1枚ごとに1回） */
-function load(name: string): Promise<Loaded | null> {
-  const hit = cache.get(name);
+function load(name: string, frame = 0): Promise<Loaded | null> {
+  const key = frame === 0 ? name : `${name}#${frame}`;
+  const hit = cache.get(key);
   if (hit) return hit;
-  const s = sprite(name);
+  const s = sprite(name, frame);
   const p = !s
     ? Promise.resolve(null)
     : new Promise<Loaded | null>((resolve) => {
@@ -87,8 +88,52 @@ function load(name: string): Promise<Loaded | null> {
         img.onerror = () => resolve(null);
         img.src = s.url;
       });
-  cache.set(name, p);
+  cache.set(key, p);
   return p;
+}
+
+/**
+ * 取り込んだ人の絵（姿勢ごと。2コマのものは拍で替える）。読めたものから使い、読めるまではコードで描いた人
+ */
+const POSE_SPRITE: Partial<Record<Actor['look']['pose'], { name: string; frames: number }>> = {
+  push: { name: 'person_push', frames: 1 },
+  shiko: { name: 'person_shiko', frames: 2 },
+  suriashi: { name: 'person_suriashi', frames: 2 },
+  teppo: { name: 'person_teppo', frames: 1 },
+  sit: { name: 'person_sit', frames: 1 },
+  lie: { name: 'person_lie', frames: 1 },
+  sweep: { name: 'person_sweep', frames: 2 },
+  idle: { name: 'person_chanko', frames: 1 },
+  oyakataSit: { name: 'person_oyakata_sit', frames: 1 },
+  oyakata: { name: 'person_oyakata', frames: 1 },
+};
+const personSprites = new Map<string, { s: Loaded; flipped: HTMLCanvasElement }>();
+// 画面のあるときだけ先に読んでおく（テストなど DOM のない所では読まない）
+for (const { name, frames } of typeof Image === 'undefined' ? [] : Object.values(POSE_SPRITE)) {
+  for (let f = 0; f < frames; f++) {
+    void load(name, f).then((s) => {
+      if (!s) return;
+      const c = document.createElement('canvas');
+      c.width = s.w;
+      c.height = s.h;
+      const g = c.getContext('2d');
+      if (g) {
+        g.translate(s.w, 0);
+        g.scale(-1, 1);
+        g.drawImage(s.img, 0, 0);
+      }
+      personSprites.set(`${name}#${f}`, { s, flipped: c });
+    });
+  }
+}
+/** その姿勢・コマの取り込んだ絵（なければ null） */
+function personSprite(
+  pose: Actor['look']['pose'],
+  frame: 0 | 1,
+): { s: Loaded; flipped: HTMLCanvasElement } | null {
+  const def = POSE_SPRITE[pose];
+  if (!def) return null;
+  return personSprites.get(`${def.name}#${def.frames > 1 ? frame : 0}`) ?? null;
 }
 
 interface Placed {
@@ -321,7 +366,20 @@ export function Hakoniwa({
               ctx.fillRect(at.x - 5, at.y - 2, 11, 5);
               ctx.globalAlpha = 1;
             }
-            ctx.drawImage(personCanvas(a.look, at.frame, at.flip), left, top);
+            const sp = personSprite(a.look.pose, at.frame);
+            if (sp && a.look.pose === 'push') {
+              // 申し合いは1枚で2人: 西（向きを返さない側）が、2人の真ん中に描く
+              if (!a.look.flip)
+                ctx.drawImage(sp.s.img, at.x - 10 - sp.s.tip[0], at.y + 2 - sp.s.tip[1]);
+            } else if (sp) {
+              ctx.drawImage(
+                at.flip ? sp.flipped : sp.s.img,
+                at.x - (at.flip ? sp.s.w - 1 - sp.s.tip[0] : sp.s.tip[0]),
+                at.y - sp.s.tip[1],
+              );
+            } else {
+              ctx.drawImage(personCanvas(a.look, at.frame, at.flip), left, top);
+            }
             if (a.rikishiId !== null && a.rikishiId === now.selected) {
               // 選んだ弟子の頭の上に、紅の印（拍で上下する）
               const y = top - 3 - (beat % 2);

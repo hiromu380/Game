@@ -621,3 +621,68 @@ Draw a cutaway diorama of two connected rooms of a sumo stable, seen from the is
 ```
 An outdoor yard next to the stable building: a carport with a small car and scooters under a tiled roof, bicycles in a rack, a storage shed, wooden crates, garbage bins, a hose reel and a ladder, behind a wooden fence with pine trees. No people.
 ```
+
+## 人（取り込んだ絵）
+
+依頼者が作った人の一覧の絵（2026-11-14 受領。5枚のうち1枚目から必要なものだけ切り出した）。作り直すときは、共通の文のあとに次を貼り、1枚に何人も並べて描いてもらう。
+取り込みは、1人ずつ切り出して（いちばん大きいかたまりだけ残し、コマは横に並べる）`client/sprites/raw/` に置いてから行う。
+
+### `person_push` — 申し合い（2人が組む。1枚で2人）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 申し合い（2人が組む。1枚で2人）. Each pose separate with wide magenta gaps.
+```
+
+### `person_shiko` — 四股（足を上げる／腰を割る）（優先 B・2コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 四股（足を上げる／腰を割る）. Each pose separate with wide magenta gaps.
+```
+
+### `person_suriashi` — すり足（腰を割る／足を出す）（優先 B・2コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: すり足（腰を割る／足を出す）. Each pose separate with wide magenta gaps.
+```
+
+### `person_teppo` — 鉄砲（腰を落として突く）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 鉄砲（腰を落として突く）. Each pose separate with wide magenta gaps.
+```
+
+### `person_sit` — あぐらで座る（ござの上）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: あぐらで座る（ござの上）. Each pose separate with wide magenta gaps.
+```
+
+### `person_lie` — 横になる（ひじをついて）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 横になる（ひじをついて）. Each pose separate with wide magenta gaps.
+```
+
+### `person_sweep` — 掃除（ほうき／ほうきと手桶）（優先 B・2コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 掃除（ほうき／ほうきと手桶）. Each pose separate with wide magenta gaps.
+```
+
+### `person_chanko` — ちゃんこ番（椀とお玉）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: ちゃんこ番（椀とお玉）. Each pose separate with wide magenta gaps.
+```
+
+### `person_oyakata_sit` — 親方（座布団に座って見る）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 親方（座布団に座って見る）. Each pose separate with wide magenta gaps.
+```
+
+### `person_oyakata` — 親方（腕を組んで立つ）（優先 B・1コマ）
+
+```
+A cute deformed sumo wrestler (or stable master in a dark kimono), 2.5 heads tall, thick dark outline, flat colors, three-quarter view. Pose: 親方（腕を組んで立つ）. Each pose separate with wide magenta gaps.
+```
