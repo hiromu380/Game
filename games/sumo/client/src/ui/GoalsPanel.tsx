@@ -1,5 +1,5 @@
-import type { GameState } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { KACHIKOSHI_SHARE, pledgeKept, type GameState } from '@ichimon/sim';
+import { useI18n, type MessageKey } from '../i18n';
 import { goalsOf, nextGoal, type Goal } from '../goals';
 
 function Pips({ goals }: { goals: Goal[] }) {
@@ -41,6 +41,7 @@ export function NextGoalCard({ game }: { game: GameState }) {
       ) : (
         <p className="note">{t('goals.allDone')}</p>
       )}
+      <PledgeLine game={game} />
     </section>
   );
 }
@@ -75,5 +76,33 @@ export function GoalsPanel({ game }: { game: GameState }) {
         ))}
       </ol>
     </section>
+  );
+}
+
+/** 後援会との約束の進み具合（約束しているときだけ1行） */
+function PledgeLine({ game }: { game: GameState }) {
+  const { t } = useI18n();
+  const p = game.player.pledge;
+  if (!p) return null;
+  const share = Math.round(KACHIKOSHI_SHARE * 100);
+  const kept = pledgeKept(p);
+  const left = 6 - (game.bashoIndex % 6);
+  const progress =
+    p.kind === 'kachikoshi'
+      ? t('pledge.progress.kk', {
+          kk: p.kk,
+          mk: p.mk,
+          pct: p.kk + p.mk > 0 ? Math.round((p.kk / (p.kk + p.mk)) * 100) : 0,
+        })
+      : t(kept ? 'pledge.progress.done' : 'pledge.progress.notYet');
+  return (
+    <p className={`pledge-line ${kept ? 'is-on' : 'is-off'}`}>
+      <span aria-hidden="true">{kept ? '✓ ' : '… '}</span>
+      {t('pledge.line', {
+        name: t(`pledge.${p.kind}.name` as MessageKey, { share }),
+        progress,
+        left,
+      })}
+    </p>
   );
 }

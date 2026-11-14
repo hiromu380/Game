@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import {
   acceptCandidate,
+  answerPledge,
   answerRetirement,
+  KACHIKOSHI_SHARE,
+  PLEDGES,
   chooseTreatment,
   declineCandidate,
   headGain,
@@ -10,7 +13,7 @@ import {
   type GameState,
   type Rank,
 } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { useI18n, type MessageKey } from '../i18n';
 import { money, rankLabel } from '../format';
 import { woundName } from '../injury';
 import { CandidatePortrait, RikishiPortrait } from '../art/Portraits';
@@ -23,7 +26,7 @@ import { happeningPicture, OTHER_PICTURE, type EventPicture } from '../eventScen
 
 /**
  * 返事が要るものを1件ずつ窓で出す（部屋の画面には並べない）。順に: 引退の申し出 → けがの治療の方針 → 場所の間の出来事 →
- * 理事選挙 → 独立の申し出 → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
+ * 理事選挙 → 独立の申し出 → 後援会との約束（年の初め） → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
  */
 export function EventDialogs({
   game,
@@ -34,7 +37,7 @@ export function EventDialogs({
   ranks: ReadonlyMap<number, Rank>;
   setGame: (g: GameState) => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   // 選挙の返事を見終えた場所・出来事の結果を見終えた日誌の長さ（返事の後も残るものを閉じる）
   const [electionSeen, setElectionSeen] = useState<number | null>(null);
   const [resultSeen, setResultSeen] = useState<number>(-1);
@@ -183,6 +186,46 @@ export function EventDialogs({
       t('independence.title'),
       <IndependencePanel game={game} ranks={ranks} setGame={setGame} />,
       OTHER_PICTURE.independence,
+    );
+
+  // 後援会との約束（年の初め）
+  if (game.pending.pledge)
+    return box(
+      t('pledge.title'),
+      <>
+        <h2>{t('pledge.title')}</h2>
+        <p className="note">{t('pledge.lead')}</p>
+        <div className="pledge__opts">
+          {game.pending.pledge.map((k) => {
+            const d = PLEDGES[k];
+            return (
+              <button
+                key={k}
+                className="button pledge__opt"
+                onClick={() => setGame(answerPledge(game, k))}
+              >
+                <strong>
+                  {t(`pledge.${k}.name` as MessageKey, {
+                    share: Math.round(KACHIKOSHI_SHARE * 100),
+                  })}
+                </strong>
+                <small>
+                  {t('pledge.terms', {
+                    advance: money(t, d.advance, lang),
+                    prestige: d.prestige,
+                    fail: d.failPrestige,
+                    members: Math.round(d.failMembers * 100),
+                  })}
+                </small>
+              </button>
+            );
+          })}
+          <button className="button pledge__opt" onClick={() => setGame(answerPledge(game, null))}>
+            <strong>{t('pledge.none')}</strong>
+          </button>
+        </div>
+      </>,
+      OTHER_PICTURE.pledge,
     );
 
   // 入門希望者（1人ずつ）

@@ -34,6 +34,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
       return 'stable';
     case 'patron':
     case 'scout':
+    case 'pledge':
       return 'business';
     case 'rival':
     case 'office':
@@ -122,6 +123,10 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
     case 'patron':
       return t(`journal.patron.${e.event}` as MessageKey, {
         name: t(`patron.kind.${e.patronKind}` as MessageKey, { surname: e.surname }),
+      });
+    case 'pledge':
+      return t(`journal.pledge.${e.result}`, {
+        pledge: t(`pledge.${e.pledge}.short` as MessageKey),
       });
     case 'office':
       return t('journal.office', { office: t(`office.${e.rank}`) });

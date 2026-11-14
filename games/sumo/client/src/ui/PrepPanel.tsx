@@ -4,6 +4,9 @@ import { playSound } from '../sound';
 import {
   atWall,
   canPrep,
+  costOf,
+  tideOf,
+  TIDES,
   fromSavings,
   doPrep,
   KOENKAI,
@@ -166,8 +169,8 @@ export function PrepPanel({
     .filter((r) => r.stableId === game.player.stableId)
     .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   const cost: Partial<Record<Menu, number>> = {
-    mune: PREP.mune.cost,
-    degeiko: PREP.degeiko.cost,
+    mune: costOf(game, 'mune'),
+    degeiko: costOf(game, 'degeiko'),
     visit: KOENKAI.visitCost,
   };
   /** そのコマンドを、いま選べるか（相手を選ぶものは、選べる相手が1つでもあるか） */
@@ -210,6 +213,23 @@ export function PrepPanel({
     </>
   );
 
+  // 今週の好機・逆風と、それで得をする（損をする）コマンド
+  const tideId = left > 0 ? tideOf(game, week) : null;
+  const tide = tideId ? TIDES[tideId] : null;
+  const tideMark = (m: Menu): 'up' | 'down' | null => {
+    if (!tide) return null;
+    const f =
+      m === 'scout'
+        ? 'scoutTalent' in tide
+          ? 2
+          : 1
+        : m === 'usual'
+          ? 1
+          : ((tide as Partial<Record<Menu, number>>)[m] ?? 1);
+    const free = 'free' in tide && tide.free === m;
+    return f > 1 || free ? 'up' : f < 1 ? 'down' : null;
+  };
+
   // 1行の知らせ: 指しているコマンドの効果。指していなければ、先週の結果
   const say = pointed ?? (draft ? null : menu);
   const message = say
@@ -251,6 +271,15 @@ export function PrepPanel({
           ))}
         </span>
       </h2>
+      {tideId && tide && (
+        <p className={`prep__tide is-${tide.tone}`}>
+          <span className={`tag ${tide.tone === 'good' ? 'tag--good' : 'tag--warn'}`}>
+            {t(tide.tone === 'good' ? 'tide.good' : 'tide.bad')}
+          </span>
+          <strong>{t(`tide.${tideId}.name` as MessageKey)}</strong>
+          <span>{t(`tide.${tideId}.desc` as MessageKey)}</span>
+        </p>
+      )}
       <MoneyOutlook game={game} />
       {left === 0 ? (
         <p className="prep__done">{t('prep.done')}</p>
@@ -283,7 +312,17 @@ export function PrepPanel({
                     setDraft(PICKS.has(m) ? null : ({ kind: m } as PrepAction));
                   }}
                 >
-                  <span>{t(`prep.cmd.${m}`)}</span>
+                  <span>
+                    {t(`prep.cmd.${m}`)}
+                    {tideMark(m) && (
+                      <span
+                        className={`prep__tidemark is-${tideMark(m)}`}
+                        aria-label={t(tideMark(m) === 'up' ? 'tide.up' : 'tide.down')}
+                      >
+                        {tideMark(m) === 'up' ? '▲' : '▼'}
+                      </span>
+                    )}
+                  </span>
                   {cost[m] !== undefined && (
                     <span className="prep__cost">{money(t, cost[m]!, lang)}</span>
                   )}
@@ -372,7 +411,7 @@ export function PrepPanel({
                 // 口座で足りない分は、親方の貯金から出る
                 const yen =
                   draft.kind === 'mune' || draft.kind === 'degeiko'
-                    ? PREP[draft.kind].cost
+                    ? costOf(game, draft.kind)
                     : draft.kind === 'scout'
                       ? SCOUT_TRIPS[draft.trip].cost
                       : 0;

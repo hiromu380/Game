@@ -1031,8 +1031,10 @@ body.has-modal {
   .goals-card__name {
     font-size: 1rem;
   }
-  .goals-card .note {
+  .goals-card .note,
+  .goals-card .pledge-line {
     grid-column: 1 / -1;
+    order: 3;
   }
   .scene-box {
     position: relative;
@@ -1237,4 +1239,57 @@ body.has-modal {
     max-height: 160px;
     object-fit: cover;
   }
+}
+
+/* 今週の好機・逆風（コマンド窓の題字の下に1行） */
+.prep__tide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 0.92em;
+}
+.prep__tide .tag {
+  margin-left: 0;
+}
+.prep__tidemark {
+  margin-left: 4px;
+}
+.prep__tidemark.is-up {
+  color: var(--good);
+}
+.prep__tidemark.is-down {
+  color: var(--shu-light);
+}
+/* 約束の進み具合（次の目標の下） */
+.pledge-line {
+  margin: 2px 0 0;
+  font-size: 0.92em;
+}
+.pledge-line.is-off {
+  color: var(--shu-light);
+}
+.pledge__opts {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+.pledge__opt {
+  text-align: left;
+}
+.pledge__opt small {
+  display: block;
+  opacity: 0.9;
+}
+.goals-card .pledge-line {
+  border-top: 2px dotted currentColor;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+.goals-card .pledge-line.is-off {
+  color: var(--shu);
+}
+.prep__cost {
+  white-space: nowrap;
 }

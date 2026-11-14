@@ -81,4 +81,5 @@ export const OTHER_PICTURE = {
   election: 'room_genkan',
   independence: 'room_ima',
   candidate: 'room_genkan',
+  pledge: 'room_ousetsu',
 } as const satisfies Record<string, EventPicture>;

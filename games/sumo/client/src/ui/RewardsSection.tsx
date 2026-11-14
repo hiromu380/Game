@@ -28,6 +28,10 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
         return t('rewards.injury', { name: x.name, basho: x.basho });
       case 'henka':
         return t('rewards.henka', { name: x.name });
+      case 'pledge':
+        return t(x.kept ? 'rewards.pledgeKept' : 'rewards.pledgeBroken', {
+          pledge: t(`pledge.${x.pledge}.short` as MessageKey),
+        });
       case 'vsOutlook':
         return t('rewards.vsOutlook', { yen: yen(x.delta) });
     }
