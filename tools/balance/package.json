@@ -9,9 +9,11 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "analyze": "tsx src/analyze.ts"
+    "analyze": "tsx src/analyze.ts",
+    "overtime": "tsx src/overtime.ts"
   },
   "dependencies": {
+    "@chain-factory/bots": "workspace:*",
     "@chain-factory/sim": "workspace:*"
   },
   "devDependencies": {

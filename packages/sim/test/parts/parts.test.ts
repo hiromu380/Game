@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { BALANCE, DEFAULT_RULES, type SimEvent } from '../../src';
-import { run } from '../helpers';
+import { NO_REDIRECT_ADD, run } from '../helpers';
 
 /** 指定種別のイベントだけ取り出す */
 const only = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
@@ -22,6 +22,37 @@ describe('スイッチ', () => {
   });
 });
 
+describe('同時出荷ボーナス', () => {
+  it('同じ tick に出荷した出荷口の数を、その tick の出荷すべてに掛ける', () => {
+    const { events } = run(['.. D>', 'S> Y>', '.. D>'], 1, NO_REDIRECT_ADD);
+    const ships = events.filter((e): e is Extract<SimEvent, { type: 'ship' }> => e.type === 'ship');
+    expect(ships.map((e) => [String(e.value), e.sync])).toEqual([
+      ['2', 2],
+      ['2', 2],
+    ]);
+    expect(String(ships[1]!.total)).toBe('4');
+  });
+
+  it('同じ出荷口に同時に2本届いても1口と数える', () => {
+    expect(run(['.. C> Cv', 'S> Y> D>', '.. C> C^'], 1, NO_REDIRECT_ADD).scoreText).toBe('2');
+  });
+
+  it('別々の tick の出荷には掛からない', () => {
+    // コピー機の2連射（1 tick ずれ）
+    expect(run(['S> X> D>']).scoreText).toBe('2');
+  });
+
+  it('倍率は syncShipMax で抑える', () => {
+    const rules = { ...DEFAULT_RULES, syncShipMax: 3 };
+    expect(run(['D> D> D>', 'D> B^ D>', 'D> S^ D>'], 1, rules).scoreText).toBe('21');
+  });
+
+  it('導入前のラン（syncShipMax が無い）はボーナスなし', () => {
+    const rules = { ...NO_REDIRECT_ADD, syncShipMax: undefined };
+    expect(run(['.. D>', 'S> Y>', '.. D>'], 1, rules).scoreText).toBe('2');
+  });
+});
+
 describe('出荷口', () => {
   it('受けた値を出荷量に加算する', () => {
     expect(run(['S> D>']).scoreText).toBe('1');
@@ -29,9 +60,9 @@ describe('出荷口', () => {
 
   it('何度でも受け付ける（発動回数無制限）', () => {
     // 分岐器で上下に分けてコンベアで同じ出荷口へ戻す
-    const { scoreText, stats } = run(['.. C> Dv', 'S> Y> ..', '.. C> D^']);
+    const { scoreText, stats } = run(['.. C> Dv', 'S> Y> ..', '.. C> D^'], 1, NO_REDIRECT_ADD);
     expect(stats.shipCount).toBe(2);
-    expect(scoreText).toBe('2');
+    expect(scoreText).toBe('4'); // 2口の同時出荷で ×2
   });
 });
 
@@ -43,10 +74,10 @@ describe('ベルトコンベア', () => {
 });
 
 describe('分岐器', () => {
-  it('自身の向きから見て左右へ同じ値で送る', () => {
-    // 右向きの分岐器 → 上（左手）と下（右手）へ
+  it(`自身の向きから見て左右へ、値に +${BALANCE.partParams.redirectAdd} して送る`, () => {
+    // 右向きの分岐器 → 上（左手）と下（右手）へ。1 + 2 = 3 が2本、2口の同時出荷で ×2 → 6 + 6
     const { scoreText, events } = run(['.. D>', 'S> Y>', '.. D>']);
-    expect(scoreText).toBe('2');
+    expect(scoreText).toBe('12');
     const dirs = only(events, 'emit')
       .filter((e) => e.tick === 1)
       .map((e) => e.dir);
@@ -88,7 +119,8 @@ describe('爆発ドラム缶', () => {
     const { scoreText, events } = run(['D> D> D>', 'D> B^ D>', 'D> S^ D>']);
     // S は B の真下。B から出る8方向のうち、下（S）以外の7方向が出荷口
     expect(only(events, 'emit').filter((e) => e.tick === 1)).toHaveLength(8);
-    expect(scoreText).toBe('7');
+    // 7口の同時出荷。倍率は上限 syncShipMax で抑える
+    expect(scoreText).toBe(String(7 * Math.min(7, DEFAULT_RULES.syncShipMax!)));
   });
 
   it('発動は1回のみ', () => {

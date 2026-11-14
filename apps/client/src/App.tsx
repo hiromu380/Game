@@ -5,17 +5,19 @@
  * 画面幅が狭いとき（スマホ縦画面）は、盤面の下にショップ・手持ちをタブで切り替えて出す。
  */
 import {
+  BALANCE,
   createRunWithConfig,
-  dailyRunSeed,
   getCurrentEconomy,
+  drawFloorPermit,
   getCurrentFloor,
-  type FloorParams,
   getCurrentRules,
   getCurrentShift,
   getDayAndPeriod,
   getRefund,
   getRerollCost,
   isEventPending,
+  isRelicPending,
+  mergeCells,
   scoreToString,
   SIM_VERSION,
   type RunState,
@@ -23,6 +25,8 @@ import {
   type PartId,
 } from '@chain-factory/sim';
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -31,29 +35,54 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import type { BoardLabels, BoardViewState } from './board/BoardRenderer';
+import type { BoardViewState } from './board/BoardRenderer';
 import { PixiBoard } from './board/PixiBoard';
 import { audio } from './audio/AudioEngine';
+import { relicRarity } from './ui/RarityTag';
 import { LAYOUT } from './config/layout';
+import { EDITION } from './config/edition';
+import {
+  autoPlayScene,
+  triggerAfterCommit,
+  type SceneId,
+  type StoryTrigger,
+} from './story/playback';
+import { AVAILABLE_SCENES } from './story/scenes';
+import { loadSeenScenes, markSceneSeen } from './state/saveStore';
 import { useI18n } from './i18n';
 import { api, OnlineError } from './online/api';
 import { getMarket, priceTrends } from './online/market';
 import { useSettings } from './settings/SettingsContext';
 import { SettingsPanel } from './settings/SettingsPanel';
 import type { PlaybackSpeed } from './playback/timeline';
-import { createGameState, gameReducer, getPersistedRun, type PlayMode } from './state/gameReducer';
+import {
+  canUndo,
+  createGameState,
+  gameReducer,
+  isTrialResultOpen,
+  getPersistedRun,
+  type PlayMode,
+} from './state/gameReducer';
 import { createInitialState, isTutorialRun, startNewNormalRun } from './state/newRun';
+import { trialStatus } from './state/trialStatus';
+import { isDebugAvailable } from './config/debug';
 import { useMediaQuery } from './state/useMediaQuery';
 import { useGameControls } from './input/useGameControls';
 import { useInputMode } from './input/useInputMode';
 import { useSteamAchievements } from './platform/useSteamAchievements';
 import { loadRun, saveGame } from './state/saveStore';
 import { BossNotice, findBossToShow } from './ui/BossNotice';
+import { RocketGoal } from './ui/RocketProgress';
 import { CommitConfirm } from './ui/CommitConfirm';
+import { commitWarnings } from './state/commitWarnings';
 import { SellZone } from './ui/SellZone';
 import { DayEventDialog, DayEventNotice } from './ui/DayEventDialog';
-import { RocketGoal } from './ui/RocketProgress';
+import { RelicDialog, RelicStrip } from './ui/RelicDialog';
 import { TutorialGuide } from './ui/TutorialGuide';
+import { useBoardLabels } from './board/useBoardLabels';
+
+/** チュートリアルの締めの大連鎖（初回だけ使うので遅延読み込み） */
+const ShowcaseDialog = lazy(() => import('./showcase/ShowcaseDialog'));
 import {
   advanceTutorial,
   gearAvailability,
@@ -73,13 +102,16 @@ import { SelectionPanel } from './ui/SelectionPanel';
 import { CapturePanel, type CaptureUi } from './ui/CapturePanel';
 import { RunShare } from './ui/share/RunShare';
 import { DragGhost, isInventoryDropZone, isSellDropZone } from './ui/DragGhost';
-import { GiveUpButton } from './ui/GiveUpButton';
-import { DailyMenu } from './ui/online/DailyMenu';
+import { FloorLegend } from './ui/FloorLegend';
+import { nextStep } from './state/nextStep';
+import { feedbackMessage, type FeedbackMessage } from './state/feedbackMessage';
+import { FEEDBACK_NOTE_MS } from './config/effects';
+import { GameMenu } from './ui/GameMenu';
+import { WeeklyMenu } from './ui/online/WeeklyMenu';
 import { ShopPanel } from './ui/ShopPanel';
 import { UiIcon } from './ui/UiIcon';
-import { WorkshopBackdrop } from './ui/WorkshopBackdrop';
 
-/** ゲーム画面の始め方（デイリー・練習はメニューで組み立てたランを渡す） */
+/** ゲーム画面の始め方（週替わり・練習はメニューで組み立てたランを渡す） */
 export interface GameStart {
   run: RunState;
   mode: PlayMode;
@@ -92,22 +124,18 @@ interface Props {
   onTitle: () => void;
 }
 
-/** 床の効果量（文言に埋め込む） */
-const floorAmounts = (params: FloorParams) => ({
-  double: params.doubleMultiplier,
-  add: params.addAmount,
-  triple: params.tripleMultiplier,
-});
-
 /** 撮影モード（VITE_CAPTURE=1 のビルドだけ。ui/CapturePanel.tsx） */
 const CAPTURE = import.meta.env.VITE_CAPTURE === '1';
 
-/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す */
-const DEBUG_AVAILABLE =
-  import.meta.env.DEV || new URLSearchParams(window.location.search).has('debug');
+/** カットシーンの再生（PixiJS と素材を、再生するときに読み込む） */
+const CutscenePlayer = lazy(() => import('./story/CutscenePlayer'));
+
+/** デバッグ表示のボタンは開発中か ?debug を付けたときだけ出す（体験版・製品版のビルドでは出ない） */
+// 撮影モードではデバッグを出さない（ストアのスクリーンショット・動画に写らないように）
+const DEBUG_AVAILABLE = !CAPTURE && isDebugAvailable(import.meta.env.DEV, window.location.search);
 
 export function App({ start, onTitle }: Props) {
-  const { t, formatScore, formatCompact } = useI18n();
+  const { t } = useI18n();
   const [state, dispatch] = useReducer(gameReducer, start, (initialStart) => {
     const initial = createInitialState();
     return initialStart
@@ -120,7 +148,6 @@ export function App({ start, onTitle }: Props) {
   /** ショップ・手持ちをタブで切り替えるか（狭い画面・高さの低い画面） */
   const tabbed = compact || short;
   /** 狭い画面で表示中のタブ */
-  const [tab, setTab] = useState<'shop' | 'inventory'>('shop');
   const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   /** 再生中の出荷量の途中経過 */
   const [liveScore, setLiveScore] = useState<string | null>(null);
@@ -132,13 +159,24 @@ export function App({ start, onTitle }: Props) {
   const [capturePeakFirst, setCapturePeakFirst] = useState(false);
   /** 撮影モード: 共有カードの確認 */
   const [sharePreview, setSharePreview] = useState(false);
-  /** デイリーのメニュー（開いていなければ null） */
-  const [dailyMenu, setDailyMenu] = useState<'menu' | 'ranking' | null>(null);
+  /** 週替わりのメニュー（開いていなければ null） */
+  const [weeklyMenu, setWeeklyMenu] = useState<'menu' | 'ranking' | null>(null);
 
   const { settings, updateSettings } = useSettings();
   const { run, selection, playback, error, mode } = state;
+  // タブ表示の一覧: シフトの始めは、手持ちにパーツがあれば手持ち（まず置く）、なければショップ（まず買う）
+  const firstTab = (r: RunState): 'shop' | 'inventory' =>
+    Object.values(r.inventory).some((count) => (count ?? 0) > 0) ? 'inventory' : 'shop';
+  const [tab, setTab] = useState<'shop' | 'inventory'>(() => firstTab(run));
+  const [tabShift, setTabShift] = useState(`${run.seed}:${run.shiftIndex}`);
+  if (tabShift !== `${run.seed}:${run.shiftIndex}`) {
+    setTabShift(`${run.seed}:${run.shiftIndex}`);
+    setTab(firstTab(run));
+  }
   const previousShift = useRef(run.shiftIndex);
-  const playing = playback !== null || state.awaitingServer;
+  // 試運転の結果を見終わったところは「再生中」として扱わない（組み立ての操作をすると結果のパネルが閉じる）
+  const trialResultOpen = isTrialResultOpen(state);
+  const playing = (playback !== null && !trialResultOpen) || state.awaitingServer;
 
   // 初回ガイド（ガイド用のランの1シフト目。進み方は state/tutorial.ts）。ランを始め直したら最初から
   const [tutorial, setTutorial] = useState<TutorialState>(() => startTutorial(run));
@@ -164,6 +202,7 @@ export function App({ start, onTitle }: Props) {
     updateSettings({ tutorialDone: true });
   };
   const guideStep = tutorialOn ? tutorial.step : null;
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
   // タブ表示では、ガイドの手順が変わったら、その手順で使う一覧（ショップ・手持ち）を開く
   const [tabGuideStep, setTabGuideStep] = useState(guideStep);
   if (guideStep !== tabGuideStep) {
@@ -172,8 +211,8 @@ export function App({ start, onTitle }: Props) {
     else if (guideStep && tutorialPart(guideStep)) setTab('inventory');
   }
 
-  // 状態が変わるたびに保存する。ランは通常モードのみ（デイリーはサーバーから再開する）。
-  // デイリー・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
+  // 状態が変わるたびに保存する。ランは通常モードのみ（週替わりはサーバーから再開する）。
+  // 週替わり・練習中は保存済みの通常ランを残したまま、メタ進行と実績だけを更新する
   const persistedRun = getPersistedRun(state);
   useEffect(() => {
     saveGame({
@@ -187,19 +226,19 @@ export function App({ start, onTitle }: Props) {
   // 解除済みを毎回まとめて送るのは、オフラインで解除した分を後から送り直すため（Steam 側では二重に解除されない）
   useSteamAchievements(state.meta, state.achievements);
   const onRanked = useCallback(
-    (topPercent: number) => dispatch({ type: 'dailyRanked', topPercent }),
+    (topPercent: number) => dispatch({ type: 'weeklyRanked', topPercent }),
     [],
   );
 
-  // デイリー本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
+  // 週替わりの本番: 操作ログをサーバーへ送り、検証済みの本番シードを受け取る。
   // 同じシフトを二重に送らないよう、送信中のシフトを覚えておく（開発時の StrictMode の二重実行対策も兼ねる）
   const inflightShift = useRef<number | null>(null);
   useEffect(() => {
-    if (!state.awaitingServer || mode.kind !== 'daily') return;
+    if (!state.awaitingServer || mode.kind !== 'weekly') return;
     if (inflightShift.current === run.shiftIndex) return;
     inflightShift.current = run.shiftIndex;
     api
-      .commit(mode.dailyId, {
+      .commit(mode.weekId, mode.dayId, {
         simVersion: SIM_VERSION,
         shiftIndex: run.shiftIndex,
         ops: state.pendingOps,
@@ -223,9 +262,22 @@ export function App({ start, onTitle }: Props) {
 
   // 操作の手応え（配置・購入・エラーなど）の効果音。
   // feedback は操作のたびに新しいオブジェクトになるので、変わったときに1回鳴らす
+  // あわせて、お金が動いた操作などは盤面の下に短く表示する（state/feedbackMessage.ts）
   const { feedback } = state;
+  const lastBudget = useRef(run.budget);
+  const [note, setNote] = useState<{ message: FeedbackMessage; seq: number } | null>(null);
   useEffect(() => {
-    if (feedback) audio.play(feedback.kind);
+    const delta = run.budget - lastBudget.current;
+    lastBudget.current = run.budget;
+    if (!feedback) return;
+    audio.play(feedback.kind === 'undo' ? 'returnPart' : feedback.kind);
+    const message = feedbackMessage(feedback.kind, delta);
+    if (!message) return;
+    setNote({ message, seq: feedback.seq });
+    const timer = setTimeout(() => setNote(null), FEEDBACK_NOTE_MS);
+    return () => clearTimeout(timer);
+    // 予算は feedback と同時に変わる（feedback が変わったときだけ見る）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feedback]);
 
   // 本番の結果が出たときの効果音（ノルマ達成・全シフトクリア・ラン失敗）。
@@ -236,15 +288,16 @@ export function App({ start, onTitle }: Props) {
     audio.play(next === 'failed' ? 'runFailed' : next === 'cleared' ? 'runCleared' : 'quotaMet');
   }, [playback]);
 
-  // BGM（曲はまだないので、今は何も流れない。曲を入れれば組み立て中・結果画面で切り替わる）
-  const bgm = run.phase === 'building' ? 'building' : 'result';
-  useEffect(() => {
-    audio.playBgm(bgm);
-  }, [bgm]);
-
   // 操作卓の奥で鳴る工場音。朝・昼・夜と、夜のトラブル発生中で音色を変える。
   const { period: ambiencePeriod } = getDayAndPeriod(run);
   const bossActive = findBossToShow(run)?.isNow ?? false;
+
+  // BGM（audio/bgm.ts で合成）: 組み立て中・夜シフト（ボス）・結果画面で切り替える。ゲーム画面を離れたら止める
+  const bgm = run.phase !== 'building' ? 'result' : bossActive ? 'night' : 'building';
+  useEffect(() => {
+    audio.playBgm(bgm);
+  }, [bgm]);
+  useEffect(() => () => audio.playBgm(null), []);
   useEffect(() => {
     audio.playAmbience(ambiencePeriod, bossActive);
     return () => audio.playAmbience(null, false);
@@ -257,20 +310,29 @@ export function App({ start, onTitle }: Props) {
     audio.play(bossActive ? 'bossAlert' : 'shiftStart');
   }, [run.shiftIndex, bossActive]);
 
+  // ショップ・レリックの候補にレジェンドが出たら鳴らす（品揃え・候補が変わったときに1回）
+  const legendaryKey = [
+    ...run.shop.flatMap((o, i) =>
+      o.partId && !o.sold && BALANCE.parts[o.partId].rarity === 'legendary'
+        ? [`s${i}${o.partId}`]
+        : [],
+    ),
+    ...(run.relicChoice?.choices ?? []).flatMap((id) =>
+      relicRarity(run, id) === 'legendary' ? [`r${id}`] : [],
+    ),
+  ].join(',');
+  const shopSeq = `${run.shiftIndex}:${run.rerollCount ?? 0}:${run.relicChoice?.day ?? ''}`;
+  useEffect(() => {
+    if (legendaryKey) audio.play('legendary');
+    // 品揃え・候補が出し直されたときだけ見る（買って sold になっても鳴らし直さない）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopSeq]);
+
   // 新しい解放があれば結果画面で鳴らす
   const showingUnlocks = !playing && run.phase !== 'building' && state.unlocks.length > 0;
   useEffect(() => {
     if (showingUnlocks) audio.play('unlock');
   }, [showingUnlocks]);
-
-  // キーボード: R で回転
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'r' || e.key === 'R') dispatch({ type: 'rotate' });
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
 
   // 盤面に渡す表示状態（選択中のマス・配置しようとしているパーツ）
   const boardView = useMemo<BoardViewState>(
@@ -285,7 +347,10 @@ export function App({ start, onTitle }: Props) {
       })(),
       highlight: selection?.kind === 'cell' ? { x: selection.x, y: selection.y } : null,
       placing:
-        selection?.kind === 'inventory' ? { partId: selection.partId, dir: selection.dir } : null,
+        selection?.kind === 'inventory'
+          ? { partId: selection.partId, dir: selection.dir, golden: !!selection.golden }
+          : null,
+      mergeable: run.phase === 'building' ? mergeableCells(run) : [],
       shiftKey: `${run.seed}:${run.shiftIndex}`,
       guideCell: guideStep ? tutorialCell(guideStep) : null,
     }),
@@ -293,29 +358,7 @@ export function App({ start, onTitle }: Props) {
   );
 
   // 盤面に出す文言（言語が変わったら作り直す）
-  const boardLabels = useMemo<BoardLabels>(
-    () => ({
-      getPartName: (partId) => t(`part.${partId}.name`),
-      formatIncome: (amount) => t('playback.incomePop', { amount }),
-      getBreakLabel: (reason) => t(`break.short.${reason}`),
-      formatChain: (count) => t('playback.chainCounter', { count }),
-      getCutInTitle: () => t('playback.cutIn'),
-      getQuotaCrossLabel: () => t('playback.quotaCross'),
-      getFloorShort: (tile, params) => t(`floor.${tile}.short`, floorAmounts(params)),
-      getFloorDescription: (cell, params) =>
-        t('floor.tooltip', {
-          name: t(`floor.${cell.tile}.name`, floorAmounts(params)),
-          desc: t(`floor.${cell.tile}.desc`, floorAmounts(params)),
-          period:
-            cell.source === 'bonus' || cell.source === 'event'
-              ? t(`floor.period.${cell.source}`)
-              : '',
-        }),
-      formatScore,
-      formatCompact,
-    }),
-    [t, formatScore, formatCompact],
-  );
+  const boardLabels = useBoardLabels();
   const effectSettings = useMemo(
     () => ({
       strength: settings.effects,
@@ -334,6 +377,10 @@ export function App({ start, onTitle }: Props) {
 
   const onCellLongPress = useCallback(
     (x: number, y: number) => dispatch({ type: 'longPressCell', x, y }),
+    [],
+  );
+  const onCellSecondaryClick = useCallback(
+    (x: number, y: number) => dispatch({ type: 'secondaryClickCell', x, y }),
     [],
   );
 
@@ -373,9 +420,35 @@ export function App({ start, onTitle }: Props) {
   };
   /** 本番の確認ダイアログ（押し間違い防止） */
   const [commitConfirm, setCommitConfirm] = useState(false);
+  /** 増やすとゲームのメニューを開く（盤面で何も選んでいないときの Esc） */
+  const [menuSignal, setMenuSignal] = useState(0);
+  // カットシーン（初回だけ自動で再生。story/playback.ts）。終わったら見た記録を残す
+  const storyContext = () => ({
+    mode: mode.kind,
+    edition: EDITION,
+    seen: loadSeenScenes(),
+    available: AVAILABLE_SCENES,
+  });
+  // 初めてのラン（まだ何もしていない最初のシフト）を開いたら、オープニング
+  const [cutscene, setCutscene] = useState<SceneId | null>(() =>
+    !CAPTURE && run.phase === 'building' && run.shiftIndex === 0 && run.history.length === 0
+      ? autoPlayScene({ kind: 'newRun' }, storyContext())
+      : null,
+  );
+  const playStory = (trigger: StoryTrigger | null) => {
+    const scene = autoPlayScene(trigger, storyContext());
+    if (scene && !CAPTURE) setCutscene(scene);
+  };
+
   const closePlayback = () => {
     setLiveScore(null);
+    // 本番の結果を閉じたとき: 日のクリア・全クリア・未達のカットシーン
+    if (playback?.mode === 'commit') playStory(triggerAfterCommit(run, playback.nextRun));
     dispatch({ type: 'closePlayback' });
+  };
+  const finishCutscene = (scene: SceneId) => {
+    markSceneSeen(scene);
+    setCutscene(null);
   };
 
   // キーボード・コントローラーの操作（盤面のカーソル・一覧・試運転・本番）。ダイアログ中・ラン終了画面はメニューの操作
@@ -383,9 +456,12 @@ export function App({ start, onTitle }: Props) {
   const gameCursor = useGameControls({
     active:
       !settingsOpen &&
+      cutscene === null &&
       !isEventPending(run) &&
+      !isRelicPending(run) &&
+      !showcaseOpen &&
       !commitConfirm &&
-      dailyMenu === null &&
+      weeklyMenu === null &&
       (playing || run.phase === 'building'),
     width: run.board.width,
     height: run.board.height,
@@ -393,7 +469,12 @@ export function App({ start, onTitle }: Props) {
     playbackFinished: playback?.finished ?? false,
     onPlace: onCellClick,
     onDeselect: () => dispatch({ type: 'deselect' }),
+    hasSelection: state.selection !== null,
+    onOpenMenu: () => setMenuSignal((n) => n + 1),
     onRotate: () => dispatch({ type: 'rotate' }),
+    onUndo: () => dispatch({ type: 'undo' }),
+    onReturn: () => dispatch({ type: 'returnSelected' }),
+    onMerge: () => dispatch({ type: 'mergeSelected' }),
     onTrial: () => startPlayback('startTrial'),
     onCommit: () => setCommitConfirm(true),
     onClosePlayback: closePlayback,
@@ -409,7 +490,7 @@ export function App({ start, onTitle }: Props) {
     if (mode.kind === 'practice') {
       dispatch({
         type: 'loadRun',
-        run: createRunWithConfig(dailyRunSeed(mode.dailyId), run.config),
+        run: createRunWithConfig(run.seed, run.config),
         mode,
       });
       return;
@@ -421,14 +502,14 @@ export function App({ start, onTitle }: Props) {
   const enterRun = (next: RunState, nextMode: PlayMode) => {
     setLiveScore(null);
     setTutorial(startTutorial(next));
-    setDailyMenu(null);
+    setWeeklyMenu(null);
     dispatch({ type: 'loadRun', run: next, mode: nextMode });
   };
   /** 通常モードに戻る（保存済みのランがあれば続きから） */
   const backToNormal = () =>
     enterRun(loadRun() ?? startNewNormalRun(state.meta), { kind: 'normal' });
 
-  // ショップの前日比（今日の相場で始めたランだけ）
+  // ショップの前週比（今週の相場で始めたランだけ）
   const trends = useMemo(() => priceTrends(getMarket(), run.config.economy.prices), [run.config]);
 
   const header = (
@@ -448,19 +529,21 @@ export function App({ start, onTitle }: Props) {
         {mode.kind !== 'normal' && (
           <>
             <span className="mode-badge">
-              {t(mode.kind === 'daily' ? 'mode.daily' : 'mode.practice', { number: mode.number })}
+              {t(mode.kind === 'weekly' ? 'mode.weekly' : 'mode.practice', { number: mode.number })}
             </span>
             <button className="button--ghost" disabled={playing} onClick={backToNormal}>
               {t('mode.backToNormal')}
             </button>
           </>
         )}
-        {mode.kind !== 'daily' && run.phase === 'building' && (
-          <GiveUpButton disabled={playing} onGiveUp={() => dispatch({ type: 'giveUp' })} />
-        )}
-        <button className="button--ghost" disabled={playing} onClick={() => setDailyMenu('menu')}>
-          <UiIcon name="daily" />
-          {t('online.dailyButton')}
+        <button
+          className="button--ghost"
+          disabled={playing}
+          onClick={() => setWeeklyMenu('menu')}
+          aria-label={t('online.weeklyButton')}
+        >
+          <UiIcon name="weekly" />
+          <span className="app-header__label">{t('online.weeklyButton')}</span>
         </button>
         {DEBUG_AVAILABLE && (
           <button className="button--ghost" onClick={() => setDebugOpen((v) => !v)}>
@@ -472,13 +555,20 @@ export function App({ start, onTitle }: Props) {
           <UiIcon name="settings" />
           {t('settings.open')}
         </button>
+        {/* 操作方法・諦める（押し間違えないよう、よく使うボタンから離してメニューの中に入れる） */}
+        <GameMenu
+          disabled={playing}
+          openSignal={menuSignal}
+          canGiveUp={mode.kind !== 'weekly' && run.phase === 'building'}
+          onGiveUp={() => dispatch({ type: 'giveUp' })}
+        />
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
-      {dailyMenu && (
-        <DailyMenu
-          initialView={dailyMenu}
+      {weeklyMenu && (
+        <WeeklyMenu
+          initialView={weeklyMenu}
           onEnter={enterRun}
-          onClose={() => setDailyMenu(null)}
+          onClose={() => setWeeklyMenu(null)}
           onRanked={onRanked}
         />
       )}
@@ -511,8 +601,12 @@ export function App({ start, onTitle }: Props) {
       disabled={playing}
       boardHasParts={run.board.cells.some((cell) => cell !== null)}
       guidePartId={guideStep && guideStep !== 'buyGear' ? tutorialPart(guideStep) : null}
-      onSelect={(partId) => dispatch({ type: 'selectInventory', partId })}
+      onSelect={(partId, golden) => dispatch({ type: 'selectInventory', partId, golden })}
       onReturnAll={() => dispatch({ type: 'returnAll' })}
+      run={run}
+      lastShiftOfDay={getDayAndPeriod(run).period === run.config.shiftsPerDay - 1}
+      permitHasCell={drawFloorPermit(run) !== null}
+      onUseItem={(itemId) => dispatch({ type: 'useItem', itemId })}
     />
   );
   const selectionPanel = (
@@ -520,57 +614,78 @@ export function App({ start, onTitle }: Props) {
       run={run}
       selection={selection}
       hideWhenEmpty={tabbed}
+      compact={tabbed}
       disabled={playing}
       onRotate={() => dispatch({ type: 'rotate' })}
       onReturn={() => dispatch({ type: 'returnSelected' })}
       onSell={() => dispatch({ type: 'sellSelected' })}
+      onMerge={() => dispatch({ type: 'mergeSelected' })}
     />
   );
 
   // シフトの情報・目的の案内（初回ガイド）・夜シフトの予告。
   // 横長の画面では盤面をできるだけ大きくするため、盤面の上ではなく右の列の先頭に置く
-  const runInfo = (
+  const trial = trialStatus(state.trials, run);
+  // 結果のパネルを閉じたら、出荷量の途中経過ではなく直近の試運転の結果を出す（操作で閉じた場合も含む）
+  const hud = <Hud run={run} liveScore={playback ? liveScore : null} trial={trial} />;
+  const playbackPanel = playback && (
+    <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />
+  );
+  const notices = (
     <>
-      <Hud run={run} liveScore={liveScore} />
       {tutorialOn ? (
         <TutorialGuide
           tutorial={tutorial}
+          ready={cutscene === null}
           run={run}
           lastTrialScore={lastTrialScore}
           onNext={() => {
-            if (tutorial.step === 'finish') endTutorial();
+            // 締めは、ボルトの本気の工場で大連鎖を体験してもらってから終える
+            if (tutorial.step === 'finish') setShowcaseOpen(true);
             else setTutorial(advanceTutorial(tutorial, run));
           }}
           onSkip={endTutorial}
         />
       ) : (
+        // ランの最初・2日目以降の朝（盤面を片付けた）・延長戦（次の行き先）にだけ出る
         <RocketGoal run={run} />
       )}
       <DayEventNotice run={run} />
-      <BossNotice run={run} />
+      <BossNotice run={run} hideUpcoming={tutorialOn} />
+      <RelicStrip run={run} />
     </>
+  );
+
+  // カットシーン（ゲーム画面・ラン終了画面のどちらでも、いちばん上に重ねる）。
+  // 読み込み中も画面を覆う（後ろの画面が一瞬見えて、キー・クリックがそちらに届かないように）
+  const cutsceneLayer = cutscene && (
+    <Suspense fallback={<div className="cutscene" aria-hidden="true" />}>
+      <CutscenePlayer scene={cutscene} onDone={() => finishCutscene(cutscene)} />
+    </Suspense>
   );
 
   // ラン終了（全シフト達成 or ノルマ未達）
   if (!playing && run.phase !== 'building') {
     return (
-      <div className="app">
+      // ラン終了画面は情報が多いので、広い画面では横幅の上限を広げる
+      <div className="app app--wide">
         {header}
-        <WorkshopBackdrop run={run} meta={state.meta} playing={false} alert={bossActive} />
         <RunEndScreen
           run={run}
           meta={state.meta}
           unlocks={state.unlocks}
           achievements={state.achievements}
           mode={mode}
-          onViewRanking={() => setDailyMenu('ranking')}
+          onViewRanking={() => setWeeklyMenu('ranking')}
           onBackToNormal={backToNormal}
           onRetry={newRun}
+          onSelectAscension={(level) => dispatch({ type: 'selectAscension', level })}
           onOvertime={() => {
             setLiveScore(null);
             dispatch({ type: 'startOvertime' });
           }}
         />
+        {cutsceneLayer}
       </div>
     );
   }
@@ -583,15 +698,31 @@ export function App({ start, onTitle }: Props) {
       {dragging && <DragGhost partId={dragging} />}
       {/* .layout は盤面の大きさの基準（container-type）で固定配置の基準にもなるため、ダイアログはその外に置く */}
       {/* 2日目以降の朝: 今日の出来事を選ぶまでは組み立てられない */}
-      {isEventPending(run) && !playing && run.phase === 'building' && (
+      {showcaseOpen && (
+        <Suspense fallback={null}>
+          <ShowcaseDialog
+            onClose={() => {
+              setShowcaseOpen(false);
+              endTutorial();
+            }}
+          />
+        </Suspense>
+      )}
+      {/* レリックの選択を先に（夜明けの朝は、レリック → 今日の出来事の順に選ぶ） */}
+      {isRelicPending(run) && !playing && run.phase === 'building' && (
+        <RelicDialog run={run} onPick={(index) => dispatch({ type: 'pickRelic', index })} />
+      )}
+      {!isRelicPending(run) && isEventPending(run) && !playing && run.phase === 'building' && (
         <DayEventDialog run={run} onChoose={(index) => dispatch({ type: 'chooseEvent', index })} />
       )}
       {commitConfirm && !playing && (
         <CommitConfirm
+          warnings={commitWarnings(run, trial, getCurrentShift(run).quota)}
           onConfirm={() => startPlayback('startCommit')}
           onCancel={() => setCommitConfirm(false)}
         />
       )}
+      {cutsceneLayer}
       {CAPTURE && (
         <CapturePanel
           board={run.board}
@@ -604,10 +735,15 @@ export function App({ start, onTitle }: Props) {
           peakFirst={capturePeakFirst}
           onPeakFirstChange={setCapturePeakFirst}
           onCommit={(seed) => {
-            setLiveScore(null);
+            // 通常の本番と同じく、画面上部の出荷量を 0 から数え上げる
+            setLiveScore('0');
             dispatch({ type: 'captureCommit', seed });
           }}
           onPreviewShare={() => setSharePreview(true)}
+          onGivePermit={() => dispatch({ type: 'captureGivePermit' })}
+          onGiveRelic={() => dispatch({ type: 'captureGiveRelic' })}
+          scenes={AVAILABLE_SCENES}
+          onPlayScene={setCutscene}
         />
       )}
       {CAPTURE && sharePreview && (
@@ -626,8 +762,8 @@ export function App({ start, onTitle }: Props) {
         </div>
       )}
       {header}
-      <WorkshopBackdrop run={run} meta={state.meta} playing={playing} alert={bossActive} />
-      {!fit && runInfo}
+      {/* 縦長の画面（スマホ）: 盤面の上には計器だけを置き、説明は操作ボタンの下へ（盤面を画面の上の方に出す） */}
+      {!fit && hud}
       <main className="layout">
         <div className="layout__board">
           <PixiBoard
@@ -639,26 +775,57 @@ export function App({ start, onTitle }: Props) {
             peakFirst={CAPTURE && capturePeakFirst}
             speed={speed}
             cursor={cursor}
+            paused={cutscene !== null}
             onCellClick={onCellClick}
             onCellLongPress={onCellLongPress}
+            onCellSecondaryClick={onCellSecondaryClick}
+            canWheelRotate={() => !playing && state.selection !== null}
+            onWheelRotate={() => dispatch({ type: 'rotate' })}
             onCellDragStart={onCellDragStart}
             onCellDragEnd={onCellDragEnd}
             onShip={onShip}
             onPlaybackFinish={onPlaybackFinish}
           />
-          {playback && <PlaybackPanel playback={playback} run={run} onClose={closePlayback} />}
+          {!playing && (
+            <FloorLegend
+              floor={boardView.floor}
+              upcomingBlocked={boardView.upcomingBlocked}
+              params={boardView.rules.floorParams}
+            />
+          )}
+          {/* 再生中の帯は盤面の上。結果は、縦長の画面では盤面の下に出す（走りきった盤面を隠さない） */}
+          {playback && (!playback.finished || !fit) && playbackPanel}
           {error && <div className="toast">{t(`error.${error}`)}</div>}
-          {state.awaitingServer && <div className="toast">{t('daily.committing')}</div>}
+          {note && !error && (
+            <div key={note.seq} className="toast toast--note" role="status">
+              {t(`toast.${note.message.kind}`, { amount: note.message.amount })}
+            </div>
+          )}
+          {state.awaitingServer && <div className="toast">{t('weekly.committing')}</div>}
         </div>
         <aside className="layout__side">
-          {fit && <div className="layout__info">{runInfo}</div>}
+          {/* 目標の計器は右の列の上に固定し（スクロールしても見える）、本番ボタンをそのすぐ下に置く */}
+          {fit && <div className="layout__goal">{hud}</div>}
+          {/* 横長の画面: 結果は右の列（計器のすぐ下）に出す（盤面を隠さない） */}
+          {fit && playback?.finished && playbackPanel}
           <ControlsPanel
             playing={playing}
             compact={compact}
             inputMode={inputMode}
             speed={speed}
+            // 初回ガイドが出ている間は、ガイドの指示と食い違わないよう1行の案内を出さない
+            next={tutorialOn ? null : nextStep(run, selection, trial, getCurrentShift(run).quota)}
+            canUndo={canUndo(state)}
+            onUndo={() => dispatch({ type: 'undo' })}
             onTrial={() => startPlayback('startTrial')}
-            onCommit={() => setCommitConfirm(true)}
+            onCommit={() =>
+              // 注意することがない（置き忘れなし・試運転が新しく、どの回もノルマに届いた）なら確認を挟まない。
+              // ランキングに残る週替わりの挑戦は、念のため毎回確認する
+              mode.kind !== 'weekly' &&
+              commitWarnings(run, trial, getCurrentShift(run).quota).length === 0
+                ? startPlayback('startCommit')
+                : setCommitConfirm(true)
+            }
             onSpeedChange={setSpeed}
             guide={
               guideStep === 'trial' || guideStep === 'trialAgain'
@@ -668,6 +835,7 @@ export function App({ start, onTitle }: Props) {
                   : null
             }
           />
+          <div className="layout__info">{notices}</div>
           {/* タブ表示では選択中のパーツの操作をタブの上に出す（何も選んでいなければ出さない） */}
           {tabbed && selectionPanel}
           {tabbed && (
@@ -697,11 +865,22 @@ export function App({ start, onTitle }: Props) {
           {(!tabbed || tab === 'inventory') && inventoryPanel}
           {(!tabbed || tab === 'shop') && shopPanel}
           {debugOpen && <DebugPanel run={run} result={state.lastResult} />}
-          {!tabbed && selectionPanel}
+          {/* 何も選んでいないときは出さない（空の欄で場所をとらない） */}
+          {!tabbed && selection && selectionPanel}
           {/* 売却エリア（盤面のパーツをドラッグして売る）。右の列の下端に固定し、スクロールしても見える */}
           <SellZone dragging={dragging !== null} refund={sellRefund} />
         </aside>
       </main>
     </div>
   );
+}
+
+/** 合体できるパーツのマス（盤面で同じパーツが3つ以上つながっているマス。金色の枠で光らせる） */
+function mergeableCells(run: RunState): number[] {
+  const { width, height } = run.board;
+  const cells: number[] = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) if (mergeCells(run, x, y)) cells.push(y * width + x);
+  }
+  return cells;
 }

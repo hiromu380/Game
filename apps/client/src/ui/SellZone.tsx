@@ -1,6 +1,7 @@
 /**
  * 売却エリア: 盤面のパーツをここへドラッグすると売却する（確認なし）
- * ふだんは小さく案内だけ出し、ドラッグ中は返金額を出して目立たせる。売れないパーツ（スイッチ）はその旨を出す
+ * パーツをドラッグしている間だけ出し、返金額を出す（ふだんは出さない: 一覧の最後の行を隠さないように）。
+ * 売れないパーツ（スイッチ）はその旨を出す
  */
 import { useI18n } from '../i18n';
 import { UiIcon } from './UiIcon';
@@ -14,16 +15,10 @@ interface Props {
 
 export function SellZone({ dragging, refund }: Props) {
   const { t } = useI18n();
-  const label = !dragging
-    ? t('sellZone.idle')
-    : refund === null
-      ? t('sellZone.cannotSell')
-      : t('sellZone.drop', { refund });
+  if (!dragging) return null;
+  const label = refund === null ? t('sellZone.cannotSell') : t('sellZone.drop', { refund });
   return (
-    <div
-      className={`sell-zone ${dragging ? 'is-active' : ''} ${dragging && refund === null ? 'is-disabled' : ''}`}
-      data-drop="sell"
-    >
+    <div className={`sell-zone is-active ${refund === null ? 'is-disabled' : ''}`} data-drop="sell">
       <UiIcon name="sell" />
       <span>{label}</span>
     </div>

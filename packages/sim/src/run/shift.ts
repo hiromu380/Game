@@ -1,28 +1,54 @@
 /**
  * シフトの進行: 試運転・本番・次のシフトへの移行
  */
-import type { ShiftSpec } from '../balance';
+import type { OvershootBonus, ShiftSpec } from '../balance';
 import { getShiftEconomy, getShiftRules } from '../config/bossModifiers';
 import { drawBoss, type EconomyConfig } from '../config/runConfig';
 import { isBlockedCell } from '../floor/layer';
 import { generateStage } from '../floor/stage';
 import { createPrng } from '../core/prng';
 import { getPart, setPart } from '../core/board';
-import { scoreCompare, scoreOf, scoreToString } from '../core/score';
+import { scoreCompare, scoreMul, scoreOf, scoreToString, type Score } from '../core/score';
 import { simulate } from '../simulate/simulate';
 import type { RuleSet, SimResult } from '../types';
 import { applyEventEconomy, applyEventShift, drawDayEvent, isEventPending } from './events';
 import { drawBonusFloor, getCurrentFloor } from './floor';
-import { addInventory } from './inventory';
+import { returnToHand } from './inventory';
+import { expireItems } from './items';
+import { applyRelicShift, drawRelicChoice, isRelicPending } from './relics';
 import { commitSeed, overtimeSeed, shopSeed, stageSeed, trialSeed } from './seeds';
-import { generateShop } from './shop';
+import { generateShop, permitForShift } from './shop';
 import type { CommitResult, RunError, RunState, ShiftOutcome } from './types';
 
-/** 現在のシフトの設定（ノルマ・予算・報酬・種類。今日のイベント込み） */
+/** shiftIndex に入るとき、直前のシフトが夜（ボス）ならレリックの候補を出す */
+function relicChoiceAfter(state: RunState, shiftIndex: number): RunState['relicChoice'] {
+  const previous = state.config.shifts[shiftIndex - 1];
+  if (!state.config.relics || previous?.kind !== 'boss') return null;
+  const day = Math.floor((shiftIndex - 1) / state.config.shiftsPerDay);
+  const choices = drawRelicChoice(state, day);
+  return choices.length > 0 ? { day, choices } : null;
+}
+
+/** レリックを選んだ後の品揃え（選ぶまで買い物はできないので、同じシードで並べ直す） */
+export function regenerateShop(state: RunState): RunState {
+  return {
+    ...state,
+    shop: generateShop(
+      shopSeed(state.seed, state.shiftIndex, state.rerollCount),
+      getCurrentEconomy(state),
+      permitForShift(state.config, state.shiftIndex),
+    ),
+  };
+}
+
+/** 現在のシフトの設定（ノルマ・予算・報酬・種類。今日のイベント・レリック込み） */
 export function getCurrentShift(state: RunState): ShiftSpec {
   const spec = state.config.shifts[state.shiftIndex];
   if (!spec) throw new Error(`Invalid shift index: ${state.shiftIndex}`);
-  return applyEventShift(state, state.shiftIndex, spec);
+  const withEvent = applyEventShift(state, state.shiftIndex, spec);
+  return state.config.relics
+    ? applyRelicShift(withEvent, state.relics ?? [], state.config.relics.params)
+    : withEvent;
 }
 
 export function getShiftCount(state: RunState): number {
@@ -37,7 +63,7 @@ export function getDayAndPeriod(state: RunState, shiftIndex = state.shiftIndex) 
 
 /** 現在のシフトで使うルール（ボス修正込み） */
 export function getCurrentRules(state: RunState): RuleSet {
-  return getShiftRules(state.config, state.shiftIndex);
+  return getShiftRules(state.config, state.shiftIndex, state.relics ?? []);
 }
 
 /** 現在のシフトで使う経済設定（ボス修正・今日のイベント込み） */
@@ -45,7 +71,7 @@ export function getCurrentEconomy(state: RunState): EconomyConfig {
   return applyEventEconomy(
     state,
     state.shiftIndex,
-    getShiftEconomy(state.config, state.shiftIndex),
+    getShiftEconomy(state.config, state.shiftIndex, state.relics ?? []),
   );
 }
 
@@ -74,8 +100,9 @@ export function commitShift(
 ): CommitResult | { error: RunError } {
   if (state.phase !== 'building') return { error: 'notBuilding' };
   if (isEventPending(state)) return { error: 'eventNotChosen' };
+  if (isRelicPending(state)) return { error: 'relicNotChosen' };
 
-  // デイリーは本番シードをサーバーから受け取る（クライアントでは計算できない）
+  // 週替わりは本番シードをサーバーから受け取る（クライアントでは計算できない）
   let seed = options.seed;
   if (seed === undefined) {
     if (state.config.commitSeedMode === 'external') return { error: 'seedRequired' };
@@ -90,10 +117,14 @@ export function commitShift(
   });
   const spec = getCurrentShift(state);
   const cleared = scoreCompare(result.score, scoreOf(spec.quota)) >= 0;
+  const bonus = cleared
+    ? overshootBonus(result.score, spec.quota, state.config.economy.overshoot)
+    : 0;
   const outcome: ShiftOutcome = {
     cleared,
     quota: spec.quota,
     income: result.income,
+    overshootBonus: bonus,
     stats: result.stats,
   };
 
@@ -106,6 +137,7 @@ export function commitShift(
       cleared,
       chainCount: result.stats.chainCount,
       income: result.income,
+      ...(bonus > 0 ? { overshootBonus: bonus } : {}),
       boss: state.config.bossPlan[state.shiftIndex]?.id ?? null,
     },
   ];
@@ -113,7 +145,7 @@ export function commitShift(
   if (!cleared) return { state: { ...state, phase: 'failed', history }, result, outcome };
 
   const nextIndex = state.shiftIndex + 1;
-  const carried = state.budget + spec.clearReward + result.income;
+  const carried = state.budget + spec.clearReward + result.income + bonus;
   if (nextIndex >= getShiftCount(state)) {
     // 延長戦中は次のシフトを作って続ける。本編なら全シフトクリアで終了
     if (state.overtime) {
@@ -124,8 +156,28 @@ export function commitShift(
     return { state: { ...state, phase: 'cleared', history, budget: carried }, result, outcome };
   }
 
-  // 残予算 + 報酬 + 収入 を持ち越して次のシフトへ
+  // 残予算 + 報酬 + 収入 + 超過ボーナス を持ち越して次のシフトへ
   return { state: enterShift({ ...state, history }, nextIndex, carried), result, outcome };
+}
+
+/**
+ * 超過ボーナス: 出荷量がノルマの 10^k 倍以上なら k 桁の超過として、k × perDigit 円（maxDigits 桁まで）。
+ * 設定のないラン（この仕組みより前に始めたセーブ）は 0
+ */
+export function overshootBonus(
+  score: Score,
+  quota: number,
+  bonus: OvershootBonus | undefined,
+): number {
+  if (!bonus || quota <= 0) return 0;
+  let digits = 0;
+  let threshold = scoreOf(quota);
+  while (digits < bonus.maxDigits) {
+    threshold = scoreMul(threshold, 10);
+    if (scoreCompare(score, threshold) < 0) break;
+    digits++;
+  }
+  return digits * bonus.perDigit;
 }
 
 /**
@@ -159,12 +211,21 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     dayEvent: dayStart
       ? drawDayEvent(state, Math.floor(shiftIndex / state.config.shiftsPerDay))
       : (state.dayEvent ?? null),
+    // 夜（ボス）のシフトをクリアした次のシフトは、レリックの候補が出る
+    relicChoice: relicChoiceAfter(state, shiftIndex),
   };
   // ショップは今日のイベント（特売日など）を反映した価格で並べる
   next = {
     ...next,
-    shop: generateShop(shopSeed(state.seed, shiftIndex, 0), getCurrentEconomy(next)),
+    shop: generateShop(
+      shopSeed(state.seed, shiftIndex, 0),
+      getCurrentEconomy(next),
+      permitForShift(state.config, shiftIndex),
+    ),
   };
+
+  // 日が変わったら、使っていない配置権と、配置権で湧いた床を消す
+  next = expireItems(next, shiftIndex);
 
   if (state.config.resetBoardEachDay && dayStart) {
     next = returnAllParts(next);
@@ -178,11 +239,7 @@ export function enterShift(state: RunState, shiftIndex: number, carriedBudget: n
     const y = Math.floor(cell / next.board.width);
     const part = getPart(next.board, x, y);
     if (!part) continue;
-    next = {
-      ...next,
-      board: setPart(next.board, x, y, null),
-      inventory: addInventory(next.inventory, part.id, 1),
-    };
+    next = returnToHand({ ...next, board: setPart(next.board, x, y, null) }, part);
   }
   // シフト開始時のボーナス床（パーツを片付けた後の盤面で、空きマスに湧く）
   return { ...next, bonusFloor: drawBonusFloor(next, shiftIndex) };
@@ -195,15 +252,14 @@ export function isDayStart(state: RunState, shiftIndex: number): boolean {
 
 /** 盤面のパーツをすべて手持ちへ戻す */
 function returnAllParts(state: RunState): RunState {
-  let inventory = state.inventory;
-  for (const part of state.board.cells) {
-    if (part) inventory = addInventory(inventory, part.id, 1);
-  }
-  return {
+  let next: RunState = {
     ...state,
     board: { ...state.board, cells: state.board.cells.map(() => null) },
-    inventory,
   };
+  for (const part of state.board.cells) {
+    if (part) next = returnToHand(next, part);
+  }
+  return next;
 }
 
 /**

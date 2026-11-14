@@ -1,7 +1,7 @@
 /**
- * パーツ20種の画像（64×64・モチーフは中央の約 70% に収める: docs/art-style.md「形と線」）
+ * パーツ28種の画像（64×64・モチーフは中央の約 70% に収める: docs/art-style.md「形と線」）
  *
- * 色は系統色（FAMILY_COLORS）が主。回転して向きを表すパーツ（コンベア・分岐器・散布機）は上向きに描く。
+ * 色は系統色（FAMILY_COLORS）が主。回転して向きを表すパーツ（コンベア・分岐器・散布機など）は上向きに描く。
  * モチーフの案は docs/plans/phase4-plan.md §9「パーツのモチーフ案」。
  */
 import type { PartId } from '@chain-factory/sim';
@@ -301,6 +301,101 @@ const PARTS: Record<PartId, () => string[]> = {
     path('M18 52 v4 M40 52 v4', line(O, 5)),
     circle(24, 40, 4.5, outlined(INK.steelLight, 1.5)),
     path('M22 38 l4 4 M26 38 l-4 4', line(O, 1.5)),
+  ],
+
+  // 曲がりレール: 90度に曲がった1本のレールと、時計回りの矢印（向きは持たない）
+  bend: () => [
+    path('M12 52 V32 Q12 14 30 14 H52', line(O, 12)),
+    path('M12 52 V32 Q12 14 30 14 H52', line(F.retrigger.main, 7)),
+    path('M12 50 V34 Q12 16 30 16', { ...line(F.retrigger.light, 2), opacity: 0.8 }),
+    polygon('58,14 50,7 50,21', outlined(F.retrigger.light, THIN)),
+    path('M30 44 a12 12 0 0 0 12 -12', line(INK.steel, 3)),
+    polygon('45,28 42,36 37,30', outlined(INK.steel, 1.2)),
+  ],
+
+  // 十字分岐器: 中央のハブから4方向へ細い矢印（上向き基準）
+  crossSplitter: () => [
+    ...[0, 90, 180, 270].map((deg) =>
+      group(
+        { transform: rotate(deg) },
+        path('M32 22 V13', line(F.branch.light, 4)),
+        arrowHead(32, 6, 5, F.branch.light),
+      ),
+    ),
+    rect(20, 20, 24, 24, outlined(F.branch.main), 5),
+    rect(20, 34, 24, 10, { fill: shade(F.branch.main) }),
+    rect(20, 20, 24, 24, line(O, 4), 5),
+    path('M27 32 h10 M32 27 v10', line(INK.white, 3)),
+  ],
+
+  // 磁石: U字の磁石と、引き寄せられる線
+  magnet: () => [
+    path('M18 12 V34 a14 14 0 0 0 28 0 V12', line(O, 15)),
+    path('M18 12 V34 a14 14 0 0 0 28 0 V12', line(F.placement.main, 10)),
+    rect(11, 8, 14, 10, outlined(INK.steelLight, THIN), 2),
+    rect(39, 8, 14, 10, outlined(INK.steelLight, THIN), 2),
+    path('M6 28 h5 M53 28 h5 M6 38 h4 M54 38 h4', line(F.placement.light, 2.5)),
+  ],
+
+  // 隅の作業台: L字の作業台（角に置くと強い）と、角の金具
+  cornerBench: () => [
+    path('M10 12 H54 V24 H22 V54 H10 Z', outlined(F.placement.main)),
+    path('M22 24 V54 H10 V40 Z', { fill: shade(F.placement.main) }),
+    path('M10 12 H54 V24 H22 V54 H10 Z', line(O, 4)),
+    path('M10 12 l10 0 l-10 10 Z', outlined(F.hazard.main, THIN)),
+    rect(30, 32, 18, 14, outlined(M.cardboard, THIN), 2),
+    path('M39 32 v6', line(M.cardboardDark, 2)),
+  ],
+
+  // 蓄電器: 2つのセルが並んだ電池と、たまっていく目盛り（上向き基準: 上が出口）
+  capacitor: () => [
+    rect(28, 4, 8, 7, outlined(INK.steelLight, THIN), 2),
+    rect(14, 10, 36, 44, outlined(F.multiplier.main), 6),
+    rect(14, 40, 36, 14, { fill: shade(F.multiplier.main) }),
+    rect(14, 10, 36, 44, line(O, 4), 6),
+    rect(20, 36, 24, 12, outlined(M.sun, THIN), 2),
+    rect(20, 20, 24, 12, { fill: INK.steelDark, stroke: O, 'stroke-width': THIN, rx: 2 }),
+    polygon('34,14 26,29 32,29 29,40 39,24 33,24 36,14', outlined(F.hazard.main, 1.2)),
+  ],
+
+  // 転送装置: 2重の輪のゲートと、渦（向きは持たない）
+  teleporter: () => [
+    el('ellipse', { cx: 32, cy: 46, rx: 22, ry: 8, ...outlined(INK.steelDark) }),
+    el('ellipse', { cx: 32, cy: 30, rx: 18, ry: 22, ...outlined(F.retrigger.main) }),
+    el('ellipse', {
+      cx: 32,
+      cy: 30,
+      rx: 11,
+      ry: 15,
+      fill: '#8fe7ff',
+      stroke: O,
+      'stroke-width': THIN,
+    }),
+    path('M32 20 a6 6 0 1 1 -6 8 a3.5 3.5 0 1 1 3 -4', line(F.retrigger.main, 2.5)),
+    circle(16, 12, 2.5, { fill: '#8fe7ff' }),
+    circle(50, 16, 2, { fill: '#8fe7ff' }),
+  ],
+
+  // ブースター: 噴射口のついたロケットエンジンと「+」（上向き基準）
+  booster: () => [
+    polygon('22,52 32,62 42,52', outlined(M.fire, THIN)),
+    rect(20, 36, 24, 14, outlined(INK.steel), 3),
+    path('M22 20 Q32 2 42 20 V38 H22 Z', outlined(F.multiplier.light)),
+    path('M34 10 Q40 16 42 24 V38 H34 Z', { fill: shade(F.multiplier.light) }),
+    path('M22 20 Q32 2 42 20 V38 H22 Z', line(O, 4)),
+    path('M27 26 h10 M32 21 v10', line(INK.white, 3)),
+  ],
+
+  // 換金機: レジ（キャッシャー）と、出てくる硬貨
+  cashier: () => [
+    rect(10, 26, 44, 26, outlined(F.economy.main), 4),
+    rect(10, 42, 44, 10, { fill: shade(F.economy.main) }),
+    rect(10, 26, 44, 26, line(O, 4), 4),
+    rect(16, 10, 26, 14, outlined(M.solarCell, THIN), 2),
+    path('M20 17 h12', line(M.solarCellLight, 2)),
+    ...[18, 27, 36].map((x) => rect(x, 31, 6, 5, outlined(INK.steelLight, 1.2), 1)),
+    circle(48, 14, 6, outlined(M.coin, THIN)),
+    path('M46 14 h4', line(M.cardboardDark, 1.5)),
   ],
 };
 

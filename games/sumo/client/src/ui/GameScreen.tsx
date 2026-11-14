@@ -1,0 +1,482 @@
+import { useMemo, useEffect, useRef, useState } from 'react';
+import type { SceneAction } from '../art/hakoniwa/grid';
+import {
+  advanceBasho,
+  isBlocked,
+  prepLeft,
+  previewBasho,
+  ranksOf,
+  type GameState,
+  type MidBasho,
+  type Stance,
+} from '@ichimon/sim';
+import { useI18n } from '../i18n';
+import { OyakataPortrait } from '../art/Portraits';
+import { useSettings } from '../settings';
+import { bashoName, money } from '../format';
+import { StableTab } from './StableTab';
+import { DeshiTab } from './DeshiTab';
+import { EventDialogs } from './EventDialogs';
+import { BanzukeTab } from './BanzukeTab';
+import { LedgerTab } from './LedgerTab';
+import { LineageTab } from './LineageTab';
+import { AssociationTab } from './AssociationTab';
+import { TabTip } from './Guide';
+import { withStep } from '../guide';
+import { HighlightDialog } from './HighlightDialog';
+import { bigBouts, highlightsOf, type Highlight } from '../highlights';
+import { TacticDialog } from './TacticDialog';
+import { BigBoutCard } from './BigBoutCard';
+import { JournalTab } from './JournalTab';
+import { ReportDialog } from './ReportDialog';
+import { SuccessorDialog, KakunDialog, TakeOverDialog } from './LineageDialogs';
+import { GameOver } from './GameOver';
+import { MidBashoDialog } from './MidBashoDialog';
+import { TopMenu } from './TopMenu';
+import { DelegateDialog } from './DelegateDialog';
+import { delegate, type DelegateResult } from '../delegate';
+import { rewardsOf, type RewardLine } from '../rewards';
+import { BashoTicker } from './BashoTicker';
+import { BASHO_DAYS, tickerRow } from '../ticker';
+import { targetOf } from '../targets';
+
+type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
+
+/** 部屋の絵で押した所 → 開くタブと、その中の欄 */
+const SCENE_TARGET: Record<SceneAction, [Tab, string | null]> = {
+  ledger: ['ledger', null],
+  staff: ['ledger', 'staff-panel'],
+  stable: ['deshi', null],
+  policy: ['deshi', null],
+  scout: ['stable', 'prep-panel'],
+  banzuke: ['banzuke', null],
+};
+const TABS: Tab[] = ['stable', 'deshi', 'banzuke', 'ledger', 'lineage', 'association', 'journal'];
+
+export function GameScreen({
+  game,
+  setGame,
+  onQuit,
+  onToggleLang,
+}: {
+  game: GameState;
+  setGame: (g: GameState | null) => void;
+  onQuit: () => void;
+  onToggleLang: () => void;
+}) {
+  const { t, lang } = useI18n();
+  const { settings, update } = useSettings();
+  const [tab, setTab] = useState<Tab>('stable');
+  // 手引き: 帳簿を開いたら「帳簿を見る」を済みにする
+  useEffect(() => {
+    if (tab === 'ledger' && !settings.guide.done.includes('ledger'))
+      update({ guide: withStep(settings.guide, 'ledger') });
+  }, [tab, settings.guide, update]);
+  const [showReport, setShowReport] = useState(false);
+  const [highlights, setHighlights] = useState<Highlight[] | null>(null);
+  const [confirmQuit, setConfirmQuit] = useState(false);
+  // 中日（8日目）で止まっている場所（前半の様子）
+  const [mid, setMid] = useState<MidBasho | null>(null);
+  // 任せる（早送り）: 開いているか・任せた結果
+  const [delegateOpen, setDelegateOpen] = useState(false);
+  const [delegated, setDelegated] = useState<DelegateResult | null>(null);
+  // 直前の場所の報酬と罰（場所を進めた直後に作る）
+  const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
+  // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
+  // 後半に大一番（勝ち越しをかけた最後の一番）がある弟子がいれば、その前の日で星取りを止めて作戦を聞き、
+  // その日に大一番を見せてから（結果を知る前に）続きの星取りへ。stops は大一番のある日（早い順）
+  type BigBout = Extract<Highlight, { kind: 'bigBout' }>;
+  type Plan = {
+    reenter: number[];
+    stance: Record<number, Stance>;
+    bouts: BigBout[];
+    stops: number[];
+  };
+  type After =
+    | { kind: 'tactic'; plan: Plan }
+    | { kind: 'bouts'; day: number; stops: number[] }
+    | { kind: 'result' };
+  const [ticker, setTicker] = useState<
+    | { half: 'first'; mid: MidBasho }
+    | { half: 'second'; next: GameState; from: number; to: number; after: After }
+    | null
+  >(null);
+  // 大一番の作戦を聞いている
+  const [tactic, setTactic] = useState<Plan | null>(null);
+  // 大一番をその場で見せている（その日の何番目か）
+  const [live, setLive] = useState<{
+    next: GameState;
+    day: number;
+    stops: number[];
+    index: number;
+  } | null>(null);
+  // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
+  const liveShown = useRef<number | null>(null);
+  const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
+  const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
+  const blocked = isBlocked(game);
+  // 場所前の4週間を終えるまで、本場所へは進めない（1年の早送りはできる）
+  const weeksLeft = prepLeft(game);
+
+  if (game.gameOver) return <GameOver game={game} onNewGame={() => setGame(null)} />;
+
+  // 部屋の絵で押した所の画面へ（タブを替え、その欄まで送る）
+  const goTo = (a: SceneAction) => {
+    const [to, id] = SCENE_TARGET[a];
+    setTab(to);
+    if (id)
+      setTimeout(
+        () => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        60,
+      );
+  };
+
+  const go = (next: GameState) => {
+    setGame(next);
+    if (next.lastReport)
+      setRewards({ bashoIndex: next.lastReport.bashoIndex, lines: rewardsOf(game, next) });
+    const all = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
+    const hl =
+      liveShown.current === next.lastReport?.bashoIndex
+        ? all.filter((h) => h.kind !== 'bigBout')
+        : all;
+    setHighlights(hl.length > 0 ? hl : null);
+    setShowReport(true);
+  };
+
+  /** 後半の星取りの後にすること */
+  const afterTicker = (next: GameState, after: After) => {
+    if (after.kind === 'result') return go(next);
+    if (after.kind === 'tactic') return setTactic(after.plan);
+    setLive({ next, day: after.day, stops: after.stops, index: 0 });
+  };
+  /**
+   * 後半の星取りを from の日から見せ、次の大一番の日（stops の先頭）の前で止める。
+   * 大一番がもうなければ千秋楽まで見せて結果へ。plan があれば、止まったところで作戦を聞く
+   */
+  const showSecond = (next: GameState, from: number, stops: number[], plan?: Plan) => {
+    const day = stops[0];
+    const after: After =
+      day === undefined
+        ? { kind: 'result' }
+        : plan
+          ? { kind: 'tactic', plan }
+          : { kind: 'bouts', day, stops };
+    const to = day === undefined ? BASHO_DAYS : day - 1;
+    if (to >= from) setTicker({ half: 'second', next, from, to, after });
+    else afterTicker(next, after);
+  };
+
+  return (
+    <div className="game">
+      <header className="topbar">
+        <div className="topbar__portrait">
+          <OyakataPortrait o={master} size={52} />
+        </div>
+        <div className="topbar__main">
+          <div className="topbar__basho">{bashoName(t, game.bashoIndex)}</div>
+          <div className="topbar__stable">
+            {t('top.stable', {
+              name: game.stables.find((s) => s.id === game.player.stableId)!.name,
+            })}
+            <span className="topbar__sub">
+              {t('top.oyakata', {
+                name: master.name,
+                age: master.age,
+                generation: game.player.generation,
+              })}
+            </span>
+          </div>
+        </div>
+        <dl className="topbar__stats">
+          <div>
+            <dt>{t('top.stableMoney')}</dt>
+            <dd>{money(t, game.player.stableMoney, lang)}</dd>
+          </div>
+          <div>
+            <dt>{t('top.personalMoney')}</dt>
+            <dd>{money(t, game.player.personalMoney, lang)}</dd>
+          </div>
+          <div>
+            <dt>{t('top.prestige')}</dt>
+            <dd>{Math.round(game.player.prestige)}</dd>
+          </div>
+        </dl>
+        <TopMenu onToggleLang={onToggleLang} onQuit={() => setConfirmQuit(true)} />
+      </header>
+
+      <nav className="tabs" role="tablist">
+        {TABS.map((k) => (
+          <button
+            key={k}
+            role="tab"
+            aria-selected={tab === k}
+            className={`tabs__tab ${tab === k ? 'is-active' : ''}`}
+            onClick={() => setTab(k)}
+          >
+            {t(`tab.${k}`)}
+          </button>
+        ))}
+      </nav>
+
+      <main className="content">
+        <TabTip tab={tab} />
+        {tab === 'stable' && (
+          <StableTab game={game} ranks={ranks} setGame={setGame} onSceneAction={goTo} />
+        )}
+        {tab === 'deshi' && <DeshiTab game={game} ranks={ranks} setGame={setGame} />}
+        {tab === 'banzuke' && <BanzukeTab game={game} ranks={ranks} />}
+        {tab === 'ledger' && <LedgerTab game={game} setGame={setGame} />}
+        {tab === 'lineage' && <LineageTab game={game} />}
+        {tab === 'association' && <AssociationTab game={game} ranks={ranks} />}
+        {tab === 'journal' && <JournalTab game={game} setGame={setGame} />}
+      </main>
+
+      <footer className="actionbar">
+        <span className="actionbar__hint">
+          {game.pending.retireRequests.length > 0
+            ? t('action.hintRetire')
+            : weeksLeft > 0
+              ? t('action.hintPrep', { n: weeksLeft })
+              : t('action.hint')}
+        </span>
+        {game.lastReport && (
+          <button className="button" onClick={() => setShowReport(true)}>
+            {t('action.lastReport')}
+          </button>
+        )}
+        <div className="delegate-menu">
+          <button
+            className="button"
+            disabled={blocked}
+            aria-haspopup="menu"
+            aria-expanded={delegateOpen}
+            onClick={() => setDelegateOpen(!delegateOpen)}
+          >
+            {t('action.delegate')}
+          </button>
+          {delegateOpen && (
+            <div className="topmenu__list delegate-menu__list" role="menu">
+              {([1, 6] as const).map((n) => (
+                <button
+                  key={n}
+                  className="topmenu__item"
+                  role="menuitem"
+                  onClick={() => {
+                    setDelegateOpen(false);
+                    const r = delegate(game, n);
+                    setGame(r.game);
+                    setDelegated(r);
+                  }}
+                >
+                  {t(n === 1 ? 'action.delegate1' : 'action.delegate6')}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <button
+          className="button button--primary"
+          disabled={blocked}
+          onClick={() => {
+            // 場所前の週が残っていれば、場所前のウィンドウへ
+            if (weeksLeft > 0) {
+              setTab('stable');
+              setTimeout(() => {
+                const panel = document.getElementById('prep-panel');
+                panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                panel?.querySelector<HTMLElement>('.prep__cmd:not(:disabled)')?.focus({
+                  preventScroll: true,
+                });
+              }, 60);
+              return;
+            }
+            const m = previewBasho(game);
+            if (m) setTicker({ half: 'first', mid: m });
+            else go(advanceBasho(game));
+          }}
+        >
+          {weeksLeft > 0 ? t('action.toPrep', { n: weeksLeft }) : t('action.basho')}
+        </button>
+      </footer>
+
+      {delegated && (
+        <DelegateDialog game={game} result={delegated} onClose={() => setDelegated(null)} />
+      )}
+      {ticker?.half === 'first' && (
+        <BashoTicker
+          title={t('ticker.first')}
+          rows={ticker.mid.mine.map((m) => ({
+            ...tickerRow(m.id, m.bouts),
+            name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
+            rank: ranks.get(m.id) ?? null,
+            absentFrom: m.out ? (m.injuredDay ?? 0) : undefined,
+            target: targetOf(
+              game,
+              game.rikishi.find((r) => r.id === m.id)!,
+              ranks,
+            )?.target,
+          }))}
+          from={1}
+          to={ticker.mid.day}
+          doneLabel={t('ticker.toMid')}
+          onDone={() => {
+            setMid(ticker.mid);
+            setTicker(null);
+          }}
+        />
+      )}
+      {mid && (
+        <MidBashoDialog
+          game={game}
+          mid={mid}
+          onContinue={(reenter, stance) => {
+            setMid(null);
+            const next = advanceBasho(game, { reenter, stance });
+            // 後半を見せてから結果へ（終わってしまった・結果がないときは、すぐ結果へ）
+            if (!next.lastReport || next.gameOver) return go(next);
+            const from = mid.day + 1;
+            const bouts = bigBouts(next.lastReport).filter((h) => h.bout.day >= from);
+            // 作戦はその一番だけに効くので、大一番の前の日までの星は作戦を選ぶ前と同じ
+            const stops = [...new Set(bouts.map((h) => h.bout.day))].sort((a, b) => a - b);
+            showSecond(
+              next,
+              from,
+              stops,
+              bouts.length > 0 ? { reenter, stance, bouts, stops } : undefined,
+            );
+          }}
+        />
+      )}
+      {ticker?.half === 'second' && ticker.next.lastReport && (
+        <BashoTicker
+          title={t('ticker.second')}
+          rows={ticker.next.lastReport.mine.map((m) => ({
+            ...tickerRow(m.id, m.bouts),
+            name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
+            rank: m.record.rank,
+            // 目標は場所前の番付で見積もる（ここの game はまだ場所前）
+            target: (() => {
+              const r = game.rikishi.find((x) => x.id === m.id);
+              return r ? targetOf(game, r, ranks)?.target : undefined;
+            })(),
+            // 休みのある弟子は、最後の取組の後から休場の札を出す
+            absentFrom:
+              m.record.absences > 0 ? Math.max(0, ...m.bouts.map((b) => b.day)) : undefined,
+          }))}
+          from={ticker.from}
+          to={ticker.to}
+          doneLabel={ticker.after.kind === 'result' ? t('ticker.toResult') : t('ticker.toTactic')}
+          onDone={() => {
+            const { next, after } = ticker;
+            setTicker(null);
+            afterTicker(next, after);
+          }}
+        />
+      )}
+      {tactic && (
+        <TacticDialog
+          game={game}
+          bouts={tactic.bouts}
+          onGo={(chosen) => {
+            const plan = tactic;
+            setTactic(null);
+            const next = advanceBasho(game, {
+              reenter: plan.reenter,
+              stance: plan.stance,
+              tactic: chosen,
+            });
+            if (!next.lastReport || next.gameOver) return go(next);
+            // 作戦で大一番の勝ち負けが変わると、その後の割も変わりうるので、大一番の日を数え直す
+            const first = plan.stops[0]!;
+            const stops = [
+              ...new Set(
+                bigBouts(next.lastReport)
+                  .map((h) => h.bout.day)
+                  .filter((d) => d >= first),
+              ),
+            ].sort((a, b) => a - b);
+            liveShown.current = next.lastReport.bashoIndex;
+            if (stops.length === 0) showSecond(next, first, []);
+            else setLive({ next, day: stops[0]!, stops, index: 0 });
+          }}
+        />
+      )}
+      {live &&
+        live.next.lastReport &&
+        (() => {
+          const report = live.next.lastReport;
+          const today = bigBouts(report).filter((h) => h.bout.day === live.day);
+          const h = today[live.index];
+          // その日の大一番を見せ終えたら、次の大一番の前（なければ千秋楽）まで星取りを続ける
+          const done = () => {
+            if (live.index + 1 < today.length) return setLive({ ...live, index: live.index + 1 });
+            setLive(null);
+            showSecond(live.next, live.day, live.stops.slice(1));
+          };
+          // stops はこの結果から数えたので、その日の大一番は必ずある
+          if (!h) return null;
+          return (
+            <BigBoutCard
+              key={`${live.day}:${live.index}`}
+              game={game}
+              report={report}
+              h={h}
+              counter=""
+              last={false}
+              nextLabel={t('ticker.continue')}
+              onNext={done}
+            />
+          );
+        })()}
+      {/* 返事が要るもの: ほかの窓が閉じているときに1件ずつ */}
+      {!ticker &&
+        !mid &&
+        !tactic &&
+        !live &&
+        !highlights &&
+        !(showReport && game.lastReport) &&
+        !delegated &&
+        !delegateOpen &&
+        !blocked && <EventDialogs game={game} ranks={ranks} setGame={setGame} />}
+      {highlights && game.lastReport && !blocked && (
+        <HighlightDialog
+          game={game}
+          report={game.lastReport}
+          highlights={highlights}
+          setGame={setGame}
+          onDone={() => setHighlights(null)}
+        />
+      )}
+      {!highlights && showReport && game.lastReport && !blocked && (
+        <ReportDialog
+          game={game}
+          report={game.lastReport}
+          rewards={rewards?.bashoIndex === game.lastReport.bashoIndex ? rewards.lines : null}
+          onClose={() => setShowReport(false)}
+        />
+      )}
+      {game.pending.successor && <SuccessorDialog game={game} setGame={setGame} />}
+      {game.pending.takeOver && <TakeOverDialog game={game} setGame={setGame} />}
+      {!game.pending.successor && !game.pending.takeOver && game.pending.kakun && (
+        <KakunDialog game={game} setGame={setGame} />
+      )}
+      {confirmQuit && (
+        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="quit-title">
+          <div className="modal__box">
+            <h2 id="quit-title">{t('quit.title')}</h2>
+            <p>{t('quit.body')}</p>
+            <div className="modal__actions">
+              <button className="button" data-dismiss onClick={() => setConfirmQuit(false)}>
+                {t('common.cancel')}
+              </button>
+              <button className="button button--danger" onClick={onQuit}>
+                {t('quit.confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

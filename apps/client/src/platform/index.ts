@@ -22,6 +22,9 @@ export interface Platform {
   showKeyboard(rect: ScreenRect): Promise<boolean>;
   /** 同じ PC の体験版のセーブ（デスクトップの製品版だけ。ほかは null） */
   readDemoSave(): Promise<string | null>;
+  /** ウィンドウの全画面（デスクトップ版だけ。Web 版はブラウザに任せるので null） */
+  getFullscreen(): Promise<boolean | null>;
+  setFullscreen(on: boolean): Promise<boolean | null>;
 }
 
 const webPlatform: Platform = {
@@ -38,6 +41,8 @@ const webPlatform: Platform = {
   },
   showKeyboard: async () => false,
   readDemoSave: async () => null,
+  getFullscreen: async () => null,
+  setFullscreen: async () => null,
 };
 
 function desktopPlatform(): Platform | null {
@@ -55,6 +60,8 @@ function desktopPlatform(): Platform | null {
     openExternal: (url) => bridge.openExternal(url),
     showKeyboard: (rect) => bridge.showKeyboard(rect),
     readDemoSave: () => (EDITION === 'demo' ? Promise.resolve(null) : bridge.readDemoSave()),
+    getFullscreen: () => bridge.getFullscreen(),
+    setFullscreen: (on) => bridge.setFullscreen(on),
   };
 }
 

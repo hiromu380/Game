@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "viewBox": "-70 -200 190 210",
+  "parts": [
+    {
+      "id": "base",
+      "parent": "root",
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 1,
+      "box": [
+        -42,
+        -24,
+        84,
+        30
+      ],
+      "files": {
+        "default": "parts/base-default.svg"
+      }
+    },
+    {
+      "id": "mast",
+      "parent": "root",
+      "pivot": [
+        0,
+        -14
+      ],
+      "z": 2,
+      "box": [
+        -16,
+        -108,
+        32,
+        112
+      ],
+      "files": {
+        "default": "parts/mast-default.svg"
+      }
+    },
+    {
+      "id": "cab",
+      "parent": "mast",
+      "pivot": [
+        0,
+        -104
+      ],
+      "z": 4,
+      "box": [
+        -34,
+        -48,
+        68,
+        52
+      ],
+      "files": {
+        "stern": "parts/cab-stern.svg",
+        "soft": "parts/cab-soft.svg",
+        "surprised": "parts/cab-surprised.svg"
+      }
+    },
+    {
+      "id": "hat",
+      "parent": "cab",
+      "pivot": [
+        0,
+        -44
+      ],
+      "z": 5,
+      "box": [
+        -36,
+        -24,
+        72,
+        30
+      ],
+      "files": {
+        "default": "parts/hat-default.svg"
+      }
+    },
+    {
+      "id": "jib",
+      "parent": "cab",
+      "pivot": [
+        26,
+        -24
+      ],
+      "z": 3,
+      "box": [
+        -8,
+        -10,
+        90,
+        20
+      ],
+      "files": {
+        "default": "parts/jib-default.svg"
+      }
+    },
+    {
+      "id": "hook",
+      "parent": "jib",
+      "pivot": [
+        72,
+        6
+      ],
+      "z": 3,
+      "box": [
+        -20,
+        -4,
+        40,
+        58
+      ],
+      "files": {
+        "open": "parts/hook-open.svg",
+        "hold": "parts/hook-hold.svg"
+      }
+    },
+    {
+      "id": "fx",
+      "parent": "cab",
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 6,
+      "box": [
+        -58,
+        -62,
+        116,
+        50
+      ],
+      "files": {
+        "nod": "parts/fx-nod.svg",
+        "shake": "parts/fx-shake.svg",
+        "steam": "parts/fx-steam.svg"
+      }
+    }
+  ],
+  "poses": {
+    "neutral": {
+      "variants": {
+        "cab": "stern"
+      },
+      "angles": {
+        "hook": 0
+      }
+    },
+    "point": {
+      "angles": {
+        "jib": 32,
+        "cab": 4,
+        "hook": -36
+      },
+      "variants": {
+        "cab": "stern"
+      }
+    },
+    "shake": {
+      "angles": {
+        "cab": -12,
+        "jib": 8,
+        "hook": 4
+      },
+      "variants": {
+        "cab": "stern",
+        "fx": "shake"
+      }
+    },
+    "nod": {
+      "offsets": {
+        "cab": [
+          0,
+          6
+        ]
+      },
+      "angles": {
+        "cab": 6,
+        "hook": -6
+      },
+      "variants": {
+        "cab": "stern",
+        "fx": "nod"
+      }
+    },
+    "offer": {
+      "angles": {
+        "jib": 50,
+        "hook": -50
+      },
+      "variants": {
+        "cab": "stern",
+        "hook": "hold"
+      }
+    },
+    "fold": {
+      "angles": {
+        "jib": 155,
+        "hook": -150,
+        "cab": 3
+      },
+      "variants": {
+        "cab": "stern",
+        "fx": "steam"
+      },
+      "z": {
+        "jib": 5,
+        "hook": 5
+      }
+    },
+    "tip": {
+      "offsets": {
+        "hat": [
+          0,
+          -14
+        ]
+      },
+      "angles": {
+        "hat": -12,
+        "jib": -20,
+        "hook": 20
+      },
+      "variants": {
+        "cab": "soft"
+      }
+    },
+    "gaze": {
+      "angles": {
+        "cab": 9,
+        "jib": 24,
+        "hook": -33
+      },
+      "variants": {
+        "cab": "soft"
+      }
+    },
+    "surprised": {
+      "offsets": {
+        "cab": [
+          0,
+          -4
+        ]
+      },
+      "angles": {
+        "jib": -35,
+        "hook": 35
+      },
+      "variants": {
+        "cab": "surprised"
+      }
+    }
+  }
+}

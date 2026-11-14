@@ -1,7 +1,7 @@
 /**
  * 通常ランの結果のシェア（結果画面・撮影モード）: 盤面の縮小図つきのカードと、投稿の本文
  */
-import { getTotalShipped, scoreToString, type RunState } from '@chain-factory/sim';
+import { getTotalShipped, isUnmeasurable, scoreToString, type RunState } from '@chain-factory/sim';
 import { useMemo } from 'react';
 import { shareUrl } from '../../config/share';
 import { useI18n, type ScoreFormatter, type TranslateFn } from '../../i18n';
@@ -35,13 +35,21 @@ export function buildRunShare(t: TranslateFn, formatScore: ScoreFormatter, run: 
     results: null,
     url: shareUrl(),
   };
-  const text = buildRunShareText(t, { result, score, shift: run.history.length });
+  const text = buildRunShareText(t, {
+    result,
+    score,
+    shift: run.history.length,
+    unmeasurable: run.history.some((r) => isUnmeasurable(r.score)),
+  });
   return { card, text };
 }
 
 export function RunShare({ run }: { run: RunState }) {
-  const { t, formatScore } = useI18n();
-  const { card, text } = useMemo(() => buildRunShare(t, formatScore, run), [t, formatScore, run]);
+  const { t, formatMeasured } = useI18n();
+  const { card, text } = useMemo(
+    () => buildRunShare(t, formatMeasured, run),
+    [t, formatMeasured, run],
+  );
   return (
     <ShareCardPanel card={card} text={text} url={shareUrl()} fileName="chain-factory-result" />
   );

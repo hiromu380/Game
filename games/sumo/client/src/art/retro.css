@@ -1,0 +1,1240 @@
+/*
+ * 昔のゲームの画面: ドットのフォント・角ばった太い枠のウィンドウ・ずらした影・コマンド風のタブとボタン。
+ * styles.css の後に読み込み、形と配色を上書きする。色は palette.ts の CSS 変数だけを使う。docs/art-style.md「昔のゲームの画面」
+ */
+@font-face {
+  font-family: 'DotGothic16';
+  src: url('../assets/fonts/dotgothic16-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-head: 'DotGothic16', 'MS Gothic', 'Osaka-Mono', monospace;
+  --font-body: 'DotGothic16', 'MS Gothic', 'Osaka-Mono', monospace;
+  --radius: 0px;
+  --print: 4px 4px 0;
+  --pad: 20px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  /* ドットの字は太らせない・にじませない */
+  font-synthesis: none;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+h1,
+h2,
+h3,
+strong,
+b,
+th {
+  font-weight: 400;
+}
+
+/* 背景: 紺の地に、2ドットの市松 */
+body {
+  background-color: var(--night);
+  background-image:
+    linear-gradient(
+      45deg,
+      var(--night-2) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--night-2) 75%
+    ),
+    linear-gradient(45deg, var(--night-2) 25%, transparent 25%, transparent 75%, var(--night-2) 75%);
+  background-size: 4px 4px;
+  background-position:
+    0 0,
+    2px 2px;
+}
+
+/* ウィンドウ: 墨の太い枠の内側に、もう1本の線。影は右下へずらす */
+.panel,
+.modal__box,
+.talk,
+.goals-card,
+.tabtip,
+.newgame {
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 4px var(--line),
+    5px 5px 0 var(--ink);
+}
+.panel {
+  padding: var(--pad);
+}
+/* 題字の帯 */
+.panel > h2 {
+  margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 14px;
+  padding: 6px 12px;
+  background: var(--ai);
+  color: var(--white);
+  border-bottom: 3px solid var(--ink);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+.panel > h2::before {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  background: var(--odo);
+  transform: none;
+}
+.panel > h2 .tag {
+  background: var(--card);
+}
+.panel--alert > h2 {
+  background: var(--shu);
+}
+.modal__box > h2 {
+  border-bottom: 3px solid var(--ink);
+  letter-spacing: 0.08em;
+}
+.goals-card {
+  border-left-width: 3px;
+}
+.talk {
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 4px var(--line),
+    5px 5px 0 var(--ink);
+}
+
+/* 上の帯とタブ: 黒い帯に、選んだ項目を反転して見せる */
+.topbar {
+  background: var(--ink);
+  border-bottom: 3px solid var(--odo);
+  padding-block: 12px;
+}
+.topbar__portrait {
+  border-color: var(--odo);
+}
+.tabs {
+  gap: 0;
+  background: var(--ink);
+  border-bottom: 3px solid var(--ink);
+}
+.tabs__tab {
+  min-height: 48px;
+  padding: 0 20px;
+  border-bottom: 0;
+  color: var(--paper-2);
+}
+.tabs__tab:hover {
+  color: var(--white);
+}
+.tabs__tab.is-active {
+  background: var(--card);
+  color: var(--ink);
+}
+.tabs__tab.is-active::before {
+  content: '▶';
+  margin-right: 6px;
+  color: var(--shu);
+}
+
+/* ボタン: 太い枠と下の段。指したら反転 */
+.button {
+  border: 2px solid var(--ink);
+  box-shadow:
+    inset -2px -2px 0 var(--line),
+    0 3px 0 var(--ink);
+  transition: none;
+  font-weight: 400;
+}
+.button:hover:not(:disabled) {
+  background-color: var(--ink);
+  color: var(--card);
+  box-shadow: 0 3px 0 var(--ink);
+}
+.button--primary {
+  box-shadow:
+    inset -2px -2px 0 var(--ink-2),
+    0 3px 0 var(--ink);
+}
+.button--ghost {
+  box-shadow: none;
+}
+.topbar .button--ghost:hover:not(:disabled) {
+  background-color: var(--card);
+  color: var(--ink);
+}
+.policy__btn,
+.segmented__btn,
+.chip,
+.choice__item {
+  border: 2px solid var(--ink);
+  font-weight: 400;
+}
+.policy__btn.is-selected,
+.segmented__btn.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--card);
+  font-weight: 400;
+}
+.policy__btn.is-selected::before,
+.segmented__btn.is-active::before {
+  content: '▶';
+  margin-right: 4px;
+  color: var(--odo);
+}
+.policy__btn--hard.is-selected {
+  background: var(--shu);
+  border-color: var(--ink);
+}
+.policy__btn:hover:not(.is-selected):not(:disabled),
+.segmented__btn:hover:not(.is-active) {
+  background: var(--odo-light);
+}
+.tag {
+  border-width: 2px;
+  padding: 0 6px;
+}
+.bar {
+  height: 8px;
+  border: 1px solid var(--ink);
+}
+.card {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.callout {
+  border-width: 2px;
+  border-left-width: 6px;
+  font-weight: 400;
+}
+
+/* 下の帯（コマンド） */
+.actionbar {
+  background: var(--ink);
+  border-top: 3px solid var(--odo);
+}
+.actionbar__hint {
+  color: var(--paper);
+}
+
+/* ウィンドウの外（紺の地）に直に出る字 */
+.stack > .note,
+.scene-box > .note {
+  color: var(--paper-2);
+}
+.hakoniwa__stage,
+.title-scene {
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.title-scene .hakoniwa__stage {
+  border: 0;
+  box-shadow: none;
+}
+
+/* 表紙 */
+.newgame {
+  margin-block: 24px;
+}
+.newgame__title {
+  letter-spacing: 0.1em;
+  /* 細いドットの字を、ずらして重ねて太らせる。金の影を落とす */
+  text-shadow:
+    3px 0 0 var(--ink),
+    0 3px 0 var(--ink),
+    3px 3px 0 var(--ink),
+    7px 7px 0 var(--odo);
+}
+.newgame__seal {
+  text-shadow: none;
+}
+.choice__item.is-selected {
+  background: var(--ink);
+  color: var(--card);
+}
+.choice__item.is-selected .choice__desc,
+.choice__item.is-selected .choice__number {
+  color: var(--paper-2);
+}
+
+/* 小さな字は、ドットがつぶれない大きさまで */
+.note,
+.card__meta,
+.topbar__stats dt,
+.policy__label {
+  font-size: 0.875rem;
+}
+
+/* 説明を出さない（既定）: 「？」で出す。docs/art-style.md */
+:root[data-help='off'] .note,
+:root[data-help='off'] .tabtip,
+:root[data-help='off'] .guide,
+:root[data-help='off'] .choice__help,
+:root[data-help='off'] .hurt__note,
+:root[data-help='off'] .newgame__picture figcaption {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --pad: 14px;
+  }
+  .tabs__tab {
+    padding: 0 12px;
+  }
+}
+
+/* 場所前の4週間: コマンドのウィンドウ */
+.panel > h2 .prep__weeks {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 4px;
+}
+.prep__pip {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--white);
+}
+.prep__pip.is-done {
+  background: var(--odo);
+  border-color: var(--odo);
+}
+.prep__pip.is-now {
+  background: var(--white);
+}
+.prep__body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.prep__menu,
+.prep__pick {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.prep__week {
+  margin: 0 0 2px;
+  font-size: 0.875rem;
+  color: var(--ai);
+}
+.prep__cmd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  align-items: baseline;
+  min-height: 44px;
+  padding: 6px 10px 6px 26px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+.prep__cmd:hover:not(:disabled)::before,
+.prep__cmd:focus-visible::before,
+.prep__cmd.is-selected::before {
+  content: '▶';
+  position: absolute;
+  left: 8px;
+  color: var(--shu);
+}
+.prep__cmd.is-selected {
+  background: var(--ink);
+  color: var(--card);
+}
+.prep__cmd.is-selected::before {
+  color: var(--odo);
+}
+.prep__cmd:disabled {
+  color: var(--muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.prep__cost {
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+.prep__rank {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  min-width: 7em;
+}
+.prep__cmd.is-selected .prep__rank,
+.prep__cmd.is-selected .prep__sub {
+  color: var(--paper-2);
+}
+.prep__sub {
+  flex-basis: 100%;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.prep__name + .prep__sub {
+  flex-basis: auto;
+  margin-left: auto;
+}
+.prep__done {
+  margin: 0;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  background: var(--odo-light);
+}
+.prep__log {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.prep__log li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+.prep__log li.is-hurt {
+  color: var(--shu);
+}
+.prep__logweek {
+  color: var(--ai);
+}
+.prep__logtext {
+  color: var(--ink-2);
+}
+.prep__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+@media (max-width: 640px) {
+  .prep__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .prep__menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .prep__menu .prep__week {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ダイアログを開いている間は、後ろをスクロールさせない。箱にフォーカスが来ても枠は出さない */
+body.has-modal {
+  overflow: hidden;
+}
+.modal__box:focus {
+  outline: none;
+}
+
+/* 上の帯のメニュー */
+.topmenu {
+  position: relative;
+  margin-left: auto;
+}
+.topmenu__toggle::before {
+  content: '≡';
+  margin-right: 6px;
+}
+.topmenu__list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  min-width: 200px;
+  display: grid;
+  padding: 6px;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  box-shadow:
+    inset 0 0 0 2px var(--card),
+    inset 0 0 0 4px var(--line),
+    5px 5px 0 var(--ink);
+}
+.topmenu__item {
+  position: relative;
+  min-height: 44px;
+  padding: 0 12px 0 26px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.topmenu__item:hover::before,
+.topmenu__item:focus-visible::before {
+  content: '▶';
+  position: absolute;
+  left: 8px;
+  color: var(--shu);
+}
+.topmenu__item:last-child {
+  border-top: 1px solid var(--line);
+  color: var(--shu);
+}
+/* 場所前: 弟子の疲れ（コマンドを選ぶ前の右側） */
+.prep__roster ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.prep__roster li {
+  display: grid;
+  grid-template-columns: 8em minmax(0, 1fr) auto minmax(80px, 160px);
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+}
+.prep__roster .tag {
+  justify-self: start;
+  margin: 0;
+}
+.prep__roster .prep__name .tag {
+  margin-left: 6px;
+}
+.prep__fatigue .bar {
+  display: block;
+}
+@media (max-width: 640px) {
+  .prep__roster {
+    display: none;
+  }
+  .topbar__main {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .topbar {
+    padding-block: 8px;
+  }
+  .topbar__stats {
+    order: 3;
+  }
+  .topmenu {
+    order: 2;
+  }
+  .prep__cmd {
+    flex-wrap: nowrap;
+    padding-right: 6px;
+  }
+  .prep__menu .prep__cost {
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+}
+
+/* 場所前: 指しているコマンドの1行の説明 */
+.prep__help {
+  grid-column: 1 / -1;
+  margin: 4px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  min-height: 2.6em;
+}
+
+/* 箱庭: 週の行動で伸びた量が、頭の上に浮かんで消える */
+.hakoniwa__pop {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 0 4px;
+  background: var(--ink);
+  color: var(--odo-light);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+  animation: pop-rise 1.8s steps(9) forwards;
+}
+.hakoniwa__pop.is-hurt {
+  background: var(--shu);
+  color: var(--white);
+}
+/* 壁を破った: 金の地に墨の字。長めに残す */
+.hakoniwa__pop.is-wall {
+  background: var(--gold-bg);
+  color: var(--ink);
+  border: 2px solid var(--gold);
+  animation-duration: 2.4s;
+}
+@keyframes pop-rise {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -60%);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -160%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -180%);
+  }
+}
+
+/* 星取り: 勝ち越しが決まった行を光らせる */
+.ticker__row.is-kk {
+  animation: kk-flash 0.9s steps(3) 1;
+}
+@keyframes kk-flash {
+  0%,
+  100% {
+    background: transparent;
+  }
+  50% {
+    background: var(--odo-light);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hakoniwa__pop {
+    animation: pop-fade 1.8s forwards;
+  }
+  .ticker__row.is-kk {
+    animation: none;
+    background: var(--odo-light);
+  }
+}
+@keyframes pop-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 場所前: 先週の行動で伸びた量（入った週だけ光る） */
+.prep__gain {
+  min-width: 5.5em;
+  text-align: right;
+  font-size: 0.875rem;
+  color: var(--good);
+}
+.prep__gain.is-hurt {
+  color: var(--shu);
+}
+.prep__gain.is-wall {
+  color: var(--ink);
+  background: var(--gold-bg);
+}
+/* 素質の壁に当たっている印 */
+.tag--wall {
+  border-color: var(--gold);
+  background: var(--gold-bg);
+  color: var(--ink);
+}
+.prep__gain.is-new {
+  animation: gain-in 0.6s steps(3) 1;
+}
+@keyframes gain-in {
+  0% {
+    background: var(--odo-light);
+    transform: translateY(-4px);
+  }
+  100% {
+    background: transparent;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prep__gain.is-new {
+    animation: none;
+  }
+}
+
+/* 弟子の近い目標 */
+.target {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: baseline;
+  font-size: 0.875rem;
+}
+.target__label {
+  padding: 0 4px;
+  background: var(--ai);
+  color: var(--white);
+}
+.target__text {
+  color: var(--ink);
+}
+.target__danger {
+  margin-left: 0;
+}
+.ticker__goal {
+  font-size: 0.875rem;
+  color: var(--ai);
+}
+
+/* 場所前: けがの確率（危ない行動の印） */
+.prep__risk {
+  margin-left: 8px;
+  padding: 0 4px;
+  border: 2px solid var(--shu);
+  color: var(--shu);
+  white-space: nowrap;
+}
+
+/* 任せる（早送り）: 下の帯から上へ開く小さなメニューと、任せた間の出来事 */
+.delegate-menu {
+  position: relative;
+  display: flex;
+}
+.delegate-menu > .button {
+  flex: 1 1 auto;
+}
+.delegate-menu__list {
+  top: auto;
+  bottom: calc(100% + 6px);
+  right: auto;
+  left: 0;
+  min-width: 180px;
+}
+.delegate__list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.delegate__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+.delegate__basho {
+  min-width: 9em;
+  color: var(--ai);
+}
+.delegate__row .tag {
+  margin-left: 0;
+}
+@media (max-width: 640px) {
+  .delegate-menu {
+    flex: 1 1 0;
+  }
+}
+
+/* 経営: この場所の見込み */
+.outlook {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  align-items: baseline;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.outlook__label {
+  color: var(--ai);
+}
+.outlook__runway {
+  margin-left: 0;
+}
+.outlook__heads {
+  color: var(--shu);
+}
+.candidates__yen {
+  margin-left: 12px;
+  color: var(--good);
+}
+.candidates__yen.down {
+  color: var(--shu);
+}
+.target__yen {
+  color: var(--good);
+}
+
+/* 経営: 報酬と罰 */
+.rewards {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.rewards__line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 8px;
+  border-left: 6px solid var(--good);
+  background: var(--paper);
+}
+.rewards__line.is-bad {
+  border-left-color: var(--shu);
+}
+.rewards__mark {
+  color: var(--good);
+}
+.rewards__line.is-bad .rewards__mark {
+  color: var(--shu);
+}
+.rewards__none {
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+/* 大一番の作戦: 相手と型を1行、作戦の4つの札を1行 */
+.tactic__vs {
+  flex-basis: 100%;
+  color: var(--ink-2);
+}
+.tactic__row .mid__stance {
+  flex-basis: 100%;
+}
+
+/* 場所前: 選んだ行動を「決定」で行う（押し間違えないように） */
+.prep__confirmtext {
+  margin: 4px 0 12px;
+  font-size: 1.125rem;
+}
+.prep__confirmbtns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.prep__confirmbtns .button {
+  min-height: 44px;
+  min-width: 6em;
+}
+
+/* 部屋: 箱庭とコマンド窓。広い画面では横に並べ、狭い画面では縦に（1画面に収める） */
+.room__main {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .room__main {
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  }
+}
+.room__main > .panel {
+  margin: 0;
+}
+
+/* コマンド窓: コマンドは2列。相手選び・確かめは、コマンドの代わりに同じ場所へ出す */
+.prep__menu {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.prep__pick {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.prep__weeknow {
+  margin-left: 12px;
+  font-size: 0.875rem;
+}
+/* 1行の知らせ（昔のゲームのメッセージ窓） */
+.prep__help {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--odo-light);
+  min-height: 3em;
+}
+.prep__help.is-hurt {
+  color: var(--shu-light);
+}
+.prep__help .prep__risk {
+  color: var(--shu-light);
+  border-color: var(--shu-light);
+}
+.prep__foot {
+  margin-top: 8px;
+}
+.prep__pick .prep__confirmbtns {
+  margin-top: 6px;
+}
+
+/* 弟子: 1人1行の一覧（押すとカード） */
+.deshi__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.deshi__row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 8em minmax(0, 1fr) 96px;
+  grid-template-areas:
+    'rank name fat'
+    'rank sub goal';
+  gap: 2px 10px;
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 10px 6px 26px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+.deshi__row:hover,
+.deshi__row:focus-visible {
+  background: var(--odo-light);
+}
+.deshi__row:hover::before,
+.deshi__row:focus-visible::before {
+  content: '▶';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: var(--shu);
+}
+.deshi__rank {
+  grid-area: rank;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.deshi__name {
+  grid-area: name;
+}
+.deshi__name .tag {
+  margin-left: 6px;
+}
+.deshi__sub {
+  grid-area: sub;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+.deshi__goal {
+  grid-area: goal;
+  font-size: 0.8125rem;
+  color: var(--ai);
+  text-align: right;
+}
+.deshi__fatigue {
+  grid-area: fat;
+}
+.deshi__fatigue .bar {
+  display: block;
+}
+@media (max-width: 640px) {
+  .deshi__row {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-areas:
+      'rank fat'
+      'name name'
+      'sub goal';
+  }
+}
+.deshi__sheet {
+  max-width: 640px;
+}
+.deshi__sheet .rikishi-list {
+  margin: 0;
+}
+
+/* 返事が要るものの窓 */
+.event-box > .panel {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.event-box__count {
+  margin-left: 8px;
+  font-size: 0.875rem;
+}
+
+/* 狭い画面: 部屋タブを1画面に収める（上の帯・タブ・下の帯を詰め、目標は1行、絵の切り替えは絵に重ねる） */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-block: 6px;
+  }
+  .topbar__portrait {
+    display: none;
+  }
+  .topbar__basho {
+    font-size: 0.75rem;
+  }
+  .topbar__stable {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .topbar__sub {
+    display: none;
+  }
+  .topbar__stats {
+    order: 0;
+    gap: 10px;
+  }
+  .topbar__stats dt {
+    font-size: 0.6875rem;
+  }
+  .topbar__stats dd {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .topbar__stats > div:last-child {
+    display: none;
+  }
+  .topmenu {
+    order: 0;
+  }
+  .topmenu > .button {
+    min-width: 44px;
+    padding-inline: 8px;
+  }
+  .tabs__tab {
+    padding: 0 9px;
+    min-height: 40px;
+  }
+  .actionbar {
+    padding-top: 8px;
+  }
+  .actionbar__hint {
+    display: none;
+  }
+  .goals-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 6px 10px;
+  }
+  .goals-card__label {
+    display: none;
+  }
+  .goals-card__head {
+    order: 2;
+  }
+  .goals-card__name {
+    font-size: 1rem;
+  }
+  .goals-card .note {
+    grid-column: 1 / -1;
+  }
+  .scene-box {
+    position: relative;
+    gap: 4px;
+  }
+  .scene-box__tabs {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 4;
+  }
+  .hakoniwa__actions {
+    display: none;
+  }
+  .prep .outlook {
+    gap: 0 10px;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+  }
+  .prep .outlook__label {
+    display: none;
+  }
+  .prep__menu {
+    padding: 4px;
+    gap: 0;
+  }
+  .stack.room {
+    gap: 10px;
+  }
+}
+@media (max-width: 640px) {
+  .topbar__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .topbar__stable {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar__stats {
+    flex: 0 0 auto;
+  }
+  /* メニューは「≡」だけ（名前は読み上げに残る） */
+  .topmenu__toggle {
+    font-size: 0;
+    min-height: 40px;
+  }
+  .topmenu__toggle::before {
+    font-size: 1.25rem;
+    margin-right: 0;
+  }
+  /* 箱庭（稽古場）は少し小さく、真ん中に */
+  .scene-box .hakoniwa {
+    max-width: 300px;
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+/* 狭い画面の上の帯: 1行目に場所と部屋・メニュー、2行目にお金（字は小さく横に） */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .topbar__main {
+    flex: 1 1 0;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .topmenu {
+    order: 1;
+  }
+  .topbar__stats {
+    order: 2;
+    flex: 1 0 100%;
+    gap: 14px;
+  }
+  .topbar__stats > div {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .topbar__stats > div:last-child {
+    display: flex;
+  }
+}
+/* コマンド窓の題字の帯: 「残りはいつも通り」 */
+.prep__fillbtn {
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 2px solid var(--white);
+  background: transparent;
+  color: var(--white);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.prep__fillbtn:hover,
+.prep__fillbtn:focus-visible {
+  background: var(--white);
+  color: var(--ai);
+}
+.panel > h2 .prep__fillbtn + .prep__weeks {
+  margin-left: 10px;
+}
+@media (max-width: 640px) {
+  .prep__weeknow {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .prep__menu .prep__cmd {
+    min-height: 44px;
+    padding-block: 2px;
+  }
+  .panel.prep > h2 {
+    padding-block: 4px;
+  }
+  .actionbar {
+    padding-bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) + 6px));
+  }
+}
+@media (max-width: 640px) {
+  .prep__menu .prep__cmd {
+    padding-left: 22px;
+    padding-right: 4px;
+    gap: 4px;
+    justify-content: space-between;
+  }
+  .prep__menu .prep__cmd > span:first-child {
+    white-space: nowrap;
+  }
+  .prep__menu .prep__cost {
+    font-size: 0.6875rem;
+  }
+  .content {
+    padding-top: 10px;
+  }
+}
+/* コマンドの名前と費用は1行に */
+.prep__menu .prep__cmd {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.prep__menu .prep__cmd > span:first-child {
+  white-space: nowrap;
+}
+/* 口座で足りない分は貯金から（確かめのときに添える） */
+.prep__savings,
+.button__sub {
+  margin: -6px 0 10px;
+  font-size: 0.8125rem;
+  color: var(--ai);
+}
+.button__sub {
+  display: block;
+  margin: 2px 0 0;
+  color: inherit;
+}
+
+/* 部屋の中: 部屋の名前と ◀ ▶（絵の右上に重ねる） */
+.scene-box {
+  position: relative;
+}
+.scene-box__room {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 4;
+  display: flex;
+  align-items: stretch;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+.scene-box__room .segmented__btn {
+  min-width: 44px;
+  min-height: 40px;
+  border: 0;
+}
+.scene-box__roomname {
+  display: grid;
+  place-items: center;
+  min-width: 7em;
+  padding: 0 6px;
+  font-size: 0.875rem;
+}
+
+/* 返事が要るものの窓の挿絵（部屋の中の絵） */
+.event-box__pic {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 8px;
+  image-rendering: pixelated;
+  background: var(--night);
+  border: 2px solid var(--ink);
+}
+@media (max-width: 640px) {
+  .event-box__pic {
+    max-height: 160px;
+    object-fit: cover;
+  }
+}

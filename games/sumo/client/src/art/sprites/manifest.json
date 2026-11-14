@@ -1,0 +1,432 @@
+{
+  "bicycle_shed": {
+    "files": ["bicycle_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "bicycles": {
+    "files": ["bicycles.png"],
+    "size": [72, 64],
+    "anchor": [36, 63]
+  },
+  "chanko": {
+    "files": ["chanko.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
+  "chanko_modern__a": {
+    "files": ["chanko_modern__a.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
+  },
+  "chanko_modern__b": {
+    "files": ["chanko_modern__b.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
+  },
+  "chochin": {
+    "files": ["chochin.png"],
+    "size": [36, 64],
+    "anchor": [18, 63]
+  },
+  "clinic": {
+    "files": ["clinic.png"],
+    "size": [112, 96],
+    "anchor": [56, 95]
+  },
+  "clinic_modern": {
+    "files": ["clinic_modern.png"],
+    "size": [240, 176],
+    "anchor": [120, 175]
+  },
+  "dohyo": {
+    "files": ["dohyo.png"],
+    "size": [160, 96],
+    "anchor": [80, 95]
+  },
+  "dohyo_honbasho": {
+    "files": ["dohyo_honbasho.png"],
+    "size": [200, 160],
+    "anchor": [100, 159]
+  },
+  "dorm_0": {
+    "files": ["dorm_0.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "dorm_1": {
+    "files": ["dorm_1.png"],
+    "size": [208, 192],
+    "anchor": [104, 191]
+  },
+  "dorm_2": {
+    "files": ["dorm_2.png"],
+    "size": [208, 224],
+    "anchor": [104, 223]
+  },
+  "dorm_modern_3f": {
+    "files": ["dorm_modern_3f.png"],
+    "size": [176, 232],
+    "anchor": [88, 231]
+  },
+  "dorm_modern__a": {
+    "files": ["dorm_modern__a.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "dorm_modern__b": {
+    "files": ["dorm_modern__b.png"],
+    "size": [176, 176],
+    "anchor": [88, 175]
+  },
+  "drying_open": {
+    "files": ["drying_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "drying_shed": {
+    "files": ["drying_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "fence_corner": {
+    "files": ["fence_corner.png"],
+    "size": [112, 112],
+    "anchor": [56, 111]
+  },
+  "garbage": {
+    "files": ["garbage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garbage_open": {
+    "files": ["garbage_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garden_open": {
+    "files": ["garden_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "garden_shed": {
+    "files": ["garden_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "gate": {
+    "files": ["gate.png"],
+    "size": [128, 112],
+    "anchor": [64, 111]
+  },
+  "gate_modern": {
+    "files": ["gate_modern.png"],
+    "size": [128, 128],
+    "anchor": [64, 127]
+  },
+  "gym_barbell": {
+    "files": ["gym_barbell.png"],
+    "size": [36, 14],
+    "anchor": [18, 13]
+  },
+  "gym_open": {
+    "files": ["gym_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "gym_shed": {
+    "files": ["gym_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "gym_stone": {
+    "files": ["gym_stone.png"],
+    "size": [12, 15],
+    "anchor": [6, 14]
+  },
+  "gym_tire": {
+    "files": ["gym_tire.png"],
+    "size": [22, 16],
+    "anchor": [11, 15]
+  },
+  "keikoba_back": {
+    "files": ["keikoba_back.png"],
+    "size": [288, 176],
+    "anchor": [144, 175]
+  },
+  "keikoba_classic__plain": {
+    "files": ["keikoba_classic__plain.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "keikoba_modern": {
+    "files": ["keikoba_modern.png"],
+    "size": [288, 176],
+    "anchor": [144, 175]
+  },
+  "kohaku_maku": {
+    "files": ["kohaku_maku.png"],
+    "size": [176, 160],
+    "anchor": [88, 159]
+  },
+  "lantern": {
+    "files": ["lantern.png"],
+    "size": [24, 40],
+    "anchor": [12, 39]
+  },
+  "laundry_open": {
+    "files": ["laundry_open.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "laundry_shed": {
+    "files": ["laundry_shed.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "nafuda": {
+    "files": ["nafuda.png"],
+    "size": [72, 64],
+    "anchor": [36, 63]
+  },
+  "nobori": {
+    "files": ["nobori.png"],
+    "size": [72, 128],
+    "anchor": [36, 127]
+  },
+  "omoya": {
+    "files": ["omoya.png"],
+    "size": [224, 192],
+    "anchor": [112, 191]
+  },
+  "parking_gate": {
+    "files": ["parking_gate.png"],
+    "size": [64, 64],
+    "anchor": [32, 63]
+  },
+  "person_chanko": {
+    "files": ["person_chanko.png"],
+    "size": [23, 40],
+    "anchor": [11, 39]
+  },
+  "person_lie": {
+    "files": ["person_lie.png"],
+    "size": [38, 26],
+    "anchor": [19, 25]
+  },
+  "person_oyakata": {
+    "files": ["person_oyakata.png"],
+    "size": [18, 44],
+    "anchor": [9, 43]
+  },
+  "person_oyakata_sit": {
+    "files": ["person_oyakata_sit.png"],
+    "size": [42, 42],
+    "anchor": [21, 41]
+  },
+  "person_push": {
+    "files": ["person_push.png"],
+    "size": [42, 37],
+    "anchor": [21, 36]
+  },
+  "person_shiko": {
+    "files": ["person_shiko_0.png", "person_shiko_1.png"],
+    "size": [36, 43],
+    "anchor": [18, 42]
+  },
+  "person_sit": {
+    "files": ["person_sit.png"],
+    "size": [40, 34],
+    "anchor": [20, 33]
+  },
+  "person_suriashi": {
+    "files": ["person_suriashi_0.png", "person_suriashi_1.png"],
+    "size": [43, 31],
+    "anchor": [21, 30]
+  },
+  "person_sweep": {
+    "files": ["person_sweep_0.png", "person_sweep_1.png"],
+    "size": [30, 40],
+    "anchor": [15, 39]
+  },
+  "person_teppo": {
+    "files": ["person_teppo.png"],
+    "size": [24, 35],
+    "anchor": [12, 34]
+  },
+  "phonebox": {
+    "files": ["phonebox.png"],
+    "size": [56, 72],
+    "anchor": [28, 71]
+  },
+  "pine": {
+    "files": ["pine.png"],
+    "size": [80, 112],
+    "anchor": [40, 111]
+  },
+  "postbox": {
+    "files": ["postbox.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
+  },
+  "roadwork": {
+    "files": ["roadwork.png"],
+    "size": [64, 56],
+    "anchor": [32, 55]
+  },
+  "rock": {
+    "files": ["rock.png"],
+    "size": [48, 44],
+    "anchor": [24, 43]
+  },
+  "room_clinic": {
+    "files": ["room_clinic.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_furo": {
+    "files": ["room_furo.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_genkan": {
+    "files": ["room_genkan.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_gym": {
+    "files": ["room_gym.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_hoshiba": {
+    "files": ["room_hoshiba.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_ima": {
+    "files": ["room_ima.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_kitchen": {
+    "files": ["room_kitchen.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_niwa": {
+    "files": ["room_niwa.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_oobeya": {
+    "files": ["room_oobeya.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_ousetsu": {
+    "files": ["room_ousetsu.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_parking": {
+    "files": ["room_parking.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "room_shokudo": {
+    "files": ["room_shokudo.png"],
+    "size": [384, 216],
+    "anchor": [192, 215]
+  },
+  "signal": {
+    "files": ["signal.png"],
+    "size": [56, 80],
+    "anchor": [28, 79]
+  },
+  "smoking": {
+    "files": ["smoking.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "storage": {
+    "files": ["storage.png"],
+    "size": [72, 72],
+    "anchor": [36, 71]
+  },
+  "tent": {
+    "files": ["tent.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
+  "tent_ai": {
+    "files": ["tent_ai.png"],
+    "size": [144, 128],
+    "anchor": [72, 127]
+  },
+  "teppo": {
+    "files": ["teppo.png"],
+    "size": [16, 56],
+    "anchor": [8, 55]
+  },
+  "transformer": {
+    "files": ["transformer.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
+  },
+  "tree_season__spring": {
+    "files": ["tree_season__spring.png"],
+    "size": [80, 112],
+    "anchor": [40, 111]
+  },
+  "tsukubai": {
+    "files": ["tsukubai.png"],
+    "size": [56, 48],
+    "anchor": [28, 47]
+  },
+  "tsuriyane": {
+    "files": ["tsuriyane.png"],
+    "size": [176, 144],
+    "anchor": [88, 143]
+  },
+  "vending": {
+    "files": ["vending.png"],
+    "size": [56, 64],
+    "anchor": [28, 63]
+  },
+  "washbasin": {
+    "files": ["washbasin.png"],
+    "size": [64, 60],
+    "anchor": [32, 59]
+  },
+  "weights": {
+    "files": ["weights.png"],
+    "size": [48, 40],
+    "anchor": [24, 39]
+  },
+  "well": {
+    "files": ["well.png"],
+    "size": [64, 64],
+    "anchor": [32, 63]
+  },
+  "yagura": {
+    "files": ["yagura.png"],
+    "size": [92, 150],
+    "anchor": [46, 149]
+  },
+  "yatai_green": {
+    "files": ["yatai_green.png"],
+    "size": [66, 74],
+    "anchor": [33, 73]
+  },
+  "yatai_red": {
+    "files": ["yatai_red.png"],
+    "size": [66, 70],
+    "anchor": [33, 69]
+  },
+  "zashiki": {
+    "files": ["zashiki.png"],
+    "size": [96, 64],
+    "anchor": [48, 63]
+  }
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-50 -64 100 168">
+  <!-- ロケットのラフ 1（ドラム缶）: 3/9（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M-12 70 H12 L18 86 H-18 Z" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-22 40 L-40 66 L-36 80 L-22 70 Z" fill="#fb8c00" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 40 L40 66 L36 80 L22 70 Z" fill="#fb8c00" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="-22" y="44" width="44" height="26" rx="4" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <rect x="-22" y="18" width="44" height="26" rx="4" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <rect x="-22" y="-8" width="44" height="26" rx="4" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <circle cx="0" cy="31" r="10" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M-20 -8 L-14 -36 H14 L20 -8 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <path d="M0 -36 V-50" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+</svg>

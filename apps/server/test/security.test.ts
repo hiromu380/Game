@@ -101,7 +101,7 @@ describe('応答ヘッダー', () => {
         steamAuth: steamDisabled,
       }),
     });
-    const res = await app.request('/api/daily/today', {
+    const res = await app.request('/api/weekly/current', {
       headers: { Origin: 'https://evil.example' },
     });
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');

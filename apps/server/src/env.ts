@@ -4,7 +4,7 @@
  * - Env: Workers から渡される生の値（wrangler.jsonc の vars・Secrets・バインディング）
  * - AppConfig: ドメインが使う形に読み替えた設定。ドメインは Env を直接見ない
  *
- * 秘密値（DAILY_MASTER_SECRET）は Workers の Secrets で管理し、ローカルは .dev.vars（git 管理外）に置く。
+ * 秘密値（DAILY_MASTER_SECRET。週替わりチャレンジの秘密値の元）は Workers の Secrets で管理し、ローカルは .dev.vars（git 管理外）に置く。
  */
 
 export interface Env {
@@ -13,12 +13,16 @@ export interface Env {
   RATE_LIMIT_READ?: RateLimit;
   RATE_LIMIT_WRITE?: RateLimit;
 
-  /** デイリーの秘密値の元になるマスター秘密鍵（Secrets） */
+  /** 週替わりチャレンジの秘密値の元になるマスター秘密鍵（Secrets。名前はデイリーの頃のまま） */
   DAILY_MASTER_SECRET: string;
-  /** デイリーの切り替え時刻（UTC からのずれ・分）。既定 540 = 日本時間0時 */
-  DAILY_OFFSET_MINUTES?: string;
-  /** デイリー #1 の日付（公開日に合わせて設定する） */
-  DAILY_EPOCH?: string;
+  /** 日・週の切り替え時刻（UTC からのずれ・分）。既定 540 = 日本時間0時 */
+  CHALLENGE_OFFSET_MINUTES?: string;
+  /** 週の始まりの曜日（0 = 日曜 … 1 = 月曜。既定 1）。Next Fest などの会期に合わせて変えられる */
+  WEEK_START_DAY?: string;
+  /** 週替わり #1 の週の ID（公開した週の始まりの日付） */
+  WEEKLY_EPOCH?: string;
+  /** '1' なら開発用の時計（POST /api/dev/clock で時刻を進める）を有効にする。本番では設定しない */
+  DEV_CLOCK?: string;
   /** CORS を許可するオリジン（カンマ区切り）。同一オリジン配信なら不要 */
   CORS_ORIGINS?: string;
   /** Turnstile の秘密キー（Secrets。ローカルはテスト用キー） */
@@ -35,8 +39,14 @@ export interface Env {
 
 export interface AppConfig {
   masterSecret: string;
-  dailyOffsetMinutes: number;
-  dailyEpoch: string;
+  /** 日・週の切り替え時刻（UTC からのずれ・分） */
+  offsetMinutes: number;
+  /** 週の始まりの曜日（0 = 日曜 … 1 = 月曜） */
+  weekStartDay: number;
+  /** 週替わり #1 の週の ID */
+  weeklyEpoch: string;
+  /** 開発用の時計を有効にするか（本番では false） */
+  devClock: boolean;
   corsOrigins: string[];
   turnstileSecretKey: string;
   ipHashRetentionDays: number;
@@ -48,7 +58,8 @@ export interface AppConfig {
 }
 
 const DEFAULT_OFFSET_MINUTES = 540;
-const DEFAULT_EPOCH = '2026-09-01';
+const DEFAULT_WEEK_START_DAY = 1;
+const DEFAULT_EPOCH = '2026-09-28';
 const DEFAULT_IP_HASH_RETENTION_DAYS = 30;
 const DEFAULT_STEAM_TICKET_IDENTITY = 'chain-factory-api';
 
@@ -61,8 +72,12 @@ export function readConfig(
       'DAILY_MASTER_SECRET must be set (32+ chars). See apps/server/.dev.vars.example',
     );
   }
-  const offset = Number(env.DAILY_OFFSET_MINUTES ?? DEFAULT_OFFSET_MINUTES);
-  if (!Number.isInteger(offset)) throw new Error('DAILY_OFFSET_MINUTES must be an integer');
+  const offset = Number(env.CHALLENGE_OFFSET_MINUTES ?? DEFAULT_OFFSET_MINUTES);
+  if (!Number.isInteger(offset)) throw new Error('CHALLENGE_OFFSET_MINUTES must be an integer');
+  const weekStartDay = Number(env.WEEK_START_DAY ?? DEFAULT_WEEK_START_DAY);
+  if (!Number.isInteger(weekStartDay) || weekStartDay < 0 || weekStartDay > 6) {
+    throw new Error('WEEK_START_DAY must be an integer 0-6 (0 = Sunday)');
+  }
   if (!env.TURNSTILE_SECRET_KEY) {
     throw new Error('TURNSTILE_SECRET_KEY must be set. See apps/server/.dev.vars.example');
   }
@@ -94,8 +109,10 @@ export function readConfig(
     turnstileSecretKey: env.TURNSTILE_SECRET_KEY,
     ipHashRetentionDays: retention,
     masterSecret: env.DAILY_MASTER_SECRET,
-    dailyOffsetMinutes: offset,
-    dailyEpoch: env.DAILY_EPOCH ?? DEFAULT_EPOCH,
+    offsetMinutes: offset,
+    weekStartDay,
+    weeklyEpoch: env.WEEKLY_EPOCH ?? DEFAULT_EPOCH,
+    devClock: env.DEV_CLOCK === '1',
     corsOrigins: (env.CORS_ORIGINS ?? '')
       .split(',')
       .map((s) => s.trim())

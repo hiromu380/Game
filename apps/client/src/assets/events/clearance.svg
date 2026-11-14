@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: clearance（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 32 L27 27 L40 32 V46 L27 51 L14 46 Z" fill="#c8a165" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M14 32 L27 37 L40 32 M27 37 V51" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M46 40 V16 M40 22 l6 -6 l6 6" fill="none" stroke="#43a047" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

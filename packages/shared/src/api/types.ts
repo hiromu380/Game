@@ -40,26 +40,53 @@ export interface UpdateNameResponse {
   displayName: string;
 }
 
-// ---- デイリー ----
+// ---- 週替わりチャレンジ ----
 
-export interface DailyInfo {
-  /** 例: '2026-09-28'（切り替え時刻の地域の日付） */
-  dailyId: string;
-  /** デイリーの通し番号（シェア文で使う） */
-  number: number;
-  /** サーバーが生成した RunConfig（その日の相場・特殊ルール込み）。クライアントはこれでランを作る */
-  config: RunConfig;
-  /** SHA-256(dailySecret) の16進。締め切り後に公開される dailySecret と照合できる */
-  seedCommitment: string;
-  /** 受付開始・締め切り（UNIX ミリ秒） */
-  opensAt: number;
-  closesAt: number;
+/** 今週の自分の挑戦（1日1回） */
+export interface WeeklyDayStatus {
+  dayId: string;
+  status: 'playing' | 'finished';
+  shiftsCleared: number;
+  /** その日の出荷量（10進の文字列） */
+  score: string;
 }
 
-export interface DailySessionView {
-  dailyId: string;
-  /** ランキング対象か（その日の最初の挑戦だけ true） */
-  ranked: boolean;
+/** 今週の自分の状況（ログインしているときだけ） */
+export interface WeeklyMe {
+  /** その週のベスト（まだ挑戦していなければ null） */
+  best: { dayId: string; shiftsCleared: number; score: string } | null;
+  /** 挑戦した日（日の順） */
+  days: WeeklyDayStatus[];
+  /** 今日の挑戦の状態（none: まだ / playing: 途中 / finished: 終わった） */
+  today: 'none' | 'playing' | 'finished';
+}
+
+export interface WeeklyInfo {
+  /** 週の ID（週の始まりの日 'YYYY-MM-DD'） */
+  weekId: string;
+  /** 週の通し番号（シェア文で使う） */
+  number: number;
+  /** サーバーが生成した RunConfig（その週の相場・特殊ルール込み）。クライアントはこれでランを作る */
+  config: RunConfig;
+  /** 盤面の候補番号・代替設定か（ランシードが変わる: createWeeklyRun に渡す） */
+  candidate: number;
+  fallback: boolean;
+  /** SHA-256(weekSecret) の16進。週の締め切り後に公開される weekSecret と照合できる */
+  seedCommitment: string;
+  /** 週の受付開始・締め切り（UNIX ミリ秒） */
+  opensAt: number;
+  closesAt: number;
+  /** 今日の日の ID と、次に挑戦できる時刻（明日の区切り。UNIX ミリ秒） */
+  today: string;
+  nextDayAt: number;
+  /** サーバーの現在時刻（UNIX ミリ秒。残り時間の表示をサーバーの時計に合わせる） */
+  serverNow: number;
+  me: WeeklyMe | null;
+}
+
+export interface WeeklyAttemptView {
+  weekId: string;
+  dayId: string;
   /** 確定したシフトごとの操作ログ */
   ops: RunOp[][];
   /** 確定したシフトごとの本番シード（再開時に演出を再現するため） */
@@ -67,8 +94,8 @@ export interface DailySessionView {
   status: 'playing' | 'finished';
 }
 
-export interface StartDailyResponse {
-  session: DailySessionView;
+export interface StartAttemptResponse {
+  attempt: WeeklyAttemptView;
 }
 
 /** 本番: 前回の本番以降の操作ログを送り、このシフトを確定する */
@@ -85,8 +112,10 @@ export interface CommitResponse {
   /** サーバーが計算した出荷量（クライアントの計算と一致するはず） */
   score: string;
   cleared: boolean;
-  /** ランが終わったか（全シフトクリア or 脱落） */
+  /** その日の挑戦が終わったか（全シフトクリア or 脱落） */
   finished: boolean;
+  /** この挑戦で今週のベストを更新したか */
+  newBest: boolean;
 }
 
 // ---- ランキング ----
@@ -95,33 +124,74 @@ export interface RankingEntry {
   rank: number;
   displayName: string;
   shiftsCleared: number;
+  /** 出荷量（10進の文字列）。暫定ランキングの丸め表示では上 3 桁だけ残して 0 で埋めた値 */
   score: string;
-  maxChain: number;
+  /** 参加日数（確定ランキングのみ。暫定では 0） */
+  daysPlayed: number;
   isMe: boolean;
 }
 
-export interface RankingResponse {
-  dailyId: string;
+/** 当週の暫定ランキング（他人の配置・操作ログは含めない） */
+export interface ProvisionalRankingResponse {
+  weekId: string;
+  provisional: true;
+  /** 参加人数 */
   total: number;
+  /** トップの出し方（full: 実数 / rounded: 丸め / hidden: 出さない） */
+  topMode: 'full' | 'rounded' | 'hidden';
   top: RankingEntry[];
-  /** 自分の前後（自分が参加していなければ空） */
+  /** 自分の前後（自分が参加していなければ空。topMode が hidden なら空） */
   around: RankingEntry[];
   me: { rank: number; topPercent: number } | null;
+  /** この並びを作った時刻（UNIX ミリ秒。最大でキャッシュの間隔だけ古い） */
+  updatedAt: number;
 }
 
-export interface RevealResponse {
-  dailyId: string;
-  /** 締め切り後に公開する、その日の秘密値（16進） */
-  dailySecret: string;
+/** 確定した結果発表（締め切り後の週だけ） */
+export interface WeeklyResultsResponse {
+  weekId: string;
+  number: number;
+  provisional: false;
+  total: number;
+  top: RankingEntry[];
+  around: RankingEntry[];
+  me: {
+    rank: number;
+    topPercent: number;
+    shiftsCleared: number;
+    score: string;
+    daysPlayed: number;
+  } | null;
+  /** 締め切り後に公開する、その週の秘密値（16進。seedCommitment と照合できる） */
+  weekSecret: string;
+}
+
+/** 結果発表のリプレイ（上位の挑戦の操作ログと本番シード。締め切り後の週だけ） */
+export interface ReplayResponse {
+  weekId: string;
+  rank: number;
+  displayName: string;
+  dayId: string;
+  config: RunConfig;
+  candidate: number;
+  fallback: boolean;
+  ops: RunOp[][];
+  commitSeeds: number[];
+}
+
+/** 結果発表の一覧（タイトルの未読バッジ・過去週の切り替え） */
+export interface WeeklyLatestResponse {
+  /** 結果が確定した週の ID（新しい順。保存期間内） */
+  finished: string[];
 }
 
 // ---- 相場 ----
 
 export interface MarketResponse {
-  /** 相場の日付（デイリー ID と同じ形式） */
-  date: string;
+  /** 相場が適用される週の ID */
+  weekId: string;
   prices: Record<PartId, number>;
-  /** 前日の価格（前日比の表示用。履歴がなければ null） */
+  /** 前週の価格（前週比の表示用。履歴がなければ null） */
   previous: Record<PartId, number> | null;
 }
 
@@ -138,8 +208,16 @@ export type ApiErrorCode =
   | 'serviceUnavailable'
   | 'rateLimited'
   | 'notFound'
-  | 'dailyClosed'
+  /** 受付期間外（挑戦の日・週が締め切られた） */
+  | 'challengeClosed'
+  /** 今日はもう挑戦した（1日1回） */
   | 'alreadyPlayed'
+  /** 当週・未来週のため、まだ公開されていない（ランキング・リプレイ・秘密値） */
+  | 'notPublished'
+  /** 締め切り後、結果を集計中（少し待って取り直す） */
+  | 'tallying'
+  /** 古いクライアント（旧 API）。アプリの更新を促す */
+  | 'clientOutdated'
   | 'simVersionMismatch'
   | 'invalidSubmission'
   | 'invalidName';

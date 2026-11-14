@@ -1,8 +1,10 @@
 /**
- * 設定画面（モーダル）: 言語・演出の強さ・画面の揺れ・音量
+ * 設定画面（モーダル）: 言語・演出の強さ・画面の揺れ・全画面（デスクトップ版だけ）・音量
  */
+import { useEffect, useState } from 'react';
 import type { EffectStrength } from '../config/effects';
 import { useI18n, type Lang } from '../i18n';
+import { getPlatform } from '../platform';
 import { useSettings } from './SettingsContext';
 
 const STRENGTHS: EffectStrength[] = ['full', 'reduced', 'minimal'];
@@ -12,6 +14,11 @@ const VOLUMES = ['masterVolume', 'seVolume', 'bgmVolume'] as const;
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
   const { settings, updateSettings } = useSettings();
+  // 全画面はウィンドウの状態なので、ユーザー設定ではなくメインプロセスに聞く（Web 版は null で出さない）
+  const [fullscreen, setFullscreen] = useState<boolean | null>(null);
+  useEffect(() => {
+    void getPlatform().getFullscreen().then(setFullscreen);
+  }, []);
 
   return (
     <div className="modal" role="dialog" aria-modal="true" onClick={onClose}>
@@ -67,6 +74,22 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           />
         </label>
         <p className="panel__hint">{t('settings.reduceFlashesHint')}</p>
+
+        {fullscreen !== null && (
+          <>
+            <label className="settings__row">
+              <span>{t('settings.fullscreen')}</span>
+              <input
+                type="checkbox"
+                checked={fullscreen}
+                onChange={(e) =>
+                  void getPlatform().setFullscreen(e.target.checked).then(setFullscreen)
+                }
+              />
+            </label>
+            <p className="panel__hint">{t('settings.fullscreenHint')}</p>
+          </>
+        )}
 
         {VOLUMES.map((key) => (
           <label key={key} className="settings__row">

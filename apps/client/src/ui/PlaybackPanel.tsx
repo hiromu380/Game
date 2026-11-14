@@ -2,7 +2,10 @@
  * 再生後の結果表示（試運転 / 本番）
  */
 import {
+  BALANCE,
   getCurrentShift,
+  isUnmeasurable,
+  overshootBonus,
   scoreCompare,
   scoreOf,
   scoreToString,
@@ -10,9 +13,11 @@ import {
   type SimResult,
   type VanishReason,
 } from '@chain-factory/sim';
+import { BOLT_BODY_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import type { Playback } from '../state/gameReducer';
 import { summarizeBreaks } from '../playback/breaks';
+import { ADDITIVE_PARTS, biggestShipBreakdown, describeChange } from '../playback/breakdown';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
 import { destinationName } from './RocketProgress';
 
@@ -23,7 +28,7 @@ interface Props {
 }
 
 export function PlaybackPanel({ playback, run, onClose }: Props) {
-  const { t, formatScore } = useI18n();
+  const { t, formatScore, formatCompact, formatMeasured } = useI18n();
   if (!playback.finished) {
     return <div className="playback-banner">{t('playback.playing')}</div>;
   }
@@ -31,6 +36,9 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
   const { score, stats } = playback.result;
   const quota = getCurrentShift(run).quota;
   const met = scoreCompare(score, scoreOf(quota)) >= 0;
+  // 超過手当（ノルマを桁で超えた分、次のシフトの予算に足す）。試運転では「本番ならこれだけ」の目安
+  const bonus = met ? overshootBonus(score, quota, run.config.economy.overshoot) : 0;
+  const perDigit = run.config.economy.overshoot?.perDigit ?? 1;
 
   // 本番で次に進むときのボタン文言
   const closeLabel =
@@ -42,27 +50,61 @@ export function PlaybackPanel({ playback, run, onClose }: Props) {
 
   return (
     <div className="playback-panel">
+      {/* ボルトの反応（全身）: 達成でガッツポーズ、未達でしょんぼり */}
+      <img
+        className="playback-panel__bolt"
+        src={met ? BOLT_BODY_ASSETS.guts : BOLT_BODY_ASSETS.sad}
+        alt=""
+      />
       <h2>{playback.mode === 'trial' ? t('playback.trialTitle') : t('playback.commitTitle')}</h2>
       <div className={`playback-panel__verdict ${met ? 'is-met' : 'is-missed'}`}>
         {met ? t('playback.quotaMet') : t('playback.quotaMissed')}
       </div>
+      {!met && (
+        <p className="playback-panel__short">
+          {t('playback.shortBy', {
+            amount: formatCompact((BigInt(quota) - BigInt(scoreToString(score))).toString()),
+          })}
+        </p>
+      )}
       <RocketLine playback={playback} run={run} />
       <dl className="stats">
         <dt>{t('playback.score')}</dt>
-        <dd className="stats__score">{formatScore(score)}</dd>
+        <dd className="stats__score">
+          {formatMeasured(score)}
+          {isUnmeasurable(score) && (
+            <span className="stats__note">
+              {t('unmeasurable.note', {
+                limit: formatScore(`1${'0'.repeat(BALANCE.unmeasurable.digits - 1)}`),
+              })}
+            </span>
+          )}
+        </dd>
         <dt>{t('playback.quota')}</dt>
         <dd>{formatScore(String(quota))}</dd>
         <dt>{t('playback.chain')}</dt>
         <dd>{stats.chainCount}</dd>
         <dt>{t('playback.maxValue')}</dt>
-        <dd>{formatScore(scoreToString(stats.maxValue))}</dd>
+        <dd>{formatMeasured(scoreToString(stats.maxValue))}</dd>
         {playback.result.income > 0 && (
           <>
             <dt>{t('playback.income')}</dt>
             <dd>{t('playback.incomePop', { amount: playback.result.income })}</dd>
           </>
         )}
+        {bonus > 0 && (
+          <>
+            <dt>{t('playback.overshoot')}</dt>
+            <dd>
+              {t('playback.overshootValue', {
+                amount: bonus,
+                times: formatScore(`1${'0'.repeat(bonus / perDigit)}`),
+              })}
+            </dd>
+          </>
+        )}
       </dl>
+      <ShipBreakdownLine result={playback.result} />
       <BreakList result={playback.result} run={run} />
       <button className="button--primary" onClick={onClose}>
         {closeLabel}
@@ -91,6 +133,66 @@ function RocketLine({ playback, run }: { playback: Playback; run: RunState }) {
   return (
     <div className="playback-panel__rocket">
       {t('rocket.partBuilt', { parts: after.parts, total: ROCKET_PARTS })}
+    </div>
+  );
+}
+
+/** 計算の内訳に並べる段の数の上限（多いときは真ん中を「…」でまとめる） */
+const BREAKDOWN_MAX_CHIPS = 7;
+
+/** いちばん大きい出荷の計算の内訳: 1 → ギア ×2 → ×2床 → … = 出荷量 */
+function ShipBreakdownLine({ result }: { result: SimResult }) {
+  const { t, formatCompact } = useI18n();
+  const breakdown = biggestShipBreakdown(result.events);
+  if (!breakdown || (breakdown.steps.length === 0 && breakdown.sync === 1)) return null;
+  const chips: { key: string; label: string; kind: 'part' | 'floor' }[] = [];
+  breakdown.steps.forEach((step, i) => {
+    if (step.floor) {
+      const change = describeChange(step.before, step.afterFloor, step.floor === 'add');
+      if (change)
+        chips.push({ key: `f${i}`, label: `${t('breakdown.floor')} ${change}`, kind: 'floor' });
+    }
+    const change = describeChange(step.afterFloor, step.after, ADDITIVE_PARTS.has(step.partId));
+    if (change)
+      chips.push({
+        key: `p${i}`,
+        label: `${t(`part.${step.partId}.name`)} ${change}`,
+        kind: 'part',
+      });
+  });
+  if (breakdown.sync > 1)
+    chips.push({
+      key: 'sync',
+      label: t('breakdown.sync', { count: breakdown.sync }),
+      kind: 'floor',
+    });
+  const shown =
+    chips.length > BREAKDOWN_MAX_CHIPS
+      ? [
+          ...chips.slice(0, 2),
+          {
+            key: 'more',
+            label: t('breakdown.more', { count: chips.length - 5 }),
+            kind: 'part' as const,
+          },
+          ...chips.slice(-3),
+        ]
+      : chips;
+  return (
+    <div className="breakdown">
+      <div className="breakdown__title">{t('breakdown.title')}</div>
+      <ol className="breakdown__chain">
+        <li className="breakdown__start">{formatCompact(breakdown.start)}</li>
+        {shown.map((chip) => (
+          <li key={chip.key} className={`breakdown__chip breakdown__chip--${chip.kind}`}>
+            <span className="breakdown__arrow" aria-hidden>
+              →
+            </span>
+            <span className="breakdown__label">{chip.label}</span>
+          </li>
+        ))}
+        <li className="breakdown__total">= {formatCompact(breakdown.shipped)}</li>
+      </ol>
     </div>
   );
 }

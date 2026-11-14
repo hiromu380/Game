@@ -28,6 +28,15 @@ export const PART_IDS = [
   'solar',
   'inspector',
   'piggyBank',
+  // パーツ追加（SIM_VERSION 9）
+  'bend',
+  'crossSplitter',
+  'magnet',
+  'cornerBench',
+  'capacitor',
+  'teleporter',
+  'booster',
+  'cashier',
 ] as const;
 export type PartId = (typeof PART_IDS)[number];
 
@@ -44,6 +53,8 @@ export type Dir8 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface Part {
   id: PartId;
   dir: Dir4;
+  /** 金色パーツ（同じパーツが合体したもの。効果の後で値を goldenMultiplier 倍する）。普通のパーツには無い */
+  golden?: true;
 }
 
 /** 盤面。cells は行優先（index = y * width + x）、空マスは null */
@@ -78,8 +89,14 @@ export interface RuleSet {
   dockDivisor: number;
   /** 経済系パーツが1回のシミュレーションで生める予算の上限 */
   maxIncomePerSim: number;
+  /** 金色パーツが送る信号の値・出荷量に掛ける倍率（金色パーツを導入する前のランには無い = 1） */
+  goldenMultiplier?: number;
   /** 同時に存在できる信号の数の上限（超えたら打ち切る。メモリと計算時間を守るため） */
   maxLiveSignals: number;
+  /** 合流炉のまとめ方（導入前のランには無い = sum） */
+  mergeMode?: 'product' | 'sum';
+  /** 同時出荷ボーナスの倍率の上限（導入前のランには無い = 1 でボーナスなし） */
+  syncShipMax?: number;
 }
 
 /** simulate の入力 */
@@ -100,19 +117,44 @@ export type VanishReason = 'outOfBoard' | 'emptyCell' | 'exhausted' | 'inert' | 
  */
 export type SimEvent =
   /** 信号が (x,y) から dir 方向へ発射された（次の tick で隣へ移動する） */
-  | { tick: number; type: 'emit'; signalId: number; x: number; y: number; dir: Dir8; value: Score }
+  | {
+      tick: number;
+      type: 'emit';
+      signalId: number;
+      x: number;
+      y: number;
+      dir: Dir8;
+      value: Score;
+      /** この信号を生んだ（パーツを発動させた）信号。スイッチの最初の信号は null（計算の内訳をたどる用） */
+      parent: number | null;
+    }
   /** 信号が (x,y) へ移動した */
   | { tick: number; type: 'move'; signalId: number; x: number; y: number }
   /** (x,y) のパーツが信号を受けて発動した（受けた信号はここで消費される） */
   | { tick: number; type: 'activate'; signalId: number; x: number; y: number; partId: PartId }
   /** 出荷口が value を出荷した。total はその時点の累計 */
-  | { tick: number; type: 'ship'; x: number; y: number; value: Score; total: Score }
+  | {
+      tick: number;
+      type: 'ship';
+      x: number;
+      y: number;
+      value: Score;
+      total: Score;
+      /** 出荷口を発動させた信号（計算の内訳をたどる用） */
+      signalId: number | null;
+      /** 同時出荷ボーナスの倍率（同じ tick に出荷した出荷口の数。value はこれを掛けた後）。1 なら無し */
+      sync: number;
+    }
   /** (x,y) のパーツの発動回数がリセットされた */
   | { tick: number; type: 'reset'; x: number; y: number }
   /** 信号が消滅した */
   | { tick: number; type: 'vanish'; signalId: number; x: number; y: number; reason: VanishReason }
   /** 合流するパーツ（合流炉）が、同じ tick の2本目以降の信号を取り込んだ */
   | { tick: number; type: 'absorb'; signalId: number; x: number; y: number }
+  /** 溜めるパーツ（蓄電器）が値を溜めた（value）／放出して空になった（null） */
+  | { tick: number; type: 'store'; x: number; y: number; value: Score | null }
+  /** 転送装置が信号を (x,y) から (toX,toY) へ飛ばした（この直後に行き先から emit される） */
+  | { tick: number; type: 'teleport'; x: number; y: number; toX: number; toY: number }
   /** 経済系パーツが予算を生んだ。total はその時点の累計 */
   | { tick: number; type: 'income'; x: number; y: number; amount: number; total: number }
   /** 信号が (x,y) のパーツを発動させる直前に、床の効果を受けた（before → after） */

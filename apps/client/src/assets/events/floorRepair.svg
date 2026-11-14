@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: floorRepair（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M20 44 L36 28 a8 8 0 0 1 10 -10 l-5 5 l1 4 l4 1 l5 -5 a8 8 0 0 1 -10 10 L25 49 a3.5 3.5 0 0 1 -5 -5 Z" fill="#90a4ae" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

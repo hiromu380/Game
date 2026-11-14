@@ -5,7 +5,7 @@
  * - 延長戦の後: どこまで届いたか
  */
 import type { RunState } from '@chain-factory/sim';
-import { MASCOT_ASSETS, ROCKET_ASSETS } from '../assets/manifest';
+import { BACKDROP_ASSETS, MASCOT_ASSETS, ROCKET_ASSETS } from '../assets/manifest';
 import { useI18n } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { getRocketProgress, ROCKET_PARTS } from '../state/rocket';
@@ -21,7 +21,10 @@ export function RocketScene({ run }: { run: RunState }) {
     <div
       className={`rocket-scene ${launched ? 'is-launched' : ''} ${animate ? 'is-animated' : ''}`}
     >
-      <div className="rocket-scene__sky">
+      <div
+        className="rocket-scene__sky"
+        style={{ backgroundImage: `url(${BACKDROP_ASSETS.launchpad})` }}
+      >
         <div className="rocket-scene__rocket">
           <img src={ROCKET_ASSETS.stages[parts]} alt="" width={96} height={104} />
           {launched && (

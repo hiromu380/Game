@@ -24,6 +24,8 @@ interface BaseContext {
    * 回転台の「何回回ったか」などに使う。Reaction.nextState で更新する
    */
   state: number;
+  /** このマスのパーツが溜めている値（初期値 0。蓄電器が使う）。Reaction.store で更新する */
+  stored: Score;
 }
 
 /** パーツが信号を1本受けたときに渡される情報 */
@@ -46,6 +48,8 @@ export interface Emission {
   value: Score;
   /** 何 tick 遅れて発射するか（省略時 0 = すぐ） */
   delay?: number;
+  /** 別のマスから発射する（転送装置の行き先）。省略時はパーツのマス */
+  from?: [number, number];
 }
 
 /** パーツの反応結果 */
@@ -60,6 +64,8 @@ export interface Reaction {
   income?: number;
   /** このマスの状態を更新する */
   nextState?: number;
+  /** このマスに溜める値を更新する（null で 0 に戻す） */
+  store?: Score | null;
 }
 
 /** 常時効果（潤滑油タンクなど）: シミュレーション開始時に1度だけ評価する */
@@ -80,5 +86,5 @@ export interface PartBehavior {
    */
   collect?: (ctx: CollectContext) => Reaction;
   /** 常時効果 */
-  passive?: (ctx: Omit<BaseContext, 'rng' | 'chainCount' | 'state'>) => PassiveEffect;
+  passive?: (ctx: Omit<BaseContext, 'rng' | 'chainCount' | 'state' | 'stored'>) => PassiveEffect;
 }

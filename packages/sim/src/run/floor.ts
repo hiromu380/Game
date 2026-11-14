@@ -2,15 +2,17 @@
  * ランの中の床: そのシフトで simulate に渡す床・配置できないマスの判定・床を湧かせる抽選
  *
  * そのシフトの床 = その日のステージ ＋ ボス・特殊ルールの使用不可（config/bossModifiers.ts の getShiftFloor）
- *                ＋ 今日の出来事の床（その日のあいだ） ＋ シフト開始時のボーナス床（そのシフトのあいだ）
+ *                ＋ 今日の出来事の床（その日のあいだ） ＋ ランダム配置権の床（その日のあいだ）
+ *                ＋ シフト開始時のボーナス床（そのシフトのあいだ）
  */
 import { getShiftFloor } from '../config/bossModifiers';
 import { createPrng } from '../core/prng';
 import { cellPermutation, pickTile, pickWeighted } from '../floor/draw';
 import { isBlockedCell, setFloorCell } from '../floor/layer';
 import type { FloorLayer, FloorTileId } from '../floor/types';
-import { bonusFloorSeed, dayEventSeed } from './seeds';
+import { bonusFloorSeed, dayEventSeed, floorPermitSeed } from './seeds';
 import type { BonusFloorState, RunState } from './types';
+import { relicBonusFloorAdd } from './relics';
 
 const dayOf = (state: RunState, shiftIndex: number) =>
   Math.floor(shiftIndex / state.config.shiftsPerDay);
@@ -29,6 +31,13 @@ export function getCurrentFloor(state: RunState, shiftIndex = state.shiftIndex):
         }
       } else if (current === null) {
         floor = setFloorCell(floor, change.index, { tile: change.tile, source: 'event' });
+      }
+    }
+  }
+  if (state.itemFloors && state.itemFloors.day === dayOf(state, shiftIndex)) {
+    for (const cell of state.itemFloors.cells) {
+      if (floor[cell.index] === null) {
+        floor = setFloorCell(floor, cell.index, { tile: cell.tile, source: 'item' });
       }
     }
   }
@@ -67,10 +76,10 @@ export function drawBonusFloor(state: RunState, shiftIndex: number): BonusFloorS
   if (!params || shiftIndex < params.fromShift) return null;
   const rng = createPrng(bonusFloorSeed(state.seed, shiftIndex));
   const count =
-    pickWeighted(
+    (pickWeighted(
       rng,
       params.countWeights.map((weight, n) => ({ value: n, weight })),
-    ) ?? 0;
+    ) ?? 0) + relicBonusFloorAdd(state);
   const floor = getCurrentFloor({ ...state, bonusFloor: null }, shiftIndex);
   const avoid = occupiedToday(state, shiftIndex);
   const cells: BonusFloorState['cells'] = [];
@@ -138,4 +147,30 @@ export function canOfferFloorEvent(state: RunState, day: number, id: string): bo
   if (id !== 'floorRepair') return true;
   const floor = state.config.stages?.days[day];
   return !!floor && floor.some((_, i) => floor[i]?.source === 'stage' && isBlockedCell(floor, i));
+}
+
+/**
+ * ランダム配置権を1枚使ったときに湧く床を決める（置けるマスがなければ null）
+ *
+ * ランシード・日・「その日の何枚目か」から全マスの並び順を作り、先頭から順に
+ * 「今のシフトの床がなく、その日のうちに工事・ステージの床もないマス」の最初の1つを選ぶ。
+ * パーツの有無は見ない（床は盤面の下層。パーツを動かして結果を変えることはできない）
+ */
+export function drawFloorPermit(state: RunState): { index: number; tile: FloorTileId } | null {
+  const params = state.config.floorPermit;
+  if (!params) return null;
+  const day = dayOf(state, state.shiftIndex);
+  const nth = state.itemFloors?.day === day ? state.itemFloors.cells.length : 0;
+  const rng = createPrng(floorPermitSeed(state.seed, day, nth));
+  const floor = getCurrentFloor(state);
+  const avoid = occupiedToday(state, state.shiftIndex);
+  const index = cellPermutation(rng, state.board.cells.length).find(
+    (i) => floor[i] === null && !avoid.has(i),
+  );
+  if (index === undefined) return null;
+  const tile = pickTile(
+    rng,
+    params.tileWeights.filter((w) => day >= (w.fromDay ?? 0)),
+  );
+  return tile ? { index, tile } : null;
 }

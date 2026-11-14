@@ -18,6 +18,8 @@ const bridge: DesktopBridge = {
   showKeyboard: (rect) => ipcRenderer.invoke(IPC_CHANNELS.showKeyboard, rect),
   openExternal: (url) => ipcRenderer.invoke(IPC_CHANNELS.openExternal, url),
   readDemoSave: () => ipcRenderer.invoke(IPC_CHANNELS.readDemoSave),
+  getFullscreen: () => ipcRenderer.invoke(IPC_CHANNELS.getFullscreen),
+  setFullscreen: (on) => ipcRenderer.invoke(IPC_CHANNELS.setFullscreen, on),
 };
 
 contextBridge.exposeInMainWorld('chainFactory', bridge);

@@ -3,9 +3,12 @@
  *
  * ゲーム画面の盤面の操作が受け取らなかった操作は、ここで「画面のボタンを順に選ぶ」操作にする。
  * - 対象: いちばん手前のダイアログ（.modal）があればその中、なければ画面全体のボタン・入力欄
- * - 上下左右: 画面上でその方向にある、いちばん近いボタンへフォーカスを移す（フォーカスがなければ最初のボタン）
+ * - 上下左右: 画面上でその方向にある、いちばん近いボタンへフォーカスを移す
  * - 決定: フォーカスのあるボタンを押す
+ * - フォーカスがなければ、方向・決定ともまず目立つボタン（.button--primary。なければ最初のボタン）にフォーカスするだけ。
+ *   押すのは次の決定から（結果を閉じた勢いの連打で、次の画面のボタンまで押さないように）
  * - 取り消し: ダイアログの「閉じる」ボタン（data-close）を押す
+ * - カットシーンの間は何もしない
  */
 import type { ControlAction } from '../config/controls';
 
@@ -61,16 +64,21 @@ export function nearestInDirection(
 }
 
 export function handleMenuAction(action: ControlAction, doc: Document = document): boolean {
+  // カットシーンの間は受け取って何もしない（スキップは長押しでカットシーン自身が受け取る。
+  // 後ろの画面のボタンを押してしまわないように）
+  if (doc.querySelector('.cutscene')) return true;
   const scope = menuScope(doc);
   const items = focusables(scope);
   if (items.length === 0) return false;
   const active = doc.activeElement instanceof HTMLElement ? doc.activeElement : null;
   const current = active && items.includes(active) ? active : null;
 
+  const first = items.find((el) => el.classList.contains('button--primary')) ?? items[0]!;
+
   const dir = DIRECTION[action];
   if (dir) {
     if (!current) {
-      items[0]!.focus();
+      first.focus();
       return true;
     }
     const next = nearestInDirection(
@@ -83,7 +91,7 @@ export function handleMenuAction(action: ControlAction, doc: Document = document
   }
   if (action === 'confirm') {
     if (!current) {
-      items[0]!.focus();
+      first.focus();
       return true;
     }
     current.click();

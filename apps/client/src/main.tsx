@@ -6,9 +6,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerServiceWorker } from './boot/serviceWorker';
+import { installStaleBuildRecovery } from './boot/staleBuild';
 import { I18nProvider } from './i18n';
 import { installControls } from './input/controls';
+import { installModalFocus } from './input/modalFocus';
 import { Root } from './Root';
+import { CrashBoundary } from './ui/CrashScreen';
 import { getPlatform } from './platform';
 import { SettingsProvider } from './settings/SettingsContext';
 import { initStorage } from './storage';
@@ -18,19 +21,26 @@ import './styles.css';
 // 同梱フォントの定義は大きいので、最初の表示の後に読み込む（届くまでは予備の日本語フォントで表示）
 void import('./fonts');
 
+// 古い版のタブで画面の読み込みに失敗したら、読み込み直して新しい版にする
+installStaleBuildRecovery();
+
 // キーボード・コントローラーの入力を受け付ける（config/controls.ts）
 installControls();
+// ダイアログを開いたらその中へフォーカスを移し、Tab を中だけで巡回させ、閉じたら元へ戻す
+installModalFocus();
 
 // 保存先の準備（デスクトップ版はファイルの読み込みを待つ）が済んでから画面を作る
 await initStorage();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SettingsProvider>
-      <I18nProvider>
-        <Root />
-      </I18nProvider>
-    </SettingsProvider>
+    <CrashBoundary>
+      <SettingsProvider>
+        <I18nProvider>
+          <Root />
+        </I18nProvider>
+      </SettingsProvider>
+    </CrashBoundary>
   </StrictMode>,
 );
 

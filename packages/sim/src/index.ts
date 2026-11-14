@@ -8,11 +8,17 @@ export {
   type BossModifierId,
   type DayEventId,
   type FloorParams,
+  type ItemId,
   type MetaCondition,
   type PartBalance,
   type PartParams,
   type Rarity,
+  type RelicId,
+  type RelicParams,
+  type AscensionEffect,
   type ShiftSpec,
+  RARITIES,
+  RELIC_IDS,
 } from './balance';
 
 export { SIM_VERSION } from './version';
@@ -27,6 +33,7 @@ export * from './floor/layer';
 export { FLOOR_BEHAVIORS } from './floor/tiles';
 export { getPressMultiplier } from './simulate/parts/press';
 export { getPartBadge, type PartBadge } from './simulate/badges';
+export { teleportTarget } from './simulate/parts/teleporter';
 export { computeActivationLimits } from './simulate/limits';
 
 export { createRuleSet, DEFAULT_RULES } from './config/rules';
@@ -52,12 +59,13 @@ export {
   transformFloor,
   validateStage,
 } from './floor/stage';
-export { getCurrentFloor, isCellBlocked } from './run/floor';
-export { buildDailyConfig, dailyRunSeed, type DailyConfigInput } from './config/daily';
+export { drawFloorPermit, getCurrentFloor, isCellBlocked } from './run/floor';
+export { addItem, countItems, expireItems, useFloorPermit } from './run/items';
+export { buildWeeklyConfig, weeklyRunSeed, type WeeklyConfigInput } from './config/weekly';
 
 export * from './run/types';
 export {
-  createDailyRun,
+  createWeeklyRun,
   createRun,
   createRunWithConfig,
   type CreateRunOptions,
@@ -68,12 +76,25 @@ export {
   buyOffer,
   getRefund,
   getRerollCost,
+  mergeCells,
+  mergeGolden,
   placePart,
   rerollShop,
   returnPart,
   rotatePart,
   sellPart,
 } from './run/build';
+export { goldenCount } from './run/inventory';
+export {
+  applyRelicEconomy,
+  applyRelicRules,
+  drawRelicChoice,
+  relicWeights,
+  hasRelic,
+  isRelicPending,
+} from './run/relics';
+export { regenerateShop } from './run/shift';
+export { isUnmeasurable } from './run/unmeasurable';
 export {
   abandonRun,
   commitShift,
@@ -83,6 +104,7 @@ export {
   getDayAndPeriod,
   getShiftCount,
   isDayStart,
+  overshootBonus,
   runTrial,
   startOvertime,
 } from './run/shift';
@@ -102,3 +124,4 @@ export {
 } from './meta/progress';
 
 export * from './achievements';
+export { applyAscension, ascensionEffects, maxAscension } from './config/ascension';

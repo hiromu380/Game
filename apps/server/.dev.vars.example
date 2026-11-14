@@ -8,3 +8,6 @@ TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 # Steam のパブリッシャーキー（本番は `wrangler secret put STEAM_WEB_API_KEY`）。
 # 未設定なら Steam 認証は serviceUnavailable を返す（Web 版の匿名登録は影響を受けない）
 # STEAM_WEB_API_KEY=
+# 開発用の時計: POST /api/dev/clock で時刻を進められる（週の切り替え・結果発表の確認用。docs/ops/weekly.md）。
+# 本番では設定しない（localhost 以外からの呼び出しも拒否する）
+DEV_CLOCK=1

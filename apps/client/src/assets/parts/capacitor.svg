@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: capacitor（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="28" y="4" width="8" height="7" rx="2" fill="#cfd8dc" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="10" width="36" height="44" rx="6" fill="#fb8c00" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="40" width="36" height="14" fill="#d57700"/>
+  <rect x="14" y="10" width="36" height="44" rx="6" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="36" width="24" height="12" rx="2" fill="#ffca28" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="20" width="24" height="12" rx="2" fill="#546e7a" stroke="#1b1f27" stroke-width="2.5"/>
+  <polygon points="34,14 26,29 32,29 29,40 39,24 33,24 36,14" fill="#ffc107" stroke="#1b1f27" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

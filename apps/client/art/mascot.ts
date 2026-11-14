@@ -35,7 +35,7 @@ const head = (face: string[]): string =>
     ...face,
   );
 
-const eye = (cx: number, cy: number, r: number, px: number, py: number, pr: number) =>
+export const eye = (cx: number, cy: number, r: number, px: number, py: number, pr: number) =>
   circle(cx, cy, r, { fill: C.eye, stroke: C.outline, 'stroke-width': THIN }) +
   circle(px, py, pr, { fill: C.pupil });
 
@@ -97,6 +97,14 @@ const FACES: Record<BoltExpression, { lamp: string; face: string[]; extras?: str
     ],
   },
 };
+
+/**
+ * 好きな顔でボルトの頭を描く（全身の設定画で、表情を足すときに使う。座標は boltBody と同じ）
+ * @param face 目・口など（頭の傾きの中に入る）
+ */
+export function boltHead(lamp: string, face: string[], extras: string[] = []): string[] {
+  return [...body(lamp, extras), head(face)];
+}
 
 /** ボルトの絵の中身（viewBox -2 -3 68 68 の座標。実績アイコンなどに流用する） */
 export function boltBody(expression: BoltExpression): string[] {

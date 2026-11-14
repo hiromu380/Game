@@ -1,0 +1,8 @@
+<svg width="48" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-24 -44 48 50">
+  <!-- ボルトの部品: torso / side（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-5" y="-40" width="10" height="8" rx="2" fill="#546e7a" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-11 -34 H11 L10 -2 Q10 2 6 2 H-6 Q-10 2 -10 -2 Z" fill="#7cb342" stroke="#33691e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-10 -10 H10 L9.5 -1 H-9.5 Z" fill="#699838"/>
+  <rect x="8" y="-27" width="5" height="12" rx="2" fill="#ffffff" stroke="#33691e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-8 -30 V-14" fill="none" stroke="#9ccc65" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

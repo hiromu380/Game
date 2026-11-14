@@ -27,10 +27,20 @@ interface Props {
   speed: PlaybackSpeed;
   labels: BoardLabels;
   effectSettings: EffectSettings;
+  /** 再生後に「途切れた場所と理由」を出す（省略時は出す。見本の盤面では出さない） */
+  showBreaks?: boolean;
+  /** 効果音を鳴らさない（タイトル画面の見本など、遊んでいない盤面） */
+  muted?: boolean;
+  /** 描画を止める（カットシーンで盤面が隠れている間） */
+  paused?: boolean;
   /** キーボード・コントローラーのカーソル（マウス・タッチで操作中は null） */
   cursor?: { x: number; y: number } | null;
   onCellClick: (x: number, y: number) => void;
   onCellLongPress: (x: number, y: number) => void;
+  onCellSecondaryClick: (x: number, y: number) => void;
+  /** マウスホイールで回せるか・回す（省略時はホイールを使わない） */
+  canWheelRotate?: () => boolean;
+  onWheelRotate?: () => void;
   onCellDragStart: BoardRendererOptions['onCellDragStart'];
   onCellDragEnd: BoardRendererOptions['onCellDragEnd'];
   onShip: (total: Score) => void;
@@ -63,6 +73,9 @@ export function PixiBoard(props: Props) {
     void BoardRenderer.create(parent, {
       onCellClick: (x, y) => callbacksRef.current.onCellClick(x, y),
       onCellLongPress: (x, y) => callbacksRef.current.onCellLongPress(x, y),
+      onCellSecondaryClick: (x, y) => callbacksRef.current.onCellSecondaryClick(x, y),
+      canWheelRotate: () => callbacksRef.current.canWheelRotate?.() ?? false,
+      onWheelRotate: () => callbacksRef.current.onWheelRotate?.(),
       onCellDragStart: (from, partId) => callbacksRef.current.onCellDragStart(from, partId),
       onCellDragEnd: (from, target, client) =>
         callbacksRef.current.onCellDragEnd(from, target, client),
@@ -74,9 +87,14 @@ export function PixiBoard(props: Props) {
       formatScore: (value) => labels().formatScore(value),
       formatCompact: (value) => labels().formatCompact(value),
       getQuotaCrossLabel: () => labels().getQuotaCrossLabel(),
+      formatSync: (count) => labels().formatSync(count),
+      getUnmeasurableLabel: () => labels().getUnmeasurableLabel(),
       getFloorShort: (tile, params) => labels().getFloorShort(tile, params),
       getFloorDescription: (cell, params) => labels().getFloorDescription(cell, params),
-      playSound: (key, semitones) => audio.play(key, semitones),
+      showBreaks: () => callbacksRef.current.showBreaks ?? true,
+      playSound: (key, semitones) => {
+        if (!callbacksRef.current.muted) audio.play(key, semitones);
+      },
     }).then((r) => {
       if (disposed) {
         r.destroy();
@@ -103,6 +121,12 @@ export function PixiBoard(props: Props) {
   useEffect(() => {
     renderer?.setCursor(cursor);
   }, [renderer, cursor]);
+
+  // 描画の停止・再開
+  const { paused = false } = props;
+  useEffect(() => {
+    renderer?.setPaused(paused);
+  }, [renderer, paused]);
 
   // 演出の設定の反映
   useEffect(() => {

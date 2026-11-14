@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 実績: ACH_UNMEASURABLE（art/ のスクリプトで生成。手で編集しない） -->
+  <circle cx="32" cy="32" r="30" fill="#ec407a" stroke="#1b1f27" stroke-width="3"/>
+  <circle cx="32" cy="32" r="24" fill="#262a31" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M14 20 a20 20 0 0 1 12 -10" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><path d="M10 40 A22 22 0 0 1 54 40 Z" fill="#ffffff" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M44 22 A22 22 0 0 1 54 40 L32 40 Z" fill="#ff5252"/><path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M32 40 L56 30 L60 22" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="40" r="4" fill="#1b1f27"/><path d="M52 10 L56 16 M60 12 L58 18 M48 16 L54 19" fill="none" stroke="#ff5252" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+</svg>

@@ -1,0 +1,107 @@
+<svg width="480" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 150">
+  <!-- ラン終了画面の発射台（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="0" y="0" width="480" height="25" fill="#141b33"/>
+  <rect x="0" y="24" width="480" height="25" fill="#1c2040"/>
+  <rect x="0" y="48" width="480" height="25" fill="#2a2550"/>
+  <rect x="0" y="72" width="480" height="25" fill="#3d2a55"/>
+  <rect x="0" y="96" width="480" height="25" fill="#4a2f55"/>
+  <circle cx="0" cy="0" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="197" cy="89" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="394" cy="78" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="111" cy="67" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="308" cy="56" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="25" cy="45" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="222" cy="34" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="419" cy="23" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="136" cy="12" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="333" cy="1" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="50" cy="90" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="247" cy="79" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="444" cy="68" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="161" cy="57" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="358" cy="46" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="75" cy="35" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="272" cy="24" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="469" cy="13" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="186" cy="2" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="383" cy="91" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="100" cy="80" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="297" cy="69" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="14" cy="58" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="211" cy="47" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="408" cy="36" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="125" cy="25" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="322" cy="14" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="39" cy="3" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="236" cy="92" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="433" cy="81" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="150" cy="70" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="347" cy="59" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="64" cy="48" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="261" cy="37" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="458" cy="26" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="175" cy="15" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="372" cy="4" r="1.6" fill="#ffffff" opacity="0.4"/>
+  <circle cx="89" cy="93" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="286" cy="82" r="1" fill="#ffffff" opacity="0.4"/>
+  <circle cx="3" cy="71" r="1.6" fill="#ffffff" opacity="0.7"/>
+  <circle cx="70" cy="30" r="9" fill="#fff3c4"/>
+  <circle cx="74" cy="26" r="8" fill="#141b33"/>
+  <path d="M-30 132 V114 L-10 104 V114 L10 104 V114 L30 104 V114 H80 V106 H120 V132 Z" fill="#2a2e45"/>
+  <rect x="90" y="80" width="9" height="30" fill="#2a2e45"/>
+  <rect x="140" y="118" width="30" height="14" fill="#2a2e45"/>
+  <path d="M100 132 V114 L120 104 V114 L140 104 V114 L160 104 V114 H210 V106 H250 V132 Z" fill="#2a2e45"/>
+  <rect x="220" y="80" width="9" height="30" fill="#2a2e45"/>
+  <rect x="270" y="118" width="30" height="14" fill="#2a2e45"/>
+  <path d="M230 132 V114 L250 104 V114 L270 104 V114 L290 104 V114 H340 V106 H380 V132 Z" fill="#2a2e45"/>
+  <rect x="350" y="80" width="9" height="30" fill="#2a2e45"/>
+  <rect x="400" y="118" width="30" height="14" fill="#2a2e45"/>
+  <path d="M360 132 V114 L380 104 V114 L400 104 V114 L420 104 V114 H470 V106 H510 V132 Z" fill="#2a2e45"/>
+  <rect x="480" y="80" width="9" height="30" fill="#2a2e45"/>
+  <rect x="530" y="118" width="30" height="14" fill="#2a2e45"/>
+  <path d="M-10 132 V106 L10 96 V106 L30 96 V106 L50 96 V106 H100 V98 H140 V132 Z" fill="#101218"/>
+  <rect x="110" y="72" width="9" height="30" fill="#101218"/>
+  <rect x="160" y="110" width="30" height="22" fill="#101218"/>
+  <rect x="-2" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="22" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="46" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="70" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <path d="M160 132 V106 L180 96 V106 L200 96 V106 L220 96 V106 H270 V98 H310 V132 Z" fill="#101218"/>
+  <rect x="280" y="72" width="9" height="30" fill="#101218"/>
+  <rect x="330" y="110" width="30" height="22" fill="#101218"/>
+  <rect x="168" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="192" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="216" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="240" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <path d="M330 132 V106 L350 96 V106 L370 96 V106 L390 96 V106 H440 V98 H480 V132 Z" fill="#101218"/>
+  <rect x="450" y="72" width="9" height="30" fill="#101218"/>
+  <rect x="500" y="110" width="30" height="22" fill="#101218"/>
+  <rect x="338" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="362" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="386" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <rect x="410" y="114" width="10" height="6" rx="1" fill="#ffd54f" opacity="0.7"/>
+  <polygon points="156,40 170,132 250,132" fill="#fff3c4" opacity="0.07"/>
+  <rect x="148" y="40" width="4" height="92" fill="#2a2f3a"/>
+  <path d="M150 132 L140 140 M150 132 L160 140" fill="none" stroke="#2a2f3a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="143" y="32" width="14" height="9" rx="2" fill="#3a404a" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="147" y="34" width="10" height="5" rx="1" fill="#fff3c4"/>
+  <polygon points="324,40 310,132 230,132" fill="#fff3c4" opacity="0.07"/>
+  <rect x="328" y="40" width="4" height="92" fill="#2a2f3a"/>
+  <path d="M330 132 L320 140 M330 132 L340 140" fill="none" stroke="#2a2f3a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="323" y="32" width="14" height="9" rx="2" fill="#3a404a" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="323" y="34" width="10" height="5" rx="1" fill="#fff3c4"/>
+  <rect x="0" y="132" width="480" height="18" fill="#1d2028"/>
+  <path d="M0 132 H480" fill="none" stroke="#2c313b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="180,140 300,140 290,128 190,128" fill="#5b6270" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="184,140 190,140 195,134 189,134" fill="#ffc107"/>
+  <polygon points="195,140 201,140 206,134 200,134" fill="#ffc107"/>
+  <polygon points="206,140 212,140 217,134 211,134" fill="#ffc107"/>
+  <polygon points="217,140 223,140 228,134 222,134" fill="#ffc107"/>
+  <polygon points="228,140 234,140 239,134 233,134" fill="#ffc107"/>
+  <polygon points="239,140 245,140 250,134 244,134" fill="#ffc107"/>
+  <polygon points="250,140 256,140 261,134 255,134" fill="#ffc107"/>
+  <polygon points="261,140 267,140 272,134 266,134" fill="#ffc107"/>
+  <polygon points="272,140 278,140 283,134 277,134" fill="#ffc107"/>
+  <polygon points="283,140 289,140 294,134 288,134" fill="#ffc107"/>
+  <path d="M182 134 H298" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

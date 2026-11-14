@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- UI アイコン: undo（art/ のスクリプトで生成。手で編集しない） -->
+  <path d="M8 9 H15 a5 5 0 0 1 0 10 H9" fill="none" stroke="#eef0f3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="3,9 9,4 9,14" fill="#eef0f3"/>
+</svg>

@@ -2,6 +2,7 @@
  * テスト用の共通部品: メモリ DB・固定の時計・API 呼び出し
  */
 import { SIM_VERSION, type RunOp } from '@chain-factory/sim';
+import { memoryCache } from '../src/adapters/cache';
 import { alwaysHuman, type HumanVerifier } from '../src/adapters/humanCheck';
 import { allowAll, type RateLimiter } from '../src/adapters/rateLimiter';
 import { steamDisabled } from '../src/adapters/steamAuth';
@@ -14,8 +15,10 @@ import type { Repositories } from '../src/repositories/types';
 
 export const TEST_CONFIG: AppConfig = {
   masterSecret: 'test-master-secret-0123456789abcdef0123456789',
-  dailyOffsetMinutes: 540,
-  dailyEpoch: '2026-10-01',
+  offsetMinutes: 540,
+  weekStartDay: 1,
+  weeklyEpoch: '2026-09-28',
+  devClock: false,
   corsOrigins: [],
   turnstileSecretKey: 'test-turnstile',
   ipHashRetentionDays: 30,
@@ -25,13 +28,19 @@ export const TEST_CONFIG: AppConfig = {
 /** 登録リクエストの本文（テストでは人間確認を alwaysHuman で通す） */
 export const REGISTER_BODY = { turnstileToken: 'test-token' };
 
-/** 2026-10-01 12:00 JST */
+/** 2026-10-01（木）12:00 JST */
 export const NOON = Date.parse('2026-10-01T03:00:00Z');
 export const DAY = '2026-10-01';
+/** その週（月曜始まり）の ID */
+export const WEEK = '2026-09-28';
+export const DAY_MS = 24 * 60 * 60 * 1000;
+/** 翌週の月曜 0:00 JST（週の締め切り） */
+export const WEEK_END = Date.parse('2026-10-04T15:00:00Z');
 
 export function testContext(repos: Repositories = createMemoryRepositories()) {
   const clock = { now: NOON };
-  const ctx: DomainContext = { repos, config: TEST_CONFIG, now: () => clock.now };
+  const now = () => clock.now;
+  const ctx: DomainContext = { repos, config: TEST_CONFIG, now, cache: memoryCache(now) };
   return { ctx, clock };
 }
 
@@ -77,7 +86,20 @@ export function testApi(
     call,
     register: async () =>
       (await call('POST', '/players', REGISTER_BODY)).json as { token: string; playerId: string },
-    commit: (token: string, shiftIndex: number, ops: RunOp[], simVersion = SIM_VERSION) =>
-      call('POST', `/daily/${DAY}/commit`, { simVersion, shiftIndex, ops }, token),
+    /** 今日の挑戦を始める */
+    start: (token: string, week = WEEK) => call('POST', `/weekly/${week}/attempts`, {}, token),
+    commit: (
+      token: string,
+      shiftIndex: number,
+      ops: RunOp[],
+      simVersion = SIM_VERSION,
+      day = DAY,
+    ) =>
+      call(
+        'POST',
+        `/weekly/${WEEK}/attempts/${day}/commit`,
+        { simVersion, shiftIndex, ops },
+        token,
+      ),
   };
 }

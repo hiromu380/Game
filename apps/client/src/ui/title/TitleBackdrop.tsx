@@ -6,7 +6,7 @@
  * 演出の強さ「最小」・端末の「動きを減らす」設定では止める。
  */
 import { BALANCE, type MetaProgress } from '@chain-factory/sim';
-import { MASCOT_ASSETS, PART_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../../assets/manifest';
+import { BOLT_BODY_ASSETS, PART_ASSETS, ROCKET_ASSETS, TITLE_ASSETS } from '../../assets/manifest';
 import { useSettings } from '../../settings/SettingsContext';
 
 /** ベルトに載せるパーツ（スイッチ以外を1つずつ。つなぎ目が見えないよう2周分並べる） */
@@ -93,10 +93,10 @@ export function TitleBackdrop({ meta }: { meta: MetaProgress | null }) {
       </div>
       <img
         className="title-backdrop__bolt"
-        src={MASCOT_ASSETS.happy}
+        src={BOLT_BODY_ASSETS.wave}
         alt=""
-        width={72}
-        height={72}
+        width={112}
+        height={130}
       />
       <div className="title-backdrop__belt">
         <div className="title-backdrop__items">
