@@ -1,4 +1,5 @@
 import type { Dohyoiri, KojoWord } from '../balance/ceremony';
+import type { PledgeKind } from '../balance/pledge';
 import type { InjuryPart, Treatment } from '../balance/injury';
 /**
  * ゲームの状態（すべて JSON にそのまま保存できる形）
@@ -350,6 +351,8 @@ export interface Pending {
   takeOver: number[] | null;
   /** 場所の間の出来事（target はけがの弟子など、出来事の相手） */
   happening: { id: HappeningId; target: number | null } | null;
+  /** 後援会との約束の候補（年の初め。選ばずに場所を進めると、約束しない） */
+  pledge: PledgeKind[] | null;
   /**
    * 理事選挙（この場所の後に行う）。recommended: 一門の推薦（理事・副理事の枠。なければ null）。
    * choice: 自分の答え（立候補する・見送る。推薦がなくても立候補できる＝造反）。返事がなければ、推薦があれば立候補・なければ見送り
@@ -360,6 +363,15 @@ export interface Pending {
 }
 
 export interface PlayerState {
+  /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
+  pledge: {
+    kind: PledgeKind;
+    since: number;
+    kk: number;
+    mk: number;
+    baseline: number;
+    done: boolean;
+  } | null;
   stableId: number;
   oyakataId: number;
   generation: number;
@@ -480,6 +492,8 @@ export interface WeekResult {
   injured: number[];
   /** 壁を破った弟子と、上がった素質 */
   walls?: { id: number; inc: number }[];
+  /** その週の好機・逆風（balance/tide.ts の ID。なければない） */
+  tide?: string;
   /** スカウトで会えた人数 */
   met?: number;
 }
@@ -546,6 +560,7 @@ export type JournalEvent =
   | { kind: 'successor'; generation: number; stable: string; shikona: string }
   | { kind: 'kakun'; id: KakunId }
   | { kind: 'facility'; id: FacilityId; level: number }
+  | { kind: 'pledge'; pledge: PledgeKind; result: 'made' | 'kept' | 'broken' }
   | { kind: 'branchSucceeded'; stable: string; shikona: string }
   | { kind: 'branchClosed'; stable: string }
   | { kind: 'diet'; diet: Diet }
@@ -655,6 +670,8 @@ export interface BashoReport {
   stance?: Record<number, Stance>;
   /** 変化で勝った弟子（名声が下がった） */
   henka?: number[];
+  /** 年の終わりに決まった、後援会との約束の結果 */
+  pledge?: { kind: PledgeKind; kept: boolean };
   /** 中日の後に再出場・途中出場した自分の弟子 */
   reentered?: number[];
   /** 幕内の優勝争い（古い結果にはない） */

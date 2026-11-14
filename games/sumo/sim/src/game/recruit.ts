@@ -102,14 +102,21 @@ export function canScout(state: GameState, id: ScoutTripId): boolean {
 }
 
 /** スカウト回りに出る（state を直接変える）。会えた入門希望者の数を返す */
-export function goScouting(state: GameState, id: ScoutTripId): number {
+export function goScouting(
+  state: GameState,
+  id: ScoutTripId,
+  /** 今週の好機（逸材の噂）: 素質の上乗せと人数に足す */
+  extra: { talent?: number; count?: number } = {},
+): number {
   const def = SCOUT_TRIPS[id];
   const rng = createPrng(
     deriveSeed(state.seed, SEED.recruit, state.bashoIndex, 100 + SCOUT_TRIP_IDS.indexOf(id)),
   );
   const scout = state.player.facilities.scout;
   const noise = FACILITY_EFFECTS.scoutNoiseByLevel[scout] ?? FACILITY_EFFECTS.scoutNoiseByLevel[0];
-  const n = rng.range(def.count[0], def.count[1] + (def.foreign ? 0 : scout));
+  const n =
+    rng.range(def.count[0], def.count[1] + (def.foreign ? 0 : scout)) +
+    (def.foreign ? 0 : (extra.count ?? 0));
   const master = state.oyakata.find((o) => o.id === state.player.oyakataId)!;
   const used = usedNames(state);
   for (const c of state.pending.candidates) used.add(c.name);
@@ -124,7 +131,7 @@ export function goScouting(state: GameState, id: ScoutTripId): number {
     used.add(name);
     const c = makeCandidate(rng, state.nextId++, name, state.player.prestige, false, noise, {
       background: def.background,
-      talentBonus: def.talentBonus,
+      talentBonus: def.talentBonus + (extra.talent ?? 0),
       foreign: def.foreign ?? false,
     });
     markContested(state, c);

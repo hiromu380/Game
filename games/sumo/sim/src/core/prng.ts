@@ -69,4 +69,6 @@ export const SEED = {
   koenkai: 15,
   wound: 16,
   prep: 17,
+  tide: 18,
+  pledge: 19,
 } as const;

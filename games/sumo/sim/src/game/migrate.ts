@@ -32,7 +32,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 15) s = v15to16(s);
   if (s.version === 16) s = v16to17(s);
   if (s.version === 17) s = v17to18(s);
+  if (s.version === 18) s = v18to19(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 18 → 19: 後援会との約束（まだしていない）
+ */
+function v18to19(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.pledge = null;
+  s.pending.pledge = null;
+  s.version = 19;
+  return s as unknown as Raw;
 }
 
 /**

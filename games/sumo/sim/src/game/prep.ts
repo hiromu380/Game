@@ -21,6 +21,7 @@ import { note } from './journal';
 import { canScout, goScouting } from './recruit';
 import { isBlocked } from './state';
 import { canAfford, pay } from '../money/pay';
+import { tideDef, tideOf } from './tide';
 
 const STYLES: Style[] = ['oshi', 'yotsu', 'waza'];
 
@@ -35,6 +36,14 @@ const mine = (state: GameState, id: number): Rikishi | undefined =>
 /** 稽古に出られる（けがをしていない） */
 const fit = (r: Rikishi | undefined): r is Rikishi => r !== undefined && r.injury === 0;
 
+/** 今週の費用（好機でただになることがある） */
+export function costOf(
+  state: Pick<GameState, 'seed' | 'bashoIndex' | 'prep'>,
+  kind: 'mune' | 'degeiko',
+): number {
+  return tideDef(tideOf(state, state.prep.week + 1))?.free === kind ? 0 : PREP[kind].cost;
+}
+
 /** その行動を今週選べるか（週が残っていて、相手・お金・条件がそろっている） */
 export function canPrep(state: GameState, action: PrepAction): boolean {
   if (state.gameOver || isBlocked(state) || prepLeft(state) === 0) return false;
@@ -47,11 +56,11 @@ export function canPrep(state: GameState, action: PrepAction): boolean {
       return (
         fit(mine(state, action.id)) &&
         mine(state, action.id)!.policy !== 'rest' &&
-        canAfford(state, PREP.mune.cost)
+        canAfford(state, costOf(state, 'mune'))
       );
     case 'degeiko':
       return (
-        canAfford(state, PREP.degeiko.cost) &&
+        canAfford(state, costOf(state, 'degeiko')) &&
         state.rikishi.some((r) => r.stableId === state.player.stableId && r.injury === 0)
       );
     case 'visit': {
@@ -82,12 +91,29 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
     const rank = ranks.get(r.id);
     return rank && isSekitori(rank) ? playerCtx : lowerCtx;
   };
-  const result: WeekResult = { week, action, gains: [], injured: [] };
+  // 今週の好機・逆風（効く行動の伸び・疲れ・けがに掛かる）
+  const tideId = tideOf(state, week);
+  const tide = tideDef(tideId);
+  const hard =
+    action.kind === 'coach' ||
+    action.kind === 'spar' ||
+    action.kind === 'mune' ||
+    action.kind === 'degeiko';
+  const mult = hard ? (tide?.[action.kind as 'coach' | 'spar' | 'mune' | 'degeiko'] ?? 1) : 1;
+  const tired = tide?.fatigue ?? 1;
+  const risky = tide?.injury ?? 1;
+  const result: WeekResult = {
+    week,
+    action,
+    gains: [],
+    injured: [],
+    ...(tideId ? { tide: tideId } : {}),
+  };
   /** 弟子に稽古をつけて、動いた量を残す */
   const work = (r: Rikishi, f: () => void, fatigue: number) => {
     const before = { ...r.abilities, weight: r.weight, fatigue: r.fatigue };
     f();
-    r.fatigue = clamp(r.fatigue + fatigue, 0, 100);
+    r.fatigue = clamp(r.fatigue + fatigue * (fatigue > 0 ? tired : (tide?.rest ?? 1)), 0, 100);
     result.gains.push({
       id: r.id,
       oshi: round1(r.abilities.oshi - before.oshi),
@@ -100,7 +126,7 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
   const all = state.rikishi.filter((r) => r.stableId === state.player.stableId);
   /** 壁に当たった弟子に負荷をかけると、素質が上がる（稽古の後・けがの前に見る） */
   const wall = (r: Rikishi, amount: number) => {
-    const inc = breakWall(r, amount);
+    const inc = breakWall(r, amount * mult);
     if (inc > 0) result.walls = [...(result.walls ?? []), { id: r.id, inc }];
   };
   switch (action.kind) {
@@ -112,9 +138,9 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
           if (r.policy === 'body') {
             const cap = r.height - GROWTH.weightCapOffset;
             if (r.age < 32) r.weight = round1(Math.min(cap, r.weight + PREP.coach.bodyKg));
-            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.coach.bodyGain);
+            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.coach.bodyGain * mult);
           } else if (r.policy !== 'rest') {
-            extraTraining(r, ctxOf(r), r.policy, PREP.coach.gain);
+            extraTraining(r, ctxOf(r), r.policy, PREP.coach.gain * mult);
           }
         },
         PREP.coach.fatigue,
@@ -139,13 +165,13 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
               r,
               ctxOf(r),
               key,
-              PREP.spar.gain * (stronger ? PREP.spar.strongerBonus : 1),
+              PREP.spar.gain * mult * (stronger ? PREP.spar.strongerBonus : 1),
             ),
           PREP.spar.fatigue,
         );
         wall(r, WALL.spar);
         // 申し合いのけが
-        if (rng.chance(PREP.spar.injury * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
+        if (rng.chance(PREP.spar.injury * risky * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
           r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
           result.injured.push(r.id);
         }
@@ -155,11 +181,11 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
     }
     case 'mune': {
       const r = mine(state, action.id)!;
-      pay(state, PREP.mune.cost);
+      pay(state, costOf(input, 'mune'));
       const key: Style = r.policy === 'body' || r.policy === 'rest' ? 'yotsu' : r.policy;
-      work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.gain), PREP.mune.fatigue);
+      work(r, () => extraTraining(r, ctxOf(r), key, PREP.mune.gain * mult), PREP.mune.fatigue);
       wall(r, WALL.mune);
-      if (rng.chance(PREP.mune.injury * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
+      if (rng.chance(PREP.mune.injury * risky * fragilityOf(r) * ctxOf(r).injuryMultiplier)) {
         r.injury = rng.range(GROWTH.injuryBashoMin, GROWTH.injuryBashoMax);
         result.injured.push(r.id);
         tagInjuries(state);
@@ -167,13 +193,13 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
       break;
     }
     case 'degeiko':
-      pay(state, PREP.degeiko.cost);
+      pay(state, costOf(input, 'degeiko'));
       for (const r of all) {
         if (r.injury > 0) continue;
         work(
           r,
           () => {
-            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.degeiko.gain);
+            for (const s of STYLES) extraTraining(r, ctxOf(r), s, PREP.degeiko.gain * mult);
           },
           PREP.degeiko.fatigue,
         );
@@ -184,13 +210,16 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
       break;
     case 'visit': {
       const p = state.player.koenkai.patrons.find((x) => x.id === action.patronId)!;
-      p.favor = Math.min(100, p.favor + KOENKAI.visitFavor);
+      p.favor = Math.min(100, p.favor + KOENKAI.visitFavor * (tide?.visit ?? 1));
       p.visitedAt = state.bashoIndex;
       state.player.personalMoney -= KOENKAI.visitCost;
       break;
     }
     case 'scout': {
-      result.met = goScouting(state, action.trip);
+      result.met = goScouting(state, action.trip, {
+        talent: tide?.scoutTalent,
+        count: tide?.scoutCount,
+      });
       note(state, { kind: 'scout', trip: action.trip, count: result.met });
       break;
     }

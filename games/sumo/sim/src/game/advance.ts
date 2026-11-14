@@ -35,6 +35,7 @@ import type {
 } from '../model/types';
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
+import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
 import { TACTIC } from '../balance/tactic';
 import { breakWall } from '../career/wall';
 import { makeCandidates, npcRecruits } from './recruit';
@@ -83,6 +84,8 @@ function prepareBasho(state: GameState, report: BashoReport): void {
   state.pending.retireRequests = [];
   // 返事をしなかった治療の方針は、保存療法
   state.pending.treatment = [];
+  // 返事をしなかった後援会との約束は、約束しない
+  state.pending.pledge = null;
   // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
   state.pending.independence = null;
   if (state.pending.happening) applyHappening(state, Number.MAX_SAFE_INTEGER);
@@ -554,6 +557,10 @@ export function advanceBasho(
     r.boost = 1;
   }
 
+  // 後援会との約束: 進み具合を数え、九州場所の後に果たせたかを決める
+  trackPledge(state, report, ranksOf(state.banzuke, state.titles));
+  if (state.bashoIndex % 6 === 5) settlePledge(state, report);
+
   // 6. 年の終わり（九州場所の後）
   if (state.bashoIndex % 6 === 5) yearEnd(state);
 
@@ -562,6 +569,11 @@ export function advanceBasho(
 
   // 7. 次の場所へ
   state.bashoIndex++;
+  // 年の初め（初場所の前）: 後援会との約束を選べる
+  if (state.bashoIndex % 6 === 0 && !state.gameOver) {
+    const offers = pledgeOffers(state, ranksOf(state.banzuke, state.titles));
+    state.pending.pledge = offers.length > 0 ? offers : null;
+  }
   // けがの部位と治療の方針・治ったけがの古傷
   tagInjuries(state);
   if (!state.gameOver) {

@@ -50,7 +50,7 @@ export { canVisit, giftOf } from './stable/koenkai';
 export { danpatsuPlan, danpatsuTier, hasamiCount, type DanpatsuPlan } from './stable/danpatsu';
 export { canScout } from './game/recruit';
 export { PREP } from './balance/prep';
-export { canPrep, doPrep, prepLeft } from './game/prep';
+export { canPrep, costOf, doPrep, prepLeft } from './game/prep';
 export { canAfford, fromSavings, pay } from './money/pay';
 export {
   breakEvenHeads,
@@ -61,4 +61,8 @@ export {
 } from './money/projection';
 export { WALL } from './balance/wall';
 export { TACTIC, TACTICS } from './balance/tactic';
+export { TIDES, TIDE_IDS, type TideId, type TideDef } from './balance/tide';
+export { tideOf, tideDef } from './game/tide';
+export { KACHIKOSHI_SHARE, PLEDGES, PLEDGE_KINDS, type PledgeKind } from './balance/pledge';
+export { answerPledge, bestHeight, pledgeKept, pledgeOffers } from './stable/pledge';
 export { atWall, breakWall, focusOf } from './career/wall';
