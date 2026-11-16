@@ -130,3 +130,33 @@ describe('入門の流れ（前相撲・新序出世披露・教習所）', () =
     );
   });
 });
+
+describe('横綱審議委員会の稽古総見', () => {
+  it('東京場所の前だけ、平幕中位以上の自分の弟子が出る。少し伸びて疲れ、記録に残る', async () => {
+    const { advanceBasho, sokenAttendees, SOKEN, ranksOf: rk } = await import('../src');
+    const g = play(6, 4);
+    const ranks = rk(g.banzuke, g.titles);
+    const r = g.rikishi.find((x) => x.stableId === g.player.stableId)!;
+    r.injury = 0;
+    r.policy = 'oshi';
+    r.abilities.oshi = 40;
+    r.talent = 90;
+    // いちばん上の弟子を前頭3枚目の位置に置く（番付の並びを入れ替える）
+    const m3 = g.banzuke.find((id) => {
+      const k = ranks.get(id)!;
+      return k.title === 'M' && k.number === 3;
+    })!;
+    const a = g.banzuke.indexOf(m3);
+    const b = g.banzuke.indexOf(r.id);
+    if (b >= 0) [g.banzuke[a], g.banzuke[b]] = [g.banzuke[b]!, g.banzuke[a]!];
+    else g.banzuke[a] = r.id;
+    for (const month of [0, 1, 2, 3, 4, 5]) {
+      g.bashoIndex = 12 + month;
+      const tokyo = (SOKEN.months as readonly number[]).includes(month);
+      expect(sokenAttendees(g).includes(r.id)).toBe(tokyo);
+    }
+    g.bashoIndex = 12;
+    const next = advanceBasho(g);
+    expect(next.lastReport!.soken).toContain(r.id);
+  });
+});

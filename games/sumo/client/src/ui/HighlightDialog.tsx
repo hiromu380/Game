@@ -18,6 +18,7 @@ import { PALETTE } from '../art/palette';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import { kojoChoices, type Highlight } from '../highlights';
+import { escortsOf, yumitoriOf } from '../ceremony';
 import { DanpatsuCard } from './DanpatsuCard';
 import { recordValue } from './RecordsPanel';
 import { RaceCard } from './RacePanel';
@@ -72,6 +73,31 @@ function SekitoriChanges({ game, id }: { game: GameState; id: number }) {
           {doki > 0
             ? t('highlight.sekitori.akeni', { n: doki })
             : t('highlight.sekitori.akeniNone')}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
+/** 新横綱の見せ場: 綱打ち・土俵入りの太刀持ちと露払い・弓取式 */
+function YokozunaChanges({ game, id }: { game: GameState; id: number }) {
+  const { t } = useI18n();
+  const { tachi, tsuyu } = escortsOf(game, id);
+  const name = (x: number | null) =>
+    x === null
+      ? t('highlight.yokozuna.escortIchimon')
+      : (game.rikishi.find((r) => r.id === x)?.name ?? '?');
+  const yumi = yumitoriOf(game);
+  return (
+    <div className="highlight__changes">
+      <h3>{t('highlight.yokozuna.changes')}</h3>
+      <ul>
+        <li>{t('highlight.yokozuna.tsuna')}</li>
+        <li>{t('highlight.yokozuna.escort', { tachi: name(tachi), tsuyu: name(tsuyu) })}</li>
+        <li>
+          {yumi === null
+            ? t('highlight.yokozuna.yumitoriNone')
+            : t('highlight.yokozuna.yumitori', { name: name(yumi) })}
         </li>
       </ul>
     </div>
@@ -197,12 +223,12 @@ export function HighlightDialog({
     });
     const seniorName =
       senior === undefined ? null : game.rikishi.find((y) => y.id === senior)!.name;
-    body = t('highlight.shusse.body', {
+    body = `${t('highlight.shusse.body', {
       names: h.ids.map((id) => game.rikishi.find((y) => y.id === id)?.name ?? '?').join('・'),
       lender: seniorName
         ? t('highlight.shusse.sekitori', { name: seniorName })
         : t('highlight.shusse.master'),
-    });
+    })}${t('highlight.shusse.teuchi')}`;
   } else if (h.kind === 'record') {
     title = t('highlight.record.title');
     body = t('highlight.record.body', {
@@ -239,6 +265,7 @@ export function HighlightDialog({
         </div>
         <p className="highlight__body">{body}</p>
         {h.kind === 'promotion' && h.to === 'sekitori' && <SekitoriChanges game={game} id={r.id} />}
+        {h.kind === 'promotion' && h.to === 'Y' && <YokozunaChanges game={game} id={r.id} />}
         {loreOf(h) && <Lore id={loreOf(h)!} />}
 
         {ceremony && !spoken && (

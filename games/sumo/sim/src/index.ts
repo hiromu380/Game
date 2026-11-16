@@ -78,3 +78,5 @@ export {
   type Role,
   type StableRoles,
 } from './stable/roles';
+export { SOKEN } from './balance/ceremony2';
+export { holdSoken, sokenAttendees } from './stable/soken';

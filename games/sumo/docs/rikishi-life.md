@@ -84,7 +84,14 @@
 - 暴力: 2018年10月「暴力決別宣言」。暴力の全面禁止・師匠による部屋内暴力の根絶・新弟子／兄弟子／関取の3段階の研修・コンプライアンス委員会［報］
   - 師匠の暴力は重く処分（2020年 2階級降格と部屋の閉鎖。2026年 元横綱の親方が2階級降格）。宣言の後も起きている［報］
 
-## 9. まだ確かめていないこと
+## 9. 横綱まわりと千秋楽（2026-11-16 追記）
+
+- 稽古総見は東京場所（1・5・9月）の前。基本、幕内は平幕中位以上の参加が義務づけられ、けがなどなら欠席できる［報］
+- 太刀持ちは原則幕内で、できれば横綱と同じ部屋から、いなければ同じ一門の別の部屋から［ブ（Wikipedia）］。露払いも同じ形と言われる
+- 千秋楽の表彰式の後、その場所に出世した新弟子が土俵に上がり、手打ち（出世力士手打式）をして行司を胴上げする（神送りの儀）［報］
+- 弓取式は幕下以下の力士が務める。横綱と同じ部屋や一門の力士が多いと言われる（今回は出典を確かめられていない）
+
+## 10. まだ確かめていないこと
 
 - 結婚と部屋の外での暮らし（関取は結婚すると部屋の外に住めることが多い、と言われるが出典が弱い）
 - 幕下以下の外出・門限の時刻、小遣いの額
@@ -94,6 +101,8 @@
 ---
 
 ## 出典
+
+- 横綱まわり・千秋楽: [日刊ゲンダイ 稽古総見](https://www.nikkan-gendai.com/articles/view/sports/359860)・[Tachimochi（Wikipedia）](https://en.wikipedia.org/wiki/Tachimochi)・[ABEMA 千秋楽の儀式](https://times.abema.tv/articles/-/3617502)・[Japan Times Sumo 101](https://japantimes.co.jp/sports/2018/09/22/sumo/sumo-101-senshuraku)
 
 - 一日・稽古: [nippon.com 伝統美のモダニズム](https://www.nippon.com/ja/views/b02346/)・[nippon.com 動画](https://www.nippon.com/ja/japan-video/vi002001/)・[SPAIA](https://spaia.jp/column/sumo/4087)・[CNN](https://www.cnn.co.jp/showbiz/35081197.html)・[文春](https://bunshun.jp/bungeishunju/articles/h7572)・[Sportiva](https://sportiva.shueisha.co.jp/clm/othersports/other/2015/11/12/post_562/)・[デイリー（かわいがり）](https://www.daily.co.jp/opinion-d/2017/11/26/0010763228.shtml)
 - 番付と待遇: [力士（Wikipedia）](https://ja.wikipedia.org/wiki/%E5%8A%9B%E5%A3%AB)・[大至伸行 note](https://note.com/daishinobuyuki/n/nef8caf14a201)・[応援部.com](https://ouenbu.com/sumo/taigu.html)・[sumo-guide 十両に昇進したら](https://sumo-guide.com/jyuuryou-syoushin)・[THE CHANGE 貴闘力](https://futabasha-change.com/articles/-/1064?page=1)・[マネーポスト 化粧まわし](https://www.moneypost.jp/1239193/0)・[gendai.media](https://gendai.media/articles/-/163303)

@@ -15,6 +15,7 @@ import {
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { Lore } from './Glossary';
+import { ownYokozuna, yumitoriOf } from '../ceremony';
 import { rankLabel } from '../format';
 import { lookOfRikishi } from '../art/Portraits';
 import { RikishiDetail } from './RikishiDetail';
@@ -47,6 +48,8 @@ export function DeshiTab({
   const roles = stableRoles(game, ranks);
   const nameOf = (id: number) => game.rikishi.find((x) => x.id === id)?.name ?? '?';
   const cooks = roles.cooks.size;
+  const yumitori = yumitoriOf(game);
+  const yokozunaName = nameOf(ownYokozuna(game)[0] ?? -1);
   /** 役目の1行（関取は付け人の名前） */
   const roleText = (id: number): string => {
     const role = roles.of.get(id);
@@ -89,6 +92,7 @@ export function DeshiTab({
                   {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
                   {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
                   {r.living && <span className="tag">{t(`living.${r.living}`)}</span>}
+                  {r.id === yumitori && <span className="tag">{t('role.yumitori')}</span>}
                   {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
                   {(() => {
                     const role = roles.of.get(r.id);
@@ -147,6 +151,7 @@ export function DeshiTab({
               <p>{roleText(card.id)}</p>
               {roles.noCook && <p className="role-box__warn">{t('role.desc.noCook')}</p>}
               {card.living && <p>{t(`living.${card.living}.desc`)}</p>}
+              {card.id === yumitori && <p>{t('role.desc.yumitori', { name: yokozunaName })}</p>}
               <Lore
                 id={
                   card.living

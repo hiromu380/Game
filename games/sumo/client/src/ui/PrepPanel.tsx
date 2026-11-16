@@ -5,6 +5,7 @@ import {
   atWall,
   canPrep,
   costOf,
+  sokenAttendees,
   tideOf,
   TIDES,
   fromSavings,
@@ -280,6 +281,15 @@ export function PrepPanel({
           </span>
           <strong>{t(`tide.${tideId}.name` as MessageKey)}</strong>
           <span>{t(`tide.${tideId}.desc` as MessageKey)}</span>
+        </p>
+      )}
+      {left > 0 && sokenAttendees(game).length > 0 && (
+        <p className="prep__soken">
+          {t('soken.line', {
+            names: sokenAttendees(game)
+              .map((id) => game.rikishi.find((r) => r.id === id)?.name ?? '?')
+              .join('・'),
+          })}
         </p>
       )}
       <MoneyOutlook game={game} />

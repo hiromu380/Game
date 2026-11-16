@@ -36,6 +36,7 @@ import type {
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
 import { roleEffect, stableRoles } from '../stable/roles';
+import { holdSoken } from '../stable/soken';
 import { onNewSekitori, setKesho } from '../stable/kesho';
 import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
 import { TACTIC } from '../balance/tactic';
@@ -96,6 +97,8 @@ function prepareBasho(state: GameState, report: BashoReport): void {
   // 返事をしなかった取り合いの新弟子は、ライバルの部屋に入る
   rivalSignsCandidates(state);
   state.pending.candidates = [];
+  // 東京場所の前は、横綱審議委員会の稽古総見
+  holdSoken(state, report);
   // 架空の部屋の稽古の方針
   const styleOfStable = new Map(state.stables.map((s) => [s.id, s.style]));
   for (const r of state.rikishi) {
