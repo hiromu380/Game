@@ -10,7 +10,7 @@ import {
 } from '@ichimon/sim';
 import { makeT } from '../src/i18n';
 import { reached, targetOf, targetText, targetWins } from '../src/targets';
-import { play } from '../../sim/test/play';
+import { autoStep, play } from '../../sim/test/play';
 
 const t = makeT('ja');
 
@@ -73,7 +73,13 @@ describe('弟子の近い目標', () => {
   });
 
   it('関脇は直近3場所の三役の勝ち星から、大関に要る勝ち星を出す。大関のカド番・横綱', () => {
-    const g = play(5, 60);
+    // 関脇と大関がそろっている場所を探す（世界の番付しだいなので）
+    let g = play(5, 60);
+    const has = (x: GameState, t: string) => {
+      const ranks = ranksOf(x.banzuke, x.titles);
+      return x.banzuke.some((id) => ranks.get(id)?.title === t);
+    };
+    for (let i = 0; i < 30 && !(has(g, 'S') && has(g, 'O')); i++) g = autoStep(g);
     const s = at(g, (k) => k.title === 'S');
     const sek = { ...s.r, recent: [rec(s.ranks.get(s.r.id)!, 12), rec(s.ranks.get(s.r.id)!, 11)] };
     expect(targetOf(g, sek, s.ranks)!.target).toEqual({ kind: 'up', to: 'ozeki', wins: 10 });

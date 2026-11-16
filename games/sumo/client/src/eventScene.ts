@@ -46,6 +46,9 @@ put('room_oobeya', [
   'leakyRoof',
 ]);
 // 食べ物 → 厨房
+put('room_genkan', ['drivingLicense', 'curfew', 'calligraphy']);
+put('room_oobeya', ['violenceRumor', 'lateNight', 'shitakuPhone', 'tsukebitoCare']);
+put('room_ousetsu', ['jinku']);
 put('room_kitchen', ['riceGift', 'chankoVideo', 'newChanko', 'nutritionist']);
 // 身内の来訪 → 応接間・居間
 put('room_ousetsu', ['parentsVisit', 'wedding']);

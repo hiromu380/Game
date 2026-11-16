@@ -30,6 +30,17 @@ import { Lore } from './Glossary';
 import { keikobaLayout } from '../art/sprites/keikoba';
 import { happeningPicture, OTHER_PICTURE, type EventPicture } from '../eventScene';
 
+/** 出来事に添える、しきたりの1行（手帖の言葉） */
+const HAPPENING_LORE: Partial<Record<string, string>> = {
+  drivingLicense: 'unten',
+  violenceRumor: 'boryoku',
+  lateNight: 'tsukebito',
+  tsukebitoCare: 'tsukebito',
+  calligraphy: 'kyoshujo',
+  jinku: 'kyoshujo',
+  curfew: 'asageiko',
+};
+
 /** 約束の選択肢のアイコン */
 const PLEDGE_ICON = {
   kachikoshi: 'ui_muscle',
@@ -155,6 +166,9 @@ export function EventDialogs({
       t('event.title'),
       <>
         <HappeningPanel game={game} setGame={setGame} />
+        {game.pending.happening && HAPPENING_LORE[game.pending.happening.id] && (
+          <Lore id={HAPPENING_LORE[game.pending.happening.id]!} />
+        )}
         {result && (
           <div className="modal__actions">
             <button

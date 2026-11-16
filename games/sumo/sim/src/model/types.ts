@@ -286,7 +286,15 @@ export type HappeningId =
   | 'famousDoctor'
   | 'surgery'
   | 'rivalDemegeiko'
-  | 'rivalTaunt';
+  | 'rivalTaunt'
+  | 'drivingLicense'
+  | 'violenceRumor'
+  | 'lateNight'
+  | 'curfew'
+  | 'calligraphy'
+  | 'jinku'
+  | 'tsukebitoCare'
+  | 'shitakuPhone';
 
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';

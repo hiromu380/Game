@@ -709,4 +709,104 @@ export const HAPPENINGS: readonly HappeningDef[] = [
       { key: 'conservative', effect: {} },
     ],
   },
+  // ── 規律と暮らし（docs/rikishi-life.md）──
+  {
+    id: 'drivingLicense',
+    requires: 'sekitori',
+    target: 'sekitoriAdult',
+    weight: 1.2,
+    options: [
+      { key: 'licenseOnly', group: 'target', effect: { boost: 1.03 } },
+      {
+        key: 'lookAway',
+        effect: {},
+        chance: { p: 0.35, effect: { prestige: -3, stableMoney: -500_000 } },
+      },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'violenceRumor',
+    requires: 'many',
+    weight: 0.8,
+    options: [
+      { key: 'report', effect: { prestige: -0.5 } },
+      {
+        key: 'hush',
+        effect: {},
+        chance: { p: 0.3, effect: { prestige: -5, stableMoney: -1_000_000 } },
+      },
+      { key: 'decline', group: 'lower', effect: { fatigue: 3 } },
+    ],
+  },
+  {
+    id: 'lateNight',
+    requires: 'sekitori',
+    target: 'sekitori',
+    weight: 1.2,
+    options: [
+      { key: 'stop', group: 'lower', effect: { fatigue: -4 } },
+      { key: 'decline', group: 'lower', effect: { fatigue: 8 } },
+    ],
+  },
+  {
+    id: 'curfew',
+    requires: 'none',
+    target: 'young',
+    weight: 1.5,
+    options: [
+      { key: 'extraChores', group: 'target', effect: { fatigue: 8, boost: 1.05 } },
+      { key: 'scold', group: 'target', effect: { fatigue: 2 } },
+      {
+        key: 'decline',
+        effect: {},
+        chance: { p: 0.25, effect: { prestige: -0.5 } },
+      },
+    ],
+  },
+  {
+    id: 'calligraphy',
+    requires: 'none',
+    target: 'young',
+    weight: 1,
+    options: [
+      { key: 'frame', effect: { prestige: 0.3 } },
+      { key: 'praise', group: 'target', effect: { boost: 1.05 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jinku',
+    requires: 'none',
+    target: 'lower',
+    weight: 1,
+    options: [
+      { key: 'sing', group: 'target', effect: { stableMoney: 200_000, prestige: 0.5, fatigue: 4 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'tsukebitoCare',
+    requires: 'sekitori',
+    target: 'lower',
+    weight: 1.2,
+    options: [
+      { key: 'praise', group: 'target', effect: { boost: 1.08, fatigue: 3 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'shitakuPhone',
+    requires: 'none',
+    target: 'young',
+    weight: 0.8,
+    options: [
+      { key: 'confiscate', group: 'target', effect: { fatigue: 2 } },
+      {
+        key: 'decline',
+        effect: {},
+        chance: { p: 0.3, effect: { prestige: -1 } },
+      },
+    ],
+  },
 ];
