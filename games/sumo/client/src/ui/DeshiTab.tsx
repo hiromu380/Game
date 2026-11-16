@@ -105,7 +105,10 @@ export function DeshiTab({
                   )}
                 </span>
                 <span className="deshi__sub">
-                  {t(`style.${styleOf(r.abilities)}`)}・{t(`policy.${r.policy}`)}
+                  {t('deshi.sub', {
+                    style: t(`style.${styleOf(r.abilities)}`),
+                    policy: t(`policy.${r.policy}`),
+                  })}
                 </span>
                 <span className="deshi__goal">{info ? targetText(t, info.target) : ''}</span>
                 <span

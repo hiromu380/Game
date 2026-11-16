@@ -1800,5 +1800,6 @@
   "journal.heyatsukiJoin": "Welcomed {name} (former {shikona}) from {from} as an attached elder.",
   "heyatsuki.vacant": "None",
   "heyatsuki.note": "Attached elders are former deshi of this stable who took an elder name on retiring (elders are not brought in from other stables)",
-  "uragata.cap": "Association-wide: {count}/{cap} (applicants come only when there is an opening)"
+  "uragata.cap": "Association-wide: {count}/{cap} (applicants come only when there is an opening)",
+  "deshi.sub": "{style} style · practising {policy}"
 }

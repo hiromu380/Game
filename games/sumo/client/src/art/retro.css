@@ -940,11 +940,17 @@ body.has-modal {
 }
 @media (max-width: 640px) {
   .deshi__row {
-    grid-template-columns: minmax(0, 1fr) 72px;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       'rank fat'
       'name name'
       'sub goal';
+  }
+  .deshi__fatigue {
+    width: 72px;
+  }
+  .deshi__goal {
+    white-space: nowrap;
   }
 }
 .deshi__sheet {
@@ -1392,4 +1398,18 @@ body.has-modal {
 .uragata__pic.is-vacant {
   opacity: 0.35;
   filter: grayscale(1);
+}
+.deshi__fatigue {
+  justify-self: end;
+}
+@media (max-width: 640px) {
+  /* 好機の札は1行に詰める（コマンドまでスクロールせずに見える） */
+  .prep__tide {
+    font-size: 0.8em;
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+  .prep__tide .ui-icon {
+    display: none;
+  }
 }

@@ -1800,5 +1800,6 @@
   "journal.heyatsukiJoin": "{from}部屋から、{name}親方（元{shikona}）を部屋付きに迎える。",
   "heyatsuki.vacant": "いない",
   "heyatsuki.note": "部屋付きの親方は、この部屋から引退して年寄名跡を継いだ元弟子が残る（よその部屋から迎えることはない）",
-  "uragata.cap": "協会全体で {count}／{cap}人（定員に空きがあるときだけ志望者が来る）"
+  "uragata.cap": "協会全体で {count}／{cap}人（定員に空きがあるときだけ志望者が来る）",
+  "deshi.sub": "{style}型・稽古は{policy}"
 }
