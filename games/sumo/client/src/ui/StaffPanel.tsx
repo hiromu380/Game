@@ -20,6 +20,7 @@ import {
 import { useI18n } from '../i18n';
 import { rankName } from '../format';
 import { Lore } from './Glossary';
+import { sprite } from '../art/sprites';
 
 function Skill({ skill }: { skill: number }) {
   const { t } = useI18n();
@@ -87,8 +88,19 @@ export function StaffPanel({
       <ul className="plain-list">
         {URAGATA_ROLES.map((role) => {
           const u = uragataOf(game, role);
+          const pic = sprite(`person_${role}`);
           return (
             <li key={role} className="row">
+              {pic && (
+                <img
+                  className={`uragata__pic ${u ? '' : 'is-vacant'}`}
+                  src={pic.url}
+                  alt=""
+                  aria-hidden="true"
+                  width={pic.size[0] * 2}
+                  height={pic.size[1] * 2}
+                />
+              )}
               <div className="row__main">
                 <strong>{t(`uragata.${role}.name`)}</strong>
                 <span className="muted">{t(`uragata.${role}.desc`)}</span>

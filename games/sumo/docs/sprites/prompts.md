@@ -856,3 +856,73 @@ Draw a single 絆創膏 as a small flat game icon, front view, thick dark outlin
 ```
 Draw a single お守り as a small flat game icon, front view, thick dark outline, flat colors.
 ```
+
+## 裏方・観客・小物（取り込んだ絵）
+
+依頼者が作った人と小物の一覧の絵（2026-11-16 受領、10枚）から、使うものだけを切り出した。
+
+### `person_tokoyama` — 床山（座って髷を結う道具を手に）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 床山, thick dark outline, flat colors.
+```
+
+### `person_gyoji` — 行司（装束に軍配）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 行司, thick dark outline, flat colors.
+```
+
+### `person_yobidashi` — 呼出（触れ太鼓を打つ）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 呼出, thick dark outline, flat colors.
+```
+
+### `person_yobidashi_sweep` — 呼出（ほうきで土俵を掃く）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 呼出, thick dark outline, flat colors.
+```
+
+### `fan_towel` — 観客（タオルを掲げる）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 観客, thick dark outline, flat colors.
+```
+
+### `fan_cheer` — 観客（こぶしを上げる）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 観客, thick dark outline, flat colors.
+```
+
+### `fan_banzuke` — 観客（番付を読む）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 観客, thick dark outline, flat colors.
+```
+
+### `fan_camera` — 観客（カメラを構える）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 観客, thick dark outline, flat colors.
+```
+
+### `fan_shout` — 観客（声援を送る）（優先 B・1コマ）
+
+```
+Draw a single chibi figure, isometric: 観客, thick dark outline, flat colors.
+```
+
+### `ui_kesho` — 化粧まわし（掛け台に3本）（優先 B・1コマ）
+
+```
+Draw a small flat game icon: 化粧まわし, thick dark outline, flat colors.
+```
+
+### `ui_tegata` — 手形（関取の手形）（優先 B・1コマ）
+
+```
+Draw a small flat game icon: 手形, thick dark outline, flat colors.
+```

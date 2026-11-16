@@ -232,7 +232,10 @@ export function EventDialogs({
     return box(
       t('kesho.title'),
       <>
-        <h2>{t('kesho.title')}</h2>
+        <h2>
+          <Icon id="ui_kesho" scale={2} />
+          {t('kesho.title')}
+        </h2>
         <p>{t('kesho.lead', { name: kr.name })}</p>
         <Lore id="kesho" />
         <div className="pledge__opts">
@@ -264,6 +267,16 @@ export function EventDialogs({
       t('uragata.applyTitle'),
       <>
         <h2>{t('uragata.applyTitle')}</h2>
+        {sprite(`person_${ura.role}`) && (
+          <img
+            className="uragata__pic"
+            src={sprite(`person_${ura.role}`)!.url}
+            alt=""
+            aria-hidden="true"
+            width={sprite(`person_${ura.role}`)!.size[0] * 2}
+            height={sprite(`person_${ura.role}`)!.size[1] * 2}
+          />
+        )}
         <p>
           {t('uragata.applyBody', {
             role: t(`uragata.${ura.role}.name`),

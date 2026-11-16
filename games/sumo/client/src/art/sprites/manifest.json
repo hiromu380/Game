@@ -104,6 +104,31 @@
     "size": [72, 72],
     "anchor": [36, 71]
   },
+  "fan_banzuke": {
+    "files": ["fan_banzuke.png"],
+    "size": [18, 38],
+    "anchor": [9, 37]
+  },
+  "fan_camera": {
+    "files": ["fan_camera.png"],
+    "size": [18, 38],
+    "anchor": [9, 37]
+  },
+  "fan_cheer": {
+    "files": ["fan_cheer.png"],
+    "size": [20, 38],
+    "anchor": [10, 37]
+  },
+  "fan_shout": {
+    "files": ["fan_shout.png"],
+    "size": [18, 38],
+    "anchor": [9, 37]
+  },
+  "fan_towel": {
+    "files": ["fan_towel.png"],
+    "size": [26, 38],
+    "anchor": [13, 37]
+  },
   "fence_corner": {
     "files": ["fence_corner.png"],
     "size": [112, 112],
@@ -224,6 +249,11 @@
     "size": [23, 40],
     "anchor": [11, 39]
   },
+  "person_gyoji": {
+    "files": ["person_gyoji.png"],
+    "size": [20, 44],
+    "anchor": [10, 43]
+  },
   "person_lie": {
     "files": ["person_lie.png"],
     "size": [38, 26],
@@ -268,6 +298,21 @@
     "files": ["person_teppo.png"],
     "size": [24, 35],
     "anchor": [12, 34]
+  },
+  "person_tokoyama": {
+    "files": ["person_tokoyama.png"],
+    "size": [32, 32],
+    "anchor": [16, 31]
+  },
+  "person_yobidashi": {
+    "files": ["person_yobidashi.png"],
+    "size": [22, 42],
+    "anchor": [11, 41]
+  },
+  "person_yobidashi_sweep": {
+    "files": ["person_yobidashi_sweep.png"],
+    "size": [24, 42],
+    "anchor": [12, 41]
   },
   "phonebox": {
     "files": ["phonebox.png"],
@@ -459,6 +504,11 @@
     "size": [20, 20],
     "anchor": [10, 19]
   },
+  "ui_kesho": {
+    "files": ["ui_kesho.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
   "ui_letter": {
     "files": ["ui_letter.png"],
     "size": [20, 20],
@@ -481,6 +531,11 @@
   },
   "ui_taru": {
     "files": ["ui_taru.png"],
+    "size": [20, 20],
+    "anchor": [10, 19]
+  },
+  "ui_tegata": {
+    "files": ["ui_tegata.png"],
     "size": [20, 20],
     "anchor": [10, 19]
   },

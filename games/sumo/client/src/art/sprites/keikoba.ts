@@ -69,6 +69,12 @@ export function keikobaLayout(
     // 器具つきの1枚絵がなければ、改修2段目から土俵の手前の床に器具を置く
     if (dojo >= WEIGHTS_FROM_DOJO && !gym)
       for (const p of GYM_PROPS) if (has(p.sprite)) out.push(p);
+    // 部屋の呼出が、手前で土俵まわりを掃く
+    if (
+      (game.player.uragata ?? []).some((u) => u.role === 'yobidashi') &&
+      has('person_yobidashi_sweep')
+    )
+      out.push({ sprite: 'person_yobidashi_sweep', x: 272, y: 186 });
     return out;
   }
   const out: Placed[] = [
@@ -81,7 +87,7 @@ export function keikobaLayout(
   return out;
 }
 
-/** 巡業の舞台: 外に置いた土俵と吊り屋根・紅白幕・テント（春と秋は赤、夏と冬は藍白）・幟 */
+/** 巡業の舞台: 外に置いた土俵と吊り屋根・紅白幕・テント（春と秋は赤、夏と冬は藍白）・幟・観客 */
 export const JUNGYO_STAGE: Stage = { width: 440, height: 310 };
 export const JUNGYO_BASE = 'dohyo_honbasho';
 
@@ -101,5 +107,11 @@ export function jungyoLayout(
     { sprite: 'nobori', x: 395, y: 302 },
     { sprite: 'yatai_red', x: 96, y: 308 },
     { sprite: 'yatai_green', x: 344, y: 308 },
+    // 土俵を囲む観客（取り込んだ絵があれば）
+    { sprite: 'fan_banzuke', x: 150, y: 309 },
+    { sprite: 'fan_towel', x: 178, y: 309 },
+    { sprite: 'fan_camera', x: 262, y: 309 },
+    { sprite: 'fan_cheer', x: 288, y: 309 },
+    { sprite: 'fan_shout', x: 312, y: 306 },
   ].filter((p) => has(p.sprite));
 }

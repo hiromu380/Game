@@ -59,6 +59,13 @@ export function compoundPieces(
     { sprite: 'bicycle_black', gx: 6.6, gy: 17, w: 1, d: 0.6 },
     { sprite: 'bench', gx: 20.5, gy: 16, w: 1.5, d: 1 },
   ];
+  // 部屋の裏方（迎えていれば）: 呼出は門の内で触れ太鼓、行司は母屋の前、床山は母屋の縁先
+  const ura = new Set((game.player.uragata ?? []).map((u) => u.role));
+  if (ura.has('yobidashi'))
+    out.push({ sprite: 'person_yobidashi', gx: 15, gy: 16.6, w: 0.6, d: 0.6 });
+  if (ura.has('gyoji')) out.push({ sprite: 'person_gyoji', gx: 12.2, gy: 11.6, w: 0.6, d: 0.6 });
+  if (ura.has('tokoyama'))
+    out.push({ sprite: 'person_tokoyama', gx: 7.2, gy: 12.6, w: 0.8, d: 0.8 });
   // 弟子が多い部屋は自転車がもう1台
   if (game.rikishi.filter((r) => r.stableId === game.player.stableId).length >= 6)
     out.push({ sprite: 'bicycle_red', gx: 5.6, gy: 17, w: 1, d: 0.6 });

@@ -11,6 +11,7 @@ import {
   type KojoWord,
 } from '@ichimon/sim';
 import { Lore } from './Glossary';
+import { Icon } from '../art/Icon';
 import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, money, rankName } from '../format';
 import { RikishiPortrait } from '../art/Portraits';
@@ -62,7 +63,10 @@ function SekitoriChanges({ game, id }: { game: GameState; id: number }) {
   const doki = dokiOf(game, id);
   return (
     <div className="highlight__changes">
-      <h3>{t('highlight.sekitori.changes')}</h3>
+      <h3>
+        <Icon id="ui_tegata" />
+        {t('highlight.sekitori.changes')}
+      </h3>
       <ul>
         <li>{t('highlight.sekitori.room')}</li>
         <li>{t('highlight.sekitori.pay', { yen: money(t, SEKITORI_MONTHLY.juryo, lang) })}</li>
