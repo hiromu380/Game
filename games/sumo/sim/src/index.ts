@@ -66,3 +66,6 @@ export { tideOf, tideDef } from './game/tide';
 export { KACHIKOSHI_SHARE, PLEDGES, PLEDGE_KINDS, type PledgeKind } from './balance/pledge';
 export { answerPledge, bestHeight, pledgeKept, pledgeOffers } from './stable/pledge';
 export { atWall, breakWall, focusOf } from './career/wall';
+export { KESHO, KESHO_FROM, type KeshoFrom } from './balance/kesho';
+export { answerKesho, dokiOf, joinedAt, keshoOptions, keshoPatron } from './stable/kesho';
+export { SEKITORI_MONTHLY } from './balance/money';

@@ -33,7 +33,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 16) s = v16to17(s);
   if (s.version === 17) s = v17to18(s);
   if (s.version === 18) s = v18to19(s);
+  if (s.version === 19) s = v19to20(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 19 → 20: 新十両の化粧まわし（まだ聞いていない）
+ */
+function v19to20(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.pending.kesho = [];
+  s.version = 20;
+  return s as unknown as Raw;
 }
 
 /**

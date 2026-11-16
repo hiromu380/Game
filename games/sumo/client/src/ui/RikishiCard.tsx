@@ -106,6 +106,11 @@ export function RikishiCard({
             </span>
           )}
           {last && <span>{t('rikishi.last', { record: recordLabel(t, last) })}</span>}
+          {r.kesho && (
+            <span>
+              {t('card.kesho')}: {t(`card.kesho.${r.kesho.from}`, { by: r.kesho.by ?? '' })}
+            </span>
+          )}
           {(knownTraits(r) ?? []).map((tr) => (
             <span key={tr} className="tag tag--trait" title={t(`trait.${tr}.desc` as MessageKey)}>
               ◆{t(`trait.${tr}.name` as MessageKey)}

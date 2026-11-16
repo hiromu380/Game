@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import {
   acceptCandidate,
+  answerKesho,
   answerPledge,
+  KESHO,
+  keshoOptions,
+  keshoPatron,
   answerRetirement,
   KACHIKOSHI_SHARE,
   PLEDGES,
@@ -35,7 +39,7 @@ const PLEDGE_ICON = {
 
 /**
  * 返事が要るものを1件ずつ窓で出す（部屋の画面には並べない）。順に: 引退の申し出 → けがの治療の方針 → 場所の間の出来事 →
- * 理事選挙 → 独立の申し出 → 後援会との約束（年の初め） → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
+ * 理事選挙 → 独立の申し出 → 新十両の化粧まわし → 後援会との約束（年の初め） → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
  */
 export function EventDialogs({
   game,
@@ -196,6 +200,39 @@ export function EventDialogs({
       <IndependencePanel game={game} ranks={ranks} setGame={setGame} />,
       OTHER_PICTURE.independence,
     );
+
+  // 新十両の化粧まわし
+  const keshoId = game.pending.kesho[0];
+  const kr = keshoId === undefined ? undefined : byId(keshoId);
+  if (kr) {
+    const patron = keshoPatron(game);
+    return box(
+      t('kesho.title'),
+      <>
+        <h2>{t('kesho.title')}</h2>
+        <p>{t('kesho.lead', { name: kr.name })}</p>
+        <Lore id="kesho" />
+        <div className="pledge__opts">
+          {keshoOptions(game).map((k) => (
+            <button
+              key={k}
+              className="button pledge__opt"
+              onClick={() => setGame(answerKesho(game, kr.id, k))}
+            >
+              <strong>
+                {t(`kesho.${k}.name`, {
+                  surname: patron?.surname ?? '',
+                  yen: money(t, KESHO.cost, lang),
+                })}
+              </strong>
+              <small>{t(`kesho.${k}.desc`, { surname: patron?.surname ?? '' })}</small>
+            </button>
+          ))}
+        </div>
+      </>,
+      OTHER_PICTURE.pledge,
+    );
+  }
 
   // 後援会との約束（年の初め）
   if (game.pending.pledge)

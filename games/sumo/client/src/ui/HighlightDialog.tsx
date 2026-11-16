@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   DOHYOIRI,
+  dokiOf,
   giveKojo,
+  SEKITORI_MONTHLY,
   ranksOf,
   type BashoReport,
   type Dohyoiri,
@@ -10,7 +12,7 @@ import {
 } from '@ichimon/sim';
 import { Lore } from './Glossary';
 import { useI18n, type MessageKey } from '../i18n';
-import { bashoName, rankName } from '../format';
+import { bashoName, money, rankName } from '../format';
 import { RikishiPortrait } from '../art/Portraits';
 import { PALETTE } from '../art/palette';
 import { useSettings } from '../settings';
@@ -53,6 +55,29 @@ function Cup() {
 }
 
 /** 場所の見せ場（自分の部屋の昇進・優勝・三賞）を1枚ずつ。大関・横綱は昇進伝達式で口上を選ぶ */
+/** 新十両の見せ場: 十両で変わること（明け荷は同期生から） */
+function SekitoriChanges({ game, id }: { game: GameState; id: number }) {
+  const { t, lang } = useI18n();
+  const doki = dokiOf(game, id);
+  return (
+    <div className="highlight__changes">
+      <h3>{t('highlight.sekitori.changes')}</h3>
+      <ul>
+        <li>{t('highlight.sekitori.room')}</li>
+        <li>{t('highlight.sekitori.pay', { yen: money(t, SEKITORI_MONTHLY.juryo, lang) })}</li>
+        <li>{t('highlight.sekitori.tsukebito')}</li>
+        <li>{t('highlight.sekitori.hair')}</li>
+        <li>{t('highlight.sekitori.dress')}</li>
+        <li>
+          {doki > 0
+            ? t('highlight.sekitori.akeni', { n: doki })
+            : t('highlight.sekitori.akeniNone')}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 /** 見せ場に添える、しきたりの1行 */
 function loreOf(h: Highlight): string | null {
   if (h.kind === 'promotion')
@@ -191,6 +216,7 @@ export function HighlightDialog({
           <RikishiPortrait r={r} rank={rank} variant="full" size={120} />
         </div>
         <p className="highlight__body">{body}</p>
+        {h.kind === 'promotion' && h.to === 'sekitori' && <SekitoriChanges game={game} id={r.id} />}
         {loreOf(h) && <Lore id={loreOf(h)!} />}
 
         {ceremony && !spoken && (

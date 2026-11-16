@@ -35,6 +35,7 @@ import type {
 } from '../model/types';
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
+import { onNewSekitori, setKesho } from '../stable/kesho';
 import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
 import { TACTIC } from '../balance/tactic';
 import { breakWall } from '../career/wall';
@@ -86,6 +87,8 @@ function prepareBasho(state: GameState, report: BashoReport): void {
   state.pending.treatment = [];
   // 返事をしなかった後援会との約束は、約束しない
   state.pending.pledge = null;
+  // 返事をしなかった化粧まわしは、師匠のを借りる
+  for (const id of [...state.pending.kesho]) setKesho(state, id, 'borrowed');
   // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
   state.pending.independence = null;
   if (state.pending.happening) applyHappening(state, Number.MAX_SAFE_INTEGER);
@@ -412,6 +415,7 @@ export function advanceBasho(
             ? 'sekitori'
             : null;
     if (promo) report.promotions.push({ id, to: promo });
+    if (firstSekitori && r.stableId === state.player.stableId) onNewSekitori(state, r);
     // 一門の部屋（本家・分家）の成績は、師匠の系譜図の節と名声に数える（分家は名声の一部だけ）
     const node = masterNodeOf(state, r.stableId);
     if (node) {

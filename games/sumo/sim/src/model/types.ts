@@ -1,3 +1,4 @@
+import type { KeshoFrom } from '../balance/kesho';
 import type { Dohyoiri, KojoWord } from '../balance/ceremony';
 import type { PledgeKind } from '../balance/pledge';
 import type { InjuryPart, Treatment } from '../balance/injury';
@@ -121,6 +122,8 @@ export interface Rikishi {
   kojo?: KojoWord;
   /** 横綱の土俵入りの型 */
   dohyoiri?: Dohyoiri;
+  /** 化粧まわしの出どころ（関取になったときに決める。by はタニマチの名字） */
+  kesho?: { from: KeshoFrom; by?: string };
 }
 
 /** 場所ごとの成績（番付の上からの順位つき） */
@@ -360,6 +363,8 @@ export interface Pending {
   election: { recommended: 'riji' | 'fukuRiji' | null; choice: 'run' | 'stay' | null } | null;
   /** けがの治療の方針を聞いている自分の弟子（返事をしなければ保存療法） */
   treatment: number[];
+  /** 化粧まわしの手配を聞いている新しい関取（返事をしなければ師匠のを借りる） */
+  kesho: number[];
 }
 
 export interface PlayerState {
@@ -592,6 +597,10 @@ export type JournalEvent =
   | { kind: 'injury'; event: 'surgery' | 'chronic'; shikona: string; part: InjuryPart }
   /** 引退相撲・断髪式（はさみを入れた人数） */
   | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
+  /** 新しい関取に、同期生から明け荷が届いた（doki: 今も土俵にいる同期生の数） */
+  | { kind: 'akeni'; shikona: string; doki: number }
+  /** 化粧まわしの手配 */
+  | { kind: 'kesho'; shikona: string; from: KeshoFrom; by?: string }
   | { kind: 'staffHire'; role: StaffRole; name: string }
   | { kind: 'staffLeave'; role: StaffRole; name: string; retired: boolean }
   /** セーブの変換で作った日誌の始まり（これより前の細かい出来事は残っていない） */

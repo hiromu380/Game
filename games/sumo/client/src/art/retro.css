@@ -1342,3 +1342,16 @@ body.has-modal {
 .lore__tag {
   margin: 0 6px 0 0;
 }
+/* 新十両で変わること */
+.highlight__changes {
+  text-align: left;
+  margin: 6px 0;
+}
+.highlight__changes h3 {
+  margin: 0 0 4px;
+  font-size: 1em;
+}
+.highlight__changes ul {
+  margin: 0;
+  padding-left: 1.2em;
+}

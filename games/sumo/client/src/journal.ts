@@ -25,6 +25,9 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'happening':
     case 'facility':
     case 'diet':
+    case 'akeni':
+    case 'kesho':
+      return 'stable';
     case 'staffHire':
     case 'staffLeave':
       return 'business';
@@ -161,6 +164,12 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t(`journal.danpatsu.${e.venue}`, { shikona: e.shikona, hasami: e.hasami });
     case 'diet':
       return t('journal.diet', { name: t(`diet.${e.diet}.name`) });
+    case 'akeni':
+      return e.doki > 0
+        ? t('journal.akeni', { shikona: e.shikona, doki: e.doki })
+        : t('journal.akeniNone', { shikona: e.shikona });
+    case 'kesho':
+      return t(`journal.kesho.${e.from}`, { shikona: e.shikona, by: e.by ?? '' });
     case 'staffHire':
       return t('journal.staffHire', { name: e.name, role: t(`staff.${e.role}.name`) });
     case 'staffLeave':
