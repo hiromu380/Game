@@ -35,7 +35,20 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 18) s = v18to19(s);
   if (s.version === 19) s = v19to20(s);
   if (s.version === 20) s = v20to21(s);
+  if (s.version === 21) s = v21to22(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 21 → 22: 雑用の免除をやめた
+ */
+function v21to22(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as Record<string, unknown> & {
+    player: Record<string, unknown>;
+  };
+  delete s.player.exempt;
+  s.version = 22;
+  return s as unknown as Raw;
 }
 
 /**
@@ -43,7 +56,7 @@ export function migrateSave(raw: unknown): GameState | null {
  */
 function v20to21(raw: Raw): Raw {
   const s = JSON.parse(JSON.stringify(raw)) as GameState;
-  s.player.exempt = [];
+  (s.player as unknown as Record<string, unknown>).exempt = [];
   s.version = 21;
   return s as unknown as Raw;
 }

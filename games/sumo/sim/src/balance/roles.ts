@@ -22,3 +22,13 @@ export const ROLES = {
   kyoshujoBasho: 3,
   kyoshujoGrowth: 1.05,
 } as const;
+
+/**
+ * 部屋の外での暮らし（関取だけ。docs/rikishi-life.md）: 一人暮らしは疲れが抜けやすいが、親方の目が届きにくく伸びが少し落ちる。
+ * 所帯持ちは家で休めて疲れがよく抜ける。関取から落ちると、一人暮らしは部屋に戻る（所帯持ちはそのまま。推定）
+ */
+export const LIVING = {
+  alone: { growth: 0.97, recovery: 2 },
+  married: { growth: 1, recovery: 3 },
+} as const;
+export type Living = keyof typeof LIVING;

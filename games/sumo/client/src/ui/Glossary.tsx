@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { GameState } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { GLOSSARY_GROUPS, seenTerms, TERMS } from '../glossary';
+import { DRESS_STEPS } from '../dress';
 
 /** 相撲の手帖: 出会った言葉と、その説明（まだのものは「？？？」） */
 export function GlossaryPanel({ game }: { game: GameState }) {
@@ -38,9 +39,32 @@ export function GlossaryPanel({ game }: { game: GameState }) {
               ),
             )}
           </dl>
+          {g === 'gear' && seen.has('mina') && <DressTable />}
         </details>
       ))}
     </section>
+  );
+}
+
+/** 手帖の補足: 番付ごとの身なり（下の段から順に許される物が増える） */
+function DressTable() {
+  const { t } = useI18n();
+  return (
+    <div className="glossary__extra">
+      <h3>{t('dress.title')}</h3>
+      <dl>
+        {DRESS_STEPS.map(({ level, division }) => (
+          <div key={level} className="glossary__item">
+            <dt>
+              {t(`dress.from.${level}` as MessageKey, {
+                division: t(`rank.division.${division}` as MessageKey),
+              })}
+            </dt>
+            <dd>{t(`dress.level.${level}` as MessageKey)}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 

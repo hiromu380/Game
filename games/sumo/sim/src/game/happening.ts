@@ -22,6 +22,7 @@ import { lineageCharOf, makeShikona } from '../core/names';
 import { createPrng, deriveSeed, SEED, type Prng } from '../core/prng';
 import type { GameState, Rank, Rikishi } from '../model/types';
 import { hasTrait } from '../career/traits';
+import { note } from './journal';
 
 function mine(state: GameState): Rikishi[] {
   return state.rikishi.filter((r) => r.stableId === state.player.stableId);
@@ -51,6 +52,10 @@ function targetsOf(state: GameState, kind: HappeningTarget): Rikishi[] {
         return rank !== undefined && isSekitori(rank);
       case 'sekitoriAdult':
         return rank !== undefined && isSekitori(rank) && r.age >= 25;
+      case 'sekitoriInStable':
+        return rank !== undefined && isSekitori(rank) && !r.living;
+      case 'sekitoriSingle':
+        return rank !== undefined && isSekitori(rank) && r.age >= 25 && r.living !== 'married';
       case 'upper':
         return upper(rank);
       case 'lower':
@@ -164,6 +169,10 @@ function applyEffect(
       r.abilities[style] = clamp(r.abilities[style] + e.ability.amount, 0, 100);
     }
     if (e.fragility) r.fragility *= e.fragility;
+    if (e.living) {
+      r.living = e.living;
+      note(state, { kind: 'living', shikona: r.name, event: e.living });
+    }
     if (e.injury && r.injury > 0) r.injury += e.injury;
     if (e.heal) r.injury = Math.max(0, r.injury - e.heal);
     if (e.injuryRisk && r.injury === 0 && rng.chance(e.injuryRisk)) {

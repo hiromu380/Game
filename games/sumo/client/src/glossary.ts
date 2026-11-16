@@ -60,6 +60,7 @@ export const TERMS: readonly Term[] = [
   { id: 'kesho', group: 'gear', seen: (s) => s.sekitori || s.joined },
   { id: 'shimekomi', group: 'gear', seen: (s) => s.sekitori },
   { id: 'akeni', group: 'gear', seen: (s) => s.sekitori },
+  { id: 'kurashi', group: 'life', seen: (s) => s.sekitori || s.journal('living') },
   { id: 'dohyomatsuri', group: 'basho', seen: (s) => s.played },
   { id: 'nakabi', group: 'basho', seen: (s) => s.played },
   { id: 'senshuraku', group: 'basho', seen: (s) => s.played },

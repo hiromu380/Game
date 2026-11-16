@@ -1,4 +1,5 @@
 import type { KeshoFrom } from '../balance/kesho';
+import type { Living } from '../balance/roles';
 import type { Dohyoiri, KojoWord } from '../balance/ceremony';
 import type { PledgeKind } from '../balance/pledge';
 import type { InjuryPart, Treatment } from '../balance/injury';
@@ -122,6 +123,8 @@ export interface Rikishi {
   kojo?: KojoWord;
   /** 横綱の土俵入りの型 */
   dohyoiri?: Dohyoiri;
+  /** 部屋の外での暮らし（関取だけ。一人暮らし・所帯持ち。なければ部屋で暮らす） */
+  living?: Living;
   /** 化粧まわしの出どころ（関取になったときに決める。by はタニマチの名字） */
   kesho?: { from: KeshoFrom; by?: string };
 }
@@ -294,7 +297,9 @@ export type HappeningId =
   | 'calligraphy'
   | 'jinku'
   | 'tsukebitoCare'
-  | 'shitakuPhone';
+  | 'shitakuPhone'
+  | 'marriage'
+  | 'moveOut';
 
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
@@ -376,8 +381,6 @@ export interface Pending {
 }
 
 export interface PlayerState {
-  /** 雑用（付け人・ちゃんこ番）を免除した自分の弟子 */
-  exempt: number[];
   /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
   pledge: {
     kind: PledgeKind;
@@ -609,6 +612,8 @@ export type JournalEvent =
   | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
   /** 新しい関取に、同期生から明け荷が届いた（doki: 今も土俵にいる同期生の数） */
   | { kind: 'akeni'; shikona: string; doki: number }
+  /** 関取が部屋を出た（一人暮らし）・結婚した・関取から落ちて部屋に戻った */
+  | { kind: 'living'; shikona: string; event: 'alone' | 'married' | 'back' }
   /** 化粧まわしの手配 */
   | { kind: 'kesho'; shikona: string; from: KeshoFrom; by?: string }
   | { kind: 'staffHire'; role: StaffRole; name: string }

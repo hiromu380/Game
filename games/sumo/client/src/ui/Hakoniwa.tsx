@@ -107,7 +107,65 @@ const POSE_SPRITE: Partial<Record<Actor['look']['pose'], { name: string; frames:
   oyakataSit: { name: 'person_oyakata_sit', frames: 1 },
   oyakata: { name: 'person_oyakata', frames: 1 },
 };
-const personSprites = new Map<string, { s: Loaded; flipped: HTMLCanvasElement }>();
+const personSprites = new Map<
+  string,
+  {
+    s: Loaded;
+    flipped: HTMLCanvasElement;
+    white?: { img: HTMLCanvasElement; flipped: HTMLCanvasElement };
+  }
+>();
+/**
+ * 関取は白い稽古まわし: 取り込んだ絵の腰のあたり（高さの割合 [from, to]）の黒いまわしの色を白に塗り替える。
+ * 申し合い（1枚で2人）・掃除・ちゃんこ番・親方は塗り替えない
+ */
+const WHITE_BAND: Record<string, [number, number]> = {
+  person_shiko: [0.4, 0.8],
+  person_suriashi: [0.4, 0.8],
+  person_teppo: [0.4, 0.8],
+  person_sit: [0.4, 0.8],
+  person_lie: [0.4, 0.8],
+};
+const WHITE_BAND_FRAME: Record<string, [number, number]> = { 'person_shiko#1': [0.55, 0.85] };
+function whiten(src: CanvasImageSource, w: number, h: number, band: [number, number]) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const g = c.getContext('2d');
+  if (!g) return c;
+  g.drawImage(src, 0, 0);
+  const data = g.getImageData(0, 0, w, h);
+  const px = data.data;
+  for (let y = Math.floor(h * band[0]); y < Math.floor(h * band[1]); y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (px[i + 3] === 0) continue;
+      const r = px[i]!;
+      const b = px[i + 2]!;
+      const m = Math.max(r, px[i + 1]!, b);
+      // まわしの黒（縁取りの墨色より明るく、肌より暗い灰褐色）
+      if (m < 40 || m > 95 || Math.abs(r - b) >= 40) continue;
+      const v = Math.round(206 + 30 * (1 - (m - 40) / 55));
+      px[i] = v;
+      px[i + 1] = v - 4;
+      px[i + 2] = v - 12;
+    }
+  }
+  g.putImageData(data, 0, 0);
+  return c;
+}
+function mirrored(src: CanvasImageSource, w: number, h: number) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const g = c.getContext('2d');
+  if (g) {
+    g.translate(w, 0);
+    g.scale(-1, 1);
+    g.drawImage(src, 0, 0);
+  }
+  return c;
+}
 // 画面のあるときだけ先に読んでおく（テストなど DOM のない所では読まない）
 for (const { name, frames } of typeof Image === 'undefined' ? [] : Object.values(POSE_SPRITE)) {
   for (let f = 0; f < frames; f++) {
@@ -122,15 +180,18 @@ for (const { name, frames } of typeof Image === 'undefined' ? [] : Object.values
         g.scale(-1, 1);
         g.drawImage(s.img, 0, 0);
       }
-      personSprites.set(`${name}#${f}`, { s, flipped: c });
+      const band = WHITE_BAND_FRAME[`${name}#${f}`] ?? WHITE_BAND[name];
+      const white = band ? whiten(s.img, s.w, s.h, band) : null;
+      personSprites.set(`${name}#${f}`, {
+        s,
+        flipped: c,
+        ...(white ? { white: { img: white, flipped: mirrored(white, s.w, s.h) } } : {}),
+      });
     });
   }
 }
 /** その姿勢・コマの取り込んだ絵（なければ null） */
-function personSprite(
-  pose: Actor['look']['pose'],
-  frame: 0 | 1,
-): { s: Loaded; flipped: HTMLCanvasElement } | null {
+function personSprite(pose: Actor['look']['pose'], frame: 0 | 1) {
   const def = POSE_SPRITE[pose];
   if (!def) return null;
   return personSprites.get(`${def.name}#${def.frames > 1 ? frame : 0}`) ?? null;
@@ -372,8 +433,9 @@ export function Hakoniwa({
               if (!a.look.flip)
                 ctx.drawImage(sp.s.img, at.x - 10 - sp.s.tip[0], at.y + 2 - sp.s.tip[1]);
             } else if (sp) {
+              const white = a.look.mawashi === 'white' ? sp.white : undefined;
               ctx.drawImage(
-                at.flip ? sp.flipped : sp.s.img,
+                white ? (at.flip ? white.flipped : white.img) : at.flip ? sp.flipped : sp.s.img,
                 at.x - (at.flip ? sp.s.w - 1 - sp.s.tip[0] : sp.s.tip[0]),
                 at.y - sp.s.tip[1],
               );

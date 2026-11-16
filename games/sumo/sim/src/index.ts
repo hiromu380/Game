@@ -69,11 +69,10 @@ export { atWall, breakWall, focusOf } from './career/wall';
 export { KESHO, KESHO_FROM, type KeshoFrom } from './balance/kesho';
 export { answerKesho, dokiOf, joinedAt, keshoOptions, keshoPatron } from './stable/kesho';
 export { SEKITORI_MONTHLY } from './balance/money';
-export { ROLES } from './balance/roles';
+export { LIVING, ROLES, type Living } from './balance/roles';
 export {
   inKyoshujo,
   roleEffect,
-  setExempt,
   stableRoles,
   tsukebitoNeeded,
   type Role,

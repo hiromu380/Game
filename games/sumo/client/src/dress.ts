@@ -32,3 +32,12 @@ export function nextDress(level: DressLevel): { division: Division; level: Dress
   const d = NEXT[level];
   return d ? { division: d, level: (level + 1) as DressLevel } : null;
 }
+
+/** 手帖の補足に並べる順（その身なりが許される最初の段） */
+export const DRESS_STEPS: readonly { level: DressLevel; division: Division }[] = [
+  { level: 0, division: 'jonokuchi' },
+  { level: 1, division: 'sandanme' },
+  { level: 2, division: 'makushita' },
+  { level: 3, division: 'juryo' },
+  { level: 4, division: 'makuuchi' },
+];

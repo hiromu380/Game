@@ -422,6 +422,12 @@ export function advanceBasho(
             : null;
     if (promo) report.promotions.push({ id, to: promo });
     if (firstSekitori && r.stableId === state.player.stableId) onNewSekitori(state, r);
+    // 関取から落ちた一人暮らしの弟子は、部屋に戻る（所帯持ちはそのまま。推定）
+    if (r.living === 'alone' && !isSekitori(rank) && before !== null && isSekitori(before)) {
+      delete r.living;
+      if (r.stableId === state.player.stableId)
+        note(state, { kind: 'living', shikona: r.name, event: 'back' });
+    }
     // 一門の部屋（本家・分家）の成績は、師匠の系譜図の節と名声に数える（分家は名声の一部だけ）
     const node = masterNodeOf(state, r.stableId);
     if (node) {

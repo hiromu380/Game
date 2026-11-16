@@ -36,6 +36,8 @@ export interface HappeningEffect {
   weightKg?: number;
   /** 対象の力士が引退を申し出る確率 */
   retireRequest?: number;
+  /** 対象の関取の暮らし（部屋を出る・結婚する） */
+  living?: 'alone' | 'married';
   /** 入門希望者が来る（素質の範囲・経歴・外国出身） */
   candidate?: {
     talent: readonly [number, number];
@@ -75,6 +77,10 @@ export type HappeningTarget =
   | 'veteran'
   | 'sekitori'
   | 'sekitoriAdult'
+  /** 部屋で暮らしている関取（一人暮らしを申し出る） */
+  | 'sekitoriInStable'
+  /** 結婚していない25歳以上の関取 */
+  | 'sekitoriSingle'
   | 'upper'
   | 'lower'
   | 'foreign'
@@ -807,6 +813,30 @@ export const HAPPENINGS: readonly HappeningDef[] = [
         effect: {},
         chance: { p: 0.3, effect: { prestige: -1 } },
       },
+    ],
+  },
+  {
+    id: 'marriage',
+    requires: 'sekitori',
+    target: 'sekitoriSingle',
+    weight: 1,
+    options: [
+      {
+        key: 'bless',
+        group: 'target',
+        effect: { living: 'married', personalMoney: -300_000, prestige: 0.5, boost: 1.05 },
+      },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'moveOut',
+    requires: 'sekitori',
+    target: 'sekitoriInStable',
+    weight: 1.2,
+    options: [
+      { key: 'allow', group: 'target', effect: { living: 'alone' } },
+      { key: 'decline', group: 'target', effect: { fatigue: 2 } },
     ],
   },
 ];

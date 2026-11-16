@@ -39,6 +39,8 @@ const HAPPENING_LORE: Partial<Record<string, string>> = {
   calligraphy: 'kyoshujo',
   jinku: 'kyoshujo',
   curfew: 'asageiko',
+  marriage: 'kurashi',
+  moveOut: 'kurashi',
 };
 
 /** 約束の選択肢のアイコン */

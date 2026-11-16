@@ -220,15 +220,12 @@ export const COMPOUND_SPOTS = {
 } as const;
 
 /** 外観の人。番付の下の弟子から雑用に回る */
-/** 雑用をする弟子（部屋の役目がちゃんこ番）。幕下上位・免除・付け人・関取は入らない */
+/** 雑用をする弟子（ちゃんこ番を持ち回る弟子）。幕下上位・関取・けが人は入らない */
 function choreCrew(
   game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
 ): Set<number> {
-  const roles = stableRoles({
-    ...game,
-    player: { ...game.player, exempt: game.player.exempt ?? [] },
-  });
-  return new Set([...roles.of].filter(([, x]) => x === 'chankoban').map(([id]) => id));
+  const roles = stableRoles(game);
+  return roles.cooks;
 }
 
 export function compoundCast(

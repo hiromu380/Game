@@ -6,7 +6,6 @@ import {
   sekitoriGain,
   setIntensity,
   setPlayHurt,
-  setExempt,
   setPolicy,
   stableCapacity,
   stableRoles,
@@ -47,21 +46,15 @@ export function DeshiTab({
   const cap = stableCapacity(game);
   const roles = stableRoles(game, ranks);
   const nameOf = (id: number) => game.rikishi.find((x) => x.id === id)?.name ?? '?';
-  const cooks = [...roles.of.values()].filter((x) => x === 'chankoban').length;
+  const cooks = roles.cooks.size;
   /** 役目の1行（関取は付け人の名前） */
   const roleText = (id: number): string => {
     const role = roles.of.get(id);
     if (role === 'sekitori') {
       const att = roles.attendants.get(id) ?? [];
-      const short = roles.short.get(id) ?? 0;
-      return [
-        att.length > 0
-          ? t('role.desc.sekitori', { names: att.map(nameOf).join('・') })
-          : t('role.desc.sekitoriNone'),
-        short > 0 ? t('role.desc.short', { n: short }) : '',
-      ]
-        .filter(Boolean)
-        .join('。');
+      return att.length > 0
+        ? t('role.desc.sekitori', { names: att.map(nameOf).join('・') })
+        : t('role.desc.sekitoriNone');
     }
     if (role === 'tsukebito')
       return t('role.desc.tsukebito', { name: nameOf(roles.serves.get(id)!) });
@@ -95,6 +88,7 @@ export function DeshiTab({
                   {r.name}
                   {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
                   {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
+                  {r.living && <span className="tag">{t(`living.${r.living}`)}</span>}
                   {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
                   {(() => {
                     const role = roles.of.get(r.id);
@@ -148,25 +142,18 @@ export function DeshiTab({
             </ul>
             <div className="role-box">
               <h3>
-                {t('role.title')}: {t(`role.${roles.of.get(card.id) ?? 'exempt'}`)}
+                {t('role.title')}: {t(`role.${roles.of.get(card.id) ?? 'injured'}`)}
               </h3>
               <p>{roleText(card.id)}</p>
               {roles.noCook && <p className="role-box__warn">{t('role.desc.noCook')}</p>}
-              {roles.of.get(card.id) !== 'sekitori' && (
-                <button
-                  className="button"
-                  onClick={() =>
-                    setGame(setExempt(game, card.id, !game.player.exempt.includes(card.id)))
-                  }
-                >
-                  {game.player.exempt.includes(card.id) ? t('role.unexempt') : t('role.exempt')}
-                </button>
-              )}
+              {card.living && <p>{t(`living.${card.living}.desc`)}</p>}
               <Lore
                 id={
-                  roles.of.get(card.id) === 'chankoban' || roles.of.get(card.id) === 'upper'
-                    ? 'chankoban'
-                    : 'tsukebito'
+                  card.living
+                    ? 'kurashi'
+                    : roles.of.get(card.id) === 'chankoban' || roles.of.get(card.id) === 'upper'
+                      ? 'chankoban'
+                      : 'tsukebito'
                 }
               />
             </div>

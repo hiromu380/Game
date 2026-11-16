@@ -27,6 +27,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'diet':
     case 'akeni':
     case 'kesho':
+    case 'living':
       return 'stable';
     case 'staffHire':
     case 'staffLeave':
@@ -168,6 +169,8 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return e.doki > 0
         ? t('journal.akeni', { shikona: e.shikona, doki: e.doki })
         : t('journal.akeniNone', { shikona: e.shikona });
+    case 'living':
+      return t(`journal.living.${e.event}`, { shikona: e.shikona });
     case 'kesho':
       return t(`journal.kesho.${e.from}`, { shikona: e.shikona, by: e.by ?? '' });
     case 'staffHire':

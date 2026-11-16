@@ -5,7 +5,6 @@ import {
   roleEffect,
   ROLES,
   SAVE_VERSION,
-  setExempt,
   stableRoles,
   type GameState,
   type Rank,
@@ -31,13 +30,13 @@ describe('部屋の役目（付け人とちゃんこ番）', () => {
     const roles = stableRoles(g, ranks);
     expect(roles.of.get(top)).toBe('sekitori');
     const att = roles.attendants.get(top)!;
-    expect(att.length + (roles.short.get(top) ?? 0)).toBe(ROLES.tsukebito.juryo);
+    // 部屋の弟子が足りなければ、そのぶん少ない（よそから借りない）
+    expect(att.length).toBeLessThanOrEqual(ROLES.tsukebito.juryo);
     for (const id of att) expect(roles.serves.get(id)).toBe(top);
     const others = g.rikishi.filter(
       (r) => r.stableId === g.player.stableId && r.id !== top && !att.includes(r.id),
     );
-    for (const r of others)
-      expect(['chankoban', 'upper', 'exempt', 'injured']).toContain(roles.of.get(r.id));
+    for (const r of others) expect(['chankoban', 'upper', 'injured']).toContain(roles.of.get(r.id));
     // 同じ入力なら同じ割り振り
     expect(stableRoles(g, ranks)).toEqual(roles);
   });
@@ -62,30 +61,15 @@ describe('部屋の役目（付け人とちゃんこ番）', () => {
     expect(['chankoban', 'tsukebito']).toContain(stableRoles(g, ranks).of.get(cook));
   });
 
-  it('雑用を免除した弟子は付け人にもちゃんこ番にもならない。持ち回りの人が減ると1人の受け持ちが重くなる', () => {
-    const { g, ranks } = withSekitori();
-    const before = stableRoles(g, ranks);
-    const cook = [...before.of].find(([, x]) => x === 'chankoban')![0];
-    const ex = setExempt(g, cook, true);
-    expect(ex.player.exempt).toEqual([cook]);
-    const after = stableRoles(ex, ranks);
-    expect(after.of.get(cook)).toBe('exempt');
-    if (after.noCook) expect(after.chankoLoad).toBe(0);
-    else expect(after.chankoLoad).toBeGreaterThanOrEqual(before.chankoLoad);
-    expect(setExempt(ex, cook, false).player.exempt).toEqual([]);
-    // よその部屋の力士は免除できない
-    const other = g.rikishi.find((r) => r.stableId !== g.player.stableId)!;
-    expect(setExempt(g, other.id, true)).toBe(g);
-  });
-
-  it('付け人は伸びて疲れる。ちゃんこ番は伸びが少し落ちて疲れる。免除はどちらもない', () => {
+  it('付け人は関取の稽古相手でちゃんこ番より伸び、疲れる。ちゃんこ番は伸びが少し落ちて疲れる。付け人もちゃんこ番を持ち回る', () => {
     const { g, ranks } = withSekitori();
     const roles = stableRoles(g, ranks);
     const pick = (role: string) => [...roles.of].find(([, x]) => x === role)?.[0];
     const tb = pick('tsukebito');
     if (tb !== undefined) {
       const e = roleEffect(roles, tb);
-      expect(e.growth).toBeGreaterThan(1);
+      expect(roles.cooks.has(tb)).toBe(true);
+      expect(e.growth).toBeGreaterThan(roleEffect(roles, pick('chankoban') ?? tb).growth - 1e-9);
       expect(e.fatigue).toBeGreaterThan(0);
     }
     const cb = pick('chankoban')!;
@@ -94,13 +78,24 @@ describe('部屋の役目（付け人とちゃんこ番）', () => {
     expect(c.fatigue).toBeGreaterThan(0);
   });
 
-  it('20版のセーブは、免除なしで読める', () => {
+  it('21版のセーブは、免除を消して読める', () => {
     const old = JSON.parse(JSON.stringify(play(3, 1))) as Record<string, unknown>;
-    old.version = 20;
-    delete (old.player as Record<string, unknown>).exempt;
+    old.version = 21;
+    (old.player as Record<string, unknown>).exempt = [1];
     const m = migrateSave(old)!;
     expect(m.version).toBe(SAVE_VERSION);
-    expect(m.player.exempt).toEqual([]);
+    expect('exempt' in m.player).toBe(false);
+  });
+
+  it('部屋の外で暮らす関取は疲れが抜けやすい。一人暮らしは伸びが少し落ちる', () => {
+    const { g, ranks, top } = withSekitori();
+    const roles = stableRoles(g, ranks);
+    const base = roleEffect(roles, top, { career: { basho: 30 } } as never);
+    const alone = roleEffect(roles, top, { career: { basho: 30 }, living: 'alone' } as never);
+    const married = roleEffect(roles, top, { career: { basho: 30 }, living: 'married' } as never);
+    expect(alone.fatigue).toBeLessThan(base.fatigue);
+    expect(alone.growth).toBeLessThan(base.growth);
+    expect(married.fatigue).toBeLessThan(alone.fatigue);
   });
 });
 

@@ -80,7 +80,7 @@ describe('場所の間の出来事', () => {
     delete v7.pending.happening;
     for (const r of v7.rikishi) delete r.boost;
     const m = migrateSave(v7)!;
-    expect(m.version).toBe(21);
+    expect(m.version).toBe(22);
     expect(m.pending.happening).toBeNull();
     expect(m.rikishi.every((r) => r.boost === 1)).toBe(true);
   });
@@ -142,5 +142,20 @@ describe('場所の間の出来事', () => {
     }
     expect(asked).toBeGreaterThan(0);
     expect(asked).toBeLessThan(12);
+  });
+
+  it('関取の一人暮らし・結婚: 認めると部屋の外で暮らし、日誌に残る', () => {
+    const s = createGame({ seed: 4 });
+    const r = s.rikishi.find((x) => x.stableId === s.player.stableId)!;
+    s.pending.happening = { id: 'moveOut', target: r.id };
+    const alone = answerHappening(s, 0);
+    expect(alone.rikishi.find((x) => x.id === r.id)!.living).toBe('alone');
+    expect(alone.journal.some((e) => e.kind === 'living' && e.event === 'alone')).toBe(true);
+    const stay = answerHappening(s, 1);
+    expect(stay.rikishi.find((x) => x.id === r.id)!.living).toBeUndefined();
+    s.pending.happening = { id: 'marriage', target: r.id };
+    const wed = answerHappening(s, 0);
+    expect(wed.rikishi.find((x) => x.id === r.id)!.living).toBe('married');
+    expect(wed.player.personalMoney).toBe(s.player.personalMoney - 300_000);
   });
 });
