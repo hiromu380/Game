@@ -1374,3 +1374,7 @@ body.has-modal {
 .role-box__warn {
   color: var(--shu);
 }
+.card__dress {
+  flex-basis: 100%;
+  font-size: 0.9em;
+}

@@ -1623,5 +1623,13 @@
   "highlight.shusse.body": "前相撲を終えた{names}が、{lender}の化粧まわしを借りて土俵に上がり、四股名を披露した。来場所、序ノ口に四股名が載る。",
   "highlight.shusse.master": "師匠",
   "highlight.shusse.sekitori": "兄弟子の{name}関",
-  "deshi.kyoshujo": "教習所"
+  "deshi.kyoshujo": "教習所",
+  "dress.title": "身なり",
+  "dress.level.0": "浴衣に素足の下駄・黒の稽古まわし",
+  "dress.level.1": "雪駄と羽織が許される",
+  "dress.level.2": "コート・襟巻・博多帯・足袋が許される",
+  "dress.level.3": "紋付羽織袴と白足袋・大銀杏・白の稽古まわしと絹の締込・化粧まわし",
+  "dress.level.4": "四股名を染めた浴衣を作れる",
+  "dress.now": "いまの身なり: {items}",
+  "dress.next": "{division}に上がると: {items}"
 }

@@ -1623,5 +1623,13 @@
   "highlight.shusse.body": "Their maezumo done, {names} stepped into the ring in a kesho-mawashi borrowed from {lender} and were announced by name. Next tournament, they appear on the banzuke in jonokuchi.",
   "highlight.shusse.master": "the master",
   "highlight.shusse.sekitori": "senior {name}",
-  "deshi.kyoshujo": "Sumo school"
+  "deshi.kyoshujo": "Sumo school",
+  "dress.title": "Dress",
+  "dress.level.0": "Yukata, bare feet in geta, black practice belt",
+  "dress.level.1": "Setta sandals and a haori jacket allowed",
+  "dress.level.2": "Coat, scarf, hakata obi and tabi allowed",
+  "dress.level.3": "Crested kimono with hakama, white tabi, oicho-mage, white practice belt, silk shimekomi, kesho-mawashi",
+  "dress.level.4": "May have yukata dyed with his shikona",
+  "dress.now": "Now: {items}",
+  "dress.next": "At {division}: {items}"
 }

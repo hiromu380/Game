@@ -15,6 +15,7 @@ import { IntensityPicker } from './RikishiTalk';
 import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
 import { RikishiPortrait } from '../art/Portraits';
+import { dressLevel, nextDress } from '../dress';
 import { points } from '../points';
 import { TargetLine } from './TargetLine';
 import type { TargetInfo } from '../targets';
@@ -106,6 +107,7 @@ export function RikishiCard({
             </span>
           )}
           {last && <span>{t('rikishi.last', { record: recordLabel(t, last) })}</span>}
+          <DressLine rank={rank} />
           {r.kesho && (
             <span>
               {t('card.kesho')}: {t(`card.kesho.${r.kesho.from}`, { by: r.kesho.by ?? '' })}
@@ -176,4 +178,21 @@ export function RikishiCard({
 /** 自分の弟子の個性（番付に載って何場所かたつと分かってくる。それまでは null） */
 export function knownTraits(r: Rikishi): readonly TraitId[] | null {
   return r.career.basho >= TRAITS.knownAfterBasho ? traitsOf(r) : null;
+}
+
+/** 身なり: いまの番付で許される物と、次の段で許される物 */
+function DressLine({ rank }: { rank: Rank | null }) {
+  const { t } = useI18n();
+  const level = dressLevel(rank);
+  const next = nextDress(level);
+  return (
+    <span className="card__dress">
+      {t('dress.now', { items: t(`dress.level.${level}`) })}
+      {next &&
+        `／${t('dress.next', {
+          division: t(`rank.division.${next.division}` as MessageKey),
+          items: t(`dress.level.${next.level}`),
+        })}`}
+    </span>
+  );
 }
