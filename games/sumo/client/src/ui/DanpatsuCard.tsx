@@ -1,3 +1,4 @@
+import { Lore } from './Glossary';
 import { useState } from 'react';
 import type { BashoReport, GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
@@ -68,6 +69,7 @@ export function DanpatsuCard({
           {guests.length > 0 &&
             `${gap}${t('highlight.danpatsu.guests', { guests: guests.join(sep) })}`}
         </p>
+        {!cut && <Lore id="danpatsu" />}
         {cut && (
           <p className="highlight__body" aria-live="polite">
             {t('highlight.danpatsu.cut', { master })}

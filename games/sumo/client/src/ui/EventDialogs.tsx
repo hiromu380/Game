@@ -22,6 +22,7 @@ import { ElectionPanel } from './ElectionPanel';
 import { IndependencePanel } from './IndependencePanel';
 import { sprite } from '../art/sprites';
 import { Icon } from '../art/Icon';
+import { Lore } from './Glossary';
 import { keikobaLayout } from '../art/sprites/keikoba';
 import { happeningPicture, OTHER_PICTURE, type EventPicture } from '../eventScene';
 
@@ -203,6 +204,7 @@ export function EventDialogs({
       <>
         <h2>{t('pledge.title')}</h2>
         <p className="note">{t('pledge.lead')}</p>
+        <Lore id="tanimachi" />
         <div className="pledge__opts">
           {game.pending.pledge.map((k) => {
             const d = PLEDGES[k];
@@ -255,6 +257,7 @@ export function EventDialogs({
           )}
         </h2>
         <p className="note">{full ? t('candidates.full', { cap }) : t('candidates.note')}</p>
+        <Lore id="kensa" />
         <CandidateRow
           rivalName={game.stables.find((s) => s.id === game.rival?.stableId)?.name}
           perHead={headGain(game)}

@@ -1303,3 +1303,42 @@ body.has-modal {
 .rewards__line .ui-icon {
   align-self: center;
 }
+
+/* 相撲の手帖 */
+.glossary__count {
+  margin-left: 8px;
+  font-size: 0.85em;
+}
+.glossary__group summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.glossary__list {
+  margin: 0 0 8px;
+}
+.glossary__item {
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--line);
+}
+.glossary__item dt {
+  font-weight: normal;
+  text-decoration: underline;
+}
+.glossary__item dd {
+  margin: 2px 0 0 1em;
+}
+.glossary__item.is-locked {
+  opacity: 0.6;
+}
+/* しきたりの1行 */
+.lore {
+  margin: 6px 0;
+  padding: 4px 8px;
+  border-left: 4px solid var(--gold);
+  font-size: 0.9em;
+}
+.lore__tag {
+  margin: 0 6px 0 0;
+}

@@ -8,6 +8,7 @@ import {
   type GameState,
   type KojoWord,
 } from '@ichimon/sim';
+import { Lore } from './Glossary';
 import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, rankName } from '../format';
 import { RikishiPortrait } from '../art/Portraits';
@@ -52,6 +53,15 @@ function Cup() {
 }
 
 /** 場所の見せ場（自分の部屋の昇進・優勝・三賞）を1枚ずつ。大関・横綱は昇進伝達式で口上を選ぶ */
+/** 見せ場に添える、しきたりの1行 */
+function loreOf(h: Highlight): string | null {
+  if (h.kind === 'promotion')
+    return { sekitori: 'sekitori', makuuchi: 'kesho', O: 'dentatsu', Y: 'tsuna' }[h.to];
+  if (h.kind === 'sansho') return 'sansho';
+  if (h.kind === 'yusho') return 'senshuraku';
+  return null;
+}
+
 export function HighlightDialog({
   game,
   report,
@@ -181,6 +191,7 @@ export function HighlightDialog({
           <RikishiPortrait r={r} rank={rank} variant="full" size={120} />
         </div>
         <p className="highlight__body">{body}</p>
+        {loreOf(h) && <Lore id={loreOf(h)!} />}
 
         {ceremony && !spoken && (
           <div className="highlight__ceremony">
