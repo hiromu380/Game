@@ -370,6 +370,11 @@ export function advanceBasho(
   // 新しく番付に載る力士: 自分の部屋で入門した新弟子（前相撲）＋ 架空の部屋の新弟子
   const onBanzuke = new Set(state.banzuke);
   const mineNew = state.rikishi.filter((r) => !onBanzuke.has(r.id)).map((r) => r.id);
+  // 前相撲を取った自分の弟子（この場所で新序出世披露。来場所、序ノ口に載る）
+  const shusse = mineNew.filter(
+    (id) => state.rikishi.find((r) => r.id === id)!.stableId === state.player.stableId,
+  );
+  if (shusse.length > 0) report.shusse = shusse;
   const kept = state.banzuke.length - retiring.size + mineNew.length;
   let npcCount = Math.min(Math.max(0, RECRUIT.npcPerYearTarget - kept), 80);
   // 番付の人数を偶数にする（奇数だと、毎日だれか1人が取組なしになる）
@@ -538,7 +543,7 @@ export function advanceBasho(
         : lowerCtx
       : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
     // 部屋の役目（付け人・ちゃんこ番）が伸びと疲れに効く
-    const role = own ? roleEffect(roles, r.id) : null;
+    const role = own ? roleEffect(roles, r.id, r) : null;
     const ctx = role
       ? {
           ...base,

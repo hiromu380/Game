@@ -1618,5 +1618,10 @@
   "role.desc.exempt": "親方の判断で、付け人とちゃんこ番を外している。ほかの弟子の受け持ちが増える",
   "role.desc.injured": "けがの間は役目を外れる",
   "role.desc.noCook": "ちゃんこ番がいない。部屋の全員の疲れが抜けにくい",
-  "role.unexempt": "免除をやめる"
+  "role.unexempt": "免除をやめる",
+  "highlight.shusse.title": "新序出世披露",
+  "highlight.shusse.body": "前相撲を終えた{names}が、{lender}の化粧まわしを借りて土俵に上がり、四股名を披露した。来場所、序ノ口に四股名が載る。",
+  "highlight.shusse.master": "師匠",
+  "highlight.shusse.sekitori": "兄弟子の{name}関",
+  "deshi.kyoshujo": "教習所"
 }

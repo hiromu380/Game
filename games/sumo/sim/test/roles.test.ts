@@ -21,7 +21,7 @@ function withSekitori(): { g: GameState; ranks: Map<number, Rank>; top: number }
   const order = new Map(g.banzuke.map((id, i) => [id, i]));
   mine.sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   const top = mine[0]!.id;
-  ranks.set(top, { division: 'juryo', title: null, number: 10, side: 'east' });
+  ranks.set(top, { division: 'juryo', title: null, number: 10, side: 'E' });
   return { g, ranks, top };
 }
 
@@ -50,14 +50,14 @@ describe('部屋の役目（付け人とちゃんこ番）', () => {
       division: 'makushita',
       title: null,
       number: ROLES.chankoExemptWithin,
-      side: 'west',
+      side: 'W',
     });
     expect(stableRoles(g, ranks).of.get(cook)).toBe('upper');
     ranks.set(cook, {
       division: 'makushita',
       title: null,
       number: ROLES.chankoExemptWithin + 1,
-      side: 'west',
+      side: 'W',
     });
     expect(['chankoban', 'tsukebito']).toContain(stableRoles(g, ranks).of.get(cook));
   });
@@ -101,5 +101,37 @@ describe('部屋の役目（付け人とちゃんこ番）', () => {
     const m = migrateSave(old)!;
     expect(m.version).toBe(SAVE_VERSION);
     expect(m.player.exempt).toEqual([]);
+  });
+});
+
+describe('入門の流れ（前相撲・新序出世披露・教習所）', () => {
+  it('入門した場所は前相撲で番付に載らず、場所の後に出世披露をして序ノ口に載る', async () => {
+    const { acceptCandidate, advanceBasho, ranksOf: rk } = await import('../src');
+    let g = play(5, 0);
+    for (let i = 0; i < 20 && g.pending.candidates.length === 0; i++) g = advanceBasho(g);
+    const c = g.pending.candidates[0]!;
+    g.player.stableMoney = 100_000_000;
+    const joined = acceptCandidate(g, c.id);
+    const r = joined.rikishi.find(
+      (x) => x.name === c.name && x.stableId === joined.player.stableId,
+    )!;
+    expect(joined.banzuke).not.toContain(r.id);
+    const next = advanceBasho(joined);
+    expect(next.lastReport!.shusse).toContain(r.id);
+    expect(rk(next.banzuke, next.titles).get(r.id)?.division).toBe('jonokuchi');
+  });
+
+  it('教習所は入門から3場所。通う弟子は伸びが少しよい', async () => {
+    const { inKyoshujo } = await import('../src');
+    const career = (basho: number) => ({ career: { basho } }) as Parameters<typeof inKyoshujo>[0];
+    expect(inKyoshujo(career(0))).toBe(true);
+    expect(inKyoshujo(career(ROLES.kyoshujoBasho - 1))).toBe(true);
+    expect(inKyoshujo(career(ROLES.kyoshujoBasho))).toBe(false);
+    const { g, ranks } = withSekitori();
+    const roles = stableRoles(g, ranks);
+    const id = [...roles.of].find(([, x]) => x === 'chankoban')![0];
+    expect(roleEffect(roles, id, career(0)).growth).toBeGreaterThan(
+      roleEffect(roles, id, career(9)).growth,
+    );
   });
 });

@@ -6,7 +6,7 @@
  */
 import { ROLES } from '../balance/roles';
 import { isSekitori, ranksOf } from '../banzuke/rank';
-import type { GameState, Rank } from '../model/types';
+import type { GameState, Rank, Rikishi } from '../model/types';
 
 export type Role = 'sekitori' | 'tsukebito' | 'chankoban' | 'upper' | 'exempt' | 'injured';
 
@@ -99,10 +99,19 @@ export function setExempt(input: GameState, id: number, on: boolean): GameState 
   return state;
 }
 
-/** 役目による稽古の効き目: 伸びの倍率と、疲れの増え（マイナスは抜ける） */
-export function roleEffect(roles: StableRoles, id: number): { growth: number; fatigue: number } {
+/** 相撲教習所に通っている（入門から半年。番付に載った場所数で数える） */
+export function inKyoshujo(r: Pick<Rikishi, 'career'>): boolean {
+  return r.career.basho < ROLES.kyoshujoBasho;
+}
+
+/** 役目による稽古の効き目: 伸びの倍率と、疲れの増え（マイナスは抜ける）。教習所に通う弟子は伸びが少しよい */
+export function roleEffect(
+  roles: StableRoles,
+  id: number,
+  r?: Pick<Rikishi, 'career'>,
+): { growth: number; fatigue: number } {
   const role = roles.of.get(id);
-  let growth = 1;
+  let growth = r && inKyoshujo(r) ? ROLES.kyoshujoGrowth : 1;
   let fatigue = roles.noCook ? ROLES.noCookFatigue : 0;
   if (role === 'tsukebito') {
     growth *= ROLES.tsukebitoGrowth;

@@ -71,6 +71,7 @@ export { answerKesho, dokiOf, joinedAt, keshoOptions, keshoPatron } from './stab
 export { SEKITORI_MONTHLY } from './balance/money';
 export { ROLES } from './balance/roles';
 export {
+  inKyoshujo,
   roleEffect,
   setExempt,
   stableRoles,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   atWall,
   chooseTreatment,
+  inKyoshujo,
   sekitoriGain,
   setIntensity,
   setPlayHurt,
@@ -93,6 +94,7 @@ export function DeshiTab({
                 <span className="deshi__name">
                   {r.name}
                   {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
+                  {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
                   {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
                   {(() => {
                     const role = roles.of.get(r.id);

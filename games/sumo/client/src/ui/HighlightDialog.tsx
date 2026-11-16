@@ -84,6 +84,7 @@ function loreOf(h: Highlight): string | null {
     return { sekitori: 'sekitori', makuuchi: 'kesho', O: 'dentatsu', Y: 'tsuna' }[h.to];
   if (h.kind === 'sansho') return 'sansho';
   if (h.kind === 'yusho') return 'senshuraku';
+  if (h.kind === 'shusse') return 'shusse';
   return null;
 }
 
@@ -180,6 +181,27 @@ export function HighlightDialog({
       name: r.name,
       wins: h.wins,
       losses: h.losses,
+    });
+  } else if (h.kind === 'shusse') {
+    title = t('highlight.shusse.title');
+    // 化粧まわしは部屋のいちばん上の関取から、いなければ師匠から借りる
+    const ranksNow = ranksOf(game.banzuke, game.titles);
+    const senior = game.banzuke.find((id) => {
+      const x = game.rikishi.find((y) => y.id === id);
+      const k = ranksNow.get(id);
+      return (
+        x?.stableId === game.player.stableId &&
+        k &&
+        (k.division === 'makuuchi' || k.division === 'juryo')
+      );
+    });
+    const seniorName =
+      senior === undefined ? null : game.rikishi.find((y) => y.id === senior)!.name;
+    body = t('highlight.shusse.body', {
+      names: h.ids.map((id) => game.rikishi.find((y) => y.id === id)?.name ?? '?').join('・'),
+      lender: seniorName
+        ? t('highlight.shusse.sekitori', { name: seniorName })
+        : t('highlight.shusse.master'),
     });
   } else if (h.kind === 'record') {
     title = t('highlight.record.title');

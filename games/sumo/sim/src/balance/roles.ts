@@ -18,4 +18,7 @@ export const ROLES = {
   chankoFatigue: 4,
   /** ちゃんこ番がひとりもいないとき: 部屋の全員の疲れの抜けが落ちる */
   noCookFatigue: 2,
+  /** 相撲教習所: 入門から半年（前相撲の場所を入れて3場所）。四股などの基本を習い、伸びが少しよい（推定） */
+  kyoshujoBasho: 3,
+  kyoshujoGrowth: 1.05,
 } as const;

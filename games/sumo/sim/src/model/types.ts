@@ -683,6 +683,8 @@ export interface BashoReport {
   henka?: number[];
   /** 年の終わりに決まった、後援会との約束の結果 */
   pledge?: { kind: PledgeKind; kept: boolean };
+  /** 前相撲を取り、新序出世披露をした自分の弟子 */
+  shusse?: number[];
   /** 中日の後に再出場・途中出場した自分の弟子 */
   reentered?: number[];
   /** 幕内の優勝争い（古い結果にはない） */

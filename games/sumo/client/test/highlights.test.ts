@@ -95,4 +95,13 @@ describe('場所の見せ場', () => {
       expect(kojoChoices(id)).toEqual(c);
     }
   });
+
+  it('前相撲を終えた自分の弟子は、新序出世披露を1枚で見せる（よその部屋の新弟子は出さない）', () => {
+    const s = createGame({ seed: 4 });
+    const mine = s.rikishi.filter((r) => r.stableId === s.player.stableId).map((r) => r.id);
+    const other = s.rikishi.find((r) => r.stableId !== s.player.stableId)!.id;
+    const hs = highlightsOf(s, report(s, { shusse: [mine[0]!, other] }));
+    const sh = hs.filter((h) => h.kind === 'shusse');
+    expect(sh).toEqual([{ kind: 'shusse', id: mine[0], ids: [mine[0]] }]);
+  });
 });

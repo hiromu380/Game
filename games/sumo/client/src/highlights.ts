@@ -19,6 +19,8 @@ export type Highlight =
   | { kind: 'bigBout'; id: number; bout: BoutResult; wins: number; losses: number }
   /** 自分の弟子が優勝の目を残して千秋楽を迎えた（id はその弟子） */
   | { kind: 'race'; id: number }
+  /** 前相撲を終えた新弟子の新序出世披露（id は先頭の弟子） */
+  | { kind: 'shusse'; id: number; ids: number[] }
   /** 部屋の新記録（id は記録を塗り替えた今の弟子） */
   | { kind: 'record'; id: number; news: RecordNews }
   | {
@@ -99,6 +101,9 @@ export function highlightsOf(game: GameState, report: BashoReport, prev?: GameSt
     }
   }
   // 元弟子の断髪式は最後に
+  const shusse = (report.shusse ?? []).filter((id) => mine(id));
+  if (shusse.length > 0)
+    out.push({ order: 27, h: { kind: 'shusse', id: shusse[0]!, ids: shusse } });
   for (const d of report.danpatsu ?? []) out.push({ order: 30, h: { kind: 'danpatsu', ...d } });
   return out.sort((a, b) => a.order - b.order).map((x) => x.h);
 }
