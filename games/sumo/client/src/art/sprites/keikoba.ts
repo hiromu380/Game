@@ -69,12 +69,6 @@ export function keikobaLayout(
     // 器具つきの1枚絵がなければ、改修2段目から土俵の手前の床に器具を置く
     if (dojo >= WEIGHTS_FROM_DOJO && !gym)
       for (const p of GYM_PROPS) if (has(p.sprite)) out.push(p);
-    // 部屋の呼出が、手前で土俵まわりを掃く
-    if (
-      (game.player.uragata ?? []).some((u) => u.role === 'yobidashi') &&
-      has('person_yobidashi_sweep')
-    )
-      out.push({ sprite: 'person_yobidashi_sweep', x: 272, y: 186 });
     return out;
   }
   const out: Placed[] = [
