@@ -34,7 +34,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 17) s = v17to18(s);
   if (s.version === 18) s = v18to19(s);
   if (s.version === 19) s = v19to20(s);
+  if (s.version === 20) s = v20to21(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 20 → 21: 雑用を免除した弟子（まだいない）
+ */
+function v20to21(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.exempt = [];
+  s.version = 21;
+  return s as unknown as Raw;
 }
 
 /**

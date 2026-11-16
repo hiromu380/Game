@@ -1601,5 +1601,22 @@
   "card.kesho": "化粧まわし",
   "card.kesho.patron": "タニマチの{by}さんから",
   "card.kesho.stable": "部屋で作った",
-  "card.kesho.borrowed": "師匠のを借りている"
+  "card.kesho.borrowed": "師匠のを借りている",
+  "role.sekitori": "関取",
+  "role.tsukebito": "付け人",
+  "role.chankoban": "ちゃんこ番",
+  "role.upper": "幕下上位",
+  "role.exempt": "雑用を免除する",
+  "role.injured": "けがで休み",
+  "role.title": "部屋の役目",
+  "role.desc.sekitori": "付け人: {names}",
+  "role.desc.sekitoriNone": "付け人はいない",
+  "role.desc.short": "足りない{n}人は、一門の部屋から借りる",
+  "role.desc.tsukebito": "{name}関の付け人。関取の稽古相手になって少し伸びるが、世話で疲れる",
+  "role.desc.chankoban": "ちゃんこ番を{n}人で持ち回る。稽古の伸びが少し落ち、疲れる",
+  "role.desc.upper": "幕下15枚目以内なので、ちゃんこ番を外れている",
+  "role.desc.exempt": "親方の判断で、付け人とちゃんこ番を外している。ほかの弟子の受け持ちが増える",
+  "role.desc.injured": "けがの間は役目を外れる",
+  "role.desc.noCook": "ちゃんこ番がいない。部屋の全員の疲れが抜けにくい",
+  "role.unexempt": "免除をやめる"
 }

@@ -368,6 +368,8 @@ export interface Pending {
 }
 
 export interface PlayerState {
+  /** 雑用（付け人・ちゃんこ番）を免除した自分の弟子 */
+  exempt: number[];
   /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
   pledge: {
     kind: PledgeKind;

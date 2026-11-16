@@ -1355,3 +1355,22 @@ body.has-modal {
   margin: 0;
   padding-left: 1.2em;
 }
+/* 部屋の役目 */
+.tag--role {
+  font-size: 0.85em;
+}
+.role-box {
+  margin: 8px 0;
+  padding: 6px 8px;
+  border: 2px solid var(--line);
+}
+.role-box h3 {
+  margin: 0 0 4px;
+  font-size: 1em;
+}
+.role-box p {
+  margin: 0 0 6px;
+}
+.role-box__warn {
+  color: var(--shu);
+}

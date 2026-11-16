@@ -35,6 +35,7 @@ import type {
 } from '../model/types';
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
+import { roleEffect, stableRoles } from '../stable/roles';
 import { onNewSekitori, setKesho } from '../stable/kesho';
 import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
 import { TACTIC } from '../balance/tactic';
@@ -526,15 +527,25 @@ export function advanceBasho(
   // 5. 稽古
   const growthRng = createPrng(deriveSeed(state.seed, SEED.growth, state.bashoIndex));
   const { playerCtx, lowerCtx } = playerGrowth(state);
+  const roles = stableRoles(state, newRanks);
   report.training = [];
   for (const r of state.rikishi) {
     const rank = newRanks.get(r.id);
     const own = r.stableId === state.player.stableId;
-    const ctx = own
+    const base = own
       ? rank && isSekitori(rank)
         ? playerCtx
         : lowerCtx
       : { ...NEUTRAL_GROWTH, oyakataStyle: styleOfStable.get(r.stableId)! };
+    // 部屋の役目（付け人・ちゃんこ番）が伸びと疲れに効く
+    const role = own ? roleEffect(roles, r.id) : null;
+    const ctx = role
+      ? {
+          ...base,
+          growthMultiplier: base.growthMultiplier * role.growth,
+          extraRecovery: base.extraRecovery - role.fatigue,
+        }
+      : base;
     const before = own ? { ...r.abilities, weight: r.weight, fatigue: r.fatigue } : null;
     const injured = train(r, ctx, growthRng);
     // 猛稽古で壁に当たっていた自分の弟子は、壁を破る（素質が上がる）

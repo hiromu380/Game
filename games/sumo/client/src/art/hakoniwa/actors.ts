@@ -3,7 +3,7 @@
  * 稽古場: 申し合い（四つ・押し）・鉄砲（押し）・すり足（技）・四股（体づくり）・見取り（休養）・親方は上がり座敷
  * 外観: けが人は寮の縁側で布団・番付の下の2人は掃除（門の前の道と敷石）・ちゃんこ番・稽古場に入りきらない弟子は庭で四股
  */
-import { isSekitori, ranksOf, type GameState, type Rikishi } from '@ichimon/sim';
+import { isSekitori, ranksOf, stableRoles, type GameState, type Rikishi } from '@ichimon/sim';
 import type { PersonLook, Pose } from './people';
 import { depthAmong, toScreen, type Piece } from './grid';
 import { WEIGHTS_FROM_DOJO } from '../sprites/keikoba';
@@ -220,6 +220,17 @@ export const COMPOUND_SPOTS = {
 } as const;
 
 /** 外観の人。番付の下の弟子から雑用に回る */
+/** 雑用をする弟子（部屋の役目がちゃんこ番）。幕下上位・免除・付け人・関取は入らない */
+function choreCrew(
+  game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
+): Set<number> {
+  const roles = stableRoles({
+    ...game,
+    player: { ...game.player, exempt: game.player.exempt ?? [] },
+  });
+  return new Set([...roles.of].filter(([, x]) => x === 'chankoban').map(([id]) => id));
+}
+
 export function compoundCast(
   game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
 ): Actor[] {
@@ -262,10 +273,9 @@ export function compoundCast(
       place(r, sekitori, 'sit', COMPOUND_SPOTS.engawa[i]!);
       taken.add(r.id);
     });
-  // 番付の下から: 掃除2人・ちゃんこ番1人（関取はしない）
-  const juniors = [...all]
-    .reverse()
-    .filter((x) => !x.sekitori && x.r.injury === 0 && !taken.has(x.r.id));
+  // ちゃんこ番の弟子（部屋の役目）から、番付の下から: 掃除2人・ちゃんこ番1人
+  const cooks = choreCrew(game);
+  const juniors = [...all].reverse().filter((x) => cooks.has(x.r.id) && !taken.has(x.r.id));
   juniors.slice(0, COMPOUND_SPOTS.sweep.length).forEach(({ r }, i) => {
     const s = COMPOUND_SPOTS.sweep[i]!;
     place(r, false, 'sweep', s.at, s.to);
@@ -403,9 +413,8 @@ export function roomCast(
   const beds = hasRoom(game, 'room_clinic') ? (ROOM_SPOTS.room_clinic.lie?.length ?? 0) : 0;
   const injured = room === 'room_clinic' ? hurt.slice(0, beds) : hurt.slice(beds);
   const rest = all.filter((x) => x.r.injury === 0 && x.r.policy === 'rest');
-  const juniors = [...all]
-    .reverse()
-    .filter((x) => !x.sekitori && x.r.injury === 0 && x.r.policy !== 'rest');
+  const cooks = choreCrew(game);
+  const juniors = [...all].reverse().filter((x) => cooks.has(x.r.id) && x.r.policy !== 'rest');
   const sweep = juniors.slice(0, 2);
   const chanko = juniors.slice(2, 3);
   injured

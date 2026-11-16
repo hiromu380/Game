@@ -5,13 +5,16 @@ import {
   sekitoriGain,
   setIntensity,
   setPlayHurt,
+  setExempt,
   setPolicy,
   stableCapacity,
+  stableRoles,
   styleOf,
   type GameState,
   type Rank,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { Lore } from './Glossary';
 import { rankLabel } from '../format';
 import { lookOfRikishi } from '../art/Portraits';
 import { RikishiDetail } from './RikishiDetail';
@@ -41,6 +44,29 @@ export function DeshiTab({
     .filter((r) => r.stableId === game.player.stableId)
     .sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   const cap = stableCapacity(game);
+  const roles = stableRoles(game, ranks);
+  const nameOf = (id: number) => game.rikishi.find((x) => x.id === id)?.name ?? '?';
+  const cooks = [...roles.of.values()].filter((x) => x === 'chankoban').length;
+  /** 役目の1行（関取は付け人の名前） */
+  const roleText = (id: number): string => {
+    const role = roles.of.get(id);
+    if (role === 'sekitori') {
+      const att = roles.attendants.get(id) ?? [];
+      const short = roles.short.get(id) ?? 0;
+      return [
+        att.length > 0
+          ? t('role.desc.sekitori', { names: att.map(nameOf).join('・') })
+          : t('role.desc.sekitoriNone'),
+        short > 0 ? t('role.desc.short', { n: short }) : '',
+      ]
+        .filter(Boolean)
+        .join('。');
+    }
+    if (role === 'tsukebito')
+      return t('role.desc.tsukebito', { name: nameOf(roles.serves.get(id)!) });
+    if (role === 'chankoban') return t('role.desc.chankoban', { n: cooks });
+    return role ? t(`role.desc.${role}`) : '';
+  };
   const card = open === null ? undefined : mine.find((r) => r.id === open);
   const shown = detail === null ? undefined : mine.find((r) => r.id === detail);
   // 十両が目標の弟子は、関取になったら部屋の口座がいくら変わるかを添える
@@ -68,6 +94,12 @@ export function DeshiTab({
                   {r.name}
                   {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
                   {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
+                  {(() => {
+                    const role = roles.of.get(r.id);
+                    return role && role !== 'sekitori' && role !== 'injured' ? (
+                      <span className={`tag tag--role is-${role}`}>{t(`role.${role}`)}</span>
+                    ) : null;
+                  })()}
                   {game.pending.treatment.includes(r.id) && (
                     <span className="tag tag--warn">{t('deshi.ask')}</span>
                   )}
@@ -112,6 +144,30 @@ export function DeshiTab({
                 onDetail={() => setDetail(card.id)}
               />
             </ul>
+            <div className="role-box">
+              <h3>
+                {t('role.title')}: {t(`role.${roles.of.get(card.id) ?? 'exempt'}`)}
+              </h3>
+              <p>{roleText(card.id)}</p>
+              {roles.noCook && <p className="role-box__warn">{t('role.desc.noCook')}</p>}
+              {roles.of.get(card.id) !== 'sekitori' && (
+                <button
+                  className="button"
+                  onClick={() =>
+                    setGame(setExempt(game, card.id, !game.player.exempt.includes(card.id)))
+                  }
+                >
+                  {game.player.exempt.includes(card.id) ? t('role.unexempt') : t('role.exempt')}
+                </button>
+              )}
+              <Lore
+                id={
+                  roles.of.get(card.id) === 'chankoban' || roles.of.get(card.id) === 'upper'
+                    ? 'chankoban'
+                    : 'tsukebito'
+                }
+              />
+            </div>
             <div className="modal__actions">
               <button className="button button--primary" data-dismiss onClick={() => setOpen(null)}>
                 {t('deshi.close')}

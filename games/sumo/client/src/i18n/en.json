@@ -1601,5 +1601,22 @@
   "card.kesho": "Kesho-mawashi",
   "card.kesho.patron": "from patron {by}",
   "card.kesho.stable": "made by the stable",
-  "card.kesho.borrowed": "borrowed from the master"
+  "card.kesho.borrowed": "borrowed from the master",
+  "role.sekitori": "Sekitori",
+  "role.tsukebito": "Attendant",
+  "role.chankoban": "Chanko duty",
+  "role.upper": "Upper makushita",
+  "role.exempt": "Excuse from chores",
+  "role.injured": "Injured",
+  "role.title": "Role in the stable",
+  "role.desc.sekitori": "Attendants: {names}",
+  "role.desc.sekitoriNone": "No attendants",
+  "role.desc.short": "{n} more are borrowed from ichimon stables",
+  "role.desc.tsukebito": "Attends {name}. Sparring with a sekitori helps him grow a little, but the chores tire him",
+  "role.desc.chankoban": "Chanko duty, shared by {n}. Growth dips a little and he tires",
+  "role.desc.upper": "Top 15 in makushita, so off chanko duty",
+  "role.desc.exempt": "Excused by the master from attending and cooking. The others carry more",
+  "role.desc.injured": "Off duty while injured",
+  "role.desc.noCook": "No one is on chanko duty. Everyone recovers more slowly",
+  "role.unexempt": "Back to chores"
 }

@@ -80,7 +80,7 @@ describe('場所の間の出来事', () => {
     delete v7.pending.happening;
     for (const r of v7.rikishi) delete r.boost;
     const m = migrateSave(v7)!;
-    expect(m.version).toBe(20);
+    expect(m.version).toBe(21);
     expect(m.pending.happening).toBeNull();
     expect(m.rikishi.every((r) => r.boost === 1)).toBe(true);
   });
@@ -99,6 +99,8 @@ describe('場所の間の出来事', () => {
     let s = play(9, 0);
     const seen: { id: string; at: number }[] = [];
     for (let i = 0; i < 90 && !s.gameOver; i++) {
+      // 出来事を見る試験なので、お金は尽きないようにする
+      s.player.personalMoney = Math.max(s.player.personalMoney, 100_000_000);
       s = autoStep(s);
       const h = s.pending.happening;
       if (!h) continue;
