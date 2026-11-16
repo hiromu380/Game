@@ -44,7 +44,7 @@ export function ReportDialog({
 }: {
   game: GameState;
   report: BashoReport;
-  /** 報酬と罰（場所を進めた直後だけ。前の結果を開き直したときは出さない） */
+  /** 部屋への影響（場所を進めた直後だけ。前の結果を開き直したときは出さない） */
   rewards?: RewardLine[] | null;
   onClose: () => void;
 }) {

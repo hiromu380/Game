@@ -238,16 +238,6 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     ],
   },
   {
-    id: 'soken',
-    requires: 'sekitori',
-    months: [0, 2, 4],
-    weight: 2,
-    options: [
-      { key: 'attend', group: 'sekitori', effect: { boost: 1.1, fatigue: 8, prestige: 0.5 } },
-      decline,
-    ],
-  },
-  {
     id: 'kneeWorry',
     requires: 'none',
     target: 'upper',
@@ -403,17 +393,18 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     ],
   },
   {
+    // 結婚は関取になってから。結婚すると部屋の外で暮らす（docs/realism.md）
     id: 'wedding',
-    requires: 'none',
-    target: 'sekitoriAdult',
+    requires: 'sekitori',
+    target: 'sekitoriSingle',
     weight: 1,
     options: [
       {
         key: 'celebrate',
         group: 'target',
-        effect: { stableMoney: -300_000, prestige: 1, boost: 1.1 },
+        effect: { personalMoney: -300_000, prestige: 1, boost: 1.1, living: 'married' },
       },
-      { key: 'quiet', group: 'target', effect: { boost: 1.05 } },
+      { key: 'quiet', group: 'target', effect: { boost: 1.05, living: 'married' } },
     ],
   },
   {
@@ -816,20 +807,6 @@ export const HAPPENINGS: readonly HappeningDef[] = [
         effect: {},
         chance: { p: 0.3, effect: { prestige: -1 } },
       },
-    ],
-  },
-  {
-    id: 'marriage',
-    requires: 'sekitori',
-    target: 'sekitoriSingle',
-    weight: 1,
-    options: [
-      {
-        key: 'bless',
-        group: 'target',
-        effect: { living: 'married', personalMoney: -300_000, prestige: 0.5, boost: 1.05 },
-      },
-      { key: 'decline', effect: {} },
     ],
   },
   {

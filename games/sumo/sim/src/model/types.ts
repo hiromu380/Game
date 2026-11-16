@@ -299,6 +299,7 @@ export type HappeningId =
   | 'jinku'
   | 'tsukebitoCare'
   | 'shitakuPhone'
+  /** 23版まで（今は wedding にまとめた） */
   | 'marriage'
   | 'moveOut'
   | 'jungyoShokkiri'

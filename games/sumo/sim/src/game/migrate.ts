@@ -39,7 +39,20 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 21) s = v21to22(s);
   if (s.version === 22) s = v22to23(s);
   if (s.version === 23) s = v23to24(s);
+  if (s.version === 24) s = v24to25(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 24 → 25: 返事待ちの出来事が「稽古総見」なら流し、「結婚の報告」は「結婚」に替える
+ */
+function v24to25(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  const h = s.pending.happening;
+  if (h?.id === 'soken') s.pending.happening = null;
+  else if (h?.id === 'marriage') s.pending.happening = { ...h, id: 'wedding' };
+  s.version = 25;
+  return s as unknown as Raw;
 }
 
 /**

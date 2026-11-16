@@ -57,8 +57,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 22: 雑用の免除をやめた（player.exempt を消す）。関取の部屋の外での暮らし（rikishi.living。なければ部屋）
  * 23: 裏方（player.uragata・pending.uragata）
  * 24: 協会全体の裏方の人数（uragataCount）
+ * 25: 出来事の「稽古総見」（自動の稽古総見にした）と「結婚の報告」（「結婚」にまとめた）をやめた
  */
-export const SAVE_VERSION = 24;
+export const SAVE_VERSION = 25;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {

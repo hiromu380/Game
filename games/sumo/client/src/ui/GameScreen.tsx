@@ -80,7 +80,7 @@ export function GameScreen({
   // 任せる（早送り）: 開いているか・任せた結果
   const [delegateOpen, setDelegateOpen] = useState(false);
   const [delegated, setDelegated] = useState<DelegateResult | null>(null);
-  // 直前の場所の報酬と罰（場所を進めた直後に作る）
+  // 直前の場所の部屋への影響（場所を進めた直後に作る）
   const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
   // 後半に大一番（勝ち越しをかけた最後の一番）がある弟子がいれば、その前の日で星取りを止めて作戦を聞き、

@@ -3,7 +3,7 @@ import { money } from '../format';
 import type { RewardLine } from '../rewards';
 import { Icon } from '../art/Icon';
 
-/** 報酬と罰の行のアイコン */
+/** 部屋への影響の行のアイコン */
 function iconOf(x: RewardLine): string {
   switch (x.kind) {
     case 'prestige':
@@ -29,7 +29,7 @@ function iconOf(x: RewardLine): string {
   }
 }
 
-/** 場所の結果の「報酬と罰」: 成績が経営に返ってきたものを、原因つきで1行ずつ */
+/** 場所の結果の「部屋への影響」: 成績が経営に返ってきたものを、原因つきで1行ずつ */
 export function RewardsSection({ lines }: { lines: RewardLine[] }) {
   const { t, lang } = useI18n();
   const yen = (n: number) => (n >= 0 ? '+' : '−') + money(t, Math.abs(n), lang);
