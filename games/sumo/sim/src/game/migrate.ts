@@ -36,7 +36,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 19) s = v19to20(s);
   if (s.version === 20) s = v20to21(s);
   if (s.version === 21) s = v21to22(s);
+  if (s.version === 22) s = v22to23(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 22 → 23: 裏方（まだいない）
+ */
+function v22to23(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.uragata = [];
+  s.pending.uragata = null;
+  s.version = 23;
+  return s as unknown as Raw;
 }
 
 /**

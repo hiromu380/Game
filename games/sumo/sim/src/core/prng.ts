@@ -71,4 +71,5 @@ export const SEED = {
   prep: 17,
   tide: 18,
   pledge: 19,
+  uragata: 20,
 } as const;

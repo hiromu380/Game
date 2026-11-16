@@ -80,3 +80,7 @@ export {
 } from './stable/roles';
 export { SOKEN } from './balance/ceremony2';
 export { holdSoken, sokenAttendees } from './stable/soken';
+export { URAGATA, URAGATA_ROLES, type UragataRole } from './balance/uragata';
+export { answerUragata, uragataEffect, uragataOf } from './stable/uragata';
+export { HEYATSUKI } from './balance/heyatsuki';
+export { heyatsukiOffers, inviteHeyatsuki } from './stable/heyatsuki';

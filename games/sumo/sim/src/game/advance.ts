@@ -36,6 +36,7 @@ import type {
 import { round1 } from '../core/math';
 import { WALL } from '../balance/wall';
 import { roleEffect, stableRoles } from '../stable/roles';
+import { ageUragata, rollUragata, uragataEffect } from '../stable/uragata';
 import { holdSoken } from '../stable/soken';
 import { onNewSekitori, setKesho } from '../stable/kesho';
 import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
@@ -87,8 +88,9 @@ function prepareBasho(state: GameState, report: BashoReport): void {
   state.pending.retireRequests = [];
   // 返事をしなかった治療の方針は、保存療法
   state.pending.treatment = [];
-  // 返事をしなかった後援会との約束は、約束しない
+  // 返事をしなかった後援会との約束は、約束しない。裏方の志望者は見送る
   state.pending.pledge = null;
+  state.pending.uragata = null;
   // 返事をしなかった化粧まわしは、師匠のを借りる
   for (const id of [...state.pending.kesho]) setKesho(state, id, 'borrowed');
   // 返事をしなかった独立の申し出は、引き留めたことにする。出来事は断ったことにする
@@ -156,6 +158,11 @@ export function playerGrowth(state: GameState): {
     ...playerCtx,
     growthMultiplier: playerCtx.growthMultiplier * staff.lowerGrowth,
   };
+  // 裏方: 床山は関取の身の回りを整え（関取の疲れが抜ける）、呼出は土俵を整える（けがが減る）
+  const ura = uragataEffect(state);
+  playerCtx.extraRecovery += ura.sekitoriRecovery;
+  playerCtx.injuryMultiplier *= ura.injury;
+  lowerCtx.injuryMultiplier *= ura.injury;
   return { playerCtx, lowerCtx };
 }
 
@@ -603,6 +610,11 @@ export function advanceBasho(
     const offers = pledgeOffers(state, ranksOf(state.banzuke, state.titles));
     state.pending.pledge = offers.length > 0 ? offers : null;
   }
+  // 裏方（行司・呼出・床山）の志望者。行司は部屋の書き物を手伝い、名声が少しずつ上がる
+  if (!state.gameOver) {
+    state.player.prestige += uragataEffect(state).prestige;
+    rollUragata(state);
+  }
   // けがの部位と治療の方針・治ったけがの古傷
   tagInjuries(state);
   if (!state.gameOver) {
@@ -626,6 +638,7 @@ function yearEnd(state: GameState) {
     note(state, { kind: 'staffLeave', role: s.role, name: s.name, retired: true });
   }
   state.player.staff = state.player.staff.filter((x) => x.age < STAFF_EFFECTS.retireAge);
+  ageUragata(state);
   // 協会: 参与の退職・部屋付きの定年・架空の部屋（分家を含む）の師匠の定年と継承・独立
   yearEndAssociation(state, rng);
   // ライバルの部屋が閉じていたら新しいライバル。何年かたち、もっと競る部屋が出てきたら替わる

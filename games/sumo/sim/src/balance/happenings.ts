@@ -108,6 +108,9 @@ export const HAPPENING_VETERAN_MIN = 30;
 
 const decline: HappeningOption = { key: 'decline', effect: {} };
 
+/** 巡業から帰ってきた場所（春巡業の後の夏場所・夏巡業の後の秋場所・秋巡業の後の九州場所・冬巡業の後の初場所） */
+const JUNGYO_MONTHS = [0, 2, 4, 5] as const;
+
 export const HAPPENINGS: readonly HappeningDef[] = [
   // ── 後援会・タニマチ ──
   {
@@ -837,6 +840,82 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     options: [
       { key: 'allow', group: 'target', effect: { living: 'alone' } },
       { key: 'decline', group: 'target', effect: { fatigue: 2 } },
+    ],
+  },
+  // ── 巡業（場所の後の巡業から帰って。docs/rikishi-life.md）──
+  {
+    id: 'jungyoShokkiri',
+    requires: 'none',
+    target: 'lower',
+    months: JUNGYO_MONTHS,
+    weight: 1.2,
+    options: [
+      { key: 'perform', group: 'target', effect: { prestige: 0.5, fatigue: 4 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jungyoChibikko',
+    requires: 'sekitori',
+    target: 'sekitori',
+    months: JUNGYO_MONTHS,
+    weight: 1.2,
+    options: [
+      {
+        key: 'lend',
+        group: 'target',
+        effect: { prestige: 0.5, fatigue: 3 },
+        chance: { p: 0.3, effect: { candidate: { talent: [35, 62], background: 'juniorHigh' } } },
+      },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jungyoHandshake',
+    requires: 'sekitori',
+    target: 'sekitori',
+    months: JUNGYO_MONTHS,
+    weight: 1,
+    options: [
+      { key: 'line', group: 'target', effect: { prestige: 0.6, fatigue: 5 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jungyoKamiyui',
+    requires: 'sekitori',
+    target: 'sekitori',
+    months: JUNGYO_MONTHS,
+    weight: 0.8,
+    options: [
+      { key: 'show', group: 'target', effect: { prestige: 0.4 } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jungyoKeiko',
+    requires: 'none',
+    target: 'upper',
+    months: JUNGYO_MONTHS,
+    weight: 1.2,
+    options: [
+      {
+        key: 'go',
+        group: 'target',
+        effect: { ability: { style: 'best', amount: 1.5 }, fatigue: 8, injuryRisk: 0.04 },
+      },
+      { key: 'watch', group: 'target', effect: { ability: { style: 'best', amount: 0.5 } } },
+      { key: 'decline', effect: {} },
+    ],
+  },
+  {
+    id: 'jungyoTravel',
+    requires: 'sekitori',
+    months: JUNGYO_MONTHS,
+    weight: 1,
+    options: [
+      { key: 'push', group: 'sekitori', effect: { prestige: 0.3, fatigue: 6 } },
+      { key: 'decline', group: 'sekitori', effect: { fatigue: -6, prestige: -0.2 } },
     ],
   },
 ];

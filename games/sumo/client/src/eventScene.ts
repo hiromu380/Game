@@ -50,6 +50,9 @@ put('room_genkan', ['drivingLicense', 'curfew', 'calligraphy']);
 put('room_oobeya', ['violenceRumor', 'lateNight', 'shitakuPhone', 'tsukebitoCare']);
 put('room_ousetsu', ['jinku', 'marriage']);
 put('room_ima', ['moveOut']);
+put('keikoba', ['jungyoShokkiri', 'jungyoChibikko', 'jungyoKeiko']);
+put('room_genkan', ['jungyoHandshake', 'jungyoTravel']);
+put('room_furo', ['jungyoKamiyui']);
 put('room_kitchen', ['riceGift', 'chankoVideo', 'newChanko', 'nutritionist']);
 // 身内の来訪 → 応接間・居間
 put('room_ousetsu', ['parentsVisit', 'wedding']);

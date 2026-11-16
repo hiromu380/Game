@@ -252,3 +252,78 @@ export function lineageCharOf(shikona: string, rng: Prng): string {
   const chars = [...shikona].filter((c) => !MIDDLES.includes(c));
   return chars.length ? rng.pick(chars) : shikona.slice(0, 1);
 }
+
+/** 行司の家（行司は木村か式守を名のる） */
+const GYOJI_HOUSES = ['木村', '式守'];
+/** 行司の名の字 */
+const GYOJI_GIVEN = [
+  '晃之助',
+  '寿之介',
+  '要之助',
+  '光之助',
+  '勘九郎',
+  '玉治郎',
+  '朝之助',
+  '和一郎',
+  '元基',
+  '秋治郎',
+  '恵之助',
+  '銀治郎',
+];
+/** 呼出の名（下の名で呼ばれる） */
+const YOBIDASHI_GIVEN = [
+  '克之',
+  '秀男',
+  '照夫',
+  '勘太',
+  '利樹',
+  '啓輔',
+  '拓郎',
+  '直也',
+  '慎吾',
+  '光一',
+  '邦夫',
+  '達郎',
+  '大輔',
+  '晴樹',
+];
+/** 床山の名（「床」で始まる） */
+const TOKOYAMA_CHARS = [
+  '山',
+  '鶴',
+  '錦',
+  '邦',
+  '秀',
+  '若',
+  '勝',
+  '正',
+  '高',
+  '武',
+  '富',
+  '美',
+  '義',
+  '光',
+  '明',
+  '蜂',
+  '大',
+];
+
+/** 裏方（行司・呼出・床山）の名 */
+export function makeUragataName(
+  rng: Prng,
+  role: 'gyoji' | 'yobidashi' | 'tokoyama',
+  used: ReadonlySet<string>,
+): string {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const name =
+      role === 'gyoji'
+        ? `${rng.pick(GYOJI_HOUSES)}${rng.pick(GYOJI_GIVEN)}`
+        : role === 'yobidashi'
+          ? rng.pick(YOBIDASHI_GIVEN)
+          : `床${rng.pick(TOKOYAMA_CHARS)}`;
+    if (!used.has(name)) return name;
+  }
+  return role === 'tokoyama'
+    ? `床${rng.pick(TOKOYAMA_CHARS)}${rng.pick(TOKOYAMA_CHARS)}`
+    : `${rng.pick(YOBIDASHI_GIVEN)}`;
+}

@@ -18,6 +18,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'open':
     case 'successor':
     case 'independence':
+    case 'heyatsukiJoin':
     case 'branchSucceeded':
     case 'branchClosed':
     case 'kakun':
@@ -31,6 +32,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
       return 'stable';
     case 'staffHire':
     case 'staffLeave':
+    case 'uragata':
       return 'business';
     case 'kojo':
     case 'danpatsu':
@@ -169,6 +171,10 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return e.doki > 0
         ? t('journal.akeni', { shikona: e.shikona, doki: e.doki })
         : t('journal.akeniNone', { shikona: e.shikona });
+    case 'uragata':
+      return t(`journal.uragata.${e.event}`, { role: t(`uragata.${e.role}.name`), name: e.name });
+    case 'heyatsukiJoin':
+      return t('journal.heyatsukiJoin', { name: e.name, shikona: e.shikona, from: e.from });
     case 'living':
       return t(`journal.living.${e.event}`, { shikona: e.shikona });
     case 'kesho':

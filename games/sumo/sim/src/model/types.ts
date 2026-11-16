@@ -1,5 +1,6 @@
 import type { KeshoFrom } from '../balance/kesho';
 import type { Living } from '../balance/roles';
+import type { UragataRole } from '../balance/uragata';
 import type { Dohyoiri, KojoWord } from '../balance/ceremony';
 import type { PledgeKind } from '../balance/pledge';
 import type { InjuryPart, Treatment } from '../balance/injury';
@@ -299,7 +300,13 @@ export type HappeningId =
   | 'tsukebitoCare'
   | 'shitakuPhone'
   | 'marriage'
-  | 'moveOut';
+  | 'moveOut'
+  | 'jungyoShokkiri'
+  | 'jungyoChibikko'
+  | 'jungyoHandshake'
+  | 'jungyoKamiyui'
+  | 'jungyoKeiko'
+  | 'jungyoTravel';
 
 /** 設備と契約: 寮・稽古場・トレーナー・スカウト */
 export type FacilityId = 'dorm' | 'dojo' | 'trainer' | 'scout';
@@ -378,9 +385,15 @@ export interface Pending {
   treatment: number[];
   /** 化粧まわしの手配を聞いている新しい関取（返事をしなければ師匠のを借りる） */
   kesho: number[];
+  /** 裏方（行司・呼出・床山）の志望者（返事をしなければ見送る） */
+  uragata: { role: UragataRole; name: string; age: number } | null;
 }
 
 export interface PlayerState {
+  /** よその部屋付きの親方を最後に迎えた場所（なければ一度も） */
+  lastInvite?: number;
+  /** 部屋の裏方（行司・呼出・床山） */
+  uragata: { role: UragataRole; name: string; age: number; since: number }[];
   /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
   pledge: {
     kind: PledgeKind;
@@ -612,6 +625,10 @@ export type JournalEvent =
   | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
   /** 新しい関取に、同期生から明け荷が届いた（doki: 今も土俵にいる同期生の数） */
   | { kind: 'akeni'; shikona: string; doki: number }
+  /** よその部屋付きの親方を迎えた */
+  | { kind: 'heyatsukiJoin'; name: string; shikona: string; from: string }
+  /** 裏方が部屋に入った・定年で去った */
+  | { kind: 'uragata'; role: UragataRole; name: string; event: 'join' | 'retire' }
   /** 関取が部屋を出た（一人暮らし）・結婚した・関取から落ちて部屋に戻った */
   | { kind: 'living'; shikona: string; event: 'alone' | 'married' | 'back' }
   /** 化粧まわしの手配 */

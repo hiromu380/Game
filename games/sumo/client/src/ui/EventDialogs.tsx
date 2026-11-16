@@ -3,6 +3,7 @@ import {
   acceptCandidate,
   answerKesho,
   answerPledge,
+  answerUragata,
   KESHO,
   keshoOptions,
   keshoPatron,
@@ -41,6 +42,12 @@ const HAPPENING_LORE: Partial<Record<string, string>> = {
   curfew: 'asageiko',
   marriage: 'kurashi',
   moveOut: 'kurashi',
+  jungyoShokkiri: 'shokkiri',
+  jungyoChibikko: 'jungyo',
+  jungyoHandshake: 'jungyo',
+  jungyoKamiyui: 'uragata',
+  jungyoKeiko: 'jungyo',
+  jungyoTravel: 'jungyo',
 };
 
 /** 約束の選択肢のアイコン */
@@ -52,7 +59,7 @@ const PLEDGE_ICON = {
 
 /**
  * 返事が要るものを1件ずつ窓で出す（部屋の画面には並べない）。順に: 引退の申し出 → けがの治療の方針 → 場所の間の出来事 →
- * 理事選挙 → 独立の申し出 → 新十両の化粧まわし → 後援会との約束（年の初め） → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
+ * 理事選挙 → 独立の申し出 → 新十両の化粧まわし → 裏方の志望者 → 後援会との約束（年の初め） → 入門希望者（1人ずつ）。返事をすると次が出る。決めないと閉じない（Esc で閉じない）
  */
 export function EventDialogs({
   game,
@@ -249,6 +256,37 @@ export function EventDialogs({
       OTHER_PICTURE.pledge,
     );
   }
+
+  // 裏方（行司・呼出・床山）の志望者
+  const ura = game.pending.uragata;
+  if (ura)
+    return box(
+      t('uragata.applyTitle'),
+      <>
+        <h2>{t('uragata.applyTitle')}</h2>
+        <p>
+          {t('uragata.applyBody', {
+            role: t(`uragata.${ura.role}.name`),
+            name: ura.name,
+            age: ura.age,
+          })}
+        </p>
+        <p className="muted">{t(`uragata.${ura.role}.desc`)}</p>
+        <Lore id="uragata" />
+        <div className="modal__actions">
+          <button className="button" onClick={() => setGame(answerUragata(game, false))}>
+            {t('uragata.decline')}
+          </button>
+          <button
+            className="button button--primary"
+            onClick={() => setGame(answerUragata(game, true))}
+          >
+            {t('uragata.accept')}
+          </button>
+        </div>
+      </>,
+      OTHER_PICTURE.candidate,
+    );
 
   // 後援会との約束（年の初め）
   if (game.pending.pledge)

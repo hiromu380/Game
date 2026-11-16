@@ -54,8 +54,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 20: 新十両の化粧まわし（pending.kesho・rikishi.kesho）
  * 21: 雑用を免除した弟子（player.exempt）
  * 22: 雑用の免除をやめた（player.exempt を消す）。関取の部屋の外での暮らし（rikishi.living。なければ部屋）
+ * 23: 裏方（player.uragata・pending.uragata）
  */
-export const SAVE_VERSION = 22;
+export const SAVE_VERSION = 23;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -189,6 +190,7 @@ export function createGame(options: NewGameOptions): GameState {
     oyakata: [oyakata],
     player: {
       pledge: null,
+      uragata: [],
       stableId: playerStable.id,
       oyakataId: oyakata.id,
       generation: 1,
@@ -234,6 +236,7 @@ export function createGame(options: NewGameOptions): GameState {
       treatment: [],
       pledge: null,
       kesho: [],
+      uragata: null,
     },
     gameOver: null,
     lastReport: null,
