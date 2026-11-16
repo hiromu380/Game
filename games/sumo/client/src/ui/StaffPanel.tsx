@@ -4,9 +4,7 @@ import {
   DIET_IDS,
   DIETS,
   dismissStaff,
-  heyatsukiOffers,
   hireStaff,
-  inviteHeyatsuki,
   setDiet,
   staffCandidates,
   staffOf,
@@ -125,36 +123,7 @@ export function StaffPanel({
           </ul>
         );
       })()}
-      <p className="muted">{t('heyatsuki.offersLead')}</p>
-      {(() => {
-        const offers = heyatsukiOffers(game);
-        return offers.length === 0 ? (
-          <p className="muted">{t('heyatsuki.none')}</p>
-        ) : (
-          <ul className="plain-list">
-            {offers.slice(0, 4).map((o) => (
-              <li key={o.id} className="row">
-                <div className="row__main">
-                  <strong>
-                    {t('heyatsuki.offer', { name: o.name, shikona: o.shikona, age: o.age })}
-                  </strong>
-                  <span className="muted">
-                    {t('heyatsuki.from', {
-                      stable: game.stables.find((x) => x.id === o.stableId)?.name ?? '',
-                      rank: o.highestRank ? rankName(t, o.highestRank) : '',
-                    })}
-                  </span>
-                </div>
-                <div className="row__actions">
-                  <button className="button" onClick={() => setGame(inviteHeyatsuki(game, o.id))}>
-                    {t('heyatsuki.invite')}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        );
-      })()}
+      <p className="muted">{t('heyatsuki.note')}</p>
 
       <h3 className="panel__sub">{t('diet.title')}</h3>
       <div className="segmented" role="group" aria-label={t('diet.title')}>

@@ -2,9 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   advanceBasho,
   answerUragata,
-  heyatsukiOffers,
-  HEYATSUKI,
-  inviteHeyatsuki,
   migrateSave,
   SAVE_VERSION,
   URAGATA,
@@ -63,30 +60,5 @@ describe('裏方（行司・呼出・床山）', () => {
     expect(m.version).toBe(SAVE_VERSION);
     expect(m.player.uragata).toEqual([]);
     expect(m.pending.uragata).toBeNull();
-  });
-});
-
-describe('よその部屋付きの親方を迎える', () => {
-  it('同じ一門の、部屋付きの親方が2人以上いる部屋から迎えられる。迎えると何場所かは次を迎えられない', () => {
-    const g = play(4, 12);
-    const mine = g.stables.find((s) => s.id === g.player.stableId)!;
-    const other = g.stables.find((s) => s.id !== mine.id && s.ichimonId === mine.ichimonId)!;
-    const base = g.oyakata.find((o) => o.stableId === other.id)!;
-    // 先方の部屋に部屋付きの親方を2人置く
-    for (const id of [9_000_001, 9_000_002])
-      g.oyakata.push({ ...base, id, role: 'heyatsuki', stableId: other.id, name: `名${id}` });
-    const offers = heyatsukiOffers(g);
-    expect(offers.length).toBeGreaterThan(0);
-    for (const o of offers) {
-      const from = g.stables.find((s) => s.id === o.stableId)!;
-      expect(from.ichimonId).toBe(mine.ichimonId);
-    }
-    const pick = offers[0]!;
-    const next = inviteHeyatsuki(g, pick.id);
-    expect(next.oyakata.find((o) => o.id === pick.id)!.stableId).toBe(g.player.stableId);
-    expect(next.journal.at(-1)).toMatchObject({ kind: 'heyatsukiJoin', name: pick.name });
-    expect(heyatsukiOffers(next)).toEqual([]);
-    next.bashoIndex += HEYATSUKI.cooldown;
-    expect(inviteHeyatsuki(g, 123456789)).toBe(g);
   });
 });

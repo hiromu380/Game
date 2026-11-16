@@ -390,8 +390,6 @@ export interface Pending {
 }
 
 export interface PlayerState {
-  /** よその部屋付きの親方を最後に迎えた場所（なければ一度も） */
-  lastInvite?: number;
   /** 部屋の裏方（行司・呼出・床山） */
   uragata: { role: UragataRole; name: string; age: number; since: number }[];
   /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
@@ -625,7 +623,7 @@ export type JournalEvent =
   | { kind: 'danpatsu'; shikona: string; venue: 'kokugikan' | 'hotel'; hasami: number }
   /** 新しい関取に、同期生から明け荷が届いた（doki: 今も土俵にいる同期生の数） */
   | { kind: 'akeni'; shikona: string; doki: number }
-  /** よその部屋付きの親方を迎えた */
+  /** よその部屋付きの親方を迎えた（23版で入れて、すぐやめた。古い日誌を読むためだけに残す） */
   | { kind: 'heyatsukiJoin'; name: string; shikona: string; from: string }
   /** 裏方が部屋に入った・定年で去った */
   | { kind: 'uragata'; role: UragataRole; name: string; event: 'join' | 'retire' }

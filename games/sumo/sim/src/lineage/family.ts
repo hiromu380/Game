@@ -48,8 +48,6 @@ export function rollIndependence(state: GameState): void {
     (o) =>
       o.stableId === state.player.stableId &&
       o.role === 'heyatsuki' &&
-      // よその部屋から迎えた親方は、自分の系譜の分家を開かない
-      o.fromRikishiId !== null &&
       o.age >= LINEAGE.independenceAgeMin &&
       o.age <= LINEAGE.independenceAgeMax &&
       state.bashoIndex - o.since >= LINEAGE.independenceAfterBasho &&

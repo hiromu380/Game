@@ -1795,13 +1795,9 @@
   "uragata.decline": "見送る",
   "heyatsuki.title": "部屋付きの親方",
   "heyatsuki.current": "{name}親方（元{shikona}・{age}歳）",
-  "heyatsuki.offer": "{name}親方（元{shikona}・{age}歳）",
-  "heyatsuki.from": "{stable}部屋の部屋付き・最高位 {rank}",
-  "heyatsuki.invite": "迎える",
-  "heyatsuki.none": "いま迎えられる親方はいない（同じ一門で、部屋付きの親方が2人以上いる部屋から。迎えたら6場所あける）",
   "journal.uragata.join": "{role}の{name}が部屋に入った。",
   "journal.uragata.retire": "{role}の{name}が定年を迎えた。",
   "journal.heyatsukiJoin": "{from}部屋から、{name}親方（元{shikona}）を部屋付きに迎えた。",
   "heyatsuki.vacant": "いない",
-  "heyatsuki.offersLead": "迎えられる親方（同じ一門の部屋から。稽古を見る人が増える）"
+  "heyatsuki.note": "部屋付きの親方は、この部屋から引退して年寄名跡を継いだ元弟子が残る（よその部屋から迎えることはない）"
 }

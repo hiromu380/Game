@@ -1795,13 +1795,9 @@
   "uragata.decline": "Pass",
   "heyatsuki.title": "Attached elders",
   "heyatsuki.current": "{name} (former {shikona}, {age})",
-  "heyatsuki.offer": "{name} (former {shikona}, {age})",
-  "heyatsuki.from": "Attached to {stable}; highest rank {rank}",
-  "heyatsuki.invite": "Invite",
-  "heyatsuki.none": "No elder can be invited now (from an ichimon stable with two or more attached elders; six tournaments between invitations)",
   "journal.uragata.join": "{role} {name} joined the stable.",
   "journal.uragata.retire": "{role} {name} reached retirement age.",
   "journal.heyatsukiJoin": "Welcomed {name} (former {shikona}) from {from} as an attached elder.",
   "heyatsuki.vacant": "None",
-  "heyatsuki.offersLead": "Elders you can invite (from ichimon stables; more eyes on practice)"
+  "heyatsuki.note": "Attached elders are former deshi of this stable who took an elder name on retiring (elders are not brought in from other stables)"
 }
