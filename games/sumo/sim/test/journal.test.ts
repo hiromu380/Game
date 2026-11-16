@@ -8,7 +8,7 @@ import {
   migrateSave,
   type JournalEntry,
 } from '../src';
-import { play } from './play';
+import { autoStep, play } from './play';
 
 describe('部屋の日誌', () => {
   it('部屋を開いたことから始まる', () => {
@@ -51,7 +51,12 @@ describe('部屋の日誌', () => {
   });
 
   it('長く遊ぶと、入門・昇進・引退が時系列で並ぶ（継承は lineage.test で確かめる）', () => {
-    const s = play(7, 180);
+    // 日誌を見る試験なので、お金は尽きないようにして進める
+    let s = play(7, 0);
+    for (let i = 0; i < 180 && !s.gameOver; i++) {
+      s.player.personalMoney = Math.max(s.player.personalMoney, 100_000_000);
+      s = autoStep(s);
+    }
     const kinds = new Set(s.journal.map((e) => e.kind));
     for (const k of ['open', 'join', 'promote', 'retire']) expect(kinds).toContain(k);
     for (let i = 1; i < s.journal.length; i++)
@@ -64,7 +69,7 @@ describe('部屋の日誌', () => {
     v9.version = 9;
     delete v9.journal;
     const m = migrateSave(v9)!;
-    expect(m.version).toBe(25);
+    expect(m.version).toBe(26);
     expect(m.journal[0]).toEqual({ bashoIndex: 0, kind: 'earlier' });
     expect(m.journal[1]).toMatchObject({ kind: 'open' });
     const retired = m.journal.filter(

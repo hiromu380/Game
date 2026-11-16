@@ -1554,7 +1554,7 @@
   "glossary.term.kensho.name": "懸賞金",
   "glossary.term.kensho.desc": "取組にかかる企業の賞金。1本7万円で、勝った力士に6万円（土俵で1万・口座に5万）。",
   "glossary.term.sansho.name": "三賞",
-  "glossary.term.sansho.desc": "幕内の殊勲賞・敢闘賞・技能賞。関脇以下で勝ち越した力士から選ぶ。",
+  "glossary.term.sansho.desc": "幕内の殊勲賞・敢闘賞・技能賞。関脇以下で、その場所に活躍した力士に贈る（勝ち越しが目安で、明文の決まりはない）。",
   "glossary.term.kinboshi.name": "金星",
   "glossary.term.kinboshi.desc": "平幕が横綱に勝つこと。持ち給金が大きく増える。",
   "glossary.term.jungyo.name": "巡業",

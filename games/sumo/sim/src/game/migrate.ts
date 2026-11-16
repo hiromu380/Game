@@ -40,7 +40,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 22) s = v22to23(s);
   if (s.version === 23) s = v23to24(s);
   if (s.version === 24) s = v24to25(s);
+  if (s.version === 25) s = v25to26(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 25 → 26: 返事待ちの出来事が「手術を勧められる」「一門の連合稽古」なら流す
+ */
+function v25to26(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  const id = s.pending.happening?.id;
+  if (id === 'surgery' || id === 'rengoKeiko') s.pending.happening = null;
+  s.version = 26;
+  return s as unknown as Raw;
 }
 
 /**

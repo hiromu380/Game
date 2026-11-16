@@ -229,15 +229,6 @@ export const HAPPENINGS: readonly HappeningDef[] = [
     ],
   },
   {
-    id: 'rengoKeiko',
-    requires: 'upper',
-    weight: 1.5,
-    options: [
-      { key: 'attend', group: 'upper', effect: { boost: 1.15, fatigue: 8, prestige: 0.5 } },
-      decline,
-    ],
-  },
-  {
     id: 'kneeWorry',
     requires: 'none',
     target: 'upper',
@@ -695,21 +686,6 @@ export const HAPPENINGS: readonly HappeningDef[] = [
       decline,
     ],
   },
-  {
-    id: 'surgery',
-    requires: 'none',
-    target: 'injured',
-    weight: 1.5,
-    options: [
-      {
-        key: 'operate',
-        group: 'target',
-        effect: { stableMoney: -800_000, injury: 1, fragility: 0.85 },
-      },
-      { key: 'conservative', effect: {} },
-    ],
-  },
-  // ── 規律と暮らし（docs/rikishi-life.md）──
   {
     id: 'drivingLicense',
     requires: 'sekitori',
