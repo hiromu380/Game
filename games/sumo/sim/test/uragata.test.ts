@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   advanceBasho,
   answerUragata,
+  TOKOYAMA_OVER_CAP_DESHI,
+  URAGATA_CAP,
+  uragataCount,
+  uragataOpen,
   migrateSave,
   SAVE_VERSION,
   URAGATA,
@@ -49,6 +53,22 @@ describe('裏方（行司・呼出・床山）', () => {
       injury: URAGATA.yobidashiInjury,
       prestige: URAGATA.gyojiPrestige,
     });
+  });
+
+  it('協会全体の定員に空きがなければ迎えられない。床山は弟子12人以上で床山のいない部屋なら定員を超えてよい', () => {
+    const g = withApplicant();
+    const role = g.pending.uragata!.role;
+    expect(uragataOpen(g, role)).toBe(true);
+    const before = uragataCount(g, role);
+    expect(answerUragata(g, true).uragataCount[role]).toBe(before + 1);
+    const full = JSON.parse(JSON.stringify(g)) as GameState;
+    full.uragataCount = { ...URAGATA_CAP };
+    expect(uragataOpen(full, 'gyoji')).toBe(false);
+    expect(uragataOpen(full, 'yobidashi')).toBe(false);
+    const mine = full.rikishi.filter((r) => r.stableId === full.player.stableId).length;
+    expect(uragataOpen(full, 'tokoyama')).toBe(mine >= TOKOYAMA_OVER_CAP_DESHI);
+    if (role !== 'tokoyama' || mine < TOKOYAMA_OVER_CAP_DESHI)
+      expect(answerUragata(full, true).player.uragata).toEqual(full.player.uragata);
   });
 
   it('22版のセーブは、裏方なしで読める', () => {

@@ -1788,7 +1788,7 @@
   "uragata.gyoji.name": "Gyoji",
   "uragata.gyoji.desc": "Referees bouts, and helps with paperwork and tour arrangements; prestige rises slowly",
   "uragata.current": "{name} (age {age}, year {years})",
-  "uragata.vacant": "None (wait for an applicant)",
+  "uragata.vacant": "None",
   "uragata.applyTitle": "A support-staff applicant",
   "uragata.applyBody": "A {age}-year-old named {name} has come wanting to be a {role}. The Association pays his salary.",
   "uragata.accept": "Take him in",
@@ -1799,5 +1799,6 @@
   "journal.uragata.retire": "{role} {name} reached retirement age.",
   "journal.heyatsukiJoin": "Welcomed {name} (former {shikona}) from {from} as an attached elder.",
   "heyatsuki.vacant": "None",
-  "heyatsuki.note": "Attached elders are former deshi of this stable who took an elder name on retiring (elders are not brought in from other stables)"
+  "heyatsuki.note": "Attached elders are former deshi of this stable who took an elder name on retiring (elders are not brought in from other stables)",
+  "uragata.cap": "Association-wide: {count}/{cap} (applicants come only when there is an opening)"
 }

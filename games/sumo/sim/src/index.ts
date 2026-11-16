@@ -80,5 +80,17 @@ export {
 } from './stable/roles';
 export { SOKEN } from './balance/ceremony2';
 export { holdSoken, sokenAttendees } from './stable/soken';
-export { URAGATA, URAGATA_ROLES, type UragataRole } from './balance/uragata';
-export { answerUragata, uragataEffect, uragataOf } from './stable/uragata';
+export {
+  TOKOYAMA_OVER_CAP_DESHI,
+  URAGATA,
+  URAGATA_CAP,
+  URAGATA_ROLES,
+  type UragataRole,
+} from './balance/uragata';
+export {
+  answerUragata,
+  uragataCount,
+  uragataEffect,
+  uragataOf,
+  uragataOpen,
+} from './stable/uragata';

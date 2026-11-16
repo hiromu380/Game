@@ -1,6 +1,7 @@
 /**
  * ゲーム開始時の相撲界（架空の部屋と力士の番付全体・自分の部屋・自分の親方）
  */
+import { URAGATA, URAGATA_CAP } from '../balance/uragata';
 import { GROWTH } from '../balance/growth';
 import { RECRUIT, TOSHIYORI } from '../balance/career';
 import { GAME } from '../balance/game';
@@ -55,8 +56,9 @@ import { NO_FACILITIES } from '../money/facilities';
  * 21: 雑用を免除した弟子（player.exempt）
  * 22: 雑用の免除をやめた（player.exempt を消す）。関取の部屋の外での暮らし（rikishi.living。なければ部屋）
  * 23: 裏方（player.uragata・pending.uragata）
+ * 24: 協会全体の裏方の人数（uragataCount）
  */
-export const SAVE_VERSION = 23;
+export const SAVE_VERSION = 24;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -241,6 +243,11 @@ export function createGame(options: NewGameOptions): GameState {
     gameOver: null,
     lastReport: null,
     journal: [],
+    uragataCount: {
+      gyoji: URAGATA_CAP.gyoji - URAGATA.startVacancy,
+      yobidashi: URAGATA_CAP.yobidashi - URAGATA.startVacancy,
+      tokoyama: URAGATA_CAP.tokoyama - URAGATA.startVacancy,
+    },
     happeningLog: [],
     rival: null,
     prep: { week: 0, log: [] },

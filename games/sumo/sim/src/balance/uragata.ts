@@ -5,7 +5,20 @@
 export type UragataRole = 'tokoyama' | 'yobidashi' | 'gyoji';
 export const URAGATA_ROLES: readonly UragataRole[] = ['tokoyama', 'yobidashi', 'gyoji'];
 
+/**
+ * 協会全体の定員（docs/realism.md「裏方の定員」）: 行司 45・呼出 45・床山 50。
+ * 床山は、力士が12人以上いて床山のいない部屋には、定員を超えても配属する（協会の事業報告書）
+ */
+export const URAGATA_CAP: Record<UragataRole, number> = { gyoji: 45, yobidashi: 45, tokoyama: 50 };
+export const TOKOYAMA_OVER_CAP_DESHI = 12;
+
 export const URAGATA = {
+  /** はじめの空き（定員からの差。推定） */
+  startVacancy: 2,
+  /** 協会全体で1年に定年などで去る人数（推定: 45年ほど勤める） */
+  leavePerYear: 1,
+  /** 空きがあるとき、場所ごとによその部屋が埋める確率（推定） */
+  npcFillChance: 0.3,
   /** その役がいない部屋に、場所ごとに志望者が来る確率（推定） */
   applyChance: 0.15,
   /** 志望者が来るのに要る弟子の数 */

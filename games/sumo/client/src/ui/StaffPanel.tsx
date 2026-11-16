@@ -10,7 +10,9 @@ import {
   staffOf,
   staffSkill,
   STAFF_IDS,
+  URAGATA_CAP,
   URAGATA_ROLES,
+  uragataCount,
   uragataOf,
   type GameState,
   type StaffRole,
@@ -98,6 +100,9 @@ export function StaffPanel({
                         years: Math.floor((game.bashoIndex - u.since) / 6) + 1,
                       })
                     : t('uragata.vacant')}
+                </span>
+                <span className="muted">
+                  {t('uragata.cap', { count: uragataCount(game, role), cap: URAGATA_CAP[role] })}
                 </span>
               </div>
             </li>

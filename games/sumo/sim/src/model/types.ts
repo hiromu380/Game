@@ -559,6 +559,8 @@ export interface GameState {
   board: Board | null;
   /** 最近起きた出来事（同じ出来事が続かないように） */
   happeningLog: { id: HappeningId; bashoIndex: number }[];
+  /** 協会全体の裏方の人数（定員の空きを見る） */
+  uragataCount: Record<UragataRole, number>;
 }
 
 /** 日誌の1行。bashoIndex は出来事が起きた場所（場所前の出来事は、これから取る場所） */

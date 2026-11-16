@@ -1,6 +1,7 @@
 /**
  * セーブの変換（古い版 → 今の版）。読めない形なら null
  */
+import { URAGATA, URAGATA_CAP } from '../balance/uragata';
 import type { FamilyNode, GameState, JournalEntry } from '../model/types';
 import { SAVE_VERSION } from '../world/create';
 import { populateAssociation } from '../world/association';
@@ -37,7 +38,22 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 20) s = v20to21(s);
   if (s.version === 21) s = v21to22(s);
   if (s.version === 22) s = v22to23(s);
+  if (s.version === 23) s = v23to24(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 23 → 24: 協会全体の裏方の人数（はじめの空きで始め、自分の部屋の裏方を数える）
+ */
+function v23to24(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.uragataCount = {
+    gyoji: URAGATA_CAP.gyoji - URAGATA.startVacancy,
+    yobidashi: URAGATA_CAP.yobidashi - URAGATA.startVacancy,
+    tokoyama: URAGATA_CAP.tokoyama - URAGATA.startVacancy,
+  };
+  s.version = 24;
+  return s as unknown as Raw;
 }
 
 /**

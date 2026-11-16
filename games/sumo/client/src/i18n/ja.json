@@ -1788,7 +1788,7 @@
   "uragata.gyoji.name": "行司",
   "uragata.gyoji.desc": "取組を裁く。部屋の書き物や巡業の手配も手伝い、部屋の名声が少しずつ上がる",
   "uragata.current": "{name}（{age}歳・{years}年目）",
-  "uragata.vacant": "いない（志望者が来るのを待つ）",
+  "uragata.vacant": "いない",
   "uragata.applyTitle": "裏方の志望者",
   "uragata.applyBody": "{age}歳の若者が、{role}になりたいと部屋を訪ねてきました。名は{name}。給料は協会が払います。",
   "uragata.accept": "部屋に迎える",
@@ -1799,5 +1799,6 @@
   "journal.uragata.retire": "{role}の{name}が定年を迎えた。",
   "journal.heyatsukiJoin": "{from}部屋から、{name}親方（元{shikona}）を部屋付きに迎えた。",
   "heyatsuki.vacant": "いない",
-  "heyatsuki.note": "部屋付きの親方は、この部屋から引退して年寄名跡を継いだ元弟子が残る（よその部屋から迎えることはない）"
+  "heyatsuki.note": "部屋付きの親方は、この部屋から引退して年寄名跡を継いだ元弟子が残る（よその部屋から迎えることはない）",
+  "uragata.cap": "協会全体で {count}／{cap}人（定員に空きがあるときだけ志望者が来る）"
 }
