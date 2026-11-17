@@ -1,7 +1,7 @@
 /**
  * 部屋の日誌の1行を文にする・分類する（文言は i18n から）
  */
-import type { JournalEntry } from '@ichimon/sim';
+import { FACILITIES, type JournalEntry } from '@ichimon/sim';
 import type { MessageKey, TranslateFn } from './i18n';
 import { rankName } from './format';
 
@@ -116,7 +116,11 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
     case 'kakun':
       return t('journal.kakun', { name: t(`kakun.${e.id}.name`) });
     case 'facility':
-      return t('journal.facility', { name: t(`facility.${e.id}.name`), level: e.level });
+      return t('journal.facility', {
+        name: t(`facility.${e.id}.name`),
+        // 建物は元の姿が Lv1（増築・改修1回で Lv2）
+        level: FACILITIES[e.id].kind === 'build' ? e.level + 1 : e.level,
+      });
     case 'branchSucceeded':
       return t('journal.branchSucceeded', { stable: e.stable, shikona: e.shikona });
     case 'branchClosed':

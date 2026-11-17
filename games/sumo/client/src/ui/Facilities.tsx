@@ -37,7 +37,13 @@ export function Facilities({
               <div className="row__main">
                 <strong>
                   {t(`facility.${id}.name`)}
-                  <span className="tag">{t('facility.level', { level, max })}</span>
+                  <span className="tag">
+                    {def.kind === 'build'
+                      ? t('facility.level', { level: level + 1, max: max + 1 })
+                      : level === 0
+                        ? t('facility.noContract')
+                        : t('facility.level', { level, max })}
+                  </span>
                 </strong>
                 <span className="muted">{t(`facility.${id}.desc`)}</span>
               </div>

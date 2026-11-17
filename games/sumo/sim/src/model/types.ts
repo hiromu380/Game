@@ -562,6 +562,23 @@ export interface GameState {
   happeningLog: { id: HappeningId; bashoIndex: number }[];
   /** 協会全体の裏方の人数（定員の空きを見る） */
   uragataCount: Record<UragataRole, number>;
+  /** 場所ごとの経営の記録（経営報告の推移と前の場所との比べ。古い順・最大 MONEY_LOG_MAX） */
+  moneyLog: MoneyLogEntry[];
+}
+
+/** 1場所の経営の記録（精算の後の値） */
+export interface MoneyLogEntry {
+  bashoIndex: number;
+  /** 部屋の収入・支出の合計（円） */
+  income: number;
+  expenses: number;
+  /** 親方個人の収支（円） */
+  personal: number;
+  stableMoney: number;
+  personalMoney: number;
+  prestige: number;
+  /** 部屋の弟子の数 */
+  deshi: number;
 }
 
 /** 日誌の1行。bashoIndex は出来事が起きた場所（場所前の出来事は、これから取る場所） */

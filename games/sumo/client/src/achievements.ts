@@ -129,7 +129,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'dojoMax',
     group: 'stable',
-    test: (x: Ctx) => ev(x, 'facility').some((e) => e.id === 'dojo' && e.level >= 2),
+    test: (x: Ctx) => ev(x, 'facility').some((e) => e.id === 'dojo' && e.level >= 3),
   },
   {
     id: 'staff',

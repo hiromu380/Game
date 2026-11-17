@@ -26,3 +26,6 @@ export const GAME = {
   /** 部屋に住める力士の数の目安（推定。建物の大きさ。新弟子検査の制度ではない） */
   stableCapacity: 30,
 };
+
+/** 経営の記録を残す場所の数（経営報告の推移。2年ぶん） */
+export const MONEY_LOG_MAX = 12;

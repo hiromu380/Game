@@ -12,7 +12,7 @@
  * 入力の state は変えない（コピーして返す）。
  */
 import { RECRUIT, TOSHIYORI } from '../balance/career';
-import { GAME } from '../balance/game';
+import { GAME, MONEY_LOG_MAX } from '../balance/game';
 import { runBasho } from '../basho/run';
 import { yushoRace } from '../basho/race';
 import { MID_BASHO } from '../balance/injury';
@@ -623,6 +623,7 @@ export function advanceBasho(
     scheduleElection(state);
   }
   state.lastReport = report;
+  logMoney(state, report);
   // 次の場所前の4週間は、はじめから
   state.prep = { week: 0, log: [] };
   return state;
@@ -676,4 +677,20 @@ function yearEnd(state: GameState) {
     else if (branches.length > 0) state.pending.takeOver = branches;
     else state.gameOver = 'noSuccessor';
   }
+}
+
+/** 経営の記録に1場所ぶんを足す（古いものから捨てる） */
+function logMoney(state: GameState, report: BashoReport): void {
+  state.moneyLog.push({
+    bashoIndex: report.bashoIndex,
+    income: sum(report.income),
+    expenses: sum(report.expenses),
+    personal: sum(report.personal),
+    stableMoney: state.player.stableMoney,
+    personalMoney: state.player.personalMoney,
+    prestige: state.player.prestige,
+    deshi: state.rikishi.filter((r) => r.stableId === state.player.stableId).length,
+  });
+  if (state.moneyLog.length > MONEY_LOG_MAX)
+    state.moneyLog.splice(0, state.moneyLog.length - MONEY_LOG_MAX);
 }

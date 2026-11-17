@@ -22,6 +22,7 @@ import { RikishiDetail } from './RikishiDetail';
 import { knownTraits, RikishiCard } from './RikishiCard';
 import { targetOf, targetText } from '../targets';
 import { withStep } from '../guide';
+import { RosterTable } from './RosterTable';
 import { useSettings } from '../settings';
 
 /**
@@ -40,6 +41,7 @@ export function DeshiTab({
   const { settings, update } = useSettings();
   const [open, setOpen] = useState<number | null>(null);
   const [detail, setDetail] = useState<number | null>(null);
+  const [view, setView] = useState<'list' | 'table'>('list');
   const order = new Map(game.banzuke.map((id, i) => [id, i]));
   const mine = game.rikishi
     .filter((r) => r.stableId === game.player.stableId)
@@ -76,57 +78,74 @@ export function DeshiTab({
     <section className="panel deshi" aria-labelledby="mine-title">
       <h2 id="mine-title">{t('stable.title', { count: mine.length, cap })}</h2>
       {mine.length === 0 && <p className="note">{t('stable.empty')}</p>}
-      <ul className="deshi__list">
-        {mine.map((r) => {
-          const info = targetOf(game, r, ranks);
-          return (
-            <li key={r.id}>
-              <button
-                className="deshi__row"
-                onClick={() => setOpen(r.id)}
-                aria-label={t('deshi.open', { name: r.name })}
-              >
-                <span className="deshi__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
-                <span className="deshi__name">
-                  {r.name}
-                  {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
-                  {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
-                  {r.living && <span className="tag">{t(`living.${r.living}`)}</span>}
-                  {r.id === yumitori && <span className="tag">{t('role.yumitori')}</span>}
-                  {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
-                  {(() => {
-                    const role = roles.of.get(r.id);
-                    return role && role !== 'sekitori' && role !== 'injured' ? (
-                      <span className={`tag tag--role is-${role}`}>{t(`role.${role}`)}</span>
-                    ) : null;
-                  })()}
-                  {game.pending.treatment.includes(r.id) && (
-                    <span className="tag tag--warn">{t('deshi.ask')}</span>
-                  )}
-                </span>
-                <span className="deshi__sub">
-                  {t('deshi.sub', {
-                    style: t(`style.${styleOf(r.abilities)}`),
-                    policy: t(`policy.${r.policy}`),
-                  })}
-                </span>
-                <span className="deshi__goal">{info ? targetText(t, info.target) : ''}</span>
-                <span
-                  className="deshi__fatigue"
-                  aria-label={`${t('talk.fatigue')} ${Math.round(r.fatigue)}`}
+      {mine.length > 0 && (
+        <div className="segmented deshi__view" role="group" aria-label={t('roster.view')}>
+          {(['list', 'table'] as const).map((v) => (
+            <button
+              key={v}
+              className={`segmented__btn ${view === v ? 'is-active' : ''}`}
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
+            >
+              {t(`roster.${v}`)}
+            </button>
+          ))}
+        </div>
+      )}
+      {view === 'table' && <RosterTable mine={mine} ranks={ranks} onOpen={setOpen} />}
+      {view === 'list' && (
+        <ul className="deshi__list">
+          {mine.map((r) => {
+            const info = targetOf(game, r, ranks);
+            return (
+              <li key={r.id}>
+                <button
+                  className="deshi__row"
+                  onClick={() => setOpen(r.id)}
+                  aria-label={t('deshi.open', { name: r.name })}
                 >
-                  <span className="bar" aria-hidden="true">
-                    <span
-                      className={`bar__fill ${r.fatigue >= 70 ? 'bar__fill--warn' : ''}`}
-                      style={{ width: `${Math.min(100, r.fatigue)}%` }}
-                    />
+                  <span className="deshi__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
+                  <span className="deshi__name">
+                    {r.name}
+                    {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
+                    {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
+                    {r.living && <span className="tag">{t(`living.${r.living}`)}</span>}
+                    {r.id === yumitori && <span className="tag">{t('role.yumitori')}</span>}
+                    {r.injury > 0 && <span className="tag tag--warn">{t('prep.hurt')}</span>}
+                    {(() => {
+                      const role = roles.of.get(r.id);
+                      return role && role !== 'sekitori' && role !== 'injured' ? (
+                        <span className={`tag tag--role is-${role}`}>{t(`role.${role}`)}</span>
+                      ) : null;
+                    })()}
+                    {game.pending.treatment.includes(r.id) && (
+                      <span className="tag tag--warn">{t('deshi.ask')}</span>
+                    )}
                   </span>
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+                  <span className="deshi__sub">
+                    {t('deshi.sub', {
+                      style: t(`style.${styleOf(r.abilities)}`),
+                      policy: t(`policy.${r.policy}`),
+                    })}
+                  </span>
+                  <span className="deshi__goal">{info ? targetText(t, info.target) : ''}</span>
+                  <span
+                    className="deshi__fatigue"
+                    aria-label={`${t('talk.fatigue')} ${Math.round(r.fatigue)}`}
+                  >
+                    <span className="bar" aria-hidden="true">
+                      <span
+                        className={`bar__fill ${r.fatigue >= 70 ? 'bar__fill--warn' : ''}`}
+                        style={{ width: `${Math.min(100, r.fatigue)}%` }}
+                      />
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
       {card && (
         <div className="modal" role="dialog" aria-modal="true" aria-label={card.name}>
           <div className="modal__box deshi__sheet">

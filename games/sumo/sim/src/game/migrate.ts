@@ -41,7 +41,33 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 23) s = v23to24(s);
   if (s.version === 24) s = v24to25(s);
   if (s.version === 25) s = v25to26(s);
+  if (s.version === 26) s = v26to27(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 26 → 27: 経営の記録（moneyLog）を足す。直近の場所の結果があれば、その1場所ぶんから始める
+ */
+function v26to27(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  const r = s.lastReport;
+  const total = (xs: { amount: number }[]) => xs.reduce((a, x) => a + x.amount, 0);
+  s.moneyLog = r
+    ? [
+        {
+          bashoIndex: r.bashoIndex,
+          income: total(r.income),
+          expenses: total(r.expenses),
+          personal: total(r.personal),
+          stableMoney: s.player.stableMoney,
+          personalMoney: s.player.personalMoney,
+          prestige: s.player.prestige,
+          deshi: s.rikishi.filter((x) => x.stableId === s.player.stableId).length,
+        },
+      ]
+    : [];
+  s.version = 27;
+  return s as unknown as Raw;
 }
 
 /**
