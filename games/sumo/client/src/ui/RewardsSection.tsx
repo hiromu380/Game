@@ -33,34 +33,46 @@ function iconOf(x: RewardLine): string {
 export function RewardsSection({ lines }: { lines: RewardLine[] }) {
   const { t, lang } = useI18n();
   const yen = (n: number) => (n >= 0 ? '+' : '−') + money(t, Math.abs(n), lang);
-  const text = (x: RewardLine): string => {
+  const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`.replace('-', '−'));
+  /** 1行: 何が（ラベル）と、どれだけ（札） */
+  const parts = (x: RewardLine): [string, string] => {
     switch (x.kind) {
       case 'prestige':
-        return t('rewards.prestige', { delta: (x.delta > 0 ? '+' : '') + x.delta });
+        return [t('rewards.label.prestige'), signed(x.delta)];
       case 'patrons':
-        return t(x.cause ? `rewards.patrons.${x.cause.result}` : 'rewards.patrons.cold', {
-          name: x.cause?.name ?? '',
-          count: x.count,
-          delta: (x.delta > 0 ? '+' : '') + x.delta,
-        } as Record<string, string | number>);
+        return [
+          t(x.cause ? `rewards.label.patrons.${x.cause.result}` : 'rewards.label.patrons.cold', {
+            name: x.cause?.name ?? '',
+            count: x.count,
+          } as Record<string, string | number>),
+          signed(x.delta),
+        ];
       case 'patronJoin':
       case 'patronLeave':
-        return t(`rewards.${x.kind}`, {
-          name: t(`patron.kind.${x.patron.kind}` as MessageKey, { surname: x.patron.surname }),
-        });
+        return [
+          t(`patron.kind.${x.patron.kind}` as MessageKey, { surname: x.patron.surname }),
+          t(`rewards.chip.${x.kind}`),
+        ];
       case 'sekitoriUp':
       case 'sekitoriDown':
-        return t(`rewards.${x.kind}`, { name: x.name, yen: yen(x.perBasho) });
+        return [
+          t(`rewards.label.${x.kind}`, { name: x.name }),
+          t('rewards.chip.perBasho', { yen: yen(x.perBasho) }),
+        ];
       case 'injury':
-        return t('rewards.injury', { name: x.name, basho: x.basho });
+        return [
+          t('rewards.label.injury', { name: x.name }),
+          t('rewards.chip.injury', { basho: x.basho }),
+        ];
       case 'henka':
-        return t('rewards.henka', { name: x.name });
+        return [t('rewards.label.henka', { name: x.name }), t('rewards.chip.henka')];
       case 'pledge':
-        return t(x.kept ? 'rewards.pledgeKept' : 'rewards.pledgeBroken', {
-          pledge: t(`pledge.${x.pledge}.short` as MessageKey),
-        });
+        return [
+          t('rewards.label.pledge', { pledge: t(`pledge.${x.pledge}.short` as MessageKey) }),
+          t(x.kept ? 'rewards.chip.pledgeKept' : 'rewards.chip.pledgeBroken'),
+        ];
       case 'vsOutlook':
-        return t('rewards.vsOutlook', { yen: yen(x.delta) });
+        return [t('rewards.label.vsOutlook'), yen(x.delta)];
     }
   };
   return (
@@ -79,7 +91,8 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
               <span className="visually-hidden">
                 {t(x.tone === 'good' ? 'rewards.good' : 'rewards.bad')}
               </span>
-              {text(x)}
+              <span className="rewards__label">{parts(x)[0]}</span>
+              <span className={`rewards__chip is-${x.tone}`}>{parts(x)[1]}</span>
             </li>
           ))}
         </ul>

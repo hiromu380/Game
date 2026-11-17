@@ -21,7 +21,7 @@ describe('大一番の作戦（画面の文言）', () => {
       'tactic.go',
       'ticker.toTactic',
       'bigBout.tactic',
-      'rewards.henka',
+      'rewards.label.henka',
     ]) {
       expect(ja).toHaveProperty([k]);
       expect(en).toHaveProperty([k]);

@@ -64,6 +64,10 @@ export function ReportDialog({
   const topPromotions = report.promotions.filter(
     (p) => (p.to === 'Y' || p.to === 'O') && !mineIds.has(p.id),
   );
+  const myYusho = DIVS.flatMap((d) => {
+    const id = report.yusho[d];
+    return id !== undefined && mineIds.has(id) ? [[d, id] as const] : [];
+  });
   const myRetired = report.retired.filter((r) => r.stableId === game.player.stableId);
   const net = sumMoney(report.income) - sumMoney(report.expenses);
   const kachikoshi = report.mine.filter(
@@ -95,6 +99,25 @@ export function ReportDialog({
           {t('report.title', { basho: bashoName(t, report.bashoIndex) })}
         </h2>
 
+        {/* 大見出し: 自分の部屋の優勝と昇進（場所の結果を報告書の形で: 見出し → 成績 → 部屋への影響） */}
+        {(myYusho.length > 0 || myPromotions.length > 0) && (
+          <div className="headline">
+            {myYusho.map(([d, id]) => (
+              <p key={`y${d}`} className="headline__big">
+                {t('report.headline.yusho', {
+                  name: nameOf(id),
+                  division: t(`rank.division.${d}` as MessageKey),
+                })}
+              </p>
+            ))}
+            {myPromotions.map((p) => (
+              <p key={p.id} className="headline__big">
+                {t(`report.promotion.${p.to}` as MessageKey, { name: nameOf(p.id) })}
+              </p>
+            ))}
+          </div>
+        )}
+
         <dl className="tiles">
           <div className="tile">
             <dt>{t('report.tile.kachikoshi')}</dt>
@@ -109,33 +132,6 @@ export function ReportDialog({
             <dd className={net < 0 ? 'is-minus' : ''}>{money(t, net, lang)}</dd>
           </div>
         </dl>
-
-        {rewards && <RewardsSection lines={rewards} />}
-
-        {report.rival && (
-          <p className="callout callout--rival">
-            {t('report.rival', {
-              rival: game.stables.find((s) => s.id === report.rival!.stableId)?.name ?? '',
-              wins: report.rival.wins,
-              losses: report.rival.losses,
-              total: game.rival
-                ? t('rival.record', { wins: game.rival.wins, losses: game.rival.losses })
-                : '',
-              mine: report.rival.sekitori[0],
-              theirs: report.rival.sekitori[1],
-            })}
-          </p>
-        )}
-
-        {myPromotions.length > 0 && (
-          <div className="callout">
-            {myPromotions.map((p) => (
-              <p key={p.id}>
-                {t(`report.promotion.${p.to}` as MessageKey, { name: nameOf(p.id) })}
-              </p>
-            ))}
-          </div>
-        )}
 
         <h3>{t('report.hoshitori')}</h3>
         {sorted.length === 0 ? (
@@ -275,6 +271,23 @@ export function ReportDialog({
             />
             <p>{t(`jungyo.${report.jungyo}` as MessageKey)}</p>
           </div>
+        )}
+
+        {rewards && <RewardsSection lines={rewards} />}
+
+        {report.rival && (
+          <p className="callout callout--rival">
+            {t('report.rival', {
+              rival: game.stables.find((s) => s.id === report.rival!.stableId)?.name ?? '',
+              wins: report.rival.wins,
+              losses: report.rival.losses,
+              total: game.rival
+                ? t('rival.record', { wins: game.rival.wins, losses: game.rival.losses })
+                : '',
+              mine: report.rival.sekitori[0],
+              theirs: report.rival.sekitori[1],
+            })}
+          </p>
         )}
 
         <h3>{t('report.champions')}</h3>

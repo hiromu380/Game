@@ -128,8 +128,9 @@ export function BashoTicker({
                     {r.target &&
                       r.absentFrom !== 0 &&
                       (reached(r.target, tally.wins)
-                        ? // 勝ち越しは下の札で出すので、上の段・大関の目標だけ
-                          r.target.kind !== 'kachikoshi' && (
+                        ? // 勝ち越し・カド番脱出は下の札で出すので、上の段・大関の目標だけ
+                          r.target.kind !== 'kachikoshi' &&
+                          r.target.kind !== 'kadoban' && (
                             <span className="tag tag--gold">{reachedText(t, r.target)}</span>
                           )
                         : targetWins(r.target) !== null &&
@@ -139,7 +140,13 @@ export function BashoTicker({
                           ))}
                     {decided && (
                       <span className={`tag ${decided === 'kachikoshi' ? 'tag--good' : ''}`}>
-                        {t(decided === 'kachikoshi' ? 'report.kachikoshi' : 'report.makekoshi')}
+                        {t(
+                          decided !== 'kachikoshi'
+                            ? 'ticker.makekoshi'
+                            : r.target?.kind === 'kadoban'
+                              ? 'ticker.kadobanOut'
+                              : 'ticker.kachikoshi',
+                        )}
                       </span>
                     )}
                   </div>
