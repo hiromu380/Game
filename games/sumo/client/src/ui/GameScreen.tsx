@@ -36,7 +36,7 @@ import { TopMenu } from './TopMenu';
 import { DelegateDialog } from './DelegateDialog';
 import { delegate, type DelegateResult } from '../delegate';
 import { rewardsOf, type RewardLine } from '../rewards';
-import { newlyAchieved, type AchievementId } from '../achievements';
+import { achievedOf, newlyAchieved, type AchievementId } from '../achievements';
 import { AchievementToast } from './AchievementsPanel';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
@@ -307,7 +307,7 @@ export function GameScreen({
 
       {/* 実績の知らせは、窓をすべて閉じてから出す */}
       {!delegated && !showReport && !highlights && (
-        <AchievementToast ids={achv} onClose={() => setAchv([])} />
+        <AchievementToast ids={achv} total={achievedOf(game).length} onClose={() => setAchv([])} />
       )}
       {delegated && (
         <DelegateDialog game={game} result={delegated} onClose={() => setDelegated(null)} />

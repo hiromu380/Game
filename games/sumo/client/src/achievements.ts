@@ -25,6 +25,8 @@ const atLeast = (c: Career, div: string) => {
 };
 const titled = (c: Career, ts: string[]) => ts.includes(top(c)?.title ?? '');
 const any = (x: Ctx, f: (c: Career) => boolean) => x.careers.some(f);
+const maxOf = (x: Ctx, f: (c: Career) => number) =>
+  x.careers.reduce((m, c) => Math.max(m, f(c)), 0);
 const sum = (x: Ctx, f: (c: Career) => number) => x.careers.reduce((s, c) => s + f(c), 0);
 const sekitori = (x: Ctx) =>
   x.careers.filter((c) => c.sekitoriBasho > 0 || atLeast(c, 'juryo')).length;
@@ -33,12 +35,23 @@ const sekitori = (x: Ctx) =>
 export const ACHIEVEMENTS = [
   // 弟子を集める
   { id: 'firstDeshi', group: 'deshi', test: (x: Ctx) => ev(x, 'join').length >= 1 },
-  { id: 'deshi10', group: 'deshi', test: (x: Ctx) => ev(x, 'join').length >= 10 },
-  { id: 'deshi30', group: 'deshi', test: (x: Ctx) => ev(x, 'join').length >= 30 },
+  {
+    id: 'deshi10',
+    group: 'deshi',
+    test: (x: Ctx) => ev(x, 'join').length >= 10,
+    progress: (x: Ctx) => [ev(x, 'join').length, 10],
+  },
+  {
+    id: 'deshi30',
+    group: 'deshi',
+    test: (x: Ctx) => ev(x, 'join').length >= 30,
+    progress: (x: Ctx) => [ev(x, 'join').length, 30],
+  },
   {
     id: 'scout10',
     group: 'deshi',
     test: (x: Ctx) => sum0(ev(x, 'scout').map((e) => e.count)) >= 10,
+    progress: (x: Ctx) => [sum0(ev(x, 'scout').map((e) => e.count)), 10],
   },
   {
     id: 'overseas',
@@ -61,8 +74,18 @@ export const ACHIEVEMENTS = [
   },
   { id: 'ozeki', group: 'banzuke', test: (x: Ctx) => any(x, (c) => titled(c, ['O', 'Y'])) },
   { id: 'yokozuna', group: 'banzuke', test: (x: Ctx) => any(x, (c) => titled(c, ['Y'])) },
-  { id: 'sekitori5', group: 'banzuke', test: (x: Ctx) => sekitori(x) >= 5 },
-  { id: 'sekitori10', group: 'banzuke', test: (x: Ctx) => sekitori(x) >= 10 },
+  {
+    id: 'sekitori5',
+    group: 'banzuke',
+    test: (x: Ctx) => sekitori(x) >= 5,
+    progress: (x: Ctx) => [sekitori(x), 5],
+  },
+  {
+    id: 'sekitori10',
+    group: 'banzuke',
+    test: (x: Ctx) => sekitori(x) >= 10,
+    progress: (x: Ctx) => [sekitori(x), 10],
+  },
   // 優勝と三賞
   { id: 'lowerYusho', group: 'honors', test: (x: Ctx) => any(x, (c) => c.otherYusho > 0) },
   { id: 'makuuchiYusho', group: 'honors', test: (x: Ctx) => any(x, (c) => c.makuuchiYusho > 0) },
@@ -71,7 +94,12 @@ export const ACHIEVEMENTS = [
     group: 'honors',
     test: (x: Ctx) => ev(x, 'yusho').some((e) => e.division === 'makuuchi' && e.wins === 15),
   },
-  { id: 'yusho5', group: 'honors', test: (x: Ctx) => sum(x, (c) => c.makuuchiYusho) >= 5 },
+  {
+    id: 'yusho5',
+    group: 'honors',
+    test: (x: Ctx) => sum(x, (c) => c.makuuchiYusho) >= 5,
+    progress: (x: Ctx) => [sum(x, (c) => c.makuuchiYusho), 5],
+  },
   {
     id: 'sansho',
     group: 'honors',
@@ -86,9 +114,24 @@ export const ACHIEVEMENTS = [
   { id: 'kinboshi', group: 'honors', test: (x: Ctx) => any(x, (c) => c.kinboshi > 0) },
   { id: 'kojo', group: 'honors', test: (x: Ctx) => ev(x, 'kojo').length >= 1 },
   // 力士の記録
-  { id: 'wins300', group: 'records', test: (x: Ctx) => any(x, (c) => c.wins >= 300) },
-  { id: 'wins600', group: 'records', test: (x: Ctx) => any(x, (c) => c.wins >= 600) },
-  { id: 'makuuchi30', group: 'records', test: (x: Ctx) => any(x, (c) => c.makuuchiBasho >= 30) },
+  {
+    id: 'wins300',
+    group: 'records',
+    test: (x: Ctx) => maxOf(x, (c) => c.wins) >= 300,
+    progress: (x: Ctx) => [maxOf(x, (c) => c.wins), 300],
+  },
+  {
+    id: 'wins600',
+    group: 'records',
+    test: (x: Ctx) => maxOf(x, (c) => c.wins) >= 600,
+    progress: (x: Ctx) => [maxOf(x, (c) => c.wins), 600],
+  },
+  {
+    id: 'makuuchi30',
+    group: 'records',
+    test: (x: Ctx) => maxOf(x, (c) => c.makuuchiBasho) >= 30,
+    progress: (x: Ctx) => [maxOf(x, (c) => c.makuuchiBasho), 30],
+  },
   {
     id: 'ironman',
     group: 'records',
@@ -105,6 +148,7 @@ export const ACHIEVEMENTS = [
     id: 'patrons5',
     group: 'stable',
     test: (x: Ctx) => ev(x, 'patron').filter((e) => e.event === 'join').length >= 5,
+    progress: (x: Ctx) => [ev(x, 'patron').filter((e) => e.event === 'join').length, 5],
   },
   {
     id: 'keshoPatron',
@@ -171,10 +215,21 @@ export const ACHIEVEMENTS = [
       ev(x, 'election').some((e) => e.rank === 'rijicho'),
   },
   { id: 'branch', group: 'kyokai', test: (x: Ctx) => ev(x, 'independence').length >= 1 },
-  { id: 'kakun3', group: 'kyokai', test: (x: Ctx) => ev(x, 'kakun').length >= 3 },
+  {
+    id: 'kakun3',
+    group: 'kyokai',
+    test: (x: Ctx) => ev(x, 'kakun').length >= 3,
+    progress: (x: Ctx) => [ev(x, 'kakun').length, 3],
+  },
   { id: 'gen2', group: 'kyokai', test: (x: Ctx) => x.generation >= 2 },
   { id: 'gen3', group: 'kyokai', test: (x: Ctx) => x.generation >= 3 },
-] as const satisfies readonly { id: string; group: AchievementGroup; test: (x: Ctx) => boolean }[];
+] as const satisfies readonly {
+  id: string;
+  group: AchievementGroup;
+  test: (x: Ctx) => boolean;
+  /** 数で進む実績の、今の数と要る数（「入門 7／10」。目標を目の前に見せる） */
+  progress?: (x: Ctx) => readonly [number, number];
+}[];
 
 function sum0(xs: number[]): number {
   return xs.reduce((s, v) => s + v, 0);
@@ -190,14 +245,42 @@ export const ACHIEVEMENT_GROUPS: AchievementGroup[] = [
   'kyokai',
 ];
 
-/** 達成した実績の id（一覧の順） */
-export function achievedOf(game: GameState): AchievementId[] {
-  const x: Ctx = {
+function ctxOf(game: GameState): Ctx {
+  return {
     careers: stablePeople(game).map((p) => p.career),
     journal: game.journal,
     generation: game.player.generation,
   };
+}
+
+/** 達成した実績の id（一覧の順） */
+export function achievedOf(game: GameState): AchievementId[] {
+  const x = ctxOf(game);
   return ACHIEVEMENTS.filter((a) => a.test(x)).map((a) => a.id);
+}
+
+/** まだの実績の進み具合（数で進むものだけ。今の数は要る数で止める） */
+export function progressOf(game: GameState): Map<AchievementId, { now: number; of: number }> {
+  const x = ctxOf(game);
+  const out = new Map<AchievementId, { now: number; of: number }>();
+  for (const a of ACHIEVEMENTS) {
+    if (!('progress' in a) || a.test(x)) continue;
+    const [now, of] = a.progress(x);
+    out.set(a.id, { now: Math.min(now, of), of });
+  }
+  return out;
+}
+
+/** もうすぐ届く実績（進み具合の割合が高い順。0 は出さない） */
+export function nearAchievements(
+  game: GameState,
+  n = 3,
+): { id: AchievementId; now: number; of: number }[] {
+  return [...progressOf(game)]
+    .filter(([, p]) => p.now > 0)
+    .map(([id, p]) => ({ id, ...p }))
+    .sort((a, b) => b.now / b.of - a.now / a.of)
+    .slice(0, n);
 }
 
 /** 前の状態から新しく達成した実績（場所の後に知らせる） */

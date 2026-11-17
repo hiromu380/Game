@@ -1965,5 +1965,8 @@
   "roster.col.yotsu": "四つ",
   "roster.col.waza": "技",
   "roster.col.last": "先場所",
-  "mgmt.range": "{from} 〜 {to}（左が古い）"
+  "mgmt.range": "{from} 〜 {to}（左が古い）",
+  "achv.near": "もうすぐ",
+  "achv.nearItem": "{name} {now}／{of}",
+  "achv.progress": "（{now}／{of}）"
 }

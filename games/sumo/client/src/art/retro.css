@@ -1627,3 +1627,33 @@ body.has-modal {
 .roster__name {
   text-decoration: underline;
 }
+.achv__near {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+}
+.achv-toast__count {
+  color: var(--muted);
+  font-size: 0.8em;
+}
+/* 達成の知らせは少し跳ねて出る（動きを減らす設定では出るだけ） */
+@media (prefers-reduced-motion: no-preference) {
+  .achv-toast {
+    animation: achv-pop 0.35s steps(4) both;
+  }
+}
+@keyframes achv-pop {
+  0% {
+    transform: translate(-50%, -24px) scale(0.9);
+    opacity: 0;
+  }
+  70% {
+    transform: translate(-50%, 4px) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+.achv__nearItem {
+  white-space: nowrap;
+}

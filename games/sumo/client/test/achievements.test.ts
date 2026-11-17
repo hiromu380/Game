@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { createGame, type Rikishi } from '@ichimon/sim';
 import ja from '../src/i18n/ja.json';
 import en from '../src/i18n/en.json';
-import { ACHIEVEMENTS, achievedOf, newlyAchieved } from '../src/achievements';
+import {
+  ACHIEVEMENTS,
+  achievedOf,
+  nearAchievements,
+  newlyAchieved,
+  progressOf,
+} from '../src/achievements';
 import { gradeOf, overallOf } from '../src/grade';
 import { titlesOf } from '../src/titles';
 import { autoStep } from '../../sim/test/play';
@@ -30,6 +36,24 @@ describe('実績', () => {
       had = now;
     }
     expect(had.has('firstDeshi')).toBe(true);
+  });
+});
+
+describe('実績の進み具合', () => {
+  it('まだの数で進む実績だけに出て、要る数を超えない', () => {
+    let g = createGame({ seed: 4 });
+    for (let i = 0; i < 12; i++) g = autoStep(g);
+    const done = new Set(achievedOf(g));
+    const p = progressOf(g);
+    expect(p.size).toBeGreaterThan(0);
+    for (const [id, v] of p) {
+      expect(done.has(id)).toBe(false);
+      expect(v.now).toBeLessThanOrEqual(v.of);
+    }
+    const near = nearAchievements(g);
+    expect(near.length).toBeLessThanOrEqual(3);
+    for (let i = 1; i < near.length; i++)
+      expect(near[i - 1]!.now / near[i - 1]!.of).toBeGreaterThanOrEqual(near[i]!.now / near[i]!.of);
   });
 });
 

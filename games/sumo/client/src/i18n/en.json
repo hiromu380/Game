@@ -1965,5 +1965,8 @@
   "roster.col.yotsu": "Belt",
   "roster.col.waza": "Tech",
   "roster.col.last": "Last",
-  "mgmt.range": "{from} – {to} (oldest left)"
+  "mgmt.range": "{from} – {to} (oldest left)",
+  "achv.near": "Almost",
+  "achv.nearItem": "{name} {now}/{of}",
+  "achv.progress": " ({now}/{of})"
 }
