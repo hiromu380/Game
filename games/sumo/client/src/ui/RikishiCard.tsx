@@ -1,5 +1,6 @@
 import {
   atWall,
+  isSekitori,
   styleOf,
   tokuiWaza,
   traitsOf,
@@ -16,6 +17,8 @@ import { partName, woundName } from '../injury';
 import { useI18n, type MessageKey } from '../i18n';
 import { RikishiPortrait } from '../art/Portraits';
 import { points } from '../points';
+import { gradeOf, overallOf } from '../grade';
+import { titlesOf } from '../titles';
 import { TargetLine } from './TargetLine';
 import type { TargetInfo } from '../targets';
 import { rankLabel, recordLabel } from '../format';
@@ -60,6 +63,14 @@ export function RikishiCard({
       <div className="card__head">
         <span className="card__rank">{rankLabel(t, rank)}</span>
         <strong className="card__name">{r.name}</strong>
+        {titlesOf(r, rank !== null && isSekitori(rank)).map((x) => (
+          <span key={x.id} className="tag tag--gold title-tag">
+            {t(`title.${x.id}` as MessageKey, {
+              n: x.n ?? 0,
+              kimarite: x.kimarite ? t(`kimarite.${x.kimarite}` as MessageKey) : '',
+            })}
+          </span>
+        ))}
         <span className="card__meta">
           {t('rikishi.meta', { age: r.age, height: r.height, weight: Math.round(r.weight) })}
         </span>
@@ -77,10 +88,22 @@ export function RikishiCard({
                     style={{ width: `${Math.min(100, r.abilities[k])}%` }}
                   />
                 </span>
+                <span className={`grade grade--${gradeOf(r.abilities[k])}`}>
+                  {gradeOf(r.abilities[k])}
+                </span>
                 <span className="abilities__num">{points(r.abilities[k])}</span>
               </dd>
             </div>
           ))}
+          <div className="abilities__item abilities__item--overall">
+            <dt>{t('grade.overall')}</dt>
+            <dd>
+              <span className={`grade grade--${gradeOf(overallOf(r.abilities))}`}>
+                {gradeOf(overallOf(r.abilities))}
+              </span>
+              <span className="abilities__num">{points(overallOf(r.abilities))}</span>
+            </dd>
+          </div>
         </dl>
         <div className="card__status">
           <span>{t('rikishi.style', { style: t(`style.${styleOf(r.abilities)}`) })}</span>

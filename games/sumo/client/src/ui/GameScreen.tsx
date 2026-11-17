@@ -36,6 +36,8 @@ import { TopMenu } from './TopMenu';
 import { DelegateDialog } from './DelegateDialog';
 import { delegate, type DelegateResult } from '../delegate';
 import { rewardsOf, type RewardLine } from '../rewards';
+import { newlyAchieved, type AchievementId } from '../achievements';
+import { AchievementToast } from './AchievementsPanel';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 import { targetOf } from '../targets';
@@ -81,6 +83,7 @@ export function GameScreen({
   const [delegateOpen, setDelegateOpen] = useState(false);
   const [delegated, setDelegated] = useState<DelegateResult | null>(null);
   // 直前の場所の部屋への影響（場所を進めた直後に作る）
+  const [achv, setAchv] = useState<AchievementId[]>([]);
   const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
   // 後半に大一番（勝ち越しをかけた最後の一番）がある弟子がいれば、その前の日で星取りを止めて作戦を聞き、
@@ -133,6 +136,7 @@ export function GameScreen({
 
   const go = (next: GameState) => {
     setGame(next);
+    setAchv(newlyAchieved(game, next));
     if (next.lastReport)
       setRewards({ bashoIndex: next.lastReport.bashoIndex, lines: rewardsOf(game, next) });
     const all = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
@@ -266,6 +270,7 @@ export function GameScreen({
                     setDelegateOpen(false);
                     const r = delegate(game, n);
                     setGame(r.game);
+                    setAchv(newlyAchieved(game, r.game));
                     setDelegated(r);
                   }}
                 >
@@ -300,6 +305,10 @@ export function GameScreen({
         </button>
       </footer>
 
+      {/* 実績の知らせは、窓をすべて閉じてから出す */}
+      {!delegated && !showReport && !highlights && (
+        <AchievementToast ids={achv} onClose={() => setAchv([])} />
+      )}
       {delegated && (
         <DelegateDialog game={game} result={delegated} onClose={() => setDelegated(null)} />
       )}
