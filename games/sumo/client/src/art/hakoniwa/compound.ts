@@ -34,8 +34,23 @@ export function seasonOf(bashoIndex: number): Season {
 /** 幟を立てる関取の数（番付の上から） */
 export const NOBORI_MAX = 3;
 
+/** 部屋の格ごとの飾り（門を入った敷石の右に祝い樽、敷石の左に提灯）。格の小さい順に足していく */
+const TIER_DECOR: readonly (readonly Piece[])[] = [
+  [],
+  [{ sprite: 'ui_taru', gx: 11.5, gy: 15.4, w: 0.6, d: 0.6 }],
+  [{ sprite: 'ui_taru', gx: 12.2, gy: 15.4, w: 0.6, d: 0.6 }],
+  [{ sprite: 'lantern', gx: 7.6, gy: 15.5, w: 1, d: 1 }],
+  [{ sprite: 'ui_taru', gx: 11.85, gy: 14.8, w: 0.6, d: 0.6 }],
+  [
+    { sprite: 'ui_taru', gx: 12.55, gy: 14.8, w: 0.6, d: 0.6 },
+    { sprite: 'lantern', gx: 12, gy: 17, w: 1, d: 1 },
+  ],
+];
+
+/** tier: 部屋の格（実績の数で決まる。achievements.ts の tierOf） */
 export function compoundPieces(
   game: Pick<GameState, 'player' | 'bashoIndex' | 'rikishi' | 'banzuke' | 'titles'>,
+  tier = 0,
 ): Piece[] {
   const f = game.player.facilities;
   const dorm = Math.min(2, f.dorm);
@@ -59,6 +74,7 @@ export function compoundPieces(
     { sprite: 'bicycle_black', gx: 6.6, gy: 17, w: 1, d: 0.6 },
     { sprite: 'bench', gx: 20.5, gy: 16, w: 1.5, d: 1 },
   ];
+  out.push(...TIER_DECOR.slice(1, tier + 1).flat());
   // 部屋の裏方（迎えていれば）: 呼出は門の内で触れ太鼓、行司は母屋の前、床山は母屋の縁先
   const ura = new Set((game.player.uragata ?? []).map((u) => u.role));
   if (ura.has('yobidashi'))

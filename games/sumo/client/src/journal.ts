@@ -29,6 +29,7 @@ export function journalGroup(e: JournalEntry): JournalGroup | null {
     case 'akeni':
     case 'kesho':
     case 'living':
+    case 'rescue':
       return 'stable';
     case 'staffHire':
     case 'staffLeave':
@@ -181,6 +182,11 @@ export function journalText(t: TranslateFn, e: JournalEntry): string {
       return t('journal.heyatsukiJoin', { name: e.name, shikona: e.shikona, from: e.from });
     case 'living':
       return t(`journal.living.${e.event}`, { shikona: e.shikona });
+    case 'rescue':
+      return t(`journal.rescue.${e.event}`, {
+        man: (e.amount / 10_000).toLocaleString('ja-JP'),
+        m: e.amount / 1_000_000,
+      });
     case 'kesho':
       return t(`journal.kesho.${e.from}`, { shikona: e.shikona, by: e.by ?? '' });
     case 'staffHire':

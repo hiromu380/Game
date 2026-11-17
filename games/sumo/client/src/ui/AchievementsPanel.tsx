@@ -6,6 +6,8 @@ import {
   ACHIEVEMENT_GROUPS,
   achievedOf,
   nearAchievements,
+  nextTierAt,
+  tierOf,
   progressOf,
   type AchievementId,
 } from '../achievements';
@@ -26,6 +28,18 @@ export function AchievementsPanel({ game }: { game: GameState }) {
           {t('achv.count', { done: done.size, total: ACHIEVEMENTS.length })}
         </span>
       </h2>
+      <p className="achv__tier">
+        {t('achv.tier', { tier: t(`achv.tierName.${tierOf(done.size)}` as MessageKey) })}
+        {nextTierAt(tierOf(done.size)) !== null && (
+          <span className="muted">
+            {' '}
+            {t('achv.tierNext', {
+              n: nextTierAt(tierOf(done.size))!,
+              tier: t(`achv.tierName.${tierOf(done.size) + 1}` as MessageKey),
+            })}
+          </span>
+        )}
+      </p>
       {near.length > 0 && (
         <p className="achv__near">
           <span className="tag tag--gold">{t('achv.near')}</span>{' '}
@@ -108,6 +122,11 @@ export function AchievementToast({
         </span>
       </span>
       {ids.map((id) => t(`achv.${id}.name` as MessageKey)).join('・')}
+      {tierOf(total) > tierOf(total - ids.length) && (
+        <span className="achv-toast__tier">
+          {t('achv.tierUp', { tier: t(`achv.tierName.${tierOf(total)}` as MessageKey) })}
+        </span>
+      )}
     </button>
   );
 }

@@ -1657,3 +1657,13 @@ body.has-modal {
 .achv__nearItem {
   white-space: nowrap;
 }
+.callout--warn {
+  border-left-color: var(--shu);
+}
+.achv__tier {
+  margin: 0 0 6px;
+}
+.achv-toast__tier {
+  display: block;
+  color: var(--shu);
+}

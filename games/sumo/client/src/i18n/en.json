@@ -1968,5 +1968,20 @@
   "mgmt.range": "{from} – {to} (oldest left)",
   "achv.near": "Almost",
   "achv.nearItem": "{name} {now}/{of}",
-  "achv.progress": " ({now}/{of})"
+  "achv.progress": " ({now}/{of})",
+  "quickPrep.on": "Confirm commands: off",
+  "quickPrep.off": "Confirm commands: on",
+  "journal.rescue.loan": "Out of money, borrowed ¥{m}M from the ichimon to keep the stable open.",
+  "journal.rescue.repaid": "Repaid the ichimon in full.",
+  "report.rescue": "You ran out of money, so the ichimon lent you {loan}. {repay} is repaid from the stable account each tournament. If money runs out again, the stable closes.",
+  "mgmt.debt": "Owed to the ichimon: {debt} ({repay} repaid per tournament)",
+  "achv.tier": "Stable standing: {tier}",
+  "achv.tierNext": "({n} achievements for “{tier}”; more decorations by the gate)",
+  "achv.tierUp": "Standing up! “{tier}”",
+  "achv.tierName.0": "Upstart",
+  "achv.tierName.1": "Established",
+  "achv.tierName.2": "Influential",
+  "achv.tierName.3": "Prestigious",
+  "achv.tierName.4": "Renowned",
+  "achv.tierName.5": "Among the finest"
 }

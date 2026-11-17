@@ -18,6 +18,7 @@ import {
 } from '../art/hakoniwa/actors';
 import { Hakoniwa, type Drawn, type Pop, type SceneActor } from './Hakoniwa';
 import { signedPoints } from '../points';
+import { achievedOf, tierOf } from '../achievements';
 import { RikishiTalk } from './RikishiTalk';
 
 /** 枠の下の中央で置く絵（稽古場・巡業）を、箱庭の描く物にする */
@@ -117,7 +118,7 @@ export function KeikobaScene({
   );
   if (views.length === 0) return null;
   const current = views.includes(view) ? view : views[0]!;
-  const ordered = depthOrder(compoundPieces(game));
+  const ordered = depthOrder(compoundPieces(game, tierOf(achievedOf(game).length)));
   const exterior: Drawn[] = ordered.map((p) => ({
     sprite: p.sprite,
     ...frontCorner(p),

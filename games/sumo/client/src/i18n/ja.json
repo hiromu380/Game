@@ -1968,5 +1968,20 @@
   "mgmt.range": "{from} 〜 {to}（左が古い）",
   "achv.near": "もうすぐ",
   "achv.nearItem": "{name} {now}／{of}",
-  "achv.progress": "（{now}／{of}）"
+  "achv.progress": "（{now}／{of}）",
+  "quickPrep.on": "コマンドの確かめ: なし",
+  "quickPrep.off": "コマンドの確かめ: あり",
+  "journal.rescue.loan": "お金が尽き、一門から{man}万円を借りて部屋をつないだ。",
+  "journal.rescue.repaid": "一門への借りを返し終えた。",
+  "report.rescue": "お金が尽きたため、一門が{loan}を貸してくれました。毎場所{repay}ずつ部屋の口座から返します。次に尽きたら、部屋をたたみます。",
+  "mgmt.debt": "一門への借り 残り{debt}（毎場所{repay}ずつ返す）",
+  "achv.tier": "部屋の格: {tier}",
+  "achv.tierNext": "（実績{n}個で「{tier}」。門の脇の飾りが増える）",
+  "achv.tierUp": "部屋の格が上がった！「{tier}」",
+  "achv.tierName.0": "新興の部屋",
+  "achv.tierName.1": "中堅の部屋",
+  "achv.tierName.2": "有力な部屋",
+  "achv.tierName.3": "名門",
+  "achv.tierName.4": "角界の名門",
+  "achv.tierName.5": "角界屈指の名門"
 }

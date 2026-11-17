@@ -105,7 +105,14 @@ describe('ユーザー設定', () => {
     // 版3（説明の設定がない）は、説明を出さないで読む。版4は設定のとおり
     expect(parseSettings(JSON.stringify({ version: 3, lang: 'ja', sound: true })).help).toBe(false);
     expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).help).toBe(true);
-    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).version).toBe(4);
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).version).toBe(5);
+    // 版4（確かめの設定がない）は確かめる。版5は設定のとおり
+    expect(
+      parseSettings(JSON.stringify({ version: 4, lang: 'ja', sound: true, help: true })).quickPrep,
+    ).toBe(false);
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, quickPrep: true })).quickPrep).toBe(
+      true,
+    );
     const v3 = {
       ...DEFAULT_SETTINGS,
       guide: { dismissed: true, done: ['bout', 9], tips: ['ledger'] },

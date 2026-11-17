@@ -135,6 +135,12 @@ export function PrepPanel({
     setFirst(null);
     setDraft(null);
   };
+  /** 選んだら確かめる（設定で確かめないときは、すぐ決める） */
+  const decide = (d: PrepAction | { kind: 'fill' }) => {
+    if (!settings.quickPrep) return setDraft(d);
+    if (d.kind === 'fill') fill();
+    else act(d);
+  };
   /** 決める前の確かめの1行（何を・だれに） */
   const draftText = (d: PrepAction | { kind: 'fill' }): string => {
     const nameOf = (id: number) => game.rikishi.find((r) => r.id === id)?.name ?? '?';
@@ -257,7 +263,7 @@ export function PrepPanel({
             onClick={() => {
               setMenu(null);
               setFirst(null);
-              setDraft({ kind: 'fill' });
+              decide({ kind: 'fill' });
             }}
           >
             {t('prep.fill')}
@@ -321,7 +327,8 @@ export function PrepPanel({
                     setFirst(null);
                     setPointed(null);
                     setMenu(m);
-                    setDraft(PICKS.has(m) ? null : ({ kind: m } as PrepAction));
+                    if (PICKS.has(m)) setDraft(null);
+                    else decide({ kind: m } as PrepAction);
                   }}
                 >
                   <span>
@@ -358,7 +365,7 @@ export function PrepPanel({
                     key={r.id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: menu, id: r.id })}
-                    onClick={() => setDraft({ kind: menu, id: r.id })}
+                    onClick={() => decide({ kind: menu, id: r.id } as PrepAction)}
                   >
                     {who(r)}
                   </button>
@@ -373,7 +380,7 @@ export function PrepPanel({
                     onClick={() => {
                       if (first === null) setFirst(r.id);
                       else if (first === r.id) setFirst(null);
-                      else setDraft({ kind: 'spar', a: first, b: r.id });
+                      else decide({ kind: 'spar', a: first, b: r.id });
                     }}
                   >
                     {who(r)}
@@ -385,7 +392,7 @@ export function PrepPanel({
                     key={p.id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: 'visit', patronId: p.id })}
-                    onClick={() => setDraft({ kind: 'visit', patronId: p.id })}
+                    onClick={() => decide({ kind: 'visit', patronId: p.id })}
                   >
                     <span className="prep__name">
                       {t(`patron.kind.${p.kind}` as MessageKey, { surname: p.surname })}
@@ -401,7 +408,7 @@ export function PrepPanel({
                     key={id}
                     className="prep__cmd"
                     disabled={!canPrep(game, { kind: 'scout', trip: id })}
-                    onClick={() => setDraft({ kind: 'scout', trip: id })}
+                    onClick={() => decide({ kind: 'scout', trip: id })}
                   >
                     <span className="prep__name">{t(`scout.${id}.name` as MessageKey)}</span>
                     <span className="prep__cost">{money(t, SCOUT_TRIPS[id].cost, lang)}</span>

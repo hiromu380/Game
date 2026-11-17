@@ -42,7 +42,19 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 24) s = v24to25(s);
   if (s.version === 25) s = v25to26(s);
   if (s.version === 26) s = v26to27(s);
+  if (s.version === 27) s = v27to28(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 27 → 28: 一門の支援（借りた額と、支援を受けた代）を足す
+ */
+function v27to28(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.debt = 0;
+  s.player.rescuedGen = null;
+  s.version = 28;
+  return s as unknown as Raw;
 }
 
 /**

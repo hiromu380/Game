@@ -391,6 +391,10 @@ export interface Pending {
 }
 
 export interface PlayerState {
+  /** 一門から借りて、まだ返していない額（円） */
+  debt: number;
+  /** 一門の支援を受けた代（なければ null。1代に1度） */
+  rescuedGen: number | null;
   /** 部屋の裏方（行司・呼出・床山） */
   uragata: { role: UragataRole; name: string; age: number; since: number }[];
   /** 後援会との約束（この年のもの。なければ null）。kk・mk はこの年の勝ち越し・負け越しの数、baseline は約束したときのいちばん上の高さ */
@@ -649,6 +653,8 @@ export type JournalEvent =
   | { kind: 'uragata'; role: UragataRole; name: string; event: 'join' | 'retire' }
   /** 関取が部屋を出た（一人暮らし）・結婚した・関取から落ちて部屋に戻った */
   | { kind: 'living'; shikona: string; event: 'alone' | 'married' | 'back' }
+  /** 一門の支援で借りた・返し終えた */
+  | { kind: 'rescue'; event: 'loan' | 'repaid'; amount: number }
   /** 化粧まわしの手配 */
   | { kind: 'kesho'; shikona: string; from: KeshoFrom; by?: string }
   | { kind: 'staffHire'; role: StaffRole; name: string }
@@ -733,6 +739,10 @@ export interface BashoReport {
   pledge?: { kind: PledgeKind; kept: boolean };
   /** 場所の前の横綱審議委員会の稽古総見に出た自分の弟子 */
   soken?: number[];
+  /** この場所の後に一門から借りた額（円） */
+  rescue?: number;
+  /** この場所の後に一門へ返した額（円） */
+  repaid?: number;
   /** 前相撲を取り、新序出世披露をした自分の弟子 */
   shusse?: number[];
   /** 中日の後に再出場・途中出場した自分の弟子 */

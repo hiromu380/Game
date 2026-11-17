@@ -68,6 +68,11 @@ export function TopMenu({
             () => update({ help: !settings.help }),
             settings.help,
           )}
+          {item(
+            settings.quickPrep ? t('quickPrep.on') : t('quickPrep.off'),
+            () => update({ quickPrep: !settings.quickPrep }),
+            settings.quickPrep,
+          )}
           {item(t('lang.toggle'), onToggleLang)}
           {item(t('top.quit'), onQuit)}
         </div>

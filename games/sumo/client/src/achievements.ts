@@ -288,3 +288,20 @@ export function newlyAchieved(before: GameState, after: GameState): AchievementI
   const had = new Set(achievedOf(before));
   return achievedOf(after).filter((id) => !had.has(id));
 }
+
+/** 部屋の格: 実績の数で上がる（ご褒美。箱庭の門の脇に祝い樽と提灯が増える） */
+export const STABLE_TIERS = [0, 5, 12, 20, 30, 40] as const;
+export type StableTier = 0 | 1 | 2 | 3 | 4 | 5;
+
+export function tierOf(achieved: number): StableTier {
+  let tier = 0;
+  STABLE_TIERS.forEach((need, i) => {
+    if (achieved >= need) tier = i;
+  });
+  return tier as StableTier;
+}
+
+/** 次の格に要る実績の数（いちばん上なら null） */
+export function nextTierAt(tier: StableTier): number | null {
+  return STABLE_TIERS[tier + 1] ?? null;
+}

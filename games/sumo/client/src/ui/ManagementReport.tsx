@@ -1,4 +1,4 @@
-import { MONEY_LOG_MAX, type GameState, type MoneyLogEntry } from '@ichimon/sim';
+import { MONEY_LOG_MAX, RESCUE, type GameState, type MoneyLogEntry } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, money } from '../format';
 
@@ -136,6 +136,14 @@ export function ManagementReport({ game }: { game: GameState }) {
           ))}
         </tbody>
       </table>
+      {game.player.debt > 0 && (
+        <p className="callout callout--warn">
+          {t('mgmt.debt', {
+            debt: money(t, game.player.debt, lang),
+            repay: money(t, RESCUE.repayPerBasho, lang),
+          })}
+        </p>
+      )}
       {log.length > 1 && (
         <>
           <h3>{t('mgmt.trend')}</h3>

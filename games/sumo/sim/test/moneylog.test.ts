@@ -19,7 +19,7 @@ describe('経営の記録', () => {
     delete old.moneyLog;
     old.version = 26;
     const m = migrateSave(old)!;
-    expect(m.version).toBe(27);
+    expect(m.version).toBe(28);
     expect(m.moneyLog).toEqual(g.moneyLog);
   });
 });

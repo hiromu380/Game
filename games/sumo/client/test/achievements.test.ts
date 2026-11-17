@@ -105,3 +105,26 @@ describe('能力のランクと称号', () => {
     }
   });
 });
+
+describe('部屋の格', () => {
+  it('実績の数で上がり、次の格に要る数が分かる', async () => {
+    const { tierOf, nextTierAt, STABLE_TIERS } = await import('../src/achievements');
+    expect(tierOf(0)).toBe(0);
+    expect(tierOf(4)).toBe(0);
+    expect(tierOf(5)).toBe(1);
+    expect(tierOf(43)).toBe(5);
+    expect(nextTierAt(0)).toBe(5);
+    expect(nextTierAt(5)).toBeNull();
+    for (let i = 0; i < STABLE_TIERS.length; i++) {
+      expect(ja).toHaveProperty([`achv.tierName.${i}`]);
+      expect(en).toHaveProperty([`achv.tierName.${i}`]);
+    }
+  });
+
+  it('格が上がるほど門の脇の飾りが増える', async () => {
+    const { compoundPieces } = await import('../src/art/hakoniwa/compound');
+    const g = createGame({ seed: 1 });
+    const n = (tier: number) => compoundPieces(g, tier).length;
+    for (let t = 1; t <= 5; t++) expect(n(t)).toBeGreaterThan(n(t - 1));
+  });
+});

@@ -60,7 +60,7 @@ import { NO_FACILITIES } from '../money/facilities';
  * 25: 出来事の「稽古総見」（自動の稽古総見にした）と「結婚の報告」（「結婚」にまとめた）をやめた
  * 26: 出来事の「手術を勧められる」（治療の方針と重なる）と「一門の連合稽古」（今週の好機と重なる）をやめた
  */
-export const SAVE_VERSION = 27;
+export const SAVE_VERSION = 28;
 
 /** 段ごとの強さの目安（上端 → 下端）と年齢の幅 */
 const TIERS: Record<Division, { top: number; bottom: number; age: [number, number] }> = {
@@ -193,6 +193,8 @@ export function createGame(options: NewGameOptions): GameState {
     stables,
     oyakata: [oyakata],
     player: {
+      debt: 0,
+      rescuedGen: null,
       pledge: null,
       uragata: [],
       stableId: playerStable.id,

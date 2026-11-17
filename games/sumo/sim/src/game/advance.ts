@@ -13,6 +13,7 @@
  */
 import { RECRUIT, TOSHIYORI } from '../balance/career';
 import { GAME, MONEY_LOG_MAX } from '../balance/game';
+import { RESCUE } from '../balance/rescue';
 import { runBasho } from '../basho/run';
 import { yushoRace } from '../basho/race';
 import { MID_BASHO } from '../balance/injury';
@@ -543,7 +544,8 @@ export function advanceBasho(
     state.player.personalMoney += state.player.stableMoney;
     state.player.stableMoney = 0;
   }
-  if (state.player.personalMoney < 0) state.gameOver = 'bankrupt';
+  repayRescue(state, report);
+  if (state.player.personalMoney < 0) rescueOrClose(state, report);
 
   // 5. 稽古
   const growthRng = createPrng(deriveSeed(state.seed, SEED.growth, state.bashoIndex));
@@ -693,4 +695,33 @@ function logMoney(state: GameState, report: BashoReport): void {
   });
   if (state.moneyLog.length > MONEY_LOG_MAX)
     state.moneyLog.splice(0, state.moneyLog.length - MONEY_LOG_MAX);
+}
+
+/** 一門への返済: 毎場所、部屋の口座にある分まで決まった額を返す */
+function repayRescue(state: GameState, report: BashoReport): void {
+  const p = state.player;
+  if (p.debt <= 0) return;
+  const pay = Math.min(p.debt, RESCUE.repayPerBasho, Math.max(0, p.stableMoney));
+  if (pay <= 0) return;
+  p.stableMoney -= pay;
+  p.debt -= pay;
+  report.repaid = pay;
+  if (p.debt === 0) note(state, { kind: 'rescue', event: 'repaid', amount: pay });
+}
+
+/** 親方の貯金まで尽きたら、1代に1度だけ一門から借りてつなぐ。もう借りていれば部屋をたたむ */
+function rescueOrClose(state: GameState, report: BashoReport): void {
+  const p = state.player;
+  if (p.rescuedGen === p.generation) {
+    state.gameOver = 'bankrupt';
+    return;
+  }
+  p.rescuedGen = p.generation;
+  p.personalMoney += RESCUE.loan;
+  p.debt += RESCUE.loan;
+  p.prestige = Math.max(0, p.prestige - RESCUE.prestigeLoss);
+  report.rescue = RESCUE.loan;
+  note(state, { kind: 'rescue', event: 'loan', amount: RESCUE.loan });
+  // 借りても足りなければ、部屋をたたむ
+  if (p.personalMoney < 0) state.gameOver = 'bankrupt';
 }

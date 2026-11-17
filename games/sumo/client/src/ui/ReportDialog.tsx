@@ -8,6 +8,7 @@ import { sprite } from '../art/sprites';
 import { JUNGYO_BASE, JUNGYO_STAGE, jungyoLayout } from '../art/sprites/keikoba';
 import { woundName } from '../injury';
 import {
+  RESCUE,
   sumMoney,
   type BashoReport,
   type BoutResult,
@@ -116,6 +117,15 @@ export function ReportDialog({
               </p>
             ))}
           </div>
+        )}
+
+        {report.rescue && (
+          <p className="callout callout--warn">
+            {t('report.rescue', {
+              loan: money(t, report.rescue, lang),
+              repay: money(t, RESCUE.repayPerBasho, lang),
+            })}
+          </p>
         )}
 
         <dl className="tiles">
