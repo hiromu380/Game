@@ -1991,5 +1991,6 @@
   "standing.points": "{n}点",
   "standing.mine": "自分",
   "standing.rival": "ライバル",
-  "standing.note": "全{total}部屋を、番付に載った力士の地位の点（横綱・大関ほど高い）の合計で並べる。"
+  "standing.note": "全{total}部屋を、番付に載った力士の地位の点（横綱・大関ほど高い）の合計で並べる。",
+  "gameOver.retry": "{basho}からやり直す"
 }

@@ -1697,3 +1697,7 @@ body.has-modal {
   text-align: center;
   color: var(--muted);
 }
+.gameover__actions {
+  display: grid;
+  gap: 8px;
+}

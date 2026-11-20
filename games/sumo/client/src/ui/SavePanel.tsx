@@ -48,7 +48,7 @@ export function SavePanel({ game, setGame }: { game: GameState; setGame: (g: Gam
   const { t } = useI18n();
   const [loaded, setLoaded] = useState<GameState | null>(null);
   const exportSave = () => {
-    downloadBlob(
+    void downloadBlob(
       new Blob([saveFileText(game)], { type: 'application/json' }),
       t('save.fileName', {
         generation: game.player.generation,

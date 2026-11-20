@@ -6,6 +6,10 @@ import type { GuideProgress } from './guide';
 
 const KEY = 'ichimon.save';
 const SETTINGS_KEY = 'ichimon.settings';
+/** 年の初め（初場所の場所前の1週目）の控え。ゲームオーバーのとき、そこからやり直せる */
+const CHECKPOINT_KEY = 'ichimon.checkpoint';
+/** 控えを書いた場所（同じ場所で書き直さない） */
+let checkpointAt: string | null = null;
 
 export function loadGame(): GameState | null {
   try {
@@ -23,6 +27,39 @@ export function saveGame(state: GameState | null): void {
     else localStorage.removeItem(KEY);
   } catch {
     // 保存できなくても遊べる
+  }
+  if (state && isYearStart(state)) saveCheckpoint(state);
+}
+
+/** 年の初め: 初場所の場所前で、まだ何もしていない */
+export function isYearStart(state: GameState): boolean {
+  return !state.gameOver && state.bashoIndex % 6 === 0 && state.prep.week === 0;
+}
+
+function saveCheckpoint(state: GameState): void {
+  const at = `${state.seed}:${state.bashoIndex}`;
+  if (checkpointAt === at) return;
+  try {
+    localStorage.setItem(CHECKPOINT_KEY, JSON.stringify(state));
+    checkpointAt = at;
+  } catch {
+    // 入りきらなければ控えは持たない（ゲームオーバーで、やり直しを出さないだけ）
+    try {
+      localStorage.removeItem(CHECKPOINT_KEY);
+    } catch {
+      // 何もしない
+    }
+  }
+}
+
+/** 同じゲーム（同じシード）の、今より前の年の初めの控え。なければ null */
+export function loadCheckpoint(game: GameState): GameState | null {
+  try {
+    const text = localStorage.getItem(CHECKPOINT_KEY);
+    const c = text ? migrateSave(JSON.parse(text)) : null;
+    return c && c.seed === game.seed && c.bashoIndex < game.bashoIndex ? c : null;
+  } catch {
+    return null;
   }
 }
 

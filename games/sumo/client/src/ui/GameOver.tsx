@@ -1,11 +1,22 @@
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { bashoName } from '../format';
+import { loadCheckpoint } from '../save';
 import { ShareTree } from './ShareTree';
 
 /** 一門が途絶えた（跡継ぎがいない・お金が尽きた） */
-export function GameOver({ game, onNewGame }: { game: GameState; onNewGame: () => void }) {
+export function GameOver({
+  game,
+  onNewGame,
+  onRetry,
+}: {
+  game: GameState;
+  onNewGame: () => void;
+  /** 年の初めの控えから続ける */
+  onRetry: (from: GameState) => void;
+}) {
   const { t } = useI18n();
+  const checkpoint = loadCheckpoint(game);
   const total = game.player.lineage.reduce(
     (n, l) => ({
       sekitori: n.sekitori + l.sekitori,
@@ -35,9 +46,22 @@ export function GameOver({ game, onNewGame }: { game: GameState; onNewGame: () =
         ))}
       </ol>
       <ShareTree game={game} />
-      <button className="button button--primary button--large" onClick={onNewGame}>
-        {t('gameOver.newGame')}
-      </button>
+      <div className="gameover__actions">
+        {checkpoint && (
+          <button
+            className="button button--primary button--large"
+            onClick={() => onRetry(checkpoint)}
+          >
+            {t('gameOver.retry', { basho: bashoName(t, checkpoint.bashoIndex) })}
+          </button>
+        )}
+        <button
+          className={`button button--large ${checkpoint ? '' : 'button--primary'}`}
+          onClick={onNewGame}
+        >
+          {t('gameOver.newGame')}
+        </button>
+      </div>
     </main>
   );
 }

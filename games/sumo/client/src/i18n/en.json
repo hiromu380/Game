@@ -1991,5 +1991,6 @@
   "standing.points": "{n} pts",
   "standing.mine": "You",
   "standing.rival": "Rival",
-  "standing.note": "All {total} stables, ranked by the sum of their wrestlers' rank points (higher for yokozuna and ozeki)."
+  "standing.note": "All {total} stables, ranked by the sum of their wrestlers' rank points (higher for yokozuna and ozeki).",
+  "gameOver.retry": "Retry from {basho}"
 }

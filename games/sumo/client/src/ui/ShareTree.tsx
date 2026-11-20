@@ -15,7 +15,7 @@ export function ShareTree({ game }: { game: GameState }) {
     try {
       const { svg, width, height } = treeSvg(game, t);
       const blob = await svgToPng(svg, width, height);
-      downloadBlob(
+      await downloadBlob(
         blob,
         t('share.fileName', {
           stable: game.stables.find((x) => x.id === game.player.stableId)?.name ?? '',

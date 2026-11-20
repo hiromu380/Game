@@ -127,7 +127,8 @@ export function GameScreen({
   // 場所前の4週間を終えるまで、本場所へは進めない（1年の早送りはできる）
   const weeksLeft = prepLeft(game);
 
-  if (game.gameOver) return <GameOver game={game} onNewGame={() => setGame(null)} />;
+  if (game.gameOver)
+    return <GameOver game={game} onNewGame={() => setGame(null)} onRetry={setGame} />;
 
   // 部屋の絵で押した所の画面へ（タブを替え、その欄まで送る）
   const goTo = (a: SceneAction) => {
