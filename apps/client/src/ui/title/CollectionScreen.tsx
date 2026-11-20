@@ -5,16 +5,20 @@
  * タイトル画面を軽く保つため、Root から遅延読み込みする。
  */
 import {
+  RARITIES,
   BALANCE,
   createInitialAchievements,
   createInitialMeta,
   DEFAULT_RULES,
   PART_IDS,
+  RELIC_IDS,
   type PartId,
+  type RelicId,
 } from '@chain-factory/sim';
 import { useMemo, useState } from 'react';
 import { EDITION_CONFIG } from '../../config/edition';
-import { MASCOT_ASSETS } from '../../assets/manifest';
+import { MASCOT_ASSETS, RELIC_ICONS } from '../../assets/manifest';
+import { describeRelicWith } from '../RelicDialog';
 import { useI18n } from '../../i18n';
 import { achievementsOnLoad } from '../../state/achievements';
 import { loadSave } from '../../state/saveStore';
@@ -22,10 +26,9 @@ import { AchievementList } from '../AchievementList';
 import { describeCondition, MetaPanel } from '../MetaPanel';
 import { describePart } from '../partText';
 import { PartIcon } from '../PartIcon';
+import { RarityTag, relicRarity } from '../RarityTag';
 
-type Tab = 'parts' | 'logs' | 'goals' | 'achievements';
-
-const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2 } as const;
+type Tab = 'parts' | 'relics' | 'logs' | 'goals' | 'achievements';
 
 export default function CollectionScreen({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
@@ -40,6 +43,7 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
 
   const tabs: Tab[] = [
     'parts',
+    'relics',
     'logs',
     ...(EDITION_CONFIG.metaProgression ? (['goals'] as const) : []),
     ...(EDITION_CONFIG.achievements ? (['achievements'] as const) : []),
@@ -65,8 +69,15 @@ export default function CollectionScreen({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         )}
-        <div className="collection__content">
+        {/* 縦にスクロールする。中に押せるものがないタブでも、キーボードでスクロールできるようにフォーカスを当てられる */}
+        <div
+          className="collection__content"
+          role="tabpanel"
+          tabIndex={0}
+          aria-label={t(`collection.tab.${tab}`)}
+        >
           {tab === 'parts' && <PartList unlockedParts={meta.unlockedParts} />}
+          {tab === 'relics' && <RelicList found={meta.relicsFound ?? []} />}
           {tab === 'logs' && <FactoryLog meta={meta} />}
           {tab === 'goals' && <MetaPanel meta={meta} unlocks={[]} />}
           {tab === 'achievements' && <AchievementList progress={achievements} open />}
@@ -121,6 +132,44 @@ function FactoryLog({ meta }: { meta: ReturnType<typeof createInitialMeta> }) {
   );
 }
 
+/** レリック図鑑: 手に入れたことのあるレリックは名前と効果、まだのものは「？？？」 */
+function RelicList({ found }: { found: RelicId[] }) {
+  const { t } = useI18n();
+  const seen = new Set(found);
+  return (
+    <>
+      <p className="panel__hint">
+        {t('collection.relicsHint', { found: seen.size, total: RELIC_IDS.length })}
+      </p>
+      <ul className="catalog__list">
+        {RELIC_IDS.map((id) => {
+          const known = seen.has(id);
+          return (
+            <li key={id} className={`catalog__item ${known ? '' : 'is-locked'}`}>
+              {known ? (
+                <img className="catalog__relic-icon" src={RELIC_ICONS[id]} alt="" />
+              ) : (
+                <span className="catalog__relic-icon catalog__relic-icon--unknown" aria-hidden>
+                  ?
+                </span>
+              )}
+              <div className="catalog__text">
+                <strong>{known ? t(`relic.${id}.name`) : t('collection.logLocked')}</strong>{' '}
+                <RarityTag rarity={relicRarity(null, id)} />
+                <div className="catalog__desc">
+                  {known
+                    ? describeRelicWith(t, BALANCE.relics.params, id)
+                    : t('collection.relicLockedHint')}
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
 /** パーツ図鑑: 全パーツの効果・基準価格・レア度と、解放済みかどうか */
 function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
   const { t, formatScore } = useI18n();
@@ -133,7 +182,9 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
     const ra = BALANCE.parts[a].rarity;
     const rb = BALANCE.parts[b].rarity;
     if (ra === null || rb === null) return ra === null ? -1 : 1;
-    return RARITY_ORDER[ra] - RARITY_ORDER[rb] || BALANCE.parts[a].price - BALANCE.parts[b].price;
+    return (
+      RARITIES.indexOf(ra) - RARITIES.indexOf(rb) || BALANCE.parts[a].price - BALANCE.parts[b].price
+    );
   });
 
   return (
@@ -146,12 +197,14 @@ function PartList({ unlockedParts }: { unlockedParts: PartId[] }) {
           const unlock = BALANCE.meta.partUnlocks.find((u) => u.partId === partId);
           return (
             <li key={partId} className={`catalog__item ${locked ? 'is-locked' : ''}`}>
-              <PartIcon partId={partId} size={36} />
+              <PartIcon partId={partId} size={52} />
               <div className="catalog__text">
                 <strong>{t(`part.${partId}.name`)}</strong>{' '}
-                <span className={`catalog__rarity catalog__rarity--${rarity ?? 'common'}`}>
-                  {rarity ? t(`rarity.${rarity}`) : t('collection.starter')}
-                </span>
+                {rarity ? (
+                  <RarityTag rarity={rarity} />
+                ) : (
+                  <span className="catalog__rarity">{t('collection.starter')}</span>
+                )}
                 {locked && <span className="catalog__rarity">{t('catalog.locked')}</span>}
                 <div className="catalog__desc">{describePart(t, partId, DEFAULT_RULES)}</div>
                 {!locked && <div className="catalog__flavor">{t(`part.${partId}.flavor`)}</div>}

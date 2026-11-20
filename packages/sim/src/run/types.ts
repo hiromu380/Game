@@ -4,15 +4,25 @@
  * RunState はそのまま JSON 化して保存できる形にしている（Score は文字列で保持）。
  */
 import type { FloorTileId } from '../floor/types';
-import type { BossModifierId, DayEventId } from '../balance';
+import type { BossModifierId, DayEventId, ItemId, RelicId } from '../balance';
 import type { RunConfig } from '../config/runConfig';
 import type { Board, PartId, SimResult, SimStats } from '../types';
 
-/** ショップの商品1つ */
-export interface ShopOffer {
+/** ショップの商品1つ: パーツか、消耗品（ランダム配置権）。消耗品かどうかは itemId で見分ける */
+export type ShopOffer = PartOffer | ItemOffer;
+
+export interface PartOffer {
   partId: PartId;
   price: number;
   sold: boolean;
+  itemId?: undefined;
+}
+
+export interface ItemOffer {
+  itemId: ItemId;
+  price: number;
+  sold: boolean;
+  partId?: undefined;
 }
 
 /** 確定したシフトの記録 */
@@ -25,6 +35,8 @@ export interface ShiftRecord {
   chainCount: number;
   /** 経済系パーツが生んだ予算 */
   income: number;
+  /** 超過ボーナス（ノルマを桁で超えた分の予算。0 のときは記録しない） */
+  overshootBonus?: number;
   /** ボスシフトだった場合の修正ルール */
   boss: BossModifierId | null;
 }
@@ -49,6 +61,8 @@ export interface RunState {
   board: Board;
   /** 手持ち（購入済み・未配置のパーツ） */
   inventory: Partial<Record<PartId, number>>;
+  /** 手持ちの金色パーツ（盤面から戻したもの）。導入前のセーブには無い */
+  goldenInventory?: Partial<Record<PartId, number>>;
   shop: ShopOffer[];
   /** このシフトでリロールした回数（リロール価格とショップのシードに使う） */
   rerollCount: number;
@@ -59,10 +73,31 @@ export interface RunState {
   overtime: boolean;
   /** メタ進行に記録済みのシフト数（延長戦で同じシフトを二重に記録しないため） */
   metaRecordedShifts: number;
+  /** 持っているレリック（選んだ順。導入前のセーブには無い） */
+  relics?: RelicId[];
+  /** レリックの候補（夜のシフトをクリアした次のシフトの開始時に出る。選ぶまでほかの操作はできない） */
+  relicChoice?: { day: number; choices: RelicId[] } | null;
   /** 今日のイベント（2日目以降の朝に選ぶ。導入前のセーブには無い） */
   dayEvent?: DayEventState | null;
   /** このシフトのボーナス床（シフト開始時に湧く。そのシフトのみ有効。導入前のセーブには無い） */
   bonusFloor?: BonusFloorState | null;
+  /** 手持ちの消耗品（ランダム配置権など。導入前のセーブには無い） */
+  items?: HeldItem[];
+  /** ランダム配置権で湧いた床（その日のあいだ有効。導入前のセーブには無い） */
+  itemFloors?: ItemFloorState | null;
+}
+
+/** 手持ちの消耗品1つ。expiresDay の日が終わると消える */
+export interface HeldItem {
+  id: ItemId;
+  /** 有効な最後の日（0 始まり） */
+  expiresDay: number;
+}
+
+/** ランダム配置権で湧いた床（cells の並びは使った順。その日の何枚目かの抽選に使う） */
+export interface ItemFloorState {
+  day: number;
+  cells: { index: number; tile: FloorTileId }[];
 }
 
 /** 日ごとのイベントの状態 */
@@ -97,6 +132,8 @@ export type RunError =
   | 'alreadySold'
   | 'notEnoughBudget'
   | 'notInInventory'
+  /** 合体できない（同じパーツが3つつながっていない・合体しないパーツ・金色パーツ） */
+  | 'cannotMerge'
   | 'cellOccupied'
   | 'cellEmpty'
   | 'cellBlocked'
@@ -105,16 +142,28 @@ export type RunError =
   | 'rerollDisabled'
   /** 今日のイベントをまだ選んでいない */
   | 'eventNotChosen'
+  /** レリックをまだ選んでいない */
+  | 'relicNotChosen'
+  /** 選べるレリックがない・候補の番号が正しくない */
+  | 'noRelicToPick'
   /** 選べるイベントがない・候補の番号が正しくない */
   | 'noEventToChoose'
-  /** 本番シードを外から渡す設定（デイリー）なのに渡されなかった */
-  | 'seedRequired';
+  /** 本番シードを外から渡す設定（週替わり）なのに渡されなかった */
+  | 'seedRequired'
+  /** その消耗品を持っていない */
+  | 'noItem'
+  /** 消耗品をこれ以上持てない */
+  | 'itemLimit'
+  /** 配置権: 床を湧かせられるマスがない（配置権は減らない） */
+  | 'noCellForItem';
 
 /** シフトを確定した結果 */
 export interface ShiftOutcome {
   cleared: boolean;
   quota: number;
   income: number;
+  /** 超過ボーナス（次のシフトの予算に足した額） */
+  overshootBonus: number;
   stats: SimStats;
 }
 

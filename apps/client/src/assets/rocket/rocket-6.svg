@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -8 96 104">
   <!-- ボルトのロケット（6/9）（art/ のスクリプトで生成。手で編集しない） -->
-  <path d="M22 56 L8 74 V86 L22 80 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M42 56 L56 74 V86 L42 80 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <path d="M24 80 H40 L44 90 H20 Z" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-  <g><rect x="20" y="62" width="24" height="18" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><rect x="21.5" y="70" width="21" height="5" fill="#e53935"/></g>
-  <rect x="20" y="46" width="24" height="16" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><path d="M22 56 L8 74 V86 L22 80 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="11" cy="80" r="1.2" fill="#1b1f27"/></g>
+  <g><path d="M42 56 L56 74 V86 L42 80 Z" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="53" cy="80" r="1.2" fill="#1b1f27"/></g>
+  <g><path d="M24 80 H40 L44 90 H20 Z" fill="#90a4ae" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M28 80 V84 M36 80 V84" fill="none" stroke="#546e7a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="20" y="62" width="24" height="18" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M21.5 66 H42.5 M21.5 76 H42.5" fill="none" stroke="#b0bec5" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M30.5 69.5 L32.5 68 V75" fill="none" stroke="#e53935" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></g>
+  <g><rect x="20" y="46" width="24" height="16" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M23 49 L29 55 M29 49 L23 55" fill="none" stroke="#cfd8dc" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
   <g><rect x="20" y="32" width="24" height="14" fill="#eceff1" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M22 35 V43" fill="none" stroke="#b0bec5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></g>
-  <path d="M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
-  <circle cx="32" cy="53" r="7.5" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <g><path d="M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
+  <circle cx="32" cy="53" r="8.5" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
   <g><path d="M32 5 V-1" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/><circle cx="32" cy="-3.5" r="3" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
 </svg>

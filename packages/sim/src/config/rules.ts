@@ -19,6 +19,9 @@ export function createRuleSet(balance: Balance = BALANCE): RuleSet {
     dockDivisor: 1,
     maxIncomePerSim: balance.sim.maxIncomePerSim,
     maxLiveSignals: balance.sim.maxLiveSignals,
+    goldenMultiplier: balance.golden.multiplier,
+    mergeMode: balance.sim.mergeMode,
+    syncShipMax: balance.sim.syncShipMax,
   };
 }
 

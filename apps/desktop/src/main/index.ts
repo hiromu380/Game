@@ -17,6 +17,7 @@ import { contentSecurityPolicy } from './security';
 import { startSteam } from './steam/steamworksAdapter';
 import { unavailableSteam, type SteamAdapter } from './steam/types';
 import { FileStore } from './storage/fileStore';
+import type { BrowserWindow } from 'electron';
 import { createGameWindow } from './window';
 
 /** Steam のコールバックを処理する間隔（ミリ秒）。Web API チケットの受け取りなどに必要 */
@@ -37,6 +38,7 @@ const rendererDir = join(appRoot, 'renderer');
 const preloadPath = join(appRoot, 'dist', 'preload.cjs');
 
 let steam: SteamAdapter = unavailableSteam;
+let gameWindow: BrowserWindow | null = null;
 
 const started = startSteam({
   appId: CONFIG.steamAppId,
@@ -66,6 +68,7 @@ if (started.kind === 'restarting') {
         openExternal: (url) => shell.openExternal(url),
         // 定義済みの実績だけを Steam へ送る（レンダラーが乗っ取られても任意の ID は解除できない）
         achievementIds: new Set(ACHIEVEMENT_IDS),
+        window: () => gameWindow,
       }),
     );
 
@@ -75,7 +78,11 @@ if (started.kind === 'restarting') {
       steam.shutdown();
     });
 
-    createGameWindow(preloadPath);
+    // 大きさ・位置・全画面の記憶は端末ごと（Steam Cloud で同期しない local フォルダ）
+    gameWindow = createGameWindow(
+      preloadPath,
+      join(app.getPath('userData'), 'local', 'window.json'),
+    );
   });
 
   app.on('window-all-closed', () => app.quit());

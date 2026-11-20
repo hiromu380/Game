@@ -27,7 +27,7 @@ const normal = (score = '12,345'): ShareCardInput => ({
 
 const daily = (rank: string | null): ShareCardInput => ({
   ...normal(),
-  title: 'デイリー #12',
+  title: '週替わり #12',
   subtitle: '2026-10-01',
   shifts: '達成シフト 2 / 3',
   rank,
@@ -67,7 +67,7 @@ describe('共有カード', () => {
     expect(images(cs)).toEqual(expect.arrayContaining(['logo', 'part:switch', 'part:dock']));
   });
 
-  it('デイリー: 盤面は載せず（ネタバレ防止）、日付・順位・シフトごとの結果を載せる', () => {
+  it('週替わり: 盤面は載せず（ネタバレ防止）、日付・順位・シフトごとの結果を載せる', () => {
     const cs = buildShareCard(daily('3位・上位 5%'), 'square');
     expect(images(cs).some((i) => i.startsWith('part:'))).toBe(false);
     expect(texts(cs)).toEqual(expect.arrayContaining(['2026-10-01', '3位・上位 5%']));
@@ -75,7 +75,7 @@ describe('共有カード', () => {
     expect(cs.filter((c) => c.kind === 'rect' && c.radius !== undefined)).toHaveLength(3);
   });
 
-  it('デイリー: 順位が取れなければ順位の行を出さない', () => {
+  it('週替わり: 順位が取れなければ順位の行を出さない', () => {
     const cs = buildShareCard(daily(null), 'landscape');
     expect(texts(cs).some((t) => t.includes('位'))).toBe(false);
   });

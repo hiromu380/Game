@@ -60,7 +60,7 @@ export function buildAchievementsDoc(): string {
     '| --- | --- | --- | --- | --- | --- |',
     '| STAT_RUNS | INT | 0 | 0 | はい | 遊んだランの回数 |',
     '| STAT_FULL_CLEARS | INT | 0 | 0 | はい | 全シフトをクリアした回数 |',
-    '| STAT_DAILY_DAYS | INT | 0 | 0 | はい | デイリーに参加した日数 |',
+    '| STAT_DAILY_DAYS | INT | 0 | 0 | はい | 週替わりチャレンジに参加した日数 |',
     '',
   );
   return lines.join('\n');

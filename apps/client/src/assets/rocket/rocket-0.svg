@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -8 96 104">
   <!-- ボルトのロケット（0/9）（art/ のスクリプトで生成。手で編集しない） -->
-  <path d="M22 56 L8 74 V86 L22 80 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
-  <path d="M42 56 L56 74 V86 L42 80 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
-  <path d="M24 80 H40 L44 90 H20 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <g><path d="M22 56 L8 74 V86 L22 80 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
+  <g><path d="M42 56 L56 74 V86 L42 80 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
+  <g><path d="M24 80 H40 L44 90 H20 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
   <g><rect x="20" y="62" width="24" height="18" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
-  <rect x="20" y="46" width="24" height="16" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <g><rect x="20" y="46" width="24" height="16" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
   <g><rect x="20" y="32" width="24" height="14" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
-  <path d="M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
-  <circle cx="32" cy="53" r="7.5" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
+  <g><path d="M20 32 C20 20 27 10 32 5 C37 10 44 20 44 32 Z" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
+  <circle cx="32" cy="53" r="8.5" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/>
   <g><path d="M32 5 V-1" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/><circle cx="32" cy="-3.5" r="3" fill="none" stroke="#6b7380" stroke-width="2" stroke-dasharray="3 3"/></g>
 </svg>

@@ -5,7 +5,7 @@
  * （pnpm --filter @chain-factory/sim achievements:export → docs/ops/steam-achievements.md の手順で登録）。
  * 名前・説明は i18n（apps/client/src/i18n の achievement.<ID>.name / .desc）に置く。
  *
- * デイリー系はサーバーで検証済みの結果（本番の確定・ランキング）を受け取ってから判定する。
+ * 週替わり系はサーバーで検証済みの結果（本番の確定・ランキング）を受け取ってから判定する。
  */
 import type { BossModifierId } from '../balance';
 
@@ -13,6 +13,7 @@ import type { BossModifierId } from '../balance';
  * 解除条件
  * - shiftScore:      1シフトの出荷量が atLeast 以上
  * - shiftZero:       本番の出荷量が 0（隠し実績用）
+ * - unmeasurable:    1シフトの出荷量が「計測不能」（balance/ の桁数以上。隠し実績用）
  * - shiftCleared:    シフトをクリアした（boss を指定したらそのボスのシフト、'any' なら何かのボスのシフト）
  * - chain:           1回の稼働で連鎖数が atLeast 以上
  * - junkbotStreak:   1回の稼働でポンコツロボが count 回続けて最大倍率を出した
@@ -20,13 +21,14 @@ import type { BossModifierId } from '../balance';
  * - record:          メタ進行の記録（累計・回数）が atLeast 以上
  * - boardLevel:      工場拡張の段階が atLeast 以上（1: 8×8, 2: 9×9）
  * - allParts:        全パーツを解放した
- * - dailyDays:       デイリーに参加した日数が atLeast 以上
- * - dailyCleared:    デイリーの全シフトをクリアした
- * - dailyTopPercent: デイリーの結果が上位 atMost % 以内
+ * - dailyDays:        週替わりチャレンジに参加した日数が atLeast 以上（1日1回の挑戦を日数で数える）
+ * - weeklyCleared:    週替わりの挑戦で全シフトをクリアした
+ * - weeklyTopPercent: 週替わりの確定した結果（結果発表）が上位 atMost % 以内
  */
 export type AchievementCondition =
   | { kind: 'shiftScore'; atLeast: string }
   | { kind: 'shiftZero' }
+  | { kind: 'unmeasurable' }
   | { kind: 'shiftCleared'; boss?: BossModifierId | 'any' }
   | { kind: 'chain'; atLeast: number }
   | { kind: 'junkbotStreak'; count: number }
@@ -36,8 +38,8 @@ export type AchievementCondition =
   | { kind: 'boardLevel'; atLeast: number }
   | { kind: 'allParts' }
   | { kind: 'dailyDays'; atLeast: number }
-  | { kind: 'dailyCleared' }
-  | { kind: 'dailyTopPercent'; atMost: number };
+  | { kind: 'weeklyCleared' }
+  | { kind: 'weeklyTopPercent'; atMost: number };
 
 /** Steam 統計（回数系だけ。実績の進捗バーに使う） */
 export type AchievementStatId = 'STAT_RUNS' | 'STAT_FULL_CLEARS' | 'STAT_DAILY_DAYS';
@@ -120,8 +122,8 @@ export const ACHIEVEMENTS = [
   { id: 'ACH_OVERTIME_3', hidden: false, condition: { kind: 'overtimeCleared', atLeast: 3 } },
   { id: 'ACH_OVERTIME_9', hidden: false, condition: { kind: 'overtimeCleared', atLeast: 9 } },
   { id: 'ACH_DAILY_FIRST', hidden: false, condition: { kind: 'dailyDays', atLeast: 1 } },
-  { id: 'ACH_DAILY_CLEAR', hidden: false, condition: { kind: 'dailyCleared' } },
-  { id: 'ACH_DAILY_TOP10', hidden: false, condition: { kind: 'dailyTopPercent', atMost: 10 } },
+  { id: 'ACH_DAILY_CLEAR', hidden: false, condition: { kind: 'weeklyCleared' } },
+  { id: 'ACH_DAILY_TOP10', hidden: false, condition: { kind: 'weeklyTopPercent', atMost: 10 } },
   {
     id: 'ACH_DAILY_7',
     hidden: false,
@@ -130,6 +132,7 @@ export const ACHIEVEMENTS = [
   },
   { id: 'ACH_JUNKBOT_JACKPOT', hidden: true, condition: { kind: 'junkbotStreak', count: 3 } },
   { id: 'ACH_ZERO', hidden: true, condition: { kind: 'shiftZero' } },
+  { id: 'ACH_UNMEASURABLE', hidden: true, condition: { kind: 'unmeasurable' } },
 ] as const satisfies readonly AchievementDef[];
 
 export type AchievementId = (typeof ACHIEVEMENTS)[number]['id'];

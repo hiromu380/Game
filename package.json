@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "pnpm --filter @chain-factory/client dev",
     "dev:server": "pnpm --filter @chain-factory/server dev",
+    "dev:sumo": "pnpm --filter @ichimon/client dev",
     "build": "pnpm -r build",
     "test": "vitest run",
     "test:watch": "vitest",

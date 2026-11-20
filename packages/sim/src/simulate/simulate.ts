@@ -20,7 +20,8 @@
 import { cellIndex, getPart, isInside } from '../core/board';
 import { dir4ToDir8, dir8Delta } from '../core/direction';
 import { createPrng } from '../core/prng';
-import { SCORE_ZERO, scoreAdd, scoreMax, scoreOf, type Score } from '../core/score';
+import { SCORE_ZERO, scoreAdd, scoreMax, scoreMul, scoreOf, type Score } from '../core/score';
+import { combineMerged } from './parts/merger';
 import { getFloorCell, isBlockedCell } from '../floor/layer';
 import { FLOOR_BEHAVIORS } from '../floor/tiles';
 import type { HaltReason, Part, SimEvent, SimInput, SimResult, Signal } from '../types';
@@ -34,6 +35,8 @@ interface PendingEmission {
   x: number;
   y: number;
   emission: Emission;
+  /** 発射のもとになった信号 */
+  parent: number | null;
 }
 
 /** 合流するパーツが、この tick に受けた信号 */
@@ -43,6 +46,8 @@ interface CollectBuffer {
   y: number;
   part: Part;
   values: Score[];
+  /** 最初に入った信号（合流した信号の代表。計算の内訳をたどる用） */
+  firstSignal: number;
 }
 
 export function simulate(input: SimInput): SimResult {
@@ -54,6 +59,7 @@ export function simulate(input: SimInput): SimResult {
   const limits = computeActivationLimits(board, rules);
   const used = new Array<number>(board.cells.length).fill(0);
   const partState = new Array<number>(board.cells.length).fill(0);
+  const partStored = new Array<Score>(board.cells.length).fill(SCORE_ZERO);
   const activatedCells = new Set<number>();
 
   let signals: Signal[] = [];
@@ -65,6 +71,8 @@ export function simulate(input: SimInput): SimResult {
   let chainCount = 0;
   let shipCount = 0;
   let floorApplied = 0;
+  /** この tick の出荷（tick の終わりに同時出荷ボーナスを掛けて確定する） */
+  let tickShips: { x: number; y: number; value: Score; cause: number | null }[] = [];
 
   const isBlocked = (index: number): boolean => isBlockedCell(floor, index);
 
@@ -91,10 +99,19 @@ export function simulate(input: SimInput): SimResult {
   };
 
   /** 信号を1つ生成し、emit イベントを記録する */
-  const emit = (tick: number, x: number, y: number, e: Emission): Signal => {
+  const emit = (tick: number, x: number, y: number, e: Emission, parent: number | null): Signal => {
     const signal: Signal = { id: nextSignalId++, x, y, dir: e.dir, value: e.value };
     maxValue = scoreMax(maxValue, e.value);
-    events.push({ tick, type: 'emit', signalId: signal.id, x, y, dir: e.dir, value: e.value });
+    events.push({
+      tick,
+      type: 'emit',
+      signalId: signal.id,
+      x,
+      y,
+      dir: e.dir,
+      value: e.value,
+      parent,
+    });
     return signal;
   };
 
@@ -103,15 +120,17 @@ export function simulate(input: SimInput): SimResult {
     tick: number,
     x: number,
     y: number,
-    reaction: Reaction,
+    raw: Reaction,
     out: Signal[],
+    cause: number | null,
   ): void => {
     const index = cellIndex(board, x, y);
-    if (reaction.ship !== undefined) {
-      score = scoreAdd(score, reaction.ship);
-      shipCount++;
-      events.push({ tick, type: 'ship', x, y, value: reaction.ship, total: score });
-    }
+    // 金色パーツ: パーツの効果の後で、出荷量と送る信号の値を倍にする（収入は増やさない）
+    const reaction = getPart(board, x, y)?.golden
+      ? goldenReaction(raw, rules.goldenMultiplier ?? 1)
+      : raw;
+    // 出荷は tick の終わりにまとめて確定する（同時出荷ボーナスのため）
+    if (reaction.ship !== undefined) tickShips.push({ x, y, value: reaction.ship, cause });
     if (reaction.income !== undefined) {
       const amount = Math.min(reaction.income, rules.maxIncomePerSim - income);
       if (amount > 0) {
@@ -124,10 +143,17 @@ export function simulate(input: SimInput): SimResult {
       events.push({ tick, type: 'reset', x: rx, y: ry });
     }
     if (reaction.nextState !== undefined) partState[index] = reaction.nextState;
+    if (reaction.store !== undefined) {
+      partStored[index] = reaction.store ?? SCORE_ZERO;
+      events.push({ tick, type: 'store', x, y, value: reaction.store });
+    }
     for (const emission of reaction.emits ?? []) {
+      // 転送装置: 行き先のマスから発射する
+      const [ex, ey] = emission.from ?? [x, y];
+      if (ex !== x || ey !== y) events.push({ tick, type: 'teleport', x, y, toX: ex, toY: ey });
       const delay = emission.delay ?? 0;
-      if (delay > 0) pending.push({ tick: tick + delay, x, y, emission });
-      else out.push(emit(tick, x, y, emission));
+      if (delay > 0) pending.push({ tick: tick + delay, x: ex, y: ey, emission, parent: cause });
+      else out.push(emit(tick, ex, ey, emission, cause));
     }
   };
 
@@ -140,7 +166,7 @@ export function simulate(input: SimInput): SimResult {
       if (isBlocked(index) || !canActivate(index)) continue;
       markActivated(index);
       signals.push(
-        emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }),
+        emit(0, x, y, { dir: dir4ToDir8(part.dir), value: scoreOf(rules.switchSignalValue) }, null),
       );
     }
   }
@@ -203,7 +229,7 @@ export function simulate(input: SimInput): SimResult {
         markActivated(index);
         chainCount++;
         events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
-        buffers.set(index, { index, x, y, part, values: [signal.value] });
+        buffers.set(index, { index, x, y, part, values: [signal.value], firstSignal: signal.id });
         continue;
       }
 
@@ -229,20 +255,21 @@ export function simulate(input: SimInput): SimResult {
         rng,
         chainCount,
         state: partState[index] ?? 0,
+        stored: partStored[index] ?? SCORE_ZERO,
       });
       markActivated(index);
       chainCount++;
       events.push({ tick, type: 'activate', signalId: signal.id, x, y, partId: part.id });
-      applyReaction(tick, x, y, reaction, nextSignals);
+      applyReaction(tick, x, y, reaction, nextSignals, signal.id);
     }
 
     // tick の終わり: 合流するパーツをマス番号の昇順に処理する
     for (const buffer of [...buffers.values()].sort((a, b) => a.index - b.index)) {
-      // 床の効果は、取り込んだ値の合計に1回だけ適用する（効果のある床なら、合計した1本として渡す）
+      // 床の効果は、取り込んだ値をまとめたものに1回だけ適用する（効果のある床なら、まとめた1本として渡す）
       const floorCell = getFloorCell(floor, buffer.index);
       const values =
         floorCell && FLOOR_BEHAVIORS[floorCell.tile].apply
-          ? [applyFloor(tick, buffer.x, buffer.y, buffer.values.reduce(scoreAdd, SCORE_ZERO))]
+          ? [applyFloor(tick, buffer.x, buffer.y, combineMerged(buffer.values, rules))]
           : buffer.values;
       const reaction = PART_BEHAVIORS[buffer.part.id].collect!({
         part: buffer.part,
@@ -254,14 +281,37 @@ export function simulate(input: SimInput): SimResult {
         rng,
         chainCount,
         state: partState[buffer.index] ?? 0,
+        stored: partStored[buffer.index] ?? SCORE_ZERO,
       });
-      applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals);
+      applyReaction(tick, buffer.x, buffer.y, reaction, nextSignals, buffer.firstSignal);
+    }
+
+    // 出荷の確定: 同じ tick に出荷した出荷口の数（上限つき）を、その tick の出荷すべてに掛ける
+    if (tickShips.length > 0) {
+      const docks = new Set(tickShips.map((t) => cellIndex(board, t.x, t.y))).size;
+      const sync = Math.max(1, Math.min(docks, rules.syncShipMax ?? 1));
+      for (const t of tickShips) {
+        const value = scoreMul(t.value, sync);
+        score = scoreAdd(score, value);
+        shipCount++;
+        events.push({
+          tick,
+          type: 'ship',
+          x: t.x,
+          y: t.y,
+          value,
+          total: score,
+          signalId: t.cause,
+          sync,
+        });
+      }
+      tickShips = [];
     }
 
     // 遅れて発射する予定の信号のうち、この tick の分を発射する（登録順）
     const due = pending.filter((p) => p.tick === tick);
     pending = pending.filter((p) => p.tick !== tick);
-    for (const p of due) nextSignals.push(emit(tick, p.x, p.y, p.emission));
+    for (const p of due) nextSignals.push(emit(tick, p.x, p.y, p.emission, p.parent));
 
     signals = nextSignals;
   }
@@ -282,5 +332,14 @@ export function simulate(input: SimInput): SimResult {
       ticks: tick,
       halted,
     },
+  };
+}
+
+/** 金色パーツの反応: 出荷量と送る信号の値を multiplier 倍する */
+function goldenReaction(reaction: Reaction, multiplier: number): Reaction {
+  return {
+    ...reaction,
+    ship: reaction.ship === undefined ? undefined : scoreMul(reaction.ship, multiplier),
+    emits: reaction.emits?.map((e) => ({ ...e, value: scoreMul(e.value, multiplier) })),
   };
 }

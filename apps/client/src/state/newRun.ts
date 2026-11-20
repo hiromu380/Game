@@ -61,10 +61,13 @@ export function startNormalRun(
 ): RunState {
   // 体験版は「メタ進行が初期状態のまま」として扱う（メタ進行を渡さないと全パーツ解放になるため、初期値を渡す）
   const progress = EDITION_CONFIG.metaProgression ? meta : createInitialMeta();
+  // 残業レベル: 製品版だけ。初回ガイドのランでは使わない
+  const ascension = options.tutorial ? 0 : (progress.ascension?.selected ?? 0);
   const run = createRun(seed, {
     meta: metaToModifiers(progress),
     prices,
     tutorial: options.tutorial,
+    ascension,
   });
   if (EDITION_CONFIG.overtime) return run;
   return { ...run, config: { ...run.config, overtimeAllowed: false } };

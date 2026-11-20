@@ -4,40 +4,63 @@
  * 並び順・一意制約などの振る舞いは drizzle 実装と同じにしておく
  * （同じテストを両方の実装に流して確認する: test/repositories.test.ts）。
  */
-import { compareRankKey, type RankKey } from '@chain-factory/shared';
+import { compareRankKey } from '@chain-factory/shared';
 import type {
-  DailyRecord,
+  AttemptRecord,
+  AttemptResultRecord,
+  BestRecord,
   ExternalAccountRecord,
+  FinalizationRecord,
   MarketRow,
   PlayerRecord,
-  RankedRow,
+  RankedBest,
   Repositories,
-  ResultRecord,
-  SessionRecord,
   ShopStatRow,
+  StandingRecord,
+  WeekRecord,
 } from './types';
 
 const clone = <T>(value: T): T => structuredClone(value);
 const key2 = (a: string, b: string) => `${a}\u0000${b}`;
+const key3 = (a: string, b: string, c: string) => `${a}\u0000${b}\u0000${c}`;
 
-const toRankKey = (r: ResultRecord): RankKey => ({
-  shiftsCleared: r.shiftsCleared,
-  score: r.score,
-  submittedAt: r.submittedAt,
-});
+/** ランキングの並び順（同順は playerId の順: 確定の順位を毎回同じにするため） */
+const byRank = (a: BestRecord, b: BestRecord) =>
+  compareRankKey(a, b) || (a.playerId < b.playerId ? -1 : a.playerId > b.playerId ? 1 : 0);
+
+/** Map から、週が weekId より前の行を消す */
+function deleteBefore<T extends { weekId: string }>(map: Map<string, T>, weekId: string): number {
+  let count = 0;
+  for (const [k, v] of map) {
+    if (v.weekId < weekId) {
+      map.delete(k);
+      count++;
+    }
+  }
+  return count;
+}
 
 export function createMemoryRepositories(): Repositories {
   const players = new Map<string, PlayerRecord>();
   const externalAccounts = new Map<string, ExternalAccountRecord>();
-  const dailies = new Map<string, DailyRecord>();
-  const sessions = new Map<string, SessionRecord>();
-  const results = new Map<string, ResultRecord>();
+  const weeks = new Map<string, WeekRecord>();
+  const attempts = new Map<string, AttemptRecord>();
+  const attemptResults = new Map<string, AttemptResultRecord>();
+  const bests = new Map<string, BestRecord>();
+  const standings = new Map<string, StandingRecord>();
+  const finalizations = new Map<string, FinalizationRecord>();
   const shopStats = new Map<string, Map<string, ShopStatRow>>();
   const market = new Map<string, MarketRow[]>();
 
-  /** 表示対象（非表示でない）の結果 */
-  const visibleResults = (dailyId: string) =>
-    [...results.values()].filter((r) => r.dailyId === dailyId && !players.get(r.playerId)?.hidden);
+  const bestsOf = (weekId: string) => [...bests.values()].filter((b) => b.weekId === weekId);
+  /** 表示対象（非表示でない）のベスト */
+  const visibleBests = (weekId: string) =>
+    bestsOf(weekId).filter((b) => !players.get(b.playerId)?.hidden);
+  const withPlayer = (s: StandingRecord) => ({
+    ...clone(s),
+    displayName: players.get(s.playerId)?.displayName ?? '',
+    hidden: players.get(s.playerId)?.hidden ?? false,
+  });
 
   return {
     players: {
@@ -67,15 +90,6 @@ export function createMemoryRepositories(): Repositories {
         return count;
       },
     },
-    dailies: {
-      async find(id) {
-        const d = dailies.get(id);
-        return d ? clone(d) : null;
-      },
-      async createIfAbsent(record) {
-        if (!dailies.has(record.id)) dailies.set(record.id, clone(record));
-      },
-    },
     externalAccounts: {
       async findPlayerId(provider, subjectHash) {
         return externalAccounts.get(key2(provider, subjectHash))?.playerId ?? null;
@@ -87,52 +101,120 @@ export function createMemoryRepositories(): Repositories {
         return true;
       },
     },
-    sessions: {
-      async find(dailyId, playerId) {
-        const s = sessions.get(key2(dailyId, playerId));
-        return s ? clone(s) : null;
+    weeks: {
+      async find(id) {
+        const w = weeks.get(id);
+        return w ? clone(w) : null;
       },
-      async create(session) {
-        const k = key2(session.dailyId, session.playerId);
-        if (sessions.has(k)) return false;
-        sessions.set(k, clone(session));
-        return true;
+      async createIfAbsent(record) {
+        if (!weeks.has(record.id)) weeks.set(record.id, clone(record));
       },
-      async update(session, expectedShiftIndex) {
-        const k = key2(session.dailyId, session.playerId);
-        const current = sessions.get(k);
-        if (!current || current.shiftIndex !== expectedShiftIndex) return false;
-        sessions.set(k, clone(session));
-        return true;
+      async save(record) {
+        weeks.set(record.id, clone(record));
       },
     },
-    results: {
-      async put(result) {
-        results.set(key2(result.dailyId, result.playerId), clone(result));
+    attempts: {
+      async find(weekId, dayId, playerId) {
+        const a = attempts.get(key3(weekId, dayId, playerId));
+        return a ? clone(a) : null;
       },
-      async find(dailyId, playerId) {
-        const r = results.get(key2(dailyId, playerId));
+      async create(attempt) {
+        const k = key3(attempt.weekId, attempt.dayId, attempt.playerId);
+        if (attempts.has(k)) return false;
+        attempts.set(k, clone(attempt));
+        return true;
+      },
+      async update(attempt, expectedShiftIndex) {
+        const k = key3(attempt.weekId, attempt.dayId, attempt.playerId);
+        const current = attempts.get(k);
+        if (!current || current.shiftIndex !== expectedShiftIndex) return false;
+        attempts.set(k, clone(attempt));
+        return true;
+      },
+      async listByPlayer(weekId, playerId) {
+        return [...attempts.values()]
+          .filter((a) => a.weekId === weekId && a.playerId === playerId)
+          .sort((a, b) => (a.dayId < b.dayId ? -1 : 1))
+          .map(clone);
+      },
+      async deleteWeeksBefore(weekId) {
+        return deleteBefore(attempts, weekId);
+      },
+    },
+    attemptResults: {
+      async put(result) {
+        attemptResults.set(key3(result.weekId, result.dayId, result.playerId), clone(result));
+      },
+      async find(weekId, dayId, playerId) {
+        const r = attemptResults.get(key3(weekId, dayId, playerId));
         return r ? clone(r) : null;
       },
-      async count(dailyId) {
-        return visibleResults(dailyId).length;
+      async deleteWeeksBefore(weekId) {
+        return deleteBefore(attemptResults, weekId);
       },
-      async countAbove(dailyId, key) {
-        return visibleResults(dailyId).filter((r) => compareRankKey(toRankKey(r), key) < 0).length;
+    },
+    bests: {
+      async find(weekId, playerId) {
+        const b = bests.get(key2(weekId, playerId));
+        return b ? clone(b) : null;
       },
-      async list(dailyId, offset, limit) {
-        return visibleResults(dailyId)
-          .sort((a, b) => compareRankKey(toRankKey(a), toRankKey(b)))
-          .slice(offset, offset + limit)
-          .map((r): RankedRow => ({
-            ...clone(r),
-            displayName: players.get(r.playerId)!.displayName,
+      async put(best) {
+        bests.set(key2(best.weekId, best.playerId), clone(best));
+      },
+      async count(weekId) {
+        return visibleBests(weekId).length;
+      },
+      async listRanked(weekId) {
+        return visibleBests(weekId)
+          .sort(byRank)
+          .map((b): RankedBest => ({
+            ...clone(b),
+            displayName: players.get(b.playerId)!.displayName,
           }));
+      },
+      async listAll(weekId) {
+        return bestsOf(weekId).sort(byRank).map(clone);
+      },
+    },
+    standings: {
+      async putMany(rows) {
+        for (const r of rows) standings.set(key2(r.weekId, r.playerId), clone(r));
+      },
+      async find(weekId, playerId) {
+        const s = standings.get(key2(weekId, playerId));
+        return s ? withPlayer(s) : null;
+      },
+      async list(weekId, fromRank, limit) {
+        return [...standings.values()]
+          .filter((s) => s.weekId === weekId && s.rank >= fromRank)
+          .sort((a, b) => a.rank - b.rank)
+          .slice(0, limit)
+          .map(withPlayer);
+      },
+      async deleteWeeksBefore(weekId) {
+        return deleteBefore(standings, weekId);
+      },
+    },
+    finalizations: {
+      async find(weekId) {
+        const f = finalizations.get(weekId);
+        return f ? clone(f) : null;
+      },
+      async save(record) {
+        finalizations.set(record.weekId, clone(record));
+      },
+      async listFinished(limit) {
+        return [...finalizations.values()]
+          .filter((f) => f.finishedAt !== null)
+          .map((f) => f.weekId)
+          .sort()
+          .reverse()
+          .slice(0, limit);
       },
     },
     shopStats: {
-      async add(dailyId, rows) {
-        const day = shopStats.get(dailyId) ?? new Map<string, ShopStatRow>();
+      async add(weekId, rows) {
+        const day = shopStats.get(weekId) ?? new Map<string, ShopStatRow>();
         for (const row of rows) {
           const current = day.get(row.partId) ?? { partId: row.partId, offered: 0, bought: 0 };
           day.set(row.partId, {
@@ -141,18 +223,18 @@ export function createMemoryRepositories(): Repositories {
             bought: current.bought + row.bought,
           });
         }
-        shopStats.set(dailyId, day);
+        shopStats.set(weekId, day);
       },
-      async get(dailyId) {
-        return [...(shopStats.get(dailyId)?.values() ?? [])].map(clone);
+      async get(weekId) {
+        return [...(shopStats.get(weekId)?.values() ?? [])].map(clone);
       },
     },
     market: {
-      async put(date, rows) {
-        market.set(date, clone(rows));
+      async put(weekId, rows) {
+        market.set(weekId, clone(rows));
       },
-      async get(date) {
-        const rows = market.get(date);
+      async get(weekId) {
+        const rows = market.get(weekId);
         return rows ? clone(rows) : null;
       },
     },

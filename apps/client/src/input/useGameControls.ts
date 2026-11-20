@@ -1,16 +1,18 @@
 /**
  * ゲーム画面のキーボード・コントローラー操作（盤面のカーソルと、ショップ・手持ちの一覧）
  *
- * - 盤面: 方向でカーソルを動かす。決定 = 置く・選ぶ（マウスのクリックと同じ）、X = 回転、B = 選択解除、
+ * - 盤面: 方向でカーソルを動かす。決定 = 置く・選ぶ（マウスのクリックと同じ）、X = 回転、Back = 元に戻す、RT = 手持ちに戻す、B = 選択解除、
  *   Y = 試運転、Start = 本番
  * - L / R: ショップ・手持ちの一覧へ移る（タブ表示ならタブも切り替える）。一覧の中は上下で選び、決定で押す。
  *   手持ちのパーツを選んだら盤面へ戻る（そのまま置けるように）。B で盤面へ戻る
+ * - 盤面の端からさらに外へ動かすと、その方向の画面のボタン（目標・設定・メニュー・案内の「次へ」など）へ移る。
+ *   ボタンの間は方向で移り、決定で押す。盤面の方向へ戻るか B で盤面へ戻る（コントローラーには Tab がないため）
  * - 再生中: 決定で結果を閉じる（再生が終わっていれば）
  * active が false（ダイアログが開いている・ラン終了画面）のときは何もしない（メニューの操作に任せる）
  */
 import { useEffect, useRef, useState } from 'react';
 import type { ControlAction } from '../config/controls';
-import { addControlHandler } from './controls';
+import { addControlHandler, focusedByPointer, getInputMode } from './controls';
 import { focusables, nearestInDirection } from './menuNavigation';
 
 type Panel = 'shop' | 'inventory';
@@ -25,7 +27,14 @@ export interface GameControlOptions {
   playbackFinished: boolean;
   onPlace: (x: number, y: number) => void;
   onDeselect: () => void;
+  /** 何か選んでいるか（何も選んでいないときの Esc はメニューを開く） */
+  hasSelection: boolean;
+  onOpenMenu: () => void;
   onRotate: () => void;
+  onUndo: () => void;
+  /** 選んでいる盤面のパーツを手持ちに戻す */
+  onReturn: () => void;
+  onMerge: () => void;
   onTrial: () => void;
   onCommit: () => void;
   onClosePlayback: () => void;
@@ -43,6 +52,22 @@ const MOVES: Partial<Record<ControlAction, [number, number]>> = {
 function panelOf(el: Element | null): Panel | null {
   const panel = el?.closest('[data-panel]')?.getAttribute('data-panel');
   return panel === 'shop' || panel === 'inventory' ? panel : null;
+}
+
+/** 盤面のマス（x, y）の画面上の位置。盤面の外のボタンへ移るときの起点 */
+function cellRect(x: number, y: number, width: number, height: number): DOMRect | null {
+  const board = document.querySelector('.board-container');
+  if (!board) return null;
+  const r = board.getBoundingClientRect();
+  const w = r.width / width;
+  const h = r.height / height;
+  return new DOMRect(r.left + x * w, r.top + y * h, w, h);
+}
+
+function candidates(except: Element | null) {
+  return focusables(document)
+    .filter((el) => el !== except)
+    .map((el) => ({ el, rect: el.getBoundingClientRect() }));
 }
 
 /** 一覧の最初のボタンにフォーカスする（タブの切り替えで描き直されるのを待つ） */
@@ -68,6 +93,8 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
       addControlHandler((action) => {
         const { options: o, cursor: c } = ref.current;
         if (!o.active) return false;
+        // ダイアログ（ショップの一覧・確認など）が開いていれば、ダイアログの操作（Esc で閉じる等）にまわす
+        if (document.querySelector('.modal')) return false;
 
         if (o.playing) {
           if (action === 'confirm' && o.playbackFinished) {
@@ -78,8 +105,34 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
           return action !== 'cancel';
         }
 
-        const active = document.activeElement;
+        // マウスで押して残ったフォーカスは無視する（続けて矢印を押したら盤面のカーソルが動くように）
+        const active = focusedByPointer(document.activeElement) ? null : document.activeElement;
         const panel = panelOf(active);
+
+        // 盤面の外のボタン（一覧以外）にいるとき
+        if (!panel && active instanceof HTMLElement && focusables(document).includes(active)) {
+          const dir = MOVES[action];
+          if (dir) {
+            // 盤面もひとつの行き先として比べ、盤面がいちばん近ければ盤面へ戻る
+            const board = document.querySelector<HTMLElement>('.board-container');
+            const options = candidates(active);
+            if (board) options.push({ el: board, rect: board.getBoundingClientRect() });
+            const next = nearestInDirection(active.getBoundingClientRect(), options, dir);
+            if (next === board) active.blur();
+            else next?.focus();
+            return true;
+          }
+          if (action === 'confirm') {
+            active.click();
+            return true;
+          }
+          if (action === 'cancel') {
+            active.blur();
+            return true;
+          }
+          // 回転・試運転・本番などは、盤面の操作としてそのまま続ける
+        }
+
         if (panel && active instanceof HTMLElement) {
           const dir = MOVES[action];
           if (dir) {
@@ -108,6 +161,15 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
 
         const move = MOVES[action];
         if (move) {
+          const nx = c.x + move[0];
+          const ny = c.y + move[1];
+          // 盤面の端からさらに外へ: その方向の画面のボタンへ移る（なければ端で止まる）
+          if (nx < 0 || ny < 0 || nx >= o.width || ny >= o.height) {
+            const from = cellRect(c.x, c.y, o.width, o.height);
+            const next = from && nearestInDirection(from, candidates(null), move);
+            next?.focus();
+            return true;
+          }
           setCursor({
             x: Math.min(o.width - 1, Math.max(0, c.x + move[0])),
             y: Math.min(o.height - 1, Math.max(0, c.y + move[1])),
@@ -119,10 +181,22 @@ export function useGameControls(options: GameControlOptions): { x: number; y: nu
             o.onPlace(c.x, c.y);
             return true;
           case 'cancel':
-            o.onDeselect();
+            // キーボードの Esc は、何も選んでいなければメニューを開く（PC のゲームの慣れた操作）。
+            // コントローラーの B は「戻る」なので、選択の解除だけにする
+            if (!o.hasSelection && getInputMode() === 'keys') o.onOpenMenu();
+            else o.onDeselect();
             return true;
           case 'rotate':
             o.onRotate();
+            return true;
+          case 'undo':
+            o.onUndo();
+            return true;
+          case 'returnPart':
+            o.onReturn();
+            return true;
+          case 'merge':
+            o.onMerge();
             return true;
           case 'trial':
             o.onTrial();

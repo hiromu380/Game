@@ -19,6 +19,10 @@ export function eventToText(e: SimEvent): string {
       return `vanish#${e.signalId}:${e.reason}`;
     case 'absorb':
       return `absorb#${e.signalId}(${e.x},${e.y})`;
+    case 'store':
+      return `store(${e.x},${e.y})=${e.value ?? '-'}`;
+    case 'teleport':
+      return `teleport(${e.x},${e.y})→(${e.toX},${e.toY})`;
     case 'income':
       return `income+${e.amount}=${e.total}`;
     case 'floor':

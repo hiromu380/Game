@@ -74,3 +74,12 @@ export function svg(comment: string, body: string[], viewBox = '0 0 64 64'): str
     '',
   ].join('\n');
 }
+
+/**
+ * 大きさ（width・height）つきの SVG。読み込んだときの画像の大きさが viewBox と同じになる
+ * （切り絵アニメの部品など、プログラムで並べる絵に使う。大きさがないとブラウザごとに既定の大きさが違う）
+ */
+export function sizedSvg(comment: string, body: string[], viewBox: string): string {
+  const [, , w, h] = viewBox.split(' ');
+  return svg(comment, body, viewBox).replace('<svg ', `<svg width="${w}" height="${h}" `);
+}

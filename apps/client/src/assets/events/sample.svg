@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: sample（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <rect x="18" y="28" width="28" height="20" rx="2" fill="#e53935" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="16" y="23" width="32" height="7" rx="2" fill="#e53935" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 23 V48" fill="none" stroke="#ffd54f" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 23 q-8 -8 -10 -1 q2 3 10 1 q8 2 10 -1 q-2 -7 -10 1" fill="#ffd54f" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

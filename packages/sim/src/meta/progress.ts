@@ -2,8 +2,9 @@
  * メタ進行の更新: 終わったランの実績を記録し、条件を満たした解放を行う（純粋関数）
  *
  * 解放条件と解放内容は balance/ の meta に置く。
- * デイリーチャレンジ（フェーズ3）ではメタ進行を適用しないので、ここで作る MetaModifiers を渡さない。
+ * 週替わりチャレンジ（フェーズ3）ではメタ進行を適用しないので、ここで作る MetaModifiers を渡さない。
  */
+import { maxAscension } from '../config/ascension';
 import { BALANCE, type Balance, type MetaCondition } from '../balance';
 import type { MetaModifiers } from '../config/runConfig';
 import { scoreAdd, scoreCompare, scoreFromString, scoreMax, scoreOf } from '../core/score';
@@ -12,7 +13,11 @@ import type { PartId } from '../types';
 import type { MetaProgress, MetaRecords } from './types';
 
 /** ランの終了で新しく解放されたもの */
-export type Unlock = { kind: 'part'; partId: PartId } | { kind: 'board'; level: number };
+export type Unlock =
+  | { kind: 'part'; partId: PartId }
+  | { kind: 'board'; level: number }
+  /** 残業レベル（そのレベルを選べるようになった） */
+  | { kind: 'ascension'; level: number };
 
 /** 解放条件を満たしているか */
 export function isConditionMet(records: MetaRecords, condition: MetaCondition): boolean {
@@ -115,8 +120,27 @@ export function applyRunToMeta(
     unlocks.push({ kind: 'board', level: boardLevel });
   }
 
+  // 残業レベル: いま選べる最高のレベルで全シフトをクリアしたら、次のレベルを解放する（延長戦は関係なし）
+  const level = run.config.ascension ?? 0;
+  const ascension = { ...(meta.ascension ?? { unlocked: 0, selected: 0 }) };
+  if (
+    run.phase === 'cleared' &&
+    run.config.mode === 'normal' &&
+    level >= ascension.unlocked &&
+    ascension.unlocked < maxAscension(balance)
+  ) {
+    ascension.unlocked = level + 1;
+    // 解放したレベルを次のランの既定にする（選び直しはラン終了画面で）
+    ascension.selected = ascension.unlocked;
+    unlocks.push({ kind: 'ascension', level: ascension.unlocked });
+  }
+
+  // このランで手に入れたレリックを図鑑に足す（新しいものだけ、手に入れた順）
+  const relicsFound = [...(meta.relicsFound ?? [])];
+  for (const id of run.relics ?? []) if (!relicsFound.includes(id)) relicsFound.push(id);
+
   return {
-    meta: { unlockedParts, boardLevel, records },
+    meta: { unlockedParts, boardLevel, records, relicsFound, ascension },
     unlocks,
     run: { ...run, metaRecordedShifts: run.history.length },
   };

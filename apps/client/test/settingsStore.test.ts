@@ -38,6 +38,21 @@ describe('ユーザー設定', () => {
     expect(migrateSettings({ version: 99 })).toEqual(DEFAULT_SETTINGS);
   });
 
+  it('型や範囲の合わない項目は既定値に戻し、音量は 0〜100 に収める', () => {
+    expect(
+      migrateSettings({
+        version: 3,
+        lang: 'fr',
+        effects: 'off',
+        shake: 'yes',
+        masterVolume: 150,
+        seVolume: -5,
+        bgmVolume: 'loud',
+        muted: true,
+      }),
+    ).toEqual({ ...DEFAULT_SETTINGS, masterVolume: 100, seVolume: 0, muted: true });
+  });
+
   it('v1 → v2: 設定はそのまま引き継ぎ、初回ガイドは未完了にする', () => {
     const v1 = { version: 1, lang: 'en', effects: 'reduced', shake: false, masterVolume: 30 };
     expect(migrateSettings(v1)).toEqual({

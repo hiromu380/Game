@@ -2,30 +2,39 @@
  * ジョブをトリガー（Cron）なしで単体実行する
  *
  * 使い方（apps/server で）:
- *   pnpm job daily               … wrangler dev のローカル D1 に対して今日のデイリーを用意
- *   pnpm job market              … 今日の相場を計算（前日の集計から）
- *   pnpm job ip-purge            … 保存期間を過ぎた IP ハッシュを消す
+ *   pnpm job prepare             … wrangler dev のローカル D1 に、今週から数週先までの盤面を用意（先行生成）
+ *   pnpm job verify              … 未検証の週を自動検証する（時間の予算なしで、終わるまで）
+ *   pnpm job open                … 今週を開く（前週の購入率から相場を確定）
+ *   pnpm job finalize            … 前週・前々週の結果を確定する（結果発表）
+ *   pnpm job purge               … 保存期間を過ぎた挑戦・確定結果・IP ハッシュを消す
  *   pnpm job all                 … Cron と同じ順番ですべて
- *   pnpm job daily --db x.sqlite … 任意の SQLite ファイルに対して実行（マイグレーションも流す）
- *   pnpm job daily --at 2026-10-05T00:00:00Z … 時刻を指定して実行
+ *   pnpm job all --db x.sqlite   … 任意の SQLite ファイルに対して実行（マイグレーションも流す）
+ *   pnpm job all --at 2026-10-05T00:00:00Z … 時刻を指定して実行
  *
  * 秘密値は .dev.vars（なければ環境変数）から読む。
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { applyMigrations, openNodeSqlite } from '../src/adapters/nodeSqlite';
+import { memoryCache } from '../src/adapters/cache';
 import type { DomainContext } from '../src/domain/context';
-import { runDailyJob } from '../src/domain/daily/dailyJob';
-import { runMarketJob } from '../src/domain/market/market';
 import { runIpPurgeJob } from '../src/domain/players/privacy';
+import { runFinalizeJob, runWeeklyPurgeJob } from '../src/domain/weekly/results';
+import { prepareWeeks, runOpenWeekJob, verifyWeeks } from '../src/domain/weekly/weeks';
 import { readConfig, type Env } from '../src/env';
 import { runScheduledJobs } from '../src/jobs/scheduled';
 import { createDrizzleRepositories } from '../src/repositories/drizzle';
 
 const JOBS: Record<string, (ctx: DomainContext) => Promise<unknown>> = {
-  daily: runDailyJob,
-  market: runMarketJob,
-  'ip-purge': runIpPurgeJob,
+  prepare: prepareWeeks,
+  // 手動実行では時間の予算を気にせず、終わるまで進める（時計を止めて予算を使い切らないようにする）
+  verify: (ctx) => verifyWeeks(ctx, () => 0),
+  open: runOpenWeekJob,
+  finalize: runFinalizeJob,
+  purge: async (ctx) => ({
+    weekly: await runWeeklyPurgeJob(ctx),
+    ip: await runIpPurgeJob(ctx),
+  }),
   /** Cron と同じ順番ですべて実行 */
   all: runScheduledJobs,
 };
@@ -72,10 +81,12 @@ async function main() {
   if (dbPath) applyMigrationsIfEmpty(raw);
 
   const at = option('at');
+  const now = () => (at ? Date.parse(at) : Date.now());
   const ctx: DomainContext = {
     repos: createDrizzleRepositories(db),
     config: readConfig(loadVars() as unknown as Env),
-    now: () => (at ? Date.parse(at) : Date.now()),
+    now,
+    cache: memoryCache(now),
   };
   console.log(name, await job(ctx));
 }

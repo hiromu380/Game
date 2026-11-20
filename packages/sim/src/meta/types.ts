@@ -2,6 +2,7 @@
  * メタ進行（ランをまたいで残る進捗）の型
  */
 import { BALANCE, type Balance } from '../balance';
+import type { RelicId } from '../balance/types';
 import type { PartId } from '../types';
 
 export interface MetaRecords {
@@ -24,6 +25,10 @@ export interface MetaProgress {
   /** 工場拡張の段階（0: 7×7, 1: 8×8, 2: 9×9） */
   boardLevel: number;
   records: MetaRecords;
+  /** これまでに手に入れたレリック（コレクションの図鑑用。手に入れた順） */
+  relicsFound: RelicId[];
+  /** 残業レベル: unlocked まで選べる（0 は通常だけ）。selected は次のランで使うレベル */
+  ascension: { unlocked: number; selected: number };
 }
 
 /** 初めて遊ぶときのメタ進行 */
@@ -39,5 +44,7 @@ export function createInitialMeta(balance: Balance = BALANCE): MetaProgress {
       runsPlayed: 0,
       clears: 0,
     },
+    relicsFound: [],
+    ascension: { unlocked: 0, selected: 0 },
   };
 }
