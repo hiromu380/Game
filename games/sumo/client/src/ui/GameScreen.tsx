@@ -36,6 +36,7 @@ import { TopMenu } from './TopMenu';
 import { DelegateDialog } from './DelegateDialog';
 import { delegate, type DelegateResult } from '../delegate';
 import { rewardsOf, type RewardLine } from '../rewards';
+import { myStanding } from '../standing';
 import { achievedOf, newlyAchieved, type AchievementId } from '../achievements';
 import { AchievementToast } from './AchievementsPanel';
 import { BashoTicker } from './BashoTicker';
@@ -84,7 +85,12 @@ export function GameScreen({
   const [delegated, setDelegated] = useState<DelegateResult | null>(null);
   // 直前の場所の部屋への影響（場所を進めた直後に作る）
   const [achv, setAchv] = useState<AchievementId[]>([]);
-  const [rewards, setRewards] = useState<{ bashoIndex: number; lines: RewardLine[] } | null>(null);
+  const [rewards, setRewards] = useState<{
+    bashoIndex: number;
+    lines: RewardLine[];
+    /** 場所の前の部屋の力の順位 */
+    placeBefore: number;
+  } | null>(null);
   // 本場所を1日ずつ見せる: 前半（中日の判断の前）と後半（進めた後の状態を持って、見終えたら結果へ）
   // 後半に大一番（勝ち越しをかけた最後の一番）がある弟子がいれば、その前の日で星取りを止めて作戦を聞き、
   // その日に大一番を見せてから（結果を知る前に）続きの星取りへ。stops は大一番のある日（早い順）
@@ -138,7 +144,11 @@ export function GameScreen({
     setGame(next);
     setAchv(newlyAchieved(game, next));
     if (next.lastReport)
-      setRewards({ bashoIndex: next.lastReport.bashoIndex, lines: rewardsOf(game, next) });
+      setRewards({
+        bashoIndex: next.lastReport.bashoIndex,
+        lines: rewardsOf(game, next),
+        placeBefore: myStanding(game).place,
+      });
     const all = next.lastReport ? highlightsOf(next, next.lastReport, game) : [];
     const hl =
       liveShown.current === next.lastReport?.bashoIndex
@@ -462,6 +472,9 @@ export function GameScreen({
           game={game}
           report={game.lastReport}
           rewards={rewards?.bashoIndex === game.lastReport.bashoIndex ? rewards.lines : null}
+          placeBefore={
+            rewards?.bashoIndex === game.lastReport.bashoIndex ? rewards.placeBefore : null
+          }
           onClose={() => setShowReport(false)}
         />
       )}

@@ -1983,5 +1983,13 @@
   "achv.tierName.2": "Influential",
   "achv.tierName.3": "Prestigious",
   "achv.tierName.4": "Renowned",
-  "achv.tierName.5": "Among the finest"
+  "achv.tierName.5": "Among the finest",
+  "report.tile.standing": "Stable power (of {total})",
+  "report.tile.place": "#{place}",
+  "standing.title": "Stable power rankings",
+  "standing.place": "#{place}",
+  "standing.points": "{n} pts",
+  "standing.mine": "You",
+  "standing.rival": "Rival",
+  "standing.note": "All {total} stables, ranked by the sum of their wrestlers' rank points (higher for yokozuna and ozeki)."
 }

@@ -20,6 +20,8 @@ import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, money, rankLabel, recordLabel } from '../format';
 import { useSettings } from '../settings';
 import { BoutViewer } from './BoutViewer';
+import { useCountUp } from './CountUp';
+import { myStanding } from '../standing';
 import { RaceSection } from './RacePanel';
 
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
@@ -41,12 +43,15 @@ export function ReportDialog({
   game,
   report,
   rewards,
+  placeBefore = null,
   onClose,
 }: {
   game: GameState;
   report: BashoReport;
   /** 部屋への影響（場所を進めた直後だけ。前の結果を開き直したときは出さない） */
   rewards?: RewardLine[] | null;
+  /** 場所の前の部屋の力の順位（場所を進めた直後だけ） */
+  placeBefore?: number | null;
   onClose: () => void;
 }) {
   const { t, lang } = useI18n();
@@ -71,6 +76,8 @@ export function ReportDialog({
   });
   const myRetired = report.retired.filter((r) => r.stableId === game.player.stableId);
   const net = sumMoney(report.income) - sumMoney(report.expenses);
+  const netShown = useCountUp(net);
+  const standing = myStanding(game);
   const kachikoshi = report.mine.filter(
     (m) => m.record.wins * 2 > m.record.wins + m.record.losses + m.record.absences,
   ).length;
@@ -139,7 +146,21 @@ export function ReportDialog({
           </div>
           <div className="tile">
             <dt>{t('report.tile.net')}</dt>
-            <dd className={net < 0 ? 'is-minus' : ''}>{money(t, net, lang)}</dd>
+            <dd className={net < 0 ? 'is-minus' : ''}>{money(t, netShown, lang)}</dd>
+          </div>
+          <div className="tile">
+            <dt>{t('report.tile.standing', { total: standing.total })}</dt>
+            <dd>
+              {t('report.tile.place', { place: standing.place })}
+              {placeBefore !== null && placeBefore !== standing.place && (
+                <span
+                  className={`rewards__chip is-${placeBefore > standing.place ? 'good' : 'bad'}`}
+                >
+                  {placeBefore > standing.place ? '▲' : '▼'}
+                  {Math.abs(placeBefore - standing.place)}
+                </span>
+              )}
+            </dd>
           </div>
         </dl>
 

@@ -8,25 +8,48 @@ import { note } from '../game/journal';
 import type { BashoReport, BoutResult, GameState, Rank } from '../model/types';
 import { masterOf } from './association';
 
+/** 地位ごとの部屋の力の点 */
+function rankPoints(rank: Rank): number {
+  const p = RIVAL.strengthPoints;
+  if (rank.title === 'Y') return p.Y;
+  if (rank.title === 'O') return p.O;
+  if (isSanyaku(rank)) return p.sanyaku;
+  if (rank.division === 'makuuchi') return p.makuuchi;
+  if (rank.division === 'juryo') return p.juryo;
+  if (rank.division === 'makushita') return p.makushita;
+  if (rank.division === 'sandanme') return p.sandanme;
+  return p.lower;
+}
+
 /** 部屋の力: 番付に載った弟子の地位ごとの点の合計（ライバル選びの目安） */
 export function stableStrength(state: GameState, stableId: number): number {
   const ranks = ranksOf(state.banzuke, state.titles);
-  const p = RIVAL.strengthPoints;
   let sum = 0;
   for (const r of state.rikishi) {
     if (r.stableId !== stableId) continue;
     const rank = ranks.get(r.id);
-    if (!rank) continue;
-    if (rank.title === 'Y') sum += p.Y;
-    else if (rank.title === 'O') sum += p.O;
-    else if (isSanyaku(rank)) sum += p.sanyaku;
-    else if (rank.division === 'makuuchi') sum += p.makuuchi;
-    else if (rank.division === 'juryo') sum += p.juryo;
-    else if (rank.division === 'makushita') sum += p.makushita;
-    else if (rank.division === 'sandanme') sum += p.sandanme;
-    else sum += p.lower;
+    if (rank) sum += rankPoints(rank);
   }
   return sum;
+}
+
+/**
+ * 部屋の力の番付: すべての部屋を力の大きい順に並べる（同じ力は同じ順位。同じなら ID の小さい順に並べる）
+ * 番付を1度だけ読むので、部屋ごとに stableStrength を呼ぶより速い
+ */
+export function stableStandings(
+  state: GameState,
+): { stableId: number; strength: number; place: number }[] {
+  const ranks = ranksOf(state.banzuke, state.titles);
+  const sum = new Map(state.stables.map((s) => [s.id, 0]));
+  for (const r of state.rikishi) {
+    const rank = ranks.get(r.id);
+    if (rank && sum.has(r.stableId)) sum.set(r.stableId, sum.get(r.stableId)! + rankPoints(rank));
+  }
+  const rows = [...sum]
+    .map(([stableId, strength]) => ({ stableId, strength }))
+    .sort((a, b) => b.strength - a.strength || a.stableId - b.stableId);
+  return rows.map((x) => ({ ...x, place: rows.findIndex((y) => y.strength === x.strength) + 1 }));
 }
 
 /** ライバルの候補（別の一門の架空の本家の部屋）を、合う順に並べる（小さいほど合う） */

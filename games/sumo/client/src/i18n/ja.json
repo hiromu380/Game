@@ -1983,5 +1983,13 @@
   "achv.tierName.2": "有力な部屋",
   "achv.tierName.3": "名門",
   "achv.tierName.4": "角界の名門",
-  "achv.tierName.5": "角界屈指の名門"
+  "achv.tierName.5": "角界屈指の名門",
+  "report.tile.standing": "部屋の力（全{total}部屋）",
+  "report.tile.place": "{place}位",
+  "standing.title": "部屋の力の番付",
+  "standing.place": "{place}位",
+  "standing.points": "{n}点",
+  "standing.mine": "自分",
+  "standing.rival": "ライバル",
+  "standing.note": "全{total}部屋を、番付に載った力士の地位の点（横綱・大関ほど高い）の合計で並べる。"
 }

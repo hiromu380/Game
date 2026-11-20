@@ -5,6 +5,7 @@ import { RivalPanel } from './RivalPanel';
 import { BoardPanel } from './BoardPanel';
 import { OyakataPortrait } from '../art/Portraits';
 import { YearPlan } from './YearPlan';
+import { StandingsPanel } from './StandingsPanel';
 
 /** 協会: 一門ごとの部屋（師匠・力士・関取の数）と、年寄名跡の空き */
 export function AssociationTab({
@@ -31,6 +32,7 @@ export function AssociationTab({
   return (
     <div className="stack">
       <YearPlan game={game} />
+      <StandingsPanel game={game} />
       <RivalPanel game={game} ranks={ranks} />
       <BoardPanel game={game} />
       <section className="panel">
