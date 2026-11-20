@@ -1992,5 +1992,13 @@
   "standing.mine": "You",
   "standing.rival": "Rival",
   "standing.note": "All {total} stables, ranked by the sum of their wrestlers' rank points (higher for yokozuna and ozeki).",
-  "gameOver.retry": "Retry from {basho}"
+  "gameOver.retry": "Retry from {basho}",
+  "prep.why.noFit": "No uninjured disciple (resting ones can't train)",
+  "prep.why.money": "Not enough money",
+  "prep.why.pair": "Need two uninjured disciples",
+  "prep.why.noPatron": "No patrons yet",
+  "prep.why.visited": "You've already visited every patron this tournament",
+  "prep.why.scouted": "One scouting trip per tournament — already done",
+  "prep.why.none": "Not available this week",
+  "facility.short": "Not enough money ({yen} short)"
 }

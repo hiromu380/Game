@@ -94,6 +94,17 @@ function BuildButton({
       onClick={() => setGame(buildFacility(game, id))}
     >
       {t('facility.build', { cost: money(t, cost, lang) })}
+      {!canAfford(game, cost) && (
+        <span className="button__sub">
+          {t('facility.short', {
+            yen: money(
+              t,
+              cost - Math.max(0, game.player.stableMoney) - Math.max(0, game.player.personalMoney),
+              lang,
+            ),
+          })}
+        </span>
+      )}
       {fromSavings(game, cost) > 0 && canAfford(game, cost) && (
         <span className="button__sub">
           {t('pay.fromSavings', { yen: money(t, fromSavings(game, cost), lang) })}

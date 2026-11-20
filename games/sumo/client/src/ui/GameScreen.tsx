@@ -301,7 +301,7 @@ export function GameScreen({
               setTimeout(() => {
                 const panel = document.getElementById('prep-panel');
                 panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                panel?.querySelector<HTMLElement>('.prep__cmd:not(:disabled)')?.focus({
+                panel?.querySelector<HTMLElement>('.prep__cmd:not([aria-disabled="true"])')?.focus({
                   preventScroll: true,
                 });
               }, 60);

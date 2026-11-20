@@ -341,7 +341,7 @@ body {
   cursor: pointer;
   position: relative;
 }
-.prep__cmd:hover:not(:disabled)::before,
+.prep__cmd:hover:not([aria-disabled='true'])::before,
 .prep__cmd:focus-visible::before,
 .prep__cmd.is-selected::before {
   content: '▶';
@@ -356,7 +356,7 @@ body {
 .prep__cmd.is-selected::before {
   color: var(--odo);
 }
-.prep__cmd:disabled {
+.prep__cmd[aria-disabled='true'] {
   color: var(--muted);
   opacity: 0.55;
   cursor: not-allowed;

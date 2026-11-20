@@ -1992,5 +1992,13 @@
   "standing.mine": "自分",
   "standing.rival": "ライバル",
   "standing.note": "全{total}部屋を、番付に載った力士の地位の点（横綱・大関ほど高い）の合計で並べる。",
-  "gameOver.retry": "{basho}からやり直す"
+  "gameOver.retry": "{basho}からやり直す",
+  "prep.why.noFit": "けがのない弟子がいない（休養の弟子は稽古できない）",
+  "prep.why.money": "お金が足りない",
+  "prep.why.pair": "けがのない弟子が2人そろわない",
+  "prep.why.noPatron": "タニマチがまだいない",
+  "prep.why.visited": "どのタニマチにも、この場所の挨拶は済んだ",
+  "prep.why.scouted": "この場所は済んだ（1場所に1回）",
+  "prep.why.none": "今週は使えない",
+  "facility.short": "お金が足りない（あと{yen}）"
 }

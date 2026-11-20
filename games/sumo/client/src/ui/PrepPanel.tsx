@@ -107,6 +107,8 @@ export function PrepPanel({
   const [draft, setDraft] = useState<PrepAction | { kind: 'fill' } | null>(null);
   // 指している（フォーカスのある）コマンド。1行の説明に出す
   const [pointed, setPointed] = useState<Menu | null>(null);
+  /** 使えないコマンドを押したとき、そのわけを1行の知らせに出す */
+  const [why, setWhy] = useState<Menu | null>(null);
   const { settings } = useSettings();
   const left = prepLeft(game);
   const week = game.prep.week + 1;
@@ -125,6 +127,7 @@ export function PrepPanel({
     setMenu(null);
     setFirst(null);
     setDraft(null);
+    setWhy(null);
   };
   /** 残りの週をいつも通りにする */
   const fill = () => {
@@ -199,6 +202,28 @@ export function PrepPanel({
         return canPrep(game, { kind: m });
     }
   };
+  /** 使えないわけ（押しても何も起きない、をなくす） */
+  const whyNot = (m: Menu): MessageKey => {
+    const fit = mine.filter((r) => r.injury === 0 && r.policy !== 'rest');
+    switch (m) {
+      case 'coach':
+        return 'prep.why.noFit';
+      case 'mune':
+      case 'degeiko':
+        return fit.length > 0 || m === 'degeiko' ? 'prep.why.money' : 'prep.why.noFit';
+      case 'spar':
+        return 'prep.why.pair';
+      case 'visit':
+        if (game.player.koenkai.patrons.length === 0) return 'prep.why.noPatron';
+        return game.player.personalMoney < KOENKAI.visitCost
+          ? 'prep.why.money'
+          : 'prep.why.visited';
+      case 'scout':
+        return game.player.scoutedAt === game.bashoIndex ? 'prep.why.scouted' : 'prep.why.money';
+      default:
+        return 'prep.why.none';
+    }
+  };
   /** 素質の壁に当たっている印（負荷をかけると素質が上がる） */
   const wallTag = (r: Rikishi) =>
     atWall(r) && (
@@ -240,11 +265,13 @@ export function PrepPanel({
 
   // 1行の知らせ: 指しているコマンドの効果。指していなければ、先週の結果
   const say = pointed ?? (draft ? null : menu);
-  const message = say
-    ? t(`prep.desc.${say}` as MessageKey)
-    : lastWeek
-      ? `${t('prep.week', { n: lastWeek.week })} ${t(`prep.cmd.${lastWeek.action.kind}`)} ${weekLine(t, game, lastWeek)}`
-      : t('prep.desc.none');
+  const message = why
+    ? `✕ ${t(`prep.cmd.${why}`)}: ${t(whyNot(why))}`
+    : say
+      ? t(`prep.desc.${say}` as MessageKey)
+      : lastWeek
+        ? `${t('prep.week', { n: lastWeek.week })} ${t(`prep.cmd.${lastWeek.action.kind}`)} ${weekLine(t, game, lastWeek)}`
+        : t('prep.desc.none');
   const back = () => {
     if (draft) setDraft(null);
     else if (first !== null) setFirst(null);
@@ -318,12 +345,23 @@ export function PrepPanel({
                 <button
                   key={m}
                   className="prep__cmd"
-                  disabled={!usable(m)}
-                  onPointerEnter={() => setPointed(m)}
+                  aria-disabled={!usable(m)}
+                  onPointerEnter={() => {
+                    setPointed(m);
+                    if (m !== why) setWhy(null);
+                  }}
                   onPointerLeave={() => setPointed(null)}
                   onFocus={() => setPointed(m)}
                   onBlur={() => setPointed(null)}
                   onClick={() => {
+                    // 使えないときは、わけを知らせる（押して何も起きない、をなくす）
+                    if (!usable(m)) {
+                      setPointed(null);
+                      setWhy(m);
+                      if (settings.sound) playSound('tick');
+                      return;
+                    }
+                    setWhy(null);
                     setFirst(null);
                     setPointed(null);
                     setMenu(m);
