@@ -20,6 +20,9 @@ describe('経営の記録', () => {
     old.version = 26;
     const m = migrateSave(old)!;
     expect(m.version).toBe(28);
-    expect(m.moneyLog).toEqual(g.moneyLog);
+    // 版26から変換した記録には、部屋の力の順位（後から足した項目）はない
+    const drop = (xs: GameState['moneyLog']) => xs.map(({ place: _place, ...e }) => e);
+    expect(drop(m.moneyLog)).toEqual(drop(g.moneyLog));
+    expect(g.moneyLog[0]!.place).toBeGreaterThan(0);
   });
 });

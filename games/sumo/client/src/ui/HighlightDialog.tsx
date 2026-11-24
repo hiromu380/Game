@@ -23,6 +23,7 @@ import { escortsOf, yumitoriOf } from '../ceremony';
 import { DanpatsuCard } from './DanpatsuCard';
 import { recordValue } from './RecordsPanel';
 import { RaceCard } from './RacePanel';
+import { YearCard } from './YearCard';
 import { BigBoutCard } from './BigBoutCard';
 
 /** 賜杯（優勝のしるし） */
@@ -139,7 +140,10 @@ export function HighlightDialog({
   const [spoken, setSpoken] = useState(false);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const h = highlights[index]!;
-  const r = h.kind === 'danpatsu' ? undefined : game.rikishi.find((x) => x.id === h.id);
+  const r =
+    h.kind === 'danpatsu' || h.kind === 'year'
+      ? undefined
+      : game.rikishi.find((x) => x.id === h.id);
   useEffect(() => {
     if (settings.sound) playSound('drum');
   }, [index, settings.sound]);
@@ -159,6 +163,18 @@ export function HighlightDialog({
         game={game}
         report={report}
         h={h}
+        counter={counter}
+        last={last}
+        onNext={next}
+      />
+    );
+  }
+  if (h.kind === 'year') {
+    return (
+      <YearCard
+        key={index}
+        game={game}
+        lastIndex={h.lastIndex}
         counter={counter}
         last={last}
         onNext={next}

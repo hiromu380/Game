@@ -49,7 +49,7 @@ import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
 import { staffGrowth } from '../stable/staff';
-import { ensureRival, rivalSignsCandidates, settleRival } from '../world/rival';
+import { ensureRival, rivalSignsCandidates, settleRival, stableStandings } from '../world/rival';
 import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '../world/office';
 import { OFFICE } from '../balance/office';
 import { settleKoenkai } from '../stable/koenkai';
@@ -692,6 +692,7 @@ function logMoney(state: GameState, report: BashoReport): void {
     personalMoney: state.player.personalMoney,
     prestige: state.player.prestige,
     deshi: state.rikishi.filter((r) => r.stableId === state.player.stableId).length,
+    place: stableStandings(state).find((x) => x.stableId === state.player.stableId)?.place,
   });
   if (state.moneyLog.length > MONEY_LOG_MAX)
     state.moneyLog.splice(0, state.moneyLog.length - MONEY_LOG_MAX);

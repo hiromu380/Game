@@ -23,6 +23,8 @@ export type Highlight =
   | { kind: 'shusse'; id: number; ids: number[] }
   /** 部屋の新記録（id は記録を塗り替えた今の弟子） */
   | { kind: 'record'; id: number; news: RecordNews }
+  /** 年の終わり（九州場所の後）の1年のふりかえり */
+  | { kind: 'year'; lastIndex: number }
   | {
       kind: 'danpatsu';
       alumnusId: number;
@@ -105,6 +107,9 @@ export function highlightsOf(game: GameState, report: BashoReport, prev?: GameSt
   if (shusse.length > 0)
     out.push({ order: 27, h: { kind: 'shusse', id: shusse[0]!, ids: shusse } });
   for (const d of report.danpatsu ?? []) out.push({ order: 30, h: { kind: 'danpatsu', ...d } });
+  // 年の終わりは、1年のふりかえりで締める（ギュッとしてパッ: 6場所ごとの山場）
+  if (report.bashoIndex % 6 === 5)
+    out.push({ order: 40, h: { kind: 'year', lastIndex: report.bashoIndex } });
   return out.sort((a, b) => a.order - b.order).map((x) => x.h);
 }
 

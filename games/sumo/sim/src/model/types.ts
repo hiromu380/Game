@@ -583,6 +583,8 @@ export interface MoneyLogEntry {
   prestige: number;
   /** 部屋の弟子の数 */
   deshi: number;
+  /** 部屋の力の順位（全部屋の中で。古い記録にはない） */
+  place?: number;
 }
 
 /** 日誌の1行。bashoIndex は出来事が起きた場所（場所前の出来事は、これから取る場所） */

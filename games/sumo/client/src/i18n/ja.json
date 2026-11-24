@@ -2000,5 +2000,15 @@
   "prep.why.visited": "どのタニマチにも、この場所の挨拶は済んだ",
   "prep.why.scouted": "この場所は済んだ（1場所に1回）",
   "prep.why.none": "今週は使えない",
-  "facility.short": "お金が足りない（あと{yen}）"
+  "facility.short": "お金が足りない（あと{yen}）",
+  "year.title": "{year}年目のふりかえり",
+  "year.record": "部屋の勝ち星",
+  "year.winsLosses": "{wins}勝{losses}敗",
+  "year.kachikoshi": "勝ち越し",
+  "year.ofTotal": "{n}／{total}",
+  "year.net": "1年の収支",
+  "year.place": "部屋の力（年の初めから）",
+  "year.events": "昇進 {promotions}・優勝 {yusho}・入門 {joined}",
+  "year.prestige": "名声 {delta}",
+  "year.standing": "部屋の格「{tier}」・実績 {done}／{total}"
 }

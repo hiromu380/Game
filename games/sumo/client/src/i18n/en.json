@@ -2000,5 +2000,15 @@
   "prep.why.visited": "You've already visited every patron this tournament",
   "prep.why.scouted": "One scouting trip per tournament — already done",
   "prep.why.none": "Not available this week",
-  "facility.short": "Not enough money ({yen} short)"
+  "facility.short": "Not enough money ({yen} short)",
+  "year.title": "Year {year} in review",
+  "year.record": "Stable wins",
+  "year.winsLosses": "{wins}–{losses}",
+  "year.kachikoshi": "Winning records",
+  "year.ofTotal": "{n}/{total}",
+  "year.net": "Net for the year",
+  "year.place": "Stable power (since Jan)",
+  "year.events": "Promotions {promotions} · Titles {yusho} · Recruits {joined}",
+  "year.prestige": "Prestige {delta}",
+  "year.standing": "Standing “{tier}” · Achievements {done}/{total}"
 }
