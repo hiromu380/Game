@@ -17,7 +17,7 @@ import { bashoName, money, rankName } from '../format';
 import { RikishiPortrait } from '../art/Portraits';
 import { PALETTE } from '../art/palette';
 import { useSettings } from '../settings';
-import { playSound } from '../sound';
+import { playSound, type SoundKind } from '../sound';
 import { kojoChoices, type Highlight } from '../highlights';
 import { escortsOf, yumitoriOf } from '../ceremony';
 import { DanpatsuCard } from './DanpatsuCard';
@@ -145,8 +145,9 @@ export function HighlightDialog({
       ? undefined
       : game.rikishi.find((x) => x.id === h.id);
   useEffect(() => {
-    if (settings.sound) playSound('drum');
-  }, [index, settings.sound]);
+    // 音は見せ場の大きさで分ける（優勝・大関や横綱の昇進 ＞ 新十両・新入幕・記録 ＞ ほか）
+    if (settings.sound) playSound(soundOf(highlights[index]!));
+  }, [index, settings.sound, highlights]);
   const last = index === highlights.length - 1;
   const next = () => {
     setWord(null);
@@ -364,4 +365,15 @@ export function HighlightDialog({
       </div>
     </div>
   );
+}
+
+/** 見せ場の大きさに合わせた音 */
+function soundOf(h: Highlight): SoundKind {
+  if (
+    (h.kind === 'yusho' && h.division === 'makuuchi') ||
+    (h.kind === 'promotion' && (h.to === 'O' || h.to === 'Y'))
+  )
+    return 'roll';
+  if (h.kind === 'yusho' || h.kind === 'promotion' || h.kind === 'record') return 'drumCheer';
+  return 'drum';
 }

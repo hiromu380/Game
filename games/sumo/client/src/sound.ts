@@ -6,6 +6,8 @@
  * - drum: 太鼓（見せ場）
  * - tick: 星取りの札が入る小さな木の音
  * - cheer: 勝負が決まったときの歓声（ざわめきが盛り上がって引く）
+ * - roll: 大きな見せ場（優勝・大関や横綱の昇進）の太鼓の連打と大歓声、締めの拍子木
+ * - drumCheer: 中くらいの見せ場（新十両・新入幕・部屋の新記録）の太鼓と歓声
  */
 let ctx: AudioContext | null = null;
 
@@ -87,7 +89,7 @@ function swell(ac: AudioContext, at: number, gain: number, seconds: number) {
   src.start(at);
 }
 
-export type SoundKind = 'clap' | 'hit' | 'fall' | 'drum' | 'tick' | 'cheer';
+export type SoundKind = 'clap' | 'hit' | 'fall' | 'drum' | 'tick' | 'cheer' | 'roll' | 'drumCheer';
 
 export function playSound(kind: SoundKind): void {
   const ac = audio();
@@ -103,6 +105,19 @@ export function playSound(kind: SoundKind): void {
     burst(ac, t, 1800, 6, 0.16, 0.04);
   } else if (kind === 'cheer') {
     swell(ac, t, 0.16, 1.4);
+  } else if (kind === 'roll') {
+    // 太鼓がだんだん速くなって、大歓声と拍子木で締める
+    let at = 0;
+    for (let i = 0; i < 12; i++) {
+      thump(ac, t + at, i === 11 ? 100 : 82, 0.5, 0.3);
+      at += Math.max(0.07, 0.26 - i * 0.02);
+    }
+    swell(ac, t + at - 0.2, 0.24, 2.2);
+    burst(ac, t + at + 0.1, 2400, 8, 0.5, 0.06);
+    burst(ac, t + at + 0.28, 2400, 8, 0.5, 0.06);
+  } else if (kind === 'drumCheer') {
+    [0, 0.32, 0.64, 0.8].forEach((d, i) => thump(ac, t + d, i === 3 ? 95 : 80, 0.55, 0.35));
+    swell(ac, t + 0.8, 0.16, 1.4);
   } else if (kind === 'drum') {
     // ドン・ドン・ドドン
     [0, 0.32, 0.64, 0.8].forEach((d, i) => thump(ac, t + d, i === 3 ? 95 : 80, 0.55, 0.35));
