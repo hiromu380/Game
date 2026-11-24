@@ -1,6 +1,7 @@
 import { useI18n, type MessageKey } from '../i18n';
 import { money } from '../format';
 import type { RewardLine } from '../rewards';
+import { HONMEI } from '@ichimon/sim';
 import { Icon } from '../art/Icon';
 
 /** 部屋への影響の行のアイコン */
@@ -26,6 +27,8 @@ function iconOf(x: RewardLine): string {
       return 'ui_coins';
     case 'pledge':
       return x.kept ? 'ui_taru' : 'ui_coin_bag';
+    case 'honmei':
+      return 'ui_trophy';
   }
 }
 
@@ -73,6 +76,11 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
         ];
       case 'vsOutlook':
         return [t('rewards.label.vsOutlook'), yen(x.delta)];
+      case 'honmei':
+        return [
+          t('rewards.label.honmei', { name: x.name }),
+          t('rewards.chip.honmei', { n: HONMEI.prestige }),
+        ];
     }
   };
   return (

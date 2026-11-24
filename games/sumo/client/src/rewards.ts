@@ -35,7 +35,8 @@ export type RewardLine =
   | { tone: 'bad'; kind: 'henka'; name: string }
   | { tone: 'good' | 'bad'; kind: 'vsOutlook'; delta: number }
   /** 後援会との約束（年の終わり） */
-  | { tone: 'good' | 'bad'; kind: 'pledge'; pledge: PledgeKind; kept: boolean };
+  | { tone: 'good' | 'bad'; kind: 'pledge'; pledge: PledgeKind; kept: boolean }
+  | { tone: 'good'; kind: 'honmei'; name: string };
 
 /** 関係の動きを知らせる下限 */
 export const FAVOR_NEWS_MIN = 3;
@@ -145,6 +146,9 @@ export function rewardsOf(prev: GameState, next: GameState): RewardLine[] {
       pledge: report.pledge.kind,
       kept: report.pledge.kept,
     });
+
+  // 本命（応援予想）が勝ち越した
+  if (report.honmei?.hit) out.push({ tone: 'good', kind: 'honmei', name: name(report.honmei.id) });
 
   // 変化で勝った弟子
   for (const id of report.henka ?? []) out.push({ tone: 'bad', kind: 'henka', name: name(id) });

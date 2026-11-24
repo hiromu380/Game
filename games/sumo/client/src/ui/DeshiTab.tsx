@@ -4,6 +4,8 @@ import {
   chooseTreatment,
   inKyoshujo,
   sekitoriGain,
+  HONMEI,
+  setHonmei,
   setIntensity,
   setPlayHurt,
   setPolicy,
@@ -106,6 +108,11 @@ export function DeshiTab({
                 >
                   <span className="deshi__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
                   <span className="deshi__name">
+                    {game.player.honmei === r.id && (
+                      <span className="honmei-mark" title={t('honmei.label')}>
+                        ◎<span className="visually-hidden">{t('honmei.label')}</span>
+                      </span>
+                    )}
                     {r.name}
                     {atWall(r) && <span className="tag tag--wall">{t('prep.wall')}</span>}
                     {inKyoshujo(r) && <span className="tag">{t('deshi.kyoshujo')}</span>}
@@ -185,6 +192,16 @@ export function DeshiTab({
               />
             </div>
             <div className="modal__actions">
+              <button
+                className="button"
+                aria-pressed={game.player.honmei === card.id}
+                onClick={() =>
+                  setGame(setHonmei(game, game.player.honmei === card.id ? null : card.id))
+                }
+              >
+                {game.player.honmei === card.id ? t('honmei.unset') : t('honmei.set')}
+                <span className="button__sub">{t('honmei.effect', { n: HONMEI.prestige })}</span>
+              </button>
               <button className="button button--primary" data-dismiss onClick={() => setOpen(null)}>
                 {t('deshi.close')}
               </button>

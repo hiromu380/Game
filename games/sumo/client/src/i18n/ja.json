@@ -2010,5 +2010,12 @@
   "year.place": "部屋の力（年の初めから）",
   "year.events": "昇進 {promotions}・優勝 {yusho}・入門 {joined}",
   "year.prestige": "名声 {delta}",
-  "year.standing": "部屋の格「{tier}」・実績 {done}／{total}"
+  "year.standing": "部屋の格「{tier}」・実績 {done}／{total}",
+  "honmei.label": "本命",
+  "honmei.set": "◎ 本命にする",
+  "honmei.unset": "本命を外す",
+  "honmei.hit": "本命 的中！",
+  "rewards.label.honmei": "本命 {name} 勝ち越し",
+  "rewards.chip.honmei": "名声 +{n}",
+  "honmei.effect": "勝ち越せば名声 +{n}"
 }

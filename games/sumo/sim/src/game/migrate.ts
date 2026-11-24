@@ -43,7 +43,18 @@ export function migrateSave(raw: unknown): GameState | null {
   if (s.version === 25) s = v25to26(s);
   if (s.version === 26) s = v26to27(s);
   if (s.version === 27) s = v27to28(s);
+  if (s.version === 28) s = v28to29(s);
   return s.version === SAVE_VERSION ? (s as unknown as GameState) : null;
+}
+
+/**
+ * 28 → 29: 本命（応援予想）を足す（選んでいない）
+ */
+function v28to29(raw: Raw): Raw {
+  const s = JSON.parse(JSON.stringify(raw)) as GameState;
+  s.player.honmei = null;
+  s.version = 29;
+  return s as unknown as Raw;
 }
 
 /**

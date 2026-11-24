@@ -42,7 +42,7 @@ describe('一門の支援', () => {
     delete (old.player as Partial<GameState['player']>).rescuedGen;
     old.version = 27;
     const m = migrateSave(old)!;
-    expect(m.version).toBe(28);
+    expect(m.version).toBe(29);
     expect(m.player.debt).toBe(0);
     expect(m.player.rescuedGen).toBeNull();
   });

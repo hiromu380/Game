@@ -21,3 +21,4 @@ export * from './scouting';
 export * from './danpatsu';
 export * from './injury';
 export * from './rescue';
+export * from './honmei';

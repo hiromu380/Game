@@ -94,3 +94,4 @@ export {
   uragataOf,
   uragataOpen,
 } from './stable/uragata';
+export { setHonmei } from './stable/honmei';

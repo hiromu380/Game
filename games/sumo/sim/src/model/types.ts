@@ -391,6 +391,8 @@ export interface Pending {
 }
 
 export interface PlayerState {
+  /** 本命（応援予想）の弟子 ID（なければ null。外すまで残る） */
+  honmei: number | null;
   /** 一門から借りて、まだ返していない額（円） */
   debt: number;
   /** 一門の支援を受けた代（なければ null。1代に1度） */
@@ -741,6 +743,8 @@ export interface BashoReport {
   pledge?: { kind: PledgeKind; kept: boolean };
   /** 場所の前の横綱審議委員会の稽古総見に出た自分の弟子 */
   soken?: number[];
+  /** 本命が勝ち越したか（本命を選んで、その弟子が番付に載っていたときだけ） */
+  honmei?: { id: number; hit: boolean };
   /** この場所の後に一門から借りた額（円） */
   rescue?: number;
   /** この場所の後に一門へ返した額（円） */

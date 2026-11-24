@@ -39,9 +39,12 @@ export function BashoTicker({
   to,
   doneLabel,
   onDone,
+  honmei = null,
 }: {
   title: string;
   rows: TickerEntry[];
+  /** 本命（応援予想）の弟子 */
+  honmei?: number | null;
   from: number;
   to: number;
   doneLabel: string;
@@ -115,10 +118,20 @@ export function BashoTicker({
               const tally = tallyUntil(r, day);
               const decided = decidedUntil(r, day, r.rank !== null && isSekitori(r.rank));
               return (
-                <li key={r.id} className={`ticker__row ${kkIds.has(r.id) ? 'is-kk' : ''}`}>
+                <li
+                  key={r.id}
+                  className={`ticker__row ${kkIds.has(r.id) ? 'is-kk' : ''} ${r.id === honmei ? 'is-honmei' : ''}`}
+                >
                   <div className="ticker__who">
                     <span className="ticker__rank">{rankLabel(t, r.rank)}</span>
-                    <strong>{r.name}</strong>
+                    <strong>
+                      {r.id === honmei && (
+                        <span className="honmei-mark" title={t('honmei.label')}>
+                          ◎<span className="visually-hidden">{t('honmei.label')}</span>
+                        </span>
+                      )}
+                      {r.name}
+                    </strong>
                     <span className="ticker__tally">
                       {t('race.record', { wins: tally.wins, losses: tally.losses })}
                     </span>
@@ -138,6 +151,9 @@ export function BashoTicker({
                           !(decided && r.target.kind === 'kachikoshi') && (
                             <span className="ticker__goal">{targetText(t, r.target)}</span>
                           ))}
+                    {decided === 'kachikoshi' && r.id === honmei && (
+                      <span className="tag tag--gold">{t('honmei.hit')}</span>
+                    )}
                     {decided && (
                       <span className={`tag ${decided === 'kachikoshi' ? 'tag--good' : ''}`}>
                         {t(

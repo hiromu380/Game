@@ -41,6 +41,7 @@ import { ageUragata, rollUragata, uragataEffect } from '../stable/uragata';
 import { holdSoken } from '../stable/soken';
 import { onNewSekitori, setKesho } from '../stable/kesho';
 import { pledgeOffers, settlePledge, trackPledge } from '../stable/pledge';
+import { settleHonmei } from '../stable/honmei';
 import { TACTIC } from '../balance/tactic';
 import { breakWall } from '../career/wall';
 import { makeCandidates, npcRecruits } from './recruit';
@@ -598,6 +599,8 @@ export function advanceBasho(
   // 後援会との約束: 進み具合を数え、九州場所の後に果たせたかを決める
   trackPledge(state, report, ranksOf(state.banzuke, state.titles));
   if (state.bashoIndex % 6 === 5) settlePledge(state, report);
+  // 本命（応援予想）が勝ち越したか
+  settleHonmei(state, report);
 
   // 6. 年の終わり（九州場所の後）
   if (state.bashoIndex % 6 === 5) yearEnd(state);

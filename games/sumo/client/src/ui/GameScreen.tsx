@@ -325,6 +325,7 @@ export function GameScreen({
       )}
       {ticker?.half === 'first' && (
         <BashoTicker
+          honmei={game.player.honmei}
           title={t('ticker.first')}
           rows={ticker.mid.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
@@ -370,6 +371,7 @@ export function GameScreen({
       )}
       {ticker?.half === 'second' && ticker.next.lastReport && (
         <BashoTicker
+          honmei={game.player.honmei}
           title={t('ticker.second')}
           rows={ticker.next.lastReport.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),

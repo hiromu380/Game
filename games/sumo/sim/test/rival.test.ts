@@ -72,7 +72,7 @@ describe('ライバルの部屋', () => {
     v12.version = 12;
     delete v12.rival;
     const m = migrateSave(v12)!;
-    expect(m.version).toBe(28);
+    expect(m.version).toBe(29);
     expect(m.rival).not.toBeNull();
   });
 

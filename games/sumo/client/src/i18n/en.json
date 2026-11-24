@@ -2010,5 +2010,12 @@
   "year.place": "Stable power (since Jan)",
   "year.events": "Promotions {promotions} · Titles {yusho} · Recruits {joined}",
   "year.prestige": "Prestige {delta}",
-  "year.standing": "Standing “{tier}” · Achievements {done}/{total}"
+  "year.standing": "Standing “{tier}” · Achievements {done}/{total}",
+  "honmei.label": "Favorite",
+  "honmei.set": "◎ Make favorite",
+  "honmei.unset": "Remove favorite",
+  "honmei.hit": "Favorite came through!",
+  "rewards.label.honmei": "Favorite {name} winning record",
+  "rewards.chip.honmei": "Prestige +{n}",
+  "honmei.effect": "Winning record: prestige +{n}"
 }
