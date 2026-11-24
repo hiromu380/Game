@@ -41,6 +41,7 @@ import { achievedOf, newlyAchieved, type AchievementId } from '../achievements';
 import { AchievementToast } from './AchievementsPanel';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
+import { keyTarget } from '../keys';
 import { targetOf } from '../targets';
 
 type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
@@ -140,6 +141,18 @@ export function GameScreen({
         60,
       );
   };
+
+  // キー操作（割り当ては keys.ts）: 画面のボタンを押すのと同じ
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = keyTarget(e, document);
+      if (!target) return;
+      e.preventDefault();
+      target.click();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const go = (next: GameState) => {
     setGame(next);

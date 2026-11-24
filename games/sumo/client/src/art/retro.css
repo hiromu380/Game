@@ -1710,3 +1710,19 @@ body.has-modal {
   outline: 2px solid var(--gold);
   outline-offset: -2px;
 }
+/* キーの手がかり（マウスのある画面だけ。keys.ts） */
+.prep__key {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .prep__key {
+    display: inline-block;
+    min-width: 1.2em;
+    margin-right: 4px;
+    font: inherit;
+    font-size: 0.7rem;
+    color: var(--muted);
+    border: 1px solid currentColor;
+    text-align: center;
+  }
+}

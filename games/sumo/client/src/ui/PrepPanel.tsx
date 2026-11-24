@@ -341,7 +341,7 @@ export function PrepPanel({
           </p>
           {!picking && !draft && (
             <div className="prep__menu" role="group" aria-label={t('prep.week', { n: week })}>
-              {MENUS.map((m) => (
+              {MENUS.map((m, i) => (
                 <button
                   key={m}
                   className="prep__cmd"
@@ -370,6 +370,9 @@ export function PrepPanel({
                   }}
                 >
                   <span>
+                    <kbd className="prep__key" aria-hidden="true">
+                      {i + 1}
+                    </kbd>
                     {t(`prep.cmd.${m}`)}
                     {tideMark(m) && (
                       <span
@@ -454,7 +457,7 @@ export function PrepPanel({
                   </button>
                 ))}
               <div className="prep__confirmbtns">
-                <button className="button" onClick={back}>
+                <button className="button" data-key="back" onClick={back}>
                   {t('prep.return')}
                 </button>
               </div>
@@ -480,7 +483,7 @@ export function PrepPanel({
                 ) : null;
               })()}
               <div className="prep__confirmbtns">
-                <button className="button" onClick={back}>
+                <button className="button" data-key="back" onClick={back}>
                   {t('prep.back')}
                 </button>
                 <button
