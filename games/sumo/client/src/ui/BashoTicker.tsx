@@ -87,8 +87,18 @@ export function BashoTicker({
       kkToday.push(r);
   }
   const kkIds = new Set(kkToday.map((r) => r.id));
+  // 本命の勝ち越しが決まった日（拍手に歓声を重ねる）
+  const honmeiRow = rows.find((r) => r.id === honmei);
+  const honmeiHit =
+    honmeiRow !== undefined &&
+    day >= from &&
+    decidedUntil(honmeiRow, day, honmeiRow.rank !== null && isSekitori(honmeiRow.rank)) ===
+      'kachikoshi' &&
+    decidedUntil(honmeiRow, day - 1, honmeiRow.rank !== null && isSekitori(honmeiRow.rank)) !==
+      'kachikoshi';
   useEffect(() => {
     if (!settings.sound || reduced) return;
+    if (honmeiHit) playSound('cheer');
     if (kkIds.size > 0) playSound('clap');
     else if (anyMark) playSound('tick');
     // 日が進んだときだけ鳴らす
