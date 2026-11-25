@@ -4,7 +4,14 @@ import { useI18n } from '../i18n';
 import { dayLabel, rankLabel } from '../format';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
-import { BASHO_DAYS, decidedUntil, tallyUntil, type Mark, type TickerRow } from '../ticker';
+import {
+  BASHO_DAYS,
+  decidedUntil,
+  tallyUntil,
+  zenshoDay,
+  type Mark,
+  type TickerRow,
+} from '../ticker';
 import { reached, reachedText, targetText, targetWins, type Target } from '../targets';
 
 /** 1日を見せる間隔（ミリ秒） */
@@ -96,9 +103,12 @@ export function BashoTicker({
       'kachikoshi' &&
     decidedUntil(honmeiRow, day - 1, honmeiRow.rank !== null && isSekitori(honmeiRow.rank)) !==
       'kachikoshi';
+  // 全勝が決まった日（最後の番の日）。いちばん褒める
+  const sek = (r: TickerEntry) => r.rank !== null && isSekitori(r.rank);
+  const zenshoToday = day >= from && rows.some((r) => zenshoDay(r, sek(r)) === day);
   useEffect(() => {
     if (!settings.sound || reduced) return;
-    if (honmeiHit) playSound('cheer');
+    if (honmeiHit || zenshoToday) playSound('cheer');
     if (kkIds.size > 0) playSound('clap');
     else if (anyMark) playSound('tick');
     // 日が進んだときだけ鳴らす
@@ -161,6 +171,12 @@ export function BashoTicker({
                           !(decided && r.target.kind === 'kachikoshi') && (
                             <span className="ticker__goal">{targetText(t, r.target)}</span>
                           ))}
+                    {(() => {
+                      const z = zenshoDay(r, sek(r));
+                      return z !== null && day >= z ? (
+                        <span className="tag tag--gold">{t('ticker.zensho')}</span>
+                      ) : null;
+                    })()}
                     {decided === 'kachikoshi' && r.id === honmei && (
                       <span className="tag tag--gold">{t('honmei.hit')}</span>
                     )}

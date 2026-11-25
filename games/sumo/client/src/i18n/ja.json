@@ -2020,5 +2020,6 @@
   "honmei.effect": "勝ち越せば名声 +{n}",
   "guide.nudge": "（次はここ）",
   "delegate.year": "{year}年目のふりかえり: {wins}勝{losses}敗・勝ち越し {kk}/{total}・1年の収支 {net}",
-  "delegate.yearPlace": "・部屋の力 {place}位"
+  "delegate.yearPlace": "・部屋の力 {place}位",
+  "ticker.zensho": "全勝！"
 }

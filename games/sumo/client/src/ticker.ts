@@ -47,3 +47,18 @@ export function decidedUntil(
   const { wins, losses } = tallyUntil(row, day);
   return wins >= need ? 'kachikoshi' : losses >= need ? 'makekoshi' : null;
 }
+
+/**
+ * その日までに全勝が決まったか: 割り当ての番（関取15・幕下以下7）をすべて取り終え、すべて白星（不戦勝を含む）
+ * 決まった日（最後の番の日）を返す。全勝でなければ null
+ */
+export function zenshoDay(row: TickerRow, sekitori: boolean): number | null {
+  const bouts = row.marks.filter((m) => m !== null);
+  if (bouts.length !== (sekitori ? 15 : 7)) return null;
+  if (!bouts.every((m) => m === 'win' || m === 'fusenWin')) return null;
+  let last = 0;
+  row.marks.forEach((m, i) => {
+    if (m !== null) last = i + 1;
+  });
+  return last;
+}

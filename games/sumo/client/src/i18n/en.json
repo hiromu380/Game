@@ -2020,5 +2020,6 @@
   "honmei.effect": "Winning record: prestige +{n}",
   "guide.nudge": " (next)",
   "delegate.year": "Year {year} in review: {wins}–{losses} · winning records {kk}/{total} · net {net}",
-  "delegate.yearPlace": " · stable power #{place}"
+  "delegate.yearPlace": " · stable power #{place}",
+  "ticker.zensho": "Perfect record!"
 }

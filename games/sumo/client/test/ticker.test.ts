@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BoutResult } from '@ichimon/sim';
-import { BASHO_DAYS, decidedUntil, tallyUntil, tickerRow } from '../src/ticker';
+import { BASHO_DAYS, decidedUntil, tallyUntil, tickerRow, zenshoDay } from '../src/ticker';
 import { autoStep, play } from '../../sim/test/play';
 
 const bout = (day: number, winnerId: number, fusen = false): BoutResult => ({
@@ -47,5 +47,36 @@ describe('本場所の星取り（1日ずつ）', () => {
       expect(t.wins).toBe(m.record.wins);
       expect(t.wins + t.losses).toBeLessThanOrEqual(m.record.wins + m.record.losses);
     }
+  });
+});
+
+describe('全勝', () => {
+  const row = (marks: (null | 'win' | 'loss' | 'fusenWin')[]) => ({
+    id: 1,
+    marks: [...marks, ...Array(15 - marks.length).fill(null)],
+  });
+  it('割り当ての番をすべて白星で取り終えた日を返す（不戦勝を含む）', () => {
+    const lower = row([
+      null,
+      'win',
+      null,
+      'win',
+      'win',
+      null,
+      'fusenWin',
+      null,
+      'win',
+      null,
+      'win',
+      null,
+      'win',
+    ]);
+    expect(zenshoDay(lower, false)).toBe(13);
+    expect(zenshoDay(row(Array(15).fill('win')), true)).toBe(15);
+  });
+  it('黒星がある・番が足りない・段の番の数と違えば null', () => {
+    expect(zenshoDay(row(['win', 'loss', 'win', 'win', 'win', 'win', 'win']), false)).toBeNull();
+    expect(zenshoDay(row(['win', 'win', 'win']), false)).toBeNull();
+    expect(zenshoDay(row(Array(7).fill('win')), true)).toBeNull();
   });
 });
