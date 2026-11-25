@@ -1343,10 +1343,10 @@
   "delegate.title": "任せた{n}場所",
   "delegate.kk": "勝ち越し {n}/{total}",
   "delegate.updown": "番付 ↑{up} ↓{down}",
-  "delegate.promo.sekitori": "{name} 新十両",
-  "delegate.promo.makuuchi": "{name} 新入幕",
-  "delegate.promo.O": "{name} 大関",
-  "delegate.promo.Y": "{name} 横綱",
+  "delegate.promo.sekitori": "{name} 新十両昇進！",
+  "delegate.promo.makuuchi": "{name} 新入幕！",
+  "delegate.promo.O": "{name} 大関昇進！",
+  "delegate.promo.Y": "{name} 横綱昇進！",
   "delegate.injury": "{name} けが",
   "delegate.stop.none": "任せた分を終えました。",
   "delegate.stop.gameOver": "部屋が続けられなくなりました。",
@@ -2018,5 +2018,7 @@
   "rewards.label.honmei": "本命 {name} 勝ち越し",
   "rewards.chip.honmei": "名声 +{n}",
   "honmei.effect": "勝ち越せば名声 +{n}",
-  "guide.nudge": "（次はここ）"
+  "guide.nudge": "（次はここ）",
+  "delegate.year": "{year}年目のふりかえり: {wins}勝{losses}敗・勝ち越し {kk}/{total}・1年の収支 {net}",
+  "delegate.yearPlace": "・部屋の力 {place}位"
 }

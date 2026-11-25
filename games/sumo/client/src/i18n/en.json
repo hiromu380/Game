@@ -2018,5 +2018,7 @@
   "rewards.label.honmei": "Favorite {name} winning record",
   "rewards.chip.honmei": "Prestige +{n}",
   "honmei.effect": "Winning record: prestige +{n}",
-  "guide.nudge": " (next)"
+  "guide.nudge": " (next)",
+  "delegate.year": "Year {year} in review: {wins}–{losses} · winning records {kk}/{total} · net {net}",
+  "delegate.yearPlace": " · stable power #{place}"
 }

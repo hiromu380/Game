@@ -1,6 +1,7 @@
 import type { GameState } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
 import { bashoName, money } from '../format';
+import { yearSummary } from '../yearSummary';
 import type { DelegateResult } from '../delegate';
 
 /** 任せた間の出来事: 場所ごとの勝ち越し・番付・お金・昇進・けがと、止まったわけ */
@@ -41,6 +42,25 @@ export function DelegateDialog({
             </li>
           ))}
         </ol>
+        {/* 任せた間に年を越えたら、その年のふりかえりを1行で（6場所ごとの山場を飛ばさない） */}
+        {result.steps
+          .filter((st) => st.bashoIndex % 6 === 5)
+          .map((st) => {
+            const y = yearSummary(result.game, st.bashoIndex);
+            return (
+              <p key={st.bashoIndex} className="callout delegate__year">
+                {t('delegate.year', {
+                  year: y.year,
+                  wins: y.wins,
+                  losses: y.losses,
+                  kk: y.kachikoshi,
+                  total: y.appearances,
+                  net: money(t, y.net, lang),
+                })}
+                {y.place && ` ${t('delegate.yearPlace', { place: y.place.to })}`}
+              </p>
+            );
+          })}
         <p className={`callout ${result.stop ? '' : 'delegate__done'}`}>
           {t(`delegate.stop.${result.stop ?? 'none'}` as MessageKey)}
         </p>
