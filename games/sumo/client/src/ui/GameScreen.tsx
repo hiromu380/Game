@@ -123,6 +123,17 @@ export function GameScreen({
   // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
   const liveShown = useRef<number | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
+  // キー操作（割り当ては keys.ts）。フックなので、早い return より前に置く: 画面のボタンを押すのと同じ
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = keyTarget(e, document);
+      if (!target) return;
+      e.preventDefault();
+      target.click();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
   // 場所前の4週間を終えるまで、本場所へは進めない（1年の早送りはできる）
@@ -141,18 +152,6 @@ export function GameScreen({
         60,
       );
   };
-
-  // キー操作（割り当ては keys.ts）: 画面のボタンを押すのと同じ
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const target = keyTarget(e, document);
-      if (!target) return;
-      e.preventDefault();
-      target.click();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
 
   const go = (next: GameState) => {
     setGame(next);
