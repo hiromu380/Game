@@ -1726,3 +1726,41 @@ body.has-modal {
     text-align: center;
   }
 }
+/* 紙吹雪（見せ場の絵の枠の中だけ。点滅させない） */
+.highlight__stage {
+  position: relative;
+  overflow: hidden;
+}
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.confetti__piece {
+  position: absolute;
+  top: -8px;
+  width: 4px;
+  height: 6px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: steps(10);
+  animation-fill-mode: forwards;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220px) rotate(270deg);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+}

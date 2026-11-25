@@ -24,6 +24,7 @@ import { DanpatsuCard } from './DanpatsuCard';
 import { recordValue } from './RecordsPanel';
 import { RaceCard } from './RacePanel';
 import { YearCard } from './YearCard';
+import { Confetti } from './Confetti';
 import { BigBoutCard } from './BigBoutCard';
 
 /** 賜杯（優勝のしるし） */
@@ -281,6 +282,7 @@ export function HighlightDialog({
           {counter}
         </p>
         <div className="highlight__stage">
+          {celebrate(h) && <Confetti key={index} />}
           {h.kind === 'yusho' && <Cup />}
           <RikishiPortrait r={r} rank={rank} variant="full" size={120} />
         </div>
@@ -376,4 +378,9 @@ function soundOf(h: Highlight): SoundKind {
     return 'roll';
   if (h.kind === 'yusho' || h.kind === 'promotion' || h.kind === 'record') return 'drumCheer';
   return 'drum';
+}
+
+/** 紙吹雪を出す見せ場（幕内優勝・大関や横綱の昇進・新十両） */
+function celebrate(h: Highlight): boolean {
+  return soundOf(h) === 'roll' || (h.kind === 'promotion' && h.to === 'sekitori');
 }
