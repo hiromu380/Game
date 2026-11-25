@@ -4,7 +4,13 @@ import { PALETTE } from '../art/palette';
 import { sprite } from '../art/sprites';
 import { FOOT, personPixels, type PersonLook } from '../art/hakoniwa/people';
 import type { Pose as ScriptPose, Side } from '../playback/boutScript';
-import { BOUT_STAGE, boutSprites, stageShake } from '../playback/boutStage';
+import {
+  BOUT_STAGE,
+  boutSprites,
+  stageShake,
+  stopJitter,
+  type StopState,
+} from '../playback/boutStage';
 
 /** 見た目（顔の絵と共通）→ 土俵の上の小さな絵の見た目 */
 export function stageLook(look: Look): Omit<PersonLook, 'pose' | 'frame' | 'flip'> {
@@ -94,6 +100,7 @@ export function BoutStagePixel({
   winner,
   title,
   still = false,
+  stop = null,
   onReady,
 }: {
   east: Look;
@@ -106,6 +113,8 @@ export function BoutStagePixel({
   title: string;
   /** 動きを減らす: 揺れと光を出さない */
   still?: boolean;
+  /** ヒットストップの最中（止まっている間も震わせる） */
+  stop?: StopState | null;
   onReady?: () => void;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -139,7 +148,10 @@ export function BoutStagePixel({
     ctx.imageSmoothingEnabled = false;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(art.hall, 0, 0);
-    ctx.translate(still ? 0 : stageShake(time, clash, finishAt), 0);
+    ctx.translate(
+      still ? 0 : stop ? stopJitter(stop, false) : stageShake(time, clash, finishAt),
+      0,
+    );
     if (art.dohyo) ctx.drawImage(art.dohyo, dohyo.x, dohyo.y);
     const looks = { E: stageLook(east), W: stageLook(west) };
     for (const s of boutSprites({ pose, time, clash, winner })) {
@@ -162,7 +174,12 @@ export function BoutStagePixel({
       ctx.fillRect(s.x - 6, s.y - 2, 13, 5);
       ctx.globalAlpha = 1;
       ctx.save();
-      ctx.translate(s.x, s.y);
+      // ヒットストップの間は力士を震わせる（決まった瞬間は、負けた側を大きく）
+      const jitter =
+        !still && stop && s.who !== 'gyoji'
+          ? stopJitter(stop, stop.kind === 'finish' && winner !== null && s.who !== winner)
+          : 0;
+      ctx.translate(s.x + jitter, s.y);
       if (s.rot !== 0) ctx.rotate((s.rot * Math.PI) / 180);
       ctx.drawImage(personCanvas(look), -FOOT.x, -FOOT.y);
       ctx.restore();
@@ -204,7 +221,7 @@ export function BoutStagePixel({
     ctx.fillStyle = PALETTE.sumi;
     ctx.fillRect(0, 0, 2, H);
     ctx.fillRect(W - 2, 0, 2, H);
-  }, [art, east, west, pose, time, clash, finishAt, winner, still]);
+  }, [art, east, west, pose, time, clash, finishAt, winner, still, stop]);
 
   return (
     <div className="bout-stage" role="img" aria-label={title}>

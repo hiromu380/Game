@@ -103,3 +103,38 @@ export function stageShake(time: number, clash: number, finishAt: number): numbe
   }
   return 0;
 }
+
+/**
+ * ヒットストップ（桜井氏の動画 #ヒットストップ）: 当たった瞬間と勝負が決まった瞬間に、動きを一瞬止める（秒）。
+ * 止まっている間も揺らし続け、決まった瞬間は負けた側を大きく・勝った側を小さく震わせる
+ */
+export const HIT_STOP = { clash: 0.1, finish: 0.18 } as const;
+
+export interface StopState {
+  kind: 'clash' | 'finish';
+  /** 止まってからの秒 */
+  elapsed: number;
+}
+
+/** 実際に経った秒 → 取組の時間（止まっている間は進めない）と、止まっているか */
+export function hitStopTime(
+  real: number,
+  clash: number,
+  finishAt: number,
+): { time: number; stop: StopState | null } {
+  if (real < clash) return { time: real, stop: null };
+  if (real < clash + HIT_STOP.clash)
+    return { time: clash, stop: { kind: 'clash', elapsed: real - clash } };
+  const after = real - HIT_STOP.clash;
+  if (after < finishAt) return { time: after, stop: null };
+  if (after < finishAt + HIT_STOP.finish)
+    return { time: finishAt, stop: { kind: 'finish', elapsed: after - finishAt } };
+  return { time: after - HIT_STOP.finish, stop: null };
+}
+
+/** 止まっている間の震え（ドット。左右）。大きく始めて小さく収める。big: 負けた側 */
+export function stopJitter(stop: StopState, big: boolean): number {
+  const total = HIT_STOP[stop.kind];
+  const amp = Math.max(1, Math.round((big ? 3 : 1) * (1 - stop.elapsed / total) + 0.4));
+  return Math.floor(stop.elapsed / 0.03) % 2 === 0 ? amp : -amp;
+}

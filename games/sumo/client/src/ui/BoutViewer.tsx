@@ -15,6 +15,7 @@ import { BoutStagePixel } from './BoutStagePixel';
 import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
 import { useSettings } from '../settings';
+import { hitStopTime, type StopState } from '../playback/boutStage';
 import { withStep } from '../guide';
 
 /** 取組の演出（ドット絵の土俵と実況）。動きを減らす設定では最後の場面と実況の全文を見せる */
@@ -58,6 +59,8 @@ export function BoutViewer({
   const [ready, setReady] = useState(false);
   const onReady = useCallback(() => setReady(true), []);
   const skipped = useRef(false);
+  const clash = script.frames[1]?.t ?? 0.6;
+  const [stop, setStop] = useState<StopState | null>(null);
   useEffect(() => {
     if (reduced || !ready) return;
     skipped.current = false;
@@ -67,7 +70,10 @@ export function BoutViewer({
     const start = performance.now();
     const tick = (now: number) => {
       if (skipped.current) return;
-      const s = (now - start) / 1000;
+      const real = (now - start) / 1000;
+      // ヒットストップ: 当たった瞬間・決まった瞬間に、取組の時間を一瞬止める
+      const { time: s, stop: st } = hitStopTime(real, clash, script.finishAt);
+      setStop(st);
       script.frames.forEach((f, i) => {
         if (f.sound && s >= f.t && !played.has(i)) {
           played.add(i);
@@ -81,10 +87,11 @@ export function BoutViewer({
       }
       setTime(Math.min(s, script.duration));
       if (s < script.duration) raf = requestAnimationFrame(tick);
+      else setStop(null);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [script, sound, reduced, run, ready]);
+  }, [script, sound, reduced, run, ready, clash]);
 
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
   const pose = poseAt(script, time);
@@ -142,7 +149,8 @@ export function BoutViewer({
               west={lookOf(west)}
               pose={pose}
               time={time}
-              clash={script.frames[1]?.t ?? 0.6}
+              clash={clash}
+              stop={stop}
               finishAt={script.finishAt}
               winner={decided ? winnerSide : null}
               title={t('bout.aria')}
@@ -210,6 +218,7 @@ export function BoutViewer({
               className="button"
               onClick={() => {
                 skipped.current = true;
+                setStop(null);
                 setTime(script.duration);
               }}
             >
