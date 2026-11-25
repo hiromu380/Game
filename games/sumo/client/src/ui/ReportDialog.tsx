@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { boxDrawn } from './KeikobaScene';
 import { TrainingSection } from './TrainingSection';
 import { RewardsSection } from './RewardsSection';
@@ -77,7 +77,8 @@ export function ReportDialog({
   const myRetired = report.retired.filter((r) => r.stableId === game.player.stableId);
   const net = sumMoney(report.income) - sumMoney(report.expenses);
   const netShown = useCountUp(net);
-  const standing = myStanding(game);
+  // 収支の数え上げで描き直すたびに、全部屋を並べ直さない
+  const standing = useMemo(() => myStanding(game), [game]);
   const kachikoshi = report.mine.filter(
     (m) => m.record.wins * 2 > m.record.wins + m.record.losses + m.record.absences,
   ).length;

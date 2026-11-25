@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { GameState } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { money } from '../format';
@@ -20,9 +21,10 @@ export function YearCard({
   onNext: () => void;
 }) {
   const { t, lang } = useI18n();
-  const y = yearSummary(game, lastIndex);
+  // 数え上げで描き直すたびに数え直さない
+  const y = useMemo(() => yearSummary(game, lastIndex), [game, lastIndex]);
   const net = useCountUp(y.net);
-  const done = achievedOf(game).length;
+  const done = useMemo(() => achievedOf(game).length, [game]);
   const signedNum = (n: number) => (n > 0 ? `▲${n}` : n < 0 ? `▼${-n}` : '±0');
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="highlight-title">

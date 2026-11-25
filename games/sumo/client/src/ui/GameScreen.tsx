@@ -331,7 +331,11 @@ export function GameScreen({
 
       {/* 実績の知らせは、窓をすべて閉じてから出す */}
       {!delegated && !showReport && !highlights && (
-        <AchievementToast ids={achv} total={achievedOf(game).length} onClose={() => setAchv([])} />
+        <AchievementToast
+          ids={achv}
+          total={achv.length > 0 ? achievedOf(game).length : 0}
+          onClose={() => setAchv([])}
+        />
       )}
       {delegated && (
         <DelegateDialog game={game} result={delegated} onClose={() => setDelegated(null)} />

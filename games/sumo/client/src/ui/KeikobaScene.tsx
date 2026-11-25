@@ -70,6 +70,8 @@ export function KeikobaScene({
   const [roomIndex, setRoomIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const names = useMemo(() => new Map(game.rikishi.map((r) => [r.id, r.name])), [game.rikishi]);
+  // 部屋の格（実績の数）は場所が進むまで変わらないので、絵を描き直すたびに数え直さない
+  const tier = useMemo(() => tierOf(achievedOf(game).length), [game]);
   const titled = (cast: Actor[]): SceneActor[] =>
     cast.map((a) => ({
       ...a,
@@ -118,7 +120,7 @@ export function KeikobaScene({
   );
   if (views.length === 0) return null;
   const current = views.includes(view) ? view : views[0]!;
-  const ordered = depthOrder(compoundPieces(game, tierOf(achievedOf(game).length)));
+  const ordered = depthOrder(compoundPieces(game, tier));
   const exterior: Drawn[] = ordered.map((p) => ({
     sprite: p.sprite,
     ...frontCorner(p),
