@@ -526,7 +526,7 @@
   "happening.hometownCheer.title": "故郷の応援会",
   "happening.hometownCheer.body": "{name}の故郷で、応援会を開きたいという話が来ました。",
   "happening.hometownCheer.go": "{name}を帰らせて出席",
-  "happening.hometownCheer.go.desc": "ご祝儀が入り、本人は張り切って次の稽古が伸びる。少し疲れる",
+  "happening.hometownCheer.go.desc": "ご祝儀が入り、{name}は張り切って次の稽古が伸びる。少し疲れる",
   "happening.hometownCheer.letter": "手紙を送る",
   "happening.hometownCheer.letter.desc": "名声がほんの少し上がる",
   "happening.kenshoOffer.title": "懸賞を出したい会社",
