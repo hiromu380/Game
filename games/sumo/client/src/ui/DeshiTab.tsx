@@ -25,6 +25,7 @@ import { knownTraits, RikishiCard } from './RikishiCard';
 import { targetOf, targetText } from '../targets';
 import { withStep } from '../guide';
 import { RosterTable } from './RosterTable';
+import { gradeOf, overallOf } from '../grade';
 import { useSettings } from '../settings';
 
 /**
@@ -130,6 +131,13 @@ export function DeshiTab({
                     )}
                   </span>
                   <span className="deshi__sub">
+                    <span
+                      className={`grade grade--${gradeOf(overallOf(r.abilities))} deshi__grade`}
+                      title={t('grade.overall')}
+                    >
+                      {gradeOf(overallOf(r.abilities))}
+                      <span className="visually-hidden">{t('grade.overall')}</span>
+                    </span>
                     {t('deshi.sub', {
                       style: t(`style.${styleOf(r.abilities)}`),
                       policy: t(`policy.${r.policy}`),

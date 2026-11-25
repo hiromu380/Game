@@ -1802,3 +1802,7 @@ body.has-modal {
   line-height: 11px;
   z-index: 1;
 }
+.deshi__grade {
+  margin-right: 6px;
+  font-size: 0.75rem;
+}
