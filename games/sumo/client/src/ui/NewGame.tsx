@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createGame, type GameState, type Style } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { TitleScene } from './TitleScene';
@@ -17,6 +17,9 @@ export function NewGame({
 }) {
   const { t } = useI18n();
   const [style, setStyle] = useState<Style>('oshi');
+  // 開いたら「部屋を開く」にフォーカス（Enter の連打で始められる。画面は動かさない）
+  const startRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => startRef.current?.focus({ preventScroll: true }), []);
   const start = () => {
     // シードは開始のときだけ乱数で決める（シミュレーションの中では使わない）
     const seed = Math.floor(Math.random() * 0xffffffff) >>> 0;
@@ -66,7 +69,7 @@ export function NewGame({
             </label>
           ))}
         </fieldset>
-        <button className="button button--primary button--large" onClick={start}>
+        <button ref={startRef} className="button button--primary button--large" onClick={start}>
           {t('newGame.start')}
           <span aria-hidden="true">↗</span>
         </button>
