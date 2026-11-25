@@ -1764,3 +1764,41 @@ body.has-modal {
     display: none;
   }
 }
+/* はじめての人へ: 次に押すところの印（ゆっくり明滅。1秒に3回より遅い。動きを減らす設定では止める） */
+.is-nudge {
+  position: relative;
+}
+.is-nudge::after {
+  content: '!';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 14px;
+  border: 2px solid var(--ink);
+  background: var(--odo);
+  color: var(--ink);
+  font-size: 0.7rem;
+  text-align: center;
+  animation: nudge-pulse 1.6s steps(2) infinite;
+}
+@keyframes nudge-pulse {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-nudge::after {
+    animation: none;
+  }
+}
+/* タブの帯は上が切れるので、印を内側に */
+.tabs__tab.is-nudge::after {
+  top: 0;
+  right: -7px;
+  min-width: 13px;
+  height: 13px;
+  line-height: 11px;
+  z-index: 1;
+}

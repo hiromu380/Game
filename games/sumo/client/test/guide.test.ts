@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { acceptCandidate, advanceBasho, createGame } from '@ichimon/sim';
 import { DEFAULT_GUIDE } from '../src/save';
-import { doneSteps, GUIDE_UNTIL_BASHO, showGuide, withStep, withTip } from '../src/guide';
+import { doneSteps, GUIDE_UNTIL_BASHO, nudgeOf, showGuide, withStep, withTip } from '../src/guide';
 
 describe('はじめての人向けの案内', () => {
   it('受け入れた・場所を進めたは、ゲームの状態から済みになる', () => {
@@ -27,5 +27,23 @@ describe('はじめての人向けの案内', () => {
     const g = withStep(withStep(DEFAULT_GUIDE, 'bout'), 'bout');
     expect(g.done).toEqual(['bout']);
     expect(withTip(withTip(g, 'ledger'), 'ledger').tips).toEqual(['ledger']);
+  });
+});
+
+describe('次に押すところの印', () => {
+  it('手引きの順に、弟子タブ → 本場所へ → 前の結果 → 帳簿 と移り、済んだら出さない', () => {
+    const DEFAULT = DEFAULT_GUIDE;
+    const g0 = createGame({ seed: 5 });
+    let p = DEFAULT;
+    expect(nudgeOf(g0, p)).toBe('deshi');
+    p = withStep(p, 'policy');
+    expect(nudgeOf(g0, p)).toBe('main');
+    const g1 = advanceBasho(g0);
+    expect(nudgeOf(g1, p)).toBe('report');
+    p = withStep(p, 'bout');
+    expect(nudgeOf(g1, p)).toBe('ledger');
+    p = withStep(withStep(p, 'ledger'), 'accept');
+    expect(nudgeOf(g1, p)).toBeNull();
+    expect(nudgeOf(g0, { ...DEFAULT, dismissed: true })).toBeNull();
   });
 });

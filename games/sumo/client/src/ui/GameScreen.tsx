@@ -22,7 +22,7 @@ import { LedgerTab } from './LedgerTab';
 import { LineageTab } from './LineageTab';
 import { AssociationTab } from './AssociationTab';
 import { TabTip } from './Guide';
-import { withStep } from '../guide';
+import { nudgeOf, withStep } from '../guide';
 import { HighlightDialog } from './HighlightDialog';
 import { bigBouts, highlightsOf, type Highlight } from '../highlights';
 import { TacticDialog } from './TacticDialog';
@@ -123,6 +123,8 @@ export function GameScreen({
   // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
   const liveShown = useRef<number | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
+  // はじめての人へ: 次に押すところの印（文字を出さない）
+  const nudge = nudgeOf(game, settings.guide);
   // キー操作（割り当ては keys.ts）。フックなので、早い return より前に置く: 画面のボタンを押すのと同じ
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -238,10 +240,13 @@ export function GameScreen({
             key={k}
             role="tab"
             aria-selected={tab === k}
-            className={`tabs__tab ${tab === k ? 'is-active' : ''}`}
+            className={`tabs__tab ${tab === k ? 'is-active' : ''} ${nudge === k && tab !== k ? 'is-nudge' : ''}`}
             onClick={() => setTab(k)}
           >
             {t(`tab.${k}`)}
+            {nudge === k && tab !== k && (
+              <span className="visually-hidden">{t('guide.nudge')}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -268,8 +273,12 @@ export function GameScreen({
               : t('action.hint')}
         </span>
         {game.lastReport && (
-          <button className="button" onClick={() => setShowReport(true)}>
+          <button
+            className={`button ${nudge === 'report' ? 'is-nudge' : ''}`}
+            onClick={() => setShowReport(true)}
+          >
             {t('action.lastReport')}
+            {nudge === 'report' && <span className="visually-hidden">{t('guide.nudge')}</span>}
           </button>
         )}
         <div className="delegate-menu">
@@ -304,7 +313,7 @@ export function GameScreen({
           )}
         </div>
         <button
-          className="button button--primary"
+          className={`button button--primary ${nudge === 'main' ? 'is-nudge' : ''}`}
           disabled={blocked}
           onClick={() => {
             // 場所前の週が残っていれば、場所前のウィンドウへ

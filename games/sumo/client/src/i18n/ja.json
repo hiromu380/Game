@@ -2017,5 +2017,6 @@
   "honmei.hit": "本命 的中！",
   "rewards.label.honmei": "本命 {name} 勝ち越し",
   "rewards.chip.honmei": "名声 +{n}",
-  "honmei.effect": "勝ち越せば名声 +{n}"
+  "honmei.effect": "勝ち越せば名声 +{n}",
+  "guide.nudge": "（次はここ）"
 }

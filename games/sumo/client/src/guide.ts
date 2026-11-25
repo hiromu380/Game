@@ -45,3 +45,26 @@ export function withStep(g: GuideProgress, step: GuideStep): GuideProgress {
 export function withTip(g: GuideProgress, tab: TipTab): GuideProgress {
   return g.tips.includes(tab) ? g : { ...g, tips: [...g.tips, tab] };
 }
+
+/** 次に押すところ（文字を出さずに印だけで示す。説明を隠していても出す） */
+export type Nudge = 'deshi' | 'main' | 'report' | 'ledger';
+
+/**
+ * 手引きのまだの手順のうち最初のもので、印を付けるところ（桜井氏の「自然なチュートリアル」: 本編の操作で覚える）
+ * 入門希望者は窓が勝手に出るので印を付けない。手引きを閉じた・場所が進んだら出さない
+ */
+export function nudgeOf(game: GameState, g: GuideProgress): Nudge | null {
+  if (!showGuide(game, g)) return null;
+  const done = doneSteps(game, g);
+  for (const s of GUIDE_STEPS) {
+    if (done.has(s)) continue;
+    if (s === 'policy') return 'deshi';
+    if (s === 'basho') return 'main';
+    if (s === 'bout') {
+      if (game.lastReport) return 'report';
+      continue;
+    }
+    if (s === 'ledger') return 'ledger';
+  }
+  return null;
+}

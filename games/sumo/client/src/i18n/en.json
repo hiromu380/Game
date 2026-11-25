@@ -2017,5 +2017,6 @@
   "honmei.hit": "Favorite came through!",
   "rewards.label.honmei": "Favorite {name} winning record",
   "rewards.chip.honmei": "Prestige +{n}",
-  "honmei.effect": "Winning record: prestige +{n}"
+  "honmei.effect": "Winning record: prestige +{n}",
+  "guide.nudge": " (next)"
 }
