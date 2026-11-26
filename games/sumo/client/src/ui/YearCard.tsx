@@ -62,6 +62,14 @@ export function YearCard({
             </div>
           )}
         </dl>
+        {y.mvp && (
+          <p className="headline year__mvp">
+            <span className="headline__big">{t('year.mvp', { name: y.mvp.name })}</span>
+            <span className="year__mvpRecord">
+              {t('year.winsLosses', { wins: y.mvp.wins, losses: y.mvp.losses })}
+            </span>
+          </p>
+        )}
         <ul className="plain-list year__list">
           <li>
             {t('year.events', { promotions: y.promotions, yusho: y.yusho, joined: y.joined })}

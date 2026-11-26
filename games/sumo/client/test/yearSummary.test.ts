@@ -17,6 +17,14 @@ describe('1年のふりかえり', () => {
     const log = g.moneyLog.filter((e) => e.bashoIndex <= 5);
     expect(y.net).toBe(log.reduce((s, e) => s + e.income - e.expenses, 0));
     expect(y.place?.to).toBe(log.at(-1)!.place);
+    // 部屋の年間最多勝は、その年の白星の合計がいちばん多い弟子
+    expect(y.mvp).not.toBeNull();
+    const best = Math.max(
+      ...g.rikishi
+        .filter((r) => r.stableId === g.player.stableId)
+        .map((r) => r.track.filter((e) => e.bashoIndex <= 5).reduce((s, e) => s + e.wins, 0)),
+    );
+    expect(y.mvp!.wins).toBeGreaterThanOrEqual(best);
   });
 
   it('九州場所の後だけ、見せ場の最後に出す', () => {

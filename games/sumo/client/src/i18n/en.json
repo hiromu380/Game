@@ -2023,5 +2023,6 @@
   "delegate.yearPlace": " · stable power #{place}",
   "ticker.zensho": "Perfect record!",
   "gameOver.tier": "Standing",
-  "gameOver.place": "Final stable power"
+  "gameOver.place": "Final stable power",
+  "year.mvp": "Most wins: {name}"
 }

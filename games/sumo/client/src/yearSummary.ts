@@ -22,12 +22,33 @@ export interface YearSummary {
   prestige: number | null;
   /** 部屋の力の順位（年の最初の場所の後 → 年の終わり） */
   place: { from: number; to: number } | null;
+  /** 部屋の年間最多勝: その年いちばん白星の多い弟子（同じなら黒星の少ない方、さらに同じなら ID の小さい方）。いなければ null */
+  mvp: { name: string; wins: number; losses: number } | null;
 }
 
 /** lastIndex: 年の最後の場所の番号（九州場所） */
 export function yearSummary(game: GameState, lastIndex: number): YearSummary {
   const first = lastIndex - (lastIndex % 6);
   const inYear = (i: number) => i >= first && i <= lastIndex;
+  const people = [
+    ...game.rikishi
+      .filter((r) => r.stableId === game.player.stableId)
+      .map((r) => ({ id: r.id, name: r.name, track: r.track })),
+    ...game.player.alumni.map((a) => ({ id: a.id, name: a.name, track: a.track ?? [] })),
+  ];
+  const mvp =
+    people
+      .map((p) => {
+        const es = p.track.filter((e) => inYear(e.bashoIndex));
+        return {
+          id: p.id,
+          name: p.name,
+          wins: es.reduce((s, e) => s + e.wins, 0),
+          losses: es.reduce((s, e) => s + e.losses, 0),
+        };
+      })
+      .filter((p) => p.wins > 0)
+      .sort((a, b) => b.wins - a.wins || a.losses - b.losses || a.id - b.id)[0] ?? null;
   const tracks: TrackEntry[] = [
     ...game.rikishi.filter((r) => r.stableId === game.player.stableId).flatMap((r) => r.track),
     ...game.player.alumni.flatMap((a) => a.track ?? []),
@@ -54,5 +75,6 @@ export function yearSummary(game: GameState, lastIndex: number): YearSummary {
       firstLog?.place !== undefined && lastLog?.place !== undefined
         ? { from: (before?.place ?? firstLog.place)!, to: lastLog.place }
         : null,
+    mvp: mvp && { name: mvp.name, wins: mvp.wins, losses: mvp.losses },
   };
 }

@@ -2023,5 +2023,6 @@
   "delegate.yearPlace": "・部屋の力 {place}位",
   "ticker.zensho": "全勝！",
   "gameOver.tier": "部屋の格",
-  "gameOver.place": "最後の部屋の力"
+  "gameOver.place": "最後の部屋の力",
+  "year.mvp": "年間最多勝 {name}"
 }
