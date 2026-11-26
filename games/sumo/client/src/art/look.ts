@@ -10,6 +10,10 @@ export type Eyes = 'dot' | 'line' | 'smile' | 'sharp';
 export type Brows = 'thick' | 'arched' | 'angry';
 export type Mouth = 'he' | 'o' | 'smile' | 'flat';
 export type Hair = 'zanbara' | 'chonmage' | 'oicho' | 'short' | 'gray';
+/** 顔の輪郭（小さな顔の絵でも見分けがつくように） */
+export type Face = 'round' | 'long' | 'wide';
+/** 顔の印 */
+export type Mark = 'none' | 'stubble' | 'mole' | 'rosy';
 
 export interface Look {
   skin: string;
@@ -29,6 +33,10 @@ export interface Look {
   sweat: boolean;
   /** 親方（着物） */
   kimono: boolean;
+  /** 顔の輪郭（なければ丸） */
+  face?: Face;
+  /** 顔の印（なければなし） */
+  mark?: Mark;
 }
 
 /** 整数のハッシュ（xorshift を数回） */
@@ -49,6 +57,13 @@ const pick = <T>(items: readonly T[], h: number): T => items[h % items.length]!;
 const EYES: Eyes[] = ['dot', 'line', 'smile', 'sharp'];
 const BROWS: Brows[] = ['thick', 'arched', 'angry'];
 const MOUTHS: Mouth[] = ['he', 'o', 'smile', 'flat'];
+const FACES: Face[] = ['round', 'long', 'wide'];
+const MARKS: Mark[] = ['none', 'stubble', 'mole', 'rosy', 'none'];
+
+/** ID で決まる顔の輪郭と印（親方も力士も同じ人なら同じ顔） */
+export function faceOf(id: number): { face: Face; mark: Mark } {
+  return { face: pick(FACES, hash(id, 6)), mark: pick(MARKS, hash(id, 7)) };
+}
 
 /** 体重 → 体の横幅（軽い新弟子は細く、重い関取は丸い） */
 export function widthFor(weight: number): number {
@@ -73,6 +88,7 @@ export function rikishiLook(i: RikishiLookInput): Look {
     eyes: pick(EYES, hash(i.id, 2)),
     brows: pick(BROWS, hash(i.id, 3)),
     mouth: pick(MOUTHS, hash(i.id, 4)),
+    ...faceOf(i.id),
     hair: i.careerBasho < 6 ? 'zanbara' : i.sekitori ? 'oicho' : 'chonmage',
     width: widthFor(i.weight),
     cloth: i.sekitori ? pick(SHIMEKOMI, hash(i.stableId, 5)) : PALETTE.sumi,
@@ -91,6 +107,7 @@ export function oyakataLook(i: { id: number; age: number; stableId: number }): L
     eyes: pick(EYES, hash(i.id, 2)),
     brows: pick(BROWS, hash(i.id, 3)),
     mouth: pick(MOUTHS, hash(i.id, 4)),
+    ...faceOf(i.id),
     hair: i.age >= 55 ? 'gray' : 'short',
     width: 34,
     cloth: pick([PALETTE.sumi, PALETTE.ai, PALETTE.kimonoBrown], hash(i.stableId, 6)),

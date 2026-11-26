@@ -12,6 +12,8 @@ import {
   type Mark,
   type TickerRow,
 } from '../ticker';
+import { PixelPortrait } from '../art/PixelPortrait';
+import type { Look } from '../art/look';
 import { reached, reachedText, targetText, targetWins, type Target } from '../targets';
 
 /** 1日を見せる間隔（ミリ秒） */
@@ -33,6 +35,8 @@ export interface TickerEntry extends TickerRow {
   absentFrom?: number;
   /** この場所の近い目標 */
   target?: Target;
+  /** 顔の絵（なければ出さない） */
+  look?: Look;
 }
 
 /**
@@ -144,6 +148,11 @@ export function BashoTicker({
                   className={`ticker__row ${kkIds.has(r.id) ? 'is-kk' : ''} ${r.id === honmei ? 'is-honmei' : ''}`}
                 >
                   <div className="ticker__who">
+                    {r.look && (
+                      <span className="ticker__face">
+                        <PixelPortrait look={r.look} size={28} />
+                      </span>
+                    )}
                     <span className="ticker__rank">{rankLabel(t, r.rank)}</span>
                     <strong>
                       {r.id === honmei && (

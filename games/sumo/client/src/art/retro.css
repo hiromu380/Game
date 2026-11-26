@@ -1859,3 +1859,21 @@ body.has-modal {
     width: 72px;
   }
 }
+/* 一覧・星取りの顔の絵 */
+.deshi__rank {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.deshi__rank .portrait,
+.ticker__face .portrait {
+  flex: none;
+}
+.ticker__face {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.hoshitori__head {
+  align-items: center;
+}

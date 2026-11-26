@@ -22,6 +22,7 @@ import { useSettings } from '../settings';
 import { BoutViewer } from './BoutViewer';
 import { useCountUp } from './CountUp';
 import { myStanding } from '../standing';
+import { RikishiPortrait } from '../art/Portraits';
 import { RaceSection } from './RacePanel';
 
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
@@ -177,6 +178,9 @@ export function ReportDialog({
                 return (
                   <li key={m.id} className="hoshitori__row">
                     <div className="hoshitori__head">
+                      {byId.get(m.id) && (
+                        <RikishiPortrait r={byId.get(m.id)!} rank={m.record.rank} size={28} />
+                      )}
                       <span className="hoshitori__rank">{rankLabel(t, m.record.rank)}</span>
                       <strong>{nameOf(m.id)}</strong>
                       <span>{recordLabel(t, m.record)}</span>

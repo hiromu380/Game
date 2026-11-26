@@ -75,12 +75,12 @@ describe('顔の絵（ドット絵）', () => {
       ).toBe(false);
   });
 
-  it('顔つき（目・眉・口）の組み合わせで、別の顔になる', () => {
+  it('顔つき（目・眉・口・肌・輪郭・印）の組み合わせで、別の顔になる', () => {
     const seen = new Set<string>();
     const faces = new Set<string>();
     for (let id = 1; id <= 60; id++) {
       const look = rikishiLook({ ...base, id });
-      faces.add(`${look.eyes}/${look.brows}/${look.mouth}/${look.skin}`);
+      faces.add(`${look.eyes}/${look.brows}/${look.mouth}/${look.skin}/${look.face}/${look.mark}`);
       seen.add(Buffer.from(portraitPixels(look, 'bust').data).toString('base64'));
     }
     expect(seen.size).toBe(faces.size);

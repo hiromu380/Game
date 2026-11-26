@@ -23,8 +23,13 @@ const DROP = rgb(PALETTE.aiLight);
 const BENI = rgb(PALETTE.beni);
 const ODO = rgb(PALETTE.odo);
 
-/** 頭の大きさ（半径） */
-const HEAD = { rx: 11.5, ry: 10.5 } as const;
+/** 頭の大きさ（半径）。輪郭で変える: 丸・面長・えら張り */
+const HEADS = {
+  round: { rx: 11.5, ry: 10.5 },
+  long: { rx: 10, ry: 10.5 },
+  wide: { rx: 12.5, ry: 9.8 },
+} as const;
+const headOf = (look: Look) => HEADS[look.face ?? 'round'];
 
 /** 左右対称に2点置く */
 function pair(s: Sheet, cx: number, dx: number, y: number, col: Rgb): void {
@@ -34,6 +39,7 @@ function pair(s: Sheet, cx: number, dx: number, y: number, col: Rgb): void {
 
 /** 髪（頭の上半分。額は丸く残す）と髷 */
 function hair(s: Sheet, cx: number, cy: number, look: Look): void {
+  const HEAD = headOf(look);
   const col = look.hair === 'gray' ? SILVER : SUMI;
   const line = look.hair === 'gray' ? GRAY : rgb(PALETTE.sumi2);
   const inHead = (x: number, y: number) =>
@@ -99,12 +105,14 @@ function hair(s: Sheet, cx: number, cy: number, look: Look): void {
 
 /** 顔（正面）。cy は頭の中心 */
 function face(s: Sheet, cx: number, cy: number, look: Look): void {
+  const HEAD = headOf(look);
   const skin = rgb(look.skin);
   s.ball(cx, cy, HEAD.rx, HEAD.ry, skin);
-  // 耳
+  // 耳（輪郭の横に付ける）
+  const ear = Math.round(HEAD.rx + 0.5);
   for (const side of [-1, 1]) {
-    s.rect(cx + side * 12 - (side > 0 ? 0 : 0), cy + 1, 1, 3, skin);
-    s.px(cx + side * 12, cy + 3, dark(skin));
+    s.rect(cx + side * ear, cy + 1, 1, 3, skin);
+    s.px(cx + side * ear, cy + 3, dark(skin));
   }
   hair(s, cx, cy, look);
 
@@ -190,6 +198,28 @@ function face(s: Sheet, cx: number, cy: number, look: Look): void {
     pair(s, cx, 1, my, SUMI);
     s.px(cx, my, dark(BENI));
   }
+  // 重い力士は二重あご（体つきの違いを顔でも見せる）
+  if (look.width >= 38 && !look.kimono) {
+    const chin = Math.round(cy + HEAD.ry) - 1;
+    for (let x = cx - 4; x <= cx + 4; x++) s.px(x, chin, dark(skin, 0.82));
+  }
+  // 顔の印（小さな絵でも見分けがつくように）
+  if (look.mark === 'stubble') {
+    // 青ひげ: 口のまわりに薄い点を散らす
+    const shade = dark(skin, 0.78);
+    for (let y = my - 1; y <= my + 2; y++)
+      for (let x = cx - 4; x <= cx + 4; x++)
+        if ((x + y) % 2 === 0 && Math.abs(x - cx) + Math.abs(y - my) > 1) s.px(x, y, shade);
+  } else if (look.mark === 'mole') {
+    s.px(cx + 4, cy + 6, SUMI);
+  } else if (look.mark === 'rosy') {
+    // 赤いほお（ふだんのほおより大きく濃く）
+    for (const side of [-1, 1])
+      for (let k = 0; k < 3; k++) {
+        s.px(cx + side * (6 + k), cy + 5, BENI);
+        s.px(cx + side * (6 + k), cy + 6, CHEEK);
+      }
+  }
   if (look.bandage) {
     // ばんそうこう（ほお）
     s.rect(cx + 5, cy + 5, 5, 3, WHITE);
@@ -253,7 +283,7 @@ function bust(look: Look): Sheet {
     }
   }
   // あごの下の陰
-  s.over(cx - 7, cy + Math.round(HEAD.ry), 15, 2, dark(look.kimono ? cloth : skin, 0.86));
+  s.over(cx - 7, cy + Math.round(headOf(look).ry), 15, 2, dark(look.kimono ? cloth : skin, 0.86));
   face(s, cx, cy, look);
   return s;
 }
@@ -336,7 +366,7 @@ function full(look: Look): Sheet {
       }
     }
   }
-  s.over(cx - 7, cy + Math.round(HEAD.ry), 15, 2, dark(look.kimono ? cloth : skin, 0.86));
+  s.over(cx - 7, cy + Math.round(headOf(look).ry), 15, 2, dark(look.kimono ? cloth : skin, 0.86));
   face(s, cx, cy, look);
   return s;
 }

@@ -26,6 +26,7 @@ import { targetOf, targetText } from '../targets';
 import { withStep } from '../guide';
 import { RosterTable } from './RosterTable';
 import { gradeOf, overallOf } from '../grade';
+import { RikishiPortrait } from '../art/Portraits';
 import { useSettings } from '../settings';
 
 /**
@@ -107,7 +108,10 @@ export function DeshiTab({
                   onClick={() => setOpen(r.id)}
                   aria-label={t('deshi.open', { name: r.name })}
                 >
-                  <span className="deshi__rank">{rankLabel(t, ranks.get(r.id) ?? null)}</span>
+                  <span className="deshi__rank">
+                    <RikishiPortrait r={r} rank={ranks.get(r.id) ?? null} size={36} />
+                    <span>{rankLabel(t, ranks.get(r.id) ?? null)}</span>
+                  </span>
                   <span className="deshi__name">
                     {game.player.honmei === r.id && (
                       <span className="honmei-mark" title={t('honmei.label')}>

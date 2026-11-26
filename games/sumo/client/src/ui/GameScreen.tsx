@@ -42,6 +42,7 @@ import { AchievementToast } from './AchievementsPanel';
 import { BashoTicker } from './BashoTicker';
 import { BASHO_DAYS, tickerRow } from '../ticker';
 import { keyTarget } from '../keys';
+import { lookOfRikishi } from '../art/Portraits';
 import { targetOf } from '../targets';
 
 type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
@@ -123,6 +124,11 @@ export function GameScreen({
   // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
   const liveShown = useRef<number | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
+  /** 星取りの行の顔の絵（場所前の番付で描く） */
+  const lookFor = (id: number) => {
+    const r = game.rikishi.find((x) => x.id === id);
+    return r ? lookOfRikishi(r, ranks.get(id) ?? null) : undefined;
+  };
   // はじめての人へ: 次に押すところの印（文字を出さない）
   const nudge = nudgeOf(game, settings.guide);
   // キー操作（割り当ては keys.ts）。フックなので、早い return より前に置く: 画面のボタンを押すのと同じ
@@ -356,6 +362,7 @@ export function GameScreen({
             ...tickerRow(m.id, m.bouts),
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: ranks.get(m.id) ?? null,
+            look: lookFor(m.id),
             absentFrom: m.out ? (m.injuredDay ?? 0) : undefined,
             target: targetOf(
               game,
@@ -402,6 +409,7 @@ export function GameScreen({
             ...tickerRow(m.id, m.bouts),
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: m.record.rank,
+            look: lookFor(m.id),
             // 目標は場所前の番付で見積もる（ここの game はまだ場所前）
             target: (() => {
               const r = game.rikishi.find((x) => x.id === m.id);
