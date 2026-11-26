@@ -2165,3 +2165,30 @@ body.has-modal {
   flex-wrap: wrap;
   gap: 4px;
 }
+/* 場所の結果: 場所前の稽古と成績 */
+.payoff__lead {
+  margin: 0 0 4px;
+}
+.payoff__list {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.payoff__row {
+  display: grid;
+  grid-template-columns: 28px minmax(4em, 1fr) auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border-bottom: 1px solid var(--line, var(--muted));
+  font-variant-numeric: tabular-nums;
+}
+.payoff__row .tag {
+  margin-left: 0;
+}
+.payoff__lead .muted {
+  display: block;
+  font-size: 0.85em;
+}

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { play } from './play';
 import {
   advanceBasho,
   canPrep,
@@ -167,5 +168,26 @@ describe('場所前の4週間', () => {
     const loaded = migrateSave(old)!;
     expect(loaded.version).toBe(SAVE_VERSION);
     expect(loaded.prep).toEqual({ week: 0, log: [] });
+  });
+});
+
+describe('場所前の稽古の要約（場所の結果に残す）', () => {
+  it('稽古の週だけを弟子ごとに足し、場所を進めると結果に残る', async () => {
+    const { prepSummary } = await import('../src');
+    let g = play(3, 4);
+    const ids = g.rikishi
+      .filter((r) => r.stableId === g.player.stableId && r.injury === 0)
+      .map((r) => r.id);
+    g = doPrep(g, { kind: 'coach', id: ids[0]! });
+    g = doPrep(g, { kind: 'rest' });
+    const sum = prepSummary(g.prep.log);
+    expect(sum.map((x) => x.id)).toEqual([ids[0]]);
+    expect(sum[0]!.weeks).toBe(1);
+    const w = g.prep.log[0]!.gains[0]!;
+    expect(sum[0]!.gain).toBeCloseTo(w.oshi + w.yotsu + w.waza, 6);
+    while (g.prep.week < 4) g = doPrep(g, { kind: 'usual' });
+    const next = advanceBasho(g);
+    expect(next.lastReport?.prep).toEqual(sum);
+    expect(next.prep.log).toEqual([]);
   });
 });

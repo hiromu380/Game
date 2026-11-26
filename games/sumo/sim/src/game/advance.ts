@@ -49,6 +49,7 @@ import { applyHappening, rollHappening } from './happening';
 import { currentLineage, isBlocked, retireRikishi } from './state';
 import { LINEAGE } from '../balance/lineage';
 import { note } from './journal';
+import { prepSummary } from './prep';
 import { staffGrowth } from '../stable/staff';
 import { ensureRival, rivalSignsCandidates, settleRival, stableStandings } from '../world/rival';
 import { holdElection, isBoardMember, scheduleElection, yearEndOffice } from '../world/office';
@@ -627,6 +628,8 @@ export function advanceBasho(
     rollHappening(state);
     scheduleElection(state);
   }
+  const trained = prepSummary(state.prep.log);
+  if (trained.length > 0) report.prep = trained;
   state.lastReport = report;
   logMoney(state, report);
   // 次の場所前の4週間は、はじめから

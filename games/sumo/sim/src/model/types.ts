@@ -753,6 +753,8 @@ export interface BashoReport {
   shusse?: number[];
   /** 中日の後に再出場・途中出場した自分の弟子 */
   reentered?: number[];
+  /** 場所前の4週間に稽古をつけた弟子と、その伸び（押し・四つ・技の合計）・壁破り・稽古の週の数（古い結果にはない） */
+  prep?: { id: number; gain: number; walls: number; weeks: number }[];
   /** 幕内の優勝争い（古い結果にはない） */
   race?: YushoRace;
   /** この場所の後に行った自分の部屋の元弟子の断髪式（名前を出すタニマチ・ライバルの師匠） */

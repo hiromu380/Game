@@ -2091,5 +2091,12 @@
   "cut.v.flat": "変わらず",
   "cut.v.fell": "力が落ちた",
   "cut.v.rested": "疲れが抜けた",
-  "cut.v.fresh": "元気いっぱい"
+  "cut.v.fresh": "元気いっぱい",
+  "payoff.title": "場所前の稽古と成績",
+  "payoff.lead": "稽古をつけた{n}人のうち 勝ち越し{kachi}人",
+  "payoff.others": "（ほかの弟子は{n}人中{kachi}人）",
+  "payoff.gain": "稽古",
+  "payoff.outcome.kachi": "勝ち越し",
+  "payoff.outcome.make": "負け越し",
+  "payoff.outcome.kyujo": "全休"
 }

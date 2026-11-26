@@ -2091,5 +2091,12 @@
   "cut.v.flat": "No change",
   "cut.v.fell": "Lost strength",
   "cut.v.rested": "Rested",
-  "cut.v.fresh": "Fully fresh"
+  "cut.v.fresh": "Fully fresh",
+  "payoff.title": "Training and results",
+  "payoff.lead": "Of {n} trained, {kachi} had winning records",
+  "payoff.others": "(others: {kachi} of {n})",
+  "payoff.gain": "Trained",
+  "payoff.outcome.kachi": "Winning",
+  "payoff.outcome.make": "Losing",
+  "payoff.outcome.kyujo": "Sat out"
 }

@@ -24,6 +24,7 @@ import { useCountUp } from './CountUp';
 import { myStanding } from '../standing';
 import { RikishiPortrait } from '../art/Portraits';
 import { RaceSection } from './RacePanel';
+import { PrepPayoffSection } from './PrepPayoffSection';
 
 const DIVS: Division[] = ['makuuchi', 'juryo', 'makushita', 'sandanme', 'jonidan', 'jonokuchi'];
 const DIV_ORDER = new Map(DIVS.map((d, i) => [d, i]));
@@ -231,6 +232,8 @@ export function ReportDialog({
             </ul>
           </>
         )}
+
+        <PrepPayoffSection report={report} byId={byId} nameOf={nameOf} />
 
         {report.banzukeChanges.length > 0 && (
           <>

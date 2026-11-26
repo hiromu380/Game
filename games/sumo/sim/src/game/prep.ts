@@ -229,3 +229,28 @@ export function doPrep(input: GameState, action: PrepAction): GameState {
   state.prep = { week, log: [...state.prep.log, result] };
   return state;
 }
+
+/**
+ * 場所前の4週間の稽古の要約（場所の結果に残す。場所を進めると state.prep は空に戻るので）。
+ * 休ませる・挨拶回り・スカウト・いつも通りの週は数えない。伸びは押し・四つ・技の合計
+ */
+export function prepSummary(
+  log: readonly WeekResult[],
+): { id: number; gain: number; walls: number; weeks: number }[] {
+  const by = new Map<number, { id: number; gain: number; walls: number; weeks: number }>();
+  for (const w of log) {
+    const k = w.action.kind;
+    if (k !== 'coach' && k !== 'spar' && k !== 'mune' && k !== 'degeiko') continue;
+    for (const g of w.gains) {
+      const x = by.get(g.id) ?? { id: g.id, gain: 0, walls: 0, weeks: 0 };
+      x.gain = Math.round((x.gain + g.oshi + g.yotsu + g.waza) * 10) / 10;
+      x.weeks++;
+      by.set(g.id, x);
+    }
+    for (const wall of w.walls ?? []) {
+      const x = by.get(wall.id);
+      if (x) x.walls++;
+    }
+  }
+  return [...by.values()];
+}
