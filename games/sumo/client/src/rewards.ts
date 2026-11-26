@@ -3,6 +3,7 @@
  * - 報酬: 名声・タニマチの関係（ひいきの勝ち越し・昇進）・新しいタニマチ・関取の誕生（養成奨励金）・見込みより多い収入
  * - 罰: 名声の低下・タニマチの冷え（ひいきの負け越し）・離れたタニマチ・関取からの陥落・けが・見込みより少ない収入
  */
+import { kimariteBook } from './kimariteBook';
 import {
   isSekitori,
   projectLedger,
@@ -36,12 +37,16 @@ export type RewardLine =
   | { tone: 'good' | 'bad'; kind: 'vsOutlook'; delta: number }
   /** 後援会との約束（年の終わり） */
   | { tone: 'good' | 'bad'; kind: 'pledge'; pledge: PledgeKind; kept: boolean }
-  | { tone: 'good'; kind: 'honmei'; name: string };
+  | { tone: 'good'; kind: 'honmei'; name: string }
+  | { tone: 'good'; kind: 'kimarite'; kimarite: string; name: string };
 
 /** 関係の動きを知らせる下限 */
 export const FAVOR_NEWS_MIN = 3;
 /** 見込みとの差を知らせる下限（円） */
 export const OUTLOOK_NEWS_MIN = 100_000;
+
+/** 決まり手帳に新しく入った決まり手を知らせる行の上限 */
+export const KIMARITE_NEWS_MAX = 2;
 
 export function rewardsOf(prev: GameState, next: GameState): RewardLine[] {
   const report = next.lastReport;
@@ -146,6 +151,20 @@ export function rewardsOf(prev: GameState, next: GameState): RewardLine[] {
       pledge: report.pledge.kind,
       kept: report.pledge.kept,
     });
+
+  // 決まり手帳に新しく入った決まり手（初めて決めた力士の名前つき）
+  const hadKimarite = new Set(
+    kimariteBook(prev)
+      .filter((e) => e.count > 0)
+      .map((e) => e.id),
+  );
+  // 序盤はたくさん入るので、行が多くなりすぎないよう上限まで（決まり手帳で全部見られる）
+  kimariteBook(next)
+    .filter((e) => e.count > 0 && !hadKimarite.has(e.id) && e.best)
+    .slice(0, KIMARITE_NEWS_MAX)
+    .forEach((e) =>
+      out.push({ tone: 'good', kind: 'kimarite', kimarite: e.id, name: e.best!.name }),
+    );
 
   // 本命（応援予想）が勝ち越した
   if (report.honmei?.hit) out.push({ tone: 'good', kind: 'honmei', name: name(report.honmei.id) });

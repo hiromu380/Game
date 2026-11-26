@@ -2035,5 +2035,7 @@
   "kimariteBook.unknown": "？？？",
   "kimariteBook.best": "部屋で{n}勝（最多 {name}）",
   "achv.kimarite20.name": "技の引き出し",
-  "achv.kimarite20.hint": "部屋で20種類の決まり手で勝つ（非技を除く）"
+  "achv.kimarite20.hint": "部屋で20種類の決まり手で勝つ（非技を除く）",
+  "rewards.label.kimarite": "決まり手帳に新しく「{kimarite}」（{name}）",
+  "rewards.chip.kimarite": "＋1種"
 }

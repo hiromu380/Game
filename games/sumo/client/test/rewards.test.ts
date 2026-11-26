@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { advanceBasho, type GameState } from '@ichimon/sim';
-import { rewardsOf } from '../src/rewards';
+import { KIMARITE_NEWS_MAX, rewardsOf } from '../src/rewards';
 import ja from '../src/i18n/ja.json';
 import en from '../src/i18n/en.json';
 import { play } from '../../sim/test/play';
@@ -94,6 +94,18 @@ describe('報酬と罰', () => {
     ]) {
       expect(ja).toHaveProperty([k]);
       expect(en).toHaveProperty([k]);
+    }
+  });
+});
+
+describe('決まり手帳の知らせ', () => {
+  it('新しく入った決まり手だけを、上限まで知らせる', () => {
+    let g = play(4, 1);
+    for (let i = 0; i < 6; i++) {
+      const next = advanceBasho(g);
+      const lines = rewardsOf(g, next).filter((x) => x.kind === 'kimarite');
+      expect(lines.length).toBeLessThanOrEqual(KIMARITE_NEWS_MAX);
+      g = next;
     }
   });
 });

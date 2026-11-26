@@ -2035,5 +2035,7 @@
   "kimariteBook.unknown": "???",
   "kimariteBook.best": "{n} stable wins (most: {name})",
   "achv.kimarite20.name": "Bag of tricks",
-  "achv.kimarite20.hint": "Win with 20 different kimarite as a stable (excluding non-techniques)"
+  "achv.kimarite20.hint": "Win with 20 different kimarite as a stable (excluding non-techniques)",
+  "rewards.label.kimarite": "New in the kimarite book: {kimarite} ({name})",
+  "rewards.chip.kimarite": "+1 kind"
 }

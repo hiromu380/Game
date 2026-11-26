@@ -29,6 +29,8 @@ function iconOf(x: RewardLine): string {
       return x.kept ? 'ui_taru' : 'ui_coin_bag';
     case 'honmei':
       return 'ui_trophy';
+    case 'kimarite':
+      return 'ui_gunbai';
   }
 }
 
@@ -76,6 +78,14 @@ export function RewardsSection({ lines }: { lines: RewardLine[] }) {
         ];
       case 'vsOutlook':
         return [t('rewards.label.vsOutlook'), yen(x.delta)];
+      case 'kimarite':
+        return [
+          t('rewards.label.kimarite', {
+            kimarite: t(`kimarite.${x.kimarite}` as MessageKey),
+            name: x.name,
+          }),
+          t('rewards.chip.kimarite'),
+        ];
       case 'honmei':
         return [
           t('rewards.label.honmei', { name: x.name }),
