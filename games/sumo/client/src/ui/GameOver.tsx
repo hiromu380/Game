@@ -1,5 +1,6 @@
 import type { GameState } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { useI18n, type MessageKey } from '../i18n';
+import { ACHIEVEMENTS, achievedOf, tierOf } from '../achievements';
 import { bashoName } from '../format';
 import { loadCheckpoint } from '../save';
 import { ShareTree } from './ShareTree';
@@ -17,6 +18,8 @@ export function GameOver({
 }) {
   const { t } = useI18n();
   const checkpoint = loadCheckpoint(game);
+  const achieved = achievedOf(game).length;
+  const lastPlace = game.moneyLog.at(-1)?.place;
   const total = game.player.lineage.reduce(
     (n, l) => ({
       sekitori: n.sekitori + l.sekitori,
@@ -37,6 +40,23 @@ export function GameOver({
           yusho: total.yusho,
         })}
       </p>
+      {/* 締めくくり: 部屋の格・実績・最後の部屋の力（言い合える数字で終える） */}
+      <dl className="tiles">
+        <div className="tile">
+          <dt>{t('gameOver.tier')}</dt>
+          <dd>{t(`achv.tierName.${tierOf(achieved)}` as MessageKey)}</dd>
+        </div>
+        <div className="tile">
+          <dt>{t('achv.title')}</dt>
+          <dd>{t('achv.count', { done: achieved, total: ACHIEVEMENTS.length })}</dd>
+        </div>
+        {lastPlace !== undefined && (
+          <div className="tile">
+            <dt>{t('gameOver.place')}</dt>
+            <dd>{t('report.tile.place', { place: lastPlace })}</dd>
+          </div>
+        )}
+      </dl>
       <ol className="lineage">
         {game.player.lineage.map((l) => (
           <li key={l.generation} className="lineage__item">

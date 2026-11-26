@@ -2021,5 +2021,7 @@
   "guide.nudge": " (next)",
   "delegate.year": "Year {year} in review: {wins}–{losses} · winning records {kk}/{total} · net {net}",
   "delegate.yearPlace": " · stable power #{place}",
-  "ticker.zensho": "Perfect record!"
+  "ticker.zensho": "Perfect record!",
+  "gameOver.tier": "Standing",
+  "gameOver.place": "Final stable power"
 }
