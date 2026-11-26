@@ -27,6 +27,7 @@ import { signed } from './TrainingSection';
 import { signedPoints } from '../points';
 import { MoneyOutlook } from './MoneyOutlook';
 import { Icon } from '../art/Icon';
+import { CUT_KINDS } from '../weekEffect';
 
 type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -115,7 +116,8 @@ export function PrepPanel({
   const act = (a: PrepAction) => {
     const next = doPrep(game, a);
     // 稽古は当たる音、壁を破ったら太鼓、けがは落ちる音
-    if (settings.sound && next !== game) {
+    // 稽古と休ませるは結果カードが音を鳴らす
+    if (settings.sound && next !== game && !CUT_KINDS.has(a.kind)) {
       const done = next.prep.log[next.prep.log.length - 1];
       if ((done?.injured.length ?? 0) > 0) playSound('fall');
       else if ((done?.walls?.length ?? 0) > 0) playSound('drum');

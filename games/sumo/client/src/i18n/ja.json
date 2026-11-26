@@ -2071,5 +2071,11 @@
   "ticker.fusenWin": "不戦勝",
   "ticker.fusenLoss": "不戦敗",
   "scene.guest": "胸を貸す関取",
-  "scene.week": "今週の稽古: {cmd}（{names}）"
+  "scene.week": "今週の稽古: {cmd}（{names}）",
+  "cut.bang": "ドン！",
+  "cut.withMaster": "親方が胸を出す",
+  "cut.withGuest": "よその関取の胸を借りる",
+  "cut.others": "ほか{n}人",
+  "cut.hurt": "けが！",
+  "cut.gradeUp": "{what} {grade}に！"
 }

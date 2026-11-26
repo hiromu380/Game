@@ -2071,5 +2071,11 @@
   "ticker.fusenWin": "Win by default",
   "ticker.fusenLoss": "Loss by default",
   "scene.guest": "Visiting sekitori",
-  "scene.week": "This week: {cmd} ({names})"
+  "scene.week": "This week: {cmd} ({names})",
+  "cut.bang": "Bam!",
+  "cut.withMaster": "The stablemaster takes the charge",
+  "cut.withGuest": "A visiting sekitori lends his chest",
+  "cut.others": "+{n} more",
+  "cut.hurt": "Injured!",
+  "cut.gradeUp": "{what} up to {grade}!"
 }

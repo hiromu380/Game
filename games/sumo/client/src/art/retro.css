@@ -1931,3 +1931,182 @@ body.has-modal {
   background: var(--paper);
   border: 2px solid var(--ink);
 }
+/* 稽古の結果カード: ぶつかる場面 → バーが伸びる → 判子 */
+.cut {
+  max-width: 420px;
+}
+.cut__title {
+  text-align: center;
+}
+.cut__stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px;
+  min-height: 84px;
+  margin: 4px 0 6px;
+  border-bottom: 3px solid var(--line, var(--muted));
+  background: linear-gradient(transparent 70%, color-mix(in srgb, var(--gold) 18%, transparent));
+  overflow: hidden;
+}
+.cut__stage.is-pair {
+  gap: 0;
+}
+.cut__face {
+  display: inline-block;
+  line-height: 0;
+}
+.cut__face--r {
+  transform: scaleX(-1);
+}
+.cut__bang {
+  align-self: center;
+  min-width: 2.5em;
+  text-align: center;
+  font-family: var(--font-head);
+  color: var(--shu);
+  opacity: 0;
+}
+.cut.is-stage1 .cut__bang,
+.cut.is-stage2 .cut__bang {
+  opacity: 1;
+}
+.cut__vs {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.cut__zzz {
+  position: absolute;
+  margin: -6px 0 0 -10px;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--ai);
+}
+.cut__rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cut__row {
+  display: grid;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 2px solid var(--line, var(--muted));
+  background: var(--paper);
+}
+.cut__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.cut__stat,
+.cut__fatigue {
+  display: grid;
+  grid-template-columns: 2.6em 1.6em minmax(0, 1fr) 4.4em;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.cut__fatigue {
+  grid-template-columns: calc(4.2em + 6px) minmax(0, 1fr) 4.4em;
+  gap: 6px;
+}
+.cut__stat.is-still {
+  opacity: 0.7;
+}
+.cut__weekno {
+  font-size: 0.8em;
+  opacity: 0.85;
+}
+.cut__stat .bar,
+.cut__fatigue .bar {
+  height: 8px;
+}
+.cut__fill {
+  transition: width 0.7s steps(10, end);
+}
+.cut__fill.is-reset {
+  transition: none;
+}
+.cut__delta {
+  text-align: right;
+}
+.cut__up {
+  color: var(--good);
+}
+.cut__down {
+  color: var(--shu);
+}
+.cut__stat.is-crossed .grade {
+  background: var(--gold);
+  color: var(--paper);
+  border-color: var(--gold);
+}
+.cut__stamp {
+  padding: 0 6px;
+  border: 2px solid currentColor;
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  transform: rotate(-4deg);
+}
+.cut__stamp.is-up {
+  color: var(--gold);
+}
+.cut__stamp.is-wall {
+  color: var(--shu);
+}
+.cut__stamp.is-hurt {
+  color: var(--paper);
+  background: var(--shu);
+  border-color: var(--shu);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cut.is-stage0 .cut__face--l {
+    transform: translateX(-28px);
+  }
+  .cut.is-stage0 .cut__face--r {
+    transform: translateX(28px) scaleX(-1);
+  }
+  .cut__face--l,
+  .cut__face--r {
+    transition: transform 0.32s steps(4, end);
+  }
+  .cut.is-stage1 .cut__bang {
+    animation: cut-bang 0.3s steps(3, end);
+  }
+  .cut__face--hop {
+    animation: cut-hop 0.5s steps(3, end) 2;
+  }
+  .cut__stamp {
+    animation: cut-stamp 0.25s steps(3, end);
+  }
+}
+@keyframes cut-bang {
+  from {
+    transform: scale(2);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes cut-hop {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes cut-stamp {
+  from {
+    transform: rotate(-4deg) scale(1.8);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(-4deg) scale(1);
+    opacity: 1;
+  }
+}

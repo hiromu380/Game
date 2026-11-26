@@ -9,6 +9,7 @@ import {
   type GameState,
   type MidBasho,
   type Stance,
+  type WeekResult,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
@@ -44,6 +45,8 @@ import { BASHO_DAYS, tickerRow } from '../ticker';
 import { keyTarget } from '../keys';
 import { lookOfRikishi } from '../art/Portraits';
 import { targetOf } from '../targets';
+import { TrainingCut } from './TrainingCut';
+import { CUT_KINDS } from '../weekEffect';
 
 type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
 
@@ -151,6 +154,17 @@ export function GameScreen({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+  // 稽古の結果カード: 週の行動が1つ進んだとき（稽古・休ませる）だけ出す。まとめて進めたとき・読み込んだときは出さない
+  const [cut, setCut] = useState<WeekResult | null>(null);
+  const prepSeen = useRef({ basho: game.bashoIndex, weeks: game.prep.log.length });
+  useEffect(() => {
+    const was = prepSeen.current;
+    const now = game.prep.log.length;
+    prepSeen.current = { basho: game.bashoIndex, weeks: now };
+    if (was.basho !== game.bashoIndex || now !== was.weeks + 1) return;
+    const w = game.prep.log[now - 1]!;
+    if (CUT_KINDS.has(w.action.kind)) setCut(w);
+  }, [game.bashoIndex, game.prep.log]);
   const master = game.oyakata.find((o) => o.id === game.player.oyakataId)!;
   const blocked = isBlocked(game);
   // 場所前の4週間を終えるまで、本場所へは進めない（1年の早送りはできる）
@@ -352,6 +366,7 @@ export function GameScreen({
         </button>
       </footer>
 
+      {cut && <TrainingCut game={game} week={cut} ranks={ranks} onDone={() => setCut(null)} />}
       {/* 実績の知らせは、窓をすべて閉じてから出す */}
       {!delegated && !showReport && !highlights && (
         <AchievementToast
