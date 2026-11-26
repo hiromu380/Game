@@ -227,12 +227,13 @@ export function BashoTicker({
         )}
         <p className="note">{t('ticker.legend')}</p>
         <div className="modal__actions">
+          {/* Esc でも押せる（飛ばす → 次へ） */}
           {done ? (
-            <button className="button button--primary" onClick={onDone}>
+            <button className="button button--primary" data-dismiss onClick={onDone}>
               {doneLabel}
             </button>
           ) : (
-            <button className="button" onClick={() => setDay(to)}>
+            <button className="button" data-dismiss onClick={() => setDay(to)}>
               {t('ticker.skip')}
             </button>
           )}
