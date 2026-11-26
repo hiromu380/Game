@@ -87,3 +87,46 @@ export function bandOf(v: number): { grade: Grade; pos: number } {
   const upper = i === 0 ? 100 : GRADE_FLOORS[i - 1]![1];
   return { grade, pos: Math.max(0, Math.min(1, (v - floor) / (upper - floor))) };
 }
+
+export interface PrepTotal {
+  id: number;
+  name: string;
+  /** いちばん伸びた能力（伸びていなければ null） */
+  best: StatMove | null;
+  /** 3つの能力の伸びの合計 */
+  gain: number;
+  walls: number;
+  hurt: boolean;
+}
+
+/** 場所前の4週間の積み上げ（弟子ごと）。伸びた順。けが・壁破りのあった弟子は伸びがなくても出す */
+export function prepTotals(game: Pick<GameState, 'rikishi' | 'prep'>): PrepTotal[] {
+  const sum = new Map<number, Record<Style, number>>();
+  const walls = new Map<number, number>();
+  const hurt = new Set<number>();
+  for (const w of game.prep.log) {
+    for (const g of w.gains) {
+      const s = sum.get(g.id) ?? { oshi: 0, yotsu: 0, waza: 0 };
+      for (const k of STYLES) s[k] += g[k];
+      sum.set(g.id, s);
+    }
+    for (const x of w.walls ?? []) walls.set(x.id, (walls.get(x.id) ?? 0) + 1);
+    for (const id of w.injured) hurt.add(id);
+  }
+  const out: PrepTotal[] = [];
+  for (const [id, s] of sum) {
+    const r = game.rikishi.find((x) => x.id === id);
+    if (!r) continue;
+    const moves = STYLES.map((key): StatMove => {
+      const after = r.abilities[key];
+      const before = after - s[key];
+      return { key, before, after, gradeBefore: gradeOf(before), gradeAfter: gradeOf(after) };
+    });
+    const gain = STYLES.reduce((a, k) => a + s[k], 0);
+    const top = [...moves].sort((p, q) => q.after - q.before - (p.after - p.before))[0]!;
+    const best = top.after > top.before ? top : null;
+    if (!best && !walls.has(id) && !hurt.has(id)) continue;
+    out.push({ id, name: r.name, best, gain, walls: walls.get(id) ?? 0, hurt: hurt.has(id) });
+  }
+  return out.sort((p, q) => q.gain - p.gain || p.id - q.id);
+}

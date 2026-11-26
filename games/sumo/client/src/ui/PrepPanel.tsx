@@ -27,7 +27,9 @@ import { signed } from './TrainingSection';
 import { signedPoints } from '../points';
 import { MoneyOutlook } from './MoneyOutlook';
 import { Icon } from '../art/Icon';
-import { CUT_KINDS } from '../weekEffect';
+import { CUT_KINDS, prepTotals } from '../weekEffect';
+import { PixelPortrait } from '../art/PixelPortrait';
+import { lookOfRikishi } from '../art/Portraits';
 
 type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -329,7 +331,10 @@ export function PrepPanel({
       )}
       <MoneyOutlook game={game} />
       {left === 0 ? (
-        <p className="prep__done">{t('prep.done')}</p>
+        <>
+          <p className="prep__done">{t('prep.done')}</p>
+          <PrepTotals game={game} ranks={ranks} />
+        </>
       ) : (
         <>
           <p
@@ -500,6 +505,62 @@ export function PrepPanel({
             </div>
           )}
         </>
+      )}
+    </section>
+  );
+}
+
+/** 一覧に出す人数（よく伸びた順） */
+const TOTAL_ROWS = 6;
+
+/** 場所前の仕上がり: 4週で弟子ごとにどれだけ伸びたか（いちばん伸びた能力・ランクの変化・壁・けが） */
+function PrepTotals({ game, ranks }: { game: GameState; ranks: ReadonlyMap<number, Rank> }) {
+  const { t } = useI18n();
+  const all = prepTotals(game);
+  if (all.length === 0) return null;
+  const rows = all.slice(0, TOTAL_ROWS);
+  return (
+    <section className="totals" aria-label={t('prep.totals')}>
+      <h3 className="totals__title">{t('prep.totals')}</h3>
+      <ul className="totals__list">
+        {rows.map((x) => {
+          const r = game.rikishi.find((y) => y.id === x.id)!;
+          const up = x.best && x.best.gradeAfter !== x.best.gradeBefore;
+          return (
+            <li key={x.id} className="totals__row">
+              <PixelPortrait look={lookOfRikishi(r, ranks.get(r.id) ?? null)} size={28} />
+              <span className="totals__name">{x.name}</span>
+              {x.best && (
+                <span className="totals__gain">
+                  {t(`style.${x.best.key}`)}
+                  <span className="cut__up"> {signedPoints(x.best.after - x.best.before)}</span>
+                </span>
+              )}
+              {x.best && (
+                <span className={`totals__grade ${up ? 'is-up' : ''}`}>
+                  {up ? (
+                    <>
+                      <span className={`grade grade--${x.best.gradeBefore}`}>
+                        {x.best.gradeBefore}
+                      </span>
+                      →
+                      <span className={`grade grade--${x.best.gradeAfter}`}>
+                        {x.best.gradeAfter}
+                      </span>
+                    </>
+                  ) : (
+                    <span className={`grade grade--${x.best.gradeAfter}`}>{x.best.gradeAfter}</span>
+                  )}
+                </span>
+              )}
+              {x.walls > 0 && <span className="tag tag--wall">{t('prep.totals.wall')}</span>}
+              {x.hurt && <span className="tag tag--warn">{t('prep.hurt')}</span>}
+            </li>
+          );
+        })}
+      </ul>
+      {all.length > rows.length && (
+        <p className="note">{t('cut.others', { n: all.length - rows.length })}</p>
       )}
     </section>
   );

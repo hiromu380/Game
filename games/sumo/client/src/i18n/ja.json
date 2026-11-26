@@ -2079,5 +2079,7 @@
   "cut.hurt": "けが！",
   "cut.gradeUp": "{what} {grade}に！",
   "talk.prep.label": "第{n}週の稽古",
-  "talk.prep.partner": "申し合いの相手"
+  "talk.prep.partner": "申し合いの相手",
+  "prep.totals": "この場所前の仕上がり",
+  "prep.totals.wall": "壁破り"
 }

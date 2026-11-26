@@ -58,3 +58,26 @@ describe('週の稽古の効果', () => {
     expect(gradeUp({ ...row, stats: [{ ...row.stats[0]!, gradeAfter: 'C' }] })).toBeNull();
   });
 });
+
+describe('場所前の積み上げ', () => {
+  it('4週の伸びを弟子ごとに足し、伸びた順に並べる', async () => {
+    const { prepTotals } = await import('../src/weekEffect');
+    let g = play(7, 4);
+    const [a, b] = mine(g);
+    const start = new Map(g.rikishi.map((r) => [r.id, { ...r.abilities }]));
+    g = doPrep(g, { kind: 'coach', id: a!.id });
+    g = doPrep(g, { kind: 'coach', id: a!.id });
+    g = doPrep(g, { kind: 'spar', a: a!.id, b: b!.id });
+    const totals = prepTotals(g);
+    for (let i = 1; i < totals.length; i++)
+      expect(totals[i - 1]!.gain).toBeGreaterThanOrEqual(totals[i]!.gain);
+    const ta = totals.find((x) => x.id === a!.id)!;
+    const r = g.rikishi.find((x) => x.id === a!.id)!;
+    const s0 = start.get(a!.id)!;
+    expect(ta.gain).toBeCloseTo(
+      r.abilities.oshi + r.abilities.yotsu + r.abilities.waza - s0.oshi - s0.yotsu - s0.waza,
+      6,
+    );
+    if (ta.best) expect(ta.best.before).toBeCloseTo(s0[ta.best.key], 6);
+  });
+});

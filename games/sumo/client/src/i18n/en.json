@@ -2079,5 +2079,7 @@
   "cut.hurt": "Injured!",
   "cut.gradeUp": "{what} up to {grade}!",
   "talk.prep.label": "Week {n} training",
-  "talk.prep.partner": "Sparring partner"
+  "talk.prep.partner": "Sparring partner",
+  "prep.totals": "Pre-tournament progress",
+  "prep.totals.wall": "Broke wall"
 }
