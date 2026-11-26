@@ -22,6 +22,8 @@ describe('表示の整形', () => {
     expect(money(t, 12_340_000, 'ja')).toBe('1,234万円');
     expect(money(t, 8_200, 'ja')).toBe('8,200円');
     expect(money(makeT('en'), 12_340_000, 'en')).toBe('¥12.3M');
+    // 英語では符号を ¥ の前に
+    expect(money(makeT('en'), -921_000, 'en')).toBe('-¥921k');
   });
 
   it('場所の名前と成績', () => {

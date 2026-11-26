@@ -30,11 +30,12 @@ export function money(t: TranslateFn, input: number, lang: 'ja' | 'en'): string 
     const abs = Math.abs(yen);
     const value =
       abs >= 1_000_000
-        ? `${(yen / 1_000_000).toFixed(1)}M`
+        ? `${(abs / 1_000_000).toFixed(1)}M`
         : abs >= 1_000
-          ? `${Math.round(yen / 1_000)}k`
-          : `${Math.round(yen)}`;
-    return t('money.yen', { value });
+          ? `${Math.round(abs / 1_000)}k`
+          : `${Math.round(abs)}`;
+    // 英語では符号を ¥ の前に（-¥921k）
+    return (yen < 0 ? '-' : '') + t('money.yen', { value });
   }
   if (Math.abs(yen) < 10_000)
     return t('money.yen', { value: Math.round(yen).toLocaleString('ja-JP') });

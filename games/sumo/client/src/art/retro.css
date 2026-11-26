@@ -1655,7 +1655,10 @@ body.has-modal {
   }
 }
 .achv__nearItem {
+  /* 項目の中では折り返さず、項目と項目の間で折り返す */
+  display: inline-block;
   white-space: nowrap;
+  max-width: 100%;
 }
 .callout--warn {
   border-left-color: var(--shu);
@@ -1820,4 +1823,18 @@ body.has-modal {
 .bout__kdesc {
   margin: 4px 0 0;
   font-size: 0.85rem;
+}
+/* 英語: 言葉が長いので、狭い画面ではコマンドの費用を次の行へ折り返す */
+@media (max-width: 640px) {
+  :root[lang='en'] .prep__cmd {
+    flex-wrap: wrap;
+  }
+}
+/* 能力の名前（英語の Technique など）が切れないように。行ごとにバーの長さがずれないよう幅は決め打ち */
+:root[lang='en'] .abilities__item {
+  grid-template-columns: 6em 1fr;
+}
+/* 縦並びの列は画面の幅に収める（中のいちばん広いものに引っ張られて、ページが横にはみ出さないように） */
+.stack {
+  grid-template-columns: minmax(0, 1fr);
 }
