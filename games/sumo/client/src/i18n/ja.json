@@ -1542,7 +1542,7 @@
   "glossary.term.sansho.name": "三賞",
   "glossary.term.sansho.desc": "幕内の殊勲賞・敢闘賞・技能賞。関脇以下で、その場所に活躍した力士に贈る（勝ち越しが目安で、明文の決まりはない）。",
   "glossary.term.kinboshi.name": "金星",
-  "glossary.term.kinboshi.desc": "平幕が横綱に勝つこと。持ち給金が大きく増える。",
+  "glossary.term.kinboshi.desc": "平幕（前頭）の力士が横綱に勝つこと。持ち給金が10円上がり、引退するまで場所ごとの褒賞金が増える。",
   "glossary.term.jungyo.name": "巡業",
   "glossary.term.jungyo.desc": "場所の間に地方を回る興行。稽古の公開・子どもとの稽古・初切・髪結いの実演・握手会がある。",
   "glossary.term.shokkiri.name": "初切",
@@ -2024,5 +2024,11 @@
   "ticker.zensho": "全勝！",
   "gameOver.tier": "部屋の格",
   "gameOver.place": "最後の部屋の力",
-  "year.mvp": "年間最多勝 {name}"
+  "year.mvp": "年間最多勝 {name}",
+  "glossary.term.yusho.name": "優勝",
+  "glossary.term.yusho.desc": "各段でいちばん勝ち星の多い力士。同じ星の力士が並べば千秋楽に優勝決定戦。幕内の優勝者には天皇賜杯が渡される。",
+  "glossary.term.zensho.name": "全勝",
+  "glossary.term.zensho.desc": "その場所の取組にすべて勝つこと（関取は15戦、幕下以下は7戦）。全勝での優勝は「全勝優勝」と呼ばれる。",
+  "glossary.term.nenkan.name": "年間最多勝",
+  "glossary.term.nenkan.desc": "1年6場所の勝ち星を合わせて、いちばん多い力士。番付や優勝とは別に、1年を通して安定して勝った証として記録に残る。"
 }

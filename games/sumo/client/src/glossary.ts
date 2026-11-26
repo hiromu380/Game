@@ -29,6 +29,7 @@ interface Seen {
 type Term = { id: string; group: GlossaryGroup; seen: (s: Seen) => boolean };
 
 const always = () => true;
+
 const happened = (ids: string[]) => (s: Seen) =>
   s.journal('happening', (e) => ids.includes(e.id as string));
 
@@ -76,6 +77,9 @@ export const TERMS: readonly Term[] = [
   { id: 'nakabi', group: 'basho', seen: (s) => s.played },
   { id: 'senshuraku', group: 'basho', seen: (s) => s.played },
   { id: 'kensho', group: 'basho', seen: (s) => s.sekitori },
+  { id: 'yusho', group: 'basho', seen: (s) => s.played },
+  { id: 'zensho', group: 'basho', seen: (s) => s.played },
+  { id: 'nenkan', group: 'basho', seen: (s) => s.game.bashoIndex >= 6 },
   { id: 'sansho', group: 'basho', seen: (s) => s.journal('sansho') },
   {
     id: 'kinboshi',

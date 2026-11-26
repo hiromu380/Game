@@ -111,3 +111,10 @@
 - 一年の流れ: [デイリー 春場所番付](https://www.daily.co.jp/general/2026/02/24/0020056514.shtml)・[報知 稽古総見](https://topics.smt.docomo.ne.jp/article/hochi/sports/hochi-20240417-OHT1T51160)・[日経 27年の日程](https://www.nikkei.com/article/DGXZQOKC29BAF0Z20C25A5000000/)・[番付編成会議](https://dohyounomokugekisya.net/archives/56286.html)・[ABEMA 巡業日程](https://times.abema.tv/sumo/schedule)・[海老名場所](https://koubo.jp/press-release/prtimes/c11710_r4191)
 - 部屋の人: [早稲田大 おかみさんの研究](https://tokorozawa.w.waseda.jp/kg/doc/50_ronbun/2021/5021A307_abs.pdf)・[和樂web 裏方](https://intojapanwaraku.com/culture/40993)・[Number おかみさん](https://number.bunshun.jp/articles/-/844969)
 - 規律: [くるまのニュース 運転禁止](https://kuruma-news.jp/post/169542)・[car-me](https://car-me.jp/articles/12120)・[デイリー 暴力決別宣言](https://www.daily.co.jp/general/2018/10/25/0011761820.shtml)・[さきがけ 師匠の暴力](https://www.sakigake.jp/news/article/20260227CO0148/)・[デイリー 中川親方](https://www.daily.co.jp/general/2020/07/13/0013506219.shtml)・[NEWSポストセブン](https://news-postseven.com/archives/20180318_659087.html?DETAIL=)
+
+## 優勝・全勝・金星・年間最多勝（2026-11-26 調べ。相撲の手帖の言葉）
+
+- 優勝: 各段で勝ち星がいちばん多い力士。同点なら千秋楽に優勝決定戦を行う（幕下で9人による決定戦の例: https://www.daily.co.jp/general/2021/01/24/0014028405.shtml ）。幕内の優勝者は賜杯を手にする（ https://www.daily.co.jp/general/2020/01/26/0013064732.shtml ）
+- 全勝: その場所の取組（関取15番・幕下以下7番）にすべて勝つこと
+- 金星: 平幕が横綱に勝つこと。持ち給金が10円上がる（realism.md「持ち給金」）
+- 年間最多勝: 1年6場所の勝ち星の合計がいちばん多い力士として記録に残る（白鵬の86勝が最多、朝乃山は2019年に小結以下で初めて獲得: https://spaia.jp/column/sumo/15644 ・ https://www.daily.co.jp/sumo/2015/11/20/0008581461.shtml ）
