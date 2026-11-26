@@ -2066,5 +2066,8 @@
   "sound.high": "Sound: high",
   "sound.mid": "Sound: medium",
   "sound.low": "Sound: low",
-  "highlight.skipAll": "Skip to results"
+  "highlight.skipAll": "Skip to results",
+  "ticker.today": "Today's bout",
+  "ticker.fusenWin": "Win by default",
+  "ticker.fusenLoss": "Loss by default"
 }

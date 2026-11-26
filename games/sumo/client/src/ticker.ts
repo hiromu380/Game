@@ -62,3 +62,15 @@ export function zenshoDay(row: TickerRow, sekitori: boolean): number | null {
   });
   return last;
 }
+
+/** 今日の一番に出す弟子と取組（本命に取組があれば本命、なければ並びのいちばん上） */
+export function todayBout<R extends { id: number; bouts?: readonly BoutResult[] }>(
+  rows: readonly R[],
+  day: number,
+  honmei: number | null,
+): { row: R; bout: BoutResult } | null {
+  const today = (r: R) => r.bouts?.find((b) => b.day === day);
+  const row = rows.find((x) => x.id === honmei && today(x)) ?? rows.find((x) => today(x));
+  const bout = row && today(row);
+  return row && bout ? { row, bout } : null;
+}

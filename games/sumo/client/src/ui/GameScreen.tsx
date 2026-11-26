@@ -124,6 +124,15 @@ export function GameScreen({
   // 大一番をその場で見せた場所（結果の後の見せ場には、もう出さない）
   const liveShown = useRef<number | null>(null);
   const ranks = useMemo(() => ranksOf(game.banzuke, game.titles), [game.banzuke, game.titles]);
+  /** 今日の一番の相手（名前・部屋・顔） */
+  const whoOf = (id: number) => {
+    const r = game.rikishi.find((x) => x.id === id);
+    return {
+      name: r?.name ?? '?',
+      stable: game.stables.find((st) => st.id === r?.stableId)?.name ?? '—',
+      look: r ? lookOfRikishi(r, ranks.get(id) ?? null) : undefined,
+    };
+  };
   /** 星取りの行の顔の絵（場所前の番付で描く） */
   const lookFor = (id: number) => {
     const r = game.rikishi.find((x) => x.id === id);
@@ -357,12 +366,14 @@ export function GameScreen({
       {ticker?.half === 'first' && (
         <BashoTicker
           honmei={game.player.honmei}
+          who={whoOf}
           title={t('ticker.first')}
           rows={ticker.mid.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: ranks.get(m.id) ?? null,
             look: lookFor(m.id),
+            bouts: m.bouts,
             absentFrom: m.out ? (m.injuredDay ?? 0) : undefined,
             target: targetOf(
               game,
@@ -404,12 +415,14 @@ export function GameScreen({
       {ticker?.half === 'second' && ticker.next.lastReport && (
         <BashoTicker
           honmei={game.player.honmei}
+          who={whoOf}
           title={t('ticker.second')}
           rows={ticker.next.lastReport.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
             name: game.rikishi.find((r) => r.id === m.id)?.name ?? '?',
             rank: m.record.rank,
             look: lookFor(m.id),
+            bouts: m.bouts,
             // 目標は場所前の番付で見積もる（ここの game はまだ場所前）
             target: (() => {
               const r = game.rikishi.find((x) => x.id === m.id);

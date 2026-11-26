@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { isSekitori, type Rank } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { isSekitori, type BoutResult, type Rank } from '@ichimon/sim';
+import { useI18n, type MessageKey } from '../i18n';
 import { dayLabel, rankLabel } from '../format';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
@@ -11,6 +11,7 @@ import {
   zenshoDay,
   type Mark,
   type TickerRow,
+  todayBout,
 } from '../ticker';
 import { PixelPortrait } from '../art/PixelPortrait';
 import type { Look } from '../art/look';
@@ -37,7 +38,12 @@ export interface TickerEntry extends TickerRow {
   target?: Target;
   /** 顔の絵（なければ出さない） */
   look?: Look;
+  /** その場所の取組（今日の一番に使う。なければ出さない） */
+  bouts?: readonly BoutResult[];
 }
+
+/** 今日の一番の相手（名前・部屋・顔の絵） */
+export type WhoOf = (id: number) => { name: string; stable: string; look?: Look };
 
 /**
  * 本場所を1日ずつ見せる星取表: from 日目から to 日目まで、自分の弟子の白星・黒星が1日ずつ入っていく。
@@ -51,11 +57,14 @@ export function BashoTicker({
   doneLabel,
   onDone,
   honmei = null,
+  who,
 }: {
   title: string;
   rows: TickerEntry[];
   /** 本命（応援予想）の弟子 */
   honmei?: number | null;
+  /** 相手の名前と顔（あれば今日の一番を出す） */
+  who?: WhoOf;
   from: number;
   to: number;
   doneLabel: string;
@@ -135,6 +144,7 @@ export function BashoTicker({
         <p className="ticker__day" aria-live="polite">
           {day < from ? t('ticker.ready') : dayLabel(t, day)}
         </p>
+        {who && day >= from && <TodayBout rows={rows} day={day} honmei={honmei} who={who} />}
         {rows.length === 0 ? (
           <p className="note">{t('report.noneMine')}</p>
         ) : (
@@ -247,6 +257,58 @@ export function BashoTicker({
             </button>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 今日の一番: その日に取組のあった弟子のうち、本命（いなければ番付のいちばん上）の一番を、顔・相手・決まり手で見せる。
+ * 表を眺めるだけにしない（毎日ひとつ、見せ場を作る）
+ */
+function TodayBout({
+  rows,
+  day,
+  honmei,
+  who,
+}: {
+  rows: TickerEntry[];
+  day: number;
+  honmei: number | null;
+  who: WhoOf;
+}) {
+  const { t } = useI18n();
+  const pick = todayBout(rows, day, honmei);
+  if (!pick) return null;
+  const { row: r, bout: b } = pick;
+  const won = b.winnerId === r.id;
+  const opp = who(b.eastId === r.id ? b.westId : b.eastId);
+  return (
+    <div className={`today ${won ? 'is-win' : 'is-loss'}`} aria-live="polite">
+      <span className="today__label">{t('ticker.today')}</span>
+      <div className="today__pair">
+        <span className="today__side">
+          {r.look && <PixelPortrait look={r.look} size={40} />}
+          <strong>{r.name}</strong>
+        </span>
+        <span className="today__result">
+          <span className="today__mark" aria-hidden="true">
+            {won ? '○' : '●'}
+          </span>
+          <span>
+            {b.fusen
+              ? t(won ? 'ticker.fusenWin' : 'ticker.fusenLoss')
+              : t(`kimarite.${b.kimarite}` as MessageKey)}
+          </span>
+          <span className="visually-hidden">{t(won ? 'report.win' : 'report.loss')}</span>
+        </span>
+        <span className="today__side">
+          {opp.look && <PixelPortrait look={opp.look} size={40} />}
+          <span>
+            {opp.name}
+            <small className="muted">（{opp.stable}）</small>
+          </span>
+        </span>
       </div>
     </div>
   );

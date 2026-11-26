@@ -1877,3 +1877,46 @@ body.has-modal {
 .hoshitori__head {
   align-items: center;
 }
+/* 今日の一番（星取りの上に、毎日ひとつ） */
+.today {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border: 3px double var(--muted);
+  background: var(--paper);
+}
+.today.is-win {
+  border-color: var(--gold);
+}
+.today__label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.today__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+}
+.today__side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.today__side:last-child {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.today__result {
+  display: grid;
+  justify-items: center;
+  font-size: 0.8rem;
+}
+.today__mark {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.today.is-win .today__mark {
+  color: var(--shu);
+}

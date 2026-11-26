@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { BoutResult } from '@ichimon/sim';
-import { BASHO_DAYS, decidedUntil, tallyUntil, tickerRow, zenshoDay } from '../src/ticker';
+import {
+  BASHO_DAYS,
+  decidedUntil,
+  tallyUntil,
+  tickerRow,
+  todayBout,
+  zenshoDay,
+} from '../src/ticker';
 import { autoStep, play } from '../../sim/test/play';
 
 const bout = (day: number, winnerId: number, fusen = false): BoutResult => ({
@@ -78,5 +85,21 @@ describe('全勝', () => {
     expect(zenshoDay(row(['win', 'loss', 'win', 'win', 'win', 'win', 'win']), false)).toBeNull();
     expect(zenshoDay(row(['win', 'win', 'win']), false)).toBeNull();
     expect(zenshoDay(row(Array(7).fill('win')), true)).toBeNull();
+  });
+});
+
+describe('今日の一番', () => {
+  const rows = [
+    { id: 1, bouts: [bout(1, 1), bout(3, 2)] },
+    { id: 2, bouts: [bout(2, 2), bout(3, 2)] },
+  ];
+  it('本命に取組があれば本命、なければ並びのいちばん上', () => {
+    expect(todayBout(rows, 3, 2)?.row.id).toBe(2);
+    expect(todayBout(rows, 3, null)?.row.id).toBe(1);
+    expect(todayBout(rows, 2, 1)?.row.id).toBe(2);
+  });
+  it('誰も取組のない日は出さない', () => {
+    expect(todayBout(rows, 4, 1)).toBeNull();
+    expect(todayBout([{ id: 3 }], 1, 3)).toBeNull();
   });
 });
