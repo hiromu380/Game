@@ -59,8 +59,18 @@ export function TopMenu({
       {open && (
         <div className="topmenu__list" role="menu" aria-label={t('menu.open')}>
           {item(
-            settings.sound ? t('sound.on') : t('sound.off'),
-            () => update({ sound: !settings.sound }),
+            settings.sound ? t(`sound.${settings.volume}`) : t('sound.off'),
+            // 大 → 中 → 小 → 切 → 大
+            () =>
+              update(
+                !settings.sound
+                  ? { sound: true, volume: 'high' }
+                  : settings.volume === 'high'
+                    ? { volume: 'mid' }
+                    : settings.volume === 'mid'
+                      ? { volume: 'low' }
+                      : { sound: false },
+              ),
             settings.sound,
           )}
           {item(

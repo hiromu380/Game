@@ -202,7 +202,6 @@
   "facility.scout.name": "スカウトの網",
   "facility.scout.desc": "高校・大学・各地の関係者とのつきあい。入門希望者が増え、見立てが当たりやすくなる",
   "money.line.facilities": "設備の維持・契約",
-  "sound.on": "音: 入",
   "sound.off": "音: 切",
   "bout.title": "{day}の取組",
   "bout.aria": "土俵を上から見た図",
@@ -2063,5 +2062,8 @@
   "kimarite.desc.kimedashi": "相手の腕を外から抱えて動けなくし（極め）、土俵の外へ出す。",
   "kimarite.desc.tsuridashi": "相手のまわしを取って吊り上げ、土俵の外へ運ぶ。",
   "kimarite.desc.isamiashi": "攻めて相手を追い込みながら、自分の足が先に土俵の外へ出てしまう（非技）。",
-  "year.next": "来年の目標:"
+  "year.next": "来年の目標:",
+  "sound.high": "音: 大",
+  "sound.mid": "音: 中",
+  "sound.low": "音: 小"
 }

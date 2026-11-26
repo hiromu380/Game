@@ -2,6 +2,7 @@
  * セーブ（localStorage）。古い版は sim の migrateSave で今の版に変換する。読めないセーブは捨てる
  */
 import { migrateSave, type GameState } from '@ichimon/sim';
+import type { Volume } from './sound';
 import type { GuideProgress } from './guide';
 
 const KEY = 'ichimon.save';
@@ -85,9 +86,9 @@ export function parseSaveFile(text: string): GameState | null {
   }
 }
 
-/** 1: 言語 / 2: 効果音の入り切り / 3: はじめての人向けの案内の進み具合 / 4: 説明を出すか / 5: 場所前のコマンドを確かめずに決めるか */
+/** 1: 言語 / 2: 効果音の入り切り / 3: はじめての人向けの案内の進み具合 / 4: 説明を出すか / 5: 場所前のコマンドを確かめずに決めるか / 6: 音量 */
 export interface Settings {
-  version: 5;
+  version: 6;
   lang: 'ja' | 'en';
   sound: boolean;
   guide: GuideProgress;
@@ -95,23 +96,26 @@ export interface Settings {
   help: boolean;
   /** 場所前のコマンドを「これで決める？」なしで、押したらすぐ決める。既定は確かめる */
   quickPrep: boolean;
+  /** 音量（音を出すときの大きさ。切るのは sound） */
+  volume: Volume;
 }
 
 export const DEFAULT_GUIDE: GuideProgress = { dismissed: false, done: [], tips: [] };
 
 export const DEFAULT_SETTINGS: Settings = {
-  version: 5,
+  version: 6,
   lang: 'ja',
   sound: true,
   guide: DEFAULT_GUIDE,
   help: false,
   quickPrep: false,
+  volume: 'high',
 };
 
 const strings = (x: unknown): string[] =>
   Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : [];
 
-/** 保存した設定を読む（版1は効果音を入れ、版1・2は案内をはじめから、版3までは説明を出さない、版4までは確かめる。壊れていれば既定） */
+/** 保存した設定を読む（版1は効果音を入れ、版1・2は案内をはじめから、版3までは説明を出さない、版4までは確かめる、版5までは音量が大。壊れていれば既定） */
 export function parseSettings(text: string | null): Settings {
   try {
     const s = JSON.parse(text ?? 'null') as {
@@ -121,11 +125,13 @@ export function parseSettings(text: string | null): Settings {
       guide?: { dismissed?: boolean; done?: unknown; tips?: unknown };
       help?: boolean;
       quickPrep?: boolean;
+      volume?: string;
     } | null;
-    if (!s || ![1, 2, 3, 4, 5].includes(s.version ?? 0)) return DEFAULT_SETTINGS;
+    if (!s || ![1, 2, 3, 4, 5, 6].includes(s.version ?? 0)) return DEFAULT_SETTINGS;
     const v = s.version!;
     return {
-      version: 5,
+      version: 6,
+      volume: v >= 6 && (s.volume === 'mid' || s.volume === 'low') ? s.volume : 'high',
       help: v >= 4 && s.help === true,
       quickPrep: v >= 5 && s.quickPrep === true,
       lang: s.lang === 'en' ? 'en' : 'ja',

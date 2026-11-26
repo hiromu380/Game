@@ -5,6 +5,7 @@ import { loadGame, loadSettings, saveGame, saveSettings, type Settings } from '.
 import { NewGame } from './ui/NewGame';
 import { GameScreen } from './ui/GameScreen';
 import { SettingsContext } from './settings';
+import { setVolume } from './sound';
 import { useDialogs } from './dialogs';
 
 export function App() {
@@ -24,6 +25,8 @@ export function App() {
 
   useEffect(() => saveGame(game), [game]);
   useEffect(() => saveSettings(settings), [settings]);
+  // 音量のつまみを設定に合わせる
+  useEffect(() => setVolume(settings.volume), [settings.volume]);
   // 説明を出すか（CSS で注記・手引き・タブの案内を隠す）
   useEffect(() => {
     document.documentElement.dataset.help = settings.help ? 'on' : 'off';

@@ -105,7 +105,17 @@ describe('ユーザー設定', () => {
     // 版3（説明の設定がない）は、説明を出さないで読む。版4は設定のとおり
     expect(parseSettings(JSON.stringify({ version: 3, lang: 'ja', sound: true })).help).toBe(false);
     expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).help).toBe(true);
-    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).version).toBe(5);
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, help: true })).version).toBe(6);
+    // 版5まで（音量の設定がない）は大。版6は設定のとおり（おかしな値は大）
+    expect(parseSettings(JSON.stringify({ version: 5, lang: 'ja', sound: true })).volume).toBe(
+      'high',
+    );
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, volume: 'low' })).volume).toBe(
+      'low',
+    );
+    expect(parseSettings(JSON.stringify({ ...DEFAULT_SETTINGS, volume: 'loud' })).volume).toBe(
+      'high',
+    );
     // 版4（確かめの設定がない）は確かめる。版5は設定のとおり
     expect(
       parseSettings(JSON.stringify({ version: 4, lang: 'ja', sound: true, help: true })).quickPrep,
