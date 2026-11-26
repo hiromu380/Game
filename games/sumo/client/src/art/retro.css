@@ -2225,3 +2225,12 @@ body.has-modal {
 .trend__legend span {
   white-space: nowrap;
 }
+.today__watch {
+  display: block;
+  margin: 6px auto 0;
+  min-height: 44px;
+}
+.today__side small {
+  display: block;
+  white-space: nowrap;
+}

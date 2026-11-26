@@ -10,6 +10,7 @@ import {
   type MidBasho,
   type Stance,
   type WeekResult,
+  type BoutResult,
 } from '@ichimon/sim';
 import { useI18n } from '../i18n';
 import { OyakataPortrait } from '../art/Portraits';
@@ -46,6 +47,7 @@ import { keyTarget } from '../keys';
 import { lookOfRikishi } from '../art/Portraits';
 import { targetOf } from '../targets';
 import { TrainingCut } from './TrainingCut';
+import { BoutViewer } from './BoutViewer';
 import { CUT_KINDS } from '../weekEffect';
 
 type Tab = 'stable' | 'deshi' | 'banzuke' | 'ledger' | 'lineage' | 'association' | 'journal';
@@ -117,6 +119,8 @@ export function GameScreen({
   >(null);
   // 大一番の作戦を聞いている
   const [tactic, setTactic] = useState<Plan | null>(null);
+  // 星取りの途中で見ている今日の一番（見ている間は星取りを止める）
+  const [watching, setWatching] = useState<BoutResult | null>(null);
   // 大一番をその場で見せている（その日の何番目か）
   const [live, setLive] = useState<{
     next: GameState;
@@ -382,6 +386,8 @@ export function GameScreen({
         <BashoTicker
           honmei={game.player.honmei}
           who={whoOf}
+          onWatch={setWatching}
+          paused={watching !== null}
           title={t('ticker.first')}
           rows={ticker.mid.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
@@ -431,6 +437,8 @@ export function GameScreen({
         <BashoTicker
           honmei={game.player.honmei}
           who={whoOf}
+          onWatch={setWatching}
+          paused={watching !== null}
           title={t('ticker.second')}
           rows={ticker.next.lastReport.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
@@ -562,6 +570,15 @@ export function GameScreen({
             </div>
           </div>
         </div>
+      )}
+      {/* 星取りの途中で見る今日の一番（星取りの窓より上に重ねる） */}
+      {watching && (
+        <BoutViewer
+          game={game}
+          bout={watching}
+          sound={settings.sound}
+          onClose={() => setWatching(null)}
+        />
       )}
     </div>
   );

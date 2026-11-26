@@ -58,6 +58,8 @@ export function BashoTicker({
   onDone,
   honmei = null,
   who,
+  onWatch,
+  paused = false,
 }: {
   title: string;
   rows: TickerEntry[];
@@ -65,6 +67,10 @@ export function BashoTicker({
   honmei?: number | null;
   /** 相手の名前と顔（あれば今日の一番を出す） */
   who?: WhoOf;
+  /** 今日の一番を見る（渡すと「取組を見る」を出す） */
+  onWatch?: (b: BoutResult) => void;
+  /** 取組を見ている間は止める（日を進めない・次へ進まない） */
+  paused?: boolean;
   from: number;
   to: number;
   doneLabel: string;
@@ -80,10 +86,10 @@ export function BashoTicker({
     if (settings.sound) playSound('drum');
   }, [settings.sound]);
   useEffect(() => {
-    if (day >= to) return;
+    if (day >= to || paused) return;
     const id = setTimeout(() => setDay((d) => Math.min(to, d + 1)), day < from ? 380 : DAY_MS);
     return () => clearTimeout(id);
-  }, [day, from, to]);
+  }, [day, from, to, paused]);
   // 札が入った日に、小さな木の音。勝ち越しが決まった日は拍手
   const anyMark = day >= from && rows.some((r) => r.marks[day - 1] != null);
   const kkToday = rows.filter((r) => {
@@ -132,10 +138,10 @@ export function BashoTicker({
   const next = useRef(onDone);
   next.current = onDone;
   useEffect(() => {
-    if (!done || reduced) return;
+    if (!done || reduced || paused) return;
     const id = setTimeout(() => next.current(), AUTO_NEXT_MS);
     return () => clearTimeout(id);
-  }, [done, reduced]);
+  }, [done, reduced, paused]);
   const days = Array.from({ length: BASHO_DAYS }, (_, i) => i + 1);
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ticker-title">
@@ -144,7 +150,9 @@ export function BashoTicker({
         <p className="ticker__day" aria-live="polite">
           {day < from ? t('ticker.ready') : dayLabel(t, day)}
         </p>
-        {who && day >= from && <TodayBout rows={rows} day={day} honmei={honmei} who={who} />}
+        {who && day >= from && (
+          <TodayBout rows={rows} day={day} honmei={honmei} who={who} onWatch={onWatch} />
+        )}
         {rows.length === 0 ? (
           <p className="note">{t('report.noneMine')}</p>
         ) : (
@@ -271,11 +279,13 @@ function TodayBout({
   day,
   honmei,
   who,
+  onWatch,
 }: {
   rows: TickerEntry[];
   day: number;
   honmei: number | null;
   who: WhoOf;
+  onWatch?: (b: BoutResult) => void;
 }) {
   const { t } = useI18n();
   const pick = todayBout(rows, day, honmei);
@@ -310,6 +320,11 @@ function TodayBout({
           </span>
         </span>
       </div>
+      {onWatch && !b.fusen && (
+        <button className="button today__watch" onClick={() => onWatch(b)}>
+          {t('bigBout.watch')}
+        </button>
+      )}
     </div>
   );
 }
