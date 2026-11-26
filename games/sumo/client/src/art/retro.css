@@ -1810,3 +1810,10 @@ body.has-modal {
 .year__mvpRecord {
   display: block;
 }
+.kbook__group summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}

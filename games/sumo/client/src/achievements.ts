@@ -3,7 +3,13 @@
  * 元弟子と今の弟子の記録・日誌・代から数える純粋関数で、セーブに持たない。
  * 一度満たせば戻らない値（累計・最高位・日誌）だけを使う（お金や名声の今の値は使わない）
  */
-import type { Career, GameState, JournalEntry, JournalEvent } from '@ichimon/sim';
+import {
+  KIMARITE_BY_ID,
+  type Career,
+  type GameState,
+  type JournalEntry,
+  type JournalEvent,
+} from '@ichimon/sim';
 import { stablePeople } from './records';
 
 export type AchievementGroup = 'deshi' | 'banzuke' | 'honors' | 'records' | 'stable' | 'kyokai';
@@ -143,6 +149,12 @@ export const ACHIEVEMENTS = [
     test: (x: Ctx) => ev(x, 'danpatsu').some((e) => e.venue === 'kokugikan'),
   },
   { id: 'oyakata', group: 'records', test: (x: Ctx) => ev(x, 'retire').some((e) => !!e.oyakata) },
+  {
+    id: 'kimarite20',
+    group: 'records',
+    test: (x: Ctx) => kimariteKinds(x) >= 20,
+    progress: (x: Ctx) => [kimariteKinds(x), 20],
+  },
   // 部屋を営む
   {
     id: 'patrons5',
@@ -230,6 +242,15 @@ export const ACHIEVEMENTS = [
   /** 数で進む実績の、今の数と要る数（「入門 7／10」。目標を目の前に見せる） */
   progress?: (x: Ctx) => readonly [number, number];
 }[];
+
+/** 部屋が白星を挙げた決まり手の種類（非技を除く） */
+function kimariteKinds(x: Ctx): number {
+  const kinds = new Set<string>();
+  for (const c of x.careers)
+    for (const [id, n] of Object.entries(c.kimarite ?? {}))
+      if (n > 0 && KIMARITE_BY_ID.get(id)?.group !== 'hiwaza') kinds.add(id);
+  return kinds.size;
+}
 
 function sum0(xs: number[]): number {
   return xs.reduce((s, v) => s + v, 0);

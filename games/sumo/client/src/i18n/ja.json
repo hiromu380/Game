@@ -2030,5 +2030,10 @@
   "glossary.term.zensho.name": "全勝",
   "glossary.term.zensho.desc": "その場所の取組にすべて勝つこと（関取は15戦、幕下以下は7戦）。全勝での優勝は「全勝優勝」と呼ばれる。",
   "glossary.term.nenkan.name": "年間最多勝",
-  "glossary.term.nenkan.desc": "1年6場所の勝ち星を合わせて、いちばん多い力士。番付や優勝とは別に、1年を通して安定して勝った証として記録に残る。"
+  "glossary.term.nenkan.desc": "1年6場所の勝ち星を合わせて、いちばん多い力士。番付や優勝とは別に、1年を通して安定して勝った証として記録に残る。",
+  "kimariteBook.title": "決まり手帳",
+  "kimariteBook.unknown": "？？？",
+  "kimariteBook.best": "部屋で{n}勝（最多 {name}）",
+  "achv.kimarite20.name": "技の引き出し",
+  "achv.kimarite20.hint": "部屋で20種類の決まり手で勝つ（非技を除く）"
 }

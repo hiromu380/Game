@@ -7,6 +7,7 @@ import { Alumni } from './Alumni';
 import { HallOfFame, RecordsPanel } from './RecordsPanel';
 import { GoalsPanel } from './GoalsPanel';
 import { AchievementsPanel } from './AchievementsPanel';
+import { KimaritePanel } from './KimaritePanel';
 import { GlossaryPanel } from './Glossary';
 
 /** 一門の系譜: 歴代の親方・殿堂・歴代記録・部屋の親方衆・家訓・名跡の空き */
@@ -53,6 +54,7 @@ export function LineageTab({ game }: { game: GameState }) {
       <GlossaryPanel game={game} />
       <HallOfFame game={game} />
       <RecordsPanel game={game} />
+      <KimaritePanel game={game} />
       <Alumni game={game} />
 
       <section className="panel">

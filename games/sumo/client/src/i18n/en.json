@@ -2030,5 +2030,10 @@
   "glossary.term.zensho.name": "Zensho (perfect record)",
   "glossary.term.zensho.desc": "Winning every bout of the tournament (15 for sekitori, 7 below). A title won this way is a zensho yusho.",
   "glossary.term.nenkan.name": "Most wins of the year",
-  "glossary.term.nenkan.desc": "The wrestler with the most wins across the year's six tournaments, kept as a record of steady strength apart from rank and titles."
+  "glossary.term.nenkan.desc": "The wrestler with the most wins across the year's six tournaments, kept as a record of steady strength apart from rank and titles.",
+  "kimariteBook.title": "Kimarite book",
+  "kimariteBook.unknown": "???",
+  "kimariteBook.best": "{n} stable wins (most: {name})",
+  "achv.kimarite20.name": "Bag of tricks",
+  "achv.kimarite20.hint": "Win with 20 different kimarite as a stable (excluding non-techniques)"
 }
