@@ -361,6 +361,7 @@ export function Hakoniwa({
       live = false;
     };
     // items は key（中身）で比べる
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 中身が同じなら読み直さない
   }, [key]);
   const box = useMemo<View | null>(() => {
     if (!placed) return null;

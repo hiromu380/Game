@@ -112,6 +112,7 @@ export function BashoTicker({
     if (kkIds.size > 0) playSound('clap');
     else if (anyMark) playSound('tick');
     // 日が進んだときだけ鳴らす
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- その日の札で1回だけ
   }, [day]);
   const done = day >= to;
   // 見終えたら、少し間をおいて次へ（押せばすぐ）。動きを減らす設定では待つ

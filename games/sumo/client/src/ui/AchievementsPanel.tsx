@@ -111,6 +111,7 @@ export function AchievementToast({
     const timer = setTimeout(onClose, TOAST_SECONDS * 1000);
     return () => clearTimeout(timer);
     // 同じ知らせで鳴らし直さない
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 知らせが替わったときだけ
   }, [key]);
   if (ids.length === 0) return null;
   return (

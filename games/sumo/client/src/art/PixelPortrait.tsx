@@ -48,6 +48,7 @@ export function PixelPortrait({
 }) {
   const key = portraitKey(look, variant);
   // look は毎回作り直されるので、鍵（中身）で比べる
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 鍵が同じなら絵も同じ
   const url = useMemo(() => urlOf(look, variant), [key]);
   const dim = PORTRAIT[variant];
   return (
