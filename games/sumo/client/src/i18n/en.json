@@ -1796,7 +1796,7 @@
   "rewards.chip.patronLeave": "Left",
   "rewards.label.sekitoriUp": "{name} promoted to sekitori",
   "rewards.label.sekitoriDown": "{name} lost sekitori status",
-  "rewards.chip.perBasho": "Account {yen}/tournament",
+  "rewards.chip.perBasho": "{yen}/basho",
   "rewards.label.injury": "{name} injured",
   "rewards.chip.injury": "{basho} tournament(s) out",
   "rewards.label.henka": "{name}'s henka",

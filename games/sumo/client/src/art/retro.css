@@ -1842,3 +1842,11 @@ body.has-modal {
 .standing {
   max-width: 560px;
 }
+/* 部屋への影響: 札が長いとき（英語など）は、札を次の行の右へ回す */
+.rewards__line {
+  flex-wrap: wrap;
+}
+.rewards__chip {
+  margin-left: auto;
+  max-width: 100%;
+}
