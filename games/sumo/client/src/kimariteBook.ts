@@ -33,3 +33,35 @@ export function kimariteCollected(game: GameState): { got: number; total: number
   const book = kimariteBook(game).filter((e) => e.group !== 'hiwaza');
   return { got: book.filter((e) => e.count > 0).length, total: book.length };
 }
+
+/**
+ * 1行の説明がある決まり手（よく出るものから。調べた事実は docs/rikishi-life.md「決まり手」）。
+ * 文言は i18n の kimarite.desc.<id>（テストで、ここと文言がそろっているかを見る）
+ */
+export const KIMARITE_DESC: ReadonlySet<string> = new Set([
+  'tsukidashi',
+  'tsukitaoshi',
+  'oshidashi',
+  'oshitaoshi',
+  'yorikiri',
+  'yoritaoshi',
+  'abisetaoshi',
+  'uwatenage',
+  'shitatenage',
+  'kotenage',
+  'sukuinage',
+  'uwatedashinage',
+  'sotogake',
+  'uchigake',
+  'watashikomi',
+  'tsukiotoshi',
+  'katasukashi',
+  'hatakikomi',
+  'hikiotoshi',
+  'hikkake',
+  'okuridashi',
+  'okuritaoshi',
+  'kimedashi',
+  'tsuridashi',
+  'isamiashi',
+]);

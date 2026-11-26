@@ -1,6 +1,6 @@
 import type { GameState, KimariteGroup } from '@ichimon/sim';
 import { useI18n, type MessageKey } from '../i18n';
-import { kimariteBook, kimariteCollected } from '../kimariteBook';
+import { KIMARITE_DESC, kimariteBook, kimariteCollected } from '../kimariteBook';
 
 const GROUPS: KimariteGroup[] = ['kihon', 'nage', 'kake', 'sori', 'hineri', 'tokushu', 'hiwaza'];
 
@@ -29,6 +29,11 @@ export function KimaritePanel({ game }: { game: GameState }) {
                 <li key={e.id} className={`achv__item ${e.count > 0 ? 'is-done' : ''}`}>
                   <span>
                     {e.count > 0 ? t(`kimarite.${e.id}` as MessageKey) : t('kimariteBook.unknown')}
+                    {e.count > 0 && KIMARITE_DESC.has(e.id) && (
+                      <small className="achv__hint">
+                        {t(`kimarite.desc.${e.id}` as MessageKey)}
+                      </small>
+                    )}
                     {e.best && (
                       <small className="achv__hint">
                         {t('kimariteBook.best', { name: e.best.name, n: e.count })}

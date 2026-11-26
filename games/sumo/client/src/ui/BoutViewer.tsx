@@ -16,6 +16,7 @@ import { rikishiLook } from '../art/look';
 import { playSound } from '../sound';
 import { useSettings } from '../settings';
 import { hitStopTime, type StopState } from '../playback/boutStage';
+import { KIMARITE_DESC } from '../kimariteBook';
 import { withStep } from '../guide';
 
 /** 取組の演出（ドット絵の土俵と実況）。動きを減らす設定では最後の場面と実況の全文を見せる */
@@ -198,6 +199,12 @@ export function BoutViewer({
                   kimarite: t(`kimarite.${bout.kimarite}` as MessageKey),
                 })}
                 {def?.group === 'hiwaza' ? ` ${t('bout.hiwazaNote')}` : ''}
+              </p>
+            )}
+            {done && KIMARITE_DESC.has(bout.kimarite) && (
+              <p className="bout__kdesc">
+                <span className="tag">{t(`kimarite.${bout.kimarite}` as MessageKey)}</span>{' '}
+                {t(`kimarite.desc.${bout.kimarite}` as MessageKey)}
               </p>
             )}
           </div>
