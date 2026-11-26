@@ -100,7 +100,8 @@ export function TacticDialog({
           {help}
         </p>
         <div className="modal__actions">
-          <button className="button button--primary" onClick={() => onGo(tactic)}>
+          {/* 選ばなければ「いつも通り」。Esc でも押せる */}
+          <button className="button button--primary" data-dismiss onClick={() => onGo(tactic)}>
             {t('tactic.go')}
           </button>
         </div>

@@ -95,7 +95,8 @@ export function BigBoutCard({
         <div className="modal__actions">
           {phase === 'before' ? (
             <>
-              <button className="button" onClick={reveal}>
+              {/* Esc は「結果だけ見る」→「次へ」 */}
+              <button className="button" data-dismiss onClick={reveal}>
                 {t('bigBout.skip')}
               </button>
               <button className="button button--primary" onClick={() => setPhase('watching')}>
@@ -105,7 +106,7 @@ export function BigBoutCard({
           ) : (
             <>
               {onSkip && !last && <SkipButton onSkip={onSkip} />}
-              <button className="button button--primary" onClick={onNext}>
+              <button className="button button--primary" data-dismiss onClick={onNext}>
                 {nextLabel ?? (last ? t('highlight.toReport') : t('highlight.next'))}
               </button>
             </>

@@ -144,8 +144,10 @@ export function MidBashoDialog({
         {mid.mine.some((m) => !m.out) && <p className="note">{t('mid.stanceNote')}</p>}
         {mid.mine.some((m) => m.out) && <p className="note">{t('mid.note')}</p>}
         <div className="modal__actions">
+          {/* 選ばなければ「そのまま・いつも通り」で進む。Esc でも押せる */}
           <button
             className="button button--primary"
+            data-dismiss
             onClick={() => onContinue([...reenter], stance)}
           >
             {t('mid.continue')}
