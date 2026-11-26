@@ -6,8 +6,8 @@ import { playSound } from '../sound';
 import { PixelPortrait } from '../art/PixelPortrait';
 import { lookOfRikishi } from '../art/Portraits';
 import { oyakataLook, rikishiLook, type Look } from '../art/look';
-import { signedPoints } from '../points';
-import { bandOf, gradeUp, weekEffect, type EffectRow, type StatMove } from '../weekEffect';
+import { points, signedPoints } from '../points';
+import { bandOf, weekEffect, type EffectRow, type StatMove, type Verdict } from '../weekEffect';
 
 /** 演出の段: 0 ぶつかる前 → 1 ぶつかった（バーが伸びる） → 2 判子（ランク・壁・けが） */
 type Stage = 0 | 1 | 2;
@@ -66,9 +66,9 @@ export function TrainingCut({
         : a.kind === 'spar'
           ? [lookOf(a.a), lookOf(a.b)]
           : null;
-  const anyUp = rows.some((r) => gradeUp(r));
-  const anyWall = rows.some((r) => r.wall);
-  const anyHurt = rows.some((r) => r.hurt);
+  const anyUp = rows.some((r) => r.verdict.kind === 'gradeUp');
+  const anyWall = rows.some((r) => r.verdict.kind === 'wall');
+  const anyHurt = rows.some((r) => r.verdict.kind === 'hurt');
   useEffect(() => {
     if (stage === 2) return;
     const hit = setTimeout(() => {
@@ -151,18 +151,12 @@ export function TrainingCut({
 
 function CutRow({ row, stage, rest }: { row: EffectRow; stage: Stage; rest: boolean }) {
   const { t } = useI18n();
-  const up = gradeUp(row);
   return (
     <li className="cut__row">
       <div className="cut__who">
         <strong>{row.name}</strong>
-        {stage === 2 && row.wall && <span className="cut__stamp is-wall">{t('prep.broke')}</span>}
-        {stage === 2 && row.hurt && <span className="cut__stamp is-hurt">{t('cut.hurt')}</span>}
-        {stage === 2 && up && !row.wall && (
-          <span className="cut__stamp is-up">
-            {t('cut.gradeUp', { what: t(`style.${up.key}`), grade: up.gradeAfter })}
-          </span>
-        )}
+        {stage === 2 && <VerdictStamp v={row.verdict} />}
+        {stage === 2 && row.tired && <span className="tag tag--warn">{t('cut.tired')}</span>}
       </div>
       {!rest && (
         <div className="cut__stats">
@@ -234,4 +228,36 @@ function StatBar({ m, stage }: { m: StatMove; stage: Stage }) {
       </span>
     </div>
   );
+}
+
+/** 判子の色の向き: よい・ふつう・伸びなかった・悪い */
+const TONE: Record<Verdict['kind'], 'great' | 'good' | 'flat' | 'bad'> = {
+  hurt: 'bad',
+  wall: 'great',
+  gradeUp: 'great',
+  grew: 'good',
+  aged: 'flat',
+  capped: 'flat',
+  flat: 'flat',
+  fell: 'bad',
+  rested: 'good',
+  fresh: 'flat',
+};
+
+/** 1人の週の結果の判子（判定は weekEffect の verdictOf。どの場合も必ず1つ出す） */
+export function VerdictStamp({ v }: { v: Verdict }) {
+  const { t } = useI18n();
+  const text = (() => {
+    switch (v.kind) {
+      case 'gradeUp':
+        return t('cut.v.gradeUp', { what: t(`style.${v.stat}`), grade: v.grade });
+      case 'grew':
+        return v.next
+          ? t('cut.v.grew', { grade: v.next, n: Math.max(1, points(v.toNext)) })
+          : t('cut.v.grewTop', { what: t(`style.${v.stat}`) });
+      default:
+        return t(`cut.v.${v.kind}`);
+    }
+  })();
+  return <span className={`cut__stamp is-${TONE[v.kind]}`}>{text}</span>;
 }

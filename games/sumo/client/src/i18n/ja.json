@@ -2076,10 +2076,20 @@
   "cut.withMaster": "親方が胸を出す",
   "cut.withGuest": "よその関取の胸を借りる",
   "cut.others": "ほか{n}人",
-  "cut.hurt": "けが！",
-  "cut.gradeUp": "{what} {grade}に！",
   "talk.prep.label": "第{n}週の稽古",
   "talk.prep.partner": "申し合いの相手",
   "prep.totals": "この場所前の仕上がり",
-  "prep.totals.wall": "壁破り"
+  "prep.totals.wall": "壁破り",
+  "cut.tired": "疲れ注意",
+  "cut.v.hurt": "けが！",
+  "cut.v.wall": "壁を破った！",
+  "cut.v.gradeUp": "{what} {grade}に！",
+  "cut.v.grew": "{grade}まであと{n}",
+  "cut.v.grewTop": "{what} 伸びた",
+  "cut.v.aged": "伸び盛りを過ぎた",
+  "cut.v.capped": "素質の壁",
+  "cut.v.flat": "変わらず",
+  "cut.v.fell": "力が落ちた",
+  "cut.v.rested": "疲れが抜けた",
+  "cut.v.fresh": "元気いっぱい"
 }

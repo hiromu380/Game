@@ -81,3 +81,68 @@ describe('場所前の積み上げ', () => {
     if (ta.best) expect(ta.best.before).toBeCloseTo(s0[ta.best.key], 6);
   });
 });
+
+describe('週の結果の判定（漏れなく重なりなく1つ）', async () => {
+  const { verdictOf } = await import('../src/weekEffect');
+  const { gradeOf } = await import('../src/grade');
+  const stat = (key: 'oshi' | 'yotsu' | 'waza', before: number, after: number) => ({
+    key,
+    before,
+    after,
+    gradeBefore: gradeOf(before),
+    gradeAfter: gradeOf(after),
+  });
+  const row = (
+    o: Partial<{ oshi: [number, number]; wall: boolean; hurt: boolean; fat: [number, number] }>,
+  ) => ({
+    stats: [stat('oshi', ...(o.oshi ?? [50, 50])), stat('yotsu', 40, 40), stat('waza', 40, 40)],
+    fatigue: { before: o.fat?.[0] ?? 30, after: o.fat?.[1] ?? 40 },
+    wall: o.wall ?? false,
+    hurt: o.hurt ?? false,
+  });
+  const young = { age: 20, peakAge: 27, talent: 80, abilities: { oshi: 50, yotsu: 40, waza: 40 } };
+  const k = (v: { kind: string }) => v.kind;
+
+  it('稽古の週: 上から順に1つ', () => {
+    expect(k(verdictOf(row({ hurt: true, wall: true }), young, 'coach'))).toBe('hurt');
+    expect(k(verdictOf(row({ wall: true, oshi: [54, 56] }), young, 'coach'))).toBe('wall');
+    expect(verdictOf(row({ oshi: [54, 56] }), young, 'coach')).toEqual({
+      kind: 'gradeUp',
+      stat: 'oshi',
+      grade: 'C',
+    });
+    const grew = verdictOf(row({ oshi: [50, 51.2] }), young, 'coach');
+    expect(grew).toMatchObject({ kind: 'grew', stat: 'oshi', next: 'C' });
+    expect(grew.kind === 'grew' && grew.toNext).toBeCloseTo(3.8);
+    expect(verdictOf(row({ oshi: [88, 89] }), young, 'coach')).toMatchObject({
+      kind: 'grew',
+      next: null,
+    });
+    expect(k(verdictOf(row({ oshi: [50, 49] }), young, 'coach'))).toBe('fell');
+  });
+
+  it('伸びなかったわけ: ピークの年齢を過ぎた → 素質の上限 → そのほか', () => {
+    expect(k(verdictOf(row({}), { ...young, age: 30 }, 'spar'))).toBe('aged');
+    expect(k(verdictOf(row({}), { ...young, talent: 50 }, 'spar'))).toBe('capped');
+    expect(k(verdictOf(row({}), young, 'spar'))).toBe('flat');
+  });
+
+  it('休ませる週: 疲れが抜けた／もともと疲れていない（けがは先）', () => {
+    expect(verdictOf(row({ fat: [40, 25] }), young, 'rest')).toEqual({ kind: 'rested', by: 15 });
+    expect(k(verdictOf(row({ fat: [0, 0] }), young, 'rest'))).toBe('fresh');
+    expect(k(verdictOf(row({ hurt: true, fat: [40, 25] }), young, 'rest'))).toBe('hurt');
+  });
+
+  it('実際の週の結果はどの行にも判定が付く', () => {
+    let g = play(9, 6);
+    const ids = mine(g).map((r) => r.id);
+    for (const a of [
+      { kind: 'coach', id: ids[0]! },
+      { kind: 'spar', a: ids[0]!, b: ids[1]! },
+      { kind: 'rest' },
+    ] as PrepAction[]) {
+      g = doPrep(g, a);
+      for (const r of weekEffect(g, g.prep.log.at(-1)!)) expect(r.verdict.kind).toBeTruthy();
+    }
+  });
+});

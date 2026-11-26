@@ -2076,10 +2076,20 @@
   "cut.withMaster": "The stablemaster takes the charge",
   "cut.withGuest": "A visiting sekitori lends his chest",
   "cut.others": "+{n} more",
-  "cut.hurt": "Injured!",
-  "cut.gradeUp": "{what} up to {grade}!",
   "talk.prep.label": "Week {n} training",
   "talk.prep.partner": "Sparring partner",
   "prep.totals": "Pre-tournament progress",
-  "prep.totals.wall": "Broke wall"
+  "prep.totals.wall": "Broke wall",
+  "cut.tired": "Tired",
+  "cut.v.hurt": "Injured!",
+  "cut.v.wall": "Broke the wall!",
+  "cut.v.gradeUp": "{what} up to {grade}!",
+  "cut.v.grew": "{n} to {grade}",
+  "cut.v.grewTop": "{what} improved",
+  "cut.v.aged": "Past his prime",
+  "cut.v.capped": "At his limit",
+  "cut.v.flat": "No change",
+  "cut.v.fell": "Lost strength",
+  "cut.v.rested": "Rested",
+  "cut.v.fresh": "Fully fresh"
 }

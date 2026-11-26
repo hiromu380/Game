@@ -2055,13 +2055,18 @@ body.has-modal {
   font-size: 0.85rem;
   transform: rotate(-4deg);
 }
-.cut__stamp.is-up {
-  color: var(--gold);
-}
-.cut__stamp.is-wall {
+.cut__stamp.is-great {
   color: var(--shu);
 }
-.cut__stamp.is-hurt {
+.cut__stamp.is-good {
+  color: var(--good);
+}
+.cut__stamp.is-flat {
+  color: var(--muted);
+  border-style: dashed;
+  transform: none;
+}
+.cut__stamp.is-bad {
   color: var(--paper);
   background: var(--shu);
   border-color: var(--shu);
@@ -2135,27 +2140,28 @@ body.has-modal {
   list-style: none;
 }
 .totals__row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 28px 4em auto minmax(0, 1fr);
   align-items: center;
-  gap: 4px 8px;
+  gap: 4px 6px;
   padding: 2px 4px;
   border-bottom: 1px solid var(--line, var(--muted));
   font-variant-numeric: tabular-nums;
 }
 .totals__name {
-  min-width: 4.5em;
+  min-width: 4em;
 }
 .totals__row .tag {
   margin-left: 0;
+  font-size: 0.75rem;
 }
-.totals__grade {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
+.totals__row .cut__stamp {
+  font-size: 0.75rem;
+  transform: none;
+  animation: none;
 }
-.totals__grade.is-up .grade:last-child {
-  background: var(--gold);
-  color: var(--paper);
-  border-color: var(--gold);
+.totals__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }

@@ -30,6 +30,7 @@ import { Icon } from '../art/Icon';
 import { CUT_KINDS, prepTotals } from '../weekEffect';
 import { PixelPortrait } from '../art/PixelPortrait';
 import { lookOfRikishi } from '../art/Portraits';
+import { VerdictStamp } from './TrainingCut';
 
 type Menu = 'coach' | 'spar' | 'mune' | 'degeiko' | 'rest' | 'visit' | 'scout' | 'usual';
 const MENUS: Menu[] = ['coach', 'spar', 'mune', 'degeiko', 'rest', 'visit', 'scout', 'usual'];
@@ -525,36 +526,23 @@ function PrepTotals({ game, ranks }: { game: GameState; ranks: ReadonlyMap<numbe
       <ul className="totals__list">
         {rows.map((x) => {
           const r = game.rikishi.find((y) => y.id === x.id)!;
-          const up = x.best && x.best.gradeAfter !== x.best.gradeBefore;
           return (
             <li key={x.id} className="totals__row">
               <PixelPortrait look={lookOfRikishi(r, ranks.get(r.id) ?? null)} size={28} />
               <span className="totals__name">{x.name}</span>
-              {x.best && (
-                <span className="totals__gain">
-                  {t(`style.${x.best.key}`)}
-                  <span className="cut__up"> {signedPoints(x.best.after - x.best.before)}</span>
-                </span>
-              )}
-              {x.best && (
-                <span className={`totals__grade ${up ? 'is-up' : ''}`}>
-                  {up ? (
-                    <>
-                      <span className={`grade grade--${x.best.gradeBefore}`}>
-                        {x.best.gradeBefore}
-                      </span>
-                      →
-                      <span className={`grade grade--${x.best.gradeAfter}`}>
-                        {x.best.gradeAfter}
-                      </span>
-                    </>
-                  ) : (
-                    <span className={`grade grade--${x.best.gradeAfter}`}>{x.best.gradeAfter}</span>
-                  )}
-                </span>
-              )}
-              {x.walls > 0 && <span className="tag tag--wall">{t('prep.totals.wall')}</span>}
-              {x.hurt && <span className="tag tag--warn">{t('prep.hurt')}</span>}
+              <span className="totals__gain">
+                {x.best && (
+                  <>
+                    {t(`style.${x.best.key}`)}
+                    <span className="cut__up"> {signedPoints(x.best.after - x.best.before)}</span>
+                  </>
+                )}
+              </span>
+              <span className="totals__marks">
+                <VerdictStamp v={x.verdict} />
+                {x.walls > 0 && <span className="tag tag--wall">{t('prep.totals.wall')}</span>}
+                {x.hurt && <span className="tag tag--warn">{t('prep.hurt')}</span>}
+              </span>
             </li>
           );
         })}
