@@ -7,6 +7,7 @@ import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import type { Highlight } from '../highlights';
 import { BoutViewer } from './BoutViewer';
+import { SkipButton } from './SkipButton';
 import { useNames } from './RacePanel';
 
 /** 場所の見せ場: 勝ち越しをかけた最後の一番。取組を見てから（または飛ばして）結果を明かす */
@@ -18,6 +19,7 @@ export function BigBoutCard({
   last,
   nextLabel,
   onNext,
+  onSkip,
 }: {
   game: GameState;
   report: BashoReport;
@@ -27,6 +29,8 @@ export function BigBoutCard({
   /** 「次へ」の代わりの字（本場所の途中で見せるとき） */
   nextLabel?: string;
   onNext: () => void;
+  /** 残りの見せ場をまとめて飛ばす（なければ出さない） */
+  onSkip?: () => void;
 }) {
   const { t } = useI18n();
   const { settings } = useSettings();
@@ -99,9 +103,12 @@ export function BigBoutCard({
               </button>
             </>
           ) : (
-            <button className="button button--primary" onClick={onNext}>
-              {nextLabel ?? (last ? t('highlight.toReport') : t('highlight.next'))}
-            </button>
+            <>
+              {onSkip && !last && <SkipButton onSkip={onSkip} />}
+              <button className="button button--primary" onClick={onNext}>
+                {nextLabel ?? (last ? t('highlight.toReport') : t('highlight.next'))}
+              </button>
+            </>
           )}
         </div>
       </div>

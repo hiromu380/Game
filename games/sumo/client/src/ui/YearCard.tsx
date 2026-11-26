@@ -5,6 +5,7 @@ import { money } from '../format';
 import { yearSummary } from '../yearSummary';
 import { achievedOf, ACHIEVEMENTS, nearAchievements, tierOf } from '../achievements';
 import { goalsOf, nextGoal } from '../goals';
+import { SkipButton } from './SkipButton';
 import { useCountUp } from './CountUp';
 
 /** 年の終わりの見せ場: 1年のふりかえり（数字を札で並べ、部屋の格で締める） */
@@ -14,12 +15,15 @@ export function YearCard({
   counter,
   last,
   onNext,
+  onSkip,
 }: {
   game: GameState;
   lastIndex: number;
   counter: string;
   last: boolean;
   onNext: () => void;
+  /** 残りの見せ場をまとめて飛ばす（なければ出さない） */
+  onSkip?: () => void;
 }) {
   const { t, lang } = useI18n();
   // 数え上げで描き直すたびに数え直さない
@@ -102,6 +106,7 @@ export function YearCard({
           </p>
         )}
         <div className="modal__actions">
+          {onSkip && !last && <SkipButton onSkip={onSkip} />}
           <button className="button button--primary" onClick={onNext}>
             {last ? t('highlight.toReport') : t('highlight.next')}
           </button>

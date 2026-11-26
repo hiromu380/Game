@@ -25,6 +25,7 @@ import { recordValue } from './RecordsPanel';
 import { RaceCard } from './RacePanel';
 import { YearCard } from './YearCard';
 import { Confetti } from './Confetti';
+import { SkipButton } from './SkipButton';
 import { BigBoutCard } from './BigBoutCard';
 
 /** 賜杯（優勝のしるし） */
@@ -168,6 +169,7 @@ export function HighlightDialog({
         counter={counter}
         last={last}
         onNext={next}
+        onSkip={onDone}
       />
     );
   }
@@ -180,6 +182,7 @@ export function HighlightDialog({
         counter={counter}
         last={last}
         onNext={next}
+        onSkip={onDone}
       />
     );
   }
@@ -193,6 +196,7 @@ export function HighlightDialog({
         counter={counter}
         last={last}
         onNext={next}
+        onSkip={onDone}
       />
     );
   }
@@ -206,6 +210,7 @@ export function HighlightDialog({
         counter={counter}
         last={last}
         onNext={next}
+        onSkip={onDone}
       />
     );
   }
@@ -359,9 +364,12 @@ export function HighlightDialog({
               </button>
             </>
           ) : (
-            <button className="button button--primary" onClick={next}>
-              {last ? t('highlight.toReport') : t('highlight.next')}
-            </button>
+            <>
+              {!last && <SkipButton onSkip={onDone} />}
+              <button className="button button--primary" onClick={next}>
+                {last ? t('highlight.toReport') : t('highlight.next')}
+              </button>
+            </>
           )}
         </div>
       </div>

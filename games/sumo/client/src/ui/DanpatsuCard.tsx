@@ -7,6 +7,7 @@ import { lookOfAlumnus } from '../art/Portraits';
 import { PixelPortrait } from '../art/PixelPortrait';
 import { useSettings } from '../settings';
 import { playSound } from '../sound';
+import { SkipButton } from './SkipButton';
 import type { Highlight } from '../highlights';
 
 /** 引退相撲・断髪式の1枚。師匠が止めばさみを入れると髷が落ちる */
@@ -17,6 +18,7 @@ export function DanpatsuCard({
   counter,
   last,
   onNext,
+  onSkip,
 }: {
   game: GameState;
   report: BashoReport;
@@ -24,6 +26,8 @@ export function DanpatsuCard({
   counter: string;
   last: boolean;
   onNext: () => void;
+  /** 残りの見せ場をまとめて飛ばす（なければ出さない） */
+  onSkip?: () => void;
 }) {
   const { t } = useI18n();
   const { settings } = useSettings();
@@ -78,9 +82,12 @@ export function DanpatsuCard({
         )}
         <div className="modal__actions">
           {cut ? (
-            <button className="button button--primary" onClick={onNext}>
-              {last ? t('highlight.toReport') : t('highlight.next')}
-            </button>
+            <>
+              {onSkip && !last && <SkipButton onSkip={onSkip} />}
+              <button className="button button--primary" onClick={onNext}>
+                {last ? t('highlight.toReport') : t('highlight.next')}
+              </button>
+            </>
           ) : (
             <button
               className="button button--primary"

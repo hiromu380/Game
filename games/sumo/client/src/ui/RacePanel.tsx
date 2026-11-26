@@ -3,6 +3,7 @@ import type { BashoReport, BoutResult, GameState, YushoRace } from '@ichimon/sim
 import { useI18n, type TranslateFn } from '../i18n';
 import { bashoName, dayLabel } from '../format';
 import { useSettings } from '../settings';
+import { SkipButton } from './SkipButton';
 import { BoutViewer } from './BoutViewer';
 
 function decidedText(t: TranslateFn, race: YushoRace): string {
@@ -102,6 +103,7 @@ export function RaceCard({
   counter,
   last,
   onNext,
+  onSkip,
 }: {
   game: GameState;
   report: BashoReport;
@@ -109,6 +111,8 @@ export function RaceCard({
   counter: string;
   last: boolean;
   onNext: () => void;
+  /** 残りの見せ場をまとめて飛ばす（なければ出さない） */
+  onSkip?: () => void;
 }) {
   const { t } = useI18n();
   const { settings } = useSettings();
@@ -163,6 +167,7 @@ export function RaceCard({
               {t('race.watchMine', { name: n.name(id) })}
             </button>
           )}
+          {onSkip && !last && <SkipButton onSkip={onSkip} />}
           <button className="button button--primary" onClick={onNext}>
             {last ? t('highlight.toReport') : t('highlight.next')}
           </button>
