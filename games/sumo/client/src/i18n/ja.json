@@ -2069,5 +2069,7 @@
   "highlight.skipAll": "結果へ飛ばす",
   "ticker.today": "今日の一番",
   "ticker.fusenWin": "不戦勝",
-  "ticker.fusenLoss": "不戦敗"
+  "ticker.fusenLoss": "不戦敗",
+  "scene.guest": "胸を貸す関取",
+  "scene.week": "今週の稽古: {cmd}（{names}）"
 }

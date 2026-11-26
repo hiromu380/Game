@@ -3,7 +3,14 @@
  * 稽古場: 申し合い（四つ・押し）・鉄砲（押し）・すり足（技）・四股（体づくり）・見取り（休養）・親方は上がり座敷
  * 外観: けが人は寮の縁側で布団・番付の下の2人は掃除（門の前の道と敷石）・ちゃんこ番・稽古場に入りきらない弟子は庭で四股
  */
-import { isSekitori, ranksOf, stableRoles, type GameState, type Rikishi } from '@ichimon/sim';
+import {
+  isSekitori,
+  ranksOf,
+  stableRoles,
+  type GameState,
+  type PrepAction,
+  type Rikishi,
+} from '@ichimon/sim';
 import type { PersonLook, Pose } from './people';
 import { depthAmong, toScreen, type Piece } from './grid';
 import { WEIGHTS_FROM_DOJO } from '../sprites/keikoba';
@@ -25,6 +32,8 @@ export interface Actor {
   to?: { x: number; y: number };
   /** 動きのずれ（全員が同じ拍で動かないように） */
   phase: number;
+  /** よその部屋の関取（胸を借りる週。押しても話しかけない） */
+  guest?: boolean;
 }
 
 function lookOf(r: Rikishi, sekitori: boolean, pose: Pose, flip = false): Actor['look'] {
@@ -138,12 +147,20 @@ export interface Cast {
 export function keikobaCast(
   game: Pick<GameState, 'player' | 'rikishi' | 'banzuke' | 'titles'>,
   spots: typeof KEIKOBA_SPOTS = KEIKOBA_SPOTS,
+  /** その週の行動（個別指導・申し合い・胸を借りるは、その弟子を土俵の真ん中に立てる） */
+  week?: PrepAction,
 ): Cast {
   const used: Record<Training, number> = { ring: 0, teppo: 0, suriashi: 0, shiko: 0, sit: 0 };
   const keikoba: Actor[] = [];
   const overflow: Rikishi[] = [];
-  for (const { r, sekitori } of mine(game)) {
-    if (r.injury > 0) continue;
+  const all = mine(game);
+  const scene = weekScene(all, spots, week);
+  if (scene) {
+    keikoba.push(...scene.actors);
+    used.ring = spots.ring.length;
+  }
+  for (const { r, sekitori } of all) {
+    if (r.injury > 0 || scene?.ids.has(r.id)) continue;
     const what = WANTS[r.policy].find((w) => used[w] < spots[w].length);
     if (!what) {
       overflow.push(r);
@@ -167,18 +184,73 @@ export function keikobaCast(
     });
   }
   // 申し合いは相手がいないとできない: 1人だけなら四股に回す
-  const ring = keikoba.filter((a) => a.look.pose === 'push');
-  if (ring.length === 1) ring[0]!.look = { ...ring[0]!.look, pose: 'shiko', flip: false };
-  keikoba.push({
-    key: 'oyakata',
-    rikishiId: null,
-    look: OYAKATA_LOOK('oyakataSit'),
-    x: spots.oyakata.x,
-    y: spots.oyakata.y,
-    z: 100 + spots.oyakata.y,
-    phase: 0,
-  });
+  const ring = keikoba.filter((a) => a.look.pose === 'push' && !scene?.ids.has(a.rikishiId!));
+  if (!scene && ring.length === 1) ring[0]!.look = { ...ring[0]!.look, pose: 'shiko', flip: false };
+  // 個別指導の週は、親方が土俵のそばに立って見る
+  if (!scene?.coach)
+    keikoba.push({
+      key: 'oyakata',
+      rikishiId: null,
+      look: OYAKATA_LOOK('oyakataSit'),
+      x: spots.oyakata.x,
+      y: spots.oyakata.y,
+      z: 100 + spots.oyakata.y,
+      phase: 0,
+    });
   return { keikoba, overflow };
+}
+
+/** その週の行動の場面（土俵の2か所を使う）。けがで出られないときは出さない */
+function weekScene(
+  all: ReturnType<typeof mine>,
+  spots: typeof KEIKOBA_SPOTS,
+  week: PrepAction | undefined,
+): { actors: Actor[]; ids: Set<number>; coach: boolean } | null {
+  if (!week || (week.kind !== 'coach' && week.kind !== 'spar' && week.kind !== 'mune')) return null;
+  const ids = week.kind === 'spar' ? [week.a, week.b] : [week.id];
+  const who = ids.map((id) => all.find((x) => x.r.id === id && x.r.injury === 0));
+  if (who.some((w) => !w)) return null;
+  const [s0, s1] = [spots.ring[0], spots.ring[1]] as { x: number; y: number; flip?: boolean }[];
+  const at = (s: { x: number; y: number }) => ({ x: s.x, y: s.y, z: 100 + s.y });
+  const actors: Actor[] = who.map((w, i) => {
+    const s = i === 0 ? s0! : s1!;
+    return {
+      key: `r${w!.r.id}`,
+      rikishiId: w!.r.id,
+      // 申し合いの絵は2人で1枚。個別指導は親方へのぶつかり（鉄砲の構え）
+      look: lookOf(w!.r, w!.sekitori, week.kind === 'coach' ? 'teppo' : 'push', s.flip ?? false),
+      ...at(s),
+      phase: 0,
+    };
+  });
+  if (week.kind === 'coach') {
+    // 親方が向かいに立って、ぶつかりを受ける
+    actors.push({
+      key: 'oyakata',
+      rikishiId: null,
+      look: { ...OYAKATA_LOOK('oyakata'), flip: s1!.flip ?? false },
+      ...at(s1!),
+      phase: 0,
+    });
+  } else if (week.kind === 'mune') {
+    // よその関取が胸を貸す（白いまわし・大きな体）
+    actors.push({
+      key: 'guest',
+      rikishiId: null,
+      guest: true,
+      look: {
+        pose: 'push',
+        skin: 2,
+        mawashi: 'white',
+        hair: 'mage',
+        build: 2,
+        flip: s1!.flip ?? false,
+      },
+      ...at(s1!),
+      phase: 0,
+    });
+  }
+  return { actors, ids: new Set(ids), coach: week.kind === 'coach' };
 }
 
 /** 外観の人の奥行きを、奥から手前へ並べた物に合わせる（門や幟の奥にいる人は、その後ろに描く） */

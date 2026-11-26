@@ -75,7 +75,11 @@ export function KeikobaScene({
   const titled = (cast: Actor[]): SceneActor[] =>
     cast.map((a) => ({
       ...a,
-      title: a.rikishiId === null ? t('scene.oyakata') : (names.get(a.rikishiId) ?? ''),
+      title: a.guest
+        ? t('scene.guest')
+        : a.rikishiId === null
+          ? t('scene.oyakata')
+          : (names.get(a.rikishiId) ?? ''),
     }));
   // 今週の行動で動いた量を、その弟子の頭の上に浮かべる
   const week = game.prep.log[game.prep.log.length - 1];
@@ -102,6 +106,21 @@ export function KeikobaScene({
         ...week.injured.map((id): Pop => ({ rikishiId: id, text: t('prep.hurt'), tone: 'hurt' })),
       ]
     : [];
+  // 個別指導・申し合い・胸を借りるの週は、稽古場の土俵にその場面を出し、1行で添える
+  const act = week?.action;
+  const weekIds =
+    act?.kind === 'spar'
+      ? [act.a, act.b]
+      : act?.kind === 'coach' || act?.kind === 'mune'
+        ? [act.id]
+        : [];
+  const weekNote =
+    act && weekIds.length > 0
+      ? t('scene.week', {
+          cmd: t(`prep.cmd.${act.kind}`),
+          names: weekIds.map((id) => names.get(id) ?? '?').join('・'),
+        })
+      : null;
   const talkTo = game.rikishi.find((r) => r.id === picked && r.stableId === game.player.stableId);
   const onPick = setGame ? (id: number) => setPicked((now) => (now === id ? null : id)) : undefined;
   const season = seasonOf(game.bashoIndex);
@@ -203,19 +222,22 @@ export function KeikobaScene({
           </div>
         </>
       ) : (
-        <Hakoniwa
-          items={boxDrawn(keikoba)}
-          base={keikoba[0]!.sprite}
-          view={{ x0: 0, y0: 0, x1: stage.width, y1: stage.height }}
-          label={t('scene.keikoba')}
-          onAction={onAction}
-          actors={titled(keikobaCast(game, spots).keikoba)}
-          onPick={onPick}
-          selected={talkTo?.id ?? null}
-          maxWidth={stage.width * 2}
-          pops={pops}
-          popKey={popKey}
-        />
+        <>
+          <Hakoniwa
+            items={boxDrawn(keikoba)}
+            base={keikoba[0]!.sprite}
+            view={{ x0: 0, y0: 0, x1: stage.width, y1: stage.height }}
+            label={t('scene.keikoba')}
+            onAction={onAction}
+            actors={titled(keikobaCast(game, spots, week?.action).keikoba)}
+            onPick={onPick}
+            selected={talkTo?.id ?? null}
+            maxWidth={stage.width * 2}
+            pops={pops}
+            popKey={popKey}
+          />
+          {weekNote && <p className="scene-box__week">{weekNote}</p>}
+        </>
       )}
       {setGame &&
         (talkTo ? (

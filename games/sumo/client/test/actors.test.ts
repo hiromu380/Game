@@ -110,6 +110,31 @@ describe('箱庭の人の配置', () => {
     }
   });
 
+  it('その週の行動の場面: 申し合いは2人が土俵、個別指導は親方が向かい、胸を借りるはよその関取', () => {
+    const g = play(5, 8);
+    const rs = mine(g);
+    for (const r of rs) r.injury = 0;
+    const [a, b] = [rs[rs.length - 1]!, rs[rs.length - 2]!];
+    const ring = (c: ReturnType<typeof keikobaCast>) =>
+      c.keikoba.filter((x) => KEIKOBA_SPOTS.ring.some((s) => s.x === x.x && s.y === x.y));
+    const spar = ring(keikobaCast(g, KEIKOBA_SPOTS, { kind: 'spar', a: a.id, b: b.id }));
+    expect(spar.map((x) => x.rikishiId)).toEqual([a.id, b.id]);
+    const coach = keikobaCast(g, KEIKOBA_SPOTS, { kind: 'coach', id: a.id }).keikoba;
+    expect(ring({ keikoba: coach, overflow: [] }).map((x) => x.key)).toEqual([
+      `r${a.id}`,
+      'oyakata',
+    ]);
+    expect(coach.filter((x) => x.key === 'oyakata')).toHaveLength(1);
+    const mune = ring(keikobaCast(g, KEIKOBA_SPOTS, { kind: 'mune', id: a.id }));
+    expect(mune[1]).toMatchObject({ guest: true, rikishiId: null });
+    // 弟子は1人1か所のまま
+    const ids = coach.flatMap((x) => (x.rikishiId === null ? [] : [x.rikishiId]));
+    expect(new Set(ids).size).toBe(ids.length);
+    // けがで出られない週は、ふだんの稽古場
+    a.injury = 2;
+    expect(keikobaCast(g, KEIKOBA_SPOTS, { kind: 'coach', id: a.id })).toEqual(keikobaCast(g));
+  });
+
   it('外観: けが人は布団、弟子は1人1か所、親方が立つ', () => {
     const g = play(5, 8);
     const hurt = mine(g)[0]!;

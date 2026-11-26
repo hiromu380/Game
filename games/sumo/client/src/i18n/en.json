@@ -2069,5 +2069,7 @@
   "highlight.skipAll": "Skip to results",
   "ticker.today": "Today's bout",
   "ticker.fusenWin": "Win by default",
-  "ticker.fusenLoss": "Loss by default"
+  "ticker.fusenLoss": "Loss by default",
+  "scene.guest": "Visiting sekitori",
+  "scene.week": "This week: {cmd} ({names})"
 }
