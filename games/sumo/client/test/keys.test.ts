@@ -37,6 +37,8 @@ describe('キー操作', () => {
     expect(keyTarget(ev('2', doc.body), doc)).toBe(c2);
     expect(keyTarget(ev('9', doc.body), doc)).toBeNull();
     expect(keyTarget(ev('Backspace', doc.body), doc)).toBe(back);
+    // Space はページを送るキーのまま
+    expect(keyTarget(ev(' ', doc.body), doc)).toBeNull();
   });
 
   it('窓が開いているとき・ボタンにフォーカスがあるとき・文字を打っているときは使わない', () => {
