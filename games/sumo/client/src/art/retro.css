@@ -1850,3 +1850,12 @@ body.has-modal {
   margin-left: auto;
   max-width: 100%;
 }
+/* 疲れのバー: 右寄せにすると中身の幅（0）まで縮むので、幅を決める（広い画面で線1本になっていた） */
+.deshi__fatigue {
+  width: 96px;
+}
+@media (max-width: 640px) {
+  .deshi__fatigue {
+    width: 72px;
+  }
+}
