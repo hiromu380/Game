@@ -135,6 +135,8 @@ export interface TrackEntry extends BashoRecord {
   /** 番付の上からの順位（0 = 筆頭）と、そのときの番付の人数 */
   order: number;
   total: number;
+  /** その場所前の4週に稽古で伸びた量（押し・四つ・技の合計。自分の弟子だけ。古い記録にはない） */
+  prep?: number;
 }
 
 /** 自分の部屋から引退した力士の記録（歴代の力士） */

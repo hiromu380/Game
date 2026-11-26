@@ -2200,3 +2200,28 @@ body.has-modal {
   display: block;
   font-size: 0.85em;
 }
+/* 弟子のカード: 場所前の稽古の伸びの推移 */
+.trend {
+  margin: 6px 0 0;
+}
+.trend__title {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+.trend svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2px 0;
+}
+.trend__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1em;
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--ink-2);
+}
+.trend__legend span {
+  white-space: nowrap;
+}

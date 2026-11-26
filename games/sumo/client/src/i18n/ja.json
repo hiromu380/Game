@@ -2098,5 +2098,12 @@
   "payoff.gain": "稽古",
   "payoff.outcome.kachi": "勝ち越し",
   "payoff.outcome.make": "負け越し",
-  "payoff.outcome.kyujo": "全休"
+  "payoff.outcome.kyujo": "全休",
+  "trend.title": "場所前の稽古の伸び",
+  "trend.now": "今の場所前",
+  "trend.nowShort": "今",
+  "trend.gain": "稽古",
+  "trend.legendBar": "棒: 4週の伸び",
+  "trend.legendMark": "○勝ち越し ●負け越し 休＝全休",
+  "trend.markKyujo": "休"
 }

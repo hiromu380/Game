@@ -2098,5 +2098,12 @@
   "payoff.gain": "Trained",
   "payoff.outcome.kachi": "Winning",
   "payoff.outcome.make": "Losing",
-  "payoff.outcome.kyujo": "Sat out"
+  "payoff.outcome.kyujo": "Sat out",
+  "trend.title": "Pre-tournament training",
+  "trend.now": "This prep",
+  "trend.nowShort": "now",
+  "trend.gain": "gain",
+  "trend.legendBar": "Bars: 4-week gain",
+  "trend.legendMark": "○ winning ● losing A sat out",
+  "trend.markKyujo": "A"
 }

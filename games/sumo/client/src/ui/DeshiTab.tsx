@@ -3,6 +3,7 @@ import {
   atWall,
   chooseTreatment,
   inKyoshujo,
+  prepSummary,
   sekitoriGain,
   HONMEI,
   setHonmei,
@@ -183,6 +184,11 @@ export function DeshiTab({
                 askTreatment={game.pending.treatment.includes(card.id)}
                 onTreatment={(tr) => setGame(chooseTreatment(game, card.id, tr))}
                 onDetail={() => setDetail(card.id)}
+                prepNow={
+                  game.prep.week > 0
+                    ? (prepSummary(game.prep.log).find((x) => x.id === card.id)?.gain ?? 0)
+                    : null
+                }
               />
             </ul>
             <div className="role-box">

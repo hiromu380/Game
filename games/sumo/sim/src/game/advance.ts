@@ -319,6 +319,8 @@ export function advanceBasho(
 
   // 3. 記録
   const yushoIds = new Set(outcome.yusho.values());
+  // 場所前の4週の稽古の伸び（自分の弟子の場所ごとの記録に残す。稽古をつけなかった弟子は 0）
+  const prepGain = new Map(prepSummary(state.prep.log).map((x) => [x.id, x.gain]));
   for (const id of state.banzuke) {
     const r = byId.get(id)!;
     const rec = outcome.records.get(id)!;
@@ -338,7 +340,12 @@ export function advanceBasho(
       zensho: rec.wins === 15,
     });
     if (isMine(id)) {
-      r.track.push({ ...record, order: state.banzuke.indexOf(id), total: state.banzuke.length });
+      r.track.push({
+        ...record,
+        order: state.banzuke.indexOf(id),
+        total: state.banzuke.length,
+        prep: prepGain.get(id) ?? 0,
+      });
       report.mine.push({
         id,
         record,

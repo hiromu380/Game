@@ -14,6 +14,7 @@ import {
 } from '@ichimon/sim';
 import { IntensityPicker } from './RikishiTalk';
 import { partName, woundName } from '../injury';
+import { PrepTrend } from './PrepTrend';
 import { useI18n, type MessageKey } from '../i18n';
 import { RikishiPortrait } from '../art/Portraits';
 import { points } from '../points';
@@ -37,6 +38,7 @@ export function RikishiCard({
   askTreatment,
   onTreatment,
   onDetail,
+  prepNow = null,
 }: {
   r: Rikishi;
   rank: Rank | null;
@@ -48,6 +50,8 @@ export function RikishiCard({
   askTreatment: boolean;
   onTreatment: (t: Treatment) => void;
   onDetail: () => void;
+  /** 今の場所前に稽古で伸びた量（場所前の週が始まっていなければ null） */
+  prepNow?: number | null;
 }) {
   const { t } = useI18n();
   const last = r.recent[0];
@@ -145,6 +149,7 @@ export function RikishiCard({
             </span>
           )}
         </div>
+        <PrepTrend track={r.track} now={prepNow} />
       </div>
       {askTreatment && r.wound && (
         <div className="hurt" role="group" aria-label={t('treatment.label')}>

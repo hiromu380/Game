@@ -188,6 +188,10 @@ describe('場所前の稽古の要約（場所の結果に残す）', () => {
     while (g.prep.week < 4) g = doPrep(g, { kind: 'usual' });
     const next = advanceBasho(g);
     expect(next.lastReport?.prep).toEqual(sum);
+    // 弟子の場所ごとの記録にも残る（稽古をつけなかった弟子は 0）
+    const tr = (id: number) => next.rikishi.find((r) => r.id === id)?.track.at(-1);
+    expect(tr(ids[0]!)?.prep).toBeCloseTo(sum[0]!.gain, 6);
+    if (ids[1] !== undefined) expect(tr(ids[1])?.prep).toBe(0);
     expect(next.prep.log).toEqual([]);
   });
 });
