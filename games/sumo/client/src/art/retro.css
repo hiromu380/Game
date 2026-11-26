@@ -1838,3 +1838,7 @@ body.has-modal {
 .stack {
   grid-template-columns: minmax(0, 1fr);
 }
+/* 広い画面で名前と点が離れすぎないように */
+.standing {
+  max-width: 560px;
+}
