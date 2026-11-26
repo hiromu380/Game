@@ -2005,19 +2005,27 @@ body.has-modal {
   align-items: center;
   gap: 4px 8px;
 }
-.cut__stat,
+/* 3つの能力は1つの表にそろえる（見出しの幅はいちばん長い名前に合わせる。英語の Technique も重ならない） */
+.cut__stats {
+  display: grid;
+  grid-template-columns: max-content 1.6em minmax(0, 1fr) 4.4em;
+  align-items: center;
+  gap: 2px 6px;
+  font-variant-numeric: tabular-nums;
+}
+.cut__stat {
+  display: contents;
+}
 .cut__fatigue {
   display: grid;
-  grid-template-columns: 2.6em 1.6em minmax(0, 1fr) 4.4em;
   align-items: center;
   gap: 6px;
   font-variant-numeric: tabular-nums;
 }
 .cut__fatigue {
-  grid-template-columns: calc(4.2em + 6px) minmax(0, 1fr) 4.4em;
-  gap: 6px;
+  grid-template-columns: max-content minmax(0, 1fr) 4.4em;
 }
-.cut__stat.is-still {
+.cut__stat.is-still > * {
   opacity: 0.7;
 }
 .cut__weekno {
@@ -2043,7 +2051,7 @@ body.has-modal {
 .cut__down {
   color: var(--shu);
 }
-.cut__stat.is-crossed .grade {
+.cut__stat.is-crossed > .grade {
   background: var(--gold);
   color: var(--paper);
   border-color: var(--gold);
