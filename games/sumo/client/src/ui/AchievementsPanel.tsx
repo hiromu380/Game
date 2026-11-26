@@ -107,7 +107,8 @@ export function AchievementToast({
   const key = ids.join(',');
   useEffect(() => {
     if (!key) return;
-    if (settings.sound) playSound('cheer');
+    // 部屋の格が上がったときは、大きな見せ場と同じ音（太鼓の連打と大歓声）
+    if (settings.sound) playSound(tierOf(total) > tierOf(total - ids.length) ? 'roll' : 'cheer');
     const timer = setTimeout(onClose, TOAST_SECONDS * 1000);
     return () => clearTimeout(timer);
     // 同じ知らせで鳴らし直さない

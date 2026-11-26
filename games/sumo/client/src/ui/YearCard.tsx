@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import type { GameState } from '@ichimon/sim';
-import { useI18n } from '../i18n';
+import { useI18n, type MessageKey } from '../i18n';
 import { money } from '../format';
 import { yearSummary } from '../yearSummary';
-import { achievedOf, ACHIEVEMENTS, tierOf } from '../achievements';
+import { achievedOf, ACHIEVEMENTS, nearAchievements, tierOf } from '../achievements';
+import { goalsOf, nextGoal } from '../goals';
 import { useCountUp } from './CountUp';
 
 /** 年の終わりの見せ場: 1年のふりかえり（数字を札で並べ、部屋の格で締める） */
@@ -25,6 +26,8 @@ export function YearCard({
   const y = useMemo(() => yearSummary(game, lastIndex), [game, lastIndex]);
   const net = useCountUp(y.net);
   const done = useMemo(() => achievedOf(game).length, [game]);
+  const next = useMemo(() => nextGoal(goalsOf(game)), [game]);
+  const near = useMemo(() => nearAchievements(game, 1)[0] ?? null, [game]);
   const signedNum = (n: number) => (n > 0 ? `▲${n}` : n < 0 ? `▼${-n}` : '±0');
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="highlight-title">
@@ -85,6 +88,19 @@ export function YearCard({
             })}
           </li>
         </ul>
+        {/* 来年の目標（目の前に吊るす）: 部屋の歩みの次の節目と、もうすぐ届く実績 */}
+        {(next || near) && (
+          <p className="callout year__next">
+            <strong>{t('year.next')}</strong> {next && t(`goals.${next.id}.name` as MessageKey)}
+            {next && near && '・'}
+            {near &&
+              t('achv.nearItem', {
+                name: t(`achv.${near.id}.name` as MessageKey),
+                now: near.now,
+                of: near.of,
+              })}
+          </p>
+        )}
         <div className="modal__actions">
           <button className="button button--primary" onClick={onNext}>
             {last ? t('highlight.toReport') : t('highlight.next')}
