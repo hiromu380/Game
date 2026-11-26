@@ -2077,5 +2077,7 @@
   "cut.withGuest": "A visiting sekitori lends his chest",
   "cut.others": "+{n} more",
   "cut.hurt": "Injured!",
-  "cut.gradeUp": "{what} up to {grade}!"
+  "cut.gradeUp": "{what} up to {grade}!",
+  "talk.prep.label": "Week {n} training",
+  "talk.prep.partner": "Sparring partner"
 }

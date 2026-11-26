@@ -2077,5 +2077,7 @@
   "cut.withGuest": "よその関取の胸を借りる",
   "cut.others": "ほか{n}人",
   "cut.hurt": "けが！",
-  "cut.gradeUp": "{what} {grade}に！"
+  "cut.gradeUp": "{what} {grade}に！",
+  "talk.prep.label": "第{n}週の稽古",
+  "talk.prep.partner": "申し合いの相手"
 }

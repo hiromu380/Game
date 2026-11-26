@@ -2110,3 +2110,12 @@ body.has-modal {
     opacity: 1;
   }
 }
+/* 話しかけるカードから、その週の稽古をつける */
+.talk__prep {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-block: 2px dotted var(--line, var(--muted));
+}

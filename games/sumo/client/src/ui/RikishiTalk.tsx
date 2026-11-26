@@ -1,4 +1,10 @@
+import { useState } from 'react';
 import {
+  canPrep,
+  costOf,
+  doPrep,
+  prepLeft,
+  type PrepAction,
   setIntensity,
   setPolicy,
   type GameState,
@@ -14,6 +20,8 @@ import { woundName } from '../injury';
 import { voiceOf } from '../voice';
 import { targetOf } from '../targets';
 import { TargetLine } from './TargetLine';
+import { useSettings } from '../settings';
+import { money } from '../format';
 
 const POLICIES: Policy[] = ['oshi', 'yotsu', 'waza', 'body', 'rest'];
 const INTENSITIES: Intensity[] = ['light', 'normal', 'hard'];
@@ -106,6 +114,7 @@ export function RikishiTalk({
           </button>
         ))}
       </div>
+      <TalkPrep game={game} r={r} setGame={setGame} onDone={onClose} />
       <IntensityPicker r={r} onChange={(i) => setGame(setIntensity(game, r.id, i))} />
       <p className="note">{t(`intensity.desc.${r.intensity ?? 'normal'}`)}</p>
       <div className="talk__actions">
@@ -118,6 +127,115 @@ export function RikishiTalk({
           {t('talk.close')}
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * 場所前の週なら、この弟子にその週の稽古をつける（個別指導・申し合い・胸を借りる）。
+ * 申し合いは相手を選ぶ。押し間違えないよう「決定」で行う（すぐ決める設定ならすぐ）
+ */
+function TalkPrep({
+  game,
+  r,
+  setGame,
+  onDone,
+}: {
+  game: GameState;
+  r: Rikishi;
+  setGame: (g: GameState) => void;
+  onDone: () => void;
+}) {
+  const { t, lang } = useI18n();
+  const { settings } = useSettings();
+  const [sparring, setSparring] = useState(false);
+  const [draft, setDraft] = useState<PrepAction | null>(null);
+  if (prepLeft(game) === 0) return null;
+  const nameOf = (id: number) => game.rikishi.find((x) => x.id === id)?.name ?? '?';
+  const partners = game.rikishi.filter(
+    (x) => x.stableId === game.player.stableId && x.id !== r.id && x.injury === 0,
+  );
+  const go = (a: PrepAction) => {
+    if (!settings.quickPrep) return setDraft(a);
+    setGame(doPrep(game, a));
+    onDone();
+  };
+  const week = game.prep.week + 1;
+  if (draft) {
+    const who =
+      draft.kind === 'spar'
+        ? t('prep.confirm.pair', { a: nameOf(draft.a), b: nameOf(draft.b) })
+        : r.name;
+    return (
+      <div className="talk__prep" role="group" aria-label={t('prep.confirm.title')}>
+        <span className="policy__label">{t('prep.week', { n: week })}</span>
+        <strong>{t('prep.confirm.who', { cmd: t(`prep.cmd.${draft.kind}`), who })}</strong>
+        <button className="button" onClick={() => setDraft(null)}>
+          {t('prep.back')}
+        </button>
+        <button
+          className="button button--primary"
+          autoFocus
+          onClick={() => {
+            setGame(doPrep(game, draft));
+            onDone();
+          }}
+        >
+          {t('prep.decide')}
+        </button>
+      </div>
+    );
+  }
+  if (sparring)
+    return (
+      <div className="talk__prep" role="group" aria-label={t('talk.prep.partner')}>
+        <span className="policy__label">{t('talk.prep.partner')}</span>
+        {partners.map((p) => (
+          <button
+            key={p.id}
+            className="policy__btn"
+            disabled={!canPrep(game, { kind: 'spar', a: r.id, b: p.id })}
+            onClick={() => go({ kind: 'spar', a: r.id, b: p.id })}
+          >
+            {p.name}
+          </button>
+        ))}
+        <button className="policy__btn" onClick={() => setSparring(false)}>
+          {t('prep.back')}
+        </button>
+      </div>
+    );
+  const coach: PrepAction = { kind: 'coach', id: r.id };
+  const mune: PrepAction = { kind: 'mune', id: r.id };
+  const muneCost = costOf(game, 'mune');
+  return (
+    <div className="talk__prep" role="group" aria-label={t('talk.prep.label', { n: week })}>
+      <span className="policy__label">{t('talk.prep.label', { n: week })}</span>
+      <button
+        className="policy__btn"
+        disabled={!canPrep(game, coach)}
+        title={t('prep.desc.coach')}
+        onClick={() => go(coach)}
+      >
+        {t('prep.cmd.coach')}
+      </button>
+      <button
+        className="policy__btn"
+        disabled={r.injury > 0 || partners.length === 0}
+        title={t('prep.desc.spar')}
+        onClick={() => setSparring(true)}
+      >
+        {t('prep.cmd.spar')}…
+      </button>
+      <button
+        className="policy__btn"
+        disabled={!canPrep(game, mune)}
+        title={t('prep.desc.mune')}
+        onClick={() => go(mune)}
+      >
+        {t('prep.cmd.mune')}
+        {muneCost > 0 && <small> {money(t, muneCost, lang)}</small>}
+      </button>
     </div>
   );
 }
