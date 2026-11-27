@@ -104,7 +104,23 @@ function hair(s: Sheet, cx: number, cy: number, look: Look): void {
 }
 
 /** 顔（正面）。cy は頭の中心 */
-function face(s: Sheet, cx: number, cy: number, look: Look): void {
+/** 表情で目・眉・口・汗を差し替える（喜び: 笑った目・上がった眉・笑った口・赤いほお。こらえる: 怒り眉・への字・汗） */
+function moodFace(look: Look): Look {
+  if (look.mood === 'joy')
+    return {
+      ...look,
+      eyes: 'smile',
+      brows: 'arched',
+      mouth: 'smile',
+      sweat: false,
+      mark: look.mark === 'none' || !look.mark ? 'rosy' : look.mark,
+    };
+  if (look.mood === 'grit') return { ...look, brows: 'angry', mouth: 'he', sweat: true };
+  return look;
+}
+
+function face(s: Sheet, cx: number, cy: number, base: Look): void {
+  const look = moodFace(base);
   const HEAD = headOf(look);
   const skin = rgb(look.skin);
   s.ball(cx, cy, HEAD.rx, HEAD.ry, skin);

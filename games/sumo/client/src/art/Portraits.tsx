@@ -11,7 +11,7 @@ import {
   type Rikishi,
 } from '@ichimon/sim';
 import { PixelPortrait } from './PixelPortrait';
-import { oyakataLook, rikishiLook } from './look';
+import { oyakataLook, rikishiLook, withMood, type Mood } from './look';
 
 /** 現役の力士の見た目（今の番付・体重・けが・疲れから） */
 export function lookOfRikishi(r: Rikishi, rank: Rank | null) {
@@ -47,13 +47,18 @@ export function RikishiPortrait({
   rank,
   size = 72,
   variant = 'bust',
+  mood = null,
 }: {
   r: Rikishi;
   rank: Rank | null;
   size?: number;
   variant?: 'bust' | 'full';
+  /** その場の表情（喜び・こらえる） */
+  mood?: Mood | null;
 }) {
-  return <PixelPortrait look={lookOfRikishi(r, rank)} variant={variant} size={size} />;
+  return (
+    <PixelPortrait look={withMood(lookOfRikishi(r, rank), mood)} variant={variant} size={size} />
+  );
 }
 
 /** 入門希望者（まだ髷のない、ざんばら頭） */

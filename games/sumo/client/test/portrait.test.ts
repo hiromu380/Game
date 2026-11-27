@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { oyakataLook, rikishiLook } from '../src/art/look';
+import { oyakataLook, rikishiLook, withMood } from '../src/art/look';
 import { PORTRAIT, portraitKey, portraitPixels } from '../src/art/pixel/portrait';
 
 const base = {
@@ -91,5 +91,17 @@ describe('顔の絵（ドット絵）', () => {
     const old = portraitPixels(oyakataLook({ id: 5, age: 62, stableId: 1 }), 'full');
     expect(same(young.data, old.data)).toBe(false);
     expect(filled(young.data)).toBeGreaterThan(600);
+  });
+
+  it('表情（喜び・こらえる）は顔だけを変え、ふだんの顔とも互いとも違う', () => {
+    const look = rikishiLook(base);
+    const plain = portraitPixels(look, 'bust').data;
+    const joy = portraitPixels(withMood(look, 'joy'), 'bust').data;
+    const grit = portraitPixels(withMood(look, 'grit'), 'bust').data;
+    const diff = (x: Uint8ClampedArray, y: Uint8ClampedArray) => x.some((v, i) => v !== y[i]);
+    expect(diff(plain, joy)).toBe(true);
+    expect(diff(plain, grit)).toBe(true);
+    expect(diff(joy, grit)).toBe(true);
+    expect(withMood(look, null)).toBe(look);
   });
 });

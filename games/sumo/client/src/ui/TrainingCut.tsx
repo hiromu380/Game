@@ -5,7 +5,7 @@ import { useSettings } from '../settings';
 import { playSound } from '../sound';
 import { PixelPortrait } from '../art/PixelPortrait';
 import { lookOfRikishi } from '../art/Portraits';
-import { oyakataLook, rikishiLook, type Look } from '../art/look';
+import { oyakataLook, rikishiLook, withMood, type Look, type Mood } from '../art/look';
 import { points, signedPoints } from '../points';
 import { bandOf, weekEffect, type EffectRow, type StatMove, type Verdict } from '../weekEffect';
 
@@ -66,6 +66,23 @@ export function TrainingCut({
         : a.kind === 'spar'
           ? [lookOf(a.a), lookOf(a.b)]
           : null;
+  // 表情: ぶつかった瞬間は力む。判子を押したら、よい結果は喜び・けがや落ちたときはこらえる
+  const moodOf = (id: number | undefined): Mood | null => {
+    if (stage === 0 || id === undefined) return null;
+    if (stage === 1) return a.kind === 'rest' ? null : 'grit';
+    const v = rows.find((x) => x.id === id)?.verdict.kind;
+    return v === 'wall' || v === 'gradeUp' || v === 'rested'
+      ? 'joy'
+      : v === 'hurt' || v === 'fell'
+        ? 'grit'
+        : null;
+  };
+  const pairIds: [number | undefined, number | undefined] =
+    a.kind === 'spar'
+      ? [a.a, a.b]
+      : a.kind === 'coach' || a.kind === 'mune'
+        ? [a.id, undefined]
+        : [undefined, undefined];
   const anyUp = rows.some((r) => r.verdict.kind === 'gradeUp');
   const anyWall = rows.some((r) => r.verdict.kind === 'wall');
   const anyHurt = rows.some((r) => r.verdict.kind === 'hurt');
@@ -110,11 +127,21 @@ export function TrainingCut({
           {pair ? (
             <>
               <span className="cut__face cut__face--l">
-                {pair[0] && <PixelPortrait look={pair[0]} size={72} />}
+                {pair[0] && (
+                  <PixelPortrait look={withMood(pair[0], moodOf(pairIds[0]))} size={72} />
+                )}
               </span>
               <span className="cut__bang">{t('cut.bang')}</span>
               <span className="cut__face cut__face--r">
-                {pair[1] && <PixelPortrait look={pair[1]} size={72} />}
+                {pair[1] && (
+                  <PixelPortrait
+                    look={withMood(
+                      pair[1],
+                      pairIds[1] !== undefined ? moodOf(pairIds[1]) : stage === 1 ? 'grit' : null,
+                    )}
+                    size={72}
+                  />
+                )}
               </span>
             </>
           ) : (
@@ -124,7 +151,9 @@ export function TrainingCut({
                 className="cut__face cut__face--hop"
                 style={{ animationDelay: `${i * 90}ms` }}
               >
-                {lookOf(r.id) && <PixelPortrait look={lookOf(r.id)!} size={48} />}
+                {lookOf(r.id) && (
+                  <PixelPortrait look={withMood(lookOf(r.id)!, moodOf(r.id))} size={48} />
+                )}
                 {a.kind === 'rest' && <span className="cut__zzz">Zzz</span>}
               </span>
             ))

@@ -289,7 +289,8 @@ export function HighlightDialog({
         <div className="highlight__stage">
           {celebrate(h) && <Confetti key={index} />}
           {h.kind === 'yusho' && <Cup />}
-          <RikishiPortrait r={r} rank={rank} variant="full" size={120} />
+          {/* 昇進・優勝・三賞・記録・出世披露は、喜びの顔 */}
+          <RikishiPortrait r={r} rank={rank} variant="full" size={120} mood="joy" />
         </div>
         <p className="highlight__body">{body}</p>
         {h.kind === 'promotion' && h.to === 'sekitori' && <SekitoriChanges game={game} id={r.id} />}

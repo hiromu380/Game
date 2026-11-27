@@ -14,6 +14,7 @@ import {
   todayBout,
 } from '../ticker';
 import { PixelPortrait } from '../art/PixelPortrait';
+import { withMood } from '../art/look';
 import { KIMARITE_DESC } from '../kimariteBook';
 import type { Look } from '../art/look';
 import { reached, reachedText, targetText, targetWins, type Target } from '../targets';
@@ -375,7 +376,12 @@ function TodayBout({
       <span className="today__label">{t('ticker.today')}</span>
       <div className="today__pair">
         <span className="today__side">
-          {r.look && <PixelPortrait look={r.look} size={40} />}
+          {r.look && (
+            <PixelPortrait
+              look={withMood(r.look, hidden ? null : won ? 'joy' : 'grit')}
+              size={40}
+            />
+          )}
           <strong>{r.name}</strong>
         </span>
         {hidden ? (
@@ -399,7 +405,12 @@ function TodayBout({
           </span>
         )}
         <span className="today__side">
-          {opp.look && <PixelPortrait look={opp.look} size={40} />}
+          {opp.look && (
+            <PixelPortrait
+              look={withMood(opp.look, hidden ? null : won ? 'grit' : 'joy')}
+              size={40}
+            />
+          )}
           <span>
             {opp.name}
             <small className="muted">（{opp.stable}）</small>

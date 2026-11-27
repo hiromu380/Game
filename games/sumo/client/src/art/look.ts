@@ -37,6 +37,16 @@ export interface Look {
   face?: Face;
   /** 顔の印（なければなし） */
   mark?: Mark;
+  /** その場の表情（なければふだんの顔）。喜び・こらえる */
+  mood?: Mood;
+}
+
+/** その場の表情: 喜び（昇進・優勝・白星）・こらえる（黒星・けが） */
+export type Mood = 'joy' | 'grit';
+
+/** 表情をつけた見た目（顔の輪郭・髪・体はそのまま。目・眉・口・汗だけを変える） */
+export function withMood(look: Look, mood: Mood | null): Look {
+  return mood ? { ...look, mood } : look;
 }
 
 /** 整数のハッシュ（xorshift を数回） */
