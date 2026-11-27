@@ -41,6 +41,18 @@ describe('メタ進行', () => {
     expect(run.board.width).toBe(BALANCE.board.width);
   });
 
+  it('ランで手に入れたレリックを図鑑に足す（新しいものだけ、手に入れた順）', () => {
+    const run = {
+      ...finishedRun('failed', [{ score: '1', chainCount: 1 }]),
+      relics: ['coupon', 'nightPay'] as const,
+    };
+    const before = { ...createInitialMeta(), relicsFound: ['nightPay' as const] };
+    expect(applyRunToMeta(before, { ...run, relics: [...run.relics] }).meta.relicsFound).toEqual([
+      'nightPay',
+      'coupon',
+    ]);
+  });
+
   it('進行中のランでは何も変わらない', () => {
     const meta = createInitialMeta();
     const run = createRun(1);

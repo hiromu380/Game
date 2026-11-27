@@ -5,8 +5,8 @@
  * キーは「画面.要素」の形で意味がわかる名前にする。
  * 文中の {name} は t() の params で置き換える。
  */
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
-import type { Score } from '@chain-factory/sim';
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react';
+import { isUnmeasurable, type Score } from '@chain-factory/sim';
 import { useSettings } from '../settings/SettingsContext';
 import { formatCompactNumber, formatScoreNumber } from './numberFormat';
 import en from './en.json';
@@ -42,6 +42,12 @@ interface I18nContextValue {
   formatScore: ScoreFormatter;
   /** 短い表記（信号の上など狭い場所） */
   formatCompact: ScoreFormatter;
+  /**
+   * 出荷量の表記（計測不能の桁数以上なら「計測不能」）。シフト・ランの出荷量に使う。
+   * ランキングは並びを比べられるよう formatScore のまま
+   */
+  formatMeasured: ScoreFormatter;
+  formatMeasuredCompact: ScoreFormatter;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -52,6 +58,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const lang = settings.lang;
   const setLang = useCallback((next: Lang) => updateSettings({ lang: next }), [updateSettings]);
 
+  // 読み上げ・改行位置（日本語は文節で折り返す。styles.css の :lang(ja)）を言語に合わせる
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const value = useMemo<I18nContextValue>(
     () => ({
       lang,
@@ -59,6 +70,14 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       t: (key, params) => translate(lang, key, params),
       formatScore: (value) => formatScoreNumber(value, lang),
       formatCompact: (value) => formatCompactNumber(value, lang),
+      formatMeasured: (value) =>
+        isUnmeasurable(value)
+          ? translate(lang, 'unmeasurable.label')
+          : formatScoreNumber(value, lang),
+      formatMeasuredCompact: (value) =>
+        isUnmeasurable(value)
+          ? translate(lang, 'unmeasurable.label')
+          : formatCompactNumber(value, lang),
     }),
     [lang, setLang],
   );

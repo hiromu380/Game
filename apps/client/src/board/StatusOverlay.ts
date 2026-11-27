@@ -2,6 +2,7 @@
  * 盤面の「状態表示」レイヤー
  * - 各パーツの残り発動回数（ピップ: ●=残り ○=使用済み、無制限は ∞）
  * - 再生後の「連鎖が途切れた場所と理由」
+ * - 再生中に溜めるパーツ（蓄電器）が溜めている値（store イベント）
  *
  * 発動回数の上限は sim の computeActivationLimits から受け取り、
  * 再生中は activate / reset イベントに合わせて増減させるだけ（ロジックは再計算しない）。
@@ -24,6 +25,8 @@ const MAX_PIPS = 3;
 export class StatusOverlay {
   readonly pipLayer = new Container();
   readonly breakLayer = new Container();
+  /** 溜めている値の表示（pipLayer の中に置く） */
+  private chargeViews = new Map<number, Container>();
 
   private board: Board | null = null;
   private rulesKey = '';
@@ -51,6 +54,7 @@ export class StatusOverlay {
     this.remaining = [...this.limits];
     this.pipLayer.removeChildren().forEach((c) => c.destroy({ children: true }));
     this.pipViews.clear();
+    this.chargeViews.clear();
     if (!this.board) return;
     this.board.cells.forEach((part, index) => {
       if (part && part.id !== 'switch') this.drawPips(index);
@@ -71,6 +75,20 @@ export class StatusOverlay {
     const index = this.indexOf(x, y);
     this.remaining[index] = this.limits[index] ?? null;
     this.drawPips(index);
+  }
+
+  /** 溜めるパーツが値を溜めた（label）／放出して空になった（null） */
+  onStore(x: number, y: number, label: string | null): void {
+    const index = this.indexOf(x, y);
+    this.chargeViews.get(index)?.destroy({ children: true });
+    this.chargeViews.delete(index);
+    if (label === null) return;
+    const view = createChargeBadge(label);
+    const { px, py } = cellCenter(x, y);
+    // マスの下寄り（右上のピップ・パーツの向きの矢印と重ならない位置）
+    view.position.set(px, py + CELL_SIZE * 0.32);
+    this.pipLayer.addChild(view);
+    this.chargeViews.set(index, view);
   }
 
   /** 途切れた場所に理由のマーカーを置く */
@@ -152,6 +170,25 @@ function pipText(text: string): Text {
   });
   label.anchor.set(1, 0);
   return label;
+}
+
+/** 溜めている値の札（電池の記号 ＋ 値。色だけに頼らず記号で示す） */
+function createChargeBadge(text: string): Container {
+  const view = new Container();
+  const label = new Text({
+    text: `⚡${text}`,
+    style: { fill: 0x1a1a1a, fontSize: 12, fontWeight: 'bold' },
+  });
+  label.anchor.set(0.5);
+  const w = label.width + 10;
+  view.addChild(
+    new Graphics()
+      .roundRect(-w / 2, -9, w, 18, 9)
+      .fill(BOARD_THEME.hazardYellow)
+      .stroke({ width: 1.5, color: 0x000000, alpha: 0.6 }),
+    label,
+  );
+  return view;
 }
 
 /** 途切れた理由のマーカー（小さな吹き出し） */

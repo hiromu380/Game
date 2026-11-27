@@ -1,0 +1,179 @@
+/*
+ * 第3段階: 番付は刷り物、帳簿は和帳、系譜は掛け軸。
+ * 色は palette.ts が流し込むCSS変数だけを使用する。
+ * 装飾の擬似要素に文章を入れず、意味のある内容は元のDOMに残す。
+ */
+
+/* 番付の紙面。実物の筆文字を模した字送りと朱の印影。 */
+.banzuke__crest {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 8px auto 16px;
+  padding: 4px 22px 6px;
+  border-block: 3px double var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+  text-align: center;
+}
+.banzuke__crest::before,
+.banzuke__crest::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--shu);
+  transform: translateY(-50%) rotate(45deg);
+}
+.banzuke__crest::before {
+  left: 3px;
+}
+.banzuke__crest::after {
+  right: 3px;
+}
+.banzuke {
+  border: 3px double var(--ink);
+  background: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.banzuke th,
+.banzuke td {
+  border-right: 1px solid var(--line);
+}
+.banzuke thead th {
+  letter-spacing: 0.07em;
+}
+.banzuke__name {
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+.banzuke__cell.is-mine {
+  outline: 2px solid var(--shu);
+  outline-offset: -3px;
+}
+
+/* 帳簿は和帳らしい罫線と余白だけで見せ、数字の可読性を優先する。 */
+.ledger {
+  border: 2px solid var(--ink);
+  border-left: 5px double var(--ink);
+  background: var(--card);
+  font-variant-numeric: tabular-nums;
+}
+.ledger caption {
+  padding: 8px 12px;
+  font-weight: 800;
+  background: var(--paper-2);
+  border: 2px solid var(--ink);
+  border-bottom: 0;
+}
+.ledger th,
+.ledger td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.ledger th {
+  font-weight: 700;
+}
+.ledger__total th,
+.ledger__total td {
+  background: var(--odo-light);
+  border-top: 2px solid var(--ink);
+  border-bottom: 3px double var(--ink);
+}
+.ledger__net {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+/* 系譜を掛け軸の縦の流れとして見せる。木軸の装飾は文字ではない。 */
+.tree {
+  position: relative;
+  padding: 28px 22px 30px;
+  background-color: var(--paper);
+  background-image: var(--pattern-asanoha);
+  border-left: 5px solid var(--ink);
+  border-right: 5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.tree::before,
+.tree::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: -13px;
+  right: -13px;
+  height: 10px;
+  background: var(--odo);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+}
+.tree::before {
+  top: -4px;
+}
+.tree::after {
+  bottom: -4px;
+}
+.tree__card {
+  border: 2px solid var(--ink);
+  background: var(--card);
+  box-shadow: 3px 3px 0 var(--line);
+}
+.tree__node--master > .tree__card,
+.tree__node--branch > .tree__card {
+  border-left: 5px solid var(--ai);
+}
+.tree__node--waiting > .tree__card {
+  border-left: 5px double var(--odo);
+}
+.tree__node--gone > .tree__card {
+  border-style: dashed;
+}
+.tree__portrait {
+  background: var(--paper);
+}
+
+/* 集計表も同じ帳面の罫線に寄せる。 */
+.results {
+  border: 2px solid var(--line);
+  background: var(--card);
+}
+.results th,
+.results td {
+  padding-block: 8px;
+}
+
+/* 横幅がある画面だけ縦書きの「番付らしさ」を足す。 */
+@media (min-width: 900px) {
+  html:lang(ja) .banzuke__name {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    min-height: 3em;
+    width: max-content;
+    margin: 0 auto;
+  }
+}
+
+/* 幅390pxで掛け軸の枠を残しながらテキストの領域を確保する。 */
+@media (max-width: 560px) {
+  .tree {
+    padding-inline: 10px;
+  }
+  .tree__children {
+    margin-left: 8px;
+    padding-left: 10px;
+  }
+  .tree__card {
+    padding: 8px;
+    gap: 2px 6px;
+  }
+  .ledger th,
+  .ledger td {
+    padding: 7px 5px;
+  }
+  .banzuke__crest {
+    padding-inline: 18px;
+  }
+}

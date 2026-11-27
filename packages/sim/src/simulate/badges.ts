@@ -6,6 +6,8 @@
  */
 import type { Board, Part, RuleSet } from '../types';
 import { getCoilMultiplier } from './parts/coil';
+import { getCornerBenchMultiplier } from './parts/cornerBench';
+import { getMagnetMultiplier } from './parts/magnet';
 import { getInspectorMultiplier } from './parts/inspector';
 import { getPressMultiplier } from './parts/press';
 import { getSolarBonus } from './parts/solar';
@@ -33,6 +35,14 @@ export function getPartBadge(
       return { kind: 'mul', value: getInspectorMultiplier(board, x, y, rules) };
     case 'solar':
       return { kind: 'add', value: getSolarBonus(board, x, y, rules) };
+    case 'magnet':
+      return { kind: 'mul', value: getMagnetMultiplier(board, x, y, rules) };
+    case 'cornerBench':
+      return { kind: 'mul', value: getCornerBenchMultiplier(board, x, y, rules) };
+    case 'booster':
+      return { kind: 'add', value: rules.params.boosterAdd };
+    case 'capacitor':
+      return { kind: 'mul', value: rules.params.capacitorMultiplier };
     default:
       return null;
   }

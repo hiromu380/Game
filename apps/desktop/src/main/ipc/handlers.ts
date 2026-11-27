@@ -28,6 +28,8 @@ export interface HandlerDeps {
   readDemoSave?: () => Promise<string | null>;
   /** 定義済みの実績の ID（sim の ACHIEVEMENT_IDS。未指定なら形だけ確かめる: テスト用） */
   achievementIds?: ReadonlySet<string>;
+  /** ゲームのウィンドウの全画面（ウィンドウを開く前は null） */
+  window?: () => { isFullScreen(): boolean; setFullScreen(on: boolean): void } | null;
 }
 
 type Handler = (...args: unknown[]) => Promise<unknown>;
@@ -73,6 +75,13 @@ export function createHandlers(
     // 体験版からは読ませない（引き継ぎは「体験版 → 製品版」の一方向だけ）
     [IPC_CHANNELS.readDemoSave]: async () =>
       isDemo || !deps.readDemoSave ? null : deps.readDemoSave(),
+    [IPC_CHANNELS.getFullscreen]: async () => deps.window?.()?.isFullScreen() ?? false,
+    [IPC_CHANNELS.setFullscreen]: async (on) => {
+      const win = deps.window?.();
+      if (!win || typeof on !== 'boolean') return win?.isFullScreen() ?? false;
+      win.setFullScreen(on);
+      return on;
+    },
     [IPC_CHANNELS.openExternal]: async (url) => {
       if (typeof url === 'string' && isAllowedExternalUrl(url, config.externalAllowList)) {
         await deps.openExternal(url);

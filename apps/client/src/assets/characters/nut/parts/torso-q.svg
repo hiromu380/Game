@@ -1,0 +1,7 @@
+<svg width="40" height="52" xmlns="http://www.w3.org/2000/svg" viewBox="-20 -48 40 52">
+  <!-- ナットの部品: torso / q（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="-4" y="-44" width="8" height="9" rx="2" fill="#546e7a" stroke="#004d5a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M-12 -36 H16 L11 0 H-9 Z" fill="#00acc1" stroke="#004d5a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="4" cy="-22" r="6" fill="#ffffff" stroke="#004d5a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M4 -27 L6 -22 L4 -17 L2 -22 Z" fill="#e53935"/>
+</svg>

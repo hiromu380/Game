@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- レリック: coupon（art/ のスクリプトで生成。手で編集しない） -->
+  <polygon points="32,3 57,17 57,47 32,61 7,47 7,17" fill="#7e57c2" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="32,9 52,20 52,44 32,55 12,44 12,20" fill="#ede7f6" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M16 19 L28 12" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="14" y="22" width="36" height="20" rx="3" fill="#ffcc80" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 22 v20" fill="none" stroke="#1b1f27" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="3 2"/>
+  <path d="M30 36 l8 -8" fill="none" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="31" cy="29" r="2" fill="#1b1f27"/>
+  <circle cx="38" cy="36" r="2" fill="#1b1f27"/>
+  <g><circle cx="46" cy="46" r="8" fill="#69f0ae" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M42 46 h8" fill="none" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+</svg>

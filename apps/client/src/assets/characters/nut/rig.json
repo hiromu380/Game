@@ -1,0 +1,589 @@
+{
+  "version": 1,
+  "groundY": 35,
+  "viewBox": "-70 -142 140 182",
+  "parts": [
+    {
+      "id": "torso",
+      "parent": "root",
+      "pivot": [
+        0,
+        0
+      ],
+      "z": 3,
+      "box": [
+        -20,
+        -48,
+        40,
+        52
+      ],
+      "files": {
+        "front": "parts/torso-front.svg",
+        "q": "parts/torso-q.svg",
+        "side": "parts/torso-side.svg",
+        "back": "parts/torso-back.svg"
+      }
+    },
+    {
+      "id": "head",
+      "parent": "torso",
+      "pivot": [
+        0,
+        -44
+      ],
+      "z": 6,
+      "box": [
+        -36,
+        -96,
+        72,
+        100
+      ],
+      "files": {
+        "idle": "parts/head-idle.svg",
+        "happy": "parts/head-happy.svg",
+        "surprised": "parts/head-surprised.svg",
+        "sad": "parts/head-sad.svg",
+        "lookUp": "parts/head-lookUp.svg",
+        "blink": "parts/head-blink.svg",
+        "q:idle": "parts/head-q-idle.svg",
+        "q:happy": "parts/head-q-happy.svg",
+        "q:surprised": "parts/head-q-surprised.svg",
+        "q:sad": "parts/head-q-sad.svg",
+        "q:lookUp": "parts/head-q-lookUp.svg",
+        "q:blink": "parts/head-q-blink.svg",
+        "side": "parts/head-side.svg",
+        "back": "parts/head-back.svg"
+      }
+    },
+    {
+      "id": "scarf",
+      "parent": "torso",
+      "pivot": [
+        0,
+        -38
+      ],
+      "z": 7,
+      "box": [
+        -22,
+        -10,
+        80,
+        44
+      ],
+      "files": {
+        "still": "parts/scarf-still.svg",
+        "wind": "parts/scarf-wind.svg",
+        "back": "parts/scarf-back.svg"
+      }
+    },
+    {
+      "id": "thighL",
+      "parent": "root",
+      "pivot": [
+        -7,
+        0
+      ],
+      "z": 1,
+      "box": [
+        -8,
+        -8,
+        16,
+        30
+      ],
+      "files": {
+        "default": "parts/thigh-default.svg"
+      }
+    },
+    {
+      "id": "shinL",
+      "parent": "thighL",
+      "pivot": [
+        0,
+        16
+      ],
+      "z": 1,
+      "box": [
+        -7,
+        -7,
+        14,
+        28
+      ],
+      "files": {
+        "default": "parts/shin-default.svg"
+      }
+    },
+    {
+      "id": "footL",
+      "parent": "shinL",
+      "pivot": [
+        0,
+        15
+      ],
+      "z": 2,
+      "box": [
+        -14,
+        -4,
+        28,
+        12
+      ],
+      "files": {
+        "front": "parts/footL-front.svg",
+        "side": "parts/footL-side.svg"
+      }
+    },
+    {
+      "id": "upperArmL",
+      "parent": "torso",
+      "pivot": [
+        -15,
+        -32
+      ],
+      "z": 4,
+      "box": [
+        -8,
+        -8,
+        16,
+        32
+      ],
+      "files": {
+        "default": "parts/upperArm-default.svg"
+      }
+    },
+    {
+      "id": "foreArmL",
+      "parent": "upperArmL",
+      "pivot": [
+        0,
+        15
+      ],
+      "z": 4,
+      "box": [
+        -7,
+        -7,
+        14,
+        28
+      ],
+      "files": {
+        "default": "parts/foreArm-default.svg"
+      }
+    },
+    {
+      "id": "handL",
+      "parent": "foreArmL",
+      "pivot": [
+        0,
+        14
+      ],
+      "z": 5,
+      "box": [
+        -12,
+        -5,
+        24,
+        26
+      ],
+      "files": {
+        "open": "parts/hand-open.svg",
+        "fist": "parts/hand-fist.svg",
+        "point": "parts/hand-point.svg"
+      }
+    },
+    {
+      "id": "thighR",
+      "parent": "root",
+      "pivot": [
+        7,
+        0
+      ],
+      "z": 1,
+      "box": [
+        -8,
+        -8,
+        16,
+        30
+      ],
+      "files": {
+        "default": "parts/thigh-default.svg"
+      }
+    },
+    {
+      "id": "shinR",
+      "parent": "thighR",
+      "pivot": [
+        0,
+        16
+      ],
+      "z": 1,
+      "box": [
+        -7,
+        -7,
+        14,
+        28
+      ],
+      "files": {
+        "default": "parts/shin-default.svg"
+      }
+    },
+    {
+      "id": "footR",
+      "parent": "shinR",
+      "pivot": [
+        0,
+        15
+      ],
+      "z": 2,
+      "box": [
+        -14,
+        -4,
+        28,
+        12
+      ],
+      "files": {
+        "front": "parts/footR-front.svg",
+        "side": "parts/footR-side.svg"
+      }
+    },
+    {
+      "id": "upperArmR",
+      "parent": "torso",
+      "pivot": [
+        15,
+        -32
+      ],
+      "z": 4,
+      "box": [
+        -8,
+        -8,
+        16,
+        32
+      ],
+      "files": {
+        "default": "parts/upperArm-default.svg"
+      }
+    },
+    {
+      "id": "foreArmR",
+      "parent": "upperArmR",
+      "pivot": [
+        0,
+        15
+      ],
+      "z": 4,
+      "box": [
+        -7,
+        -7,
+        14,
+        28
+      ],
+      "files": {
+        "default": "parts/foreArm-default.svg"
+      }
+    },
+    {
+      "id": "handR",
+      "parent": "foreArmR",
+      "pivot": [
+        0,
+        14
+      ],
+      "z": 5,
+      "box": [
+        -12,
+        -5,
+        24,
+        26
+      ],
+      "files": {
+        "open": "parts/hand-open.svg",
+        "fist": "parts/hand-fist.svg",
+        "point": "parts/hand-point.svg"
+      }
+    }
+  ],
+  "poses": {
+    "stand": {
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4
+      },
+      "variants": {
+        "scarf": "still"
+      }
+    },
+    "wave": {
+      "angles": {
+        "upperArmL": 8,
+        "foreArmL": -4,
+        "upperArmR": -150,
+        "foreArmR": -20,
+        "head": 4
+      },
+      "variants": {
+        "head": "happy",
+        "scarf": "wind"
+      }
+    },
+    "point": {
+      "angles": {
+        "upperArmL": 8,
+        "foreArmL": -4,
+        "upperArmR": -165,
+        "foreArmR": 5,
+        "head": -6,
+        "torso": -3
+      },
+      "variants": {
+        "head": "lookUp",
+        "handR": "point",
+        "scarf": "wind"
+      }
+    },
+    "lookUp": {
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4,
+        "head": -8
+      },
+      "variants": {
+        "head": "lookUp",
+        "scarf": "wind"
+      }
+    },
+    "nod": {
+      "offsets": {
+        "head": [
+          0,
+          5
+        ]
+      },
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4
+      },
+      "variants": {
+        "head": "blink",
+        "scarf": "still"
+      }
+    },
+    "welcome": {
+      "angles": {
+        "upperArmL": 8,
+        "foreArmL": -4,
+        "upperArmR": -60,
+        "foreArmR": -30,
+        "head": 6
+      },
+      "variants": {
+        "head": "happy",
+        "handR": "open",
+        "scarf": "wind"
+      }
+    },
+    "sad": {
+      "offsets": {
+        "head": [
+          0,
+          4
+        ]
+      },
+      "angles": {
+        "upperArmL": 2,
+        "upperArmR": -2,
+        "foreArmL": 12,
+        "foreArmR": -12,
+        "head": 8
+      },
+      "variants": {
+        "head": "sad",
+        "scarf": "still"
+      }
+    },
+    "walk": {
+      "angles": {
+        "thighL": -24,
+        "shinL": 10,
+        "thighR": 22,
+        "shinR": 20,
+        "upperArmL": 24,
+        "upperArmR": -26
+      },
+      "offsets": {
+        "upperArmL": [
+          15,
+          0
+        ],
+        "upperArmR": [
+          -15,
+          0
+        ],
+        "thighL": [
+          5,
+          0
+        ],
+        "thighR": [
+          -5,
+          0
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "scarf": "back"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0
+      }
+    },
+    "walkB": {
+      "angles": {
+        "thighL": 22,
+        "shinL": 20,
+        "thighR": -24,
+        "shinR": 10,
+        "upperArmL": -26,
+        "upperArmR": 24
+      },
+      "offsets": {
+        "upperArmL": [
+          15,
+          0
+        ],
+        "upperArmR": [
+          -15,
+          0
+        ],
+        "thighL": [
+          5,
+          0
+        ],
+        "thighR": [
+          -5,
+          0
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "scarf": "back"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0
+      }
+    }
+  },
+  "views": {
+    "front": {
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4
+      },
+      "variants": {
+        "scarf": "still"
+      }
+    },
+    "quarter": {
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4
+      },
+      "offsets": {
+        "upperArmL": [
+          4,
+          0
+        ],
+        "thighL": [
+          2,
+          0
+        ]
+      },
+      "variants": {
+        "head": "q:idle",
+        "torso": "q",
+        "scarf": "still"
+      },
+      "z": {
+        "upperArmL": 2,
+        "foreArmL": 2,
+        "handL": 2
+      }
+    },
+    "side": {
+      "angles": {
+        "upperArmL": -4,
+        "upperArmR": 4
+      },
+      "offsets": {
+        "upperArmL": [
+          15,
+          0
+        ],
+        "upperArmR": [
+          -15,
+          0
+        ],
+        "thighL": [
+          5,
+          0
+        ],
+        "thighR": [
+          -5,
+          0
+        ]
+      },
+      "variants": {
+        "head": "side",
+        "torso": "side",
+        "footL": "side",
+        "footR": "side",
+        "scarf": "back"
+      },
+      "z": {
+        "upperArmL": 1,
+        "foreArmL": 1,
+        "handL": 1,
+        "thighL": 0,
+        "shinL": 0,
+        "footL": 0
+      }
+    },
+    "back": {
+      "angles": {
+        "upperArmL": 8,
+        "upperArmR": -8,
+        "foreArmL": -4,
+        "foreArmR": 4
+      },
+      "offsets": {},
+      "variants": {
+        "head": "back",
+        "torso": "back",
+        "scarf": "back"
+      },
+      "z": {
+        "scarf": 2
+      }
+    }
+  }
+}

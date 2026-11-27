@@ -8,6 +8,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      '**/dist-single/**',
       '**/node_modules/**',
       '**/.wrangler/**',
       'legacy/**',
@@ -26,7 +27,7 @@ export default tseslint.config(
   },
   // シミュレーションは完全決定論。非決定的なAPIの使用を禁止する
   {
-    files: ['packages/sim/src/**/*.ts'],
+    files: ['packages/sim/src/**/*.ts', 'games/*/sim/src/**/*.ts'],
     rules: {
       'no-restricted-properties': [
         'error',
@@ -46,12 +47,23 @@ export default tseslint.config(
     plugins: { 'react-hooks': reactHooks },
     rules: reactHooks.configs.recommended.rules,
   },
+  // 一門のクライアント: フックの並び（早い return より後ろに置かない）を検査する
+  {
+    files: ['games/*/client/src/**/*.{ts,tsx}'],
+    languageOptions: { globals: globals.browser },
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
   // ビルド用のスクリプト・デスクトップ版のメインプロセス（Node で動く）
   {
     files: [
       'apps/client/build/**/*.{ts,mjs}',
       'apps/desktop/**/*.{ts,mjs,cjs}',
       'tools/**/*.mjs',
+      'games/*/client/build/**/*.{mjs,ts,tsx}',
       '.github/**/*.mjs',
     ],
     languageOptions: { globals: globals.node },

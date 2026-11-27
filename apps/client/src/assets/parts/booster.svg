@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- パーツ: booster（art/ のスクリプトで生成。手で編集しない） -->
+  <polygon points="22,52 32,62 42,52" fill="#ff7043" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="20" y="36" width="24" height="14" rx="3" fill="#90a4ae" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M22 20 Q32 2 42 20 V38 H22 Z" fill="#ffcc80" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M34 10 Q40 16 42 24 V38 H34 Z" fill="#d9ad6d"/>
+  <path d="M22 20 Q32 2 42 20 V38 H22 Z" fill="none" stroke="#1b1f27" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M27 26 h10 M32 21 v10" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

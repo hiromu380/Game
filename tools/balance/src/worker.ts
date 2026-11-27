@@ -2,8 +2,8 @@
  * 並列実行用のワーカー: 担当するシードのランを実行して結果を返す
  */
 import { parentPort, workerData } from 'node:worker_threads';
-import type { BotName } from './bots';
-import { playRun, type RunnerOptions } from './runner';
+import type { BotName } from '@chain-factory/bots';
+import { playRun, type RunnerOptions } from '@chain-factory/bots';
 
 interface Job {
   seeds: number[];

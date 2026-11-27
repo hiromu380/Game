@@ -4,7 +4,7 @@
  * セーブデータ（ラン・メタ進行）とは別のキーに保存し、こちらにもバージョンを持たせる。
  * 形式を変えたら SETTINGS_VERSION を上げ、migrateSettings に変換を足すこと。
  */
-import type { EffectStrength } from '../config/effects';
+import { EFFECTS_CONFIG, type EffectStrength } from '../config/effects';
 import type { Lang } from '../i18n';
 import { appStorage } from '../storage';
 
@@ -60,7 +60,32 @@ export function migrateSettings(raw: unknown): UserSettings {
   if (typeof raw !== 'object' || raw === null) return DEFAULT_SETTINGS;
   const value = raw as Record<string, unknown>;
   if (value.version !== 1 && value.version !== 2 && value.version !== 3) return DEFAULT_SETTINGS;
-  return { ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 3 };
+  return sanitize({ ...DEFAULT_SETTINGS, ...(value as Partial<UserSettings>), version: 3 });
+}
+
+/**
+ * 型や範囲の合わない項目を既定値に戻す（手で書き換えたファイル・別の版から同期された設定でも動くように。
+ * 例えば演出の強さが知らない値だと、演出の長さが計算できず再生が止まる）
+ */
+function sanitize(settings: UserSettings): UserSettings {
+  const d = DEFAULT_SETTINGS;
+  const bool = (v: unknown, fallback: boolean) => (typeof v === 'boolean' ? v : fallback);
+  const volume = (v: unknown, fallback: number) =>
+    typeof v === 'number' && Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : fallback;
+  return {
+    version: 3,
+    lang: settings.lang === 'ja' || settings.lang === 'en' ? settings.lang : d.lang,
+    effects: Object.hasOwn(EFFECTS_CONFIG.strength, settings.effects)
+      ? settings.effects
+      : d.effects,
+    shake: bool(settings.shake, d.shake),
+    reduceFlashes: bool(settings.reduceFlashes, d.reduceFlashes),
+    masterVolume: volume(settings.masterVolume, d.masterVolume),
+    seVolume: volume(settings.seVolume, d.seVolume),
+    bgmVolume: volume(settings.bgmVolume, d.bgmVolume),
+    muted: bool(settings.muted, d.muted),
+    tutorialDone: bool(settings.tutorialDone, d.tutorialDone),
+  };
 }
 
 export function loadSettings(storage = defaultStorage()): UserSettings {

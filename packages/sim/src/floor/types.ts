@@ -17,8 +17,9 @@ export type FloorTileId = (typeof FLOOR_TILE_IDS)[number];
  * - boss: ボス・特殊ルール（床の補修工事）
  * - event: 今日の出来事
  * - bonus: シフト開始時のボーナス床
+ * - item: ランダム配置権で湧いた床（その日のあいだ）
  */
-export type FloorSource = 'stage' | 'boss' | 'event' | 'bonus';
+export type FloorSource = 'stage' | 'boss' | 'event' | 'bonus' | 'item';
 
 export interface FloorCell {
   tile: FloorTileId;

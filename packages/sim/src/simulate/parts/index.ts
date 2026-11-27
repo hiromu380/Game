@@ -24,6 +24,15 @@ import { reflectorBehavior } from './reflector';
 import { solarBehavior } from './solar';
 import { spreaderBehavior } from './spreader';
 import { turntableBehavior } from './turntable';
+// パーツ追加（SIM_VERSION 9）
+import { bendBehavior } from './bend';
+import { boosterBehavior } from './booster';
+import { capacitorBehavior } from './capacitor';
+import { cashierBehavior } from './cashier';
+import { cornerBenchBehavior } from './cornerBench';
+import { crossSplitterBehavior } from './crossSplitter';
+import { magnetBehavior } from './magnet';
+import { teleporterBehavior } from './teleporter';
 
 export const PART_BEHAVIORS: Record<PartId, PartBehavior> = {
   switch: switchBehavior,
@@ -46,4 +55,12 @@ export const PART_BEHAVIORS: Record<PartId, PartBehavior> = {
   solar: solarBehavior,
   inspector: inspectorBehavior,
   piggyBank: piggyBankBehavior,
+  bend: bendBehavior,
+  crossSplitter: crossSplitterBehavior,
+  magnet: magnetBehavior,
+  cornerBench: cornerBenchBehavior,
+  capacitor: capacitorBehavior,
+  teleporter: teleporterBehavior,
+  booster: boosterBehavior,
+  cashier: cashierBehavior,
 };

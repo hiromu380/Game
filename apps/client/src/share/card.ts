@@ -3,7 +3,7 @@
  *
  * 画面や Canvas には触れない（描くのは share/renderCard.ts）。文言は呼び出し側で翻訳して渡す。
  * - 通常ラン: 盤面の縮小図を載せる（配置データから描き直す。スクリーンショットは使わない）
- * - デイリー: 盤面はネタバレになるので載せず、シフトごとの結果（達成・未達・未到達）を載せる
+ * - 週替わり: 盤面はネタバレになるので載せず、シフトごとの結果（達成・未達・未到達）を載せる
  */
 import type { Board, PartId } from '@chain-factory/sim';
 import { BOARD_COLORS, UI_COLORS } from '../assets/palette';
@@ -32,20 +32,20 @@ export type DrawCommand =
 export type ShiftResult = 'cleared' | 'failed' | 'notPlayed';
 
 export interface ShareCardInput {
-  /** 見出し（例: 「打ち上げ成功！」「デイリー #12」） */
+  /** 見出し（例: 「打ち上げ成功！」「週替わり #12」） */
   title: string;
-  /** 見出しの下の小さな文字（デイリーの日付など。なければ null） */
+  /** 見出しの下の小さな文字（週替わりの日付など。なければ null） */
   subtitle: string | null;
   scoreLabel: string;
   /** 出荷量（表記済みの文字列） */
   score: string;
   /** 到達したシフト（例: 「シフト 7 / 9 まで到達」） */
   shifts: string;
-  /** 順位（デイリーで取れたときだけ。例: 「12位・上位 5%」） */
+  /** 順位（週替わりで取れたときだけ。例: 「12位・上位 5%」） */
   rank: string | null;
-  /** 通常ランの盤面（デイリーは null） */
+  /** 通常ランの盤面（週替わりは null） */
   board: Board | null;
-  /** デイリーのシフトごとの結果（通常ランは null） */
+  /** 週替わりのシフトごとの結果（通常ランは null） */
   results: ShiftResult[] | null;
   url: string;
 }
@@ -130,7 +130,7 @@ export function buildShareCard(input: ShareCardInput, size: ShareCardSize): Draw
     { kind: 'hazard', x: 0, y: H - stripe, w: W, h: stripe, band: stripe },
   ];
 
-  // 絵（通常ランは盤面、デイリーはボルト）: 横長は右側に置く。正方形は文字の下に置く（大きさは残りの高さで決める）
+  // 絵（通常ランは盤面、週替わりはボルト）: 横長は右側に置く。正方形は文字の下に置く（大きさは残りの高さで決める）
   const landscapeArt = Math.round(H * 0.72);
   const artX0 = W - margin - landscapeArt;
 

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 今日の出来事: rollUpSleeves（art/ のスクリプトで生成。手で編集しない） -->
+  <rect x="5" y="5" width="54" height="54" rx="12" fill="#43a047" stroke="#1b1f27" stroke-width="3"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="#e8f5e9" stroke="#1b1f27" stroke-width="2"/>
+  <rect x="16" y="20" width="9" height="26" rx="2" fill="#ff5252" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="28" y="30" width="9" height="16" rx="2" fill="#ffc107" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M45 16 V40 M39 34 l6 6 l6 -6" fill="none" stroke="#43a047" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

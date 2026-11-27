@@ -6,4 +6,8 @@ export const INPUT_CONFIG = {
   longPressMs: 500,
   /** この距離（盤面のピクセル）以上動かしたらドラッグ（置いたパーツを別のマスへ動かす） */
   dragThresholdPx: 10,
+  /** マウスホイールで回す: この量（deltaY の合計）ごとに1回。タッチパッドの細かい量がたまってから回す */
+  wheelStep: 100,
+  /** マウスホイールで続けて回すときの最短の間隔（ミリ秒。1ノッチで何度も回らないように） */
+  wheelIntervalMs: 120,
 } as const;

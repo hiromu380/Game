@@ -10,7 +10,7 @@ import {
   getPartBadge,
   type SimEvent,
 } from '../../src';
-import { board, run } from '../helpers';
+import { board, NO_REDIRECT_ADD, run } from '../helpers';
 
 const only = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
   events.filter((e): e is Extract<SimEvent, { type: T }> => e.type === type);
@@ -18,12 +18,22 @@ const only = <T extends SimEvent['type']>(events: SimEvent[], type: T) =>
 const P = BALANCE.partParams;
 
 describe('合流炉（倍率系）', () => {
-  it('同じ tick に入った信号を合算して1本にする', () => {
-    // 分岐器で上下に分けた 1 と 1 が、同じ長さの経路で合流炉(2,1)に同時に入る → 2 を出荷
-    const { scoreText, events } = run(['.. C> Cv ..', 'S> Y> M> D>', '.. C> C^ ..']);
-    expect(scoreText).toBe('2');
+  it('同じ tick に入った信号の値を掛け合わせて1本にする', () => {
+    // 分岐器で上下に分けた信号が、同じ長さの経路で合流炉(2,1)に同時に入る。上はギア2つで 4、下はギア1つで 2
+    // → 4 × 2 = 8（足し算なら 6）
+    const { scoreText, events } = run(
+      ['.. G> Gv ..', 'S> Y> M> D>', '.. G> C^ ..'],
+      1,
+      NO_REDIRECT_ADD,
+    );
+    expect(scoreText).toBe('8');
     expect(only(events, 'absorb')).toHaveLength(1);
     expect(only(events, 'activate').filter((e) => e.partId === 'merger')).toHaveLength(1);
+  });
+
+  it('導入前のラン（mergeMode が sum）は足し算のまま', () => {
+    const rules = { ...NO_REDIRECT_ADD, mergeMode: 'sum' as const };
+    expect(run(['.. G> Gv ..', 'S> Y> M> D>', '.. G> C^ ..'], 1, rules).scoreText).toBe('6');
   });
 
   it('別々の tick に入った信号は別々に送る（発動回数は tick ごとに1回）', () => {
@@ -54,9 +64,9 @@ describe('連鎖メーター（倍率系）', () => {
 });
 
 describe('散布機（分岐系）', () => {
-  it('前・左・右の3方向へ同じ値で送る', () => {
+  it(`前・左・右の3方向へ、値に +${P.redirectAdd} して送る`, () => {
     const { scoreText } = run(['.. D> ..', 'S> E> D>', '.. D> ..']);
-    expect(scoreText).toBe('3');
+    expect(scoreText).toBe('27'); // (1 + 2) × 3口 × 同時出荷 ×3
   });
 });
 
@@ -122,13 +132,13 @@ describe('潤滑油タンク（再発動系）', () => {
 });
 
 describe('共鳴コイル（配置系）', () => {
-  it('値に（1 + 隣接する共鳴コイル数）を掛ける', () => {
-    // 3つ並んだコイル: 1つ目 ×2、2つ目 ×3、3つ目 ×2 → 1×2×3×2 = 12
-    expect(run(['S> L> L> L> D>']).scoreText).toBe('12');
+  it(`値に（${P.coilBase} + 隣接する共鳴コイル数）を掛ける（1つでも効く）`, () => {
+    // 3つ並んだコイル: 1つ目 ×3、2つ目 ×4、3つ目 ×3 → 1×3×4×3 = 36
+    expect(run(['S> L> L> L> D>']).scoreText).toBe('36');
   });
 
-  it('コイル以外の隣接パーツは数えない', () => {
-    expect(run(['.. G^ ..', 'S> L> D>']).scoreText).toBe('1');
+  it('コイル以外の隣接パーツは数えない（1つだけなら基本の倍率）', () => {
+    expect(run(['.. G^ ..', 'S> L> D>']).scoreText).toBe(String(P.coilBase));
   });
 });
 
@@ -169,7 +179,7 @@ describe('効果量バッジ', () => {
     const badge = (x: number, y: number) =>
       getPartBadge(b.cells[y * 3 + x]!, b, x, y, DEFAULT_RULES);
     expect(badge(1, 1)).toEqual({ kind: 'add', value: 3 });
-    expect(badge(0, 2)).toEqual({ kind: 'mul', value: 2 });
+    expect(badge(0, 2)).toEqual({ kind: 'mul', value: P.coilBase + 1 }); // 隣にコイル1つ
     expect(badge(2, 2)).toEqual({ kind: 'mul', value: P.inspectorMultiplier }); // 上に出荷口
     expect(badge(0, 1)).toBeNull();
   });

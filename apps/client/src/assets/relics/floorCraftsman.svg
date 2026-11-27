@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- レリック: floorCraftsman（art/ のスクリプトで生成。手で編集しない） -->
+  <polygon points="32,3 57,17 57,47 32,61 7,47 7,17" fill="#7e57c2" stroke="#1b1f27" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="32,9 52,20 52,44 32,55 12,44 12,20" fill="#ede7f6" stroke="#1b1f27" stroke-width="2"/>
+  <path d="M16 19 L28 12" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <polygon points="14,38 32,28 50,38 32,48" fill="#4dd0e1" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="28" y="14" width="8" height="14" rx="2" fill="#90a4ae" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <rect x="24" y="12" width="16" height="5" rx="2" fill="#00acc1" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <g><circle cx="46" cy="46" r="8" fill="#ffc107" stroke="#1b1f27" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M42 46 h8 M46 42 v8" fill="none" stroke="#1b1f27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></g>
+</svg>

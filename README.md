@@ -39,11 +39,11 @@
 - `--start 5000` … 開始シード
 - `--time-limit 3000` … 探索ボットの1シフトあたりの思考時間（ミリ秒）
 - `--eval worst --samples 5` … ランダムな盤面を「5回試して最悪の回」で評価する（慎重なプレイヤー）
-- `--mode daily` … デイリーと同じ条件（3シフト・全パーツ・今日の特殊ルール）
+- `--mode weekly` … 週替わりチャレンジと同じ条件（3シフト・全パーツ・今週の特殊ルール）
 
 調整の記録は [docs/balance-log.md](./docs/balance-log.md) にあります。
 
-### オンライン（デイリーチャレンジ）をローカルで動かす
+### オンライン（週替わりチャレンジ）をローカルで動かす
 
 API サーバーは Cloudflare Workers + D1（Hono）。ローカルでは wrangler が D1 ごと再現します。
 
@@ -54,11 +54,14 @@ pnpm dev:server                                           # API（:8787）
 pnpm dev                                                  # クライアント（:5173。/api は 8787 へ転送される）
 ```
 
-画面右上の「デイリー」から、本番（1日1回・ランキング対象）・練習・ランキングを開けます。
+タイトルの「今週のチャレンジ」（ゲーム中は画面右上）から、本番（1日1回・週のベストがランキング対象）・練習・暫定ランキング・結果発表を開けます。
+
+- 最初の1回は `pnpm --filter @chain-factory/server job all` で今週以降の盤面を用意・検証しておく（しないと、最初にアクセスした週は固定の代替設定で開く）
+- 時刻を進めて週の切り替え・結果発表を試す手順は [docs/ops/weekly.md](./docs/ops/weekly.md)
 
 - 本番と同じ形（同一オリジン・セキュリティヘッダー・PWA）で試すときは、クライアントをビルドしてから `pnpm dev:server` だけを起動し http://localhost:8787 を開く
 - 人間確認（Turnstile）は、開発時は Cloudflare 公式のテスト用キーで常に通る（通信もしない）
-- ジョブ（Cron とは独立して実行できる）: `pnpm --filter @chain-factory/server job <daily|market|ip-purge|all>`
+- ジョブ（Cron とは独立して実行できる）: `pnpm --filter @chain-factory/server job <prepare|verify|open|finalize|purge|all>`
   （`--at 2026-10-05T00:00:00Z` で時刻指定、`--db file.sqlite` で任意の SQLite に対して実行）
 - スキーマを変えたら `pnpm --filter @chain-factory/server db:generate` でマイグレーションを生成する
 - 本番デプロイ・バックアップの手順は [docs/ops/](./docs/ops/)、規約類の下書きは [docs/legal/](./docs/legal/)
@@ -80,7 +83,7 @@ packages/
     src/
       balance/          ★ ゲームの数値はすべてここ（種類ごとにファイルを分けている）
         parts.ts          パーツの価格・発動回数・レア度・倍率などの効果量
-        shifts.ts         シフト表（ノルマ・予算・報酬）・延長戦・デイリー
+        shifts.ts         シフト表（ノルマ・予算・報酬）・延長戦・週替わり
         economy.ts        ショップの品数・リロール・売却・最初の手持ち
         meta.ts           パーツの解放条件・工場拡張
         boss.ts           ボス（夜シフト）の修正ルールの効果量
@@ -94,19 +97,20 @@ packages/
       achievements/     実績の定義と解除の判定（純粋関数）
     test/               決定論・停止性・各パーツ・連鎖スナップショット・ボス・ラン進行・実績
   shared/         client / server / desktop 共通の型（セーブデータ形式・API の型・スコアの3列表現・ランキングの並び順・デスクトップ版の IPC）
+  bots/           自動プレイのボット（貪欲・中級・探索・ランダム。sim だけに依存。tools/balance と、サーバーの週替わりの盤面の自動検証が使う）
 apps/
   server/         API サーバー（Hono + Cloudflare Workers + D1）
     src/
       index.ts          Workers の入り口（Cloudflare 固有のものはここと adapters/ だけ）
       app.ts            ルーティング・認証・レート制限・エラー変換
       env.ts            環境変数 → 設定
-      domain/           デイリー（秘密値・生成ジョブ・サーバー検証）・相場・プレイヤー（IP の扱い）・ランキング
+      domain/           週替わり（暦・秘密値・先行生成と検証・挑戦と提出・暫定ランキング・結果発表）・相場・プレイヤー（IP の扱い）
       repositories/     DB アクセスの窓口（types.ts）と実装（drizzle.ts / memory.ts）
       adapters/         レート制限・人間確認（Turnstile）・Steam の認証チケットの確認・node:sqlite（テスト用）
       db/               Drizzle スキーマとマイグレーション
       jobs/             Cron から呼ぶジョブの一覧
-      config/           サーバーの上限値・表示名のルール・相場の係数
-    scripts/run-job.ts  ジョブを単体で実行する（daily / market / ip-purge / all）
+      config/           サーバーの上限値・表示名のルール・相場の係数・週替わりの設定（猶予・検証・ランキング・保存期間）
+    scripts/run-job.ts  ジョブを単体で実行する（prepare / verify / open / finalize / purge / all）
     test/               リポジトリ・API（不正な提出の拒否・ゴールデンデータ）
   client/         Web版クライアント（Vite + PixiJS + React）
     art/                素材の生成スクリプト（パレット → SVG・CSS）とプレビューページ
@@ -118,7 +122,7 @@ apps/
       board/            PixiJS の盤面描画と演出再生（fx/ に連鎖演出）
       playback/         イベント再生のタイミング制御・途切れた理由の集計（描画に依存しない）
       state/            画面状態の reducer（操作ログの記録・プレイモード）・セーブ/ロード
-      online/           API クライアント・オンラインの身元・デイリーのラン組み立て・相場・シェア文・Turnstile
+      online/           API クライアント・オンラインの身元・週替わりのラン組み立て・結果発表の既読・相場・シェア文・Turnstile
       ui/               React の各パネル（HUD・ショップ・手持ち・結果画面など。title/ online/ share/）
       i18n/             文言（ja.json / en.json）と大きな数の表記
       audio/            サウンドマニフェスト（合成SEのレシピ）と再生エンジン
@@ -130,7 +134,7 @@ apps/
       assets/           見た目の定義（manifest.ts・palette.ts）と素材（パーツ・マスコット・盤面・アイコン・ロゴ・実績・フォント）
   desktop/        デスクトップ版（Electron。メインプロセス・preload・Steam アダプター・ビルド設定・SteamPipe のひな形）
 tools/
-  balance/        バランス検証ツール（bots/ にボット3種、reports/ に出力）
+  balance/        バランス検証ツール（ボットは packages/bots。reports/ に出力）
   perf/           計算量の計測（サーバー検証の CPU 時間の見積もり）
   fonts/          同梱フォントのサブセット化
 docs/

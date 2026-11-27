@@ -1,0 +1,57 @@
+import { useEffect, useMemo, useState } from 'react';
+import type { GameState } from '@ichimon/sim';
+import { I18nContext, makeT } from './i18n';
+import { loadGame, loadSettings, saveGame, saveSettings, type Settings } from './save';
+import { NewGame } from './ui/NewGame';
+import { GameScreen } from './ui/GameScreen';
+import { SettingsContext } from './settings';
+import { setVolume } from './sound';
+import { useDialogs } from './dialogs';
+
+export function App() {
+  const [settings, setSettings] = useState<Settings>(() => loadSettings());
+  const [game, setGame] = useState<GameState | null>(() => loadGame());
+  const { lang } = settings;
+  useDialogs();
+  const i18n = useMemo(() => ({ lang, t: makeT(lang) }), [lang]);
+  const settingsValue = useMemo(
+    () => ({
+      settings,
+      update: (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })),
+    }),
+    [settings],
+  );
+  const toggleLang = () => settingsValue.update({ lang: lang === 'ja' ? 'en' : 'ja' });
+
+  useEffect(() => saveGame(game), [game]);
+  useEffect(() => saveSettings(settings), [settings]);
+  // 音量のつまみを設定に合わせる
+  useEffect(() => setVolume(settings.volume), [settings.volume]);
+  // 説明を出すか（CSS で注記・手引き・タブの案内を隠す）
+  useEffect(() => {
+    document.documentElement.dataset.help = settings.help ? 'on' : 'off';
+  }, [settings.help]);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = i18n.t('app.title');
+  }, [lang, i18n]);
+
+  return (
+    <SettingsContext.Provider value={settingsValue}>
+      <I18nContext.Provider value={i18n}>
+        <div className="app">
+          {game ? (
+            <GameScreen
+              game={game}
+              setGame={setGame}
+              onQuit={() => setGame(null)}
+              onToggleLang={toggleLang}
+            />
+          ) : (
+            <NewGame onStart={setGame} onToggleLang={toggleLang} />
+          )}
+        </div>
+      </I18nContext.Provider>
+    </SettingsContext.Provider>
+  );
+}

@@ -20,6 +20,8 @@ export const IPC_CHANNELS = {
   showKeyboard: 'platform:showKeyboard',
   openExternal: 'platform:openExternal',
   readDemoSave: 'storage:readDemoSave',
+  getFullscreen: 'window:getFullscreen',
+  setFullscreen: 'window:setFullscreen',
 } as const;
 
 /**
@@ -31,6 +33,8 @@ export const STORAGE_ENTRIES = {
   'chain-factory:settings': { file: 'settings.json', cloud: true },
   // 認証トークンは端末ごと。Steam 版は起動時に取り直せるので同期しない
   'chain-factory:online': { file: 'identity.json', cloud: false },
+  // 読めなかったセーブの控え（新しい版から同期された・壊れた save.json を上書きする前に残す）。この端末にだけ置く
+  'chain-factory:save:unreadable': { file: 'save-unreadable.json', cloud: false },
 } as const;
 
 export type StorageKey = keyof typeof STORAGE_ENTRIES;
@@ -85,4 +89,8 @@ export interface DesktopBridge {
    * （製品版の初回起動時に、体験版のデータを引き継ぐかを聞くため）
    */
   readDemoSave(): Promise<string | null>;
+  /** ウィンドウが全画面か */
+  getFullscreen(): Promise<boolean>;
+  /** 全画面にする・戻す。切り替えた後の状態を返す */
+  setFullscreen(on: boolean): Promise<boolean>;
 }
