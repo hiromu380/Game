@@ -2105,5 +2105,8 @@
   "trend.gain": "稽古",
   "trend.legendBar": "棒: 4週の伸び",
   "trend.legendMark": "○勝ち越し ●負け越し 休＝全休",
-  "trend.markKyujo": "休"
+  "trend.markKyujo": "休",
+  "ticker.hidden": "結果は？",
+  "ticker.reveal": "結果を見る",
+  "ticker.spoil": "この場所は伏せない"
 }

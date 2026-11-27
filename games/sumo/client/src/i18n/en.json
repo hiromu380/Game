@@ -2105,5 +2105,8 @@
   "trend.gain": "gain",
   "trend.legendBar": "Bars: 4-week gain",
   "trend.legendMark": "○ winning ● losing A sat out",
-  "trend.markKyujo": "A"
+  "trend.markKyujo": "A",
+  "ticker.hidden": "Result?",
+  "ticker.reveal": "Show result",
+  "ticker.spoil": "Don't hide this basho"
 }

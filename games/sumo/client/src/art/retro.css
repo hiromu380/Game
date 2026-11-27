@@ -2234,3 +2234,36 @@ body.has-modal {
   display: block;
   white-space: nowrap;
 }
+/* 今日の一番を伏せている間 */
+.today.is-hidden {
+  border-color: var(--ai);
+}
+.today.is-hidden .today__mark {
+  color: var(--ai);
+}
+.today__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 6px;
+}
+.today__actions .button {
+  min-height: 44px;
+}
+.today__spoil {
+  flex-basis: 100%;
+  min-height: 44px;
+  border: none;
+  background: none;
+  color: var(--ink-2);
+  text-decoration: underline;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.ticker__mark.is-veiled {
+  color: var(--ai);
+  border-color: var(--ai);
+}

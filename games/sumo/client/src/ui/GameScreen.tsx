@@ -121,6 +121,8 @@ export function GameScreen({
   const [tactic, setTactic] = useState<Plan | null>(null);
   // 星取りの途中で見ている今日の一番（見ている間は星取りを止める）
   const [watching, setWatching] = useState<BoutResult | null>(null);
+  // この場所は今日の一番の結果を伏せない（場所が変われば、また伏せる）
+  const [spoilAt, setSpoilAt] = useState<number | null>(null);
   // 大一番をその場で見せている（その日の何番目か）
   const [live, setLive] = useState<{
     next: GameState;
@@ -388,6 +390,8 @@ export function GameScreen({
           who={whoOf}
           onWatch={setWatching}
           paused={watching !== null}
+          spoil={spoilAt === game.bashoIndex}
+          onSpoil={() => setSpoilAt(game.bashoIndex)}
           title={t('ticker.first')}
           rows={ticker.mid.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),
@@ -439,6 +443,8 @@ export function GameScreen({
           who={whoOf}
           onWatch={setWatching}
           paused={watching !== null}
+          spoil={spoilAt === game.bashoIndex}
+          onSpoil={() => setSpoilAt(game.bashoIndex)}
           title={t('ticker.second')}
           rows={ticker.next.lastReport.mine.map((m) => ({
             ...tickerRow(m.id, m.bouts),

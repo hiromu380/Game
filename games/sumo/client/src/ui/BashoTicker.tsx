@@ -60,6 +60,8 @@ export function BashoTicker({
   who,
   onWatch,
   paused = false,
+  spoil = false,
+  onSpoil,
 }: {
   title: string;
   rows: TickerEntry[];
@@ -71,6 +73,9 @@ export function BashoTicker({
   onWatch?: (b: BoutResult) => void;
   /** 取組を見ている間は止める（日を進めない・次へ進まない） */
   paused?: boolean;
+  /** 今日の一番の結果を伏せない（この場所は伏せない、を選んだ） */
+  spoil?: boolean;
+  onSpoil?: () => void;
   from: number;
   to: number;
   doneLabel: string;
@@ -82,66 +87,97 @@ export function BashoTicker({
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // 見せ終わった日（from - 1 から始めて、to まで）
   const [day, setDay] = useState(reduced ? to : from - 1);
+  // 今日の一番の結果を明かした日（伏せている間は、その日で星取りを止める）
+  const [shownDay, setShownDay] = useState(from - 1);
+  // 取組を見ている間は伏せたまま。閉じたら明かす
+  const [revealOnClose, setRevealOnClose] = useState(false);
+  useEffect(() => {
+    if (revealOnClose && !paused) {
+      setShownDay(day);
+      setRevealOnClose(false);
+    }
+  }, [revealOnClose, paused, day]);
+  const pick = who && day >= from ? todayBout(rows, day, honmei) : null;
+  const hiddenId =
+    onWatch && !spoil && pick && !pick.bout.fusen && shownDay < day ? pick.row.id : null;
+  /** 行ごとに見せてよい日（伏せている今日の一番の弟子は前の日まで） */
+  const seen = (r: TickerEntry) => (r.id === hiddenId ? day - 1 : day);
   useEffect(() => {
     if (settings.sound) playSound('drum');
   }, [settings.sound]);
   useEffect(() => {
-    if (day >= to || paused) return;
+    if (day >= to || paused || hiddenId !== null) return;
     const id = setTimeout(() => setDay((d) => Math.min(to, d + 1)), day < from ? 380 : DAY_MS);
     return () => clearTimeout(id);
-  }, [day, from, to, paused]);
-  // 札が入った日に、小さな木の音。勝ち越しが決まった日は拍手
-  const anyMark = day >= from && rows.some((r) => r.marks[day - 1] != null);
+  }, [day, from, to, paused, hiddenId]);
+  // 札が入った日に、小さな木の音。勝ち越しが決まった日は拍手（行ごとに、見せてよい日で数える）
+  const sek = (r: TickerEntry) => r.rank !== null && isSekitori(r.rank);
   const kkToday = rows.filter((r) => {
-    const sekitori = r.rank !== null && isSekitori(r.rank);
+    const e = seen(r);
     return (
-      day >= from &&
-      decidedUntil(r, day, sekitori) === 'kachikoshi' &&
-      decidedUntil(r, day - 1, sekitori) !== 'kachikoshi'
+      e >= from &&
+      decidedUntil(r, e, sek(r)) === 'kachikoshi' &&
+      decidedUntil(r, e - 1, sek(r)) !== 'kachikoshi'
     );
   });
   // 目標に届いた日（勝ち越しと同じく褒める）
   for (const r of rows) {
+    const e = seen(r);
     if (
       r.target &&
       r.target.kind !== 'kachikoshi' &&
-      day >= from &&
-      reached(r.target, tallyUntil(r, day).wins) &&
-      !reached(r.target, tallyUntil(r, day - 1).wins) &&
+      e >= from &&
+      reached(r.target, tallyUntil(r, e).wins) &&
+      !reached(r.target, tallyUntil(r, e - 1).wins) &&
       !kkToday.includes(r)
     )
       kkToday.push(r);
   }
   const kkIds = new Set(kkToday.map((r) => r.id));
-  // 本命の勝ち越しが決まった日（拍手に歓声を重ねる）
-  const honmeiRow = rows.find((r) => r.id === honmei);
-  const honmeiHit =
-    honmeiRow !== undefined &&
-    day >= from &&
-    decidedUntil(honmeiRow, day, honmeiRow.rank !== null && isSekitori(honmeiRow.rank)) ===
-      'kachikoshi' &&
-    decidedUntil(honmeiRow, day - 1, honmeiRow.rank !== null && isSekitori(honmeiRow.rank)) !==
-      'kachikoshi';
-  // 全勝が決まった日（最後の番の日）。いちばん褒める
-  const sek = (r: TickerEntry) => r.rank !== null && isSekitori(r.rank);
-  const zenshoToday = day >= from && rows.some((r) => zenshoDay(r, sek(r)) === day);
+  // 本命の勝ち越しが決まった日（拍手に歓声を重ねる）・全勝が決まった日（いちばん褒める）
+  const cheerIds = rows
+    .filter((r) => {
+      const e = seen(r);
+      if (e < from) return false;
+      const honmeiHit =
+        r.id === honmei &&
+        decidedUntil(r, e, sek(r)) === 'kachikoshi' &&
+        decidedUntil(r, e - 1, sek(r)) !== 'kachikoshi';
+      return honmeiHit || zenshoDay(r, sek(r)) === e;
+    })
+    .map((r) => r.id);
+  const markIds = rows
+    .filter((r) => seen(r) >= from && r.marks[seen(r) - 1] != null)
+    .map((r) => r.id);
+  // 同じ行の同じ日の音は1回だけ（明かしたときに鳴らし、次の日にもう一度鳴らさない）
+  const played = useRef(new Set<string>());
+  const soundKey = rows.map((r) => `${r.id}:${seen(r)}`).join(',');
   useEffect(() => {
+    const fresh = (id: number) => {
+      const r = rows.find((x) => x.id === id)!;
+      const k = `${id}:${seen(r)}`;
+      return !played.current.has(k);
+    };
+    const cheer = cheerIds.some(fresh);
+    const clap = [...kkIds].some(fresh);
+    const tick = markIds.some(fresh);
+    for (const r of rows) played.current.add(`${r.id}:${seen(r)}`);
     if (!settings.sound || reduced) return;
-    if (honmeiHit || zenshoToday) playSound('cheer');
-    if (kkIds.size > 0) playSound('clap');
-    else if (anyMark) playSound('tick');
-    // 日が進んだときだけ鳴らす
+    if (cheer) playSound('cheer');
+    if (clap) playSound('clap');
+    else if (tick) playSound('tick');
+    // 見せる日が変わったときだけ鳴らす
     // eslint-disable-next-line react-hooks/exhaustive-deps -- その日の札で1回だけ
-  }, [day]);
+  }, [soundKey]);
   const done = day >= to;
   // 見終えたら、少し間をおいて次へ（押せばすぐ）。動きを減らす設定では待つ
   const next = useRef(onDone);
   next.current = onDone;
   useEffect(() => {
-    if (!done || reduced || paused) return;
+    if (!done || reduced || paused || hiddenId !== null) return;
     const id = setTimeout(() => next.current(), AUTO_NEXT_MS);
     return () => clearTimeout(id);
-  }, [done, reduced, paused]);
+  }, [done, reduced, paused, hiddenId]);
   const days = Array.from({ length: BASHO_DAYS }, (_, i) => i + 1);
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ticker-title">
@@ -151,15 +187,31 @@ export function BashoTicker({
           {day < from ? t('ticker.ready') : dayLabel(t, day)}
         </p>
         {who && day >= from && (
-          <TodayBout rows={rows} day={day} honmei={honmei} who={who} onWatch={onWatch} />
+          <TodayBout
+            rows={rows}
+            day={day}
+            honmei={honmei}
+            who={who}
+            hidden={hiddenId !== null}
+            onWatch={
+              onWatch &&
+              ((b) => {
+                onWatch(b);
+                if (hiddenId !== null) setRevealOnClose(true);
+              })
+            }
+            onReveal={() => setShownDay(day)}
+            onSpoil={onSpoil}
+          />
         )}
         {rows.length === 0 ? (
           <p className="note">{t('report.noneMine')}</p>
         ) : (
           <ul className="ticker__list">
             {rows.map((r) => {
-              const tally = tallyUntil(r, day);
-              const decided = decidedUntil(r, day, r.rank !== null && isSekitori(r.rank));
+              const e = seen(r);
+              const tally = tallyUntil(r, e);
+              const decided = decidedUntil(r, e, sek(r));
               return (
                 <li
                   key={r.id}
@@ -201,7 +253,7 @@ export function BashoTicker({
                           ))}
                     {(() => {
                       const z = zenshoDay(r, sek(r));
-                      return z !== null && day >= z ? (
+                      return z !== null && e >= z ? (
                         <span className="tag tag--gold">{t('ticker.zensho')}</span>
                       ) : null;
                     })()}
@@ -229,20 +281,27 @@ export function BashoTicker({
                     })}
                   >
                     {days.map((d) => {
-                      const m = d <= day ? r.marks[d - 1]! : null;
-                      const fresh = d === day && d >= from;
+                      const m = d <= e ? r.marks[d - 1]! : null;
+                      const fresh = d === e && d >= from;
+                      const veiled = d === day && d > e;
                       return (
                         <span
                           key={d}
                           aria-hidden="true"
                           className={[
                             'ticker__mark',
-                            m ? `is-${m}` : d <= day ? 'is-none' : 'is-ahead',
+                            veiled
+                              ? 'is-veiled'
+                              : m
+                                ? `is-${m}`
+                                : d <= day
+                                  ? 'is-none'
+                                  : 'is-ahead',
                             fresh && m ? 'is-fresh' : '',
                             d === 8 ? 'is-nakabi' : '',
                           ].join(' ')}
                         >
-                          {m ? SIGN[m] : d <= day ? '・' : ''}
+                          {veiled ? '？' : m ? SIGN[m] : d <= day ? '・' : ''}
                         </span>
                       );
                     })}
@@ -260,7 +319,14 @@ export function BashoTicker({
               {doneLabel}
             </button>
           ) : (
-            <button className="button" data-dismiss onClick={() => setDay(to)}>
+            <button
+              className="button"
+              data-dismiss
+              onClick={() => {
+                setShownDay(to);
+                setDay(to);
+              }}
+            >
               {t('ticker.skip')}
             </button>
           )}
@@ -279,13 +345,20 @@ function TodayBout({
   day,
   honmei,
   who,
+  hidden,
   onWatch,
+  onReveal,
+  onSpoil,
 }: {
   rows: TickerEntry[];
   day: number;
   honmei: number | null;
   who: WhoOf;
+  /** 結果を伏せている（取組を見る・結果を見るを選ぶまで） */
+  hidden: boolean;
   onWatch?: (b: BoutResult) => void;
+  onReveal: () => void;
+  onSpoil?: () => void;
 }) {
   const { t } = useI18n();
   const pick = todayBout(rows, day, honmei);
@@ -294,24 +367,36 @@ function TodayBout({
   const won = b.winnerId === r.id;
   const opp = who(b.eastId === r.id ? b.westId : b.eastId);
   return (
-    <div className={`today ${won ? 'is-win' : 'is-loss'}`} aria-live="polite">
+    <div
+      className={`today ${hidden ? 'is-hidden' : won ? 'is-win' : 'is-loss'}`}
+      aria-live="polite"
+    >
       <span className="today__label">{t('ticker.today')}</span>
       <div className="today__pair">
         <span className="today__side">
           {r.look && <PixelPortrait look={r.look} size={40} />}
           <strong>{r.name}</strong>
         </span>
-        <span className="today__result">
-          <span className="today__mark" aria-hidden="true">
-            {won ? '○' : '●'}
+        {hidden ? (
+          <span className="today__result">
+            <span className="today__mark" aria-hidden="true">
+              ？
+            </span>
+            <span>{t('ticker.hidden')}</span>
           </span>
-          <span>
-            {b.fusen
-              ? t(won ? 'ticker.fusenWin' : 'ticker.fusenLoss')
-              : t(`kimarite.${b.kimarite}` as MessageKey)}
+        ) : (
+          <span className="today__result">
+            <span className="today__mark" aria-hidden="true">
+              {won ? '○' : '●'}
+            </span>
+            <span>
+              {b.fusen
+                ? t(won ? 'ticker.fusenWin' : 'ticker.fusenLoss')
+                : t(`kimarite.${b.kimarite}` as MessageKey)}
+            </span>
+            <span className="visually-hidden">{t(won ? 'report.win' : 'report.loss')}</span>
           </span>
-          <span className="visually-hidden">{t(won ? 'report.win' : 'report.loss')}</span>
-        </span>
+        )}
         <span className="today__side">
           {opp.look && <PixelPortrait look={opp.look} size={40} />}
           <span>
@@ -320,10 +405,29 @@ function TodayBout({
           </span>
         </span>
       </div>
-      {onWatch && !b.fusen && (
-        <button className="button today__watch" onClick={() => onWatch(b)}>
-          {t('bigBout.watch')}
-        </button>
+      {hidden ? (
+        <div className="today__actions">
+          {onWatch && (
+            <button className="button" onClick={() => onWatch(b)}>
+              {t('bigBout.watch')}
+            </button>
+          )}
+          <button className="button button--primary" autoFocus onClick={onReveal}>
+            {t('ticker.reveal')}
+          </button>
+          {onSpoil && (
+            <button className="today__spoil" onClick={onSpoil}>
+              {t('ticker.spoil')}
+            </button>
+          )}
+        </div>
+      ) : (
+        onWatch &&
+        !b.fusen && (
+          <button className="button today__watch" onClick={() => onWatch(b)}>
+            {t('bigBout.watch')}
+          </button>
+        )
       )}
     </div>
   );
