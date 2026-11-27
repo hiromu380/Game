@@ -11,7 +11,7 @@ export type PortraitVariant = 'bust' | 'full';
 /** 絵の大きさ（ドット） */
 export const PORTRAIT = {
   bust: { width: 40, height: 40 },
-  full: { width: 48, height: 62 },
+  full: { width: 48, height: 68 },
 } as const;
 
 const CHEEK = rgb(PALETTE.cheek);
@@ -334,57 +334,97 @@ function full(look: Look): Sheet {
       s.rect(cx + side * 5 - 3, ground, 7, 1, rgb(PALETTE.wood));
     }
   } else {
-    const rx = halfWidth(look, 11, 4);
-    // 脚と足（少し開いて立つ）
-    for (const side of [-1, 1]) {
-      const x = cx + side * (rx * 0.55);
-      s.limb(x, 45, x + side, ground - 3, 3.4, skin);
-      s.rect(Math.round(x + side) - 3, ground - 1, 7, 2, skin);
-      s.rect(Math.round(x + side) - 3, ground, 7, 1, dark(skin));
-    }
-    // 腕は体の横に下ろす。体との境に細い陰を入れる
-    for (const side of [-1, 1]) {
-      s.limb(cx + side * (rx + 1), 31, cx + side * (rx + 3), 42, 2.7, skin);
-      s.ball(cx + side * (rx + 3), 43, 2.4, 2.2, skin, false);
-    }
-    // 胸と腹（肩はなだらかに、腹は丸く）
-    s.ball(cx, 39, rx + 1.2, 10, dark(skin, 0.74), false);
-    s.ball(cx, 32, rx - 0.5, 5.5, skin, false);
-    s.ball(cx, 39, rx, 9.6, skin);
-    for (const side of [-1, 1]) {
-      for (let k = 2; k <= 6; k++) s.px(cx + side * k, 34 + (k === 6 ? -1 : 0), dark(skin));
-    }
-    s.px(cx, 40, dark(skin));
-    // まわし: 帯と前袋
-    const by = 43;
-    for (let x = cx - 20; x <= cx + 20; x++) {
-      // 腹の形の中だけ（腕は塗らない）
-      if (((x - cx) / (rx + 1.2)) ** 2 > 1) continue;
-      s.over(x, by, 1, 4, cloth);
-      s.over(x, by + 3, 1, 1, dark(cloth));
-    }
-    s.rect(cx - 3, by + 4, 7, 5, cloth);
-    s.rect(cx + 2, by + 4, 2, 5, dark(cloth));
-    if (look.sagari) {
-      // 下がり: 帯から下がる房
-      for (const dx of [-9, -6, -3, 0, 3, 6, 9]) s.rect(cx + dx, by + 4, 1, 7, dark(cloth, 0.86));
-    }
-    if (look.tsuna) {
-      // 横綱の綱と紙垂
-      for (let x = cx - 20; x <= cx + 20; x++) {
-        if (((x - cx) / (rx + 1.2)) ** 2 > 1) continue;
-        s.over(x, by - 4, 1, 4, WHITE);
-        s.over(x, by - 1, 1, 1, dark(WHITE, 0.82));
-      }
-      for (const dx of [-8, -4, 0, 4, 8]) {
-        s.rect(cx + dx - 1, by, 3, 5, PAPER);
-        s.px(cx + dx + 1, by + 2, dark(WHITE, 0.82));
-      }
-    }
+    rikishiBody(s, cx, ground, look, skin, cloth);
   }
   s.over(cx - 7, cy + Math.round(headOf(look).ry), 15, 2, dark(look.kimono ? cloth : skin, 0.86));
   face(s, cx, cy, look);
   return s;
+}
+
+/**
+ * 力士の全身（正面・立ち姿）: なで肩より広い肩、体の横に下ろした腕（内側に1段濃い縁で胴と分ける）、
+ * せり出した丸い腹、腹の下へ沈むまわしと前の縦みつ、太い腿。重い力士ほど横に広い
+ */
+function rikishiBody(
+  s: Sheet,
+  cx: number,
+  ground: number,
+  look: Look,
+  skin: Rgb,
+  cloth: Rgb,
+): void {
+  const heavy = (look.width - 26) / 20; // 0（軽い）〜1（重い）
+  const rx = halfWidth(look, 10.5, 4);
+  const sw = rx + 2;
+  const rim = dark(skin, 0.72);
+  // 脚: 太い腿から膝、すね、外へ開いた足
+  for (const side of [-1, 1]) {
+    const hip = cx + side * rx * 0.5;
+    const knee = cx + side * (rx * 0.55 + 1.5);
+    s.limb(hip, 50, knee, 57, 3.8 + heavy * 0.8, rim);
+    s.limb(hip, 50, knee, 57, 3 + heavy * 0.8, skin);
+    // ひざの陰
+    s.px(knee - side, 57, rim);
+    s.limb(knee, 57, knee + side * 0.5, ground - 2, 2.6 + heavy * 0.4, skin);
+    s.rect(Math.round(knee + side * 0.5) - (side < 0 ? 5 : 2), ground - 1, 8, 2, skin);
+    s.rect(Math.round(knee + side * 0.5) - (side < 0 ? 5 : 2), ground, 8, 1, dark(skin));
+  }
+  // 胸と肩（頭より広く、なだらか）・腹（丸くせり出す。右下に陰）
+  s.ball(cx, 33, sw, 7.5, skin, false);
+  s.ball(cx, 41, rx + 1.5, 9.2, skin);
+  // 胸の線と、腹の下のしわ・へそ
+  for (const side of [-1, 1])
+    for (let k = 2; k <= 6; k++) s.px(cx + side * k, 34 + (k >= 5 ? -1 : 0), rim);
+  s.px(cx, 42, rim);
+  s.px(cx, 43, rim);
+  // まわし: 腰の帯は脇で高く、腹の下へ沈む（腹がのる）。前は縦みつが股へ下りる
+  const half = rx + 2.5;
+  for (let x = Math.floor(cx - half); x <= Math.ceil(cx + half); x++) {
+    const t = (x - cx) / half;
+    if (t * t > 1) continue;
+    const top = Math.round(45 + 3 * (1 - t * t));
+    s.rect(x, top, 1, 4, cloth);
+    s.px(x, top + 3, dark(cloth));
+  }
+  for (let y = 52; y <= 56; y++) {
+    const w = y < 55 ? 2 : 1;
+    s.rect(cx - w, y, w * 2 + 1, 1, cloth);
+    s.px(cx + w, y, dark(cloth));
+  }
+  // 腕: 肩から下ろし、ひじで少し外へ。手は腿の横
+  for (const side of [-1, 1]) {
+    const sx = cx + side * (sw - 2);
+    const ex = cx + side * (sw + 1.2);
+    const hx = cx + side * (sw + 0.3);
+    const r = 2.4 + heavy * 0.6;
+    s.limb(sx, 32, ex, 38, r + 0.6, rim);
+    s.limb(ex, 38, hx, 45, r + 0.5, rim);
+    // 肩の丸み
+    s.ball(sx, 32, r + 0.6, r + 0.2, skin, false);
+    s.limb(sx, 32, ex, 38, r, skin);
+    s.limb(ex, 38, hx, 45, r - 0.3, skin);
+    s.ball(hx, 46.5, 2.2, 2, skin, false);
+    s.px(hx + side, 47, rim);
+  }
+  if (look.sagari) {
+    // 下がり: 帯の前から下がる房（縦みつの左右）
+    for (const dx of [-8, -6, -4, 4, 6, 8])
+      s.rect(cx + dx, 49 - Math.round(Math.abs(dx) / 4), 1, 7, dark(cloth, 0.86));
+  }
+  if (look.tsuna) {
+    // 横綱の綱（腰の帯の上に太く）と紙垂
+    for (let x = Math.floor(cx - half); x <= Math.ceil(cx + half); x++) {
+      const t = (x - cx) / half;
+      if (t * t > 1) continue;
+      const top = Math.round(42 + 3 * (1 - t * t));
+      s.rect(x, top, 1, 3, WHITE);
+      s.px(x, top + 2, dark(WHITE, 0.82));
+    }
+    for (const dx of [-7, -2, 3, 8]) {
+      s.rect(cx + dx - 1, 47, 3, 4, PAPER);
+      s.px(cx + dx, 49, dark(WHITE, 0.82));
+    }
+  }
 }
 
 const cache = new Map<string, Pixels>();
