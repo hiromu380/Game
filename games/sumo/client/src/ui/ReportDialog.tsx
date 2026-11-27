@@ -180,7 +180,12 @@ export function ReportDialog({
                   <li key={m.id} className="hoshitori__row">
                     <div className="hoshitori__head">
                       {byId.get(m.id) && (
-                        <RikishiPortrait r={byId.get(m.id)!} rank={m.record.rank} size={28} />
+                        <RikishiPortrait
+                          r={byId.get(m.id)!}
+                          rank={m.record.rank}
+                          size={28}
+                          mood={m.bouts.length === 0 ? null : kk ? 'joy' : 'grit'}
+                        />
                       )}
                       <span className="hoshitori__rank">{rankLabel(t, m.record.rank)}</span>
                       <strong>{nameOf(m.id)}</strong>

@@ -8,11 +8,12 @@ import {
   type GameState,
   type Rikishi,
 } from '@ichimon/sim';
+import { PixelPortrait } from '../art/PixelPortrait';
 import { useI18n, type MessageKey } from '../i18n';
 import { dayLabel } from '../format';
 import { boutFlow, boutScript, linesAt, poseAt, type CallLine } from '../playback/boutScript';
 import { BoutStagePixel } from './BoutStagePixel';
-import { rikishiLook } from '../art/look';
+import { rikishiLook, withMood } from '../art/look';
 import { playSound } from '../sound';
 import { useSettings } from '../settings';
 import { hitStopTime, type StopState } from '../playback/boutStage';
@@ -159,11 +160,26 @@ export function BoutViewer({
               onReady={onReady}
             />
             <p className="bout__names">
-              <span>
+              {/* 顔の絵: 決まるまでは力む。決まったら勝った側が喜び、負けた側がこらえる */}
+              <span className="bout__who">
+                <PixelPortrait
+                  look={withMood(
+                    lookOf(west),
+                    decided ? (winnerSide === 'W' ? 'joy' : 'grit') : 'grit',
+                  )}
+                  size={36}
+                />
                 {t('rank.side.W')} <strong>{west?.name ?? '?'}</strong>
               </span>
-              <span>
+              <span className="bout__who">
                 {t('rank.side.E')} <strong>{east?.name ?? '?'}</strong>
+                <PixelPortrait
+                  look={withMood(
+                    lookOf(east),
+                    decided ? (winnerSide === 'E' ? 'joy' : 'grit') : 'grit',
+                  )}
+                  size={36}
+                />
               </span>
             </p>
             {decided && (

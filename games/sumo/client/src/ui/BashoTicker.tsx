@@ -222,7 +222,13 @@ export function BashoTicker({
                   <div className="ticker__who">
                     {r.look && (
                       <span className="ticker__face">
-                        <PixelPortrait look={r.look} size={28} />
+                        <PixelPortrait
+                          look={withMood(
+                            r.look,
+                            decided === 'kachikoshi' ? 'joy' : decided ? 'grit' : null,
+                          )}
+                          size={28}
+                        />
                       </span>
                     )}
                     <span className="ticker__rank">{rankLabel(t, r.rank)}</span>

@@ -2304,3 +2304,8 @@ body.has-modal {
   white-space: nowrap;
   padding-inline: 4px;
 }
+.bout__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
