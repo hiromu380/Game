@@ -135,6 +135,17 @@ describe('箱庭の人の配置', () => {
     expect(keikobaCast(g, KEIKOBA_SPOTS, { kind: 'coach', id: a.id })).toEqual(keikobaCast(g));
   });
 
+  it('休ませる週は座って休み、出稽古の週は留守（稽古場に誰もいない）', () => {
+    const g = play(5, 8);
+    for (const r of mine(g)) r.injury = 0;
+    const rest = keikobaCast(g, KEIKOBA_SPOTS, { kind: 'rest' }).keikoba;
+    expect(rest.filter((a) => a.rikishiId !== null).every((a) => a.look.pose === 'sit')).toBe(true);
+    expect(rest.some((a) => a.key === 'oyakata')).toBe(true);
+    const feet = new Set(rest.map((a) => `${a.x},${a.y}`));
+    expect(feet.size).toBe(rest.length);
+    expect(keikobaCast(g, KEIKOBA_SPOTS, { kind: 'degeiko' }).keikoba).toEqual([]);
+  });
+
   it('外観: けが人は布団、弟子は1人1か所、親方が立つ', () => {
     const g = play(5, 8);
     const hurt = mine(g)[0]!;

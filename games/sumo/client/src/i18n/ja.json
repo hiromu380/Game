@@ -2108,5 +2108,7 @@
   "trend.markKyujo": "休",
   "ticker.hidden": "結果は？",
   "ticker.reveal": "結果を見る",
-  "ticker.spoil": "この場所は伏せない"
+  "ticker.spoil": "この場所は伏せない",
+  "scene.weekAll": "全員",
+  "scene.weekAway": "よその部屋へ。留守"
 }

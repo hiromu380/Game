@@ -120,7 +120,12 @@ export function KeikobaScene({
           cmd: t(`prep.cmd.${act.kind}`),
           names: weekIds.map((id) => names.get(id) ?? '?').join('・'),
         })
-      : null;
+      : act?.kind === 'rest' || act?.kind === 'degeiko'
+        ? t('scene.week', {
+            cmd: t(`prep.cmd.${act.kind}`),
+            names: t(act.kind === 'rest' ? 'scene.weekAll' : 'scene.weekAway'),
+          })
+        : null;
   const talkTo = game.rikishi.find((r) => r.id === picked && r.stableId === game.player.stableId);
   const onPick = setGame ? (id: number) => setPicked((now) => (now === id ? null : id)) : undefined;
   const season = seasonOf(game.bashoIndex);

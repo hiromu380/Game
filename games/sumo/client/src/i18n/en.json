@@ -2108,5 +2108,7 @@
   "trend.markKyujo": "A",
   "ticker.hidden": "Result?",
   "ticker.reveal": "Show result",
-  "ticker.spoil": "Don't hide this basho"
+  "ticker.spoil": "Don't hide this basho",
+  "scene.weekAll": "everyone",
+  "scene.weekAway": "away at another stable"
 }

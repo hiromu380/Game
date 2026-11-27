@@ -154,6 +154,10 @@ export function keikobaCast(
   const keikoba: Actor[] = [];
   const overflow: Rikishi[] = [];
   const all = mine(game);
+  // 出稽古の週は、弟子も親方もよその部屋へ出かけて留守
+  if (week?.kind === 'degeiko') return { keikoba: [], overflow: [] };
+  // 休ませる週は、けがのない弟子が稽古場の隅々で座って休む（見取り）
+  if (week?.kind === 'rest') return { keikoba: restCast(all, spots), overflow: [] };
   const scene = weekScene(all, spots, week);
   if (scene) {
     keikoba.push(...scene.actors);
@@ -198,6 +202,37 @@ export function keikobaCast(
       phase: 0,
     });
   return { keikoba, overflow };
+}
+
+/** 休ませる週: 立ち位置の順に座らせる（入りきらない弟子は出さない）。親方は座敷 */
+function restCast(all: ReturnType<typeof mine>, spots: typeof KEIKOBA_SPOTS): Actor[] {
+  const places = [...spots.sit, ...spots.shiko, ...spots.suriashi, ...spots.teppo] as {
+    x: number;
+    y: number;
+    flip?: boolean;
+  }[];
+  const out: Actor[] = all
+    .filter(({ r }) => r.injury === 0)
+    .slice(0, places.length)
+    .map(({ r, sekitori }, i) => ({
+      key: `r${r.id}`,
+      rikishiId: r.id,
+      look: lookOf(r, sekitori, 'sit', places[i]!.flip ?? false),
+      x: places[i]!.x,
+      y: places[i]!.y,
+      z: 100 + places[i]!.y,
+      phase: r.id % 4,
+    }));
+  out.push({
+    key: 'oyakata',
+    rikishiId: null,
+    look: OYAKATA_LOOK('oyakataSit'),
+    x: spots.oyakata.x,
+    y: spots.oyakata.y,
+    z: 100 + spots.oyakata.y,
+    phase: 0,
+  });
+  return out;
 }
 
 /** その週の行動の場面（土俵の2か所を使う）。けがで出られないときは出さない */
