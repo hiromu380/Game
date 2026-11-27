@@ -14,6 +14,7 @@ import {
   todayBout,
 } from '../ticker';
 import { PixelPortrait } from '../art/PixelPortrait';
+import { KIMARITE_DESC } from '../kimariteBook';
 import type { Look } from '../art/look';
 import { reached, reachedText, targetText, targetWins, type Target } from '../targets';
 
@@ -405,6 +406,9 @@ function TodayBout({
           </span>
         </span>
       </div>
+      {!hidden && !b.fusen && KIMARITE_DESC.has(b.kimarite) && (
+        <p className="today__desc">{t(`kimarite.desc.${b.kimarite}` as MessageKey)}</p>
+      )}
       {hidden ? (
         <div className="today__actions">
           {onWatch && (
