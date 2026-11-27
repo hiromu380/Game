@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { isSekitori, ranksOf, type GameState, type MidBasho, type Stance } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { RikishiPortrait } from '../art/Portraits';
 import { dayLabel, rankLabel } from '../format';
 import { reachedText, targetName, targetOf, targetWins } from '../targets';
 import { woundName } from '../injury';
@@ -78,6 +79,7 @@ export function MidBashoDialog({
             const on = reenter.has(m.id);
             return (
               <li key={m.id} className={m.out ? 'mid__row is-out' : 'mid__row'}>
+                {r && <RikishiPortrait r={r} rank={rank} size={28} />}
                 <span className="mid__rank">{rankLabel(t, rank)}</span>
                 <strong>{name(m.id)}</strong>
                 <span className="mid__record">

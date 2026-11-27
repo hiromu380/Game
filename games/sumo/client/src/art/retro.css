@@ -2290,3 +2290,17 @@ body.has-modal {
     opacity: 1;
   }
 }
+/* 中日の判断・大一番の作戦の行に顔の絵 */
+.mid__row {
+  align-items: center;
+}
+.tactic__vs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+.mid__stance .segmented__btn {
+  white-space: nowrap;
+  padding-inline: 4px;
+}

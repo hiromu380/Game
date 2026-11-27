@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ranksOf, styleOf, TACTIC, TACTICS, type GameState, type Tactic } from '@ichimon/sim';
 import { useI18n } from '../i18n';
+import { RikishiPortrait } from '../art/Portraits';
 import { dayLabel, rankLabel } from '../format';
 import type { Highlight } from '../highlights';
 
@@ -52,6 +53,7 @@ export function TacticDialog({
             const opp = byId.get(oppId);
             return (
               <li key={h.id} className="mid__row tactic__row">
+                {r && <RikishiPortrait r={r} rank={ranks.get(h.id) ?? null} size={28} />}
                 <span className="mid__rank">{rankLabel(t, ranks.get(h.id) ?? null)}</span>
                 <strong>{r?.name ?? '?'}</strong>
                 <span className="mid__record">
@@ -59,6 +61,7 @@ export function TacticDialog({
                 </span>
                 {r && <span className="tag">{t(`style.${styleOf(r.abilities)}`)}</span>}
                 <span className="tactic__vs">
+                  {opp && <RikishiPortrait r={opp} rank={ranks.get(oppId) ?? null} size={28} />}
                   {t('tactic.vs', {
                     day: dayLabel(t, h.bout.day),
                     rank: rankLabel(t, ranks.get(oppId) ?? null),
